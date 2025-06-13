@@ -1,0 +1,83 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explications des termes et de la logique</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Explications des termes et de la logique</h1>
+    <div id="explanations" style="margin: 30px auto; max-width: 800px; text-align: left;">
+        <h2>Insécurité</h2>
+        <p>Les données de l'insécurité sont issues de la base SSMSI du Ministère de l'Intérieur. <a href="https://www.data.gouv.fr/fr/datasets/bases-statistiques-communale-departementale-et-regionale-de-la-delinquance-enregistree-par-la-police-et-la-gendarmerie-nationales/" target="_blank">Lien vers la source</a>.</p>
+        <p>Pour les petites communes, certaines données sont anonymisées si moins de 5 faits ont été enregistrés pendant 3 années successives. Dans ce cas, le taux moyen dans le département par classe de commune est utilisé. Si la valeur est à 0, c'est qu'il n'y a pas eu de faits de ce type.</p>
+
+        <h2>Prénoms de naissance</h2>
+        <p>Les données de prénoms sont issus des bases publiques disponibles sur data.gouv.fr</p>
+        <p>L'ensemble des prénoms de naissances a été catégorisé. Il s'agit d'une approche subjective aidée par intelligence artificielle.</p>
+
+        <h2>Catégories d'articles</h2>
+        <p>Les articles du site fdesouche.com ont été catégorisés. Il s'agit d'une approche subjective aidée par intelligence artificielle.</p>
+
+        <h2>Score insécurité</h2>
+        <p>Utilise l'ensemble des données à propos d'activités illégales (violences, vols, vandalisme...), les comportements antisociaux ou le sentiment d'insécurité en général.</p>
+
+        <h2>Score immigration (= Grand Remplacement)</h2>
+        <p>Décrit l'ensemble des données à propos de personnes ou de groupes dont l'origine et l'identité n'est pas française de souche, indépendamment de la nationalité administrative actuelle.</p>
+
+        <h2>Islamisation</h2>
+        <p>Décrit l'ensemble des données ayant trait à la religion musulmane, et sa progression dans l'espace Français.</p>
+
+        <h2>Défrancisation (= Petit Remplacement)</h2>
+        <p>Décrit l'ensemble des données ayant trait à l'érosion sociétale de l'identité culturelle Française, ainsi que la promotion de cultures non-françaises sur le territoire. Sont inclus les cultures d'immigration, ainsi que l'américanisation de la société.</p>
+
+        <h2>Wokisme</h2>
+        <p>Décrit l'ensemble des données reflétant une idéologie gauchiste promouvant un changement sociétal. Sont inclus l'immigrationnisme, le féminisme excessif, le socialisme, le racisme anti-blanc, le combat contre le 'patriarcat', l'intersectionnalité, la promotion dans l'espace public de l'idéologie LGBTQ, la promotion de la diversité ou du métissage, l'idéologie de l'inclusif, l'idéologie de la 'discrimination positive', l'idéologie de la 'justice sociale', les mouvances 'antifa'...</p>
+
+        <div style="margin-top: 20px;">
+            <a href="index.html">Retour à la page principale</a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Où va ma France?</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Où va ma France?</h1>
+    <div>
+        <label for="departementSelect">Sélectionner un département :</label>
+        <select id="departementSelect">
+            <option value="">-- Choisir un département --</option>
+        </select>
+    </div>
+    <div>
+        <label for="communeInput">Rechercher une commune :</label>
+        <input id="communeInput" list="communeList" disabled>
+        <datalist id="communeList"></datalist>
+    </div>
+    <div id="results"></div>
+    <div>
+        <a href="rankings.html">Lien vers les classements</a>
+    </div>
+    <div>
+        <label for="lieuxSelect">Sélectionner un lieu :</label>
+        <select id="lieuxSelect" disabled>
+            <option value="">-- Tous les lieux --</option>
+        </select>
+    </div>
+    <div id="filterButtons"></div>
+    <div id="articles">
+        <h2>Articles associés</h2>
+        <div id="articleList" class="article-list"></div>
+    </div>
+    <div id="feedback">
+        <h2>Feedback</h2>
+        <form>
+            <textarea placeholder="Votre feedback ici..."></textarea>
+            <button type="submit">Envoyer</button>
+        </form>
+    </div>
+    <div>
+        <a href="notice.html">Explications des termes et de la logique utilisée</a>
+    </div>
+    <script src="locationHandler.js"></script>
+    <script src="articleHandler.js"></script>
+    <script src="scoreTableHandler.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>
