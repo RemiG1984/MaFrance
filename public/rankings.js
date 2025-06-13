@@ -52,12 +52,12 @@ const RankingsHandler = (function () {
                 const topResponse = await fetch(`/departements_details_all?limit=10&sort=${metric}&direction=DESC`);
                 if (!topResponse.ok) throw new Error('Erreur lors de la récupération des données départementales (top)');
                 const topData = await topResponse.json();
-        
+
                 // Fetch bottom 10 (ASC)
                 const bottomResponse = await fetch(`/departements_details_all?limit=10&sort=${metric}&direction=ASC`);
                 if (!bottomResponse.ok) throw new Error('Erreur lors de la récupération des données départementales (bottom)');
                 const bottomData = await bottomResponse.json();
-        
+
                 // Process data
                 const totalDepartments = 101; // Total number of departments
                 const rankings = [
@@ -81,7 +81,7 @@ const RankingsHandler = (function () {
                         defrancisation_score: dept.defrancisation_score,
                         prenom_francais_pct: dept.prenom_francais_pct || 0,
                         wokisme_score: dept.wokisme_score,
-                        total_score: (dept.insecurite_score || 0) + (dept.immigration_score || 0) + (dept.islamisation_score || 0) + (dept.defrancisation_score || 0) + (dept.wokisme_score || 0),
+                        total_score: dept.total_score,
                         rank: index + 1 // Top ranks: 1–10
                     })),
                     ...bottomData.map((dept, index) => ({
@@ -104,7 +104,7 @@ const RankingsHandler = (function () {
                         defrancisation_score: dept.defrancisation_score,
                         prenom_francais_pct: dept.prenom_francais_pct || 0,
                         wokisme_score: dept.wokisme_score,
-                        total_score: (dept.insecurite_score || 0) + (dept.immigration_score || 0) + (dept.islamisation_score || 0) + (dept.defrancisation_score || 0) + (dept.wokisme_score || 0),
+                        total_score: dept.total_score,
                         rank: totalDepartments - index // Bottom ranks: 92–101
                     }))
                 ];
@@ -122,20 +122,20 @@ const RankingsHandler = (function () {
                 const baseUrl = deptCode 
                     ? `/communes_details_all?dept=${deptCode}&limit=10&sort=${metric}` 
                     : `/communes_details_all?limit=10&sort=${metric}`;
-        
+
                 // Fetch top 10 (DESC)
                 const topResponse = await fetch(`${baseUrl}&direction=DESC`);
                 if (!topResponse.ok) throw new Error('Erreur lors de la récupération des données des communes (top)');
                 const topResult = await topResponse.json();
                 const topData = topResult.data;
                 const totalCommunes = topResult.total_count;
-        
+
                 // Fetch bottom 10 (ASC)
                 const bottomResponse = await fetch(`${baseUrl}&direction=ASC`);
                 if (!bottomResponse.ok) throw new Error('Erreur lors de la récupération des données des communes (bottom)');
                 const bottomResult = await bottomResponse.json();
                 const bottomData = bottomResult.data;
-        
+
                 // Debug logs
                 console.log('totalCommunes:', totalCommunes);
                 console.log('Raw bottomData:', bottomData.map(item => ({
@@ -164,7 +164,7 @@ const RankingsHandler = (function () {
                         defrancisation_score: commune.defrancisation_score,
                         prenom_francais_pct: commune.prenom_francais_pct || 0,
                         wokisme_score: commune.wokisme_score,
-                        total_score: (commune.insecurite_score || 0) + (commune.immigration_score || 0) + (commune.islamisation_score || 0) + (commune.defrancisation_score || 0) + (commune.wokisme_score || 0),
+                        total_score: commune.total_score,
                         rank: index + 1 // Top ranks: 1–10
                     })),
                     ...bottomData.map((commune, index) => ({
@@ -186,11 +186,11 @@ const RankingsHandler = (function () {
                         defrancisation_score: commune.defrancisation_score,
                         prenom_francais_pct: commune.prenom_francais_pct || 0,
                         wokisme_score: commune.wokisme_score,
-                        total_score: (commune.insecurite_score || 0) + (commune.immigration_score || 0) + (commune.islamisation_score || 0) + (commune.defrancisation_score || 0) + (commune.wokisme_score || 0),
+                        total_score: commune.total_score,
                         rank: totalCommunes - index // Bottom ranks: e.g., 342 to 333
                     }))
                 ];
-        
+
                 return rankings;
             } catch (error) {
                 resultsDiv.innerHTML = `<p>Erreur : ${error.message}</p>`;
