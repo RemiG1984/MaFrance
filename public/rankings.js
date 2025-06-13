@@ -81,6 +81,7 @@ const RankingsHandler = (function () {
                         defrancisation_score: dept.defrancisation_score,
                         prenom_francais_pct: dept.prenom_francais_pct || 0,
                         wokisme_score: dept.wokisme_score,
+                        total_score: (dept.insecurite_score || 0) + (dept.immigration_score || 0) + (dept.islamisation_score || 0) + (dept.defrancisation_score || 0) + (dept.wokisme_score || 0),
                         rank: index + 1 // Top ranks: 1–10
                     })),
                     ...bottomData.map((dept, index) => ({
@@ -103,6 +104,7 @@ const RankingsHandler = (function () {
                         defrancisation_score: dept.defrancisation_score,
                         prenom_francais_pct: dept.prenom_francais_pct || 0,
                         wokisme_score: dept.wokisme_score,
+                        total_score: (dept.insecurite_score || 0) + (dept.immigration_score || 0) + (dept.islamisation_score || 0) + (dept.defrancisation_score || 0) + (dept.wokisme_score || 0),
                         rank: totalDepartments - index // Bottom ranks: 92–101
                     }))
                 ];
@@ -162,6 +164,7 @@ const RankingsHandler = (function () {
                         defrancisation_score: commune.defrancisation_score,
                         prenom_francais_pct: commune.prenom_francais_pct || 0,
                         wokisme_score: commune.wokisme_score,
+                        total_score: (commune.insecurite_score || 0) + (commune.immigration_score || 0) + (commune.islamisation_score || 0) + (commune.defrancisation_score || 0) + (commune.wokisme_score || 0),
                         rank: index + 1 // Top ranks: 1–10
                     })),
                     ...bottomData.map((commune, index) => ({
@@ -183,6 +186,7 @@ const RankingsHandler = (function () {
                         defrancisation_score: commune.defrancisation_score,
                         prenom_francais_pct: commune.prenom_francais_pct || 0,
                         wokisme_score: commune.wokisme_score,
+                        total_score: (commune.insecurite_score || 0) + (commune.immigration_score || 0) + (commune.islamisation_score || 0) + (commune.defrancisation_score || 0) + (commune.wokisme_score || 0),
                         rank: totalCommunes - index // Bottom ranks: e.g., 342 to 333
                     }))
                 ];

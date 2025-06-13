@@ -852,6 +852,7 @@ app.get("/departements_details_all", (req, res) => {
 
     // Validate sort parameter to prevent SQL injection
     const validSortColumns = [
+        "total_score",
         "insecurite_score",
         "immigration_score",
         "islamisation_score",
@@ -890,6 +891,7 @@ app.get("/departements_details_all", (req, res) => {
             d.departement, d.population, d.insecurite_score, 
             d.immigration_score, d.islamisation_score, d.defrancisation_score, 
             d.wokisme_score, d.number_of_mosques, d.mosque_p100k,
+            (COALESCE(d.insecurite_score, 0) + COALESCE(d.immigration_score, 0) + COALESCE(d.islamisation_score, 0) + COALESCE(d.defrancisation_score, 0) + COALESCE(d.wokisme_score, 0)) AS total_score,
             dn.musulman_pct, dn.africain_pct, dn.asiatique_pct, dn.traditionnel_pct, 
             dn.moderne_pct, dn.annais,
             (COALESCE(dc.homicides_p100k, 0) + COALESCE(dc.tentatives_homicides_p100k, 0)) AS homicides_p100k,
@@ -1093,6 +1095,7 @@ app.get("/communes_details_all", (req, res) => {
             l.COG, l.departement, l.commune, l.population, l.insecurite_score, 
             l.immigration_score, l.islamisation_score, l.defrancisation_score, 
             l.wokisme_score, l.number_of_mosques, l.mosque_p100k,
+            (COALESCE(l.insecurite_score, 0) + COALESCE(l.immigration_score, 0) + COALESCE(l.islamisation_score, 0) + COALESCE(l.defrancisation_score, 0) + COALESCE(l.wokisme_score, 0)) AS total_score,
             cn.musulman_pct, cn.africain_pct, cn.asiatique_pct, cn.traditionnel_pct, 
             cn.moderne_pct, cn.annais,
             (COALESCE(cc.coups_et_blessures_volontaires_p1k, 0) + 
