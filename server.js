@@ -720,7 +720,7 @@ app.get("/lieux", (req, res) => {
     db.all(
         `SELECT DISTINCT lieu 
          FROM articles 
-         WHERE departement = ? AND COG = ? AND lieu IS NOT NULL 
+         WHERE departement = ? AND cog = ? AND lieu IS NOT NULL 
          AND (insecurite = 1 OR immigration = 1 OR islamisme = 1 OR defrancisation = 1 OR wokisme = 1)`,
         [departement, cog],
         (err, rows) => {
@@ -807,7 +807,7 @@ app.get("/articles", (req, res) => {
     let sql, params;
     if (cog) {
         sql =
-            "SELECT date, title, url, lieu, commune, insecurite, immigration, islamisme, defrancisation, wokisme FROM articles WHERE departement = ? AND COG = ? AND (insecurite = 1 OR immigration = 1 OR islamisme = 1 OR defrancisation = 1 OR wokisme = 1)";
+            "SELECT date, title, url, lieu, commune, insecurite, immigration, islamisme, defrancisation, wokisme FROM articles WHERE departement = ? AND cog = ? AND (insecurite = 1 OR immigration = 1 OR islamisme = 1 OR defrancisation = 1 OR wokisme = 1)";
         params = [departement, cog];
     } else {
         sql =
@@ -1200,7 +1200,7 @@ app.get("/article_counts", (req, res) => {
             SUM(defrancisation) as defrancisation_count,
             SUM(wokisme) as wokisme_count
         FROM articles 
-        WHERE departement = ? AND COG = ? AND (insecurite = 1 OR immigration = 1 OR islamisme = 1 OR defrancisation = 1 OR wokisme = 1)`;
+        WHERE departement = ? AND cog = ? AND (insecurite = 1 OR immigration = 1 OR islamisme = 1 OR defrancisation = 1 OR wokisme = 1)`;
         params = [departement, cog];
     } else {
         sql = `SELECT 
