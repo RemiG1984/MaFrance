@@ -835,8 +835,7 @@ app.get("/articles", (req, res) => {
 // Route: GET /departement_details_all
 app.get("/departements_details_all", (req, res) => {
     res.setHeader("Content-Type", "application/json; charset=utf-8");
-    const limit = parseInt(req.query.limit) || 101;
-    const offset = parseInt(req.query.offset) || 0;
+    const limit = parseInt(req.query.limit) || 101;    const offset = parseInt(req.query.offset) || 0;
     const sort = req.query.sort || "insecurite_score";
     const direction = req.query.direction || "DESC";
     console.log(
