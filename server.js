@@ -807,7 +807,7 @@ app.get("/articles", (req, res) => {
     let sql, params;
     if (cog) {
         sql =
-            "SELECT date, title, url, lieu, commune, insecurite, immigration, islamisme, defrancisation, wokisme FROM articles WHERE departement = ? AND COG = ? AND (insecurite = 1 OR immigration = 1 OR islamisme = 1 OR defrancisation = 1 OR wokisme = 1)";
+            "SELECT date, title, url, lieu, commune, insecurite, immigration, islamisme, defrancisation, wokisme FROM articles WHERE departement = ? AND cog = ? AND (insecurite = 1 OR immigration = 1 OR islamisme = 1 OR defrancisation = 1 OR wokisme = 1)";
         params = [departement, cog];
     } else {
         sql =
@@ -1036,7 +1036,7 @@ app.get("/communes_details_all", (req, res) => {
     // Define sort expression to handle derived columns and nulls
     let sortExpression;
     switch (sortColumn) {
-            case "total_score":
+        case "total_score":
             sortExpression = `(COALESCE(l.insecurite_score, 0) + 
                               COALESCE(l.immigration_score, 0) + 
                               COALESCE(l.islamisation_score, 0) + 
