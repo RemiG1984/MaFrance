@@ -2,9 +2,9 @@ const ArticleHandler = (function () {
     return function (articleListDiv, filterButtonsDiv) {
         let currentFilter = null;
 
-        async function loadArticles(departement, cog = '', lieu = '') {
+        async function loadArticles(departement, commune = '', lieu = '') {
             try {
-                const response = await fetch(`/articles?dept=${departement}${cog ? `&cog=${encodeURIComponent(cog)}` : ''}${lieu ? `&lieu=${encodeURIComponent(lieu)}` : ''}`);
+                const response = await fetch(`/articles?dept=${departement}${commune ? `&commune=${encodeURIComponent(commune)}` : ''}${lieu ? `&lieu=${encodeURIComponent(lieu)}` : ''}`);
                 if (!response.ok) {
                     throw new Error(`Erreur lors du chargement des articles: ${response.statusText}`);
                 }
@@ -20,9 +20,9 @@ const ArticleHandler = (function () {
             }
         }
 
-        async function loadArticleCounts(departement, cog = '', lieu = '') {
+        async function loadArticleCounts(departement, commune = '', lieu = '') {
             try {
-                const response = await fetch(`/article_counts?dept=${departement}${cog ? `&cog=${encodeURIComponent(cog)}` : ''}${lieu ? `&lieu=${encodeURIComponent(lieu)}` : ''}`);
+                const response = await fetch(`/article_counts?dept=${departement}${commune ? `&commune=${encodeURIComponent(commune)}` : ''}${lieu ? `&lieu=${encodeURIComponent(lieu)}` : ''}`);
                 if (!response.ok) {
                     throw new Error('Erreur lors du chargement des comptes d\'articles');
                 }
