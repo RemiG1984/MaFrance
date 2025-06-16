@@ -1,7 +1,6 @@
 const express = require("express");
 const sqlite3 = require("sqlite3").verbose();
 const path = require("path");
-const basicAuth = require("express-basic-auth");
 const app = express();
 const port = process.env.PORT || 3000;
 const fs = require("fs");
@@ -9,23 +8,7 @@ const fs = require("fs");
 // Initialize SQLite database connection to '.data/france.db'
 const db = new sqlite3.Database(".data/france.db");
 
-// Load environment variables
-const authSecret = process.env.AUTH_SECRET || "defaultsecret";
-const authPassword = "betapass" + authSecret;
-
-// Add basic authentication for beta testing (skip for health checks)
-app.use((req, res, next) => {
-    // Skip auth for health check endpoint
-    if (req.path === '/' && req.method === 'GET') {
-        return next();
-    }
-    // Apply basic auth to all other routes
-    return basicAuth({
-        users: { betauser: authPassword },
-        challenge: true,
-        realm: "BetaTest",
-    })(req, res, next);
-});
+// Authentication removed - all routes are now publicly accessible
 
 // Parse URL-encoded form data for feedback form
 app.use(express.urlencoded({ extended: true }));
