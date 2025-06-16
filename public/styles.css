@@ -105,49 +105,7 @@ body {
     color: #343a40;
 }
 
-#feedback {
-    margin: 30px auto;
-    max-width: 800px;
-    text-align: left;
-}
 
-#feedback h2 {
-    font-size: 22px;
-    margin-bottom: 15px;
-    color: #343a40;
-}
-
-#feedback form {
-    background-color: #fff;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-#feedback textarea {
-    width: 100%;
-    padding: 10px;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    margin-bottom: 15px;
-    resize: vertical;
-}
-
-#feedback button {
-    padding: 10px 16px;
-    font-size: 16px;
-    border: none;
-    border-radius: 6px;
-    background-color: #007bff;
-    color: #fff;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-#feedback button:hover {
-    background-color: #0056b3;
-}
 
 .article-list {
     max-height: 350px;

@@ -41,52 +41,9 @@ app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// Route: POST /feedback
-app.post("/submit_feedback", (req, res) => {
-    const feedback = req.body.feedback;
-    const timestamp = new Date().toISOString();
-    const logEntry = `${timestamp}: ${feedback}\n`;
-    console.log("Feedback received:", feedback);
-    const filePath = path.join(__dirname, "feedback.txt");
-    console.log("Attempting to write to:", filePath);
-    fs.appendFile(filePath, logEntry, (err) => {
-        if (err) {
-            console.error("Erreur écriture feedback:", err.message, err.code);
-            return res
-                .status(500)
-                .send("Erreur lors de l'enregistrement du feedback");
-        }
-        console.log("Feedback successfully written to:", filePath);
-        fs.access(filePath, fs.constants.F_OK, (accessErr) => {
-            if (accessErr) {
-                console.error(
-                    "Feedback file not found after write:",
-                    accessErr.message,
-                );
-            } else {
-                console.log("Feedback file confirmed to exist:", filePath);
-            }
-        });
-        res.send("Merci pour votre feedback !");
-    });
-});
+;
 
-// Route: GET /feedback_content
-app.get("/feedback_content", (req, res) => {
-    res.setHeader("Content-Type", "text/plain; charset=utf-8");
-    fs.readFile(path.join(__dirname, "feedback.txt"), "utf8", (err, data) => {
-        if (err) {
-            if (err.code === "ENOENT") {
-                return res.send("Aucun commentaire trouvé.");
-            }
-            console.error("Erreur lecture feedback.txt:", err.message);
-            return res
-                .status(500)
-                .send("Erreur lors de la lecture des commentaires");
-        }
-        res.send(data);
-    });
-});
+);
 
 // Route: GET /country_details
 app.get("/country_details", (req, res) => {
