@@ -704,38 +704,58 @@ app.get("/commune_crime_history", (req, res) => {
 app.get("/lieux", (req, res) => {
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     const departement = req.query.dept || "";
+    const commune = req.query.commune || "";
     const cog = req.query.cog || "";
-    console.log("Fetching lieux for dept:", departement, "COG:", cog);
-    if (!departement || !cog) {
-        return res.status(400).json({ error: "Département et COG requis" });
+    console.log("Fetching lieux for dept:", departement, "commune:", commune, "COG:", cog);
+    
+    if (!departement) {
+        return res.status(400).json({ error: "Département requis" });
     }
-    db.all(
-        `SELECT DISTINCT lieu 
-         FROM articles 
-         WHERE departement = ? AND COG = ? AND lieu IS NOT NULL 
-         AND (insecurite = 1 OR immigration = 1 OR islamisme = 1 OR defrancisation = 1 OR wokisme = 1)`,
-        [departement, cog],
-        (err, rows) => {
-            if (err) {
-                console.error("Database error in /lieux:", err.message);
-                return res.status(500).json({
-                    error: "Erreur lors de la requête à la base de données",
-                    details: err.message,
-                });
-            }
-            console.log("Lieux found:", rows.length);
-            const lieuxSet = new Set();
-            rows.forEach((row) => {
-                if (row.lieu) {
-                    row.lieu
-                        .split(",")
-                        .forEach((lieu) => lieuxSet.add(lieu.trim()));
-                }
+    
+    let sql, params;
+    if (cog) {
+        // Use COG if provided
+        sql = `SELECT DISTINCT lieu 
+               FROM articles 
+               WHERE departement = ? AND cog = ? AND lieu IS NOT NULL 
+               AND (insecurite = 1 OR immigration = 1 OR islamisme = 1 OR defrancisation = 1 OR wokisme = 1)`;
+        params = [departement, cog];
+    } else if (commune) {
+        // Use commune name if COG not provided
+        sql = `SELECT DISTINCT lieu 
+               FROM articles 
+               WHERE departement = ? AND commune = ? AND lieu IS NOT NULL 
+               AND (insecurite = 1 OR immigration = 1 OR islamisme = 1 OR defrancisation = 1 OR wokisme = 1)`;
+        params = [departement, commune];
+    } else {
+        // Just departement
+        sql = `SELECT DISTINCT lieu 
+               FROM articles 
+               WHERE departement = ? AND lieu IS NOT NULL 
+               AND (insecurite = 1 OR immigration = 1 OR islamisme = 1 OR defrancisation = 1 OR wokisme = 1)`;
+        params = [departement];
+    }
+    
+    db.all(sql, params, (err, rows) => {
+        if (err) {
+            console.error("Database error in /lieux:", err.message);
+            return res.status(500).json({
+                error: "Erreur lors de la requête à la base de données",
+                details: err.message,
             });
-            const lieux = Array.from(lieuxSet).sort();
-            res.json(lieux.map((lieu) => ({ lieu })));
-        },
-    );
+        }
+        console.log("Lieux found:", rows.length);
+        const lieuxSet = new Set();
+        rows.forEach((row) => {
+            if (row.lieu) {
+                row.lieu
+                    .split(",")
+                    .forEach((lieu) => lieuxSet.add(lieu.trim()));
+            }
+        });
+        const lieux = Array.from(lieuxSet).sort();
+        res.json(lieux.map((lieu) => ({ lieu })));
+    });
 });
 
 // Route: GET /search

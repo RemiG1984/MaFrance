@@ -62,7 +62,7 @@ const LocationHandler = (function () {
             }
         }
 
-        async function loadLieux(departement, commune) {
+        async function loadLieux(departement, cogOrCommune) {
             // Normalize departement
             departement = departement.trim().toUpperCase();
             if (/^\d+$/.test(departement)) {
@@ -74,7 +74,17 @@ const LocationHandler = (function () {
                 return;
             }
             try {
-                const response = await fetch(`/lieux?dept=${departement}&commune=${encodeURIComponent(commune)}`);
+                let url = `/lieux?dept=${departement}`;
+                if (cogOrCommune) {
+                    // Check if it's a COG (numeric) or commune name
+                    if (/^\d+$/.test(cogOrCommune)) {
+                        url += `&cog=${encodeURIComponent(cogOrCommune)}`;
+                    } else {
+                        url += `&commune=${encodeURIComponent(cogOrCommune)}`;
+                    }
+                }
+                
+                const response = await fetch(url);
                 if (!response.ok) {
                     throw new Error('Erreur lors du chargement des lieux');
                 }

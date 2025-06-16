@@ -194,7 +194,7 @@
                 const item = data[0];
                 const cog = item.COG;
                 scoreTableHandler.showCommuneDetails(departement, commune);
-                locationHandler.loadLieux(departement, cog);
+                locationHandler.loadLieux(departement, commune);
                 articleHandler.loadArticles(departement, cog).then(() => {
                     articleHandler.loadArticleCounts(departement, cog).then(counts => {
                         articleHandler.renderFilterButtons(counts, allArticles, currentLieu);
