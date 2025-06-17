@@ -118,8 +118,9 @@ router.get("/ministre", (req, res) => {
   db.get(
     `SELECT country, prenom, nom, sexe, date_nais, date_mandat, famille_nuance, nuance_politique 
      FROM ministre_interieur 
-     WHERE UPPER(country) = ? AND date_mandat = (SELECT MAX(date_mandat) FROM ministre_interieur WHERE UPPER(country) = ?)`,
-    ["FRANCE", "FRANCE"],
+     WHERE UPPER(country) = ? 
+     ORDER BY date_mandat DESC LIMIT 1`,
+    ["FRANCE"],
     (err, row) => {
       if (err) {
         return res.status(500).json({
