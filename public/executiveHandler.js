@@ -2,7 +2,7 @@ const ExecutiveHandler = (function () {
     return function (executiveDiv, departmentNames) {
         async function showCountryExecutive() {
             try {
-                const response = await fetch("/country_ministre");
+                const response = await fetch("/api/country/ministre");
                 if (!response.ok) {
                     throw new Error(
                         `Erreur lors de la récupération du ministre: ${response.statusText}`,
@@ -34,7 +34,7 @@ const ExecutiveHandler = (function () {
         async function showDepartmentExecutive(deptCode) {
             try {
                 const response = await fetch(
-                    `/departement_prefet?dept=${deptCode}`,
+                    `/api/departement/prefet?dept=${deptCode}`,
                 );
                 if (!response.ok) {
                     throw new Error(
@@ -67,7 +67,7 @@ const ExecutiveHandler = (function () {
         async function showCommuneExecutive(departement, commune) {
             try {
                 const searchResponse = await fetch(
-                    `/search?dept=${departement}&q=${encodeURIComponent(commune)}`,
+                    `/api/search?dept=${departement}&q=${encodeURIComponent(commune)}`,
                 );
                 if (!searchResponse.ok) {
                     throw new Error(
@@ -84,7 +84,7 @@ const ExecutiveHandler = (function () {
                     throw new Error("Code COG manquant pour la commune");
                 }
                 const response = await fetch(
-                    `/commune_maire?cog=${encodeURIComponent(item.COG)}`,
+                    `/api/commune/maire?cog=${encodeURIComponent(item.COG)}`,
                 );
                 if (!response.ok) {
                     throw new Error(

@@ -4,9 +4,9 @@ const ScoreTableHandler = (function () {
             try {
                 const [response, namesResponse, crimeResponse] =
                     await Promise.all([
-                        fetch("/country_details"),
-                        fetch("/country_names"),
-                        fetch("/country_crime"),
+                        fetch("/api/country/details"),
+                        fetch("/api/country/names"),
+                        fetch("/api/country/crime"),
                     ]);
                 if (!response.ok) {
                     throw new Error(
@@ -185,10 +185,10 @@ const ScoreTableHandler = (function () {
                     namesResponse,
                     crimeResponse,
                 ] = await Promise.all([
-                    fetch(`/departement_details?dept=${deptCode}`),
-                    fetch("/country_details"),
-                    fetch(`/department_names?dept=${deptCode}`),
-                    fetch(`/department_crime?dept=${deptCode}`),
+                    fetch(`/api/departement/details?dept=${deptCode}`),
+                    fetch("/api/country/details"),
+                    fetch(`/api/departement/names?dept=${deptCode}`),
+                    fetch(`/api/departement/crime?dept=${deptCode}`),
                 ]);
                 if (!deptResponse.ok || !countryResponse.ok) {
                     throw new Error(
@@ -199,9 +199,9 @@ const ScoreTableHandler = (function () {
                 const countryData = await countryResponse.json();
                 const namesData = await namesResponse.json();
                 const crimeData = await crimeResponse.json();
-                const countryNamesResponse = await fetch("/country_names");
+                const countryNamesResponse = await fetch("/api/country/names");
                 const countryNamesData = await countryNamesResponse.json();
-                const countryCrimeResponse = await fetch("/country_crime");
+                const countryCrimeResponse = await fetch("/api/country/crime");
                 const countryCrimeData = await countryCrimeResponse.json();
                 console.log("Department details:", data);
                 if (!data) {
@@ -475,11 +475,11 @@ const ScoreTableHandler = (function () {
                     deptCrimeResponse,
                 ] = await Promise.all([
                     fetch(
-                        `/search?dept=${departement}&q=${encodeURIComponent(commune)}`,
+                        `/api/search?dept=${departement}&q=${encodeURIComponent(commune)}`,
                     ),
-                    fetch(`/departement_details?dept=${departement}`),
-                    fetch(`/department_names?dept=${departement}`),
-                    fetch(`/department_crime?dept=${departement}`),
+                    fetch(`/api/departement/details?dept=${departement}`),
+                    fetch(`/api/departement/names?dept=${departement}`),
+                    fetch(`/api/departement/crime?dept=${departement}`),
                 ]);
                 if (!communeResponse.ok || !deptResponse.ok) {
                     throw new Error(
@@ -497,11 +497,11 @@ const ScoreTableHandler = (function () {
                     throw new Error("Code COG manquant pour la commune");
                 }
                 const namesResponse = await fetch(
-                    `/commune_names?dept=${departement}&cog=${encodeURIComponent(item.COG)}`,
+                    `/api/commune/names?dept=${departement}&cog=${encodeURIComponent(item.COG)}`,
                 );
                 const namesData = await namesResponse.json();
                 const crimeResponse = await fetch(
-                    `/commune_crime?dept=${departement}&cog=${encodeURIComponent(item.COG)}`,
+                    `/api/commune/crime?dept=${departement}&cog=${encodeURIComponent(item.COG)}`,
                 );
                 const crimeData = await crimeResponse.json();
                 const deptNamesData = await deptNamesResponse.json();

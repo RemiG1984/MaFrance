@@ -214,7 +214,7 @@
         if (departement && commune) {
             try {
                 const response = await fetch(
-                    `/search?dept=${departement}&q=${encodeURIComponent(commune)}`,
+                    `/api/search?dept=${departement}&q=${encodeURIComponent(commune)}`,
                 );
                 if (!response.ok) {
                     throw new Error(
@@ -259,7 +259,7 @@
         if (departement && commune) {
             try {
                 const response = await fetch(
-                    `/search?dept=${departement}&q=${encodeURIComponent(commune)}`,
+                    `/api/search?dept=${departement}&q=${encodeURIComponent(commune)}`,
                 );
                 if (!response.ok) {
                     throw new Error(

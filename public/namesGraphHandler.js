@@ -125,16 +125,16 @@
 
             // Determine the endpoint based on type
             if (type === 'country') {
-                endpoint = '/country_names_history';
+                endpoint = '/api/country/names_history';
                 params = { country: code || 'France' };
             } else if (type === 'department') {
-                endpoint = '/department_names_history';
+                endpoint = '/api/department/names_history';
                 params = { dept: code };
             } else if (type === 'commune') {
                 if (!dept) {
                     throw new Error('Department code is required for commune');
                 }
-                endpoint = '/commune_names_history';
+                endpoint = '/api/commune_names_history';
                 params = { dept: dept, cog: code };
             } else {
                 throw new Error('Invalid type parameter');

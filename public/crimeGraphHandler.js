@@ -127,18 +127,18 @@
 
             // Determine the endpoint and title
             if (type === 'country') {
-                endpoint = '/country_crime_history';
+                endpoint = '/api/country/crime_history';
                 params = { country: code || 'France' };
                 titleText = 'France';
             } else if (type === 'department') {
-                endpoint = '/department_crime_history';
+                endpoint = '/api/department/crime_history';
                 params = { dept: code };
                 titleText = `${code} - ${departmentNames[code] || code}`;
             } else if (type === 'commune') {
                 if (!dept || !communeName) {
                     throw new Error('Department code and commune name are required for commune');
                 }
-                endpoint = '/commune_crime_history';
+                endpoint = '/api/commune/crime_history';
                 params = { dept: dept, cog: code };
                 titleText = `${communeName} (${dept})`;
             } else {
@@ -163,7 +163,7 @@
 
             // Fetch higher-level data
             if (type === 'department' || type === 'commune') {
-                const countryResponse = await fetch('/country_crime_history?country=France');
+                const countryResponse = await fetch('/api/country/crime_history?country=France');
                 if (!countryResponse.ok) {
                     console.error('Country fetch failed:', { status: countryResponse.status, statusText: countryResponse.statusText });
                     throw new Error(`Erreur lors de la récupération des données nationales: ${countryResponse.statusText}`);
@@ -173,7 +173,7 @@
             }
 
             if (type === 'commune') {
-                const deptResponse = await fetch(`/department_crime_history?dept=${dept}`);
+                const deptResponse = await fetch(`/api/department/crime_history?dept=${dept}`);
                 if (!deptResponse.ok) {
                     console.error('Department fetch failed:', { status: deptResponse.status, statusText: deptResponse.statusText });
                     throw new Error(`Erreur lors de la récupération des données départementales: ${deptResponse.statusText}`);
