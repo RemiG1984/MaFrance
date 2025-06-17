@@ -34,16 +34,15 @@ app.use(
 // Route: GET / (health check optimized)
 app.get("/", (req, res) => {
     // Quick health check response for deployment
-    if (req.headers['user-agent'] && req.headers['user-agent'].includes('GoogleHC')) {
-        return res.status(200).send('OK');
+    if (
+        req.headers["user-agent"] &&
+        req.headers["user-agent"].includes("GoogleHC")
+    ) {
+        return res.status(200).send("OK");
     }
     console.log("Serving index.html");
     res.sendFile(path.join(__dirname, "public", "index.html"));
 });
-
-;
-
-);
 
 // Route: GET /country_details
 app.get("/country_details", (req, res) => {
@@ -663,12 +662,19 @@ app.get("/lieux", (req, res) => {
     const departement = req.query.dept || "";
     const commune = req.query.commune || "";
     const cog = req.query.cog || "";
-    console.log("Fetching lieux for dept:", departement, "commune:", commune, "COG:", cog);
-    
+    console.log(
+        "Fetching lieux for dept:",
+        departement,
+        "commune:",
+        commune,
+        "COG:",
+        cog,
+    );
+
     if (!departement) {
         return res.status(400).json({ error: "Département requis" });
     }
-    
+
     let sql, params;
     if (cog) {
         // Use COG if provided
@@ -692,7 +698,7 @@ app.get("/lieux", (req, res) => {
                AND (insecurite = 1 OR immigration = 1 OR islamisme = 1 OR defrancisation = 1 OR wokisme = 1)`;
         params = [departement];
     }
-    
+
     db.all(sql, params, (err, rows) => {
         if (err) {
             console.error("Database error in /lieux:", err.message);
@@ -804,7 +810,8 @@ app.get("/articles", (req, res) => {
 // Route: GET /departement_details_all
 app.get("/departements_details_all", (req, res) => {
     res.setHeader("Content-Type", "application/json; charset=utf-8");
-    const limit = parseInt(req.query.limit) || 101;    const offset = parseInt(req.query.offset) || 0;
+    const limit = parseInt(req.query.limit) || 101;
+    const offset = parseInt(req.query.offset) || 0;
     const sort = req.query.sort || "insecurite_score";
     const direction = req.query.direction || "DESC";
     console.log(
@@ -1204,8 +1211,96 @@ app.get("/article_counts", (req, res) => {
     });
 });
 
+app.get("/commune_maire", (req, res) => {
+    res.setHeader("Content-Type", "application/json; charset=utf-8");
+    const cog = req.query.cog || "";
+    console.log("Fetching maire for COG:", cog);
+    if (!cog) {
+        return res.status(400).json({ error: "COG requis" });
+    }
+    db.get(
+        "SELECT cog, commune, prenom, nom, sexe, date_nais, date_mandat, famille_nuance, nuance_politique FROM maires WHERE cog = ?",
+        [cog],
+        (err, row) => {
+            if (err) {
+                console.error("Database error in /commune_maire:", err.message);
+                return res.status(500).json({
+                    error: "Erreur lors de la requête à la base de données",
+                    details: err.message,
+                });
+            }
+            if (!row) {
+                console.log(`No maire found for COG = ${cog}`);
+                return res.status(404).json({ error: "Maire non trouvé" });
+            }
+            console.log("Maire data:", row);
+            res.json(row);
+        },
+    );
+});
+
+app.get("/departement_prefet", (req, res) => {
+    res.setHeader("Content-Type", "application/json; charset=utf-8");
+    const departement = req.query.dept || "";
+    console.log("Fetching prefet for departement:", departement);
+    if (!departement) {
+        return res.status(400).json({ error: "Département requis" });
+    }
+    db.get(
+        "SELECT code, prenom, nom, date_poste FROM prefets WHERE code = ?",
+        [departement],
+        (err, row) => {
+            if (err) {
+                console.error(
+                    "Database error in /departement_prefet:",
+                    err.message,
+                );
+                return res.status(500).json({
+                    error: "Erreur lors de la requête à la base de données",
+                    details: err.message,
+                });
+            }
+            if (!row) {
+                console.log(`No prefet found for departement = ${departement}`);
+                return res.status(404).json({ error: "Préfet non trouvé" });
+            }
+            console.log("Prefet data:", row);
+            res.json(row);
+        },
+    );
+});
+
+app.get("/country_ministre", (req, res) => {
+    res.setHeader("Content-Type", "application/json; charset=utf-8");
+    console.log("Fetching ministre_interieur for country: France");
+    db.get(
+        `SELECT country, prenom, nom, sexe, date_nais, date_mandat, famille_nuance, nuance_politique 
+         FROM ministre_interieur 
+         WHERE UPPER(country) = ? AND date_mandat = (SELECT MAX(date_mandat) FROM ministre_interieur WHERE UPPER(country) = ?)`,
+        ["FRANCE", "FRANCE"],
+        (err, row) => {
+            if (err) {
+                console.error(
+                    "Database error in /country_ministre:",
+                    err.message,
+                );
+                return res.status(500).json({
+                    error: "Erreur lors de la requête à la base de données",
+                    details: err.message,
+                });
+            }
+            if (!row) {
+                console.log("No ministre found for country = France");
+                return res.status(404).json({ error: "Ministre non trouvé" });
+            }
+            console.log("Ministre data:", row);
+            res.json(row);
+        },
+    );
+});
+
 // Start the Express server
-const server = app.listen(port, '0.0.0.0', () => {
+const server = app.listen(port, "0.0.0.0", () => {
     console.log(`Server running at http://0.0.0.0:${port}`);
 });
 

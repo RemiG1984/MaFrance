@@ -4,6 +4,7 @@ const { importScores } = require("./importScores");
 const { importArticles } = require("./importArticles");
 const { importNames } = require("./importNames");
 const { importCrimeData } = require("./importCrimeData");
+const { importElus } = require("./importElus");
 
 const dbFile = ".data/france.db";
 
@@ -24,6 +25,11 @@ const csvFiles = {
     "crime_data_france.csv",
     "crime_data_departement.csv",
     "crime_data_commune.csv",
+  ],
+  importElus: [
+    "maires_list.csv",
+    "prefets_list.csv",
+    "ministre_interieur_list.csv",
   ],
 };
 
@@ -72,8 +78,7 @@ function runImports() {
       if (err) {
         console.error("Importation stoppée après articles:", err.message);
         db.close((closeErr) => {
-          if (closeErr)
-            console.error("Erreur fermeture base:", closeErr.message);
+          if (closeErr) console.error("Erreur fermeture base:", closeErr.message);
           process.exit(1);
         });
         return;
@@ -83,8 +88,7 @@ function runImports() {
         if (err) {
           console.error("Importation stoppée après scores:", err.message);
           db.close((closeErr) => {
-            if (closeErr)
-              console.error("Erreur fermeture base:", closeErr.message);
+            if (closeErr) console.error("Erreur fermeture base:", closeErr.message);
             process.exit(1);
           });
           return;
@@ -93,14 +97,28 @@ function runImports() {
         importNames(db, (err) => {
           if (err) {
             console.error("Importation stoppée après names:", err.message);
-          } else {
-            console.log("Importation complète terminée");
+            db.close((closeErr) => {
+              if (closeErr) console.error("Erreur fermeture base:", closeErr.message);
+              process.exit(1);
+            });
+            return;
           }
           //deleteCsvFiles(csvFiles.importNames); // Delete names CSVs
-          db.close((closeErr) => {
-            if (closeErr)
-              console.error("Erreur fermeture base:", closeErr.message);
-            process.exit(err ? 1 : 0);
+          importElus(db, (err) => {
+            if (err) {
+              console.error("Importation stoppée après élus:", err.message);
+              db.close((closeErr) => {
+                if (closeErr) console.error("Erreur fermeture base:", closeErr.message);
+                process.exit(1);
+              });
+              return;
+            }
+            //deleteCsvFiles(csvFiles.importElus); // Delete elus CSVs
+            db.close((closeErr) => {
+              if (closeErr) console.error("Erreur fermeture base:", closeErr.message);
+              console.log("Importation complète terminée");
+              process.exit(err ? 1 : 0);
+            });
           });
         });
       });
