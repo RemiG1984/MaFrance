@@ -185,7 +185,7 @@ const ScoreTableHandler = (function () {
                     namesResponse,
                     crimeResponse,
                 ] = await Promise.all([
-                    fetch(`/api/departement/details?dept=${deptCode}`),
+                    fetch(`/api/departements/details?dept=${deptCode}`),
                     fetch("/api/country/details"),
                     fetch(`/api/departement/names?dept=${deptCode}`),
                     fetch(`/api/departement/crime?dept=${deptCode}`),
@@ -445,9 +445,7 @@ const ScoreTableHandler = (function () {
                             },
                             {
                                 title: "Score Wokisme",
-                                main: data.wokisme_score.toLocaleString(
-                                    "fr-FR",
-                                ),
+                                main: data.wokisme_score.toLocaleString("fr-FR"),
                                 compare:
                                     countryData.wokisme_score.toLocaleString(
                                         "fr-FR",
@@ -477,7 +475,7 @@ const ScoreTableHandler = (function () {
                     fetch(
                         `/api/search?dept=${departement}&q=${encodeURIComponent(commune)}`,
                     ),
-                    fetch(`/api/departement/details?dept=${departement}`),
+                    fetch(`/api/departements/details?dept=${departement}`),
                     fetch(`/api/departement/names?dept=${departement}`),
                     fetch(`/api/departement/crime?dept=${departement}`),
                 ]);
