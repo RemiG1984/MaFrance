@@ -21,11 +21,19 @@ app.use(
 );
 
 // Routes
-app.use("/api/country", require("./routes/countryRoutes"));
-app.use("/api/departements", require("./routes/departementRoutes"));
-app.use("/api/communes", require("./routes/communeRoutes"));
-app.use("/api/articles", require("./routes/articleRoutes"));
-app.use("/api", require("./routes/otherRoutes"));
+const articleRoutes = require("./routes/articleRoutes");
+const communeRoutes = require("./routes/communeRoutes");
+const departementRoutes = require("./routes/departementRoutes");
+const countryRoutes = require("./routes/countryRoutes");
+const otherRoutes = require("./routes/otherRoutes");
+const debugRoutes = require("./routes/debugRoutes");
+
+app.use("/api/articles", articleRoutes);
+app.use("/api/communes", communeRoutes);
+app.use("/api/departements", departementRoutes);
+app.use("/api/country", countryRoutes);
+app.use("/api/debug", debugRoutes);
+app.use("/api", otherRoutes);
 
 // Error handling
 const errorHandler = require("./middleware/errorHandler");

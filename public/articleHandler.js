@@ -4,13 +4,15 @@ const ArticleHandler = (function () {
 
         async function loadArticles(departement, cog = "", lieu = "") {
             try {
-                const response = await fetch(
-                    `/api/articles?dept=${departement}${cog ? `&cog=${encodeURIComponent(cog)}` : ""}${lieu ? `&lieu=${encodeURIComponent(lieu)}` : ""}`,
-                );
+                const url = `/api/articles?dept=${departement}${cog ? `&cog=${encodeURIComponent(cog)}` : ""}${lieu ? `&lieu=${encodeURIComponent(lieu)}` : ""}`;
+                console.log("Fetching articles from:", url);
+                const response = await fetch(url);
+                console.log("Articles response status:", response.status, response.statusText);
+                
                 if (!response.ok) {
-                    throw new Error(
-                        `Erreur lors du chargement des articles: ${response.statusText}`,
-                    );
+                    const errorText = await response.text();
+                    console.error("Articles API error response:", errorText);
+                    throw new Error(`Erreur ${response.status}: ${response.statusText} - ${errorText}`);
                 }
                 const articles = await response.json();
                 console.log("Articles fetched:", articles);
@@ -19,26 +21,40 @@ const ArticleHandler = (function () {
                 return articles;
             } catch (error) {
                 articleListDiv.innerHTML = `<p>Erreur : ${error.message}</p>`;
-                console.error("Erreur chargement articles:", error);
+                console.error("Erreur chargement articles:", {
+                    error: error.message,
+                    stack: error.stack,
+                    departement: departement,
+                    cog: cog,
+                    lieu: lieu
+                });
                 return [];
             }
         }
 
         async function loadArticleCounts(departement, cog = "", lieu = "") {
             try {
-                const response = await fetch(
-                    `/api/articles/counts?dept=${departement}${cog ? `&cog=${encodeURIComponent(cog)}` : ""}${lieu ? `&lieu=${encodeURIComponent(lieu)}` : ""}`,
-                );
+                const url = `/api/articles/counts?dept=${departement}${cog ? `&cog=${encodeURIComponent(cog)}` : ""}${lieu ? `&lieu=${encodeURIComponent(lieu)}` : ""}`;
+                console.log("Fetching article counts from:", url);
+                const response = await fetch(url);
+                console.log("Article counts response status:", response.status, response.statusText);
+                
                 if (!response.ok) {
-                    throw new Error(
-                        "Erreur lors du chargement des comptes d'articles",
-                    );
+                    const errorText = await response.text();
+                    console.error("Article counts API error response:", errorText);
+                    throw new Error(`Erreur ${response.status}: ${response.statusText} - ${errorText}`);
                 }
                 const counts = await response.json();
                 console.log("Article counts:", counts);
                 return counts;
             } catch (error) {
-                console.error("Erreur chargement comptes articles:", error);
+                console.error("Erreur chargement comptes articles:", {
+                    error: error.message,
+                    stack: error.stack,
+                    departement: departement,
+                    cog: cog,
+                    lieu: lieu
+                });
                 return {
                     insecurite: 0,
                     immigration: 0,

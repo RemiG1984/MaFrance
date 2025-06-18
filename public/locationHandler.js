@@ -63,11 +63,15 @@ const LocationHandler = (function () {
                 return;
             }
             try {
-                const response = await fetch(
-                    `/api/communes?dept=${departement}&q=${encodeURIComponent(query)}`,
-                );
+                const url = `/api/communes?dept=${departement}&q=${encodeURIComponent(query)}`;
+                console.log("Fetching communes from:", url);
+                const response = await fetch(url);
+                console.log("Communes response status:", response.status, response.statusText);
+                
                 if (!response.ok) {
-                    throw new Error("Erreur lors du chargement des communes");
+                    const errorText = await response.text();
+                    console.error("Communes API error response:", errorText);
+                    throw new Error(`Erreur ${response.status}: ${response.statusText} - ${errorText}`);
                 }
                 const communes = await response.json();
                 console.log("Communes fetched:", communes);
@@ -80,7 +84,12 @@ const LocationHandler = (function () {
                 });
             } catch (error) {
                 resultsDiv.innerHTML = `<p>Erreur : ${error.message}</p>`;
-                console.error("Erreur chargement communes:", error);
+                console.error("Erreur chargement communes:", {
+                    error: error.message,
+                    stack: error.stack,
+                    departement: departement,
+                    query: query
+                });
             }
         }
 

@@ -15,22 +15,25 @@ const {
 // GET /api/communes
 router.get("/", [validateDepartement, validateSearchQuery], (req, res) => {
   const { dept, q = "" } = req.query;
+  console.log("GET /api/communes - Request params:", { dept, q });
 
   if (!q || q.length < 2) {
-    db.all(
-      `SELECT DISTINCT commune, COG 
+    const sql = `SELECT DISTINCT commune, COG 
        FROM locations 
        WHERE departement = ? 
        ORDER BY commune ASC 
-       LIMIT 10`,
-      [dept],
-      (err, rows) => {
+       LIMIT 10`;
+    console.log("Executing SQL (no query):", sql, "with params:", [dept]);
+    
+    db.all(sql, [dept], (err, rows) => {
         if (err) {
+          console.error("Database error in /api/communes:", err);
           return res.status(500).json({
             error: "Erreur lors de la requête à la base de données",
             details: err.message,
           });
         }
+        console.log("Query result (no search):", rows?.length || 0, "rows");
         res.json(rows);
       },
     );
@@ -41,19 +44,23 @@ router.get("/", [validateDepartement, validateSearchQuery], (req, res) => {
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "");
+  console.log("Normalized search query:", normalizedQuery);
 
-  db.all(
-    `SELECT DISTINCT commune, COG 
+  const sql = `SELECT DISTINCT commune, COG 
      FROM locations 
-     WHERE departement = ?`,
-    [dept],
-    (err, rows) => {
+     WHERE departement = ?`;
+  console.log("Executing SQL (with search):", sql, "with params:", [dept]);
+
+  db.all(sql, [dept], (err, rows) => {
       if (err) {
+        console.error("Database error in /api/communes (search):", err);
         return res.status(500).json({
           error: "Erreur lors de la requête à la base de données",
           details: err.message,
         });
       }
+
+      console.log("Raw query result:", rows?.length || 0, "rows for dept", dept);
 
       const filteredCommunes = rows.filter((row) => {
         const normalizedCommune = row.commune
@@ -62,6 +69,8 @@ router.get("/", [validateDepartement, validateSearchQuery], (req, res) => {
           .replace(/[\u0300-\u036f]/g, "");
         return normalizedCommune.includes(normalizedQuery);
       });
+
+      console.log("Filtered communes:", filteredCommunes.length, "matches for query:", q);
 
       filteredCommunes.sort((a, b) => {
         const normA = a.commune
@@ -79,7 +88,9 @@ router.get("/", [validateDepartement, validateSearchQuery], (req, res) => {
           : a.commune.localeCompare(b.commune);
       });
 
-      res.json(filteredCommunes.slice(0, 5));
+      const result = filteredCommunes.slice(0, 5);
+      console.log("Final result:", result.length, "communes returned");
+      res.json(result);
     },
   );
 });

@@ -13,6 +13,8 @@ router.get(
   [validateDepartement, validateCOG, validateLieu],
   (req, res) => {
     const { dept, cog, lieu } = req.query;
+    console.log("GET /api/articles - Request params:", { dept, cog, lieu });
+    
     let sql =
       "SELECT date, title, url, lieu, commune, insecurite, immigration, islamisme, defrancisation, wokisme FROM articles WHERE departement = ? AND (insecurite = 1 OR immigration = 1 OR islamisme = 1 OR defrancisation = 1 OR wokisme = 1)";
     let params = [dept];
@@ -25,13 +27,18 @@ router.get(
       params.push(`%${lieu}%`);
     }
     sql += " ORDER BY date DESC";
+    
+    console.log("Executing SQL:", sql, "with params:", params);
+    
     db.all(sql, params, (err, rows) => {
       if (err) {
+        console.error("Database error in /api/articles:", err);
         return res.status(500).json({
           error: "Erreur lors de la requête à la base de données",
           details: err.message,
         });
       }
+      console.log("Articles query result:", rows?.length || 0, "articles found");
       res.json(rows);
     });
   },
@@ -43,6 +50,8 @@ router.get(
   [validateDepartement, validateCOG, validateLieu],
   (req, res) => {
     const { dept, cog, lieu } = req.query;
+    console.log("GET /api/articles/counts - Request params:", { dept, cog, lieu });
+    
     let sql = `SELECT 
     SUM(insecurite) as insecurite_count,
     SUM(immigration) as immigration_count,
@@ -60,20 +69,26 @@ router.get(
       sql += " AND lieu LIKE ?";
       params.push(`%${lieu}%`);
     }
+    
+    console.log("Executing counts SQL:", sql, "with params:", params);
+    
     db.get(sql, params, (err, row) => {
       if (err) {
+        console.error("Database error in /api/articles/counts:", err);
         return res.status(500).json({
           error: "Erreur lors de la requête à la base de données",
           details: err.message,
         });
       }
-      res.json({
+      const result = {
         insecurite: row ? row.insecurite_count || 0 : 0,
         immigration: row ? row.immigration_count || 0 : 0,
         islamisme: row ? row.islamisme_count || 0 : 0,
         defrancisation: row ? row.defrancisation_count || 0 : 0,
         wokisme: row ? row.wokisme_count || 0 : 0,
-      });
+      };
+      console.log("Article counts result:", result);
+      res.json(result);
     });
   },
 );
