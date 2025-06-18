@@ -125,9 +125,76 @@ const validateLieu = [
   handleValidationErrors,
 ];
 
+function validateSearchQuery(req, res, next) {
+  const { q } = req.query;
+  if (q !== undefined && q !== "" && (typeof q !== "string" || q.length < 2 || q.length > 100)) {
+    return res.status(400).json({
+      errors: [
+        {
+          type: "field",
+          value: q,
+          msg: "La requête doit contenir entre 2 et 100 caractères",
+          path: "q",
+          location: "query",
+        },
+      ],
+    });
+  }
+  next();
+}
+
+function validateCOG(req, res, next) {
+  const { cog } = req.query;
+  if (!cog) {
+    return res.status(400).json({
+      errors: [
+        {
+          type: "field",
+          msg: "COG requis",
+          path: "cog",
+          location: "query",
+        },
+      ],
+    });
+  }
+  if (!/^\d{5}$/.test(cog)) {
+    return res.status(400).json({
+      errors: [
+        {
+          type: "field",
+          value: cog,
+          msg: "Code COG invalide",
+          path: "cog",
+          location: "query",
+        },
+      ],
+    });
+  }
+  next();
+}
+
+function validateOptionalCOG(req, res, next) {
+  const { cog } = req.query;
+  if (cog && !/^\d{5}$/.test(cog)) {
+    return res.status(400).json({
+      errors: [
+        {
+          type: "field",
+          value: cog,
+          msg: "Code COG invalide",
+          path: "cog",
+          location: "query",
+        },
+      ],
+    });
+  }
+  next();
+}
+
 module.exports = {
   validateDepartement,
   validateCOG,
+  validateOptionalCOG,
   validateSearchQuery,
   validateSort,
   validateDirection,

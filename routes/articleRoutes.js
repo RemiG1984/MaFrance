@@ -3,14 +3,14 @@ const router = express.Router();
 const db = require("../config/db");
 const {
   validateDepartement,
-  validateCOG,
+  validateOptionalCOG,
   validateLieu,
 } = require("../middleware/validate");
 
 // GET /api/articles
 router.get(
   "/",
-  [validateDepartement, validateCOG, validateLieu],
+  [validateDepartement, validateOptionalCOG, validateLieu],
   (req, res) => {
     const { dept, cog, lieu } = req.query;
     console.log("GET /api/articles - Request params:", { dept, cog, lieu });
@@ -47,7 +47,7 @@ router.get(
 // GET /api/articles/counts
 router.get(
   "/counts",
-  [validateDepartement, validateCOG, validateLieu],
+  [validateDepartement, validateOptionalCOG, validateLieu],
   (req, res) => {
     const { dept, cog, lieu } = req.query;
     console.log("GET /api/articles/counts - Request params:", { dept, cog, lieu });
@@ -96,7 +96,7 @@ router.get(
 // GET /api/articles/lieux
 router.get(
   "/lieux",
-  [validateDepartement, validateCOG, validateLieu],
+  [validateDepartement, validateOptionalCOG, validateLieu],
   (req, res) => {
     const { dept, cog, lieu } = req.query;
     let sql, params;
