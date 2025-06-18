@@ -29,16 +29,7 @@ const validateCOG = [
   handleValidationErrors,
 ];
 
-// Validation for search query
-const validateSearchQuery = [
-  query('q')
-    .optional()
-    .trim()
-    .escape()
-    .isLength({ min: 2, max: 100 })
-    .withMessage('La requête doit contenir entre 2 et 100 caractères'),
-  handleValidationErrors,
-];
+// Validation for search query (using custom function below)
 
 // Validation for sort parameter
 const validateSort = [
