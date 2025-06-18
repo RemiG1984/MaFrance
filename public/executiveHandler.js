@@ -34,7 +34,7 @@ const ExecutiveHandler = (function () {
         async function showDepartmentExecutive(deptCode) {
             try {
                 const response = await fetch(
-                    `/api/departement/prefet?dept=${deptCode}`,
+                    `/api/departements/prefet?dept=${deptCode}`,
                 );
                 if (!response.ok) {
                     throw new Error(
@@ -84,7 +84,7 @@ const ExecutiveHandler = (function () {
                     throw new Error("Code COG manquant pour la commune");
                 }
                 const response = await fetch(
-                    `/api/commune/maire?cog=${encodeURIComponent(item.COG)}`,
+                    `/api/communes/maire?cog=${encodeURIComponent(item.COG)}`,
                 );
                 if (!response.ok) {
                     throw new Error(

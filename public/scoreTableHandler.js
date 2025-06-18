@@ -187,8 +187,8 @@ const ScoreTableHandler = (function () {
                 ] = await Promise.all([
                     fetch(`/api/departements/details?dept=${deptCode}`),
                     fetch("/api/country/details"),
-                    fetch(`/api/departement/names?dept=${deptCode}`),
-                    fetch(`/api/departement/crime?dept=${deptCode}`),
+                    fetch(`/api/departements/names?dept=${deptCode}`),
+                    fetch(`/api/departements/crime?dept=${deptCode}`),
                 ]);
                 if (!deptResponse.ok || !countryResponse.ok) {
                     throw new Error(
@@ -445,7 +445,9 @@ const ScoreTableHandler = (function () {
                             },
                             {
                                 title: "Score Wokisme",
-                                main: data.wokisme_score.toLocaleString("fr-FR"),
+                                main: data.wokisme_score.toLocaleString(
+                                    "fr-FR",
+                                ),
                                 compare:
                                     countryData.wokisme_score.toLocaleString(
                                         "fr-FR",
@@ -476,8 +478,8 @@ const ScoreTableHandler = (function () {
                         `/api/search?dept=${departement}&q=${encodeURIComponent(commune)}`,
                     ),
                     fetch(`/api/departements/details?dept=${departement}`),
-                    fetch(`/api/departement/names?dept=${departement}`),
-                    fetch(`/api/departement/crime?dept=${departement}`),
+                    fetch(`/api/departements/names?dept=${departement}`),
+                    fetch(`/api/departements/crime?dept=${departement}`),
                 ]);
                 if (!communeResponse.ok || !deptResponse.ok) {
                     throw new Error(
@@ -495,11 +497,11 @@ const ScoreTableHandler = (function () {
                     throw new Error("Code COG manquant pour la commune");
                 }
                 const namesResponse = await fetch(
-                    `/api/commune/names?dept=${departement}&cog=${encodeURIComponent(item.COG)}`,
+                    `/api/communes/names?dept=${departement}&cog=${encodeURIComponent(item.COG)}`,
                 );
                 const namesData = await namesResponse.json();
                 const crimeResponse = await fetch(
-                    `/api/commune/crime?dept=${departement}&cog=${encodeURIComponent(item.COG)}`,
+                    `/api/communes/crime?dept=${departement}&cog=${encodeURIComponent(item.COG)}`,
                 );
                 const crimeData = await crimeResponse.json();
                 const deptNamesData = await deptNamesResponse.json();

@@ -138,7 +138,7 @@
                 if (!dept || !communeName) {
                     throw new Error('Department code and commune name are required for commune');
                 }
-                endpoint = '/api/commune/crime_history';
+                endpoint = '/api/communes/crime_history';
                 params = { dept: dept, cog: code };
                 titleText = `${communeName} (${dept})`;
             } else {
