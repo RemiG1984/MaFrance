@@ -220,7 +220,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 1259,01,Montcet,715,25,44,18,63,14,0,0.0
 1260,01,Le Montellier,329,30,44,18,63,14,0,0.0
 1261,01,Monthieux,673,38,44,18,63,14,0,0.0
-1262,01,Montluel,6879,88,44,600,77,14,4,58.15
+1262,01,Montluel,6879,88,44,454,77,14,3,43.61
 1263,01,Montmerle-sur-Saône,3798,45,44,18,63,14,0,0.0
 1264,01,Montracol,1008,35,44,18,63,14,0,0.0
 1265,01,Montréal-la-Cluse,3584,99,100,297,63,14,1,27.9
@@ -364,7 +364,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 1424,01,Tramoyes,1845,113,44,18,63,14,0,0.0
 1425,01,La Tranclière,288,29,44,18,63,14,0,0.0
 1426,01,Val-Revermont,2494,38,44,18,63,14,0,0.0
-1427,01,Trévoux,6931,96,58,595,77,14,4,57.71
+1427,01,Trévoux,6931,96,58,451,77,14,3,43.28
 1428,01,Valeins,131,31,44,18,63,14,0,0.0
 1429,01,Vandeins,725,32,44,18,63,14,0,0.0
 1430,01,Varambon,664,37,44,18,63,14,0,0.0
@@ -1371,7 +1371,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 3182,03,Monteignet-sur-l'Andelot,267,25,35,8,56,16,0,0.0
 3183,03,Le Montet,469,31,35,8,56,16,0,0.0
 3184,03,Montilly,496,25,35,8,56,16,0,0.0
-3185,03,Montluçon,33317,183,92,242,89,22,7,21.01
+3185,03,Montluçon,33317,183,92,212,89,22,6,18.01
 3186,03,Montmarault,1522,73,35,8,56,16,0,0.0
 3187,03,Montoldre,602,26,35,8,56,16,0,0.0
 3188,03,Montord,209,22,35,8,56,16,0,0.0
@@ -1953,7 +1953,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 6085,06,Mougins,19481,129,70,28,76,22,0,0.0
 6086,06,Moulinet,253,429,55,23,70,12,0,0.0
 6087,06,Les Mujouls,38,16,55,23,70,12,0,0.0
-6088,06,Nice,353701,359,228,196,195,38,20,5.65
+6088,06,Nice,353701,359,228,194,195,38,19,5.37
 6089,06,Opio,2408,48,55,23,70,12,0,0.0
 6090,06,Pégomas,8143,56,55,35,83,12,0,0.0
 6091,06,Peille,2205,89,55,23,70,12,0,0.0
@@ -3826,7 +3826,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 11259,11,Moussoulens,988,143,43,14,61,13,0,0.0
 11260,11,Mouthoumet,115,20,43,14,61,13,0,0.0
 11261,11,Moux,715,45,43,14,61,13,0,0.0
-11262,11,Narbonne,56692,293,124,183,94,18,7,12.35
+11262,11,Narbonne,56692,293,124,148,94,18,5,8.82
 11263,11,Nébias,257,35,43,14,61,13,0,0.0
 11264,11,Névian,1283,44,43,14,61,13,0,0.0
 11265,11,Niort-de-Sault,36,14,43,14,61,13,0,0.0
@@ -4341,7 +4341,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 13052,13,Maillane,2779,97,56,29,73,14,0,0.0
 13053,13,Mallemort,6190,63,56,29,73,14,0,0.0
 13054,13,Marignane,33164,174,101,149,100,17,3,9.05
-13055,13,Marseille,877215,422,178,161,152,46,59,6.73
+13055,13,Marseille,877215,422,178,160,152,46,58,6.61
 13056,13,Martigues,48818,180,85,131,91,18,4,8.19
 13057,13,Mas-Blanc-des-Alpilles,537,45,56,29,73,14,0,0.0
 13058,13,Maussane-les-Alpilles,2396,71,56,29,73,14,0,0.0
@@ -4947,7 +4947,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 15011,15,Arnac,178,12,29,5,52,16,0,0.0
 15012,15,Arpajon-sur-Cère,6363,25,29,5,52,16,0,0.0
 15013,15,Auriac-l'Église,142,16,29,5,52,16,0,0.0
-15014,15,Aurillac,26189,154,102,100,94,27,2,7.64
+15014,15,Aurillac,26189,154,102,62,94,27,1,3.82
 15015,15,Auzers,161,11,29,5,52,16,0,0.0
 15016,15,Ayrens,618,27,29,5,52,16,0,0.0
 15017,15,Badailhac,130,7,29,5,52,16,0,0.0
@@ -8401,7 +8401,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 25026,25,Arc-sous-Montenot,228,26,38,14,56,13,0,0.0
 25029,25,Aubonne,260,28,38,14,56,13,0,0.0
 25030,25,Audeux,422,34,38,14,56,13,0,0.0
-25031,25,Audincourt,14009,263,102,192,91,20,2,14.28
+25031,25,Audincourt,14009,263,102,121,91,20,1,7.14
 25032,25,Autechaux,431,33,38,14,56,13,0,0.0
 25033,25,Autechaux-Roide,497,31,38,14,56,13,0,0.0
 25035,25,Les Auxons,2522,45,38,14,56,13,0,0.0
@@ -8424,7 +8424,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 25053,25,Belvoir,90,18,38,14,56,13,0,0.0
 25054,25,Berche,543,29,38,14,56,13,0,0.0
 25055,25,Berthelange,358,27,38,14,56,13,0,0.0
-25056,25,Besançon,120057,310,127,146,94,30,11,9.16
+25056,25,Besançon,120057,310,127,138,94,30,10,8.33
 25057,25,Bethoncourt,5288,283,133,448,112,32,2,37.82
 25058,25,Beure,1342,135,38,14,56,13,0,0.0
 25059,25,Beutal,269,36,38,14,56,13,0,0.0
@@ -10535,7 +10535,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 29301,29,Trézilidé,403,16,33,9,52,15,0,0.0
 29302,29,Pont-de-Buis-lès-Quimerch,3571,30,33,9,52,15,0,0.0
 2A001,2A,Afa,3350,36,51,11,68,14,0,0.0
-2A004,2A,Ajaccio,75343,118,90,146,101,22,8,10.62
+2A004,2A,Ajaccio,75343,118,90,93,101,22,4,5.31
 2A006,2A,Alata,3645,34,51,11,68,14,0,0.0
 2A008,2A,Albitreccia,1780,36,51,11,68,14,0,0.0
 2A011,2A,Altagène,54,18,51,11,68,14,0,0.0
@@ -10548,7 +10548,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 2A024,2A,Aullène,183,27,51,11,68,14,0,0.0
 2A026,2A,Azilone-Ampaza,203,31,51,11,68,14,0,0.0
 2A027,2A,Azzana,50,25,51,11,68,14,0,0.0
-2A028,2A,Balogna,141,32,51,14195,68,14,2,1418.44
+2A028,2A,Balogna,141,32,51,7103,68,14,1,709.22
 2A031,2A,Bastelica,517,37,51,11,68,14,0,0.0
 2A032,2A,Bastelicaccia,4258,38,51,11,68,14,0,0.0
 2A035,2A,Belvédère-Campomoro,195,27,51,11,68,14,0,0.0
@@ -10627,8 +10627,8 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 2A268,2A,Sampolo,87,27,51,11,68,14,0,0.0
 2A269,2A,Sari-Solenzara,1447,45,51,11,68,14,0,0.0
 2A270,2A,Sari-d'Orcino,351,32,51,11,68,14,0,0.0
-2A271,2A,Sarrola-Carcopino,3250,61,51,626,68,14,2,61.54
-2A272,2A,Sartène,3732,100,51,547,94,14,2,53.59
+2A271,2A,Sarrola-Carcopino,3250,61,51,318,68,14,1,30.77
+2A272,2A,Sartène,3732,100,51,279,94,14,1,26.8
 2A276,2A,Serra-di-Ferro,709,37,51,11,68,14,0,0.0
 2A278,2A,Serra-di-Scopamène,117,24,51,11,68,14,0,0.0
 2A279,2A,Serriera,115,34,51,11,68,14,0,0.0
@@ -10673,7 +10673,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 2B025,2B,Avapessa,81,25,51,11,68,14,0,0.0
 2B029,2B,Barbaggio,340,40,51,11,68,14,0,0.0
 2B030,2B,Barrettali,160,29,51,11,68,14,0,0.0
-2B033,2B,Bastia,47459,129,91,114,95,16,4,8.43
+2B033,2B,Bastia,47459,129,91,72,95,16,2,4.21
 2B034,2B,Belgodère,773,45,51,11,68,14,0,0.0
 2B036,2B,Bigorno,94,22,51,11,68,14,0,0.0
 2B037,2B,Biguglia,7638,46,51,11,68,14,0,0.0
@@ -10714,7 +10714,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 2B088,2B,Chiatra,224,27,51,11,68,14,0,0.0
 2B093,2B,Corbara,942,51,51,11,68,14,0,0.0
 2B095,2B,Corscia,124,34,51,11,68,14,0,0.0
-2B096,2B,Corte,7737,84,51,269,93,14,2,25.85
+2B096,2B,Corte,7737,84,51,140,93,14,1,12.92
 2B097,2B,Costa,49,25,51,11,68,14,0,0.0
 2B101,2B,Croce,80,22,51,11,68,14,0,0.0
 2B102,2B,Crocicchia,81,22,51,11,68,14,0,0.0
@@ -10734,7 +10734,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 2B124,2B,Ghisoni,194,35,51,11,68,14,0,0.0
 2B125,2B,Giocatojo,50,24,51,11,68,14,0,0.0
 2B126,2B,Giuncaggio,81,20,51,11,68,14,0,0.0
-2B134,2B,L'Île-Rousse,3213,59,51,633,68,14,2,62.25
+2B134,2B,L'Île-Rousse,3213,59,51,322,68,14,1,31.12
 2B135,2B,Isolaccio-di-Fiumorbo,332,38,51,11,68,14,0,0.0
 2B136,2B,Lama,152,32,51,11,68,14,0,0.0
 2B137,2B,Lano,21,12,51,11,68,14,0,0.0
@@ -12605,7 +12605,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 33321,33,Peujard,2191,49,41,14,58,13,0,0.0
 33322,33,Le Pian-Médoc,7198,62,41,14,58,13,0,0.0
 33323,33,Le Pian-sur-Garonne,967,37,41,14,58,13,0,0.0
-33324,33,Pineuilh,4447,89,63,464,80,13,2,44.97
+33324,33,Pineuilh,4447,89,63,239,80,13,1,22.49
 33325,33,Plassac,942,35,41,14,58,13,0,0.0
 33326,33,Pleine-Selve,220,26,41,14,58,13,0,0.0
 33327,33,Podensac,3300,54,41,14,58,13,0,0.0
@@ -12858,7 +12858,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 34029,34,Bélarga,662,41,51,23,68,14,0,0.0
 34030,34,Berlou,222,36,51,23,68,14,0,0.0
 34031,34,Bessan,5705,96,69,23,68,14,0,0.0
-34032,34,Béziers,80815,398,238,279,239,62,14,17.32
+34032,34,Béziers,80815,398,238,267,239,62,13,16.09
 34033,34,Boisseron,2178,45,51,23,68,14,0,0.0
 34034,34,Boisset,41,22,51,23,68,14,0,0.0
 34035,34,La Boissière,1054,45,51,23,68,14,0,0.0
@@ -15788,7 +15788,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 42180,42,Précieux,1040,38,50,25,68,14,0,0.0
 42181,42,Régny,1447,40,50,25,68,14,0,0.0
 42182,42,Renaison,3220,44,50,25,68,14,0,0.0
-42183,42,La Ricamarie,8162,197,75,515,80,26,4,49.01
+42183,42,La Ricamarie,8162,197,75,393,80,26,3,36.76
 42184,42,Riorges,11034,76,50,25,68,14,0,0.0
 42185,42,Rivas,737,33,50,25,68,14,0,0.0
 42186,42,Rive-de-Gier,15457,206,96,187,94,14,2,12.94
@@ -16450,7 +16450,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 45050,45,Boynes,1323,46,50,25,66,12,0,0.0
 45051,45,Bray-Saint-Aignan,1774,41,50,25,66,12,0,0.0
 45052,45,Breteau,95,27,50,25,66,12,0,0.0
-45053,45,Briare,5012,55,50,424,66,12,2,39.9
+45053,45,Briare,5012,55,50,225,66,12,1,19.95
 45054,45,Briarres-sur-Essonne,526,36,50,25,66,12,0,0.0
 45055,45,Bricy,542,40,50,25,66,12,0,0.0
 45056,45,Bromeilles,321,24,50,25,66,12,0,0.0
@@ -17512,7 +17512,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 48198,48,Villefort,617,31,26,3,57,14,0,0.0
 49002,49,Allonnes,2925,68,35,11,53,14,0,0.0
 49003,49,Tuffalun,1734,35,35,11,53,14,0,0.0
-49007,49,Angers,157555,172,106,84,89,31,7,4.44
+49007,49,Angers,157555,172,106,77,89,31,6,3.81
 49008,49,Angrie,917,27,35,11,53,14,0,0.0
 49009,49,Antoigné,450,26,35,11,53,14,0,0.0
 49010,49,Armaillé,317,20,35,11,53,14,0,0.0
@@ -17558,7 +17558,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 49089,49,Chazé-sur-Argos,1067,28,35,11,53,14,0,0.0
 49090,49,Cheffes,1036,31,35,11,53,14,0,0.0
 49092,49,Chemillé-en-Anjou,21550,42,40,11,53,14,0,0.0
-49099,49,Cholet,54074,105,65,96,73,24,4,7.4
+49099,49,Cholet,54074,105,65,78,73,24,3,5.55
 49100,49,Cizay-la-Madeleine,473,25,35,11,53,14,0,0.0
 49102,49,Cléré-sur-Layon,345,23,35,11,53,14,0,0.0
 49107,49,Cornillé-les-Caves,481,25,35,11,53,14,0,0.0
@@ -20023,7 +20023,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 55026,55,Badonvilliers-Gérauvilliers,127,26,31,6,51,17,0,0.0
 55027,55,Bannoncourt,161,43,31,6,51,17,0,0.0
 55028,55,Bantheville,103,41,31,6,51,17,0,0.0
-55029,55,Bar-le-Duc,14615,208,100,313,85,31,4,27.37
+55029,55,Bar-le-Duc,14615,208,100,177,85,31,2,13.68
 55031,55,Baudonvilliers,377,37,31,6,51,17,0,0.0
 55032,55,Baudrémont,41,16,31,6,51,17,0,0.0
 55033,55,Baulny,20,19,31,6,51,17,0,0.0
@@ -20106,7 +20106,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 55119,55,Cléry-le-Petit,189,42,31,6,51,17,0,0.0
 55120,55,Combles-en-Barrois,773,45,31,6,51,17,0,0.0
 55121,55,Combres-sous-les-Côtes,108,23,31,6,51,17,0,0.0
-55122,55,Commercy,5332,78,31,381,51,17,2,37.51
+55122,55,Commercy,5332,78,31,193,51,17,1,18.76
 55123,55,Les Hauts-de-Chée,702,42,31,6,51,17,0,0.0
 55124,55,Consenvoye,290,45,31,6,51,17,0,0.0
 55125,55,Contrisson,773,51,31,6,51,17,0,0.0
@@ -20182,7 +20182,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 55211,55,Gincrey,61,34,31,6,51,17,0,0.0
 55212,55,Girauvoisin,77,30,31,6,51,17,0,0.0
 55214,55,Givrauval,287,35,31,6,51,17,0,0.0
-55215,55,Gondrecourt-le-Château,1041,50,31,1927,51,17,2,192.12
+55215,55,Gondrecourt-le-Château,1041,50,31,966,51,17,1,96.06
 55216,55,Gouraincourt,70,23,31,6,51,17,0,0.0
 55217,55,Goussaincourt,118,19,31,6,51,17,0,0.0
 55218,55,Gremilly,44,27,31,6,51,17,0,0.0
@@ -20243,7 +20243,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 55288,55,Lérouville,1380,205,31,6,51,17,0,0.0
 55289,55,Levoncourt,56,16,31,6,51,17,0,0.0
 55290,55,Lignières-sur-Aire,52,15,31,6,51,17,0,0.0
-55291,55,Ligny-en-Barrois,3696,61,31,1358,51,17,5,135.28
+55291,55,Ligny-en-Barrois,3696,61,31,547,51,17,2,54.11
 55292,55,Liny-devant-Dun,189,35,31,6,51,17,0,0.0
 55293,55,Lion-devant-Dun,178,45,31,6,51,17,0,0.0
 55295,55,Lisle-en-Barrois,28,26,31,6,51,17,0,0.0
@@ -20393,7 +20393,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 55460,55,Saint-Julien-sous-les-Côtes,139,33,31,6,51,17,0,0.0
 55461,55,Saint-Laurent-sur-Othain,443,31,31,6,51,17,0,0.0
 55462,55,Saint-Maurice-sous-les-Côtes,359,47,31,6,51,17,0,0.0
-55463,55,Saint-Mihiel,3848,108,83,551,51,17,2,51.98
+55463,55,Saint-Mihiel,3848,108,83,291,51,17,1,25.99
 55464,55,Saint-Pierrevillers,151,33,31,6,51,17,0,0.0
 55465,55,Saint-Remy-la-Calonne,99,18,31,6,51,17,0,0.0
 55466,55,Salmagne,284,39,31,6,51,17,0,0.0
@@ -20463,7 +20463,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 55541,55,Vavincourt,532,42,31,6,51,17,0,0.0
 55543,55,Velaines,880,50,31,6,51,17,0,0.0
 55544,55,Velosnes,139,41,31,6,51,17,0,0.0
-55545,55,Verdun,16610,297,314,313,334,95,2,12.04
+55545,55,Verdun,16610,297,314,252,334,95,1,6.02
 55546,55,Verneuil-Grand,204,42,31,6,51,17,0,0.0
 55547,55,Verneuil-Petit,109,31,31,6,51,17,0,0.0
 55549,55,Véry,82,18,31,6,51,17,0,0.0
@@ -20942,7 +20942,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 57203,57,Évrange,227,23,48,21,64,13,0,0.0
 57204,57,Failly,542,26,48,21,64,13,0,0.0
 57205,57,Falck,2516,31,48,21,64,13,0,0.0
-57206,57,Fameck,14759,84,81,231,78,33,3,20.33
+57206,57,Fameck,14759,84,81,163,78,33,2,13.55
 57207,57,Farébersviller,5226,86,67,231,83,13,1,19.14
 57208,57,Farschviller,1325,33,48,21,64,13,0,0.0
 57209,57,Faulquemont,5154,63,67,428,64,13,2,38.8
@@ -21662,7 +21662,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 58191,58,Neuilly,109,32,36,7,57,19,0,0.0
 58192,58,Neuville-lès-Decize,211,31,36,7,57,19,0,0.0
 58193,58,Neuvy-sur-Loire,1428,45,36,7,57,19,0,0.0
-58194,58,Nevers,33172,210,111,124,90,28,3,9.04
+58194,58,Nevers,33172,210,111,94,90,28,2,6.03
 58195,58,La Nocle-Maulaix,270,33,36,7,57,19,0,0.0
 58196,58,Nolay,346,24,36,7,57,19,0,0.0
 58197,58,Nuars,169,18,36,7,57,19,0,0.0
@@ -21790,7 +21790,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 59006,59,Amfroipret,232,31,45,23,62,14,0,0.0
 59007,59,Anhiers,895,33,45,23,62,14,0,0.0
 59008,59,Aniche,10001,97,55,33,72,14,0,0.0
-59009,59,Villeneuve-d'Ascq,62342,162,98,119,93,18,5,8.02
+59009,59,Villeneuve-d'Ascq,62342,162,98,103,93,18,4,6.42
 59010,59,Anneux,256,33,45,23,62,14,0,0.0
 59011,59,Annœullin,10887,98,63,50,71,24,0,0.0
 59012,59,Anor,3152,75,45,23,62,14,0,0.0
@@ -22248,7 +22248,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 59481,59,Le Quesnoy,4859,81,45,23,62,14,0,0.0
 59482,59,Quesnoy-sur-Deûle,6863,66,45,23,62,14,0,0.0
 59483,59,Quiévelon,138,23,45,23,62,14,0,0.0
-59484,59,Quiévrechain,6078,126,94,714,79,14,4,65.81
+59484,59,Quiévrechain,6078,126,94,385,79,14,2,32.91
 59485,59,Quiévy,1800,41,45,23,62,14,0,0.0
 59486,59,Râches,2644,55,45,23,62,14,0,0.0
 59487,59,Radinghem-en-Weppes,1404,37,45,23,62,14,0,0.0
@@ -22360,7 +22360,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 59596,59,Tilloy-lez-Marchiennes,538,33,45,23,62,14,0,0.0
 59597,59,Tilloy-lez-Cambrai,695,36,45,23,62,14,0,0.0
 59598,59,Toufflers,3964,49,45,23,62,14,0,0.0
-59599,59,Tourcoing,99160,192,121,132,118,37,6,6.05
+59599,59,Tourcoing,99160,192,121,122,118,37,5,5.04
 59600,59,Tourmignies,950,34,45,23,62,14,0,0.0
 59601,59,Trélon,2642,94,45,23,62,14,0,0.0
 59602,59,Tressin,1390,45,45,23,62,14,0,0.0
@@ -22413,7 +22413,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 59651,59,Wavrechain-sous-Denain,1606,51,45,23,62,14,0,0.0
 59652,59,Wavrechain-sous-Faulx,432,37,45,23,62,14,0,0.0
 59653,59,Wavrin,7777,97,70,23,62,14,0,0.0
-59654,59,Waziers,7312,70,45,296,62,14,2,27.35
+59654,59,Waziers,7312,70,45,160,62,14,1,13.68
 59655,59,Wemaers-Cappel,229,27,45,23,62,14,0,0.0
 59656,59,Wervicq-Sud,5446,48,45,23,62,14,0,0.0
 59657,59,West-Cappel,640,33,45,23,62,14,0,0.0
@@ -22484,7 +22484,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 60054,60,Beaumont-les-Nonains,337,39,48,23,66,14,0,0.0
 60055,60,Beaurains-lès-Noyon,340,35,48,23,66,14,0,0.0
 60056,60,Beaurepaire,64,24,48,23,66,14,0,0.0
-60057,60,Beauvais,55906,253,134,165,105,27,5,8.94
+60057,60,Beauvais,55906,253,134,147,105,27,4,7.16
 60058,60,Beauvoir,224,28,48,23,66,14,0,0.0
 60059,60,Béhéricourt,194,36,48,23,66,14,0,0.0
 60060,60,Belle-Église,725,41,48,23,66,14,0,0.0
@@ -22600,7 +22600,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 60172,60,Coye-la-Forêt,3868,51,48,23,66,14,0,0.0
 60173,60,Cramoisy,804,41,48,23,66,14,0,0.0
 60174,60,Crapeaumesnil,220,37,48,23,66,14,0,0.0
-60175,60,Creil,36494,303,190,385,178,36,9,24.66
+60175,60,Creil,36494,303,190,330,178,36,7,19.18
 60176,60,Crépy-en-Valois,14243,100,90,129,94,14,1,7.02
 60177,60,Cressonsacq,437,37,48,23,66,14,0,0.0
 60178,60,Crèvecœur-le-Grand,3458,46,48,23,66,14,0,0.0
@@ -22833,7 +22833,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 60411,60,Monneville,769,37,48,23,66,14,0,0.0
 60412,60,Montagny-en-Vexin,676,29,48,23,66,14,0,0.0
 60413,60,Montagny-Sainte-Félicité,431,39,48,23,66,14,0,0.0
-60414,60,Montataire,13944,133,69,109,80,21,1,7.17
+60414,60,Montataire,13944,133,69,181,80,21,2,14.34
 60415,60,Montépilloy,151,30,48,23,66,14,0,0.0
 60416,60,Montgérain,168,16,48,23,66,14,0,0.0
 60418,60,Montiers,396,35,48,23,66,14,0,0.0
@@ -23990,7 +23990,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 62507,62,Liencourt,301,28,33,9,55,19,0,0.0
 62508,62,Lières,340,31,33,9,55,19,0,0.0
 62509,62,Liettres,368,31,33,9,55,19,0,0.0
-62510,62,Liévin,30113,87,33,109,55,25,3,9.96
+62510,62,Liévin,30113,87,33,76,55,25,2,6.64
 62511,62,Lignereuil,140,13,33,9,55,19,0,0.0
 62512,62,Ligny-lès-Aire,564,35,33,9,55,19,0,0.0
 62513,62,Ligny-sur-Canche,188,34,33,9,55,19,0,0.0
@@ -24494,7 +24494,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 63110,63,Cisternes-la-Forêt,450,31,37,14,55,14,0,0.0
 63111,63,Clémensat,121,22,37,14,55,14,0,0.0
 63112,63,Clerlande,631,31,37,14,55,14,0,0.0
-63113,63,Clermont-Ferrand,147751,245,129,161,96,35,16,10.83
+63113,63,Clermont-Ferrand,147751,245,129,147,96,35,14,9.48
 63114,63,Collanges,156,19,37,14,55,14,0,0.0
 63115,63,Combrailles,213,24,37,14,55,14,0,0.0
 63116,63,Combronde,2142,46,37,14,55,14,0,0.0
@@ -26530,7 +26530,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 67479,67,Steinseltz,612,183,207,183,221,11,0,0.0
 67480,67,Still,1799,25,43,20,58,11,0,0.0
 67481,67,Stotzheim,1105,26,43,20,58,11,0,0.0
-67482,67,Strasbourg,291709,217,151,201,153,43,28,9.6
+67482,67,Strasbourg,291709,217,151,184,153,43,23,7.88
 67483,67,Struth,218,19,43,20,58,11,0,0.0
 67484,67,Stundwiller,510,19,43,20,58,11,0,0.0
 67485,67,Stutzheim-Offenheim,1628,27,43,20,58,11,0,0.0
@@ -26815,7 +26815,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 68221,68,Muespach,934,31,49,24,63,11,0,0.0
 68222,68,Muespach-le-Haut,1144,29,49,24,63,11,0,0.0
 68223,68,Muhlbach-sur-Munster,817,30,49,24,63,11,0,0.0
-68224,68,Mulhouse,104924,268,149,205,118,22,13,12.39
+68224,68,Mulhouse,104924,268,149,196,118,22,12,11.44
 68225,68,Munchhouse,1538,96,49,24,63,11,0,0.0
 68226,68,Munster,4709,46,49,24,63,11,0,0.0
 68227,68,Muntzenheim,1281,31,49,24,63,11,0,0.0
@@ -27082,7 +27082,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 69120,69,Longessaigne,592,32,52,28,66,11,0,0.0
 69121,69,Lozanne,3182,86,83,28,97,11,0,0.0
 69122,69,Lucenay,2068,48,52,28,66,11,0,0.0
-69123,69,Lyon,520774,404,203,155,163,72,28,5.38
+69123,69,Lyon,520774,404,203,152,163,72,26,4.99
 69124,69,Marchampt,452,32,52,28,66,11,0,0.0
 69125,69,Marcilly-d'Azergues,1004,35,52,28,66,11,0,0.0
 69126,69,Marcy,879,35,52,28,66,11,0,0.0
@@ -27100,7 +27100,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 69140,69,Morancé,2267,35,52,28,66,11,0,0.0
 69141,69,Mornant,6261,70,68,28,66,11,0,0.0
 69142,69,La Mulatière,6554,188,82,59,81,11,0,0.0
-69143,69,Neuville-sur-Saône,7807,114,90,297,78,11,2,25.62
+69143,69,Neuville-sur-Saône,7807,114,90,169,78,11,1,12.81
 69145,69,Odenas,943,32,52,28,66,11,0,0.0
 69148,69,Orliénas,2633,76,90,66,66,11,0,0.0
 69149,69,Oullins-Pierre-Bénite,37928,154,81,89,81,16,2,5.27
@@ -27196,7 +27196,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 69256,69,Vaulx-en-Velin,52448,359,159,186,146,39,5,9.53
 69257,69,Vaux-en-Beaujolais,1153,35,52,28,66,11,0,0.0
 69258,69,Vauxrenard,315,29,52,28,66,11,0,0.0
-69259,69,Vénissieux,66701,357,149,246,139,21,10,14.99
+69259,69,Vénissieux,66701,357,149,231,139,21,9,13.49
 69260,69,Vernaison,5175,62,52,28,66,11,0,0.0
 69261,69,Vernay,117,20,52,28,66,11,0,0.0
 69263,69,Villechenève,908,33,52,28,66,11,0,0.0
@@ -28502,7 +28502,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 72178,72,Maisoncelles,197,22,36,13,54,15,0,0.0
 72179,72,Malicorne-sur-Sarthe,1881,95,89,13,54,15,0,0.0
 72180,72,Mamers,5080,116,75,13,74,35,0,0.0
-72181,72,Le Mans,145182,177,89,88,83,25,8,5.51
+72181,72,Le Mans,145182,177,89,81,83,25,7,4.82
 72182,72,Mansigné,1550,35,36,13,54,15,0,0.0
 72183,72,Marçon,1063,35,36,13,54,15,0,0.0
 72184,72,Mareil-en-Champagne,346,28,36,13,54,15,0,0.0
@@ -28974,7 +28974,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 74007,74,Amancy,2786,87,82,18,62,12,0,0.0
 74008,74,Ambilly,6269,162,78,193,78,12,1,15.95
 74009,74,Andilly,1011,36,46,18,62,12,0,0.0
-74010,74,Annecy,131272,182,111,106,86,20,9,6.86
+74010,74,Annecy,131272,182,111,98,86,20,8,6.09
 74012,74,Annemasse,37595,238,102,172,94,17,5,13.3
 74013,74,Anthy-sur-Léman,2370,99,46,18,104,12,0,0.0
 74014,74,Arâches-la-Frasse,1777,138,46,18,62,12,0,0.0
@@ -30438,7 +30438,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 77511,77,Villeneuve-sous-Dammartin,612,42,56,25,75,15,0,0.0
 77512,77,Villeneuve-sur-Bellot,1143,40,56,25,75,15,0,0.0
 77513,77,Villenoy,5073,49,56,25,75,15,0,0.0
-77514,77,Villeparisis,26794,136,78,141,82,15,3,11.2
+77514,77,Villeparisis,26794,136,78,104,82,15,2,7.46
 77515,77,Villeroy,692,36,56,25,75,15,0,0.0
 77516,77,Ville-Saint-Jacques,811,160,179,149,198,15,0,0.0
 77517,77,Villevaudé,2114,98,56,25,75,15,0,0.0
@@ -30650,7 +30650,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 78486,78,Le Perray-en-Yvelines,6515,48,56,32,69,10,0,0.0
 78490,78,Plaisir,31971,178,81,98,82,10,2,6.26
 78497,78,Poigny-la-Forêt,930,40,56,32,69,10,0,0.0
-78498,78,Poissy,40792,214,93,194,96,18,6,14.71
+78498,78,Poissy,40792,214,93,169,96,18,5,12.26
 78499,78,Ponthévrard,700,47,56,32,69,10,0,0.0
 78501,78,Porcheville,3167,204,88,348,69,10,1,31.58
 78502,78,Le Port-Marly,5583,54,56,32,69,10,0,0.0
@@ -30705,7 +30705,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 78642,78,Verneuil-sur-Seine,16112,77,68,45,75,10,0,0.0
 78643,78,Vernouillet,9953,136,86,243,79,10,2,20.09
 78644,78,La Verrière,6142,470,137,244,151,10,1,16.28
-78646,78,Versailles,83918,182,123,89,112,27,3,3.58
+78646,78,Versailles,83918,182,123,77,112,27,2,2.38
 78647,78,Vert,852,36,56,32,69,10,0,0.0
 78650,78,Le Vésinet,15712,141,88,39,69,10,0,0.0
 78653,78,Vicq,391,31,56,32,69,10,0,0.0
@@ -30858,7 +30858,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 79185,79,Aigondigné,4685,33,31,9,50,14,0,0.0
 79189,79,Nanteuil,1702,31,31,9,50,14,0,0.0
 79190,79,Neuvy-Bouin,484,233,237,215,50,14,0,0.0
-79191,79,Niort,60074,181,89,82,74,22,3,4.99
+79191,79,Niort,60074,181,89,65,74,22,2,3.33
 79195,79,Nueil-les-Aubiers,5529,59,31,9,50,14,0,0.0
 79196,79,Plaine-et-Vallées,2334,30,31,9,50,14,0,0.0
 79197,79,Oroux,102,17,31,9,50,14,0,0.0
@@ -30992,7 +30992,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 80018,80,Allenay,252,35,32,10,51,14,0,0.0
 80019,80,Allery,826,39,32,10,51,14,0,0.0
 80020,80,Allonville,777,166,161,10,180,143,0,0.0
-80021,80,Amiens,134780,268,106,166,99,31,15,11.13
+80021,80,Amiens,134780,268,106,159,99,31,14,10.39
 80022,80,Andainville,244,31,32,10,51,14,0,0.0
 80023,80,Andechy,285,35,32,10,51,14,0,0.0
 80024,80,Argœuves,562,32,32,10,51,14,0,0.0
@@ -31848,7 +31848,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 81102,81,Garrigues,317,21,39,9,55,12,0,0.0
 81103,81,Gijounet,122,19,39,9,55,12,0,0.0
 81104,81,Giroussens,1543,36,39,9,55,12,0,0.0
-81105,81,Graulhet,13275,92,46,326,70,12,4,30.13
+81105,81,Graulhet,13275,92,46,250,70,12,3,22.6
 81106,81,Grazac,641,27,39,9,55,12,0,0.0
 81108,81,Itzac,178,11,39,9,55,12,0,0.0
 81109,81,Jonquières,443,20,39,9,55,12,0,0.0
@@ -32339,7 +32339,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 83083,83,Montfort-sur-Argens,1464,37,48,19,68,15,0,0.0
 83084,83,Montmeyan,595,39,48,19,68,15,0,0.0
 83085,83,La Motte,3050,75,48,347,68,15,1,32.79
-83086,83,Le Muy,9882,109,58,222,78,15,2,20.24
+83086,83,Le Muy,9882,109,58,120,78,15,1,10.12
 83087,83,Nans-les-Pins,5090,54,48,19,68,15,0,0.0
 83088,83,Néoules,2956,78,48,19,68,15,0,0.0
 83089,83,Ollières,638,51,48,19,68,15,0,0.0
@@ -32379,7 +32379,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 83123,83,Sanary-sur-Mer,17938,80,54,19,68,15,0,0.0
 83124,83,Seillans,2852,37,48,19,68,15,0,0.0
 83125,83,Seillons-Source-d'Argens,2717,49,48,19,68,15,0,0.0
-83126,83,La Seyne-sur-Mer,62905,141,82,81,82,15,3,4.77
+83126,83,La Seyne-sur-Mer,62905,141,82,65,82,15,2,3.18
 83127,83,Signes,3126,75,48,19,68,15,0,0.0
 83128,83,Sillans-la-Cascade,783,38,48,19,68,15,0,0.0
 83129,83,Six-Fours-les-Plages,36843,87,62,25,73,18,0,0.0
@@ -32536,7 +32536,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 84126,84,Séguret,773,297,180,154,67,13,0,0.0
 84127,84,Sérignan-du-Comtat,2896,72,51,25,67,13,0,0.0
 84128,84,Sivergues,44,16,51,25,67,13,0,0.0
-84129,84,Sorgues,19030,235,88,161,83,24,2,10.51
+84129,84,Sorgues,19030,235,88,109,83,24,1,5.26
 84130,84,Suzette,111,30,51,25,67,13,0,0.0
 84131,84,Taillades,1998,40,51,25,67,13,0,0.0
 84132,84,Le Thor,8887,94,51,25,67,24,0,0.0
@@ -33428,7 +33428,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 88157,88,Dounoux,871,31,33,7,54,16,0,0.0
 88158,88,Éloyes,3117,42,33,7,54,16,0,0.0
 88159,88,Entre-deux-Eaux,509,23,33,7,54,16,0,0.0
-88160,88,Épinal,32296,136,64,155,69,19,4,12.38
+88160,88,Épinal,32296,136,64,124,69,19,3,9.29
 88161,88,Escles,385,30,33,7,54,16,0,0.0
 88162,88,Esley,170,23,33,7,54,16,0,0.0
 88163,88,Essegney,745,33,33,7,54,16,0,0.0
@@ -34310,7 +34310,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 91017,91,Angervilliers,1720,42,65,36,81,12,0,0.0
 91021,91,Arpajon,11503,129,83,131,81,12,1,8.69
 91022,91,Arrancourt,119,36,65,36,81,12,0,0.0
-91027,91,Athis-Mons,36451,142,104,162,103,18,4,10.97
+91027,91,Athis-Mons,36451,142,104,107,103,18,2,5.49
 91035,91,Authon-la-Plaine,371,41,65,36,81,12,0,0.0
 91037,91,Auvernaux,330,41,65,36,81,12,0,0.0
 91038,91,Auvers-Saint-Georges,1250,42,65,36,81,12,0,0.0
@@ -34333,7 +34333,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 91098,91,Boutervilliers,429,273,65,36,81,12,0,0.0
 91099,91,Boutigny-sur-Essonne,3048,57,65,36,81,12,0,0.0
 91100,91,Bouville,658,39,65,36,81,12,0,0.0
-91103,91,Brétigny-sur-Orge,26658,178,110,167,122,24,3,11.25
+91103,91,Brétigny-sur-Orge,26658,178,110,130,122,24,2,7.5
 91105,91,Breuillet,9023,44,65,36,81,12,0,0.0
 91106,91,Breux-Jouy,1283,43,65,36,81,12,0,0.0
 91109,91,Brières-les-Scellés,1218,43,65,36,81,12,0,0.0
@@ -34503,7 +34503,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 92004,92,Asnières-sur-Seine,91457,131,74,60,77,12,2,2.19
 92007,92,Bagneux,43647,144,78,75,92,13,1,2.29
 92009,92,Bois-Colombes,29376,55,63,33,68,9,0,0.0
-92012,92,Boulogne-Billancourt,120205,100,70,82,73,13,5,4.16
+92012,92,Boulogne-Billancourt,120205,100,70,73,73,13,4,3.33
 92014,92,Bourg-la-Reine,21140,87,62,34,64,9,0,0.0
 92019,92,Châtenay-Malabry,35490,78,64,63,76,12,1,2.82
 92020,92,Châtillon,36224,80,66,63,67,9,1,2.76
@@ -34511,7 +34511,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 92023,92,Clamart,56882,95,63,56,68,11,1,1.76
 92024,92,Clichy,65102,134,117,160,132,18,4,6.14
 92025,92,Colombes,90692,138,88,74,88,14,2,2.2
-92026,92,Courbevoie,81945,90,72,76,75,13,3,3.66
+92026,92,Courbevoie,81945,90,72,64,75,13,2,2.44
 92032,92,Fontenay-aux-Roses,24586,87,69,90,77,13,1,4.07
 92033,92,Garches,17705,56,52,29,64,9,0,0.0
 92035,92,La Garenne-Colombes,29828,75,52,29,64,9,0,0.0
@@ -34522,7 +34522,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 92047,92,Marnes-la-Coquette,1758,124,52,29,64,9,0,0.0
 92048,92,Meudon,46722,86,61,32,66,9,0,0.0
 92049,92,Montrouge,46273,86,72,68,79,15,1,2.16
-92050,92,Nanterre,98119,320,186,218,145,50,11,11.21
+92050,92,Nanterre,98119,320,186,208,145,50,10,10.19
 92051,92,Neuilly-sur-Seine,59200,134,91,48,85,17,0,0.0
 92060,92,Le Plessis-Robinson,28893,48,59,29,75,9,0,0.0
 92062,92,Puteaux,44198,188,82,77,98,13,1,2.26
@@ -34535,17 +34535,17 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 92076,92,Vaucresson,8506,72,52,29,64,9,0,0.0
 92077,92,Ville-d'Avray,10871,84,80,29,74,9,0,0.0
 92078,92,Villeneuve-la-Garenne,25566,234,88,139,96,13,2,7.82
-93001,93,Aubervilliers,89489,359,217,199,187,47,9,10.06
+93001,93,Aubervilliers,89489,359,217,188,187,47,8,8.94
 93005,93,Aulnay-sous-Bois,86360,324,182,190,169,33,7,8.11
 93006,93,Bagnolet,41776,233,166,195,165,54,4,9.57
 93007,93,Le Blanc-Mesnil,59912,191,117,140,117,19,4,6.68
-93008,93,Bobigny,55270,570,322,313,251,90,9,16.28
+93008,93,Bobigny,55270,570,322,295,251,90,8,14.47
 93010,93,Bondy,51066,239,158,186,162,30,5,9.79
 93013,93,Le Bourget,15052,290,178,291,195,42,2,13.29
 93014,93,Clichy-sous-Bois,29551,367,305,221,285,73,3,10.15
 93015,93,Coubron,5156,114,85,58,95,9,0,0.0
-93027,93,La Courneuve,47086,374,242,345,210,60,10,21.24
-93029,93,Drancy,71312,198,175,190,178,20,4,5.61
+93027,93,La Courneuve,47086,374,242,324,210,60,9,19.11
+93029,93,Drancy,71312,198,175,176,178,20,3,4.21
 93030,93,Dugny,11723,156,111,340,112,9,3,25.59
 93031,93,Épinay-sur-Seine,53564,189,145,182,136,29,5,9.34
 93032,93,Gagny,40790,99,92,188,100,9,5,12.26
@@ -34553,10 +34553,10 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 93039,93,L'Île-Saint-Denis,8682,303,166,104,164,44,0,0.0
 93045,93,Les Lilas,23262,153,107,71,108,13,0,0.0
 93046,93,Livry-Gargan,46507,120,96,86,102,11,1,2.15
-93047,93,Montfermeil,28257,234,220,253,255,48,3,10.62
+93047,93,Montfermeil,28257,234,220,218,255,48,2,7.08
 93048,93,Montreuil,110758,209,196,215,180,60,12,10.83
 93049,93,Neuilly-Plaisance,21914,99,94,104,100,14,1,4.56
-93050,93,Neuilly-sur-Marne,38799,134,98,195,103,14,5,12.89
+93050,93,Neuilly-sur-Marne,38799,134,98,169,103,14,4,10.31
 93051,93,Noisy-le-Grand,71632,128,110,132,116,24,4,5.58
 93053,93,Noisy-le-Sec,45915,255,139,152,128,24,3,6.53
 93055,93,Pantin,60954,300,183,176,166,42,4,6.56
@@ -34566,9 +34566,9 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 93062,93,Le Raincy,14778,121,99,72,116,9,0,0.0
 93063,93,Romainville,35314,152,108,146,112,17,3,8.49
 93064,93,Rosny-sous-Bois,45947,186,131,163,128,13,4,8.71
-93066,93,Saint-Denis,115237,627,338,290,310,131,12,10.41
+93066,93,Saint-Denis,115237,627,338,281,310,131,11,9.55
 93070,93,Saint-Ouen-sur-Seine,53041,414,172,158,148,43,4,7.54
-93071,93,Sevran,51640,363,182,302,200,40,9,17.43
+93071,93,Sevran,51640,363,182,283,200,40,8,15.49
 93072,93,Stains,40600,285,203,258,206,63,5,12.32
 93073,93,Tremblay-en-France,38210,222,143,181,153,30,3,7.85
 93074,93,Vaujours,7743,100,111,58,121,9,0,0.0
@@ -34576,16 +34576,16 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 93078,93,Villepinte,39647,227,146,172,131,17,3,7.57
 93079,93,Villetaneuse,12432,235,141,163,136,25,1,8.04
 94001,94,Ablon-sur-Seine,6029,70,67,38,82,12,0,0.0
-94002,94,Alfortville,45569,103,95,141,110,23,4,8.78
+94002,94,Alfortville,45569,103,95,119,110,23,3,6.58
 94003,94,Arcueil,21868,132,80,84,91,30,1,4.57
 94004,94,Boissy-Saint-Léger,17335,196,119,182,128,18,2,11.54
 94011,94,Bonneuil-sur-Marne,18340,156,89,103,109,12,1,5.45
 94015,94,Bry-sur-Marne,18095,89,105,71,120,23,0,0.0
 94016,94,Cachan,30526,117,109,87,111,25,1,3.28
-94017,94,Champigny-sur-Marne,78367,169,102,116,107,30,5,6.38
+94017,94,Champigny-sur-Marne,78367,169,102,103,107,30,4,5.1
 94018,94,Charenton-le-Pont,28756,90,77,45,85,16,0,0.0
 94019,94,Chennevières-sur-Marne,18295,119,72,38,82,12,0,0.0
-94021,94,Chevilly-Larue,19813,165,92,200,102,27,3,15.14
+94021,94,Chevilly-Larue,19813,165,92,149,102,27,2,10.09
 94022,94,Choisy-le-Roi,46122,154,93,136,99,21,4,8.67
 94028,94,Créteil,92859,224,127,136,111,36,6,6.46
 94033,94,Fontenay-sous-Bois,52646,125,88,144,101,23,5,9.5
@@ -34685,7 +34685,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 95212,95,Épiais-lès-Louvres,141,43,68,42,83,12,0,0.0
 95213,95,Épiais-Rhus,607,47,68,42,83,12,0,0.0
 95214,95,Épinay-Champlâtreux,58,31,68,42,83,12,0,0.0
-95218,95,Éragny,18723,117,100,170,104,23,2,10.68
+95218,95,Éragny,18723,117,100,117,104,23,1,5.34
 95219,95,Ermont,29189,114,68,114,86,12,2,6.85
 95229,95,Ézanville,9789,80,78,144,93,12,1,10.22
 95241,95,Fontenay-en-Parisis,2220,94,113,42,83,12,0,0.0
@@ -34696,11 +34696,11 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 95256,95,Frépillon,3327,101,98,72,83,12,0,0.0
 95257,95,La Frette-sur-Seine,4587,93,68,42,83,12,0,0.0
 95258,95,Frouville,347,36,68,42,83,12,0,0.0
-95268,95,Garges-lès-Gonesse,42388,241,139,320,144,26,10,23.59
+95268,95,Garges-lès-Gonesse,42388,241,139,297,144,26,9,21.23
 95270,95,Genainville,521,47,68,42,83,12,0,0.0
 95271,95,Génicourt,515,50,68,42,83,12,0,0.0
 95277,95,Gonesse,26959,234,120,150,142,20,2,7.42
-95280,95,Goussainville,30952,210,133,301,141,15,6,19.39
+95280,95,Goussainville,30952,210,133,268,141,15,5,16.15
 95287,95,Grisy-les-Plâtres,706,273,68,42,83,12,0,0.0
 95288,95,Groslay,8378,82,68,42,83,12,0,0.0
 95295,95,Guiry-en-Vexin,151,39,68,42,83,12,0,0.0
@@ -34805,7 +34805,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 95680,95,Villiers-le-Bel,29238,414,208,309,189,50,6,20.52
 95682,95,Villiers-le-Sec,198,36,68,42,83,12,0,0.0
 95690,95,Wy-dit-Joli-Village,329,47,68,42,83,12,0,0.0
-97101,971,Les Abymes,51760,142,49,20,80,28,0,0.0
+97101,971,Les Abymes,51760,142,49,59,80,28,2,3.86
 97102,971,Anse-Bertrand,4232,91,49,20,80,28,0,0.0
 97103,971,Baie-Mahault,30943,135,49,20,80,28,0,0.0
 97104,971,Baillif,4949,119,49,20,80,28,0,0.0
@@ -34845,7 +34845,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 97206,972,Le Diamant,5924,122,48,22,79,28,0,0.0
 97207,972,Ducos,17837,120,48,22,79,28,0,0.0
 97208,972,Fonds-Saint-Denis,641,95,48,22,79,28,0,0.0
-97209,972,Fort-de-France,75165,137,48,22,82,29,0,0.0
+97209,972,Fort-de-France,75165,137,48,36,82,29,1,1.33
 97210,972,Le François,15858,113,48,22,79,28,0,0.0
 97211,972,Grand'Rivière,508,100,48,22,79,28,0,0.0
 97212,972,Gros-Morne,9752,114,48,22,79,28,0,0.0
@@ -34864,7 +34864,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 97225,972,Saint-Pierre,4069,138,48,22,79,28,0,0.0
 97226,972,Sainte-Anne,4491,128,48,22,79,28,0,0.0
 97227,972,Sainte-Luce,9275,128,48,22,79,28,0,0.0
-97228,972,Sainte-Marie,14827,113,48,22,79,28,0,0.0
+97228,972,Sainte-Marie,14827,113,48,90,79,28,1,6.74
 97229,972,Schœlcher,19342,117,48,22,79,28,0,0.0
 97230,972,La Trinité,11622,144,48,22,79,28,0,0.0
 97231,972,Les Trois-Îlets,6735,143,48,22,79,28,0,0.0
@@ -34872,16 +34872,16 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 97233,972,Le Morne-Vert,1748,95,48,22,79,28,0,0.0
 97234,972,Bellefontaine,1824,105,48,22,79,28,0,0.0
 97301,973,Régina,1657,137,51,16,73,19,0,0.0
-97302,973,Cayenne,63956,231,72,20,90,27,0,0.0
+97302,973,Cayenne,63956,231,72,67,90,27,3,4.69
 97303,973,Iracoubo,1685,138,51,16,73,19,0,0.0
-97304,973,Kourou,24470,225,63,16,77,19,0,0.0
+97304,973,Kourou,24470,225,63,57,77,19,1,4.09
 97305,973,Macouria,18807,153,51,16,73,19,0,0.0
 97306,973,Mana,11364,140,51,16,73,19,0,0.0
 97307,973,Matoury,35551,205,51,16,73,19,0,0.0
 97308,973,Saint-Georges,4710,165,51,16,73,19,0,0.0
 97309,973,Remire-Montjoly,27037,182,51,16,73,19,0,0.0
 97310,973,Roura,3382,135,51,16,73,19,0,0.0
-97311,973,Saint-Laurent-du-Maroni,51732,188,51,16,73,19,0,0.0
+97311,973,Saint-Laurent-du-Maroni,51732,188,51,35,73,19,1,1.93
 97312,973,Sinnamary,2801,162,51,16,73,19,0,0.0
 97313,973,Montsinéry-Tonnegrande,3457,135,51,16,73,19,0,0.0
 97314,973,Ouanary,200,115,51,16,73,19,0,0.0
@@ -34894,31 +34894,31 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 97361,973,Awala-Yalimapo,1549,132,51,16,73,19,0,0.0
 97362,973,Papaichton,5530,123,51,16,73,19,0,0.0
 97401,974,Les Avirons,11445,33,49,23,77,25,0,0.0
-97402,974,Bras-Panon,13131,51,49,23,77,25,0,0.0
+97402,974,Bras-Panon,13131,51,49,99,77,25,1,7.62
 97403,974,Entre-Deux,7115,29,49,23,77,25,0,0.0
 97404,974,L'Étang-Salé,14329,55,49,23,77,25,0,0.0
 97405,974,Petite-Île,12920,33,49,23,77,25,0,0.0
-97406,974,La Plaine-des-Palmistes,6920,48,49,23,77,25,0,0.0
-97407,974,Le Port,33670,52,49,23,77,25,0,0.0
-97408,974,La Possession,36390,37,49,23,77,25,0,0.0
-97409,974,Saint-André,57546,54,50,23,77,25,0,0.0
-97410,974,Saint-Benoît,37585,52,49,23,77,25,0,0.0
-97411,974,Saint-Denis,156149,52,49,25,80,25,0,0.0
-97412,974,Saint-Joseph,38992,35,51,26,77,25,0,0.0
-97413,974,Saint-Leu,35597,48,49,23,77,25,0,0.0
-97414,974,Saint-Louis,54478,61,49,25,79,25,0,0.0
-97415,974,Saint-Paul,106220,56,49,23,78,25,0,0.0
-97416,974,Saint-Pierre,85254,69,50,25,77,25,0,0.0
+97406,974,La Plaine-des-Palmistes,6920,48,49,168,77,25,1,14.45
+97407,974,Le Port,33670,52,49,142,77,25,4,11.88
+97408,974,La Possession,36390,37,49,51,77,25,1,2.75
+97409,974,Saint-André,57546,54,50,128,77,25,6,10.43
+97410,974,Saint-Benoît,37585,52,49,103,77,25,3,7.98
+97411,974,Saint-Denis,156149,52,49,121,80,25,15,9.61
+97412,974,Saint-Joseph,38992,35,51,52,77,25,1,2.56
+97413,974,Saint-Leu,35597,48,49,51,77,25,1,2.81
+97414,974,Saint-Louis,54478,61,49,80,79,25,3,5.51
+97415,974,Saint-Paul,106220,56,49,52,78,25,3,2.82
+97416,974,Saint-Pierre,85254,69,50,118,77,25,8,9.38
 97417,974,Saint-Philippe,5093,39,49,23,77,25,0,0.0
-97418,974,Sainte-Marie,35584,61,49,23,77,25,0,0.0
+97418,974,Sainte-Marie,35584,61,49,108,77,25,3,8.43
 97419,974,Sainte-Rose,6450,35,49,23,77,25,0,0.0
-97420,974,Sainte-Suzanne,24855,41,49,23,77,25,0,0.0
+97420,974,Sainte-Suzanne,24855,41,49,64,77,25,1,4.02
 97421,974,Salazie,7333,44,49,23,77,25,0,0.0
-97422,974,Le Tampon,81964,37,49,23,77,25,0,0.0
+97422,974,Le Tampon,81964,37,49,72,77,25,4,4.88
 97423,974,Les Trois-Bassins,7113,40,49,23,77,25,0,0.0
-97424,974,Cilaos,5215,41,49,23,77,25,0,0.0
+97424,974,Cilaos,5215,41,49,215,77,25,1,19.18
 75101,75,Paris 1e,15475,965,147,50,132,92,0,0.0
-75102,75,Paris 2e,20433,298,60,78,66,23,1,4.89
+75102,75,Paris 2e,20433,298,60,29,66,23,0,0.0
 75103,75,Paris 3e,32772,198,78,33,85,23,0,0.0
 75104,75,Paris 4e,28039,242,68,42,79,36,0,0.0
 75105,75,Paris 5e,55925,128,63,62,66,17,2,3.58
@@ -34926,7 +34926,7 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 75107,75,Paris 7e,48196,278,129,57,123,52,0,0.0
 75108,75,Paris 8e,35418,546,76,33,75,25,0,0.0
 75109,75,Paris 9e,58419,273,57,29,66,10,0,0.0
-75110,75,Paris 10e,81926,339,82,80,77,15,4,4.88
+75110,75,Paris 10e,81926,339,82,56,77,15,2,2.44
 75111,75,Paris 11e,139983,145,75,121,89,15,10,7.14
 75112,75,Paris 12e,139788,175,63,49,64,14,3,2.15
 75113,75,Paris 13e,177735,134,60,69,65,14,7,3.94
@@ -34934,8 +34934,8 @@ COG,departement,commune,population,Insécurité_Score,Immigration_Score,Islamisa
 75115,75,Paris 15e,228754,118,60,41,67,11,3,1.31
 75116,75,Paris 16e,159733,151,85,31,83,25,0,0.0
 75117,75,Paris 17e,161206,120,55,39,61,9,2,1.24
-75118,75,Paris 18e,185825,284,139,81,117,45,6,3.23
-75119,75,Paris 19e,178371,199,83,79,78,19,9,5.05
+75118,75,Paris 18e,185825,284,139,76,117,45,5,2.69
+75119,75,Paris 19e,178371,199,83,74,78,19,8,4.49
 75120,75,Paris 20e,187694,115,67,82,74,16,9,4.8
 97601,976,Acoua,5192,76,91,77,98,7,0,0.0
 97602,976,Bandraboua,13989,64,98,84,105,14,0,0.0

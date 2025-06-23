@@ -128,7 +128,7 @@
                 endpoint = "/api/country/names_history";
                 params = { country: code || "France" };
             } else if (type === "department") {
-                endpoint = "/api/department/names_history";
+                endpoint = "/api/departements/names_history";
                 params = { dept: code };
             } else if (type === "commune") {
                 if (!dept) {
