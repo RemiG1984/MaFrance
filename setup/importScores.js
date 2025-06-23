@@ -11,13 +11,13 @@ function importScores(db, callback) {
 
         function readCountryScores() {
             return new Promise((resolve, reject) => {
-                if (!fs.existsSync('france_scores.csv')) {
-                    console.error('Erreur: france_scores.csv n\'existe pas dans le répertoire courant');
+                if (!fs.existsSync('setup/france_scores.csv')) {
+                    console.error('Erreur: setup/france_scores.csv n\'existe pas dans le répertoire courant');
                     resolve(); // Continue with empty data
                     return;
                 }
 
-                fs.createReadStream('france_scores.csv')
+                fs.createReadStream('setup/france_scores.csv')
                     .pipe(csv())
                     .on('data', (row) => {
                         const missingFields = [];
@@ -150,13 +150,13 @@ function importScores(db, callback) {
 
         function readDepartmentScores() {
             return new Promise((resolve, reject) => {
-                if (!fs.existsSync('departement_scores.csv')) {
-                    console.error('Erreur: departement_scores.csv n\'existe pas dans le répertoire courant');
-                    reject(new Error('Fichier departement_scores.csv manquant'));
+                if (!fs.existsSync('setup/departement_scores.csv')) {
+                    console.error('Erreur: setup/departement_scores.csv n\'existe pas dans le répertoire courant');
+                    reject(new Error('Fichier setup/departement_scores.csv manquant'));
                     return;
                 }
 
-                fs.createReadStream('departement_scores.csv')
+                fs.createReadStream('setup/departement_scores.csv')
                     .pipe(csv())
                     .on('data', (row) => {
                         const missingFields = [];
@@ -292,13 +292,13 @@ function importScores(db, callback) {
 
         function readCommuneScores() {
             return new Promise((resolve, reject) => {
-                if (!fs.existsSync('commune_scores.csv')) {
-                    console.error('Erreur: commune_scores.csv n\'existe pas dans le répertoire courant');
-                    reject(new Error('Fichier commune_scores.csv manquant'));
+                if (!fs.existsSync('setup/commune_scores.csv')) {
+                    console.error('Erreur: setup/commune_scores.csv n\'existe pas dans le répertoire courant');
+                    reject(new Error('Fichier setup/commune_scores.csv manquant'));
                     return;
                 }
 
-                fs.createReadStream('commune_scores.csv')
+                fs.createReadStream('setup/commune_scores.csv')
                     .pipe(csv())
                     .on('data', (row) => {
                         const missingFields = [];

@@ -150,19 +150,19 @@ function importNames(db, callback) {
                     resolve(); // Continue with empty data
                     return;
                 }
-        
+
                 fs.createReadStream('analyse_prenom_departement.csv')
                     .pipe(csv())
                     .on('data', (row) => {
                         const missingFields = [];
                         if (!row['dpt']) missingFields.push('dpt');
                         if (!row['annais']) missingFields.push('annais');
-        
+
                         if (missingFields.length > 0) {
                             console.warn(`Ligne ignorée dans analyse_prenom_departement.csv (champs manquants: ${missingFields.join(', ')}):`, row);
                             return;
                         }
-        
+
                         // Normalize dpt to consistent format: '01' to '09', '11' to '95', '2A', '2B', '971' to '976'
                         let dpt = row['dpt'].trim().toUpperCase();
                         // Pad numeric codes to two digits
@@ -174,7 +174,7 @@ function importNames(db, callback) {
                             console.warn(`Code département invalide ignoré: ${dpt}`, row);
                             return;
                         }
-        
+
                         const musulman_pct = parseFloat(row['Musulman_pct']) || 0;
                         const africain_pct = parseFloat(row['Africain_pct']) || 0;
                         const asiatique_pct = parseFloat(row['Asiatique_pct']) || 0;
@@ -183,7 +183,7 @@ function importNames(db, callback) {
                         const invente_pct = parseFloat(row['Inventé_pct']) || 0;
                         const europeen_pct = parseFloat(row['Européen_pct']) || 0;
                         const annais = row['annais'];
-        
+
                         departmentRows++;
                         departmentBatch.push([
                             dpt,
@@ -196,7 +196,7 @@ function importNames(db, callback) {
                             invente_pct,
                             europeen_pct
                         ]);
-        
+
                         // Handle Corse (20) by adding entries for 2A and 2B
                         if (dpt === '20') {
                             corseData.push([
@@ -323,13 +323,13 @@ function importNames(db, callback) {
 
         function readCommuneNames() {
             return new Promise((resolve, reject) => {
-                if (!fs.existsSync('analyse_prenom_commune.csv')) {
-                    console.error('Erreur: analyse_prenom_commune.csv n\'existe pas dans le répertoire courant');
+                if (!fs.existsSync('setup/analyse_prenom_commune.csv')) {
+                    console.error('Erreur: setup/analyse_prenom_commune.csv n\'existe pas dans le répertoire courant');
                     resolve(); // Continue with empty data
                     return;
                 }
 
-                fs.createReadStream('analyse_prenom_commune.csv')
+                fs.createReadStream('setup/analyse_prenom_commune.csv')
                     .pipe(csv())
                     .on('data', (row) => {
                         const missingFields = [];

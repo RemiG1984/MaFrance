@@ -59,17 +59,17 @@ function importArticles(db, callback) {
                                     }
 
                                     if (
-                                        !fs.existsSync("fdesouche_analyzed.csv")
+                                        !fs.existsSync("setup/fdesouche_analyzed.csv")
                                     ) {
                                         console.error(
-                                            "Erreur: fdesouche_analyzed.csv n'existe pas dans le répertoire courant",
+                                            "Erreur: setup/fdesouche_analyzed.csv n'existe pas dans le répertoire courant",
                                         );
                                         db.run("COMMIT", () => resolve());
                                         return;
                                     }
 
                                     fs.createReadStream(
-                                        "fdesouche_analyzed.csv",
+                                        "setup/fdesouche_analyzed.csv",
                                     )
                                         .pipe(csv())
                                         .on("data", (row) => {

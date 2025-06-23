@@ -1,35 +1,35 @@
 const sqlite3 = require("sqlite3").verbose();
 const fs = require("fs");
-const { importScores } = require("./importScores");
-const { importArticles } = require("./importArticles");
-const { importNames } = require("./importNames");
-const { importCrimeData } = require("./importCrimeData");
-const { importElus } = require("./importElus");
+const { importScores } = require("./setup/importScores");
+const { importArticles } = require("./setup/importArticles");
+const { importNames } = require("./setup/importNames");
+const { importCrimeData } = require("./setup/importCrimeData");
+const { importElus } = require("./setup/importElus");
 
 const dbFile = ".data/france.db";
 
 // List of CSV files associated with each import function
 const csvFiles = {
   importScores: [
-    "france_scores.csv",
-    "departement_scores.csv",
-    "commune_scores.csv",
+    "setup/france_scores.csv",
+    "setup/departement_scores.csv",
+    "setup/commune_scores.csv",
   ],
-  importArticles: ["fdesouche_analyzed.csv"],
+  importArticles: ["setup/fdesouche_analyzed.csv"],
   importNames: [
-    "analyse_prenom_france.csv",
-    "analyse_prenom_departement.csv",
-    "analyse_prenom_commune.csv",
+    "setup/analyse_prenom_france.csv",
+    "setup/analyse_prenom_departement.csv",
+    "setup/analyse_prenom_commune.csv",
   ],
   importCrimeData: [
-    "crime_data_france.csv",
-    "crime_data_departement.csv",
-    "crime_data_commune.csv",
+    "setup/crime_data_france.csv",
+    "setup/crime_data_departement.csv",
+    "setup/crime_data_commune.csv",
   ],
   importElus: [
-    "maires_list.csv",
-    "prefets_list.csv",
-    "ministre_interieur_list.csv",
+    "setup/maires_list.csv",
+    "setup/prefets_list.csv",
+    "setup/ministre_interieur_list.csv",
   ],
 };
 

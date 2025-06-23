@@ -11,14 +11,14 @@ function importCrimeData(db, callback) {
 
         function readCountryCrime() {
             return new Promise((resolve, reject) => {
-                if (!fs.existsSync('crime_data_france.csv')) {
-                    const error = new Error('crime_data_france.csv does not exist in the current directory');
+                if (!fs.existsSync('setup/crime_data_france.csv')) {
+                    const error = new Error('setup/crime_data_france.csv does not exist in the current directory');
                     console.error(error.message);
                     reject(error);
                     return;
                 }
         
-                fs.createReadStream('crime_data_france.csv')
+                fs.createReadStream('setup/crime_data_france.csv')
                     .pipe(csv())
                     .on('data', (row) => {
                         const missingFields = [];
@@ -199,14 +199,14 @@ function importCrimeData(db, callback) {
 
         function readDepartmentCrime() {
             return new Promise((resolve, reject) => {
-                if (!fs.existsSync('crime_data_departement.csv')) {
-                    const error = new Error('crime_data_departement.csv does not exist in the current directory');
+                if (!fs.existsSync('setup/crime_data_departement.csv')) {
+                    const error = new Error('setup/crime_data_departement.csv does not exist in the current directory');
                     console.error(error.message);
                     reject(error);
                     return;
                 }
         
-                fs.createReadStream('crime_data_departement.csv')
+                fs.createReadStream('setup/crime_data_departement.csv')
                     .pipe(csv())
                     .on('data', (row) => {
                         const missingFields = [];
@@ -443,14 +443,14 @@ function importCrimeData(db, callback) {
 
         function readCommuneCrime() {
             return new Promise((resolve, reject) => {
-                if (!fs.existsSync('crime_data_commune.csv')) {
-                    const error = new Error('crime_data_commune.csv does not exist in the current directory');
+                if (!fs.existsSync('setup/crime_data_commune.csv')) {
+                    const error = new Error('setup/crime_data_commune.csv does not exist in the current directory');
                     console.error(error.message);
                     reject(error);
                     return;
                 }
         
-                const stream = fs.createReadStream('crime_data_commune.csv').pipe(csv());
+                const stream = fs.createReadStream('setup/crime_data_commune.csv').pipe(csv());
         
                 stream
                     .on('data', (row) => {

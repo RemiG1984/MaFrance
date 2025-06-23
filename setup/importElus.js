@@ -66,9 +66,9 @@ function importElus(db, callback) {
 
         function readMaires() {
             return new Promise((resolve, reject) => {
-                if (!fs.existsSync("maires_list.csv")) {
+                if (!fs.existsSync("setup/maires_list.csv")) {
                     const error = new Error(
-                        "maires_list.csv does not exist in the current directory",
+                        "setup/maires_list.csv does not exist in the current directory",
                     );
                     console.error(error.message);
                     reject(error);
@@ -76,7 +76,7 @@ function importElus(db, callback) {
                 }
 
                 const stream = fs
-                    .createReadStream("maires_list.csv")
+                    .createReadStream("setup/maires_list.csv")
                     .pipe(csv());
 
                 stream
@@ -230,16 +230,16 @@ function importElus(db, callback) {
 
         function readPrefets() {
             return new Promise((resolve, reject) => {
-                if (!fs.existsSync("prefets_list.csv")) {
+                if (!fs.existsSync("setup/prefets_list.csv")) {
                     const error = new Error(
-                        "prefets_list.csv does not exist in the current directory",
+                        "setup/prefets_list.csv does not exist in the current directory",
                     );
                     console.error(error.message);
                     reject(error);
                     return;
                 }
 
-                fs.createReadStream("prefets_list.csv")
+                fs.createReadStream("setup/prefets_list.csv")
                     .pipe(csv())
                     .on("data", (row) => {
                         const missingFields = [];
@@ -421,16 +421,16 @@ function importElus(db, callback) {
 
         function readMinistreInterieur() {
             return new Promise((resolve, reject) => {
-                if (!fs.existsSync("ministre_interieur_list.csv")) {
+                if (!fs.existsSync("setup/ministre_interieur_list.csv")) {
                     const error = new Error(
-                        "ministre_interieur_list.csv does not exist in the current directory",
+                        "setup/ministre_interieur_list.csv does not exist in the current directory",
                     );
                     console.error(error.message);
                     reject(error);
                     return;
                 }
 
-                fs.createReadStream("ministre_interieur_list.csv")
+                fs.createReadStream("setup/ministre_interieur_list.csv")
                     .pipe(csv())
                     .on("data", (row) => {
                         const missingFields = [];
