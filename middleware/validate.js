@@ -1,7 +1,3 @@
-The code is modified to centralize configuration using a config file and update validation middleware accordingly.
-```
-
-```javascript
 const { query, validationResult } = require("express-validator");
 const config = require("../config");
 
