@@ -1,8 +1,8 @@
 require("dotenv").config();
 const express = require("express");
 const path = require("path");
+const config = require("./config");
 const app = express();
-const port = process.env.PORT || 3000;
 
 // Middleware
 app.use(express.urlencoded({ extended: true }));
@@ -48,8 +48,8 @@ app.get("/", (req, res) => {
 });
 
 // Start server
-const server = app.listen(port, "0.0.0.0", () => {
-  console.log(`Server running at http://0.0.0.0:${port}`);
+const server = app.listen(config.server.port, config.server.host, () => {
+  console.log(`Server running at http://${config.server.host}:${config.server.port}`);
 });
 
 // Graceful shutdown

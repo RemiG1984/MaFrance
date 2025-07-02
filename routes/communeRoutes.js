@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../config/db");
+const config = require("../config");
 const {
   validateDepartement,
   validateCOG,
@@ -24,7 +25,7 @@ router.get("/", [validateDepartement, validateSearchQuery], (req, res) => {
        ORDER BY commune ASC 
        LIMIT 10`;
     console.log("Executing SQL (no query):", sql, "with params:", [dept]);
-    
+
     db.all(sql, [dept], (err, rows) => {
         if (err) {
           console.error("Database error in /api/communes:", err);

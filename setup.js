@@ -1,37 +1,14 @@
 const sqlite3 = require("sqlite3").verbose();
 const fs = require("fs");
+const config = require("./config");
 const { importScores } = require("./setup/importScores");
 const { importArticles } = require("./setup/importArticles");
 const { importNames } = require("./setup/importNames");
 const { importCrimeData } = require("./setup/importCrimeData");
 const { importElus } = require("./setup/importElus");
 
-const dbFile = ".data/france.db";
-
-// List of CSV files associated with each import function
-const csvFiles = {
-  importScores: [
-    "setup/france_scores.csv",
-    "setup/departement_scores.csv",
-    "setup/commune_scores.csv",
-  ],
-  importArticles: ["setup/fdesouche_analyzed.csv"],
-  importNames: [
-    "setup/analyse_prenom_france.csv",
-    "setup/analyse_prenom_departement.csv",
-    "setup/analyse_prenom_commune.csv",
-  ],
-  importCrimeData: [
-    "setup/crime_data_france.csv",
-    "setup/crime_data_departement.csv",
-    "setup/crime_data_commune.csv",
-  ],
-  importElus: [
-    "setup/maires_list.csv",
-    "setup/prefets_list.csv",
-    "setup/ministre_interieur_list.csv",
-  ],
-};
+const dbFile = config.database.path;
+const csvFiles = config.setup.csvFiles;
 
 // Initialize SQLite database
 function initializeDatabase() {

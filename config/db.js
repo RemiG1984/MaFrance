@@ -1,7 +1,9 @@
+
 const sqlite3 = require("sqlite3").verbose();
+const config = require('./index');
 
 const db = new sqlite3.Database(
-  process.env.DB_PATH || ".data/france.db",
+  config.database.path,
   (err) => {
     if (err) {
       console.error("Database connection error:", err.message);
@@ -10,6 +12,9 @@ const db = new sqlite3.Database(
     console.log("Connected to SQLite database");
   },
 );
+
+// Set database timeout
+db.configure("busyTimeout", config.api.timeouts.connection);
 
 process.on("SIGINT", () => {
   db.close((err) => {
