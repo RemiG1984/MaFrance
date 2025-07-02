@@ -322,10 +322,7 @@
                     } else {
                         value = row[category.key];
                     }
-                    return Math.min(
-                        value,
-                        category.key === "homicides_p100k" ? 1000 : 100,
-                    );
+                    return value;
                 });
 
                 // Calculate data for country level (if applicable)
@@ -624,12 +621,5 @@
         }
     }
 
-    // Load Chart.js dynamically
-    const script = document.createElement("script");
-    script.src =
-        "https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js";
-    script.onload = initCrimeCharts;
-    script.onerror = () =>
-        console.error("Erreur lors du chargement de Chart.js");
-    document.head.appendChild(script);
+    initCrimeCharts();
 })();

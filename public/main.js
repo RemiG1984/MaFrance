@@ -152,6 +152,7 @@
         locationHandler.resetCommuneAndLieux();
         articleHandler.clearArticles();
         currentLieu = "";
+        communeInput.value = "";
         articleHandler.setFilter(null);
         console.log("Reset filter on department change");
         if (departement) {

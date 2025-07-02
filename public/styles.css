@@ -171,7 +171,7 @@ label {
 }
 
 #namesChart {
-    height: 600px !important; /* Set height to 600px */
+    height: 600px !important; /* Set height to 600px for desktop*/
 }
 
 .executive-box {
@@ -227,7 +227,8 @@ label {
     }
 
     #namesChart {
-        height: 400px !important; /* Adjusted for smaller screens */
+        height: 400px !important; /* Increased height for mobile */
+        width: 100% !important; /* Ensure full width on mobile */
     }
 
     .executive-box {

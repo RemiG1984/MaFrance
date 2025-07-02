@@ -240,12 +240,15 @@
                     plugins: {
                         legend: {
                             position: "top",
+                            align: "start", // Align legend items to the left
                             labels: {
                                 font: {
                                     family: "'Roboto', Arial, sans-serif",
                                     size: 14,
                                 },
                                 color: "#343a40",
+                                boxWidth: 12, // Ensure consistent box size for alignment
+                                padding: 10,
                             },
                         },
                         title: {
@@ -305,14 +308,7 @@
                             beginAtZero: true,
                             max: 100,
                             title: {
-                                display: true,
-                                text: "Pourcentage (%)",
-                                font: {
-                                    family: "'Roboto', Arial, sans-serif",
-                                    size: 16,
-                                    weight: "600",
-                                },
-                                color: "#343a40",
+                                display: false, // Remove y-axis title
                             },
                             ticks: {
                                 font: {
@@ -337,12 +333,5 @@
         }
     }
 
-    // Load Chart.js dynamically
-    const script = document.createElement("script");
-    script.src =
-        "https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js";
-    script.onload = initChart;
-    script.onerror = () =>
-        console.error("Erreur lors du chargement de Chart.js");
-    document.head.appendChild(script);
+    initChart();
 })();
