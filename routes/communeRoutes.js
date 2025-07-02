@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../config/db");
-const config = require("../config");
 const {
   validateDepartement,
   validateCOG,

@@ -1,5 +1,4 @@
 const { query, validationResult } = require("express-validator");
-const config = require("../config");
 
 // Middleware to handle validation errors
 const handleValidationErrors = (req, res, next) => {
@@ -187,4 +186,3 @@ module.exports = {
   validateCountry,
   validateLieu,
 };
-`
