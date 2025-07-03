@@ -130,7 +130,7 @@
                 const cog = item.COG;
                 scoreTableHandler.showCommuneDetails(departement, commune);
                 executiveHandler.showCommuneExecutive(departement, commune);
-                locationHandler.loadLieux(departement, commune);
+                locationHandler.loadLieux(departement, cog);
                 articleHandler.loadArticles(departement, cog).then(() => {
                     articleHandler
                         .loadArticleCounts(departement, cog)
