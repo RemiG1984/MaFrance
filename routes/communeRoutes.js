@@ -98,7 +98,7 @@ router.get("/", [validateDepartement, validateSearchQuery], (req, res) => {
 // GET /api/communes/all
 router.get("/all", (req, res) => {
   db.all(
-    "SELECT COG, departement, commune, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k FROM locations",
+    "SELECT COG, departement, commune, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct FROM locations",
     [],
     (err, rows) => {
       if (err) {
@@ -142,6 +142,8 @@ router.get(
       "wokisme_score",
       "number_of_mosques",
       "mosque_p100k",
+      "total_qpv",
+      "pop_in_qpv_pct",
       "musulman_pct",
       "africain_pct",
       "asiatique_pct",
@@ -221,7 +223,7 @@ router.get(
     SELECT 
       l.COG, l.departement, l.commune, l.population, l.insecurite_score, 
       l.immigration_score, l.islamisation_score, l.defrancisation_score, 
-      l.wokisme_score, l.number_of_mosques, l.mosque_p100k,
+      l.wokisme_score, l.number_of_mosques, l.mosque_p100k, l.total_qpv, l.pop_in_qpv_pct,
       (COALESCE(l.insecurite_score, 0) + COALESCE(l.immigration_score, 0) + COALESCE(l.islamisation_score, 0) + COALESCE(l.defrancisation_score, 0) + COALESCE(l.wokisme_score, 0)) AS total_score,
       cn.musulman_pct, cn.africain_pct, cn.asiatique_pct, cn.traditionnel_pct, 
       cn.moderne_pct, cn.annais,

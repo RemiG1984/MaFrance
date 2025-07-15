@@ -38,6 +38,8 @@ function importScores(db, callback) {
                         const wokisme_score = parseInt(row['Wokisme_Score']) || 0;
                         const number_of_mosques = parseInt(row['Number_of_Mosques']) || 0;
                         const mosque_p100k = parseFloat(row['Mosque_p100k']) || 0;
+                        const total_qpv = parseInt(row['Total_QPV']) || 0;
+                        const pop_in_qpv_pct = parseFloat(row['Pop_in_QPV_pct']) || 0;
 
                         countryRows++;
                         countryBatch.push([
@@ -49,7 +51,9 @@ function importScores(db, callback) {
                             defrancisation_score,
                             wokisme_score,
                             number_of_mosques,
-                            mosque_p100k
+                            mosque_p100k,
+                            total_qpv,
+                            pop_in_qpv_pct
                         ]);
                     })
                     .on('end', () => {
@@ -79,7 +83,9 @@ function importScores(db, callback) {
                             defrancisation_score INTEGER,
                             wokisme_score INTEGER,
                             number_of_mosques INTEGER,
-                            mosque_p100k REAL
+                            mosque_p100k REAL,
+                            total_qpv INTEGER,
+                            pop_in_qpv_pct REAL
                         )
                     `, (err) => {
                         if (err) {
@@ -103,10 +109,10 @@ function importScores(db, callback) {
                                 }
 
                                 if (countryBatch.length > 0) {
-                                    const placeholders = countryBatch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
+                                    const placeholders = countryBatch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
                                     const flatBatch = [].concat(...countryBatch);
                                     db.run(
-                                        `INSERT OR IGNORE INTO country (country, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k) VALUES ${placeholders}`,
+                                        `INSERT OR IGNORE INTO country (country, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct) VALUES ${placeholders}`,
                                         flatBatch,
                                         (err) => {
                                             if (err) {
@@ -186,6 +192,8 @@ function importScores(db, callback) {
                         const wokisme_score = parseInt(row['Wokisme_Score']) || 0;
                         const number_of_mosques = parseInt(row['Number_of_Mosques']) || 0;
                         const mosque_p100k = parseFloat(row['Mosque_p100k']) || 0;
+                        const total_qpv = parseInt(row['Total_QPV']) || 0;
+                        const pop_in_qpv_pct = parseFloat(row['Pop_in_QPV_pct']) || 0;
 
                         departmentRows++;
                         departmentBatch.push([
@@ -197,7 +205,9 @@ function importScores(db, callback) {
                             defrancisation_score,
                             wokisme_score,
                             number_of_mosques,
-                            mosque_p100k
+                            mosque_p100k,
+                            total_qpv,
+                            pop_in_qpv_pct
                         ]);
                     })
                     .on('end', () => {
@@ -227,7 +237,9 @@ function importScores(db, callback) {
                             defrancisation_score INTEGER,
                             wokisme_score INTEGER,
                             number_of_mosques INTEGER,
-                            mosque_p100k REAL
+                            mosque_p100k REAL,
+                            total_qpv INTEGER,
+                            pop_in_qpv_pct REAL
                         )
                     `, (err) => {
                         if (err) {
@@ -252,10 +264,10 @@ function importScores(db, callback) {
 
                                 for (let i = 0; i < departmentBatch.length; i += batchSize) {
                                     const batch = departmentBatch.slice(i, i + batchSize);
-                                    const placeholders = batch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
+                                    const placeholders = batch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
                                     const flatBatch = [].concat(...batch);
                                     db.run(
-                                        `INSERT OR IGNORE INTO departements (departement, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k) VALUES ${placeholders}`,
+                                        `INSERT OR IGNORE INTO departements (departement, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct) VALUES ${placeholders}`,
                                         flatBatch,
                                         (err) => {
                                             if (err) {
@@ -330,6 +342,8 @@ function importScores(db, callback) {
                         const wokisme_score = parseInt(row['Wokisme_Score']) || 0;
                         const number_of_mosques = parseInt(row['Number_of_Mosques']) || 0;
                         const mosque_p100k = parseFloat(row['Mosque_p100k']) || 0;
+                        const total_qpv = parseInt(row['Total_QPV']) || 0;
+                        const pop_in_qpv_pct = parseFloat(row['Pop_in_QPV_pct']) || 0;
 
                         locationsMap.set(row['COG'], {
                             code: row['COG'],
@@ -342,7 +356,9 @@ function importScores(db, callback) {
                             defrancisation_score,
                             wokisme_score,
                             number_of_mosques,
-                            mosque_p100k
+                            mosque_p100k,
+                            total_qpv,
+                            pop_in_qpv_pct
                         });
                     })
                     .on('end', () => {
@@ -375,6 +391,8 @@ function importScores(db, callback) {
                             wokisme_score INTEGER,
                             number_of_mosques INTEGER,
                             mosque_p100k REAL,
+                            total_qpv INTEGER,
+                            pop_in_qpv_pct REAL,
                             UNIQUE(COG, commune)
                         )
                     `, (err) => {
@@ -411,16 +429,18 @@ function importScores(db, callback) {
                                         loc.defrancisation_score,
                                         loc.wokisme_score,
                                         loc.number_of_mosques,
-                                        loc.mosque_p100k
+                                        loc.mosque_p100k,
+                                        loc.total_qpv,
+                                        loc.pop_in_qpv_pct
                                     ]);
 
                                     locationRows++;
 
                                     if (locationBatch.length >= batchSize) {
-                                        const placeholders = locationBatch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
+                                        const placeholders = locationBatch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
                                         const flatBatch = [].concat(...locationBatch);
                                         db.run(
-                                            `INSERT OR IGNORE INTO locations (COG, departement, commune, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k) VALUES ${placeholders}`,
+                                            `INSERT OR IGNORE INTO locations (COG, departement, commune, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct) VALUES ${placeholders}`,
                                             flatBatch,
                                             (err) => {
                                                 if (err) {
@@ -433,10 +453,10 @@ function importScores(db, callback) {
                                 }
 
                                 if (locationBatch.length > 0) {
-                                    const placeholders = locationBatch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
+                                    const placeholders = locationBatch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
                                     const flatBatch = [].concat(...locationBatch);
                                     db.run(
-                                        `INSERT OR IGNORE INTO locations (COG, departement, commune, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k) VALUES ${placeholders}`,
+                                        `INSERT OR IGNORE INTO locations (COG, departement, commune, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct) VALUES ${placeholders}`,
                                         flatBatch,
                                         (err) => {
                                             if (err) {

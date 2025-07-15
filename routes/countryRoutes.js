@@ -6,7 +6,7 @@ const { validateCountry } = require("../middleware/validate");
 // GET /api/country/details
 router.get("/details", (req, res) => {
   db.get(
-    "SELECT country, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k FROM country WHERE country = ?",
+    "SELECT country, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct FROM country WHERE country = ?",
     ["France"],
     (err, row) => {
       if (err) {

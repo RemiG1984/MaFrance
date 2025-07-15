@@ -25,7 +25,7 @@ router.get('/', (req, res) => {
 router.get('/details', validateDepartement, (req, res) => {
   const { dept } = req.query;
   db.get(
-    'SELECT departement, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k FROM departements WHERE departement = ?',
+    'SELECT departement, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct FROM departements WHERE departement = ?',
     [dept],
     (err, row) => {
       if (err) {
@@ -140,10 +140,10 @@ router.get('/details_all', [validateSort, validateDirection, validatePagination]
   const validSortColumns = [
     'total_score', 'insecurite_score', 'immigration_score', 'islamisation_score',
     'defrancisation_score', 'wokisme_score', 'number_of_mosques', 'mosque_p100k',
-    'musulman_pct', 'africain_pct', 'asiatique_pct', 'traditionnel_pct', 'moderne_pct',
-    'homicides_p100k', 'violences_physiques_p1k', 'violences_sexuelles_p1k', 'vols_p1k',
-    'destructions_p1k', 'stupefiants_p1k', 'escroqueries_p1k', 'extra_europeen_pct',
-    'prenom_francais_pct',
+    'total_qpv', 'pop_in_qpv_pct', 'musulman_pct', 'africain_pct', 'asiatique_pct', 
+    'traditionnel_pct', 'moderne_pct', 'homicides_p100k', 'violences_physiques_p1k', 
+    'violences_sexuelles_p1k', 'vols_p1k', 'destructions_p1k', 'stupefiants_p1k', 
+    'escroqueries_p1k', 'extra_europeen_pct', 'prenom_francais_pct',
   ];
   const sortColumn = validSortColumns.includes(sort) ? sort : 'insecurite_score';
   const sortDirection = direction === 'ASC' ? 'ASC' : 'DESC';
@@ -158,7 +158,7 @@ router.get('/details_all', [validateSort, validateDirection, validatePagination]
     SELECT 
       d.departement, d.population, d.insecurite_score, 
       d.immigration_score, d.islamisation_score, d.defrancisation_score, 
-      d.wokisme_score, d.number_of_mosques, d.mosque_p100k,
+      d.wokisme_score, d.number_of_mosques, d.mosque_p100k, d.total_qpv, d.pop_in_qpv_pct,
       (COALESCE(d.insecurite_score, 0) + COALESCE(d.immigration_score, 0) + COALESCE(d.islamisation_score, 0) + COALESCE(d.defrancisation_score, 0) + COALESCE(d.wokisme_score, 0)) AS total_score,
       dn.musulman_pct, dn.africain_pct, dn.asiatique_pct, dn.traditionnel_pct, 
       dn.moderne_pct, dn.annais,
