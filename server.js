@@ -21,19 +21,21 @@ app.use(
 );
 
 // Routes
-const articleRoutes = require("./routes/articleRoutes");
-const communeRoutes = require("./routes/communeRoutes");
-const departementRoutes = require("./routes/departementRoutes");
-const countryRoutes = require("./routes/countryRoutes");
-const otherRoutes = require("./routes/otherRoutes");
-const debugRoutes = require("./routes/debugRoutes");
+const communeRoutes = require('./routes/communeRoutes');
+const departementRoutes = require('./routes/departementRoutes');
+const countryRoutes = require('./routes/countryRoutes');
+const articleRoutes = require('./routes/articleRoutes');
+const debugRoutes = require('./routes/debugRoutes');
+const otherRoutes = require('./routes/otherRoutes');
+const qpvRoutes = require('./routes/qpvRoutes');
 
-app.use("/api/articles", articleRoutes);
-app.use("/api/communes", communeRoutes);
-app.use("/api/departements", departementRoutes);
-app.use("/api/country", countryRoutes);
-app.use("/api/debug", debugRoutes);
-app.use("/api", otherRoutes);
+app.use('/api/communes', communeRoutes);
+app.use('/api/departements', departementRoutes);
+app.use('/api/country', countryRoutes);
+app.use('/api/articles', articleRoutes);
+app.use('/api/debug', debugRoutes);
+app.use('/api/qpv', qpvRoutes);
+app.use('/api', otherRoutes);
 
 // Error handling
 const errorHandler = require("./middleware/errorHandler");

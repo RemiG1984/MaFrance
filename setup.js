@@ -1,11 +1,12 @@
 const sqlite3 = require("sqlite3").verbose();
 const fs = require("fs");
 const config = require("./config");
-const { importScores } = require("./setup/importScores");
-const { importArticles } = require("./setup/importArticles");
-const { importNames } = require("./setup/importNames");
-const { importCrimeData } = require("./setup/importCrimeData");
-const { importElus } = require("./setup/importElus");
+const { importScores } = require('./setup/importScores');
+const { importArticles } = require('./setup/importArticles');
+const { importElus } = require('./setup/importElus');
+const { importNames } = require('./setup/importNames');
+const { importCrimeData } = require('./setup/importCrimeData');
+const { importQPV } = require('./setup/importQPV');
 
 const dbFile = config.database.path;
 const csvFiles = config.setup.csvFiles;
@@ -42,65 +43,20 @@ function runImports() {
   const db = initializeDatabase();
 
   importCrimeData(db, (err) => {
-    if (err) {
-      console.error("Importation stoppée après crime data:", err.message);
-      db.close((closeErr) => {
-        if (closeErr) console.error("Erreur fermeture base:", closeErr.message);
-        process.exit(1);
-      });
-      return;
-    }
-    //deleteCsvFiles(csvFiles.importCrimeData); // Delete crime data CSVs
-    importArticles(db, (err) => {
-      if (err) {
-        console.error("Importation stoppée après articles:", err.message);
-        db.close((closeErr) => {
-          if (closeErr) console.error("Erreur fermeture base:", closeErr.message);
-          process.exit(1);
-        });
-        return;
-      }
-      //deleteCsvFiles(csvFiles.importArticles); // Delete articles CSV
-      importScores(db, (err) => {
-        if (err) {
-          console.error("Importation stoppée après scores:", err.message);
-          db.close((closeErr) => {
-            if (closeErr) console.error("Erreur fermeture base:", closeErr.message);
-            process.exit(1);
-          });
-          return;
-        }
-        //deleteCsvFiles(csvFiles.importScores); // Delete score-related CSVs
-        importNames(db, (err) => {
-          if (err) {
-            console.error("Importation stoppée après names:", err.message);
-            db.close((closeErr) => {
-              if (closeErr) console.error("Erreur fermeture base:", closeErr.message);
-              process.exit(1);
-            });
-            return;
-          }
-          //deleteCsvFiles(csvFiles.importNames); // Delete names CSVs
-          importElus(db, (err) => {
-            if (err) {
-              console.error("Importation stoppée après élus:", err.message);
-              db.close((closeErr) => {
-                if (closeErr) console.error("Erreur fermeture base:", closeErr.message);
-                process.exit(1);
-              });
-              return;
-            }
-            //deleteCsvFiles(csvFiles.importElus); // Delete elus CSVs
-            db.close((closeErr) => {
-              if (closeErr) console.error("Erreur fermeture base:", closeErr.message);
-              console.log("Importation complète terminée");
-              process.exit(err ? 1 : 0);
-            });
-          });
-        });
-      });
-    });
-  });
-}
+                if (err) {
+                    console.error('Échec importation données criminalité:', err.message);
+                    process.exit(1);
+                }
+                console.log('✓ Importation données criminalité terminée');
 
-runImports();
+                importQPV(db, (err) => {
+                    if (err) {
+                        console.error('Échec importation données QPV:', err.message);
+                        process.exit(1);
+                    }
+                    console.log('✓ Importation données QPV terminée');
+                    console.log('🎉 Configuration de la base de données terminée !');
+                    process.exit(0);
+                });
+            });
+        });
