@@ -83,6 +83,8 @@ const RankingsHandler = (function () {
                         defrancisation_score: dept.defrancisation_score,
                         prenom_francais_pct: dept.prenom_francais_pct || 0,
                         wokisme_score: dept.wokisme_score,
+                        total_qpv: dept.total_qpv || 0,
+                        pop_in_qpv_pct: dept.pop_in_qpv_pct || 0,
                         total_score: dept.total_score,
                         rank: index + 1, // Top ranks: 1–10
                     })),
@@ -110,6 +112,8 @@ const RankingsHandler = (function () {
                         defrancisation_score: dept.defrancisation_score,
                         prenom_francais_pct: dept.prenom_francais_pct || 0,
                         wokisme_score: dept.wokisme_score,
+                        total_qpv: dept.total_qpv || 0,
+                        pop_in_qpv_pct: dept.pop_in_qpv_pct || 0,
                         total_score: dept.total_score,
                         rank: totalDepartments - index, // Bottom ranks: 92–101
                     })),
@@ -184,6 +188,8 @@ const RankingsHandler = (function () {
                         defrancisation_score: commune.defrancisation_score,
                         prenom_francais_pct: commune.prenom_francais_pct || 0,
                         wokisme_score: commune.wokisme_score,
+                        total_qpv: commune.total_qpv || 0,
+                        pop_in_qpv_pct: commune.pop_in_qpv_pct || 0,
                         total_score: commune.total_score,
                         rank: index + 1, // Top ranks: 1–10
                     })),
@@ -208,6 +214,8 @@ const RankingsHandler = (function () {
                         defrancisation_score: commune.defrancisation_score,
                         prenom_francais_pct: commune.prenom_francais_pct || 0,
                         wokisme_score: commune.wokisme_score,
+                        total_qpv: commune.total_qpv || 0,
+                        pop_in_qpv_pct: commune.pop_in_qpv_pct || 0,
                         total_score: commune.total_score,
                         rank: totalCommunes - index, // Bottom ranks: e.g., 342 to 333
                     })),
