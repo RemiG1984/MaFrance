@@ -34,7 +34,7 @@ const QpvHandler = (function() {
     }
 
     function formatNumber(value) {
-        if (value === null || value === undefined || value === '' || (typeof value === 'number' && isNaN(value))) return 'N/A';
+        if (value === null || value === undefined || value === '' || value === 0 || (typeof value === 'number' && isNaN(value))) return 'N/A';
         if (typeof value === 'number') {
             return value.toLocaleString('fr-FR');
         }
@@ -42,7 +42,7 @@ const QpvHandler = (function() {
     }
 
     function formatPercentage(value) {
-        if (value === null || value === undefined || value === '' || (typeof value === 'number' && isNaN(value))) return 'N/A';
+        if (value === null || value === undefined || value === '' || value === 0 || (typeof value === 'number' && isNaN(value))) return 'N/A';
         if (typeof value === 'number') {
             return value.toFixed(1) + '%';
         }
