@@ -1,2 +1,2 @@
-country,population,Insécurité_Score,Immigration_Score,Islamisation_Score,Défrancisation_Score,Wokisme_Score,Number_of_Mosques,Mosque_p100k
-France,68034066,72,53,60,68,15,2430,3.57
+country,population,Pop_in_QPV_pct,Total_QPV,Insécurité_Score,Immigration_Score,Islamisation_Score,Défrancisation_Score,Wokisme_Score,Number_of_Mosques,Mosque_p100k
+France,68034066,11.52,1518,84,70,82,86,74,3030,4.45

@@ -93,6 +93,18 @@ body {
     border-bottom: none;
 }
 
+#results .score-row.sub-row-hidden {
+    display: none;
+}
+
+#results .score-row:not(.sub-row) .row-title {
+    cursor: pointer;
+}
+
+#results .score-row:not(.sub-row) .row-title:hover {
+    background-color: #f0f0f0;
+}
+
 #articles {
     margin: 30px auto;
     max-width: 800px;

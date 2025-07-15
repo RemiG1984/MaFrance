@@ -739,6 +739,16 @@ const ScoreTableHandler = (function () {
                 "compareHeader:",
                 compareHeader,
             );
+
+            // Group rows by main row and assign a group ID
+            let currentGroupId = null;
+            const groupedRows = rows.map((row, index) => {
+                if (!row.subRow) {
+                    currentGroupId = `group-${index}`;
+                }
+                return { ...row, groupId: currentGroupId };
+            });
+
             resultsDiv.innerHTML = `
                 <div class="data-box">
                     <table class="score-table">
@@ -750,10 +760,10 @@ const ScoreTableHandler = (function () {
                             </tr>
                         </thead>
                         <tbody>
-                            ${rows
+                            ${groupedRows
                                 .map(
-                                    (row) => `
-                                <tr class="score-row">
+                                    (row, index) => `
+                                <tr class="score-row${row.subRow ? ` sub-row group-${row.groupId}` : ""}" ${!row.subRow ? `data-group-id="${row.groupId}"` : ""}>
                                     <td class="row-title${row.subRow ? " sub-row" : ""}">
                                         ${row.link ? `<a href="${row.link}" target="_blank">${row.title}</a>` : row.title}
                                     </td>
@@ -767,6 +777,22 @@ const ScoreTableHandler = (function () {
                     </table>
                 </div>
             `;
+
+            // Add click event listeners to main rows
+            const mainRows = resultsDiv.querySelectorAll(
+                ".score-row:not(.sub-row)",
+            );
+            mainRows.forEach((row) => {
+                row.addEventListener("click", () => {
+                    const groupId = row.getAttribute("data-group-id");
+                    const subRows = resultsDiv.querySelectorAll(
+                        `.sub-row.group-${groupId}`,
+                    );
+                    subRows.forEach((subRow) => {
+                        subRow.classList.toggle("sub-row-hidden");
+                    });
+                });
+            });
         }
 
         return {
