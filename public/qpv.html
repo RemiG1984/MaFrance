@@ -1,26 +1,32 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Détails QPV - Quartiers Prioritaires de la Politique de la Ville</title>
-    <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-</head>
-<body>
-    <div class="container">
-        <h1 id="pageTitle">Quartiers Prioritaires de la Politique de la Ville</h1>
-        
-        <div class="navigation">
-            <a href="/" class="nav-link">← Retour à l'accueil</a>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Détails des Quartiers Mal Peuplés (QPV)</title>
+        <link rel="stylesheet" href="styles.css" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"
+            rel="stylesheet"
+        />
+    </head>
+    <body>
+        <div class="container">
+            <h1 id="pageTitle">
+                Quartiers Mal Peuplés (QPV - Quartiers Prioritaires de la
+                Politique de la Ville)
+            </h1>
+
+            <div class="navigation">
+                <a href="/" class="nav-link">← Retour à l'accueil</a>
+            </div>
+
+            <div id="results">
+                <p>Chargement des données QPV...</p>
+            </div>
         </div>
 
-        <div id="results">
-            <p>Chargement des données QPV...</p>
-        </div>
-    </div>
-
-    <script src="qpvHandler.js"></script>
-</body>
+        <script src="departmentNames.js"></script>
+        <script src="qpvHandler.js"></script>
+    </body>
 </html>

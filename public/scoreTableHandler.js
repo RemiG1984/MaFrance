@@ -170,7 +170,7 @@ const ScoreTableHandler = (function () {
                             main: data.wokisme_score.toLocaleString("fr-FR"),
                         },
                         {
-                            title: "Nombre de QPV",
+                            title: "Nombre de quartiers mal peuplés (QPV)",
                             main: data.total_qpv,
                             subRow: true,
                         },
@@ -464,7 +464,7 @@ const ScoreTableHandler = (function () {
                                     ),
                             },
                             {
-                                title: "Nombre de QPV",
+                                title: "Nombre de quartiers mal peuplés (QPV)",
                                 main: data.total_qpv,
                                 compare: countryData.total_qpv,
                                 subRow: true,
@@ -473,7 +473,8 @@ const ScoreTableHandler = (function () {
                             {
                                 title: "% de population dans les QPV",
                                 main: data.pop_in_qpv_pct.toFixed(1) + "%",
-                                compare: countryData.pop_in_qpv_pct.toFixed(1) + "%",
+                                compare:
+                                    countryData.pop_in_qpv_pct.toFixed(1) + "%",
                                 subRow: true,
                             },
                         ],
@@ -743,16 +744,32 @@ const ScoreTableHandler = (function () {
                         compare: deptData.wokisme_score.toLocaleString("fr-FR"),
                     },
                     {
-                        title: "Nombre de QPV",
-                        main: item.total_qpv !== null && item.total_qpv !== undefined ? item.total_qpv : 0,
-                        compare: deptData.total_qpv !== null && deptData.total_qpv !== undefined ? deptData.total_qpv : 0,
+                        title: "Nombre de quartiers mal peuplés (QPV)",
+                        main:
+                            item.total_qpv !== null &&
+                            item.total_qpv !== undefined
+                                ? item.total_qpv
+                                : 0,
+                        compare:
+                            deptData.total_qpv !== null &&
+                            deptData.total_qpv !== undefined
+                                ? deptData.total_qpv
+                                : 0,
                         subRow: true,
                         link: `/qpv.html?type=commune&code=${item.COG}&dept=${departement}&commune=${encodeURIComponent(commune)}`,
                     },
                     {
                         title: "% de population dans les QPV",
-                        main: item.pop_in_qpv_pct !== null && item.pop_in_qpv_pct !== undefined ? item.pop_in_qpv_pct.toFixed(1) + "%" : "0.0%",
-                        compare: deptData.pop_in_qpv_pct !== null && deptData.pop_in_qpv_pct !== undefined ? deptData.pop_in_qpv_pct.toFixed(1) + "%" : "0.0%",
+                        main:
+                            item.pop_in_qpv_pct !== null &&
+                            item.pop_in_qpv_pct !== undefined
+                                ? item.pop_in_qpv_pct.toFixed(1) + "%"
+                                : "0.0%",
+                        compare:
+                            deptData.pop_in_qpv_pct !== null &&
+                            deptData.pop_in_qpv_pct !== undefined
+                                ? deptData.pop_in_qpv_pct.toFixed(1) + "%"
+                                : "0.0%",
                         subRow: true,
                     },
                 );
