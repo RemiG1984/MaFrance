@@ -1,3 +1,4 @@
+
 const sqlite3 = require("sqlite3").verbose();
 const fs = require("fs");
 const config = require("./config");
@@ -9,7 +10,6 @@ const { importCrimeData } = require('./setup/importCrimeData');
 const { importQPV } = require('./setup/importQPV');
 
 const dbFile = config.database.path;
-const csvFiles = config.setup.csvFiles;
 
 // Initialize SQLite database
 function initializeDatabase() {
@@ -25,38 +25,59 @@ function initializeDatabase() {
   return new sqlite3.Database(dbFile);
 }
 
-// Function to delete CSV files after successful import
-function deleteCsvFiles(files) {
-  files.forEach((file) => {
-    if (fs.existsSync(file)) {
-      try {
-        fs.unlinkSync(file);
-        console.log(`Deleted ${file}`);
-      } catch (err) {
-        console.error(`Error deleting ${file}:`, err.message);
-      }
-    }
-  });
-}
-
 function runImports() {
   const db = initializeDatabase();
 
-  importCrimeData(db, (err) => {
-                if (err) {
-                    console.error('Échec importation données criminalité:', err.message);
-                    process.exit(1);
-                }
-                console.log('✓ Importation données criminalité terminée');
+  importScores(db, (err) => {
+    if (err) {
+      console.error('Échec importation scores:', err.message);
+      process.exit(1);
+    }
+    console.log('✓ Importation scores terminée');
 
-                importQPV(db, (err) => {
-                    if (err) {
-                        console.error('Échec importation données QPV:', err.message);
-                        process.exit(1);
-                    }
-                    console.log('✓ Importation données QPV terminée');
-                    console.log('🎉 Configuration de la base de données terminée !');
-                    process.exit(0);
-                });
+    importArticles(db, (err) => {
+      if (err) {
+        console.error('Échec importation articles:', err.message);
+        process.exit(1);
+      }
+      console.log('✓ Importation articles terminée');
+
+      importElus(db, (err) => {
+        if (err) {
+          console.error('Échec importation élus:', err.message);
+          process.exit(1);
+        }
+        console.log('✓ Importation élus terminée');
+
+        importNames(db, (err) => {
+          if (err) {
+            console.error('Échec importation noms:', err.message);
+            process.exit(1);
+          }
+          console.log('✓ Importation noms terminée');
+
+          importCrimeData(db, (err) => {
+            if (err) {
+              console.error('Échec importation données criminalité:', err.message);
+              process.exit(1);
+            }
+            console.log('✓ Importation données criminalité terminée');
+
+            importQPV(db, (err) => {
+              if (err) {
+                console.error('Échec importation données QPV:', err.message);
+                process.exit(1);
+              }
+              console.log('✓ Importation données QPV terminée');
+              console.log('🎉 Configuration de la base de données terminée !');
+              db.close();
+              process.exit(0);
             });
+          });
         });
+      });
+    });
+  });
+}
+
+runImports();
