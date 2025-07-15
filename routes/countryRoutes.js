@@ -143,24 +143,43 @@ router.get('/search', (req, res) => {
     return res.status(400).json({ error: 'Query parameter is required' });
   }
 
-  // Simplified query that focuses on the main country table first
   const sql = `
+    WITH LatestCountryNames AS (
+      SELECT country, musulman_pct, africain_pct, asiatique_pct, traditionnel_pct, moderne_pct, annais
+      FROM country_names cn
+      WHERE cn.annais = (SELECT MAX(annais) FROM country_names WHERE country = cn.country)
+      GROUP BY country
+    )
     SELECT 
-      c.country, 
-      c.population, 
-      c.insecurite_score, 
-      c.immigration_score, 
-      c.islamisation_score, 
-      c.defrancisation_score, 
-      c.wokisme_score, 
-      c.number_of_mosques, 
-      c.mosque_p100k, 
-      c.total_qpv, 
-      c.pop_in_qpv_pct,
-      (COALESCE(c.insecurite_score, 0) + COALESCE(c.immigration_score, 0) + COALESCE(c.islamisation_score, 0) + COALESCE(c.defrancisation_score, 0) + COALESCE(c.wokisme_score, 0)) AS total_score
+      c.country, c.population, c.insecurite_score, 
+      c.immigration_score, c.islamisation_score, c.defrancisation_score, 
+      c.wokisme_score, c.number_of_mosques, c.mosque_p100k, c.total_qpv, c.pop_in_qpv_pct,
+      (COALESCE(c.insecurite_score, 0) + COALESCE(c.immigration_score, 0) + COALESCE(c.islamisation_score, 0) + COALESCE(c.defrancisation_score, 0) + COALESCE(c.wokisme_score, 0)) AS total_score,
+      cn.musulman_pct, cn.africain_pct, cn.asiatique_pct, cn.traditionnel_pct, 
+      cn.moderne_pct, cn.annais,
+      (COALESCE(cc.homicides_p100k, 0) + COALESCE(cc.tentatives_homicides_p100k, 0)) AS homicides_p100k,
+      (COALESCE(cc.coups_et_blessures_volontaires_p1k, 0) + 
+       COALESCE(cc.coups_et_blessures_volontaires_intrafamiliaux_p1k, 0) + 
+       COALESCE(cc.autres_coups_et_blessures_volontaires_p1k, 0) + 
+       COALESCE(cc.vols_avec_armes_p1k, 0) + 
+       COALESCE(cc.vols_violents_sans_arme_p1k, 0)) AS violences_physiques_p1k,
+      COALESCE(cc.violences_sexuelles_p1k, 0) AS violences_sexuelles_p1k,
+      (COALESCE(cc.vols_avec_armes_p1k, 0) + 
+       COALESCE(cc.vols_violents_sans_arme_p1k, 0) + 
+       COALESCE(cc.vols_sans_violence_contre_personnes_p1k, 0) + 
+       COALESCE(cc.cambriolages_p1k, 0) + 
+       COALESCE(cc.vols_daccessoires_sur_vehicules_p1k, 0) + 
+       COALESCE(cc.vols_dans_vehicules_p1k, 0) + 
+       COALESCE(cc.vols_de_vehicules_p1k, 0)) AS vols_p1k,
+      (COALESCE(cc.trafic_et_revente_stupefiants_p1k, 0) + 
+       COALESCE(cc.usage_stupefiants_p1k, 0)) AS stupefiants_p1k,
+      (COALESCE(cc.destructions_et_degradations_p1k, 0) + 
+       COALESCE(cc.destructions_et_degradations_vehicules_p1k, 0)) AS destructions_p1k
     FROM country c
+    LEFT JOIN LatestCountryNames cn ON c.country = cn.country
+    LEFT JOIN country_crime cc ON c.country = cc.country
     WHERE LOWER(c.country) LIKE LOWER(?) 
-    LIMIT 1
+    LIMIT 10
   `;
 
   db.get(sql, [`%${q.trim()}%`], (err, row) => {
