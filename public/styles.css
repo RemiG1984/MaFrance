@@ -214,6 +214,30 @@ label {
     font-weight: 700;
 }
 
+.navigation {
+    margin: 20px auto;
+    max-width: 800px;
+    text-align: left;
+}
+
+.nav-link {
+    color: #007bff;
+    text-decoration: none;
+    font-size: 16px;
+    display: inline-block;
+    margin-bottom: 20px;
+}
+
+.nav-link:hover {
+    text-decoration: underline;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
 @media (max-width: 600px) {
     #departementSelect, #lieuxSelect, #communeInput {
         width: 100%;
@@ -249,5 +273,18 @@ label {
 
     .executive-box p {
         font-size: 14px;
+    }
+
+    .container {
+        padding: 10px;
+    }
+
+    #results .score-table {
+        font-size: 12px;
+    }
+
+    #results .score-header th,
+    #results .score-row td {
+        padding: 6px 8px;
     }
 }

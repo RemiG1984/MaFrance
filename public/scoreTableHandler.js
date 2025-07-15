@@ -468,6 +468,7 @@ const ScoreTableHandler = (function () {
                                 main: data.total_qpv,
                                 compare: countryData.total_qpv,
                                 subRow: true,
+                                link: `/qpv.html?type=department&code=${deptCode}`,
                             },
                             {
                                 title: "% de population dans les QPV",
@@ -746,6 +747,7 @@ const ScoreTableHandler = (function () {
                         main: item.total_qpv !== null && item.total_qpv !== undefined ? item.total_qpv : 0,
                         compare: deptData.total_qpv !== null && deptData.total_qpv !== undefined ? deptData.total_qpv : 0,
                         subRow: true,
+                        link: `/qpv.html?type=commune&code=${item.COG}&dept=${departement}&commune=${encodeURIComponent(commune)}`,
                     },
                     {
                         title: "% de population dans les QPV",
