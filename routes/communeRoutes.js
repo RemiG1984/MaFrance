@@ -15,25 +15,22 @@ const {
 // GET /api/communes
 router.get("/", [validateDepartement, validateSearchQuery], (req, res) => {
   const { dept, q = "" } = req.query;
-  console.log("GET /api/communes - Request params:", { dept, q });
 
   if (!q || q.length < 2) {
-    const sql = `SELECT DISTINCT commune, COG 
+    db.all(
+      `SELECT DISTINCT commune, COG 
        FROM locations 
        WHERE departement = ? 
        ORDER BY commune ASC 
-       LIMIT 10`;
-    console.log("Executing SQL (no query):", sql, "with params:", [dept]);
-
-    db.all(sql, [dept], (err, rows) => {
+       LIMIT 10`,
+      [dept],
+      (err, rows) => {
         if (err) {
-          console.error("Database error in /api/communes:", err);
           return res.status(500).json({
             error: "Erreur lors de la requête à la base de données",
             details: err.message,
           });
         }
-        console.log("Query result (no search):", rows?.length || 0, "rows");
         res.json(rows);
       },
     );
@@ -44,23 +41,19 @@ router.get("/", [validateDepartement, validateSearchQuery], (req, res) => {
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "");
-  console.log("Normalized search query:", normalizedQuery);
 
-  const sql = `SELECT DISTINCT commune, COG 
+  db.all(
+    `SELECT DISTINCT commune, COG 
      FROM locations 
-     WHERE departement = ?`;
-  console.log("Executing SQL (with search):", sql, "with params:", [dept]);
-
-  db.all(sql, [dept], (err, rows) => {
+     WHERE departement = ?`,
+    [dept],
+    (err, rows) => {
       if (err) {
-        console.error("Database error in /api/communes (search):", err);
         return res.status(500).json({
           error: "Erreur lors de la requête à la base de données",
           details: err.message,
         });
       }
-
-      console.log("Raw query result:", rows?.length || 0, "rows for dept", dept);
 
       const filteredCommunes = rows.filter((row) => {
         const normalizedCommune = row.commune
@@ -69,8 +62,6 @@ router.get("/", [validateDepartement, validateSearchQuery], (req, res) => {
           .replace(/[\u0300-\u036f]/g, "");
         return normalizedCommune.includes(normalizedQuery);
       });
-
-      console.log("Filtered communes:", filteredCommunes.length, "matches for query:", q);
 
       filteredCommunes.sort((a, b) => {
         const normA = a.commune
@@ -88,9 +79,7 @@ router.get("/", [validateDepartement, validateSearchQuery], (req, res) => {
           : a.commune.localeCompare(b.commune);
       });
 
-      const result = filteredCommunes.slice(0, 5);
-      console.log("Final result:", result.length, "communes returned");
-      res.json(result);
+      res.json(filteredCommunes.slice(0, 5));
     },
   );
 });
@@ -98,7 +87,7 @@ router.get("/", [validateDepartement, validateSearchQuery], (req, res) => {
 // GET /api/communes/all
 router.get("/all", (req, res) => {
   db.all(
-    "SELECT COG, departement, commune, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct FROM locations",
+    "SELECT COG, departement, commune, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k FROM locations",
     [],
     (err, rows) => {
       if (err) {
@@ -142,8 +131,6 @@ router.get(
       "wokisme_score",
       "number_of_mosques",
       "mosque_p100k",
-      "total_qpv",
-      "pop_in_qpv_pct",
       "musulman_pct",
       "africain_pct",
       "asiatique_pct",
@@ -223,7 +210,7 @@ router.get(
     SELECT 
       l.COG, l.departement, l.commune, l.population, l.insecurite_score, 
       l.immigration_score, l.islamisation_score, l.defrancisation_score, 
-      l.wokisme_score, l.number_of_mosques, l.mosque_p100k, l.total_qpv, l.pop_in_qpv_pct,
+      l.wokisme_score, l.number_of_mosques, l.mosque_p100k,
       (COALESCE(l.insecurite_score, 0) + COALESCE(l.immigration_score, 0) + COALESCE(l.islamisation_score, 0) + COALESCE(l.defrancisation_score, 0) + COALESCE(l.wokisme_score, 0)) AS total_score,
       cn.musulman_pct, cn.africain_pct, cn.asiatique_pct, cn.traditionnel_pct, 
       cn.moderne_pct, cn.annais,
