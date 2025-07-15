@@ -238,6 +238,55 @@ label {
     padding: 20px;
 }
 
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    margin: 20px 0;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.qpv-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px; /* Minimum width to trigger horizontal scroll */
+}
+
+.qpv-table th,
+.qpv-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ececec;
+    white-space: nowrap;
+}
+
+.qpv-table th {
+    background-color: #e9ecef;
+    font-weight: 700;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.qpv-table tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.qpv-table tr:last-child td {
+    border-bottom: none;
+}
+
+.qpv-table a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.qpv-table a:hover {
+    text-decoration: underline;
+}
+
 @media (max-width: 600px) {
     #departementSelect, #lieuxSelect, #communeInput {
         width: 100%;

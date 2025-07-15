@@ -1,4 +1,3 @@
-
 const QpvHandler = (function() {
     const departmentNames = {
         "01": "Ain", "02": "Aisne", "03": "Allier", "04": "Alpes-de-Haute-Provence", "05": "Hautes-Alpes",
@@ -76,7 +75,7 @@ const QpvHandler = (function() {
 
             const response = await fetch(apiUrl);
             console.log('QPV Handler - Response status:', response.status);
-            
+
             if (!response.ok) {
                 const errorText = await response.text();
                 console.error('QPV Handler - Error response:', errorText);
@@ -104,42 +103,44 @@ const QpvHandler = (function() {
 
         const tableHtml = `
             <div class="data-box">
-                <table class="score-table">
-                    <thead>
-                        <tr class="score-header">
-                            <th>Nom du QPV</th>
-                            <th>Population</th>
-                            <th>Indice Jeunesse</th>
-                            <th>Logements sociaux</th>
-                            <th>Taux logements sociaux</th>
-                            <th>Taux d'emploi</th>
-                            <th>Taux de pauvreté</th>
-                            <th>Personnes CAF</th>
-                            <th>Allocataires CAF</th>
-                            <th>RSA socle</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${qpvData.map(qpv => `
-                            <tr class="score-row">
-                                <td class="row-title">
-                                    <a href="https://sig.ville.gouv.fr/territoire/${qpv.codeQPV}" target="_blank">
-                                        ${qpv.lib_qp || qpv.codeQPV}
-                                    </a>
-                                </td>
-                                <td class="score-main">${formatNumber(qpv.popMuniQPV)}</td>
-                                <td class="score-main">${formatNumber(qpv.indiceJeunesse)}</td>
-                                <td class="score-main">${formatNumber(qpv.nombre_logements_sociaux)}</td>
-                                <td class="score-main">${formatPercentage(qpv.taux_logements_sociaux)}</td>
-                                <td class="score-main">${formatPercentage(qpv.taux_d_emploi)}</td>
-                                <td class="score-main">${formatPercentage(qpv.taux_pauvrete_60)}</td>
-                                <td class="score-main">${formatNumber(qpv.personnes_couvertes_CAF)}</td>
-                                <td class="score-main">${formatNumber(qpv.allocataires_CAF)}</td>
-                                <td class="score-main">${formatNumber(qpv.RSA_socle)}</td>
+                <div class="table-container">
+                    <table class="score-table">
+                        <thead>
+                            <tr class="score-header">
+                                <th>Nom du QPV</th>
+                                <th>Population</th>
+                                <th>Indice Jeunesse</th>
+                                <th>Logements sociaux</th>
+                                <th>Taux logements sociaux</th>
+                                <th>Taux d'emploi</th>
+                                <th>Taux de pauvreté</th>
+                                <th>Personnes CAF</th>
+                                <th>Allocataires CAF</th>
+                                <th>RSA socle</th>
                             </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            ${qpvData.map(qpv => `
+                                <tr class="score-row">
+                                    <td class="row-title">
+                                        <a href="https://sig.ville.gouv.fr/territoire/${qpv.codeQPV}" target="_blank">
+                                            ${qpv.lib_qp || qpv.codeQPV}
+                                        </a>
+                                    </td>
+                                    <td class="score-main">${formatNumber(qpv.popMuniQPV)}</td>
+                                    <td class="score-main">${formatNumber(qpv.indiceJeunesse)}</td>
+                                    <td class="score-main">${formatNumber(qpv.nombre_logements_sociaux)}</td>
+                                    <td class="score-main">${formatPercentage(qpv.taux_logements_sociaux)}</td>
+                                    <td class="score-main">${formatPercentage(qpv.taux_d_emploi)}</td>
+                                    <td class="score-main">${formatPercentage(qpv.taux_pauvrete_60)}</td>
+                                    <td class="score-main">${formatNumber(qpv.personnes_couvertes_CAF)}</td>
+                                    <td class="score-main">${formatNumber(qpv.allocataires_CAF)}</td>
+                                    <td class="score-main">${formatNumber(qpv.RSA_socle)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         `;
 
