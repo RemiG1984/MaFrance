@@ -134,71 +134,48 @@ router.get('/crime_history', validateDepartement, (req, res) => {
   );
 });
 
-// GET /api/departements/details_all
-router.get('/details_all', [validateSort, validateDirection, validatePagination], (req, res) => {
-  const { limit = 101, offset = 0, sort = 'insecurite_score', direction = 'DESC' } = req.query;
-  const validSortColumns = [
-    'total_score', 'insecurite_score', 'immigration_score', 'islamisation_score',
-    'defrancisation_score', 'wokisme_score', 'number_of_mosques', 'mosque_p100k',
-    'total_qpv', 'pop_in_qpv_pct', 'musulman_pct', 'africain_pct', 'asiatique_pct', 
-    'traditionnel_pct', 'moderne_pct', 'homicides_p100k', 'violences_physiques_p1k', 
-    'violences_sexuelles_p1k', 'vols_p1k', 'destructions_p1k', 'stupefiants_p1k', 
-    'escroqueries_p1k', 'extra_europeen_pct', 'prenom_francais_pct',
-  ];
-  const sortColumn = validSortColumns.includes(sort) ? sort : 'insecurite_score';
-  const sortDirection = direction === 'ASC' ? 'ASC' : 'DESC';
+// GET /api/departements/details_all - Get detailed data for all departments with sorting
+router.get('/details_all', (req, res) => {
+    const { limit = 100, sort = 'total_score', direction = 'DESC' } = req.query;
 
-  const sql = `
-    WITH LatestDepartmentNames AS (
-      SELECT dpt, musulman_pct, africain_pct, asiatique_pct, traditionnel_pct, moderne_pct, annais
-      FROM department_names dn
-      WHERE dn.annais = (SELECT MAX(annais) FROM department_names WHERE dpt = dn.dpt)
-      GROUP BY dpt
-    )
-    SELECT 
-      d.departement, d.population, d.insecurite_score, 
-      d.immigration_score, d.islamisation_score, d.defrancisation_score, 
-      d.wokisme_score, d.number_of_mosques, d.mosque_p100k, d.total_qpv, d.pop_in_qpv_pct,
-      (COALESCE(d.insecurite_score, 0) + COALESCE(d.immigration_score, 0) + COALESCE(d.islamisation_score, 0) + COALESCE(d.defrancisation_score, 0) + COALESCE(d.wokisme_score, 0)) AS total_score,
-      dn.musulman_pct, dn.africain_pct, dn.asiatique_pct, dn.traditionnel_pct, 
-      dn.moderne_pct, dn.annais,
-      (COALESCE(dc.homicides_p100k, 0) + COALESCE(dc.tentatives_homicides_p100k, 0)) AS homicides_p100k,
-      (COALESCE(dc.coups_et_blessures_volontaires_p1k, 0) + 
-       COALESCE(dc.coups_et_blessures_volontaires_intrafamiliaux_p1k, 0) + 
-       COALESCE(dc.autres_coups_et_blessures_volontaires_p1k, 0) + 
-       COALESCE(dc.vols_avec_armes_p1k, 0) + 
-       COALESCE(dc.vols_violents_sans_arme_p1k, 0)) AS violences_physiques_p1k,
-      COALESCE(dc.violences_sexuelles_p1k, 0) AS violences_sexuelles_p1k,
-      (COALESCE(dc.vols_avec_armes_p1k, 0) + 
-       COALESCE(dc.vols_violents_sans_arme_p1k, 0) + 
-       COALESCE(dc.vols_sans_violence_contre_des_personnes_p1k, 0) + 
-       COALESCE(dc.cambriolages_de_logement_p1k, 0) + 
-       COALESCE(dc.vols_de_vehicules_p1k, 0) + 
-       COALESCE(dc.vols_dans_les_vehicules_p1k, 0) + 
-       COALESCE(dc.vols_d_accessoires_sur_vehicules_p1k, 0)) AS vols_p1k,
-      COALESCE(dc.destructions_et_degradations_volontaires_p1k, 0) AS destructions_p1k,
-      (COALESCE(dc.usage_de_stupefiants_p1k, 0) + 
-       COALESCE(dc.usage_de_stupefiants_afd_p1k, 0) + 
-       COALESCE(dc.trafic_de_stupefiants_p1k, 0)) AS stupefiants_p1k,
-      COALESCE(dc.escroqueries_p1k, 0) AS escroqueries_p1k,
-      ROUND(COALESCE(dn.musulman_pct, 0) + COALESCE(dn.africain_pct, 0) + COALESCE(dn.asiatique_pct, 0)) AS extra_europeen_pct,
-      ROUND(COALESCE(dn.traditionnel_pct, 0) + COALESCE(dn.moderne_pct, 0)) AS prenom_francais_pct
-    FROM departements d
-    LEFT JOIN LatestDepartmentNames dn ON d.departement = dn.dpt
-    LEFT JOIN department_crime dc ON d.departement = dc.dep 
-      AND dc.annee = (SELECT MAX(annee) FROM department_crime WHERE dep = d.departement)
-    ORDER BY ${sortColumn} ${sortDirection}
-    LIMIT ? OFFSET ?
-  `;
-  db.all(sql, [limit, offset], (err, rows) => {
-    if (err) {
-      return res.status(500).json({
-        error: 'Erreur lors de la requête à la base de données',
-        details: err.message,
-      });
+    // Validate sort direction
+    const sortDirection = direction.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+
+    // List of allowed sort columns
+    const allowedSorts = [
+        'departement', 'population', 'insecurite_score', 'homicides_p100k',
+        'violences_physiques_p1k', 'violences_sexuelles_p1k', 'vols_p1k',
+        'destructions_p1k', 'stupefiants_p1k', 'escroqueries_p1k',
+        'immigration_score', 'extra_europeen_pct', 'islamisation_score',
+        'musulman_pct', 'number_of_mosques', 'mosque_p100k',
+        'defrancisation_score', 'prenom_francais_pct', 'wokisme_score', 
+        'total_qpv', 'pop_in_qpv_pct', 'total_score'
+    ];
+
+    if (!allowedSorts.includes(sort)) {
+        return res.status(400).json({ error: 'Invalid sort column' });
     }
-    res.json(rows);
-  });
+
+    const sql = `
+        SELECT d.departement, d.population,
+               d.insecurite_score, d.homicides_p100k, d.violences_physiques_p1k,
+               d.violences_sexuelles_p1k, d.vols_p1k, d.destructions_p1k,
+               d.stupefiants_p1k, d.escroqueries_p1k,
+               d.immigration_score, d.extra_europeen_pct,
+               d.islamisation_score, d.musulman_pct, d.number_of_mosques, d.mosque_p100k,
+               d.defrancisation_score, d.prenom_francais_pct,
+               d.wokisme_score, d.total_qpv, d.pop_in_qpv_pct, d.total_score
+        FROM departements d
+        ORDER BY d.${sort} ${sortDirection}
+        LIMIT ?
+    `;
+
+    db.all(sql, [limit], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.json(rows);
+    });
 });
 
 // GET /api/departements/prefet
