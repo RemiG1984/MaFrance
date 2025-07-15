@@ -5,36 +5,29 @@ const { validateDepartement, validateSearchQuery } = require('../middleware/vali
 
 // GET /api/search
 router.get('/search', [validateDepartement, validateSearchQuery], (req, res) => {
-  const { dept, q = '' } = req.query;
-  if (!dept) {
-    db.all(
-      'SELECT COG, departement, commune, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k FROM locations WHERE departement LIKE ? OR commune LIKE ? LIMIT 50',
-      [`%${q}%`, `%${q}%`],
-      (err, rows) => {
-        if (err) {
-          return res.status(500).json({
-            error: 'Erreur lors de la requête à la base de données',
-            details: err.message,
-          });
-        }
-        res.json(rows);
-      },
-    );
-  } else {
-    db.all(
-      'SELECT COG, departement, commune, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k FROM locations WHERE departement = ? AND commune = ? LIMIT 1',
-      [dept, q],
-      (err, rows) => {
-        if (err) {
-          return res.status(500).json({
-            error: 'Erreur lors de la requête à la base de données',
-            details: err.message,
-          });
-        }
-        res.json(rows);
-      },
-    );
+  const { dept, q } = req.query;
+
+  if (!q || q.trim().length === 0) {
+    return res.status(400).json({ error: 'Query parameter is required' });
   }
+
+  const sql = `
+    SELECT COG, departement, commune, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct
+    FROM locations 
+    WHERE departement = ? AND LOWER(commune) LIKE LOWER(?) 
+    LIMIT 10
+  `;
+
+  db.all(sql, [dept, `%${q.trim()}%`], (err, rows) => {
+    if (err) {
+      console.error('Database error in /api/search:', err);
+      return res.status(500).json({ 
+        error: 'Database error', 
+        details: err.message 
+      });
+    }
+    res.json(rows);
+  });
 });
 
 module.exports = router;
