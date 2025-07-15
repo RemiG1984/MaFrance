@@ -6,7 +6,7 @@ const { validateCountry } = require("../middleware/validate");
 // GET /api/country/details
 router.get("/details", (req, res) => {
   db.get(
-    "SELECT country, COALESCE(population, 0) as population, COALESCE(insecurite_score, 0) as insecurite_score, COALESCE(immigration_score, 0) as immigration_score, COALESCE(islamisation_score, 0) as islamisation_score, COALESCE(defrancisation_score, 0) as defrancisation_score, COALESCE(wokisme_score, 0) as wokisme_score, COALESCE(number_of_mosques, 0) as number_of_mosques, COALESCE(mosque_p100k, 0) as mosque_p100k, COALESCE(total_qpv, 0) as total_qpv, COALESCE(pop_in_qpv_pct, 0) as pop_in_qpv_pct FROM country WHERE country = ?",
+    "SELECT country, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct FROM country WHERE country = ?",
     ["France"],
     (err, row) => {
       if (err) {
@@ -26,7 +26,7 @@ router.get("/details", (req, res) => {
 // GET /api/country/names
 router.get("/names", (req, res) => {
   db.get(
-    `SELECT COALESCE(musulman_pct, 0) as musulman_pct, COALESCE(africain_pct, 0) as africain_pct, COALESCE(asiatique_pct, 0) as asiatique_pct, COALESCE(traditionnel_pct, 0) as traditionnel_pct, COALESCE(moderne_pct, 0) as moderne_pct, annais
+    `SELECT musulman_pct, africain_pct, asiatique_pct, traditionnel_pct, moderne_pct, annais
      FROM country_names 
      WHERE UPPER(country) = ? AND annais = (SELECT MAX(annais) FROM country_names WHERE UPPER(country) = ?)`,
     ["FRANCE", "FRANCE"],
