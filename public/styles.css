@@ -265,9 +265,25 @@ label {
 .qpv-table th {
     background-color: #e9ecef;
     font-weight: 700;
+    font-size: 14px;
     position: sticky;
     top: 0;
-    z-index: 1;
+    z-index: 2;
+}
+
+.qpv-table th:first-child,
+.qpv-table td:first-child {
+    position: sticky;
+    left: 0;
+    background-color: inherit;
+    z-index: 3;
+    min-width: 250px;
+    width: 250px;
+}
+
+.qpv-table th:first-child {
+    background-color: #e9ecef;
+    z-index: 4;
 }
 
 .qpv-table tr:nth-child(even) {
