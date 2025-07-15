@@ -59,6 +59,8 @@ const QpvHandler = (function() {
             let apiUrl;
             let pageTitle;
 
+            console.log('QPV Handler - Params:', params);
+
             if (params.type === 'department') {
                 apiUrl = `/api/qpv/departement/${params.code}`;
                 pageTitle = `QPV pour ${departmentNames[params.code] || params.code} (${params.code})`;
@@ -66,20 +68,25 @@ const QpvHandler = (function() {
                 apiUrl = `/api/qpv/commune/${params.code}`;
                 pageTitle = `QPV pour ${params.commune} (${params.dept})`;
             } else {
-                throw new Error('Type non supporté');
+                throw new Error('Type non supporté: ' + params.type);
             }
 
+            console.log('QPV Handler - API URL:', apiUrl);
             titleDiv.textContent = pageTitle;
 
             const response = await fetch(apiUrl);
+            console.log('QPV Handler - Response status:', response.status);
+            
             if (!response.ok) {
-                throw new Error(`Erreur HTTP: ${response.status}`);
+                const errorText = await response.text();
+                console.error('QPV Handler - Error response:', errorText);
+                throw new Error(`Erreur HTTP: ${response.status} - ${errorText}`);
             }
 
             const qpvData = await response.json();
             console.log('QPV data loaded:', qpvData);
 
-            if (qpvData.length === 0) {
+            if (!qpvData || qpvData.length === 0) {
                 resultsDiv.innerHTML = '<p>Aucun QPV trouvé pour cette zone.</p>';
                 return;
             }

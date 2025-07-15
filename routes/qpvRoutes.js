@@ -82,8 +82,17 @@ router.get('/commune/:cog', (req, res) => {
 });
 
 // GET /api/qpv/departement/:dept - Get QPV data for a specific department
-router.get('/departement/:dept', [validateDepartement], (req, res) => {
+router.get('/departement/:dept', (req, res) => {
     const { dept } = req.params;
+    
+    console.log('QPV Route - Department request for:', dept);
+    
+    // Basic validation for department code
+    if (!dept || dept.trim().length === 0) {
+        return res.status(400).json({ 
+            error: 'Department code is required' 
+        });
+    }
     
     const sql = `
         SELECT COG, lib_com, codeQPV, lib_qp, insee_reg, lib_reg, insee_dep, lib_dep,
@@ -96,6 +105,8 @@ router.get('/departement/:dept', [validateDepartement], (req, res) => {
         ORDER BY lib_com ASC, codeQPV ASC
     `;
     
+    console.log('QPV Route - Executing SQL with dept:', dept);
+    
     db.all(sql, [dept], (err, rows) => {
         if (err) {
             console.error('Database error in /api/qpv/departement:', err);
@@ -104,13 +115,21 @@ router.get('/departement/:dept', [validateDepartement], (req, res) => {
                 details: err.message 
             });
         }
+        console.log(`QPV Route - Found ${rows.length} QPV records for department ${dept}`);
         res.json(rows);
     });
 });
 
 // GET /api/qpv/stats/departement/:dept - Get QPV statistics for a department
-router.get('/stats/departement/:dept', [validateDepartement], (req, res) => {
+router.get('/stats/departement/:dept', (req, res) => {
     const { dept } = req.params;
+    
+    // Basic validation for department code
+    if (!dept || dept.trim().length === 0) {
+        return res.status(400).json({ 
+            error: 'Department code is required' 
+        });
+    }
     
     const sql = `
         SELECT 
