@@ -25,7 +25,7 @@ router.get('/', (req, res) => {
 router.get('/details', validateDepartement, (req, res) => {
   const { dept } = req.query;
   db.get(
-    'SELECT departement, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k FROM departements WHERE departement = ?',
+    'SELECT departement, COALESCE(population, 0) as population, COALESCE(insecurite_score, 0) as insecurite_score, COALESCE(immigration_score, 0) as immigration_score, COALESCE(islamisation_score, 0) as islamisation_score, COALESCE(defrancisation_score, 0) as defrancisation_score, COALESCE(wokisme_score, 0) as wokisme_score, COALESCE(number_of_mosques, 0) as number_of_mosques, COALESCE(mosque_p100k, 0) as mosque_p100k, COALESCE(total_qpv, 0) as total_qpv, COALESCE(pop_in_qpv_pct, 0) as pop_in_qpv_pct FROM departements WHERE departement = ?',
     [dept],
     (err, row) => {
       if (err) {
@@ -46,7 +46,7 @@ router.get('/details', validateDepartement, (req, res) => {
 router.get('/names', validateDepartement, (req, res) => {
   const { dept } = req.query;
   db.get(
-    `SELECT musulman_pct, africain_pct, asiatique_pct, traditionnel_pct, moderne_pct, annais
+    `SELECT COALESCE(musulman_pct, 0) as musulman_pct, COALESCE(africain_pct, 0) as africain_pct, COALESCE(asiatique_pct, 0) as asiatique_pct, COALESCE(traditionnel_pct, 0) as traditionnel_pct, COALESCE(moderne_pct, 0) as moderne_pct, annais
      FROM department_names 
      WHERE dpt = ? AND annais = (SELECT MAX(annais) FROM department_names WHERE dpt = ?)`,
     [dept, dept],
@@ -92,7 +92,25 @@ router.get('/names_history', validateDepartement, (req, res) => {
 router.get('/crime', validateDepartement, (req, res) => {
   const { dept } = req.query;
   db.get(
-    `SELECT * 
+    `SELECT dep, annee, 
+     COALESCE(homicides_p100k, 0) as homicides_p100k,
+     COALESCE(tentatives_homicides_p100k, 0) as tentatives_homicides_p100k,
+     COALESCE(coups_et_blessures_volontaires_p1k, 0) as coups_et_blessures_volontaires_p1k,
+     COALESCE(coups_et_blessures_volontaires_intrafamiliaux_p1k, 0) as coups_et_blessures_volontaires_intrafamiliaux_p1k,
+     COALESCE(autres_coups_et_blessures_volontaires_p1k, 0) as autres_coups_et_blessures_volontaires_p1k,
+     COALESCE(violences_sexuelles_p1k, 0) as violences_sexuelles_p1k,
+     COALESCE(vols_avec_armes_p1k, 0) as vols_avec_armes_p1k,
+     COALESCE(vols_violents_sans_arme_p1k, 0) as vols_violents_sans_arme_p1k,
+     COALESCE(vols_sans_violence_contre_des_personnes_p1k, 0) as vols_sans_violence_contre_des_personnes_p1k,
+     COALESCE(cambriolages_de_logement_p1k, 0) as cambriolages_de_logement_p1k,
+     COALESCE(vols_de_vehicules_p1k, 0) as vols_de_vehicules_p1k,
+     COALESCE(vols_dans_les_vehicules_p1k, 0) as vols_dans_les_vehicules_p1k,
+     COALESCE(vols_d_accessoires_sur_vehicules_p1k, 0) as vols_d_accessoires_sur_vehicules_p1k,
+     COALESCE(destructions_et_degradations_volontaires_p1k, 0) as destructions_et_degradations_volontaires_p1k,
+     COALESCE(usage_de_stupefiants_p1k, 0) as usage_de_stupefiants_p1k,
+     COALESCE(usage_de_stupefiants_afd_p1k, 0) as usage_de_stupefiants_afd_p1k,
+     COALESCE(trafic_de_stupefiants_p1k, 0) as trafic_de_stupefiants_p1k,
+     COALESCE(escroqueries_p1k, 0) as escroqueries_p1k
      FROM department_crime 
      WHERE dep = ? AND annee = (SELECT MAX(annee) FROM department_crime WHERE dep = ?)`,
     [dept, dept],
