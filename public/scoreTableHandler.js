@@ -743,14 +743,14 @@ const ScoreTableHandler = (function () {
                     },
                     {
                         title: "Nombre de QPV",
-                        main: item.total_qpv,
-                        compare: deptData.total_qpv,
+                        main: item.total_qpv || 0,
+                        compare: deptData.total_qpv || 0,
                         subRow: true,
                     },
                     {
                         title: "% de population dans les QPV",
-                        main: item.pop_in_qpv_pct.toFixed(1) + "%",
-                        compare: deptData.pop_in_qpv_pct.toFixed(1) + "%",
+                        main: item.pop_in_qpv_pct ? item.pop_in_qpv_pct.toFixed(1) + "%" : "0.0%",
+                        compare: deptData.pop_in_qpv_pct ? deptData.pop_in_qpv_pct.toFixed(1) + "%" : "0.0%",
                         subRow: true,
                     },
                 );
