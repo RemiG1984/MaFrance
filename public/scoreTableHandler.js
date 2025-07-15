@@ -169,6 +169,16 @@ const ScoreTableHandler = (function () {
                             title: "Score Wokisme",
                             main: data.wokisme_score.toLocaleString("fr-FR"),
                         },
+                        {
+                            title: "Nombre de QPV",
+                            main: data.total_qpv,
+                            subRow: true,
+                        },
+                        {
+                            title: "% de population dans les QPV",
+                            main: data.pop_in_qpv_pct.toFixed(1) + "%",
+                            subRow: true,
+                        },
                     ]);
                 }
             } catch (error) {
@@ -453,6 +463,18 @@ const ScoreTableHandler = (function () {
                                         "fr-FR",
                                     ),
                             },
+                            {
+                                title: "Nombre de QPV",
+                                main: data.total_qpv,
+                                compare: countryData.total_qpv,
+                                subRow: true,
+                            },
+                            {
+                                title: "% de population dans les QPV",
+                                main: data.pop_in_qpv_pct.toFixed(1) + "%",
+                                compare: countryData.pop_in_qpv_pct.toFixed(1) + "%",
+                                subRow: true,
+                            },
                         ],
                         "France",
                     );
@@ -713,11 +735,25 @@ const ScoreTableHandler = (function () {
                         link: `/names_graph.html?type=commune&code=${item.COG}&dept=${departement}`,
                     });
                 }
-                rows.push({
-                    title: "Score Wokisme",
-                    main: item.wokisme_score.toLocaleString("fr-FR"),
-                    compare: deptData.wokisme_score.toLocaleString("fr-FR"),
-                });
+                rows.push(
+                    {
+                        title: "Score Wokisme",
+                        main: item.wokisme_score.toLocaleString("fr-FR"),
+                        compare: deptData.wokisme_score.toLocaleString("fr-FR"),
+                    },
+                    {
+                        title: "Nombre de QPV",
+                        main: item.total_qpv,
+                        compare: deptData.total_qpv,
+                        subRow: true,
+                    },
+                    {
+                        title: "% de population dans les QPV",
+                        main: item.pop_in_qpv_pct.toFixed(1) + "%",
+                        compare: deptData.pop_in_qpv_pct.toFixed(1) + "%",
+                        subRow: true,
+                    },
+                );
 
                 renderScoreTable(
                     `${item.departement} - ${item.commune}`,
