@@ -292,10 +292,11 @@ const RankingsHandler = (function () {
 
         function formatMetricValue(value, metric) {
             if (value === undefined || value === null) return "N/A";
-            if (metric.includes("_pct")) return `${value}%`;
+            if (metric.includes("_pct")) return `${value.toFixed(1)}%`;
             if (metric.includes("_p100k") || metric.includes("_p1k"))
                 return value.toFixed(1);
             if (metric.includes("_score")) return value.toLocaleString("fr-FR");
+            if (metric === "total_qpv") return value.toLocaleString("fr-FR");
             return value.toString();
         }
 
