@@ -34,7 +34,11 @@ function importQPV(db, callback) {
                     const lib_qp = row['lib_qp'] || null;
                     const insee_reg = parseInt(row['insee_reg']) || null;
                     const lib_reg = row['lib_reg'] || null;
-                    const insee_dep = row['insee_dep'] || null;
+                    let insee_dep = row['insee_dep'] || null;
+                    // Normalize department code to match format used in other tables
+                    if (insee_dep && /^\d+$/.test(insee_dep) && insee_dep.length < 2) {
+                        insee_dep = insee_dep.padStart(2, '0');
+                    }
                     const lib_dep = row['lib_dep'] || null;
                     const siren_epci = row['siren_epci'] || null;
                     const lib_epci = row['lib_epci'] || null;
