@@ -25,6 +25,12 @@ router.get('/', (req, res) => {
 router.get('/details', validateDepartement, (req, res) => {
   const { dept } = req.query;
   
+  // Normalize department code to match QPV data format
+  let normalizedDept = dept;
+  if (/^\d+$/.test(dept) && dept.length < 2) {
+    normalizedDept = dept.padStart(2, '0');
+  }
+  
   const sql = `
     SELECT 
       d.departement, 
@@ -50,11 +56,11 @@ router.get('/details', validateDepartement, (req, res) => {
         SUM(popMuniQPV) as total_population_qpv
       FROM qpv_data 
       GROUP BY insee_dep
-    ) qpv_stats ON d.departement = qpv_stats.insee_dep
+    ) qpv_stats ON qpv_stats.insee_dep = ?
     WHERE d.departement = ?
   `;
   
-  db.get(sql, [dept], (err, row) => {
+  db.get(sql, [normalizedDept, dept], (err, row) => {
     if (err) {
       return res.status(500).json({
         error: 'Erreur lors de la requête à la base de données',
