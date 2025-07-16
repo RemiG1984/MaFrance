@@ -24,22 +24,48 @@ router.get('/', (req, res) => {
 // GET /api/departements/details
 router.get('/details', validateDepartement, (req, res) => {
   const { dept } = req.query;
-  db.get(
-    'SELECT departement, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k FROM departements WHERE departement = ?',
-    [dept],
-    (err, row) => {
-      if (err) {
-        return res.status(500).json({
-          error: 'Erreur lors de la requête à la base de données',
-          details: err.message,
-        });
-      }
-      if (!row) {
-        return res.status(404).json({ error: 'Département non trouvé' });
-      }
-      res.json(row);
-    },
-  );
+  
+  const sql = `
+    SELECT 
+      d.departement, 
+      d.population, 
+      d.insecurite_score, 
+      d.immigration_score, 
+      d.islamisation_score, 
+      d.defrancisation_score, 
+      d.wokisme_score, 
+      d.number_of_mosques, 
+      d.mosque_p100k,
+      COALESCE(qpv_stats.total_qpv, 0) as total_qpv,
+      COALESCE(qpv_stats.total_population_qpv, 0) as total_population_qpv,
+      CASE 
+        WHEN d.population > 0 THEN (COALESCE(qpv_stats.total_population_qpv, 0) * 100.0 / d.population)
+        ELSE 0
+      END as pop_in_qpv_pct
+    FROM departements d
+    LEFT JOIN (
+      SELECT 
+        insee_dep,
+        COUNT(*) as total_qpv,
+        SUM(popMuniQPV) as total_population_qpv
+      FROM qpv_data 
+      GROUP BY insee_dep
+    ) qpv_stats ON d.departement = qpv_stats.insee_dep
+    WHERE d.departement = ?
+  `;
+  
+  db.get(sql, [dept], (err, row) => {
+    if (err) {
+      return res.status(500).json({
+        error: 'Erreur lors de la requête à la base de données',
+        details: err.message,
+      });
+    }
+    if (!row) {
+      return res.status(404).json({ error: 'Département non trouvé' });
+    }
+    res.json(row);
+  });
 });
 
 // GET /api/departements/names

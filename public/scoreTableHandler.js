@@ -472,9 +472,12 @@ const ScoreTableHandler = (function () {
                             },
                             {
                                 title: "% de population dans les QPV",
-                                main: data.pop_in_qpv_pct.toFixed(1) + "%",
-                                compare:
-                                    countryData.pop_in_qpv_pct.toFixed(1) + "%",
+                                main: data.pop_in_qpv_pct !== null && data.pop_in_qpv_pct !== undefined 
+                                    ? data.pop_in_qpv_pct.toFixed(1) + "%" 
+                                    : "0.0%",
+                                compare: countryData.pop_in_qpv_pct !== null && countryData.pop_in_qpv_pct !== undefined
+                                    ? countryData.pop_in_qpv_pct.toFixed(1) + "%"
+                                    : "0.0%",
                                 subRow: true,
                             },
                         ],
