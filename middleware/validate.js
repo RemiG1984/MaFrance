@@ -1,4 +1,4 @@
-const { query, validationResult } = require("express-validator");
+const { query, param, validationResult } = require("express-validator");
 
 // Middleware to handle validation errors
 const handleValidationErrors = (req, res, next) => {
@@ -12,6 +12,16 @@ const handleValidationErrors = (req, res, next) => {
 // Validation for French department codes (e.g., 01-95, 2A, 2B, 971-976)
 const validateDepartement = [
   query("dept")
+    .notEmpty()
+    .withMessage("Département requis")
+    .matches(/^(0[1-9]|[1-8][0-9]|9[0-5]|2[AB]|97[1-6])$/)
+    .withMessage("Code département invalide"),
+  handleValidationErrors,
+];
+
+// Validation for French department codes in path parameters
+const validateDepartementParam = [
+  param("dept")
     .notEmpty()
     .withMessage("Département requis")
     .matches(/^(0[1-9]|[1-8][0-9]|9[0-5]|2[AB]|97[1-6])$/)
@@ -175,6 +185,7 @@ function validateSearchQuery(req, res, next) {
 
 module.exports = {
   validateDepartement,
+  validateDepartementParam,
   validateCOG,
   validateOptionalCOG,
   validateSearchQuery,

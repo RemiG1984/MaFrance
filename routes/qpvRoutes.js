@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/db');
-const { validateDepartement } = require('../middleware/validate');
+const { validateDepartement, validateDepartementParam } = require('../middleware/validate');
 
 // GET /api/qpv - Get all QPV data with optional filtering
 router.get('/', (req, res) => {
@@ -82,17 +82,10 @@ router.get('/commune/:cog', (req, res) => {
 });
 
 // GET /api/qpv/departement/:dept - Get QPV data for a specific department
-router.get('/departement/:dept', (req, res) => {
+router.get('/departement/:dept', validateDepartementParam, (req, res) => {
     const { dept } = req.params;
     
     console.log('QPV Route - Department request for:', dept);
-    
-    // Basic validation for department code
-    if (!dept || dept.trim().length === 0) {
-        return res.status(400).json({ 
-            error: 'Department code is required' 
-        });
-    }
     
     const sql = `
         SELECT COG, lib_com, codeQPV, lib_qp, insee_reg, lib_reg, insee_dep, lib_dep,
@@ -121,15 +114,8 @@ router.get('/departement/:dept', (req, res) => {
 });
 
 // GET /api/qpv/stats/departement/:dept - Get QPV statistics for a department
-router.get('/stats/departement/:dept', (req, res) => {
+router.get('/stats/departement/:dept', validateDepartementParam, (req, res) => {
     const { dept } = req.params;
-    
-    // Basic validation for department code
-    if (!dept || dept.trim().length === 0) {
-        return res.status(400).json({ 
-            error: 'Department code is required' 
-        });
-    }
     
     const sql = `
         SELECT 
