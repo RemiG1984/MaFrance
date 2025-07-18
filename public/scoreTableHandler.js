@@ -770,7 +770,7 @@ const ScoreTableHandler = (function () {
                                 ? deptData.total_qpv
                                 : 0,
                         subRow: true,
-                        link: `/qpv.html?type=commune&code=${cog}&dept=${departement}&commune=${encodeURIComponent(commune)}`,
+                        link: `/qpv.html?type=commune&code=${item.COG}&dept=${departement}&commune=${encodeURIComponent(commune)}`,
                     },
                     {
                         title: "% de population dans les QPV",
