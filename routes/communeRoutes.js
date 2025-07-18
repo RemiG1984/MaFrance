@@ -319,6 +319,20 @@ const nuanceMap = {
   NC: "",
 };
 
+// GET /api/communes/details
+router.get("/details", validateCOG, (req, res) => {
+  const { cog } = req.query;
+  db.get(
+    "SELECT COG, departement, commune, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct FROM locations WHERE COG = ?",
+    [cog],
+    (err, row) => {
+      if (err) return handleDbError(res, err);
+      if (!row) return res.status(404).json({ error: "Commune non trouvée" });
+      res.json(row);
+    },
+  );
+});
+
 // GET /api/communes/maire
 router.get("/maire", validateCOG, (req, res) => {
   const { cog } = req.query;

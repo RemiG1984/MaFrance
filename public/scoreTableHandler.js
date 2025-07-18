@@ -540,7 +540,7 @@ const ScoreTableHandler = (function () {
                 const crimeData = await crimeResponse.json();
                 const deptNamesData = await deptNamesResponse.json();
                 const deptCrimeData = await deptCrimeResponse.json();
-                console.log("Commune details:", data);
+                console.log("Commune details:", item);
                 const extraEuropeenPct = Math.round(
                     namesData.musulman_pct +
                         namesData.africain_pct +
