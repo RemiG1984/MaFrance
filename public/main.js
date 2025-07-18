@@ -128,8 +128,8 @@
                 }
                 const item = data[0];
                 const cog = item.COG;
-                scoreTableHandler.showCommuneDetails(departement, commune);
-                executiveHandler.showCommuneExecutive(departement, commune);
+                scoreTableHandler.showCommuneDetails(cog);
+                executiveHandler.showCommuneExecutive(cog);
                 locationHandler.loadLieux(departement, cog);
                 articleHandler.loadArticles(departement, cog).then(() => {
                     articleHandler

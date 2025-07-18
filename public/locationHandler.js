@@ -99,7 +99,7 @@ const LocationHandler = (function () {
             }
         }
 
-        async function loadLieux(departement, cogOrCommune) {
+        async function loadLieux(departement, cog) {
             // Normalize departement
             departement = departement.trim().toUpperCase();
             if (/^\d+$/.test(departement)) {
@@ -115,13 +115,8 @@ const LocationHandler = (function () {
             }
             try {
                 let url = `/api/articles/lieux?dept=${departement}`;
-                if (cogOrCommune) {
-                    // Check if it's a COG (numeric) or commune name
-                    if (/^\d+$/.test(cogOrCommune)) {
-                        url += `&cog=${encodeURIComponent(cogOrCommune)}`;
-                    } else {
-                        url += `&commune=${encodeURIComponent(cogOrCommune)}`;
-                    }
+                if (cog) {
+                    url += `&cog=${encodeURIComponent(cog)}`;
                 }
 
                 const response = await fetch(url);
