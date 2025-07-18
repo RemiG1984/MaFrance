@@ -52,13 +52,19 @@ const QpvHandler = (function () {
             console.log("QPV Handler - Params:", params);
 
             if (params.type === "department") {
+                if (!params.code) {
+                    throw new Error("Code département manquant");
+                }
                 apiUrl = `/api/qpv/departement/${params.code}`;
                 pageTitle = `Quartiers "Prioritaires" (QPV) pour ${departmentNames[params.code] || params.code} (${params.code})`;
             } else if (params.type === "commune") {
+                if (!params.code) {
+                    throw new Error("Code commune (COG) manquant");
+                }
                 apiUrl = `/api/qpv/commune/${params.code}`;
-                pageTitle = `Quartiers "Prioritaires" (QPV) pour ${params.commune} (${params.dept})`;
+                pageTitle = `Quartiers "Prioritaires" (QPV) pour ${params.commune || 'Commune'} (${params.dept || params.code})`;
             } else {
-                throw new Error("Type non supporté: " + params.type);
+                throw new Error("Type non supporté: " + (params.type || 'undefined'));
             }
 
             console.log("QPV Handler - API URL:", apiUrl);
