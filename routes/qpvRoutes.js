@@ -4,6 +4,7 @@ const db = require("../config/db");
 const {
     validateDepartement,
     validateDepartementParam,
+    validateCOG,
     validateCOGParam,
     validateSearchQuery,
     validatePagination,
