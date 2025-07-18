@@ -4,17 +4,17 @@ const db = require("../config/db");
 const {
     validateDepartement,
     validateDepartementParam,
-    validateCOG,
+    validateCOGParam,
     validateSearchQuery,
     validatePagination,
 } = require("../middleware/validate");
 
 // Centralized error handler for database queries
 const handleDbError = (err, next) => {
-  const error = new Error("Erreur lors de la requête à la base de données");
-  error.status = 500;
-  error.details = err.message;
-  return next(error);
+    const error = new Error("Erreur lors de la requête à la base de données");
+    error.status = 500;
+    error.details = err.message;
+    return next(error);
 };
 
 // Base SQL select for QPV data
@@ -66,7 +66,7 @@ router.get(
 );
 
 // GET /api/qpv/commune/:cog - Get QPV data for a specific commune
-router.get("/commune/:cog", validateCOG, (req, res) => {
+router.get("/commune/:cog", validateCOGParam, (req, res) => {
     const { cog } = req.params;
 
     const sql = `${baseQpvSelect} WHERE COG = ? ORDER BY codeQPV ASC`;

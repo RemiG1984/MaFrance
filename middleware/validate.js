@@ -39,6 +39,16 @@ const validateCOG = [
   handleValidationErrors,
 ];
 
+// Validation for COG in path parameters
+const validateCOGParam = [
+  param("cog")
+    .notEmpty()
+    .withMessage("COG requis")
+    .matches(/^(?:[0-9]{5}|2[AB][0-9]{3}|97[1-6][0-9]{2}|[0-9]{4})$/)
+    .withMessage("Code COG invalide"),
+  handleValidationErrors,
+];
+
 function validateOptionalCOG(req, res, next) {
   const { cog } = req.query;
   if (
@@ -189,6 +199,7 @@ module.exports = {
   validateDepartement,
   validateDepartementParam,
   validateCOG,
+  validateCOGParam,
   validateOptionalCOG,
   validateSearchQuery,
   validateSort,
