@@ -64,27 +64,21 @@ const ExecutiveHandler = (function () {
             }
         }
 
-        async function showCommuneExecutive(departement, commune) {
+        async function showCommuneExecutive(cog) {
             try {
-                const searchResponse = await fetch(
-                    `/api/search?dept=${departement}&q=${encodeURIComponent(commune)}`,
-                );
-                if (!searchResponse.ok) {
-                    throw new Error(
-                        `Erreur lors de la récupération du COG: ${searchResponse.statusText}`,
-                    );
+                // First get commune details from COG
+                const communeResponse = await fetch(`/api/communes/details?cog=${encodeURIComponent(cog)}`);
+                if (!communeResponse.ok) {
+                    throw new Error(`Erreur lors de la récupération de la commune: ${communeResponse.statusText}`);
                 }
-                const searchData = await searchResponse.json();
-                if (searchData.length === 0) {
+                const communeData = await communeResponse.json();
+                if (!communeData) {
                     executiveDiv.innerHTML = "<p>Aucune commune trouvée.</p>";
                     return;
                 }
-                const item = searchData[0];
-                if (!item.COG) {
-                    throw new Error("Code COG manquant pour la commune");
-                }
+                
                 const response = await fetch(
-                    `/api/communes/maire?cog=${encodeURIComponent(item.COG)}`,
+                    `/api/communes/maire?cog=${encodeURIComponent(cog)}`,
                 );
                 if (!response.ok) {
                     throw new Error(
@@ -97,7 +91,7 @@ const ExecutiveHandler = (function () {
                     executiveDiv.innerHTML = "<p>Aucun maire trouvé.</p>";
                 } else {
                     renderExecutive(
-                        `${commune} (${departement})`,
+                        `${communeData.commune} (${communeData.departement})`,
                         "Maire",
                         data.prenom,
                         data.nom,

@@ -529,6 +529,7 @@ const ScoreTableHandler = (function () {
                 if (!item.COG) {
                     throw new Error("Code COG manquant pour la commune");
                 }
+                const cog = item.COG;
                 const namesResponse = await fetch(
                     `/api/communes/names?dept=${departement}&cog=${encodeURIComponent(item.COG)}`,
                 );
@@ -603,7 +604,7 @@ const ScoreTableHandler = (function () {
                                 deptCrimeData.vols_violents_sans_arme_p1k
                             ).toFixed(1) + deptCrimeYearLabel,
                         subRow: true,
-                        link: `/crime_graph.html?type=commune&code=${item.COG}&dept=${departement}&commune=${encodeURIComponent(commune)}`,
+                        link: `/crime_graph.html?type=commune&code=${cog}&dept=${departement}&commune=${encodeURIComponent(commune)}`,
                     },
                     {
                         title: "Violences sexuelles (pour mille hab.)",
@@ -614,7 +615,7 @@ const ScoreTableHandler = (function () {
                             deptCrimeData.violences_sexuelles_p1k.toFixed(1) +
                             deptCrimeYearLabel,
                         subRow: true,
-                        link: `/crime_graph.html?type=commune&code=${item.COG}&dept=${departement}&commune=${encodeURIComponent(commune)}`,
+                        link: `/crime_graph.html?type=commune&code=${cog}&dept=${departement}&commune=${encodeURIComponent(commune)}`,
                     },
                     {
                         title: "Vols (pour mille hab.)",
@@ -639,7 +640,7 @@ const ScoreTableHandler = (function () {
                                 deptCrimeData.vols_d_accessoires_sur_vehicules_p1k
                             ).toFixed(1) + deptCrimeYearLabel,
                         subRow: true,
-                        link: `/crime_graph.html?type=commune&code=${item.COG}&dept=${departement}&commune=${encodeURIComponent(commune)}`,
+                        link: `/crime_graph.html?type=commune&code=${cog}&dept=${departement}&commune=${encodeURIComponent(commune)}`,
                     },
                     {
                         title: "Destruction et dégradations (pour mille hab.)",
@@ -652,7 +653,7 @@ const ScoreTableHandler = (function () {
                                 1,
                             ) + deptCrimeYearLabel,
                         subRow: true,
-                        link: `/crime_graph.html?type=commune&code=${item.COG}&dept=${departement}&commune=${encodeURIComponent(commune)}`,
+                        link: `/crime_graph.html?type=commune&code=${cog}&dept=${departement}&commune=${encodeURIComponent(commune)}`,
                     },
                     {
                         title: "Trafic et usage de stupéfiants (pour mille hab.)",
@@ -669,7 +670,7 @@ const ScoreTableHandler = (function () {
                                 deptCrimeData.trafic_de_stupefiants_p1k
                             ).toFixed(1) + deptCrimeYearLabel,
                         subRow: true,
-                        link: `/crime_graph.html?type=commune&code=${item.COG}&dept=${departement}&commune=${encodeURIComponent(commune)}`,
+                        link: `/crime_graph.html?type=commune&code=${cog}&dept=${departement}&commune=${encodeURIComponent(commune)}`,
                     },
                     {
                         title: "Escroqueries (pour mille hab.)",
@@ -680,7 +681,7 @@ const ScoreTableHandler = (function () {
                             deptCrimeData.escroqueries_p1k.toFixed(1) +
                             deptCrimeYearLabel,
                         subRow: true,
-                        link: `/crime_graph.html?type=commune&code=${item.COG}&dept=${departement}&commune=${encodeURIComponent(commune)}`,
+                        link: `/crime_graph.html?type=commune&code=${cog}&dept=${departement}&commune=${encodeURIComponent(commune)}`,
                     },
                     {
                         title: "Score Immigration",
@@ -697,7 +698,7 @@ const ScoreTableHandler = (function () {
                         main: `${extraEuropeenPct}%${yearLabel}`,
                         compare: `${deptExtraEuropeenPct}%${deptYearLabel}`,
                         subRow: true,
-                        link: `/names_graph.html?type=commune&code=${item.COG}&dept=${departement}`,
+                        link: `/names_graph.html?type=commune&code=${cog}&dept=${departement}`,
                     });
                 }
                 rows.push({
@@ -712,7 +713,7 @@ const ScoreTableHandler = (function () {
                         main: `${musulmanPct}%${yearLabel}`,
                         compare: `${deptMusulmanPct}%${deptYearLabel}`,
                         subRow: true,
-                        link: `/names_graph.html?type=commune&code=${item.COG}&dept=${departement}`,
+                        link: `/names_graph.html?type=commune&code=${cog}&dept=${departement}`,
                     });
                 }
                 rows.push(
@@ -743,7 +744,7 @@ const ScoreTableHandler = (function () {
                         main: `${traditionnelPct + modernePct}%${yearLabel}`,
                         compare: `${deptTraditionnelPct + deptModernePct}%${deptYearLabel}`,
                         subRow: true,
-                        link: `/names_graph.html?type=commune&code=${item.COG}&dept=${departement}`,
+                        link: `/names_graph.html?type=commune&code=${cog}&dept=${departement}`,
                     });
                 }
                 rows.push(
