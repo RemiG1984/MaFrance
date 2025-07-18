@@ -465,8 +465,12 @@ const ScoreTableHandler = (function () {
                             },
                             {
                                 title: "Quartiers Prioritaires (QPV)",
-                                main: data.total_qpv,
-                                compare: countryData.total_qpv,
+                                main:
+                                    data.total_qpv !== null &&
+                                    data.total_qpv !== undefined
+                                        ? data.total_qpv
+                                        : 0,
+                                compare: "",
                                 subRow: true,
                                 link: `/qpv.html?type=department&code=${deptCode}`,
                             },
@@ -511,10 +515,10 @@ const ScoreTableHandler = (function () {
                     resultsDiv.innerHTML = "<p>Aucune commune trouvée.</p>";
                     return;
                 }
-                
+
                 const departement = item.departement;
                 const commune = item.commune;
-                
+
                 const [
                     deptResponse,
                     deptNamesResponse,
