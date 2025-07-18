@@ -62,7 +62,7 @@ const QpvHandler = (function () {
                     throw new Error("Code commune (COG) manquant");
                 }
                 apiUrl = `/api/qpv/commune/${params.code}`;
-                pageTitle = `Quartiers "Prioritaires" (QPV) pour ${params.commune || 'Commune'} (${params.dept || params.code})`;
+                pageTitle = `Quartiers "Prioritaires" (QPV) pour la commune ${params.code}`;
             } else {
                 throw new Error("Type non supporté: " + (params.type || 'undefined'));
             }
