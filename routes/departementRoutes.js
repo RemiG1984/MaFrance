@@ -1,36 +1,40 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const db = require('../config/db');
-const { validateDepartement, validateSort, validateDirection, validatePagination } = require('../middleware/validate');
+const db = require("../config/db");
+const {
+  validateDepartement,
+  validateSort,
+  validateDirection,
+  validatePagination,
+} = require("../middleware/validate");
+
+// Centralized error handler for database queries
+const handleDbError = (err, next) => {
+  const error = new Error("Erreur lors de la requête à la base de données");
+  error.status = 500;
+  error.details = err.message;
+  return next(error);
+};
 
 // GET /api/departements
-router.get('/', (req, res) => {
-  db.all('SELECT DISTINCT departement FROM departements', [], (err, rows) => {
-    if (err) {
-      return res.status(500).json({
-        error: 'Erreur lors de la requête à la base de données',
-        details: err.message,
-      });
-    }
-    rows.sort((a, b) => {
-      const deptA = a.departement.padStart(3, '0');
-      const deptB = b.departement.padStart(3, '0');
-      return deptA.localeCompare(deptB);
-    });
+router.get("/", (req, res) => {
+  db.all("SELECT DISTINCT departement FROM departements", [], (err, rows) => {
+    if (err) return handleDbError(res, err);
+    rows.sort((a, b) =>
+      a.departement
+        .padStart(3, "0")
+        .localeCompare(b.departement.padStart(3, "0")),
+    );
     res.json(rows);
   });
 });
 
 // GET /api/departements/details
-router.get('/details', validateDepartement, (req, res) => {
+router.get("/details", validateDepartement, (req, res) => {
   const { dept } = req.query;
-  
-  // Normalize department code to match QPV data format
-  let normalizedDept = dept;
-  if (/^\d+$/.test(dept) && dept.length < 2) {
-    normalizedDept = dept.padStart(2, '0');
-  }
-  
+  const normalizedDept =
+    /^\d+$/.test(dept) && dept.length < 2 ? dept.padStart(2, "0") : dept;
+
   const sql = `
     SELECT 
       d.departement, 
@@ -59,23 +63,16 @@ router.get('/details', validateDepartement, (req, res) => {
     ) qpv_stats ON qpv_stats.insee_dep = ?
     WHERE d.departement = ?
   `;
-  
+
   db.get(sql, [normalizedDept, dept], (err, row) => {
-    if (err) {
-      return res.status(500).json({
-        error: 'Erreur lors de la requête à la base de données',
-        details: err.message,
-      });
-    }
-    if (!row) {
-      return res.status(404).json({ error: 'Département non trouvé' });
-    }
+    if (err) return handleDbError(res, err);
+    if (!row) return res.status(404).json({ error: "Département non trouvé" });
     res.json(row);
   });
 });
 
 // GET /api/departements/names
-router.get('/names', validateDepartement, (req, res) => {
+router.get("/names", validateDepartement, (req, res) => {
   const { dept } = req.query;
   db.get(
     `SELECT musulman_pct, africain_pct, asiatique_pct, traditionnel_pct, moderne_pct, annais
@@ -83,24 +80,18 @@ router.get('/names', validateDepartement, (req, res) => {
      WHERE dpt = ? AND annais = (SELECT MAX(annais) FROM department_names WHERE dpt = ?)`,
     [dept, dept],
     (err, row) => {
-      if (err) {
-        return res.status(500).json({
-          error: 'Erreur lors de la requête à la base de données',
-          details: err.message,
-        });
-      }
-      if (!row) {
+      if (err) return handleDbError(res, err);
+      if (!row)
         return res.status(404).json({
-          error: 'Données de prénoms non trouvées pour la dernière année',
+          error: "Données de prénoms non trouvées pour la dernière année",
         });
-      }
       res.json(row);
     },
   );
 });
 
 // GET /api/departements/names_history
-router.get('/names_history', validateDepartement, (req, res) => {
+router.get("/names_history", validateDepartement, (req, res) => {
   const { dept } = req.query;
   db.all(
     `SELECT musulman_pct, africain_pct, asiatique_pct, traditionnel_pct, moderne_pct, invente_pct, europeen_pct, annais
@@ -109,19 +100,14 @@ router.get('/names_history', validateDepartement, (req, res) => {
      ORDER BY annais ASC`,
     [dept],
     (err, rows) => {
-      if (err) {
-        return res.status(500).json({
-          error: 'Erreur lors de la requête à la base de données',
-          details: err.message,
-        });
-      }
+      if (err) return handleDbError(res, err);
       res.json(rows);
     },
   );
 });
 
 // GET /api/departements/crime
-router.get('/crime', validateDepartement, (req, res) => {
+router.get("/crime", validateDepartement, (req, res) => {
   const { dept } = req.query;
   db.get(
     `SELECT * 
@@ -129,24 +115,18 @@ router.get('/crime', validateDepartement, (req, res) => {
      WHERE dep = ? AND annee = (SELECT MAX(annee) FROM department_crime WHERE dep = ?)`,
     [dept, dept],
     (err, row) => {
-      if (err) {
-        return res.status(500).json({
-          error: 'Erreur lors de la requête à la base de données',
-          details: err.message,
-        });
-      }
-      if (!row) {
+      if (err) return handleDbError(res, err);
+      if (!row)
         return res.status(404).json({
-          error: 'Données criminelles non trouvées pour la dernière année',
+          error: "Données criminelles non trouvées pour la dernière année",
         });
-      }
       res.json(row);
     },
   );
 });
 
 // GET /api/departements/crime_history
-router.get('/crime_history', validateDepartement, (req, res) => {
+router.get("/crime_history", validateDepartement, (req, res) => {
   const { dept } = req.query;
   db.all(
     `SELECT *
@@ -155,32 +135,27 @@ router.get('/crime_history', validateDepartement, (req, res) => {
      ORDER BY annee ASC`,
     [dept],
     (err, rows) => {
-      if (err) {
-        return res.status(500).json({
-          error: 'Erreur lors de la requête à la base de données',
-          details: err.message,
-        });
-      }
+      if (err) return handleDbError(res, err);
       res.json(rows);
     },
   );
 });
 
 // GET /api/departements/details_all
-router.get('/details_all', [validateSort, validateDirection, validatePagination], (req, res) => {
-  const { limit = 101, offset = 0, sort = 'insecurite_score', direction = 'DESC' } = req.query;
-  const validSortColumns = [
-    'total_score', 'insecurite_score', 'immigration_score', 'islamisation_score',
-    'defrancisation_score', 'wokisme_score', 'number_of_mosques', 'mosque_p100k',
-    'musulman_pct', 'africain_pct', 'asiatique_pct', 'traditionnel_pct', 'moderne_pct',
-    'homicides_p100k', 'violences_physiques_p1k', 'violences_sexuelles_p1k', 'vols_p1k',
-    'destructions_p1k', 'stupefiants_p1k', 'escroqueries_p1k', 'extra_europeen_pct',
-    'prenom_francais_pct',
-  ];
-  const sortColumn = validSortColumns.includes(sort) ? sort : 'insecurite_score';
-  const sortDirection = direction === 'ASC' ? 'ASC' : 'DESC';
+router.get(
+  "/details_all",
+  [validateSort, validateDirection, validatePagination],
+  (req, res) => {
+    const {
+      limit = 101,
+      offset = 0,
+      sort = "insecurite_score",
+      direction = "DESC",
+    } = req.query;
+    const sortColumn = sort; // validateSort middleware ensures valid sort value
+    const sortDirection = direction; // validateDirection middleware ensures valid direction
 
-  const sql = `
+    const sql = `
     WITH LatestDepartmentNames AS (
       SELECT dpt, musulman_pct, africain_pct, asiatique_pct, traditionnel_pct, moderne_pct, annais
       FROM department_names dn
@@ -188,12 +163,24 @@ router.get('/details_all', [validateSort, validateDirection, validatePagination]
       GROUP BY dpt
     )
     SELECT 
-      d.departement, d.population, d.insecurite_score, 
-      d.immigration_score, d.islamisation_score, d.defrancisation_score, 
-      d.wokisme_score, d.number_of_mosques, d.mosque_p100k,
+      d.departement, 
+      d.population, 
+      d.insecurite_score, 
+      d.immigration_score, 
+      d.islamisation_score, 
+      d.defrancisation_score, 
+      d.wokisme_score, 
+      d.number_of_mosques, 
+      d.mosque_p100k,
+      d.total_qpv,
+      d.pop_in_qpv_pct,
       (COALESCE(d.insecurite_score, 0) + COALESCE(d.immigration_score, 0) + COALESCE(d.islamisation_score, 0) + COALESCE(d.defrancisation_score, 0) + COALESCE(d.wokisme_score, 0)) AS total_score,
-      dn.musulman_pct, dn.africain_pct, dn.asiatique_pct, dn.traditionnel_pct, 
-      dn.moderne_pct, dn.annais,
+      dn.musulman_pct, 
+      dn.africain_pct, 
+      dn.asiatique_pct, 
+      dn.traditionnel_pct, 
+      dn.moderne_pct, 
+      dn.annais,
       (COALESCE(dc.homicides_p100k, 0) + COALESCE(dc.tentatives_homicides_p100k, 0)) AS homicides_p100k,
       (COALESCE(dc.coups_et_blessures_volontaires_p1k, 0) + 
        COALESCE(dc.coups_et_blessures_volontaires_intrafamiliaux_p1k, 0) + 
@@ -222,33 +209,22 @@ router.get('/details_all', [validateSort, validateDirection, validatePagination]
     ORDER BY ${sortColumn} ${sortDirection}
     LIMIT ? OFFSET ?
   `;
-  db.all(sql, [limit, offset], (err, rows) => {
-    if (err) {
-      return res.status(500).json({
-        error: 'Erreur lors de la requête à la base de données',
-        details: err.message,
-      });
-    }
-    res.json(rows);
-  });
-});
+    db.all(sql, [limit, offset], (err, rows) => {
+      if (err) return handleDbError(res, err);
+      res.json(rows);
+    });
+  },
+);
 
 // GET /api/departements/prefet
-router.get('/prefet', validateDepartement, (req, res) => {
+router.get("/prefet", validateDepartement, (req, res) => {
   const { dept } = req.query;
   db.get(
-    'SELECT code, prenom, nom, date_poste FROM prefets WHERE code = ?',
+    "SELECT code, prenom, nom, date_poste FROM prefets WHERE code = ?",
     [dept],
     (err, row) => {
-      if (err) {
-        return res.status(500).json({
-          error: 'Erreur lors de la requête à la base de données',
-          details: err.message,
-        });
-      }
-      if (!row) {
-        return res.status(404).json({ error: 'Préfet non trouvé' });
-      }
+      if (err) return handleDbError(res, err);
+      if (!row) return res.status(404).json({ error: "Préfet non trouvé" });
       res.json(row);
     },
   );

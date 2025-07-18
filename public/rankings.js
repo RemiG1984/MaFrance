@@ -84,6 +84,8 @@ const RankingsHandler = (function () {
                         prenom_francais_pct: dept.prenom_francais_pct || 0,
                         wokisme_score: dept.wokisme_score,
                         total_score: dept.total_score,
+                        total_qpv: dept.total_qpv || 0,
+                        pop_in_qpv_pct: dept.pop_in_qpv_pct || 0,
                         rank: index + 1, // Top ranks: 1–10
                     })),
                     ...bottomData.map((dept, index) => ({
@@ -111,6 +113,8 @@ const RankingsHandler = (function () {
                         prenom_francais_pct: dept.prenom_francais_pct || 0,
                         wokisme_score: dept.wokisme_score,
                         total_score: dept.total_score,
+                        total_qpv: dept.total_qpv || 0,
+                        pop_in_qpv_pct: dept.pop_in_qpv_pct || 0,
                         rank: totalDepartments - index, // Bottom ranks: 92–101
                     })),
                 ];
@@ -185,6 +189,8 @@ const RankingsHandler = (function () {
                         prenom_francais_pct: commune.prenom_francais_pct || 0,
                         wokisme_score: commune.wokisme_score,
                         total_score: commune.total_score,
+                        total_qpv: commune.total_qpv || 0,
+                        pop_in_qpv_pct: commune.pop_in_qpv_pct || 0,
                         rank: index + 1, // Top ranks: 1–10
                     })),
                     ...bottomData.map((commune, index) => ({
@@ -209,6 +215,8 @@ const RankingsHandler = (function () {
                         prenom_francais_pct: commune.prenom_francais_pct || 0,
                         wokisme_score: commune.wokisme_score,
                         total_score: commune.total_score,
+                        total_qpv: commune.total_qpv || 0,
+                        pop_in_qpv_pct: commune.pop_in_qpv_pct || 0,
                         rank: totalCommunes - index, // Bottom ranks: e.g., 342 to 333
                     })),
                 ];
@@ -284,6 +292,8 @@ const RankingsHandler = (function () {
 
         function formatMetricValue(value, metric) {
             if (value === undefined || value === null) return "N/A";
+            if (metric === "pop_in_qpv_pct") return `${value.toFixed(1)}%`; // Format as percentage
+            if (metric === "total_qpv") return value.toString(); // Format as integer
             if (metric.includes("_pct")) return `${value}%`;
             if (metric.includes("_p100k") || metric.includes("_p1k"))
                 return value.toFixed(1);

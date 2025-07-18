@@ -53,10 +53,10 @@ const QpvHandler = (function () {
 
             if (params.type === "department") {
                 apiUrl = `/api/qpv/departement/${params.code}`;
-                pageTitle = `Quartiers Mal Peuplés (QPV) pour ${departmentNames[params.code] || params.code} (${params.code})`;
+                pageTitle = `Quartiers "Prioritaires" (QPV) pour ${departmentNames[params.code] || params.code} (${params.code})`;
             } else if (params.type === "commune") {
                 apiUrl = `/api/qpv/commune/${params.code}`;
-                pageTitle = `Quartiers Mal Peuplés (QPV) pour ${params.commune} (${params.dept})`;
+                pageTitle = `Quartiers "Prioritaires" (QPV) pour ${params.commune} (${params.dept})`;
             } else {
                 throw new Error("Type non supporté: " + params.type);
             }
@@ -97,19 +97,19 @@ const QpvHandler = (function () {
         const tableHtml = `
             <div class="data-box">
                 <div class="table-container">
-                    <table class="score-table">
+                    <table class="qpv-table">
                         <thead>
                             <tr class="score-header">
-                                <th>Nom du QPV</th>
+                                <th>Quartier QPV</th>
                                 <th>Population</th>
                                 <th>Indice Jeunesse</th>
                                 <th>Logements sociaux</th>
                                 <th>Taux logements sociaux</th>
                                 <th>Taux d'emploi</th>
                                 <th>Taux de pauvreté</th>
-                                <th>Personnes CAF</th>
-                                <th>Allocataires CAF</th>
                                 <th>RSA socle</th>
+                                <th>Allocataires CAF</th>
+                                <th>Couverture CAF</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -128,9 +128,9 @@ const QpvHandler = (function () {
                                     <td class="score-main">${formatPercentage(qpv.taux_logements_sociaux)}</td>
                                     <td class="score-main">${formatPercentage(qpv.taux_d_emploi)}</td>
                                     <td class="score-main">${formatPercentage(qpv.taux_pauvrete_60)}</td>
-                                    <td class="score-main">${formatNumber(qpv.personnes_couvertes_CAF)}</td>
-                                    <td class="score-main">${formatNumber(qpv.allocataires_CAF)}</td>
                                     <td class="score-main">${formatNumber(qpv.RSA_socle)}</td>
+                                    <td class="score-main">${formatNumber(qpv.allocataires_CAF)}</td>
+                                    <td class="score-main">${formatNumber(qpv.personnes_couvertes_CAF)}</td>
                                 </tr>
                             `,
                                 )

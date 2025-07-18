@@ -170,7 +170,7 @@ const ScoreTableHandler = (function () {
                             main: data.wokisme_score.toLocaleString("fr-FR"),
                         },
                         {
-                            title: "Nombre de quartiers mal peuplés (QPV)",
+                            title: "Quartiers Prioritaires (QPV)",
                             main: data.total_qpv,
                             subRow: true,
                         },
@@ -464,7 +464,7 @@ const ScoreTableHandler = (function () {
                                     ),
                             },
                             {
-                                title: "Nombre de quartiers mal peuplés (QPV)",
+                                title: "Quartiers Prioritaires (QPV)",
                                 main: data.total_qpv,
                                 compare: countryData.total_qpv,
                                 subRow: true,
@@ -472,12 +472,18 @@ const ScoreTableHandler = (function () {
                             },
                             {
                                 title: "% de population dans les QPV",
-                                main: data.pop_in_qpv_pct !== null && data.pop_in_qpv_pct !== undefined 
-                                    ? data.pop_in_qpv_pct.toFixed(1) + "%" 
-                                    : "0.0%",
-                                compare: countryData.pop_in_qpv_pct !== null && countryData.pop_in_qpv_pct !== undefined
-                                    ? countryData.pop_in_qpv_pct.toFixed(1) + "%"
-                                    : "0.0%",
+                                main:
+                                    data.pop_in_qpv_pct !== null &&
+                                    data.pop_in_qpv_pct !== undefined
+                                        ? data.pop_in_qpv_pct.toFixed(1) + "%"
+                                        : "0.0%",
+                                compare:
+                                    countryData.pop_in_qpv_pct !== null &&
+                                    countryData.pop_in_qpv_pct !== undefined
+                                        ? countryData.pop_in_qpv_pct.toFixed(
+                                              1,
+                                          ) + "%"
+                                        : "0.0%",
                                 subRow: true,
                             },
                         ],
@@ -747,7 +753,7 @@ const ScoreTableHandler = (function () {
                         compare: deptData.wokisme_score.toLocaleString("fr-FR"),
                     },
                     {
-                        title: "Nombre de quartiers mal peuplés (QPV)",
+                        title: "Quartiers Prioritaires (QPV)",
                         main:
                             item.total_qpv !== null &&
                             item.total_qpv !== undefined

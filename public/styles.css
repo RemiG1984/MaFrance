@@ -259,7 +259,7 @@ label {
     padding: 12px 15px;
     text-align: left;
     border-bottom: 1px solid #ececec;
-    white-space: nowrap;
+    white-space: normal;
 }
 
 .qpv-table th {
@@ -275,10 +275,9 @@ label {
 .qpv-table td:first-child {
     position: sticky;
     left: 0;
-    background-color: inherit;
+    background-color: #fff;
     z-index: 3;
-    min-width: 250px;
-    width: 250px;
+    width: 30%; 
 }
 
 .qpv-table th:first-child {
@@ -351,5 +350,9 @@ label {
     #results .score-header th,
     #results .score-row td {
         padding: 6px 8px;
+    }
+
+    .qpv-table {
+        font-size: 12px; /* Table-wide font size for small screens */
     }
 }

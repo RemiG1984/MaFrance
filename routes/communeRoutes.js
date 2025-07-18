@@ -12,11 +12,19 @@ const {
   validateDeptAndCOG,
 } = require("../middleware/validate");
 
+// Centralized error handler for database queries
+const handleDbError = (err, next) => {
+  const error = new Error("Erreur lors de la requête à la base de données");
+  error.status = 500;
+  error.details = err.message;
+  return next(error);
+};
+
 // GET /api/communes
 router.get("/", [validateDepartement, validateSearchQuery], (req, res) => {
   const { dept, q = "" } = req.query;
 
-  if (!q || q.length < 2) {
+  if (!q) {
     db.all(
       `SELECT DISTINCT commune, COG 
        FROM locations 
@@ -25,12 +33,7 @@ router.get("/", [validateDepartement, validateSearchQuery], (req, res) => {
        LIMIT 10`,
       [dept],
       (err, rows) => {
-        if (err) {
-          return res.status(500).json({
-            error: "Erreur lors de la requête à la base de données",
-            details: err.message,
-          });
-        }
+        if (err) return handleDbError(res, err);
         res.json(rows);
       },
     );
@@ -48,38 +51,44 @@ router.get("/", [validateDepartement, validateSearchQuery], (req, res) => {
      WHERE departement = ?`,
     [dept],
     (err, rows) => {
-      if (err) {
-        return res.status(500).json({
-          error: "Erreur lors de la requête à la base de données",
-          details: err.message,
-        });
-      }
+      if (err) return handleDbError(res, err);
 
-      const filteredCommunes = rows.filter((row) => {
-        const normalizedCommune = row.commune
-          .toLowerCase()
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "");
-        return normalizedCommune.includes(normalizedQuery);
-      });
+      const filteredCommunes = rows
+        .filter((row) =>
+          row.commune
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .includes(normalizedQuery),
+        )
+        .sort((a, b) => {
+          const normA = a.commune
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "");
+          const normB = b.commune
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "");
 
-      filteredCommunes.sort((a, b) => {
-        const normA = a.commune
-          .toLowerCase()
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "");
-        const normB = b.commune
-          .toLowerCase()
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "");
-        const aStartsWith = normA.startsWith(normalizedQuery) ? -1 : 0;
-        const bStartsWith = normB.startsWith(normalizedQuery) ? -1 : 0;
-        return aStartsWith !== bStartsWith
-          ? aStartsWith - bStartsWith
-          : a.commune.localeCompare(b.commune);
-      });
+          // 1. Prioritize exact matches
+          const isExactA = normA === normalizedQuery;
+          const isExactB = normB === normalizedQuery;
+          if (isExactA && !isExactB) return -1;
+          if (!isExactA && isExactB) return 1;
 
-      res.json(filteredCommunes.slice(0, 5));
+          // 2. Prioritize startsWith
+          const startsA = normA.startsWith(normalizedQuery);
+          const startsB = normB.startsWith(normalizedQuery);
+          if (startsA && !startsB) return -1;
+          if (!startsA && startsB) return 1;
+
+          // 3. Sort alphabetically
+          return a.commune.localeCompare(b.commune);
+        })
+        .slice(0, 5);
+
+      res.json(filteredCommunes);
     },
   );
 });
@@ -87,15 +96,10 @@ router.get("/", [validateDepartement, validateSearchQuery], (req, res) => {
 // GET /api/communes/all
 router.get("/all", (req, res) => {
   db.all(
-    "SELECT COG, departement, commune, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k FROM locations",
+    "SELECT COG, departement, commune, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct FROM locations",
     [],
     (err, rows) => {
-      if (err) {
-        return res.status(500).json({
-          error: "Erreur lors de la requête à la base de données",
-          details: err.message,
-        });
-      }
+      if (err) return handleDbError(res, err);
       res.json(rows);
     },
   );
@@ -120,35 +124,7 @@ router.get(
       direction = "DESC",
       population_range = "",
     } = req.query;
-
-    const validSortColumns = [
-      "total_score",
-      "population",
-      "insecurite_score",
-      "immigration_score",
-      "islamisation_score",
-      "defrancisation_score",
-      "wokisme_score",
-      "number_of_mosques",
-      "mosque_p100k",
-      "musulman_pct",
-      "africain_pct",
-      "asiatique_pct",
-      "traditionnel_pct",
-      "moderne_pct",
-      "violences_physiques_p1k",
-      "violences_sexuelles_p1k",
-      "vols_p1k",
-      "destructions_p1k",
-      "stupefiants_p1k",
-      "escroqueries_p1k",
-      "extra_europeen_pct",
-      "prenom_francais_pct",
-    ];
-    const sortColumn = validSortColumns.includes(sort)
-      ? sort
-      : "insecurite_score";
-    const sortDirection = direction === "ASC" ? "ASC" : "DESC";
+    const sortDirection = direction; // Validated by middleware
 
     let populationFilter = "";
     let queryParams = [dept, dept, limit, offset];
@@ -167,39 +143,6 @@ router.get(
       }
     }
 
-    let sortExpression;
-    switch (sortColumn) {
-      case "total_score":
-        sortExpression = `(COALESCE(l.insecurite_score, 0) + COALESCE(l.immigration_score, 0) + COALESCE(l.islamisation_score, 0) + COALESCE(l.defrancisation_score, 0) + COALESCE(l.wokisme_score, 0))`;
-        break;
-      case "violences_physiques_p1k":
-        sortExpression = `(COALESCE(cc.coups_et_blessures_volontaires_p1k, 0) + COALESCE(cc.coups_et_blessures_volontaires_intrafamiliaux_p1k, 0) + COALESCE(cc.autres_coups_et_blessures_volontaires_p1k, 0) + COALESCE(cc.vols_avec_armes_p1k, 0) + COALESCE(cc.vols_violents_sans_arme_p1k, 0))`;
-        break;
-      case "violences_sexuelles_p1k":
-        sortExpression = `COALESCE(cc.violences_sexuelles_p1k, 0)`;
-        break;
-      case "vols_p1k":
-        sortExpression = `(COALESCE(cc.vols_avec_armes_p1k, 0) + COALESCE(cc.vols_violents_sans_arme_p1k, 0) + COALESCE(cc.vols_sans_violence_contre_des_personnes_p1k, 0) + COALESCE(cc.cambriolages_de_logement_p1k, 0) + COALESCE(cc.vols_de_vehicules_p1k, 0) + COALESCE(cc.vols_dans_les_vehicules_p1k, 0) + COALESCE(cc.vols_d_accessoires_sur_vehicules_p1k, 0))`;
-        break;
-      case "destructions_p1k":
-        sortExpression = `COALESCE(cc.destructions_et_degradations_volontaires_p1k, 0)`;
-        break;
-      case "stupefiants_p1k":
-        sortExpression = `(COALESCE(cc.usage_de_stupefiants_p1k, 0) + COALESCE(cc.usage_de_stupefiants_afd_p1k, 0) + COALESCE(cc.trafic_de_stupefiants_p1k, 0))`;
-        break;
-      case "escroqueries_p1k":
-        sortExpression = `COALESCE(cc.escroqueries_p1k, 0)`;
-        break;
-      case "extra_europeen_pct":
-        sortExpression = `(COALESCE(cn.musulman_pct, 0) + COALESCE(cn.africain_pct, 0) + COALESCE(cn.asiatique_pct, 0))`;
-        break;
-      case "prenom_francais_pct":
-        sortExpression = `(COALESCE(cn.traditionnel_pct, 0) + COALESCE(cn.moderne_pct, 0))`;
-        break;
-      default:
-        sortExpression = `l.${sortColumn}`;
-    }
-
     const sql = `
     WITH LatestCommuneNames AS (
       SELECT COG, musulman_pct, africain_pct, asiatique_pct, traditionnel_pct, moderne_pct, annais
@@ -208,12 +151,26 @@ router.get(
       GROUP BY COG
     )
     SELECT 
-      l.COG, l.departement, l.commune, l.population, l.insecurite_score, 
-      l.immigration_score, l.islamisation_score, l.defrancisation_score, 
-      l.wokisme_score, l.number_of_mosques, l.mosque_p100k,
+      l.COG, 
+      l.departement, 
+      l.commune, 
+      l.population, 
+      l.insecurite_score, 
+      l.immigration_score, 
+      l.islamisation_score, 
+      l.defrancisation_score, 
+      l.wokisme_score, 
+      l.number_of_mosques, 
+      l.mosque_p100k,
+      l.total_qpv,
+      l.pop_in_qpv_pct,
       (COALESCE(l.insecurite_score, 0) + COALESCE(l.immigration_score, 0) + COALESCE(l.islamisation_score, 0) + COALESCE(l.defrancisation_score, 0) + COALESCE(l.wokisme_score, 0)) AS total_score,
-      cn.musulman_pct, cn.africain_pct, cn.asiatique_pct, cn.traditionnel_pct, 
-      cn.moderne_pct, cn.annais,
+      cn.musulman_pct, 
+      cn.africain_pct, 
+      cn.asiatique_pct, 
+      cn.traditionnel_pct, 
+      cn.moderne_pct, 
+      cn.annais,
       (COALESCE(cc.coups_et_blessures_volontaires_p1k, 0) + 
        COALESCE(cc.coups_et_blessures_volontaires_intrafamiliaux_p1k, 0) + 
        COALESCE(cc.autres_coups_et_blessures_volontaires_p1k, 0) + 
@@ -240,7 +197,7 @@ router.get(
       AND cc.annee = (SELECT MAX(annee) FROM commune_crime WHERE COG = l.COG)
     WHERE l.departement = ? OR ? = ''
     ${populationFilter}
-    ORDER BY ${sortExpression} ${sortDirection}, l.COG ASC
+    ORDER BY ${sort} ${sortDirection}, l.COG ASC
     LIMIT ? OFFSET ?
   `;
 
@@ -252,19 +209,9 @@ router.get(
   `;
 
     db.all(sql, queryParams, (err, rows) => {
-      if (err) {
-        return res.status(500).json({
-          error: "Erreur lors de la requête à la base de données",
-          details: err.message,
-        });
-      }
+      if (err) return handleDbError(res, err);
       db.get(countSql, [dept, dept], (countErr, countRow) => {
-        if (countErr) {
-          return res.status(500).json({
-            error: "Erreur lors de la requête de comptage",
-            details: countErr.message,
-          });
-        }
+        if (countErr) return handleDbError(res, countErr);
         res.json({
           data: rows,
           total_count: countRow.total_count,
@@ -276,24 +223,18 @@ router.get(
 
 // GET /api/communes/names
 router.get("/names", validateDeptAndCOG, (req, res) => {
-  const { dept, cog } = req.query;
+  const { cog } = req.query;
   db.get(
     `SELECT musulman_pct, africain_pct, asiatique_pct, traditionnel_pct, moderne_pct, annais
      FROM commune_names 
      WHERE COG = ? AND annais = (SELECT MAX(annais) FROM commune_names WHERE COG = ?)`,
     [cog, cog],
     (err, row) => {
-      if (err) {
-        return res.status(500).json({
-          error: "Erreur lors de la requête à la base de données",
-          details: err.message,
-        });
-      }
-      if (!row) {
+      if (err) return handleDbError(res, err);
+      if (!row)
         return res.status(404).json({
           error: "Données de prénoms non trouvées pour la dernière année",
         });
-      }
       res.json(row);
     },
   );
@@ -309,12 +250,7 @@ router.get("/names_history", validateDeptAndCOG, (req, res) => {
      ORDER BY annais ASC`,
     [cog],
     (err, rows) => {
-      if (err) {
-        return res.status(500).json({
-          error: "Erreur lors de la requête à la base de données",
-          details: err.message,
-        });
-      }
+      if (err) return handleDbError(res, err);
       res.json(rows);
     },
   );
@@ -329,17 +265,11 @@ router.get("/crime", validateDeptAndCOG, (req, res) => {
      WHERE COG = ? AND annee = (SELECT MAX(annee) FROM commune_crime WHERE COG = ?)`,
     [cog, cog],
     (err, row) => {
-      if (err) {
-        return res.status(500).json({
-          error: "Erreur lors de la requête à la base de données",
-          details: err.message,
-        });
-      }
-      if (!row) {
+      if (err) return handleDbError(res, err);
+      if (!row)
         return res.status(404).json({
           error: "Données criminelles non trouvées pour la dernière année",
         });
-      }
       res.json(row);
     },
   );
@@ -355,16 +285,39 @@ router.get("/crime_history", validateDeptAndCOG, (req, res) => {
      ORDER BY annee ASC`,
     [cog],
     (err, rows) => {
-      if (err) {
-        return res.status(500).json({
-          error: "Erreur lors de la requête à la base de données",
-          details: err.message,
-        });
-      }
+      if (err) return handleDbError(res, err);
       res.json(rows);
     },
   );
 });
+
+const nuanceMap = {
+  LEXG: "Liste d'extrême gauche",
+  LCOM: "Liste Parti Communiste",
+  LFI: "Liste France Insoumise",
+  LSOC: "Liste Socialiste",
+  LRDG: "Liste du parti radical de gauche",
+  LDVG: "Liste divers gauche",
+  LUG: "Liste d'Union de la gauche",
+  LVEC: "liste Europe Ecologie",
+  LECO: "autre liste écologiste",
+  LDIV: "Liste divers",
+  LREG: "Liste régionaliste",
+  LGJ: "Liste gilets jaunes",
+  LREM: "Liste La République en marche",
+  LMDM: "Liste Modem",
+  LUDI: "Liste UDI",
+  LUC: "Liste union du centre",
+  LDVC: "Liste divers centre",
+  LLR: "Liste Les Républicains",
+  LUD: "Liste union de la droite",
+  LDVD: "Liste divers droite",
+  LDLF: "Liste Debout la France",
+  LRN: "Liste Rassemblement national",
+  LEXD: "Liste d'extrême droite",
+  LCMD: "Liste présentée par le MoDem",
+  NC: "",
+};
 
 // GET /api/communes/maire
 router.get("/maire", validateCOG, (req, res) => {
@@ -373,16 +326,17 @@ router.get("/maire", validateCOG, (req, res) => {
     "SELECT cog, commune, prenom, nom, sexe, date_nais, date_mandat, famille_nuance, nuance_politique FROM maires WHERE cog = ?",
     [cog],
     (err, row) => {
-      if (err) {
-        return res.status(500).json({
-          error: "Erreur lors de la requête à la base de données",
-          details: err.message,
-        });
-      }
-      if (!row) {
-        return res.status(404).json({ error: "Maire non trouvé" });
-      }
-      res.json(row);
+      if (err) return handleDbError(res, err);
+      if (!row) return res.status(404).json({ error: "Maire non trouvé" });
+
+      // Map the nuance_politique code to its full description
+      const response = {
+        ...row,
+        nuance_politique:
+          nuanceMap[row.nuance_politique] || row.nuance_politique,
+      };
+
+      res.json(response);
     },
   );
 });

@@ -60,7 +60,7 @@ function validateOptionalCOG(req, res, next) {
   next();
 }
 
-// Validation for sort parameter
+// Validation for sort parameter in rankings
 const validateSort = [
   query("sort")
     .optional()
@@ -88,6 +88,8 @@ const validateSort = [
       "escroqueries_p1k",
       "extra_europeen_pct",
       "prenom_francais_pct",
+      "total_qpv",
+      "pop_in_qpv_pct",
     ])
     .withMessage("Paramètre de tri invalide"),
   handleValidationErrors,
