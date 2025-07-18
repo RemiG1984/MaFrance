@@ -499,43 +499,43 @@ const ScoreTableHandler = (function () {
             }
         }
 
-        async function showCommuneDetails(departement, commune) {
+        async function showCommuneDetails(cog) {
             try {
+                // First get commune details from COG
+                const communeDetailsResponse = await fetch(`/api/communes/details?cog=${encodeURIComponent(cog)}`);
+                if (!communeDetailsResponse.ok) {
+                    throw new Error(`Erreur lors de la récupération de la commune: ${communeDetailsResponse.statusText}`);
+                }
+                const item = await communeDetailsResponse.json();
+                if (!item) {
+                    resultsDiv.innerHTML = "<p>Aucune commune trouvée.</p>";
+                    return;
+                }
+                
+                const departement = item.departement;
+                const commune = item.commune;
+                
                 const [
-                    communeResponse,
                     deptResponse,
                     deptNamesResponse,
                     deptCrimeResponse,
                 ] = await Promise.all([
-                    fetch(
-                        `/api/search?dept=${departement}&q=${encodeURIComponent(commune)}`,
-                    ),
                     fetch(`/api/departements/details?dept=${departement}`),
                     fetch(`/api/departements/names?dept=${departement}`),
                     fetch(`/api/departements/crime?dept=${departement}`),
                 ]);
-                if (!communeResponse.ok || !deptResponse.ok) {
+                if (!deptResponse.ok) {
                     throw new Error(
-                        `Erreur lors de la récupération: commune ${communeResponse.statusText}, département ${deptResponse.statusText}`,
+                        `Erreur lors de la récupération du département: ${deptResponse.statusText}`,
                     );
                 }
-                const data = await communeResponse.json();
                 const deptData = await deptResponse.json();
-                if (data.length === 0) {
-                    resultsDiv.innerHTML = "<p>Aucune commune trouvée.</p>";
-                    return;
-                }
-                const item = data[0];
-                if (!item.COG) {
-                    throw new Error("Code COG manquant pour la commune");
-                }
-                const cog = item.COG;
                 const namesResponse = await fetch(
-                    `/api/communes/names?dept=${departement}&cog=${encodeURIComponent(item.COG)}`,
+                    `/api/communes/names?dept=${departement}&cog=${encodeURIComponent(cog)}`,
                 );
                 const namesData = await namesResponse.json();
                 const crimeResponse = await fetch(
-                    `/api/communes/crime?dept=${departement}&cog=${encodeURIComponent(item.COG)}`,
+                    `/api/communes/crime?dept=${departement}&cog=${encodeURIComponent(cog)}`,
                 );
                 const crimeData = await crimeResponse.json();
                 const deptNamesData = await deptNamesResponse.json();
@@ -785,7 +785,7 @@ const ScoreTableHandler = (function () {
                 );
 
                 renderScoreTable(
-                    `${item.departement} - ${item.commune}`,
+                    `${departement} - ${commune}`,
                     rows,
                     departmentNames[departement] || departement,
                 );
