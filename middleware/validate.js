@@ -12,10 +12,16 @@ const handleValidationErrors = (req, res, next) => {
 // Validation for French department codes (e.g., 01-95, 2A, 2B, 971-976)
 const validateDepartement = [
   query("dept")
-    .notEmpty()
-    .withMessage("Département requis")
-    .matches(/^(0[1-9]|[1-8][0-9]|9[0-5]|2[AB]|97[1-6])$/)
-    .withMessage("Code département invalide"),
+    .optional() // Allow dept to be empty or undefined
+    .custom((value) => {
+      if (value === "" || value === undefined) {
+        return true; // Allow empty string for national commune rankings
+      }
+      if (!/^(0[1-9]|[1-8][0-9]|9[0-5]|2[AB]|97[1-6])$/.test(value)) {
+        throw new Error("Code département invalide");
+      }
+      return true;
+    }),
   handleValidationErrors,
 ];
 
@@ -118,8 +124,8 @@ const validateDirection = [
 const validatePagination = [
   query("limit")
     .optional()
-    .isInt({ min: 1, max: 1000 })
-    .withMessage("Limit doit être un entier entre 1 et 1000")
+    .isInt({ min: 1, max: 100 })
+    .withMessage("Limit doit être un entier entre 1 et 100")
     .toInt(),
   query("offset")
     .optional()

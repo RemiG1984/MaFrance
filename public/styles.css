@@ -5,8 +5,9 @@ body {
     background-color: #f4f6f8;
 }
 
-#departementSelect, #metricSelect {
+#scopeSelect, #departementSelect, #metricSelect {
     width: 100%;
+    max-width: 400px;
     padding: 8px;
     font-size: 14px;
     border-radius: 6px;
@@ -17,11 +18,24 @@ body {
 }
 
 #communeInput {
-    padding: 8px;
     width: 100%;
+    max-width: 400px;
+    padding: 8px;
     font-size: 14px;
     border: 1px solid #ccc;
     border-radius: 6px;
+    margin: 8px 0;
+    background-color: #fff;
+    box-sizing: border-box;
+}
+
+#lieuxSelect {
+    width: 100%;
+    max-width: 400px;
+    padding: 8px;
+    font-size: 14px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
     margin: 8px 0;
     background-color: #fff;
     box-sizing: border-box;
@@ -55,10 +69,10 @@ body {
 
 #results .score-header th {
     padding: 10px 12px;
-    position: sticky;
-    top: 0;
-    background-color: #e9ecef;
-    z-index: 2;
+}
+
+#results .score-header th:nth-child(2) {
+    text-align: left;
 }
 
 #results .row-title {
@@ -80,8 +94,6 @@ body {
     width: 30%;
 }
 
-#ソーシャルメディアのコメントは許可されていません。
-
 #results .score-compare {
     text-align: right;
     color: #6c757d;
@@ -93,12 +105,8 @@ body {
     border-bottom: 1px solid #ececec;
 }
 
-#results .score-row.top-rank {
-    background-color: #e6ffed;
-}
-
-#results .score-row.bottom-rank {
-    background-color: #ffe6e6;
+#results .score-row td:nth-child(2) {
+    text-align: left;
 }
 
 #results .score-row:nth-child(even) {
@@ -319,13 +327,16 @@ label {
 }
 
 #results .score-table th:nth-child(3),
-#results .score-table td:nth-child(3) {
+#results .score-table td:nth-child(3),
+#results .score-table th:nth-child(4),
+#results impon .score-table td:nth-child(4) {
     text-align: right;
 }
 
 /* Styles for the tweaking box */
 #tweakingBox {
     margin: 0;
+    position: relative;
 }
 
 .tweaking-box {
@@ -333,10 +344,33 @@ label {
     padding: 10px;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 400px;
+    width: 400px;
     text-align: left;
     box-sizing: border-box;
+    position: absolute;
+    z-index: 100;
+    top: 30px;
+    right: 0;
+    display: none;
+}
+
+.tweaking-box.active {
+    display: block;
+}
+
+.tweaking-toggle {
+    padding: 8px 14px;
+    font-size: 13px;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.tweaking-toggle:hover {
+    background-color: #0056b3;
 }
 
 .tweaking-box h3 {
@@ -345,36 +379,35 @@ label {
     color: #343a40;
 }
 
+.tweaking-box .population-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.tweaking-box .population-controls div {
+    flex: 1;
+}
+
 .tweaking-box label {
-    display: inline-block;
+    display: block;
     margin-bottom: 4px;
     font-size: 13px;
 }
 
-.tweaking-box .pop-select-container {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    margin-bottom: 8px;
-}
-
-.tweaking-box .pop-select-container select {
-    width: 100px;
+.tweaking-box select,
+.tweaking-box input[type="number"] {
+    width: 100%;
     padding: 6px;
     font-size: 13px;
     border-radius: 6px;
     border: 1px solid #ccc;
+    margin-bottom: 8px;
     box-sizing: border-box;
 }
 
 .tweaking-box input[type="number"] {
     width: 80px;
-    padding: 6px;
-    font-size: 13px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    margin-bottom: 8px;
-    box-sizing: border-box;
 }
 
 .tweaking-box button {
@@ -397,7 +430,6 @@ label {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    proportionate: true;
     margin-bottom: 15px;
     max-width: 800px;
     margin-left: auto;
@@ -410,22 +442,6 @@ label {
     max-width: 400px;
     display: flex;
     flex-direction: column;
-}
-
-/* Loading spinner */
-.loading-spinner {
-    border: 4px solid #e9ecef;
-    border-top: 4px solid #007bff;
-    border-radius: 50%;
-    width: 24px;
-    height: 24px;
-    animation: spin 1s linear infinite;
-    margin: 20px auto;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
 }
 
 @media (max-width: 768px) {
@@ -443,8 +459,14 @@ label {
         margin-top: 10px;
     }
 
-    #departementSelect, #metricSelect, #communeInput {
+    .tweaking-box {
+        position: static;
         width: 100%;
+    }
+
+    #scopeSelect, #departementSelect, #metricSelect, #communeInput, #lieuxSelect {
+        width: 100%;
+        max-width: 100%;
         font-size: 13px;
         padding: 6px;
     }
@@ -491,30 +513,11 @@ label {
     }
 
     .tweaking-box input[type="number"] {
-        width: 60px;
+        width: 40px;
     }
 
-    .tweaking-box .pop-select-container select {
-        width: 80px;
-    }
-}
-
-@media (max-width: 600px) {
-    .filter-container {
+    .tweaking-box .population-controls {
         flex-direction: column;
-        gap: 10px;
-    }
-
-    #results .score-table {
-        font-size: 11px;
-    }
-
-    #results .score-header th,
-    #results .score-row td {
-        padding: 5px 6px;
-    }
-
-    .tweaking-box .pop-select-container select {
-        width: 70px;
+        gap: 5px;
     }
 }

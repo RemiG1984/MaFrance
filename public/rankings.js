@@ -1,26 +1,32 @@
 const RankingsHandler = (function () {
+    // Use shared department names
     const departmentNames = DepartmentNames;
 
-    return function (departementSelect, metricSelect, resultsDiv) {
+    return function (scopeSelect, departementSelect, metricSelect, resultsDiv) {
+        // Populate existing tweaking box
         const tweakingBox = document.getElementById("tweakingBox");
         tweakingBox.innerHTML = `
+            <button class="tweaking-toggle">Paramètres</button>
             <div class="tweaking-box">
-                <h3>Ajuster le classement</h3>
-                <div class="pop-select-container">
-                    <label for="popLower">Pop. min :</label>
-                    <select id="popLower">
-                        <option value="">Aucune limite</option>
-                        <option value="1000">1k</option>
-                        <option value="10000">10k</option>
-                        <option value="100000">100k</option>
-                    </select>
-                    <label for="popUpper">Pop. max :</label>
-                    <select id="popUpper">
-                        <option value="">Aucune limite</option>
-                        <option value="1000">1k</option>
-                        <option value="10000">10k</option>
-                        <option value="100000">100k</option>
-                    </select>
+                <div class="population-controls">
+                    <div>
+                        <label for="popLower">Pop min:</label>
+                        <select id="popLower">
+                            <option value="">Aucune limite</option>
+                            <option value="1000">1k</option>
+                            <option value="10000">10k</option>
+                            <option value="100000">100k</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="popUpper">Pop max:</label>
+                        <select id="popUpper">
+                            <option value="">Aucune limite</option>
+                            <option value="1000">1k</option>
+                            <option value="10000">10k</option>
+                            <option value="100000">100k</option>
+                        </select>
+                    </div>
                 </div>
                 <label for="topLimit">Nombre de résultats (Top/Bottom) :</label>
                 <input type="number" id="topLimit" value="10" min="1" max="100">
@@ -28,18 +34,45 @@ const RankingsHandler = (function () {
             </div>
         `;
 
+        // Get tweaking input elements
         const popLowerInput = document.getElementById("popLower");
         const popUpperInput = document.getElementById("popUpper");
         const topLimitInput = document.getElementById("topLimit");
         const applyButton = document.getElementById("applyFilters");
+        const tweakingToggle = document.querySelector(".tweaking-toggle");
+        const tweakingBoxContent = document.querySelector(".tweaking-box");
+        const departementWrapper =
+            document.getElementById("departementWrapper");
+
+        // Toggle tweaking box visibility
+        tweakingToggle.addEventListener("click", () => {
+            tweakingBoxContent.classList.toggle("active");
+        });
+
+        // Toggle department dropdown visibility based on scope
+        function toggleDepartementVisibility() {
+            if (scopeSelect.value === "communes_dept") {
+                departementWrapper.style.display = "block";
+            } else {
+                departementWrapper.style.display = "none";
+                departementSelect.value = ""; // Reset department selection
+            }
+        }
+
+        // Add event listener for scope selection
+        scopeSelect.addEventListener("change", () => {
+            toggleDepartementVisibility();
+            updateRankings();
+        });
 
         async function loadDepartements() {
             try {
                 const response = await fetch("/api/departements");
-                if (!response.ok)
+                if (!response.ok) {
                     throw new Error(
                         "Erreur lors du chargement des départements",
                     );
+                }
                 const departements = await response.json();
                 departementSelect.innerHTML =
                     '<option value="">-- Tous les départements --</option>';
@@ -65,15 +98,16 @@ const RankingsHandler = (function () {
         }
 
         async function fetchDepartmentRankings(metric, limit) {
-            resultsDiv.innerHTML = '<div class="loading-spinner"></div>';
             try {
                 const topResponse = await fetch(
                     `/api/rankings/departements?limit=${limit}&sort=${metric}&direction=DESC`,
                 );
                 if (!topResponse.ok) {
-                    const errorText = await topResponse.text();
+                    const errorData = await topResponse.json();
                     throw new Error(
-                        `Erreur lors de la récupération des données départementales (top): ${errorText}`,
+                        errorData.errors
+                            ? errorData.errors.map((e) => e.msg).join("; ")
+                            : "Erreur serveur",
                     );
                 }
                 const topResult = await topResponse.json();
@@ -84,9 +118,11 @@ const RankingsHandler = (function () {
                     `/api/rankings/departements?limit=${limit}&sort=${metric}&direction=ASC`,
                 );
                 if (!bottomResponse.ok) {
-                    const errorText = await bottomResponse.text();
+                    const errorData = await bottomResponse.json();
                     throw new Error(
-                        `Erreur lors de la récupération des données départementales (bottom): ${errorText}`,
+                        errorData.errors
+                            ? errorData.errors.map((e) => e.msg).join("; ")
+                            : "Erreur serveur",
                     );
                 }
                 const bottomResult = await bottomResponse.json();
@@ -164,7 +200,8 @@ const RankingsHandler = (function () {
                             1,
                     }));
 
-                return [...topRankings, ...bottomRankings];
+                const rankings = [...topRankings, ...bottomRankings];
+                return rankings;
             } catch (error) {
                 resultsDiv.innerHTML = `<p>Erreur : ${error.message}</p>`;
                 console.error(
@@ -181,36 +218,54 @@ const RankingsHandler = (function () {
             limit,
             populationRange,
         ) {
-            resultsDiv.innerHTML = '<div class="loading-spinner"></div>';
             try {
                 console.log(
-                    "fetchCommuneRankings: populationRange =",
-                    JSON.stringify(populationRange),
+                    "fetchCommuneRankings: deptCode =",
+                    deptCode,
+                    "metric =",
+                    metric,
+                    "limit =",
+                    limit,
+                    "populationRange =",
+                    populationRange,
                 );
                 const popFilter = populationRange
                     ? `&population_range=${encodeURIComponent(populationRange)}`
                     : "";
-                const baseUrl = deptCode
-                    ? `/api/rankings/communes?dept=${deptCode}&limit=${limit}&sort=${metric}${popFilter}`
-                    : `/api/rankings/communes?limit=${limit}&sort=${metric}${popFilter}`;
-                console.log("Request URL:", `${baseUrl}&direction=DESC`);
+                const queryParams = [];
+                if (deptCode) queryParams.push(`dept=${deptCode}`);
+                queryParams.push(`limit=${limit}`);
+                queryParams.push(`sort=${metric}`);
+                if (popFilter) queryParams.push(popFilter.slice(1)); // Remove leading &
+                const queryString = queryParams.join("&");
+                const baseUrl = `/api/rankings/communes?${queryString}`;
+
+                console.log("Request URL (top):", `${baseUrl}&direction=DESC`);
 
                 const topResponse = await fetch(`${baseUrl}&direction=DESC`);
                 if (!topResponse.ok) {
-                    const errorText = await topResponse.text();
+                    const errorData = await topResponse.json();
                     throw new Error(
-                        `Erreur lors de la récupération des données des communes (top): ${errorText}`,
+                        errorData.errors
+                            ? errorData.errors.map((e) => e.msg).join("; ")
+                            : "Erreur serveur",
                     );
                 }
                 const topResult = await topResponse.json();
                 const topData = topResult.data;
                 const totalCommunes = topResult.total_count;
 
+                console.log(
+                    "Request URL (bottom):",
+                    `${baseUrl}&direction=ASC`,
+                );
                 const bottomResponse = await fetch(`${baseUrl}&direction=ASC`);
                 if (!bottomResponse.ok) {
-                    const errorText = await bottomResponse.text();
+                    const errorData = await bottomResponse.json();
                     throw new Error(
-                        `Erreur lors de la récupération des données des communes (bottom): ${errorText}`,
+                        errorData.errors
+                            ? errorData.errors.map((e) => e.msg).join("; ")
+                            : "Erreur serveur",
                     );
                 }
                 const bottomResult = await bottomResponse.json();
@@ -293,7 +348,8 @@ const RankingsHandler = (function () {
                             1,
                     }));
 
-                return [...topRankings, ...bottomRankings];
+                const rankings = [...topRankings, ...bottomRankings];
+                return rankings;
             } catch (error) {
                 resultsDiv.innerHTML = `<p>Erreur : ${error.message}</p>`;
                 console.error("Erreur chargement classements communes:", error);
@@ -320,22 +376,23 @@ const RankingsHandler = (function () {
             resultsDiv.innerHTML = `
                 <div class="data-box">
                     <h2>Classement des ${type}s pour ${metricName}</h2>
+                    <h3>Top ${topN.length}</h3>
                     <table class="score-table">
                         <thead>
                             <tr class="score-header">
-                                <th>Rang</th>
-                                <th>${type}</th>
-                                <th>Population</th>
-                                <th>Valeur</th>
+                                <th style="width: 15%;">Rang</th>
+                                <th style="width: 40%;">${type}</th>
+                                <th style="width: 25%;">Population</th>
+                                <th style="width: 20%;">Valeur</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${topN
                                 .map(
-                                    (item, index) => `
-                                <tr class="${index < 3 ? "top-rank" : ""}">
+                                    (item) => `
+                                <tr class="score-row">
                                     <td>${item.rank}</td>
-                                    <td>${type === "Département" ? `${item.name} (${item.deptCode})` : item.name}</td>
+                                    <td>${type === "Département" ? `${item.name} (${item.deptCode})` : `${item.name} (${item.deptCode})`}</td>
                                     <td>${item.population.toLocaleString("fr-FR")}</td>
                                     <td>${formatMetricValue(item[metric], metric)}</td>
                                 </tr>
@@ -348,19 +405,19 @@ const RankingsHandler = (function () {
                     <table class="score-table">
                         <thead>
                             <tr class="score-header">
-                                <th>Rang</th>
-                                <th>${type}</th>
-                                <th>Population</th>
-                                <th>Valeur</th>
+                                <th style="width: 15%;">Rang</th>
+                                <th style="width: 40%;">${type}</th>
+                                <th style="width: 25%;">Population</th>
+                                <th style="width: 20%;">Valeur</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${bottomN
                                 .map(
-                                    (item, index) => `
-                                <tr class="${index >= bottomN.length - 3 && index < bottomN.length ? "bottom-rank" : ""}">
+                                    (item) => `
+                                <tr class="score-row">
                                     <td>${item.rank}</td>
-                                    <td>${type === "Département" ? `${item.name} (${item.deptCode})` : item.name}</td>
+                                    <td>${type === "Département" ? `${item.name} (${item.deptCode})` : `${item.name} (${item.deptCode})`}</td>
                                     <td>${item.population.toLocaleString("fr-FR")}</td>
                                     <td>${formatMetricValue(item[metric], metric)}</td>
                                 </tr>
@@ -385,6 +442,7 @@ const RankingsHandler = (function () {
         }
 
         async function updateRankings() {
+            const scope = scopeSelect.value;
             const deptCode = departementSelect.value;
             const metric = metricSelect.value;
             const popLower = popLowerInput.value
@@ -393,19 +451,10 @@ const RankingsHandler = (function () {
             const popUpper = popUpperInput.value
                 ? parseInt(popUpperInput.value)
                 : null;
-            const limit = parseInt(topLimitInput.value) || 10;
+            let limit = parseInt(topLimitInput.value) || 10;
+            if (limit > 100) limit = 100; // Enforce max limit of 100
 
-            console.log(
-                "Raw popLowerInput.value:",
-                JSON.stringify(popLowerInput.value),
-            );
-            console.log(
-                "Raw popUpperInput.value:",
-                JSON.stringify(popUpperInput.value),
-            );
-            console.log("Parsed popLower:", popLower);
-            console.log("Parsed popUpper:", popUpper);
-
+            // Validate population inputs
             const validPopValues = [1000, 10000, 100000];
             if (popLower !== null && !validPopValues.includes(popLower)) {
                 resultsDiv.innerHTML =
@@ -423,6 +472,7 @@ const RankingsHandler = (function () {
                 return;
             }
 
+            // Construct population_range to match backend
             let populationRange = "";
             if (popLower !== null && popUpper !== null) {
                 if (popLower === 1000) {
@@ -452,10 +502,23 @@ const RankingsHandler = (function () {
                 return;
             }
 
-            if (!deptCode) {
+            if (scope === "departements") {
                 const rankings = await fetchDepartmentRankings(metric, limit);
                 renderRankings("Département", rankings, metric);
-            } else {
+            } else if (scope === "communes_france") {
+                const rankings = await fetchCommuneRankings(
+                    null,
+                    metric,
+                    limit,
+                    populationRange,
+                );
+                renderRankings("Commune", rankings, metric);
+            } else if (scope === "communes_dept") {
+                if (!deptCode) {
+                    resultsDiv.innerHTML =
+                        "<p>Veuillez sélectionner un département.</p>";
+                    return;
+                }
                 const rankings = await fetchCommuneRankings(
                     deptCode,
                     metric,
@@ -466,11 +529,14 @@ const RankingsHandler = (function () {
             }
         }
 
+        // Event listeners
         departementSelect.addEventListener("change", updateRankings);
         metricSelect.addEventListener("change", updateRankings);
         applyButton.addEventListener("click", updateRankings);
 
+        // Initialize
         loadDepartements();
+        toggleDepartementVisibility();
         updateRankings();
 
         return {
@@ -481,16 +547,21 @@ const RankingsHandler = (function () {
 })();
 
 (function () {
+    // DOM elements
+    const scopeSelect = document.getElementById("scopeSelect");
     const departementSelect = document.getElementById("departementSelect");
     const metricSelect = document.getElementById("metricSelect");
     const resultsDiv = document.getElementById("results");
 
-    if (!departementSelect || !metricSelect || !resultsDiv) {
+    // Validate DOM elements
+    if (!scopeSelect || !departementSelect || !metricSelect || !resultsDiv) {
         console.error("One or more DOM elements are missing");
         return;
     }
 
+    // Initialize handler
     const rankingsHandler = RankingsHandler(
+        scopeSelect,
         departementSelect,
         metricSelect,
         resultsDiv,
