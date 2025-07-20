@@ -159,7 +159,7 @@ const RankingsHandler = (function () {
                         total_score: dept.total_score,
                         total_qpv: dept.total_qpv || 0,
                         pop_in_qpv_pct: dept.pop_in_qpv_pct || 0,
-                        rank: totalDepartments - filteredBottomData.length + index + 1,
+                        rank: totalDepartments - limit + index + 1,
                     }));
 
                 const rankings = [...topRankings, ...bottomRankings];
