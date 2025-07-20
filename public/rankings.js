@@ -122,13 +122,12 @@ const RankingsHandler = (function () {
                     rank: index + 1,
                 }));
 
-                // Process bottom data with correct ranking
+                // Process bottom data and filter out duplicates that appear in top rankings
                 const topDeptCodes = new Set(
                     topRankings.map((d) => d.deptCode),
                 );
-                const filteredBottomData = bottomData.filter((dept) => !topDeptCodes.has(dept.departement));
-                
-                const bottomRankings = filteredBottomData
+                const bottomRankings = bottomData
+                    .filter((dept) => !topDeptCodes.has(dept.departement))
                     .map((dept, index) => ({
                         deptCode: dept.departement,
                         name:
@@ -157,7 +156,13 @@ const RankingsHandler = (function () {
                         total_score: dept.total_score,
                         total_qpv: dept.total_qpv || 0,
                         pop_in_qpv_pct: dept.pop_in_qpv_pct || 0,
-                        rank: totalDepartments - filteredBottomData.length + index + 1,
+                        rank:
+                            totalDepartments -
+                            bottomData.filter(
+                                (d) => !topDeptCodes.has(d.departement),
+                            ).length +
+                            index +
+                            1,
                     }));
 
                 const rankings = [...topRankings, ...bottomRankings];
