@@ -128,7 +128,9 @@ const RankingsHandler = (function () {
                 );
                 const filteredBottomData = bottomData.filter((dept) => !topDeptCodes.has(dept.departement));
 
+                // Sort filtered bottom data by metric value ascending (lowest values first) and assign ranks
                 const bottomRankings = filteredBottomData
+                    .sort((a, b) => (a[metric] || 0) - (b[metric] || 0))
                     .map((dept, index) => ({
                         deptCode: dept.departement,
                         name:
@@ -157,7 +159,7 @@ const RankingsHandler = (function () {
                         total_score: dept.total_score,
                         total_qpv: dept.total_qpv || 0,
                         pop_in_qpv_pct: dept.pop_in_qpv_pct || 0,
-                        rank: totalDepartments - limit + index + 1,
+                        rank: totalDepartments - filteredBottomData.length + index + 1,
                     }));
 
                 const rankings = [...topRankings, ...bottomRankings];
@@ -260,8 +262,11 @@ const RankingsHandler = (function () {
 
                 // Process bottom data and filter out duplicates that appear in top rankings
                 const topNames = new Set(topRankings.map((c) => c.name));
-                const bottomRankings = bottomData
-                    .filter((commune) => !topNames.has(commune.commune))
+                const filteredBottomData = bottomData.filter((commune) => !topNames.has(commune.commune));
+                
+                // Sort filtered bottom data by metric value ascending (lowest values first) and assign ranks
+                const bottomRankings = filteredBottomData
+                    .sort((a, b) => (a[metric] || 0) - (b[metric] || 0))
                     .map((commune, index) => ({
                         deptCode: commune.departement,
                         name: commune.commune,
@@ -287,12 +292,7 @@ const RankingsHandler = (function () {
                         total_score: commune.total_score,
                         total_qpv: commune.total_qpv || 0,
                         pop_in_qpv_pct: commune.pop_in_qpv_pct || 0,
-                        rank:
-                            totalCommunes -
-                            bottomData.filter((c) => !topNames.has(c.commune))
-                                .length +
-                            index +
-                            1,
+                        rank: totalCommunes - filteredBottomData.length + index + 1,
                     }));
 
                 const rankings = [...topRankings, ...bottomRankings];
