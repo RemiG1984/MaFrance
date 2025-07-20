@@ -185,7 +185,7 @@ const RankingsHandler = (function () {
 
                 // Build URL
                 const popFilter = populationRange
-                    ? `&population_range=${populationRange}`
+                    ? `&population_range=${encodeURIComponent(populationRange)}`
                     : "";
                 const baseUrl = deptCode
                     ? `/api/rankings/communes?dept=${deptCode}&limit=${limit}&sort=${metric}${popFilter}`
