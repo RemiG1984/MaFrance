@@ -8,14 +8,14 @@ const RankingsHandler = (function () {
         tweakingBox.innerHTML = `
             <div class="tweaking-box">
                 <h3>Ajuster le classement</h3>
-                <label for="popLower">Population min :</label>
+                <label for="popLower">Pop. min :</label>
                 <select id="popLower">
                     <option value="">Aucune limite</option>
                     <option value="1000">1k</option>
                     <option value="10000">10k</option>
                     <option value="100000">100k</option>
                 </select>
-                <label for="popUpper">Population max :</label>
+                <label for="popUpper">Pop. max :</label>
                 <select id="popUpper">
                     <option value="">Aucune limite</option>
                     <option value="1000">1k</option>
@@ -97,16 +97,12 @@ const RankingsHandler = (function () {
                 // Process top data
                 const topRankings = topData.map((dept, index) => ({
                     deptCode: dept.departement,
-                    name:
-                        departmentNames[dept.departement] ||
-                        dept.departement,
+                    name: departmentNames[dept.departement] || dept.departement,
                     population: dept.population || 0,
                     insecurite_score: dept.insecurite_score,
                     homicides_p100k: dept.homicides_p100k || 0,
-                    violences_physiques_p1k:
-                        dept.violences_physiques_p1k || 0,
-                    violences_sexuelles_p1k:
-                        dept.violences_sexuelles_p1k || 0,
+                    violences_physiques_p1k: dept.violences_physiques_p1k || 0,
+                    violences_sexuelles_p1k: dept.violences_sexuelles_p1k || 0,
                     vols_p1k: dept.vols_p1k || 0,
                     destructions_p1k: dept.destructions_p1k || 0,
                     stupefiants_p1k: dept.stupefiants_p1k || 0,
@@ -127,9 +123,11 @@ const RankingsHandler = (function () {
                 }));
 
                 // Process bottom data and filter out duplicates that appear in top rankings
-                const topDeptCodes = new Set(topRankings.map(d => d.deptCode));
+                const topDeptCodes = new Set(
+                    topRankings.map((d) => d.deptCode),
+                );
                 const bottomRankings = bottomData
-                    .filter(dept => !topDeptCodes.has(dept.departement))
+                    .filter((dept) => !topDeptCodes.has(dept.departement))
                     .map((dept, index) => ({
                         deptCode: dept.departement,
                         name:
@@ -158,7 +156,13 @@ const RankingsHandler = (function () {
                         total_score: dept.total_score,
                         total_qpv: dept.total_qpv || 0,
                         pop_in_qpv_pct: dept.pop_in_qpv_pct || 0,
-                        rank: totalDepartments - bottomData.filter(d => !topDeptCodes.has(d.departement)).length + index + 1,
+                        rank:
+                            totalDepartments -
+                            bottomData.filter(
+                                (d) => !topDeptCodes.has(d.departement),
+                            ).length +
+                            index +
+                            1,
                     }));
 
                 const rankings = [...topRankings, ...bottomRankings];
@@ -260,9 +264,9 @@ const RankingsHandler = (function () {
                 }));
 
                 // Process bottom data and filter out duplicates that appear in top rankings
-                const topNames = new Set(topRankings.map(c => c.name));
+                const topNames = new Set(topRankings.map((c) => c.name));
                 const bottomRankings = bottomData
-                    .filter(commune => !topNames.has(commune.commune))
+                    .filter((commune) => !topNames.has(commune.commune))
                     .map((commune, index) => ({
                         deptCode: commune.departement,
                         name: commune.commune,
@@ -288,7 +292,12 @@ const RankingsHandler = (function () {
                         total_score: commune.total_score,
                         total_qpv: commune.total_qpv || 0,
                         pop_in_qpv_pct: commune.pop_in_qpv_pct || 0,
-                        rank: totalCommunes - bottomData.filter(c => !topNames.has(c.commune)).length + index + 1,
+                        rank:
+                            totalCommunes -
+                            bottomData.filter((c) => !topNames.has(c.commune))
+                                .length +
+                            index +
+                            1,
                     }));
 
                 const rankings = [...topRankings, ...bottomRankings];
@@ -306,11 +315,11 @@ const RankingsHandler = (function () {
                 metricSelect.options[metricSelect.selectedIndex]?.text ||
                 metric;
             const limit = parseInt(topLimitInput.value) || 10;
-            
+
             // The rankings array contains [topResults, bottomResults] concatenated
             // Split by taking first 'limit' items as top, and remaining as bottom
             const topN = rankings.slice(0, limit);
-            
+
             // For bottom rankings, skip the top results and take the next 'limit' items
             // Only if we have more than 'limit' total results
             let bottomN = [];
