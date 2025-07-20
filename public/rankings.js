@@ -316,18 +316,26 @@ const RankingsHandler = (function () {
                 metric;
             const limit = parseInt(topLimitInput.value) || 10;
 
-            // The rankings array contains [topResults, bottomResults] concatenated
-            // Split by taking first 'limit' items as top, and remaining as bottom
+            // Split rankings into top and bottom
             const topN = rankings.slice(0, limit);
-
-            // For bottom rankings, skip the top results and take the next 'limit' items
-            // Only if we have more than 'limit' total results
+            
             let bottomN = [];
-            const remainingRankings = rankings.slice(limit);
-            if (remainingRankings.length > 0) {
-                bottomN = remainingRankings
-                    .slice(0, limit)
-                    .sort((a, b) => a.rank - b.rank); // Sort by rank ascending (lowest rank numbers first)
+            if (rankings.length > limit) {
+                // If we have enough rankings, take the remaining ones after top N
+                // and ensure they don't duplicate the top rankings
+                const topIds = new Set(topN.map(item => 
+                    type === "Département" ? item.deptCode : item.name
+                ));
+                
+                const remainingRankings = rankings.slice(limit).filter(item => 
+                    !topIds.has(type === "Département" ? item.deptCode : item.name)
+                );
+                
+                if (remainingRankings.length > 0) {
+                    bottomN = remainingRankings
+                        .slice(0, limit)
+                        .sort((a, b) => a.rank - b.rank); // Sort by rank ascending
+                }
             }
             resultsDiv.innerHTML = `
                 <div class="data-box">
