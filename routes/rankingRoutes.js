@@ -13,8 +13,12 @@ const {
 const handleDbError = (err, res, next) => {
   const error = new Error("Erreur lors de la requête à la base de données");
   error.status = 500;
-  error.details = err.message;
-  console.error("Database error:", err.message);
+  error.details = {
+    message: err.message,
+    stack: err.stack,
+    queryParams: req.query,
+  };
+  console.error("Database error:", error.details);
   return next(error);
 };
 
