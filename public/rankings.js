@@ -306,8 +306,13 @@ const RankingsHandler = (function () {
                     .sort((a, b) => a.rank - b.rank);
             } else if (rankings.length > limit) {
                 // Take remaining items after the top N, avoiding duplicates
+                // and assign correct ranks starting from limit + 1
                 bottomN = rankings
                     .slice(limit)
+                    .map((item, index) => ({
+                        ...item,
+                        rank: limit + index + 1
+                    }))
                     .sort((a, b) => a.rank - b.rank);
             }
             resultsDiv.innerHTML = `
