@@ -67,16 +67,20 @@ const ExecutiveHandler = (function () {
         async function showCommuneExecutive(cog) {
             try {
                 // First get commune details from COG
-                const communeResponse = await fetch(`/api/communes/details?cog=${encodeURIComponent(cog)}`);
+                const communeResponse = await fetch(
+                    `/api/communes/details?cog=${encodeURIComponent(cog)}`,
+                );
                 if (!communeResponse.ok) {
-                    throw new Error(`Erreur lors de la récupération de la commune: ${communeResponse.statusText}`);
+                    throw new Error(
+                        `Erreur lors de la récupération de la commune: ${communeResponse.statusText}`,
+                    );
                 }
                 const communeData = await communeResponse.json();
                 if (!communeData) {
                     executiveDiv.innerHTML = "<p>Aucune commune trouvée.</p>";
                     return;
                 }
-                
+
                 const response = await fetch(
                     `/api/communes/maire?cog=${encodeURIComponent(cog)}`,
                 );

@@ -5,7 +5,7 @@ body {
     background-color: #f4f6f8;
 }
 
-#departementSelect, #populationSelect, #metricSelect, #lieuxSelect {
+#departementSelect, #metricSelect {
     width: 220px;
     padding: 10px;
     font-size: 16px;
@@ -183,7 +183,7 @@ label {
 }
 
 #namesChart {
-    height: 600px !important; /* Set height to 600px for desktop*/
+    height: 600px !important;
 }
 
 .executive-box {
@@ -197,7 +197,7 @@ label {
     margin-left: auto;
     margin-right: auto;
     text-align: left;
-    overflow-wrap: break-word; /* Ensure long text wraps */
+    overflow-wrap: break-word;
 }
 
 .executive-box p {
@@ -251,7 +251,7 @@ label {
 .qpv-table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 800px; /* Minimum width to trigger horizontal scroll */
+    min-width: 800px;
 }
 
 .qpv-table th,
@@ -302,8 +302,65 @@ label {
     text-decoration: underline;
 }
 
+#results .score-table th:nth-child(3),
+#results .score-table td:nth-child(3) {
+    text-align: right;
+}
+
+/* Styles for the tweaking box */
+#tweakingBox {
+    display: inline-block;
+    vertical-align: top;
+    margin-left: 20px;
+    margin-bottom: 20px;
+}
+
+.tweaking-box {
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    width: 300px;
+    text-align: left;
+}
+
+.tweaking-box h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: #343a40;
+}
+
+.tweaking-box label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.tweaking-box input {
+    width: 100%;
+    padding: 8px;
+    font-size: 14px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+}
+
+/* Styles for filter container */
+.filter-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.selections-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
 @media (max-width: 600px) {
-    #departementSelect, #lieuxSelect, #communeInput {
+    #departementSelect, #metricSelect, #communeInput {
         width: 100%;
     }
 
@@ -327,8 +384,8 @@ label {
     }
 
     #namesChart {
-        height: 400px !important; /* Increased height for mobile */
-        width: 100% !important; /* Ensure full width on mobile */
+        height: 400px !important;
+        width: 100% !important;
     }
 
     .executive-box {
@@ -353,6 +410,25 @@ label {
     }
 
     .qpv-table {
-        font-size: 12px; /* Table-wide font size for small screens */
+        font-size: 12px;
+    }
+
+    #tweakingBox {
+        display: block;
+        margin-left: 0;
+        margin-top: 10px;
+        width: 100%;
+    }
+
+    .tweaking-box {
+        width: 100%;
+    }
+
+    .filter-container {
+        flex-direction: column;
+    }
+
+    .selections-wrapper {
+        width: 100%;
     }
 }

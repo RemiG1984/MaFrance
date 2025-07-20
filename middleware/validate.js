@@ -133,8 +133,21 @@ const validatePagination = [
 const validatePopulationRange = [
   query("population_range")
     .optional()
-    .isIn(["0-1000", "1000-10000", "10000+"])
-    .withMessage("Plage de population invalide"),
+    .isIn([
+      "0-1k",
+      "0-10k",
+      "0-100k",
+      "0+",
+      "1-10k",
+      "1-100k",
+      "1k+",
+      "10-100k",
+      "10k+",
+      "100k+",
+    ])
+    .withMessage(
+      "Plage de population invalide. Valeurs autorisées : 0-1k, 0-10k, 0-100k, 0+, 1-10k, 1-100k, 1k+, 10-100k, 10k+, 100k+",
+    ),
   handleValidationErrors,
 ];
 

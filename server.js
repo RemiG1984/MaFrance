@@ -21,21 +21,23 @@ app.use(
 );
 
 // Routes
-const communeRoutes = require('./routes/communeRoutes');
-const departementRoutes = require('./routes/departementRoutes');
-const countryRoutes = require('./routes/countryRoutes');
-const articleRoutes = require('./routes/articleRoutes');
-const debugRoutes = require('./routes/debugRoutes');
-const otherRoutes = require('./routes/otherRoutes');
-const qpvRoutes = require('./routes/qpvRoutes');
+const communeRoutes = require("./routes/communeRoutes");
+const departementRoutes = require("./routes/departementRoutes");
+const countryRoutes = require("./routes/countryRoutes");
+const articleRoutes = require("./routes/articleRoutes");
+const debugRoutes = require("./routes/debugRoutes");
+const otherRoutes = require("./routes/otherRoutes");
+const qpvRoutes = require("./routes/qpvRoutes");
+const rankingRoutes = require("./routes/rankingRoutes");
 
-app.use('/api/communes', communeRoutes);
-app.use('/api/departements', departementRoutes);
-app.use('/api/country', countryRoutes);
-app.use('/api/articles', articleRoutes);
-app.use('/api/debug', debugRoutes);
-app.use('/api/qpv', qpvRoutes);
-app.use('/api', otherRoutes);
+app.use("/api/communes", communeRoutes);
+app.use("/api/departements", departementRoutes);
+app.use("/api/country", countryRoutes);
+app.use("/api/articles", articleRoutes);
+app.use("/api/debug", debugRoutes);
+app.use("/api/qpv", qpvRoutes);
+app.use("/api", otherRoutes);
+app.use("/api/rankings", rankingRoutes);
 
 // Error handling
 const errorHandler = require("./middleware/errorHandler");
@@ -51,7 +53,9 @@ app.get("/", (req, res) => {
 
 // Start server
 const server = app.listen(config.server.port, config.server.host, () => {
-  console.log(`Server running at http://${config.server.host}:${config.server.port}`);
+  console.log(
+    `Server running at http://${config.server.host}:${config.server.port}`,
+  );
 });
 
 // Graceful shutdown

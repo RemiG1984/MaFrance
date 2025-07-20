@@ -3,6 +3,39 @@ const RankingsHandler = (function () {
     const departmentNames = DepartmentNames;
 
     return function (departementSelect, metricSelect, resultsDiv) {
+        // Populate existing tweaking box
+        const tweakingBox = document.getElementById("tweakingBox");
+        tweakingBox.innerHTML = `
+            <div class="tweaking-box">
+                <h3>Ajuster le classement</h3>
+                <label for="popLower">Population min :</label>
+                <select id="popLower">
+                    <option value="">Aucune limite</option>
+                    <option value="0">0</option>
+                    <option value="1000">1k</option>
+                    <option value="10000">10k</option>
+                    <option value="100000">100k</option>
+                </select>
+                <label for="popUpper">Population max :</label>
+                <select id="popUpper">
+                    <option value="">Aucune limite</option>
+                    <option value="0">0</option>
+                    <option value="1000">1k</option>
+                    <option value="10000">10k</option>
+                    <option value="100000">100k</option>
+                </select>
+                <label for="topLimit">Nombre de résultats (Top/Bottom) :</label>
+                <input type="number" id="topLimit" value="10" min="1" max="100">
+                <button id="applyFilters">Appliquer</button>
+            </div>
+        `;
+
+        // Get tweaking input elements
+        const popLowerInput = document.getElementById("popLower");
+        const popUpperInput = document.getElementById("popUpper");
+        const topLimitInput = document.getElementById("topLimit");
+        const applyButton = document.getElementById("applyFilters");
+
         async function loadDepartements() {
             try {
                 const response = await fetch("/api/departements");
@@ -34,36 +67,43 @@ const RankingsHandler = (function () {
             }
         }
 
-        async function fetchDepartmentRankings(metric) {
+        async function fetchDepartmentRankings(metric, limit) {
             try {
-                // Fetch top 10 (DESC)
+                // Fetch top rankings (DESC)
                 const topResponse = await fetch(
-                    `/api/departements/details_all?limit=10&sort=${metric}&direction=DESC`,
+                    `/api/rankings/departements?limit=${limit}&sort=${metric}&direction=DESC`,
                 );
-                if (!topResponse.ok)
+                if (!topResponse.ok) {
+                    const errorText = await topResponse.text();
                     throw new Error(
-                        "Erreur lors de la récupération des données départementales (top)",
+                        `Erreur lors de la récupération des données départementales (top): ${errorText}`,
                     );
-                const topData = await topResponse.json();
+                }
+                const topResult = await topResponse.json();
+                const topData = topResult.data;
+                const totalDepartments = topResult.total_count;
 
-                // Fetch bottom 10 (ASC)
+                // Fetch bottom rankings (ASC)
                 const bottomResponse = await fetch(
-                    `/api/departements/details_all?limit=10&sort=${metric}&direction=ASC`,
+                    `/api/rankings/departements?limit=${limit}&sort=${metric}&direction=ASC`,
                 );
-                if (!bottomResponse.ok)
+                if (!bottomResponse.ok) {
+                    const errorText = await topResponse.text();
                     throw new Error(
-                        "Erreur lors de la récupération des données départementales (bottom)",
+                        `Erreur lors de la récupération des données départementales (bottom): ${errorText}`,
                     );
-                const bottomData = await bottomResponse.json();
+                }
+                const bottomResult = await bottomResponse.json();
+                const bottomData = bottomResult.data;
 
                 // Process data
-                const totalDepartments = 101; // Total number of departments
                 const rankings = [
                     ...topData.map((dept, index) => ({
                         deptCode: dept.departement,
                         name:
                             departmentNames[dept.departement] ||
                             dept.departement,
+                        population: dept.population || 0,
                         insecurite_score: dept.insecurite_score,
                         homicides_p100k: dept.homicides_p100k || 0,
                         violences_physiques_p1k:
@@ -86,13 +126,14 @@ const RankingsHandler = (function () {
                         total_score: dept.total_score,
                         total_qpv: dept.total_qpv || 0,
                         pop_in_qpv_pct: dept.pop_in_qpv_pct || 0,
-                        rank: index + 1, // Top ranks: 1–10
+                        rank: index + 1,
                     })),
                     ...bottomData.map((dept, index) => ({
                         deptCode: dept.departement,
                         name:
                             departmentNames[dept.departement] ||
                             dept.departement,
+                        population: dept.population || 0,
                         insecurite_score: dept.insecurite_score,
                         homicides_p100k: dept.homicides_p100k || 0,
                         violences_physiques_p1k:
@@ -115,7 +156,7 @@ const RankingsHandler = (function () {
                         total_score: dept.total_score,
                         total_qpv: dept.total_qpv || 0,
                         pop_in_qpv_pct: dept.pop_in_qpv_pct || 0,
-                        rank: totalDepartments - index, // Bottom ranks: 92–101
+                        rank: totalDepartments - index,
                     })),
                 ];
                 return rankings;
@@ -129,29 +170,50 @@ const RankingsHandler = (function () {
             }
         }
 
-        async function fetchCommuneRankings(deptCode, metric) {
+        async function fetchCommuneRankings(
+            deptCode,
+            metric,
+            limit,
+            populationRange,
+        ) {
             try {
-                // Build URL
-                const baseUrl = deptCode
-                    ? `/api/communes/details_all?dept=${deptCode}&limit=10&sort=${metric}`
-                    : `/api/communes/details_all?limit=10&sort=${metric}`;
+                // Debug: Log the populationRange value
+                console.log(
+                    "fetchCommuneRankings: populationRange =",
+                    JSON.stringify(populationRange),
+                );
 
-                // Fetch top 10 (DESC)
+                // Build URL
+                const popFilter = populationRange
+                    ? `&population_range=${populationRange}`
+                    : "";
+                const baseUrl = deptCode
+                    ? `/api/rankings/communes?dept=${deptCode}&limit=${limit}&sort=${metric}${popFilter}`
+                    : `/api/rankings/communes?limit=${limit}&sort=${metric}${popFilter}`;
+
+                // Debug: Log the full URL
+                console.log("Request URL:", `${baseUrl}&direction=DESC`);
+
+                // Fetch top rankings (DESC)
                 const topResponse = await fetch(`${baseUrl}&direction=DESC`);
-                if (!topResponse.ok)
+                if (!topResponse.ok) {
+                    const errorText = await topResponse.text();
                     throw new Error(
-                        "Erreur lors de la récupération des données des communes (top)",
+                        `Erreur lors de la récupération des données des communes (top): ${errorText}`,
                     );
+                }
                 const topResult = await topResponse.json();
                 const topData = topResult.data;
                 const totalCommunes = topResult.total_count;
 
-                // Fetch bottom 10 (ASC)
+                // Fetch bottom rankings (ASC)
                 const bottomResponse = await fetch(`${baseUrl}&direction=ASC`);
-                if (!bottomResponse.ok)
+                if (!bottomResponse.ok) {
+                    const errorText = await bottomResponse.text();
                     throw new Error(
-                        "Erreur lors de la récupération des données des communes (bottom)",
+                        `Erreur lors de la récupération des données des communes (bottom): ${errorText}`,
                     );
+                }
                 const bottomResult = await bottomResponse.json();
                 const bottomData = bottomResult.data;
 
@@ -170,6 +232,7 @@ const RankingsHandler = (function () {
                     ...topData.map((commune, index) => ({
                         deptCode: commune.departement,
                         name: commune.commune,
+                        population: commune.population || 0,
                         insecurite_score: commune.insecurite_score,
                         violences_physiques_p1k:
                             commune.violences_physiques_p1k || 0,
@@ -191,11 +254,12 @@ const RankingsHandler = (function () {
                         total_score: commune.total_score,
                         total_qpv: commune.total_qpv || 0,
                         pop_in_qpv_pct: commune.pop_in_qpv_pct || 0,
-                        rank: index + 1, // Top ranks: 1–10
+                        rank: index + 1,
                     })),
                     ...bottomData.map((commune, index) => ({
                         deptCode: commune.departement,
                         name: commune.commune,
+                        population: commune.population || 0,
                         insecurite_score: commune.insecurite_score,
                         violences_physiques_p1k:
                             commune.violences_physiques_p1k || 0,
@@ -217,7 +281,7 @@ const RankingsHandler = (function () {
                         total_score: commune.total_score,
                         total_qpv: commune.total_qpv || 0,
                         pop_in_qpv_pct: commune.pop_in_qpv_pct || 0,
-                        rank: totalCommunes - index, // Bottom ranks: e.g., 342 to 333
+                        rank: totalCommunes - index,
                     })),
                 ];
 
@@ -233,29 +297,31 @@ const RankingsHandler = (function () {
             const metricName =
                 metricSelect.options[metricSelect.selectedIndex]?.text ||
                 metric;
-            const top10 = rankings.slice(0, 10);
-            const bottom10 = rankings
-                .slice(-10)
+            const topN = rankings.slice(0, parseInt(topLimitInput.value) || 10);
+            const bottomN = rankings
+                .slice(-parseInt(topLimitInput.value) || -10)
                 .sort((a, b) => a.rank - b.rank);
             resultsDiv.innerHTML = `
                 <div class="data-box">
                     <h2>Classement des ${type}s pour ${metricName}</h2>
-                    <h3>Top 10</h3>
+                    <h3>Top ${topN.length}</h3>
                     <table class="score-table">
                         <thead>
                             <tr>
                                 <th>Rang</th>
                                 <th>${type}</th>
+                                <th>Population</th>
                                 <th>Valeur</th>
                             </tr>
                         </thead>
                         <tbody>
-                            ${top10
+                            ${topN
                                 .map(
                                     (item) => `
                                 <tr>
                                     <td>${item.rank}</td>
                                     <td>${type === "Département" ? `${item.name} (${item.deptCode})` : item.name}</td>
+                                    <td>${item.population.toLocaleString("fr-FR")}</td>
                                     <td>${formatMetricValue(item[metric], metric)}</td>
                                 </tr>
                             `,
@@ -263,22 +329,24 @@ const RankingsHandler = (function () {
                                 .join("")}
                         </tbody>
                     </table>
-                    <h3>Bottom 10</h3>
+                    <h3>Bottom ${bottomN.length}</h3>
                     <table class="score-table">
                         <thead>
                             <tr>
                                 <th>Rang</th>
                                 <th>${type}</th>
+                                <th>Population</th>
                                 <th>Valeur</th>
                             </tr>
                         </thead>
                         <tbody>
-                            ${bottom10
+                            ${bottomN
                                 .map(
                                     (item) => `
                                 <tr>
                                     <td>${item.rank}</td>
                                     <td>${type === "Département" ? `${item.name} (${item.deptCode})` : item.name}</td>
+                                    <td>${item.population.toLocaleString("fr-FR")}</td>
                                     <td>${formatMetricValue(item[metric], metric)}</td>
                                 </tr>
                             `,
@@ -292,8 +360,8 @@ const RankingsHandler = (function () {
 
         function formatMetricValue(value, metric) {
             if (value === undefined || value === null) return "N/A";
-            if (metric === "pop_in_qpv_pct") return `${value.toFixed(1)}%`; // Format as percentage
-            if (metric === "total_qpv") return value.toString(); // Format as integer
+            if (metric === "pop_in_qpv_pct") return `${value.toFixed(1)}%`;
+            if (metric === "total_qpv") return value.toString();
             if (metric.includes("_pct")) return `${value}%`;
             if (metric.includes("_p100k") || metric.includes("_p1k"))
                 return value.toFixed(1);
@@ -304,6 +372,75 @@ const RankingsHandler = (function () {
         async function updateRankings() {
             const deptCode = departementSelect.value;
             const metric = metricSelect.value;
+            const popLower = popLowerInput.value
+                ? parseInt(popLowerInput.value)
+                : null;
+            const popUpper = popUpperInput.value
+                ? parseInt(popUpperInput.value)
+                : null;
+            const limit = parseInt(topLimitInput.value) || 10;
+
+            // Debug: Log raw input values
+            console.log(
+                "Raw popLowerInput.value:",
+                JSON.stringify(popLowerInput.value),
+            );
+            console.log(
+                "Raw popUpperInput.value:",
+                JSON.stringify(popUpperInput.value),
+            );
+            console.log("Parsed popLower:", popLower);
+            console.log("Parsed popUpper:", popUpper);
+
+            // Validate population inputs
+            const validPopValues = [0, 1000, 10000, 100000];
+            if (popLower !== null && !validPopValues.includes(popLower)) {
+                resultsDiv.innerHTML =
+                    "<p>Erreur : Valeur de population minimale invalide.</p>";
+                return;
+            }
+            if (popUpper !== null && !validPopValues.includes(popUpper)) {
+                resultsDiv.innerHTML =
+                    "<p>Erreur : Valeur de population maximale invalide.</p>";
+                return;
+            }
+            if (popLower !== null && popUpper !== null && popLower > popUpper) {
+                resultsDiv.innerHTML =
+                    "<p>Erreur : La population minimale ne peut pas être supérieure à la population maximale.</p>";
+                return;
+            }
+
+            // Construct population_range
+            let populationRange = "";
+            if (popLower !== null && popUpper !== null) {
+                if (popLower === 0) {
+                    if (popUpper === 1000) populationRange = "0-1k";
+                    else if (popUpper === 10000) populationRange = "0-10k";
+                    else if (popUpper === 100000) populationRange = "0-100k";
+                } else if (popLower === 1000) {
+                    if (popUpper === 10000) populationRange = "1-10k";
+                    else if (popUpper === 100000) populationRange = "1-100k";
+                } else if (popLower === 10000 && popUpper === 100000) {
+                    populationRange = "10-100k";
+                }
+            } else if (popLower !== null) {
+                if (popLower === 0) populationRange = "0+";
+                else if (popLower === 1000) populationRange = "1k+";
+                else if (popLower === 10000) populationRange = "10k+";
+                else if (popLower === 100000) populationRange = "100k+";
+            } else if (popUpper !== null) {
+                if (popUpper === 0)
+                    populationRange = "0+"; // Treat max 0 as no filter
+                else if (popUpper === 1000) populationRange = "0-1k";
+                else if (popUpper === 10000) populationRange = "0-10k";
+                else if (popUpper === 100000) populationRange = "0-100k";
+            }
+
+            // Debug: Log constructed populationRange
+            console.log(
+                "Constructed populationRange:",
+                JSON.stringify(populationRange),
+            );
 
             if (!metric) {
                 resultsDiv.innerHTML =
@@ -312,10 +449,15 @@ const RankingsHandler = (function () {
             }
 
             if (!deptCode) {
-                const rankings = await fetchDepartmentRankings(metric);
+                const rankings = await fetchDepartmentRankings(metric, limit);
                 renderRankings("Département", rankings, metric);
             } else {
-                const rankings = await fetchCommuneRankings(deptCode, metric);
+                const rankings = await fetchCommuneRankings(
+                    deptCode,
+                    metric,
+                    limit,
+                    populationRange,
+                );
                 renderRankings("Commune", rankings, metric);
             }
         }
@@ -323,6 +465,7 @@ const RankingsHandler = (function () {
         // Event listeners
         departementSelect.addEventListener("change", updateRankings);
         metricSelect.addEventListener("change", updateRankings);
+        applyButton.addEventListener("click", updateRankings);
 
         // Initialize
         loadDepartements();
