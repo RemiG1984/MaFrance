@@ -296,23 +296,20 @@ const RankingsHandler = (function () {
                 metricSelect.options[metricSelect.selectedIndex]?.text ||
                 metric;
             const limit = parseInt(topLimitInput.value) || 10;
-            const topN = rankings.slice(0, limit);
             
-            // Avoid duplicates when total results are less than 2 * limit
+            // Split rankings into actual top and bottom parts
+            // The rankings array contains both top results (first half) and bottom results (second half)
+            const halfLength = Math.floor(rankings.length / 2);
+            const topRankings = rankings.slice(0, halfLength);
+            const bottomRankings = rankings.slice(halfLength);
+            
+            const topN = topRankings.slice(0, limit);
+            
+            // For bottom list, take from the actual bottom rankings, not the combined array
             let bottomN = [];
-            if (rankings.length > limit * 2) {
-                bottomN = rankings
-                    .slice(-limit)
-                    .sort((a, b) => a.rank - b.rank);
-            } else if (rankings.length > limit) {
-                // Take remaining items after the top N, avoiding duplicates
-                // and assign correct ranks starting from limit + 1
-                bottomN = rankings
-                    .slice(limit)
-                    .map((item, index) => ({
-                        ...item,
-                        rank: limit + index + 1
-                    }))
+            if (bottomRankings.length > 0) {
+                bottomN = bottomRankings
+                    .slice(0, limit)
                     .sort((a, b) => a.rank - b.rank);
             }
             resultsDiv.innerHTML = `
