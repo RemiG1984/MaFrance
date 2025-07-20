@@ -137,7 +137,7 @@ router.get(
     LEFT JOIN LatestCommuneNames cn ON l.COG = cn.COG
     LEFT JOIN commune_crime cc ON l.COG = cc.COG 
       AND cc.annee = (SELECT MAX(annee) FROM commune_crime WHERE COG = l.COG)
-    WHERE l.departement = ? OR ? = ''
+    WHERE (l.departement = ? OR ? = '')
     ${populationFilter}
     ORDER BY ${sort} ${direction}, l.COG ASC
     LIMIT ? OFFSET ?
@@ -146,7 +146,7 @@ router.get(
     const countSql = `
     SELECT COUNT(*) as total_count
     FROM locations l
-    WHERE l.departement = ? OR ? = ''
+    WHERE (l.departement = ? OR ? = '')
     ${populationFilter}
   `;
 
