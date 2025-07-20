@@ -11,7 +11,6 @@ const RankingsHandler = (function () {
                 <label for="popLower">Population min :</label>
                 <select id="popLower">
                     <option value="">Aucune limite</option>
-                    <option value="0">0</option>
                     <option value="1000">1k</option>
                     <option value="10000">10k</option>
                     <option value="100000">100k</option>
@@ -19,7 +18,6 @@ const RankingsHandler = (function () {
                 <label for="popUpper">Population max :</label>
                 <select id="popUpper">
                     <option value="">Aucune limite</option>
-                    <option value="0">0</option>
                     <option value="1000">1k</option>
                     <option value="10000">10k</option>
                     <option value="100000">100k</option>
@@ -393,7 +391,7 @@ const RankingsHandler = (function () {
             console.log("Parsed popUpper:", popUpper);
 
             // Validate population inputs
-            const validPopValues = [0, 1000, 10000, 100000];
+            const validPopValues = [1000, 10000, 100000];
             if (popLower !== null && !validPopValues.includes(popLower)) {
                 resultsDiv.innerHTML =
                     "<p>Erreur : Valeur de population minimale invalide.</p>";
@@ -413,25 +411,18 @@ const RankingsHandler = (function () {
             // Construct population_range
             let populationRange = "";
             if (popLower !== null && popUpper !== null) {
-                if (popLower === 0) {
-                    if (popUpper === 1000) populationRange = "0-1k";
-                    else if (popUpper === 10000) populationRange = "0-10k";
-                    else if (popUpper === 100000) populationRange = "0-100k";
-                } else if (popLower === 1000) {
+                if (popLower === 1000) {
                     if (popUpper === 10000) populationRange = "1-10k";
                     else if (popUpper === 100000) populationRange = "1-100k";
                 } else if (popLower === 10000 && popUpper === 100000) {
                     populationRange = "10-100k";
                 }
             } else if (popLower !== null) {
-                if (popLower === 0) populationRange = "0+";
-                else if (popLower === 1000) populationRange = "1k+";
+                if (popLower === 1000) populationRange = "1k+";
                 else if (popLower === 10000) populationRange = "10k+";
                 else if (popLower === 100000) populationRange = "100k+";
             } else if (popUpper !== null) {
-                if (popUpper === 0)
-                    populationRange = "0+"; // Treat max 0 as no filter
-                else if (popUpper === 1000) populationRange = "0-1k";
+                if (popUpper === 1000) populationRange = "0-1k";
                 else if (popUpper === 10000) populationRange = "0-10k";
                 else if (popUpper === 100000) populationRange = "0-100k";
             }
