@@ -295,10 +295,21 @@ const RankingsHandler = (function () {
             const metricName =
                 metricSelect.options[metricSelect.selectedIndex]?.text ||
                 metric;
-            const topN = rankings.slice(0, parseInt(topLimitInput.value) || 10);
-            const bottomN = rankings
-                .slice(-parseInt(topLimitInput.value) || -10)
-                .sort((a, b) => a.rank - b.rank);
+            const limit = parseInt(topLimitInput.value) || 10;
+            const topN = rankings.slice(0, limit);
+            
+            // Avoid duplicates when total results are less than 2 * limit
+            let bottomN = [];
+            if (rankings.length > limit * 2) {
+                bottomN = rankings
+                    .slice(-limit)
+                    .sort((a, b) => a.rank - b.rank);
+            } else if (rankings.length > limit) {
+                // Take remaining items after the top N, avoiding duplicates
+                bottomN = rankings
+                    .slice(limit)
+                    .sort((a, b) => a.rank - b.rank);
+            }
             resultsDiv.innerHTML = `
                 <div class="data-box">
                     <h2>Classement des ${type}s pour ${metricName}</h2>
