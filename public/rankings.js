@@ -327,7 +327,7 @@ const RankingsHandler = (function () {
             if (remainingRankings.length > 0) {
                 bottomN = remainingRankings
                     .slice(0, limit)
-                    .sort((a, b) => a[metric] - b[metric]); // Sort by metric value ascending (worst first)
+                    .sort((a, b) => a.rank - b.rank); // Sort by rank ascending (lowest rank numbers first)
             }
             resultsDiv.innerHTML = `
                 <div class="data-box">
