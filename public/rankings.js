@@ -367,10 +367,7 @@ const RankingsHandler = (function () {
             let bottomN = [];
             const remainingRankings = rankings.slice(limit);
             if (remainingRankings.length > 0) {
-                bottomN = remainingRankings
-                    .sort((a, b) => (b[metric] || 0) - (a[metric] || 0))
-                    .slice(0, limit)
-                    .sort((a, b) => a.rank - b.rank);
+                bottomN = remainingRankings.sort((a, b) => a.rank - b.rank);
             }
 
             resultsDiv.innerHTML = `
