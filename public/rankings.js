@@ -1,34 +1,33 @@
 const RankingsHandler = (function () {
-    // Use shared department names
     const departmentNames = DepartmentNames;
 
     return function (departementSelect, metricSelect, resultsDiv) {
-        // Populate existing tweaking box
         const tweakingBox = document.getElementById("tweakingBox");
         tweakingBox.innerHTML = `
             <div class="tweaking-box">
                 <h3>Ajuster le classement</h3>
-                <label for="popLower">Pop. min :</label>
-                <select id="popLower">
-                    <option value="">Aucune limite</option>
-                    <option value="1000">1k</option>
-                    <option value="10000">10k</option>
-                    <option value="100000">100k</option>
-                </select>
-                <label for="popUpper">Pop. max :</label>
-                <select id="popUpper">
-                    <option value="">Aucune limite</option>
-                    <option value="1000">1k</option>
-                    <option value="10000">10k</option>
-                    <option value="100000">100k</option>
-                </select>
+                <div class="pop-select-container">
+                    <label for="popLower">Pop. min :</label>
+                    <select id="popLower">
+                        <option value="">Aucune limite</option>
+                        <option value="1000">1k</option>
+                        <option value="10000">10k</option>
+                        <option value="100000">100k</option>
+                    </select>
+                    <label for="popUpper">Pop. max :</label>
+                    <select id="popUpper">
+                        <option value="">Aucune limite</option>
+                        <option value="1000">1k</option>
+                        <option value="10000">10k</option>
+                        <option value="100000">100k</option>
+                    </select>
+                </div>
                 <label for="topLimit">Nombre de résultats (Top/Bottom) :</label>
                 <input type="number" id="topLimit" value="10" min="1" max="100">
                 <button id="applyFilters">Appliquer</button>
             </div>
         `;
 
-        // Get tweaking input elements
         const popLowerInput = document.getElementById("popLower");
         const popUpperInput = document.getElementById("popUpper");
         const topLimitInput = document.getElementById("topLimit");
@@ -66,8 +65,8 @@ const RankingsHandler = (function () {
         }
 
         async function fetchDepartmentRankings(metric, limit) {
+            resultsDiv.innerHTML = '<div class="loading-spinner"></div>';
             try {
-                // Fetch top rankings (DESC)
                 const topResponse = await fetch(
                     `/api/rankings/departements?limit=${limit}&sort=${metric}&direction=DESC`,
                 );
@@ -79,14 +78,13 @@ const RankingsHandler = (function () {
                 }
                 const topResult = await topResponse.json();
                 const topData = topResult.data;
-                const totalDepartments = topResult.total_count;
+                const totalDepartments = 101;
 
-                // Fetch bottom rankings (ASC)
                 const bottomResponse = await fetch(
                     `/api/rankings/departements?limit=${limit}&sort=${metric}&direction=ASC`,
                 );
                 if (!bottomResponse.ok) {
-                    const errorText = await topResponse.text();
+                    const errorText = await bottomResponse.text();
                     throw new Error(
                         `Erreur lors de la récupération des données départementales (bottom): ${errorText}`,
                     );
@@ -94,7 +92,6 @@ const RankingsHandler = (function () {
                 const bottomResult = await bottomResponse.json();
                 const bottomData = bottomResult.data;
 
-                // Process top data
                 const topRankings = topData.map((dept, index) => ({
                     deptCode: dept.departement,
                     name: departmentNames[dept.departement] || dept.departement,
@@ -122,15 +119,16 @@ const RankingsHandler = (function () {
                     rank: index + 1,
                 }));
 
-                // Process bottom data and filter out duplicates that appear in top rankings
                 const topDeptCodes = new Set(
                     topRankings.map((d) => d.deptCode),
                 );
-                const filteredBottomData = bottomData.filter((dept) => !topDeptCodes.has(dept.departement));
+                const filteredBottomData = bottomData.filter(
+                    (dept) => !topDeptCodes.has(dept.departement),
+                );
 
-                // Sort filtered bottom data by metric value ascending (lowest values first) and assign ranks
                 const bottomRankings = filteredBottomData
-                    .sort((a, b) => (a[metric] || 0) - (b[metric] || 0))
+                    .sort((a, b) => (b[metric] || 0) - (a[metric] || 0))
+                    .slice(0, limit)
                     .map((dept, index) => ({
                         deptCode: dept.departement,
                         name:
@@ -159,11 +157,14 @@ const RankingsHandler = (function () {
                         total_score: dept.total_score,
                         total_qpv: dept.total_qpv || 0,
                         pop_in_qpv_pct: dept.pop_in_qpv_pct || 0,
-                        rank: totalDepartments - limit + index + 1,
+                        rank:
+                            totalDepartments -
+                            filteredBottomData.length +
+                            index +
+                            1,
                     }));
 
-                const rankings = [...topRankings, ...bottomRankings];
-                return rankings;
+                return [...topRankings, ...bottomRankings];
             } catch (error) {
                 resultsDiv.innerHTML = `<p>Erreur : ${error.message}</p>`;
                 console.error(
@@ -180,25 +181,20 @@ const RankingsHandler = (function () {
             limit,
             populationRange,
         ) {
+            resultsDiv.innerHTML = '<div class="loading-spinner"></div>';
             try {
-                // Debug: Log the populationRange value
                 console.log(
                     "fetchCommuneRankings: populationRange =",
                     JSON.stringify(populationRange),
                 );
-
-                // Build URL
                 const popFilter = populationRange
                     ? `&population_range=${encodeURIComponent(populationRange)}`
                     : "";
                 const baseUrl = deptCode
                     ? `/api/rankings/communes?dept=${deptCode}&limit=${limit}&sort=${metric}${popFilter}`
                     : `/api/rankings/communes?limit=${limit}&sort=${metric}${popFilter}`;
-
-                // Debug: Log the full URL
                 console.log("Request URL:", `${baseUrl}&direction=DESC`);
 
-                // Fetch top rankings (DESC)
                 const topResponse = await fetch(`${baseUrl}&direction=DESC`);
                 if (!topResponse.ok) {
                     const errorText = await topResponse.text();
@@ -210,7 +206,6 @@ const RankingsHandler = (function () {
                 const topData = topResult.data;
                 const totalCommunes = topResult.total_count;
 
-                // Fetch bottom rankings (ASC)
                 const bottomResponse = await fetch(`${baseUrl}&direction=ASC`);
                 if (!bottomResponse.ok) {
                     const errorText = await bottomResponse.text();
@@ -221,7 +216,6 @@ const RankingsHandler = (function () {
                 const bottomResult = await bottomResponse.json();
                 const bottomData = bottomResult.data;
 
-                // Debug logs
                 console.log("totalCommunes:", totalCommunes);
                 console.log(
                     "Raw bottomData:",
@@ -231,7 +225,6 @@ const RankingsHandler = (function () {
                     })),
                 );
 
-                // Process top data
                 const topRankings = topData.map((commune, index) => ({
                     deptCode: commune.departement,
                     name: commune.commune,
@@ -260,13 +253,14 @@ const RankingsHandler = (function () {
                     rank: index + 1,
                 }));
 
-                // Process bottom data and filter out duplicates that appear in top rankings
                 const topNames = new Set(topRankings.map((c) => c.name));
-                const filteredBottomData = bottomData.filter((commune) => !topNames.has(commune.commune));
-                
-                // Sort filtered bottom data by metric value ascending (lowest values first) and assign ranks
+                const filteredBottomData = bottomData.filter(
+                    (commune) => !topNames.has(commune.commune),
+                );
+
                 const bottomRankings = filteredBottomData
-                    .sort((a, b) => (a[metric] || 0) - (b[metric] || 0))
+                    .sort((a, b) => (b[metric] || 0) - (a[metric] || 0))
+                    .slice(0, limit)
                     .map((commune, index) => ({
                         deptCode: commune.departement,
                         name: commune.commune,
@@ -292,12 +286,14 @@ const RankingsHandler = (function () {
                         total_score: commune.total_score,
                         total_qpv: commune.total_qpv || 0,
                         pop_in_qpv_pct: commune.pop_in_qpv_pct || 0,
-                        rank: totalCommunes - filteredBottomData.length + index + 1,
+                        rank:
+                            totalCommunes -
+                            filteredBottomData.length +
+                            index +
+                            1,
                     }));
 
-                const rankings = [...topRankings, ...bottomRankings];
-
-                return rankings;
+                return [...topRankings, ...bottomRankings];
             } catch (error) {
                 resultsDiv.innerHTML = `<p>Erreur : ${error.message}</p>`;
                 console.error("Erreur chargement classements communes:", error);
@@ -311,26 +307,22 @@ const RankingsHandler = (function () {
                 metric;
             const limit = parseInt(topLimitInput.value) || 10;
 
-            // The rankings array contains [topResults, bottomResults] concatenated
-            // Split by taking first 'limit' items as top, and remaining as bottom
             const topN = rankings.slice(0, limit);
-
-            // For bottom rankings, skip the top results and take the next 'limit' items
-            // Only if we have more than 'limit' total results
             let bottomN = [];
             const remainingRankings = rankings.slice(limit);
             if (remainingRankings.length > 0) {
                 bottomN = remainingRankings
+                    .sort((a, b) => (b[metric] || 0) - (a[metric] || 0))
                     .slice(0, limit)
-                    .sort((a, b) => a.rank - b.rank); // Sort by rank ascending (worst performers show in correct rank order)
+                    .sort((a, b) => a.rank - b.rank);
             }
+
             resultsDiv.innerHTML = `
                 <div class="data-box">
                     <h2>Classement des ${type}s pour ${metricName}</h2>
-                    <h3>Top ${topN.length}</h3>
                     <table class="score-table">
                         <thead>
-                            <tr>
+                            <tr class="score-header">
                                 <th>Rang</th>
                                 <th>${type}</th>
                                 <th>Population</th>
@@ -340,8 +332,8 @@ const RankingsHandler = (function () {
                         <tbody>
                             ${topN
                                 .map(
-                                    (item) => `
-                                <tr>
+                                    (item, index) => `
+                                <tr class="${index < 3 ? "top-rank" : ""}">
                                     <td>${item.rank}</td>
                                     <td>${type === "Département" ? `${item.name} (${item.deptCode})` : item.name}</td>
                                     <td>${item.population.toLocaleString("fr-FR")}</td>
@@ -355,7 +347,7 @@ const RankingsHandler = (function () {
                     <h3>Bottom ${bottomN.length}</h3>
                     <table class="score-table">
                         <thead>
-                            <tr>
+                            <tr class="score-header">
                                 <th>Rang</th>
                                 <th>${type}</th>
                                 <th>Population</th>
@@ -365,8 +357,8 @@ const RankingsHandler = (function () {
                         <tbody>
                             ${bottomN
                                 .map(
-                                    (item) => `
-                                <tr>
+                                    (item, index) => `
+                                <tr class="${index >= bottomN.length - 3 && index < bottomN.length ? "bottom-rank" : ""}">
                                     <td>${item.rank}</td>
                                     <td>${type === "Département" ? `${item.name} (${item.deptCode})` : item.name}</td>
                                     <td>${item.population.toLocaleString("fr-FR")}</td>
@@ -403,7 +395,6 @@ const RankingsHandler = (function () {
                 : null;
             const limit = parseInt(topLimitInput.value) || 10;
 
-            // Debug: Log raw input values
             console.log(
                 "Raw popLowerInput.value:",
                 JSON.stringify(popLowerInput.value),
@@ -415,7 +406,6 @@ const RankingsHandler = (function () {
             console.log("Parsed popLower:", popLower);
             console.log("Parsed popUpper:", popUpper);
 
-            // Validate population inputs
             const validPopValues = [1000, 10000, 100000];
             if (popLower !== null && !validPopValues.includes(popLower)) {
                 resultsDiv.innerHTML =
@@ -433,7 +423,6 @@ const RankingsHandler = (function () {
                 return;
             }
 
-            // Construct population_range
             let populationRange = "";
             if (popLower !== null && popUpper !== null) {
                 if (popLower === 1000) {
@@ -452,7 +441,6 @@ const RankingsHandler = (function () {
                 else if (popUpper === 100000) populationRange = "0-100k";
             }
 
-            // Debug: Log constructed populationRange
             console.log(
                 "Constructed populationRange:",
                 JSON.stringify(populationRange),
@@ -478,12 +466,10 @@ const RankingsHandler = (function () {
             }
         }
 
-        // Event listeners
         departementSelect.addEventListener("change", updateRankings);
         metricSelect.addEventListener("change", updateRankings);
         applyButton.addEventListener("click", updateRankings);
 
-        // Initialize
         loadDepartements();
         updateRankings();
 
@@ -495,18 +481,15 @@ const RankingsHandler = (function () {
 })();
 
 (function () {
-    // DOM elements
     const departementSelect = document.getElementById("departementSelect");
     const metricSelect = document.getElementById("metricSelect");
     const resultsDiv = document.getElementById("results");
 
-    // Validate DOM elements
     if (!departementSelect || !metricSelect || !resultsDiv) {
         console.error("One or more DOM elements are missing");
         return;
     }
 
-    // Initialize handler
     const rankingsHandler = RankingsHandler(
         departementSelect,
         metricSelect,
