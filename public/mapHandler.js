@@ -1,4 +1,5 @@
 import { formatNumber, formatPercentage, formatMetricValue } from './utils.js';
+import { apiService } from './apiService.js';
 
 /**
  * Map handler module for displaying interactive maps with statistical data.
@@ -98,17 +99,9 @@ function MapHandler(mapDiv, mapMetricSelect, departementSelect, resultsDiv, depa
 
         // Fetch department data
         try {
-            const response = await fetch(
-                "/api/rankings/departements?limit=101&sort=total_score&direction=DESC",
+            const { data } = await apiService.request(
+                "/api/rankings/departements?limit=101&sort=total_score&direction=DESC"
             );
-            if (!response.ok) {
-                const errorData = await response.text();
-                console.error("API error details:", errorData);
-                throw new Error(
-                    `Failed to fetch department rankings: ${response.status} - ${errorData}`,
-                );
-            }
-            const { data } = await response.json();
             data.forEach((dept) => {
                 if (validDeptCodes.includes(dept.departement)) {
                     deptData[dept.departement] = {
@@ -145,11 +138,9 @@ function MapHandler(mapDiv, mapMetricSelect, departementSelect, resultsDiv, depa
 
         // Fetch GeoJSON
         try {
-            const geoResponse = await fetch(
-                "https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements.geojson",
+            const geoData = await apiService.request(
+                "https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements.geojson"
             );
-            if (!geoResponse.ok) throw new Error("Failed to fetch GeoJSON");
-            const geoData = await geoResponse.json();
 
             // Filter GeoJSON for mainland France and Corsica
             geoData.features = geoData.features.filter((feature) =>

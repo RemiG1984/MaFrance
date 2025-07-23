@@ -1,6 +1,7 @@
 import { DepartmentNames } from './departmentNames.js';
 import { formatNumber, formatPercentage, formatMetricValue } from './utils.js';
 import ErrorHandler from './errorHandler.js';
+import { apiService } from './apiService.js';
 
 /**
  * Rankings page handler for displaying department and commune rankings
@@ -84,13 +85,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const url = `/api/rankings/${currentParams.level}?${params.toString()}`;
             console.log('Fetching rankings from:', url);
 
-            const response = await fetch(url);
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`HTTP ${response.status}: ${errorText}`);
-            }
-
-            const result = await response.json();
+            const result = await apiService.request(url);
             console.log('Rankings data:', result);
 
             hideLoading();

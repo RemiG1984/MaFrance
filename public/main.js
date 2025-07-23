@@ -6,7 +6,9 @@ import { ArticleHandler } from './articleHandler.js';
 import { MapHandler } from './mapHandler.js';
 import { DepartmentNames } from './departmentNames.js';
 import { debounce, normalizeDept } from './utils.js';
-import { ErrorHandler } from './errorHandler.js';
+import ErrorHandler from './errorHandler.js';
+import { apiService } from './apiService.js';
+import { validateDepartment, validateCommune } from './validators.js';
 
 /**
  * Main application initialization and event handling

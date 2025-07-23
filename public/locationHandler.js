@@ -1,5 +1,7 @@
 
 import { normalizeDept, debounce } from './utils.js';
+import { apiService } from './apiService.js';
+import { validateDepartment, validateCommune } from './validators.js';
 
 /**
  * Location handler module for managing department, commune, and lieu selection.
@@ -22,13 +24,7 @@ function LocationHandler(
 ) {
     async function loadDepartements() {
         try {
-            const response = await fetch("/api/departements");
-            if (!response.ok) {
-                throw new Error(
-                    "Erreur lors du chargement des départements",
-                );
-            }
-            const departements = await response.json();
+            const departements = await apiService.request("/api/departements");
             console.log("Departments fetched:", departements);
             departementSelect.innerHTML =
                 '<option value="">-- Choisir un département --</option>';
@@ -59,34 +55,19 @@ function LocationHandler(
     }
 
     async function loadCommunes(departement, query = "") {
-        // Normalize departement using utils
+        // Normalize and validate departement
         const normalizedDept = normalizeDept(departement);
-        if (
-            !/^(0[1-9]|[1-8][0-9]|9[0-5]|2[AB]|97[1-6])$/.test(normalizedDept)
-        ) {
-            console.error("Invalid departement code:", normalizedDept);
-            resultsDiv.innerHTML =
-                "<p>Erreur : Code département invalide</p>";
+        const validation = validateDepartment(normalizedDept);
+        if (!validation.isValid) {
+            console.error("Invalid departement code:", normalizedDept, validation.errors);
+            resultsDiv.innerHTML = `<p>Erreur : ${validation.errors.join(', ')}</p>`;
             return;
         }
+        
         try {
             const url = `/api/communes?dept=${normalizedDept}&q=${encodeURIComponent(query)}`;
             console.log("Fetching communes from:", url);
-            const response = await fetch(url);
-            console.log(
-                "Communes response status:",
-                response.status,
-                response.statusText,
-            );
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error("Communes API error response:", errorText);
-                throw new Error(
-                    `Erreur ${response.status}: ${response.statusText} - ${errorText}`,
-                );
-            }
-            const communes = await response.json();
+            const communes = await apiService.request(url);
             console.log("Communes fetched:", communes);
             communeList.innerHTML = "";
             communes.forEach((commune) => {
@@ -107,27 +88,22 @@ function LocationHandler(
     }
 
     async function loadLieux(departement, cog) {
-        // Normalize departement using utils
+        // Normalize and validate departement
         const normalizedDept = normalizeDept(departement);
-        if (
-            !/^(0[1-9]|[1-8][0-9]|9[0-5]|2[AB]|97[1-6])$/.test(normalizedDept)
-        ) {
-            console.error("Invalid departement code:", normalizedDept);
-            resultsDiv.innerHTML =
-                "<p>Erreur : Code département invalide</p>";
+        const validation = validateDepartment(normalizedDept);
+        if (!validation.isValid) {
+            console.error("Invalid departement code:", normalizedDept, validation.errors);
+            resultsDiv.innerHTML = `<p>Erreur : ${validation.errors.join(', ')}</p>`;
             return;
         }
+        
         try {
             let url = `/api/articles/lieux?dept=${normalizedDept}`;
             if (cog) {
                 url += `&cog=${encodeURIComponent(cog)}`;
             }
 
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error("Erreur lors du chargement des lieux");
-            }
-            const lieux = await response.json();
+            const lieux = await apiService.request(url);
             console.log("Lieux fetched:", lieux);
             lieuxSelect.innerHTML =
                 '<option value="">-- Tous les lieux --</option>';

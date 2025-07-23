@@ -1,5 +1,6 @@
 
 import { formatNumber, formatPercentage, formatDate, formatMetricValue } from './utils.js';
+import { apiService } from './apiService.js';
 
 /**
  * Score table handler module for displaying detailed score information.
@@ -16,20 +17,11 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
      */
     async function showCountryDetails() {
         try {
-            const [response, namesResponse, crimeResponse] =
-                await Promise.all([
-                    fetch("/api/country/details"),
-                    fetch("/api/country/names"),
-                    fetch("/api/country/crime"),
-                ]);
-            if (!response.ok) {
-                throw new Error(
-                    `Erreur lors de la récupération des détails du pays: ${response.statusText}`,
-                );
-            }
-            const data = await response.json();
-            const namesData = await namesResponse.json();
-            const crimeData = await crimeResponse.json();
+            const [data, namesData, crimeData] = await Promise.all([
+                apiService.request("/api/country/details"),
+                apiService.request("/api/country/names"),
+                apiService.request("/api/country/crime"),
+            ]);
             console.log("Country details:", data);
             if (!data) {
                 resultsDiv.innerHTML = "<p>Aucun pays trouvé.</p>";

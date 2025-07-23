@@ -1,5 +1,6 @@
 
 import { formatDate } from './utils.js';
+import { apiService } from './apiService.js';
 
 /**
  * Executive Handler module for displaying executive information (ministers, prefects, mayors).
@@ -14,13 +15,7 @@ function ExecutiveHandler(executiveDiv, departmentNames) {
      */
     async function showCountryExecutive() {
         try {
-            const response = await fetch("/api/country/ministre");
-            if (!response.ok) {
-                throw new Error(
-                    `Erreur lors de la récupération du ministre: ${response.statusText}`,
-                );
-            }
-            const data = await response.json();
+            const data = await apiService.request("/api/country/ministre");
             console.log("Country executive data:", data);
             if (!data) {
                 executiveDiv.innerHTML = "<p>Aucun ministre trouvé.</p>";
@@ -49,15 +44,7 @@ function ExecutiveHandler(executiveDiv, departmentNames) {
      */
     async function showDepartmentExecutive(deptCode) {
         try {
-            const response = await fetch(
-                `/api/departements/prefet?dept=${deptCode}`,
-            );
-            if (!response.ok) {
-                throw new Error(
-                    `Erreur lors de la récupération du préfet: ${response.statusText}`,
-                );
-            }
-            const data = await response.json();
+            const data = await apiService.request(`/api/departements/prefet?dept=${deptCode}`);
             console.log("Department executive data:", data);
             if (!data) {
                 executiveDiv.innerHTML = "<p>Aucun préfet trouvé.</p>";
@@ -87,29 +74,13 @@ function ExecutiveHandler(executiveDiv, departmentNames) {
     async function showCommuneExecutive(cog) {
         try {
             // First get commune details from COG
-            const communeResponse = await fetch(
-                `/api/communes/details?cog=${encodeURIComponent(cog)}`,
-            );
-            if (!communeResponse.ok) {
-                throw new Error(
-                    `Erreur lors de la récupération de la commune: ${communeResponse.statusText}`,
-                );
-            }
-            const communeData = await communeResponse.json();
+            const communeData = await apiService.request(`/api/communes/details?cog=${encodeURIComponent(cog)}`);
             if (!communeData) {
                 executiveDiv.innerHTML = "<p>Aucune commune trouvée.</p>";
                 return;
             }
 
-            const response = await fetch(
-                `/api/communes/maire?cog=${encodeURIComponent(cog)}`,
-            );
-            if (!response.ok) {
-                throw new Error(
-                    `Erreur lors de la récupération du maire: ${response.statusText}`,
-                );
-            }
-            const data = await response.json();
+            const data = await apiService.request(`/api/communes/maire?cog=${encodeURIComponent(cog)}`);
             console.log("Commune executive data:", data);
             if (!data) {
                 executiveDiv.innerHTML = "<p>Aucun maire trouvé.</p>";

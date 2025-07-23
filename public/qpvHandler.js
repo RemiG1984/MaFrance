@@ -1,6 +1,7 @@
 
 import { formatNumber, formatPercentage } from './utils.js';
 import { DepartmentNames } from './departmentNames.js';
+import { apiService } from './apiService.js';
 
 /**
  * QPV (Quartiers Prioritaires de la Ville) Handler module for displaying QPV data.
@@ -52,18 +53,7 @@ function QpvHandler() {
             console.log("QPV Handler - API URL:", apiUrl);
             titleDiv.textContent = pageTitle;
 
-            const response = await fetch(apiUrl);
-            console.log("QPV Handler - Response status:", response.status);
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error("QPV Handler - Error response:", errorText);
-                throw new Error(
-                    `Erreur HTTP: ${response.status} - ${errorText}`,
-                );
-            }
-
-            const qpvData = await response.json();
+            const qpvData = await apiService.request(apiUrl);
             console.log("QPV data loaded:", qpvData);
 
             if (!qpvData || qpvData.length === 0) {
