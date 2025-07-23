@@ -1,5 +1,9 @@
-
-import { formatNumber, formatPercentage, formatDate, formatMetricValue } from './utils.js';
+import {
+    formatNumber,
+    formatPercentage,
+    formatDate,
+    formatMetricValue,
+} from "./utils.js";
 
 /**
  * Score table handler module for displaying detailed score information.
@@ -9,19 +13,17 @@ import { formatNumber, formatPercentage, formatDate, formatMetricValue } from '.
  * @returns {Object} Score table handler interface
  */
 function ScoreTableHandler(resultsDiv, departmentNames) {
-    
     /**
      * Displays country-level details with comprehensive statistics.
      * @async
      */
     async function showCountryDetails() {
         try {
-            const [response, namesResponse, crimeResponse] =
-                await Promise.all([
-                    fetch("/api/country/details"),
-                    fetch("/api/country/names"),
-                    fetch("/api/country/crime"),
-                ]);
+            const [response, namesResponse, crimeResponse] = await Promise.all([
+                fetch("/api/country/details"),
+                fetch("/api/country/names"),
+                fetch("/api/country/crime"),
+            ]);
             if (!response.ok) {
                 throw new Error(
                     `Erreur lors de la récupération des détails du pays: ${response.statusText}`,
@@ -40,9 +42,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                         namesData.asiatique_pct,
                 );
                 const musulmanPct = Math.round(namesData.musulman_pct);
-                const traditionnelPct = Math.round(
-                    namesData.traditionnel_pct,
-                );
+                const traditionnelPct = Math.round(namesData.traditionnel_pct);
                 const modernePct = Math.round(namesData.moderne_pct);
                 const yearLabel = namesData.annais
                     ? ` (${namesData.annais})`
@@ -244,9 +244,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                 const countryMusulmanPct = Math.round(
                     countryNamesData.musulman_pct,
                 );
-                const traditionnelPct = Math.round(
-                    namesData.traditionnel_pct,
-                );
+                const traditionnelPct = Math.round(namesData.traditionnel_pct);
                 const countryTraditionnelPct = Math.round(
                     countryNamesData.traditionnel_pct,
                 );
@@ -318,9 +316,8 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                         {
                             title: "Violences sexuelles (pour mille hab.)",
                             main:
-                                crimeData.violences_sexuelles_p1k.toFixed(
-                                    1,
-                                ) + crimeYearLabel,
+                                crimeData.violences_sexuelles_p1k.toFixed(1) +
+                                crimeYearLabel,
                             compare:
                                 countryCrimeData.violences_sexuelles_p1k.toFixed(
                                     1,
@@ -389,16 +386,17 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                                 crimeData.escroqueries_p1k.toFixed(1) +
                                 crimeYearLabel,
                             compare:
-                                countryCrimeData.escroqueries_p1k.toFixed(
-                                    1,
-                                ) + countryCrimeYearLabel,
+                                countryCrimeData.escroqueries_p1k.toFixed(1) +
+                                countryCrimeYearLabel,
                             subRow: true,
                             link: `/crime_graph.html?type=department&code=${deptCode}`,
                         },
                         {
                             title: "Score Immigration",
                             main: formatNumber(data.immigration_score),
-                            compare: formatNumber(countryData.immigration_score),
+                            compare: formatNumber(
+                                countryData.immigration_score,
+                            ),
                         },
                         {
                             title: "Prénoms de naissance extra-européen",
@@ -410,7 +408,9 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                         {
                             title: "Score Islamisation",
                             main: formatNumber(data.islamisation_score),
-                            compare: formatNumber(countryData.islamisation_score),
+                            compare: formatNumber(
+                                countryData.islamisation_score,
+                            ),
                         },
                         {
                             title: "Prénoms de naissance musulmans",
@@ -434,7 +434,9 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                         {
                             title: "Score Défrancisation",
                             main: formatNumber(data.defrancisation_score),
-                            compare: formatNumber(countryData.defrancisation_score),
+                            compare: formatNumber(
+                                countryData.defrancisation_score,
+                            ),
                         },
                         {
                             title: "Prénoms de naissance français",
@@ -469,9 +471,8 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                             compare:
                                 countryData.pop_in_qpv_pct !== null &&
                                 countryData.pop_in_qpv_pct !== undefined
-                                    ? countryData.pop_in_qpv_pct.toFixed(
-                                          1,
-                                      ) + "%"
+                                    ? countryData.pop_in_qpv_pct.toFixed(1) +
+                                      "%"
                                     : "0.0%",
                             subRow: true,
                         },
@@ -481,10 +482,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
             }
         } catch (error) {
             resultsDiv.innerHTML = `<p>Erreur : ${error.message}</p>`;
-            console.error(
-                "Erreur lors de la recherche département:",
-                error,
-            );
+            console.error("Erreur lors de la recherche département:", error);
         }
     }
 
@@ -496,9 +494,13 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
     async function showCommuneDetails(cog) {
         try {
             // First get commune details from COG
-            const communeDetailsResponse = await fetch(`/api/communes/details?cog=${encodeURIComponent(cog)}`);
+            const communeDetailsResponse = await fetch(
+                `/api/communes/details?cog=${encodeURIComponent(cog)}`,
+            );
             if (!communeDetailsResponse.ok) {
-                throw new Error(`Erreur lors de la récupération de la commune: ${communeDetailsResponse.statusText}`);
+                throw new Error(
+                    `Erreur lors de la récupération de la commune: ${communeDetailsResponse.statusText}`,
+                );
             }
             const item = await communeDetailsResponse.json();
             if (!item) {
@@ -509,15 +511,12 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
             const departement = item.departement;
             const commune = item.commune;
 
-            const [
-                deptResponse,
-                deptNamesResponse,
-                deptCrimeResponse,
-            ] = await Promise.all([
-                fetch(`/api/departements/details?dept=${departement}`),
-                fetch(`/api/departements/names?dept=${departement}`),
-                fetch(`/api/departements/crime?dept=${departement}`),
-            ]);
+            const [deptResponse, deptNamesResponse, deptCrimeResponse] =
+                await Promise.all([
+                    fetch(`/api/departements/details?dept=${departement}`),
+                    fetch(`/api/departements/names?dept=${departement}`),
+                    fetch(`/api/departements/crime?dept=${departement}`),
+                ]);
             if (!deptResponse.ok) {
                 throw new Error(
                     `Erreur lors de la récupération du département: ${deptResponse.statusText}`,
@@ -527,7 +526,20 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
             const namesResponse = await fetch(
                 `/api/communes/names?dept=${departement}&cog=${encodeURIComponent(cog)}`,
             );
-            const namesData = await namesResponse.json();
+            let namesData;
+            if (namesResponse.ok) {
+                namesData = await namesResponse.json();
+            } else {
+                // Handle missing names data gracefully
+                namesData = {
+                    musulman_pct: NaN,
+                    africain_pct: NaN,
+                    asiatique_pct: NaN,
+                    traditionnel_pct: NaN,
+                    moderne_pct: NaN,
+                    annais: null,
+                };
+            }
             const crimeResponse = await fetch(
                 `/api/communes/crime?dept=${departement}&cog=${encodeURIComponent(cog)}`,
             );
@@ -553,9 +565,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
             );
             const modernePct = Math.round(namesData.moderne_pct);
             const deptModernePct = Math.round(deptNamesData.moderne_pct);
-            const yearLabel = namesData.annais
-                ? ` (${namesData.annais})`
-                : "";
+            const yearLabel = namesData.annais ? ` (${namesData.annais})` : "";
             const deptYearLabel = deptNamesData.annais
                 ? ` (${deptNamesData.annais})`
                 : "";
@@ -668,8 +678,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                 {
                     title: "Escroqueries (pour mille hab.)",
                     main:
-                        crimeData.escroqueries_p1k.toFixed(1) +
-                        crimeYearLabel,
+                        crimeData.escroqueries_p1k.toFixed(1) + crimeYearLabel,
                     compare:
                         deptCrimeData.escroqueries_p1k.toFixed(1) +
                         deptCrimeYearLabel,
@@ -744,8 +753,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                 {
                     title: "Quartiers Prioritaires (QPV)",
                     main:
-                        item.total_qpv !== null &&
-                        item.total_qpv !== undefined
+                        item.total_qpv !== null && item.total_qpv !== undefined
                             ? item.total_qpv
                             : 0,
                     compare:
