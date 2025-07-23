@@ -44,15 +44,9 @@
         </div>
         <!-- Load Chart.js -->
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <!-- Load modules with error handling -->
-        <script type="module">
-            try {
-                await import('./chartWatermark.js');
-                await import('./departmentNames.js');
-                await import('./crimeGraphHandler.js');
-            } catch (error) {
-                console.error('Error loading modules:', error);
-            }
-        </script>
+        <!-- Load Watermark Plugin -->
+        <script type="module" src="chartWatermark.js"></script>
+        <script type="module" src="departmentNames.js"></script>
+        <script type="module" src="crimeGraphHandler.js"></script>
     </body>
 </html>

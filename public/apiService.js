@@ -1,3 +1,4 @@
+
 /**
  * Centralized API service with caching and error handling.
  */
@@ -7,7 +8,7 @@ class ApiService {
         this.cache = new Map();
         this.cacheExpiry = 5 * 60 * 1000; // 5 minutes
     }
-
+    
     /**
      * Makes cached API requests with consistent error handling.
      * @param {string} url - API endpoint
@@ -17,7 +18,7 @@ class ApiService {
      */
     async request(url, options = {}, useCache = true) {
         const cacheKey = `${url}_${JSON.stringify(options)}`;
-
+        
         // Check cache first
         if (useCache && this.cache.has(cacheKey)) {
             const cached = this.cache.get(cacheKey);
@@ -27,7 +28,7 @@ class ApiService {
             }
             this.cache.delete(cacheKey);
         }
-
+        
         try {
             const response = await fetch(url, {
                 ...options,
@@ -36,19 +37,13 @@ class ApiService {
                     ...options.headers
                 }
             });
-
+            
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
-
-            // For external GeoJSON files, return the JSON directly
-            if (url.includes('geojson')) {
-                const data = await response.json();
-                return data;
-            }
-
+            
             const data = await response.json();
-
+            
             // Cache successful responses
             if (useCache) {
                 this.cache.set(cacheKey, {
@@ -56,31 +51,20 @@ class ApiService {
                     timestamp: Date.now()
                 });
             }
-
+            
             return data;
         } catch (error) {
-            console.error('API request failed:', { url, error: error.message });
+            console.error('API request failed:', { url, error });
             throw error;
         }
     }
-
+    
     /**
      * Clears the API cache.
      */
     clearCache() {
         this.cache.clear();
     }
-}
-
-// Export for ES6 modules
-export { ApiService };
-
-// Export as default as well for compatibility
-export default ApiService;
-
-// Initialize when the script loads (for backward compatibility)
-if (typeof window !== 'undefined') {
-    window.ApiService = ApiService;
 }
 
 // Export singleton instance
@@ -95,7 +79,7 @@ export const api = {
         apiService.request(`/api/departements/crime_history?dept=${code}`),
     getDepartmentNamesHistory: (code) => 
         apiService.request(`/api/departements/names_history?dept=${code}`),
-
+    
     // Commune data
     getCommuneDetails: (dept, cog) => 
         apiService.request(`/api/communes/details/${dept}/${cog}`),
@@ -103,7 +87,7 @@ export const api = {
         apiService.request(`/api/communes/crime_history?dept=${dept}&cog=${cog}`),
     getCommuneNamesHistory: (dept, cog) => 
         apiService.request(`/api/communes/names_history?dept=${dept}&cog=${cog}`),
-
+    
     // Country data
     getCountryDetails: (country = 'France') => 
         apiService.request(`/api/country/details?country=${country}`),
@@ -111,7 +95,7 @@ export const api = {
         apiService.request(`/api/country/crime_history?country=${country}`),
     getCountryNamesHistory: (country = 'France') => 
         apiService.request(`/api/country/names_history?country=${country}`),
-
+    
     // Location data
     getDepartments: () => 
         apiService.request('/api/departements'),
@@ -119,13 +103,13 @@ export const api = {
         apiService.request(`/api/communes/${dept}`),
     getLieux: (dept, cog) => 
         apiService.request(`/api/lieux/${dept}/${cog}`),
-
+    
     // QPV data
     getQpvDepartment: (code) => 
         apiService.request(`/api/qpv/departement/${code}`),
     getQpvCommune: (code) => 
         apiService.request(`/api/qpv/commune/${code}`),
-
+    
     // Articles
     getArticles: (params) => {
         const queryString = new URLSearchParams(params).toString();

@@ -1,251 +1,247 @@
+import { debounce } from './utils.js';
 import { LocationHandler } from './locationHandler.js';
 import { ScoreTableHandler } from './scoreTableHandler.js';
 import { ExecutiveHandler } from './executiveHandler.js';
 import { ArticleHandler } from './articleHandler.js';
 import { MapHandler } from './mapHandler.js';
 import { DepartmentNames } from './departmentNames.js';
-import { debounce, normalizeDept } from './utils.js';
-import { ErrorHandler } from './errorHandler.js';
-import { apiService } from './apiService.js';
-import { validateDepartment, validateCommune } from './validators.js';
 
-/**
- * Main application initialization and event handling
- */
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize error handler
-    const errorHandler = ErrorHandler();
+(function () {
+    // Use shared department names
+    const departmentNames = DepartmentNames;
 
-    // Get DOM elements
-    const departementSelect = document.getElementById('departementSelect');
-    const communeInput = document.getElementById('communeInput');
-    const communeList = document.getElementById('communeList');
-    const lieuxSelect = document.getElementById('lieuxSelect');
-    const resultsDiv = document.getElementById('results');
-    const executiveDiv = document.getElementById('executive');
-    const articleListDiv = document.getElementById('articleList');
-    const filterButtonsDiv = document.getElementById('filterButtons');
-    const mapDiv = document.getElementById('mapContainer');
+    // DOM elements
+    const departementSelect = document.getElementById("departementSelect");
+    const communeInput = document.getElementById("communeInput");
+    const communeList = document.getElementById("communeList");
+    const lieuxSelect = document.getElementById("lieuxSelect");
+    const resultsDiv = document.getElementById("results");
+    const executiveDiv = document.getElementById("executiveDetails");
+    const articleListDiv = document.getElementById("articleList");
+    const filterButtonsDiv = document.getElementById("filterButtons");
+    const mapDiv = document.getElementById('map');
     const mapMetricSelect = document.getElementById('mapMetricSelect');
 
-    // Check if required elements exist
-    if (!departementSelect || !communeInput || !communeList || !lieuxSelect || !resultsDiv) {
-        console.error('Required DOM elements not found');
+    // Validate DOM elements
+    if (
+        !departementSelect ||
+        !communeInput ||
+        !communeList ||
+        !lieuxSelect ||
+        !resultsDiv ||
+        !executiveDiv ||
+        !articleListDiv ||
+        !filterButtonsDiv
+    ) {
+        console.error("One or more DOM elements are missing");
+        return;
+    }
+    if (!mapDiv || !mapMetricSelect) {
+        console.error('Map elements missing');
         return;
     }
 
-    // Initialize handlers
-    let locationHandler, scoreTableHandler, executiveHandler, articleHandler, mapHandler;
-
-    try {
-        locationHandler = LocationHandler(
-            departementSelect,
-            communeInput,
-            communeList,
-            lieuxSelect,
-            resultsDiv,
-            DepartmentNames
-        );
-
-        scoreTableHandler = ScoreTableHandler(resultsDiv, DepartmentNames);
-
-        if (executiveDiv) {
-            executiveHandler = ExecutiveHandler(executiveDiv, DepartmentNames);
-        }
-
-        if (articleListDiv && filterButtonsDiv) {
+    // Initialize modules with lazy loading
+    const locationHandler = LocationHandler(
+        departementSelect,
+        communeInput,
+        communeList,
+        lieuxSelect,
+        resultsDiv,
+        departmentNames,
+    );
+    
+    // Lazy load other modules to improve initial page load
+    let articleHandler, scoreTableHandler, executiveHandler, mapHandler;
+    
+    // Initialize article handler when needed
+    const getArticleHandler = () => {
+        if (!articleHandler) {
             articleHandler = ArticleHandler(articleListDiv, filterButtonsDiv);
         }
-
-        if (mapDiv && mapMetricSelect) {
-            mapHandler = MapHandler(mapDiv, mapMetricSelect, departementSelect, resultsDiv, DepartmentNames);
+        return articleHandler;
+    };
+    
+    // Initialize score table handler when needed
+    const getScoreTableHandler = () => {
+        if (!scoreTableHandler) {
+            scoreTableHandler = ScoreTableHandler(resultsDiv, departmentNames);
         }
-    } catch (error) {
-        console.error('Error initializing handlers:', error);
-        errorHandler.handleError(error, 'Failed to initialize application handlers');
-        return;
-    }
-
-    // Global variables
-    let currentCOG = null;
-    let currentCommune = null;
-    let currentDepartement = null;
-    window.allArticles = [];
-
-    // Initialize the application
-    async function init() {
-        try {
-            await locationHandler.loadDepartements();
-
-            // Show country details by default
-            if (scoreTableHandler) {
-                await scoreTableHandler.showCountryDetails();
-            }
-
-            if (executiveHandler) {
-                await executiveHandler.showCountryExecutive();
-            }
-        } catch (error) {
-            console.error('Error during initialization:', error);
-            errorHandler.handleError(error, 'Failed to initialize application');
+        return scoreTableHandler;
+    };
+    
+    // Initialize executive handler when needed
+    const getExecutiveHandler = () => {
+        if (!executiveHandler) {
+            executiveHandler = ExecutiveHandler(executiveDiv, departmentNames);
         }
-    }
+        return executiveHandler;
+    };
+    
+    // Initialize map handler when needed
+    const getMapHandler = () => {
+        if (!mapHandler) {
+            mapHandler = MapHandler(mapDiv, mapMetricSelect, departementSelect, resultsDiv, departmentNames);
+        }
+        return mapHandler;
+    };
+
+    // Shared state
+    let currentLieu = "";
+    let allArticles = [];
 
     // Event listeners
-    departementSelect.addEventListener('change', async function() {
-        const selectedDept = this.value;
-        currentDepartement = selectedDept;
-
-        try {
-            if (selectedDept) {
-                // Enable commune input
-                communeInput.disabled = false;
-                communeInput.value = '';
-
-                // Reset dependent fields
-                currentCOG = null;
-                currentCommune = null;
-                lieuxSelect.innerHTML = '<option value="">-- Tous les lieux --</option>';
-                lieuxSelect.disabled = true;
-
-                // Clear articles
-                if (articleHandler) {
-                    articleHandler.clearArticles();
-                }
-
-                // Show department details
-                if (scoreTableHandler && typeof scoreTableHandler.showDepartmentDetails === 'function') {
-                    await scoreTableHandler.showDepartmentDetails(selectedDept);
-                }
-
-                if (executiveHandler && typeof executiveHandler.showDepartmentExecutive === 'function') {
-                    await executiveHandler.showDepartmentExecutive(selectedDept);
-                }
-
-                // Load articles for department
-                if (articleHandler) {
-                    const articles = await articleHandler.loadArticles(selectedDept);
-                    const counts = await articleHandler.loadArticleCounts(selectedDept);
-                    articleHandler.renderFilterButtons(counts, articles, '');
-                }
-            } else {
-                // Reset to country view
-                locationHandler.resetCommuneAndLieux();
-                currentDepartement = null;
-                currentCOG = null;
-                currentCommune = null;
-
-                if (articleHandler) {
-                    articleHandler.clearArticles();
-                }
-
-                if (scoreTableHandler && typeof scoreTableHandler.showCountryDetails === 'function') {
-                    await scoreTableHandler.showCountryDetails();
-                }
-
-                if (executiveHandler && typeof executiveHandler.showCountryExecutive === 'function') {
-                    await executiveHandler.showCountryExecutive();
-                }
-            }
-        } catch (error) {
-            console.error('Error handling department change:', error);
-            errorHandler.handleError(error, 'Failed to load department data');
+    departementSelect.addEventListener("change", () => {
+        const departement = departementSelect.value;
+        locationHandler.resetCommuneAndLieux();
+        articleHandler.clearArticles();
+        currentLieu = "";
+        communeInput.value = "";
+        articleHandler.setFilter(null);
+        console.log("Reset filter on department change");
+        if (departement) {
+            scoreTableHandler.showDepartmentDetails(departement);
+            executiveHandler.showDepartmentExecutive(departement);
+            locationHandler.loadCommunes(departement);
+            articleHandler.loadArticles(departement).then(() => {
+                articleHandler.loadArticleCounts(departement).then((counts) => {
+                    articleHandler.renderFilterButtons(
+                        counts,
+                        allArticles,
+                        currentLieu,
+                    );
+                });
+            });
+        } else {
+            scoreTableHandler.showCountryDetails();
+            executiveHandler.showCountryExecutive();
+            articleHandler.clearArticles();
         }
     });
 
-    // Debounced commune input handler
-    const debouncedCommuneHandler = debounce(async function(query) {
-        if (!currentDepartement) return;
-
-        try {
-            await locationHandler.handleCommuneInput(currentDepartement, query);
-        } catch (error) {
-            console.error('Error handling commune input:', error);
-            errorHandler.handleError(error, 'Failed to search communes');
+    const debouncedInputHandler = debounce(() => {
+        const departement = departementSelect.value;
+        const query = communeInput.value;
+        locationHandler.handleCommuneInput(departement, query);
+        if (!(departement && query.length >= 2)) {
+            locationHandler.resetCommuneAndLieux();
+            articleHandler.clearArticles();
+            currentLieu = "";
+            articleHandler.setFilter(null);
+            console.log("Reset filter on commune input");
+            if (departement && query.length === 0) {
+                scoreTableHandler.showDepartmentDetails(departement);
+                executiveHandler.showDepartmentExecutive(departement);
+                articleHandler.loadArticles(departement).then(() => {
+                    articleHandler
+                        .loadArticleCounts(departement)
+                        .then((counts) => {
+                            articleHandler.renderFilterButtons(
+                                counts,
+                                allArticles,
+                                currentLieu,
+                            );
+                        });
+                });
+            } else if (!departement) {
+                scoreTableHandler.showCountryDetails();
+                executiveHandler.showCountryExecutive();
+                articleHandler.clearArticles();
+            }
         }
     }, 300);
 
-    communeInput.addEventListener('input', function() {
-        const query = this.value.trim();
-        debouncedCommuneHandler(query);
-    });
+    communeInput.addEventListener("input", debouncedInputHandler);
 
-    communeInput.addEventListener('change', async function() {
-        const selectedCommune = this.value.trim();
-
-        if (!selectedCommune || !currentDepartement) {
-            return;
-        }
-
-        try {
-            // Find the COG for the selected commune
-            const response = await fetch(`/api/communes?dept=${currentDepartement}&q=${encodeURIComponent(selectedCommune)}`);
-            if (!response.ok) {
-                throw new Error('Failed to fetch commune details');
+    communeInput.addEventListener("change", async () => {
+        const departement = departementSelect.value;
+        const commune = communeInput.value;
+        if (departement && commune) {
+            try {
+                const response = await fetch(
+                    `/api/search?dept=${departement}&q=${encodeURIComponent(commune)}`,
+                );
+                if (!response.ok) {
+                    throw new Error(
+                        `Erreur lors de la récupération de la commune: ${response.statusText}`,
+                    );
+                }
+                const data = await response.json();
+                if (data.length === 0) {
+                    resultsDiv.innerHTML = "<p>Aucune commune trouvée.</p>";
+                    executiveDiv.innerHTML = "<p>Aucune commune trouvée.</p>";
+                    return;
+                }
+                const item = data[0];
+                const cog = item.COG;
+                scoreTableHandler.showCommuneDetails(cog);
+                executiveHandler.showCommuneExecutive(cog);
+                locationHandler.loadLieux(departement, cog);
+                articleHandler.loadArticles(departement, cog).then(() => {
+                    articleHandler
+                        .loadArticleCounts(departement, cog)
+                        .then((counts) => {
+                            articleHandler.renderFilterButtons(
+                                counts,
+                                allArticles,
+                                currentLieu,
+                            );
+                        });
+                });
+            } catch (error) {
+                resultsDiv.innerHTML = `<p>Erreur : ${error.message}</p>`;
+                executiveDiv.innerHTML = `<p>Erreur : ${error.message}</p>`;
+                console.error("Erreur lors de la recherche:", error);
             }
-
-            const communes = await response.json();
-            const matchingCommune = communes.find(c => c.commune.toLowerCase() === selectedCommune.toLowerCase());
-
-            if (matchingCommune) {
-                currentCOG = matchingCommune.cog;
-                currentCommune = matchingCommune.commune;
-
-                // Enable lieu selection
-                lieuxSelect.disabled = false;
-
-                // Load lieux for the commune
-                await locationHandler.loadLieux(currentDepartement, currentCOG);
-
-                // Show commune details
-                if (scoreTableHandler && typeof scoreTableHandler.showCommuneDetails === 'function') {
-                    await scoreTableHandler.showCommuneDetails(currentCOG);
-                }
-
-                if (executiveHandler && typeof executiveHandler.showCommuneExecutive === 'function') {
-                    await executiveHandler.showCommuneExecutive(currentCOG);
-                }
-
-                // Load articles for commune
-                if (articleHandler) {
-                    const articles = await articleHandler.loadArticles(currentDepartement, currentCOG);
-                    const counts = await articleHandler.loadArticleCounts(currentDepartement, currentCOG);
-                    articleHandler.renderFilterButtons(counts, articles, '');
-                }
-            } else {
-                console.warn('Commune not found:', selectedCommune);
-            }
-        } catch (error) {
-            console.error('Error handling commune selection:', error);
-            errorHandler.handleError(error, 'Failed to load commune data');
         }
     });
 
-    lieuxSelect.addEventListener('change', async function() {
-        const selectedLieu = this.value;
-
-        if (!currentDepartement) return;
-
-        try {
-            if (articleHandler) {
-                if (currentCOG) {
-                    // Commune level with lieu filter
-                    const articles = await articleHandler.loadArticles(currentDepartement, currentCOG, selectedLieu);
-                    const counts = await articleHandler.loadArticleCounts(currentDepartement, currentCOG, selectedLieu);
-                    articleHandler.renderFilterButtons(counts, articles, selectedLieu);
-                } else {
-                    // Department level with lieu filter
-                    const articles = await articleHandler.loadArticles(currentDepartement, '', selectedLieu);
-                    const counts = await articleHandler.loadArticleCounts(currentDepartement, '', selectedLieu);
-                    articleHandler.renderFilterButtons(counts, articles, selectedLieu);
+    lieuxSelect.addEventListener("change", async () => {
+        const departement = departementSelect.value;
+        const commune = communeInput.value;
+        currentLieu = lieuxSelect.value;
+        console.log("Current lieu set to:", currentLieu);
+        if (departement && commune) {
+            try {
+                const response = await fetch(
+                    `/api/search?dept=${departement}&q=${encodeURIComponent(commune)}`,
+                );
+                if (!response.ok) {
+                    throw new Error(
+                        `Erreur lors de la récupération de la commune: ${response.statusText}`,
+                    );
                 }
+                const data = await response.json();
+                if (data.length === 0) {
+                    resultsDiv.innerHTML = "<p>Aucune commune trouvée.</p>";
+                    executiveDiv.innerHTML = "<p>Aucune commune trouvée.</p>";
+                    return;
+                }
+                const item = data[0];
+                const cog = item.COG;
+                articleHandler
+                    .loadArticles(departement, cog, currentLieu)
+                    .then(() => {
+                        articleHandler
+                            .loadArticleCounts(departement, cog, currentLieu)
+                            .then((counts) => {
+                                articleHandler.renderFilterButtons(
+                                    counts,
+                                    allArticles,
+                                    currentLieu,
+                                );
+                            });
+                    });
+            } catch (error) {
+                resultsDiv.innerHTML = `<p>Erreur : ${error.message}</p>`;
+                executiveDiv.innerHTML = `<p>Erreur : ${error.message}</p>`;
+                console.error("Erreur lors de la recherche:", error);
             }
-        } catch (error) {
-            console.error('Error handling lieu selection:', error);
-            errorHandler.handleError(error, 'Failed to filter articles by location');
         }
     });
 
-    // Initialize the application
-    init();
-});
+    // Initialize app
+    scoreTableHandler.showCountryDetails();
+    executiveHandler.showCountryExecutive();
+    locationHandler.loadDepartements();
+})();
