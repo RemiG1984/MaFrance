@@ -41,7 +41,7 @@ import { DepartmentNames } from './departmentNames.js';
         return;
     }
 
-    // Initialize modules
+    // Initialize modules with lazy loading
     const locationHandler = LocationHandler(
         departementSelect,
         communeInput,
@@ -50,10 +50,41 @@ import { DepartmentNames } from './departmentNames.js';
         resultsDiv,
         departmentNames,
     );
-    const articleHandler = ArticleHandler(articleListDiv, filterButtonsDiv);
-    const scoreTableHandler = ScoreTableHandler(resultsDiv, departmentNames);
-    const executiveHandler = ExecutiveHandler(executiveDiv, departmentNames);
-    const mapHandler = MapHandler(mapDiv, mapMetricSelect, departementSelect, resultsDiv, departmentNames);
+    
+    // Lazy load other modules to improve initial page load
+    let articleHandler, scoreTableHandler, executiveHandler, mapHandler;
+    
+    // Initialize article handler when needed
+    const getArticleHandler = () => {
+        if (!articleHandler) {
+            articleHandler = ArticleHandler(articleListDiv, filterButtonsDiv);
+        }
+        return articleHandler;
+    };
+    
+    // Initialize score table handler when needed
+    const getScoreTableHandler = () => {
+        if (!scoreTableHandler) {
+            scoreTableHandler = ScoreTableHandler(resultsDiv, departmentNames);
+        }
+        return scoreTableHandler;
+    };
+    
+    // Initialize executive handler when needed
+    const getExecutiveHandler = () => {
+        if (!executiveHandler) {
+            executiveHandler = ExecutiveHandler(executiveDiv, departmentNames);
+        }
+        return executiveHandler;
+    };
+    
+    // Initialize map handler when needed
+    const getMapHandler = () => {
+        if (!mapHandler) {
+            mapHandler = MapHandler(mapDiv, mapMetricSelect, departementSelect, resultsDiv, departmentNames);
+        }
+        return mapHandler;
+    };
 
     // Shared state
     let currentLieu = "";
