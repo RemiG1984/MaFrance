@@ -1,7 +1,7 @@
 import { formatNumber, formatPercentage } from './utils.js';
 import { DepartmentNames } from './departmentNames.js';
 import { apiService } from './apiService.js';
-import ErrorHandler from './errorHandler.js';
+import { ErrorHandler } from './errorHandler.js';
 
 /**
  * Crime Graph Handler module for displaying crime statistics charts.

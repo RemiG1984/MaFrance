@@ -1,6 +1,6 @@
 import { DepartmentNames } from './departmentNames.js';
 import { formatNumber, formatPercentage, formatMetricValue } from './utils.js';
-import ErrorHandler from './errorHandler.js';
+import { ErrorHandler } from './errorHandler.js';
 import { apiService } from './apiService.js';
 
 /**

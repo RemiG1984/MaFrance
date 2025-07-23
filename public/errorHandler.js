@@ -74,8 +74,8 @@ export class LoadingManager {
         this.isLoading = false;
     }
 }
-// Export for ES6 modules (default export)
-export default function ErrorHandler() {
+// Default export function
+function ErrorHandler() {
     return {
         handleError: (error, context) => {
             console.error(`Error in ${context}:`, error);
@@ -85,16 +85,12 @@ export default function ErrorHandler() {
 }
 
 // Named exports
-export { LoadingManager, displayError };
+export { LoadingManager, displayError, ErrorHandler };
+
+// Default export
+export default ErrorHandler;
 
 // Make available globally for backward compatibility
 if (typeof window !== 'undefined') {
-    window.ErrorHandler = function() {
-        return {
-            handleError: (error, context) => {
-                console.error(`Error in ${context}:`, error);
-                displayError(document.body, error);
-            }
-        };
-    };
+    window.ErrorHandler = ErrorHandler;
 }
