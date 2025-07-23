@@ -1,110 +1,146 @@
-import { formatDate, normalizeDept } from './utils.js';
-
-/**
- * Executive handler module for displaying information about political executives.
- * Manages the display of ministers, prefects, and mayors.
- * @param {HTMLElement} executiveDiv - Container for displaying executive information
- * @param {Object} departmentNames - Department names mapping
- * @returns {Object} Executive handler interface
- */
-function ExecutiveHandler(executiveDiv, departmentNames) {
-
-    /**
-     * Displays country-level executive information (Minister of Interior).
-     * @async
-     */
-    async function showCountryExecutive() {
-        try {
-            const response = await fetch('/api/country/ministre');
-            if (!response.ok) {
-                throw new Error('Erreur lors de la récupération des données de l\'exécutif');
+const ExecutiveHandler = (function () {
+    return function (executiveDiv, departmentNames) {
+        async function showCountryExecutive() {
+            try {
+                const response = await fetch("/api/country/ministre");
+                if (!response.ok) {
+                    throw new Error(
+                        `Erreur lors de la récupération du ministre: ${response.statusText}`,
+                    );
+                }
+                const data = await response.json();
+                console.log("Country executive data:", data);
+                if (!data) {
+                    executiveDiv.innerHTML = "<p>Aucun ministre trouvé.</p>";
+                } else {
+                    renderExecutive(
+                        "France",
+                        "Ministre de l'intérieur",
+                        data.prenom,
+                        data.nom,
+                        data.date_mandat,
+                        data.famille_nuance,
+                    );
+                }
+            } catch (error) {
+                executiveDiv.innerHTML = `<p>Erreur : ${error.message}</p>`;
+                console.error(
+                    "Erreur lors de la récupération du ministre:",
+                    error,
+                );
             }
-            const data = await response.json();
-            console.log("Country executive data:", data);
+        }
 
-            const formattedDate = formatDate(data.date_mandat);
+        async function showDepartmentExecutive(deptCode) {
+            try {
+                const response = await fetch(
+                    `/api/departements/prefet?dept=${deptCode}`,
+                );
+                if (!response.ok) {
+                    throw new Error(
+                        `Erreur lors de la récupération du préfet: ${response.statusText}`,
+                    );
+                }
+                const data = await response.json();
+                console.log("Department executive data:", data);
+                if (!data) {
+                    executiveDiv.innerHTML = "<p>Aucun préfet trouvé.</p>";
+                } else {
+                    renderExecutive(
+                        `${departmentNames[deptCode]} (${deptCode})`,
+                        "Préfet",
+                        data.prenom,
+                        data.nom,
+                        data.date_poste,
+                        null, // No famille_nuance for prefets
+                    );
+                }
+            } catch (error) {
+                executiveDiv.innerHTML = `<p>Erreur : ${error.message}</p>`;
+                console.error(
+                    "Erreur lors de la récupération du préfet:",
+                    error,
+                );
+            }
+        }
 
+        async function showCommuneExecutive(cog) {
+            try {
+                // First get commune details from COG
+                const communeResponse = await fetch(
+                    `/api/communes/details?cog=${encodeURIComponent(cog)}`,
+                );
+                if (!communeResponse.ok) {
+                    throw new Error(
+                        `Erreur lors de la récupération de la commune: ${communeResponse.statusText}`,
+                    );
+                }
+                const communeData = await communeResponse.json();
+                if (!communeData) {
+                    executiveDiv.innerHTML = "<p>Aucune commune trouvée.</p>";
+                    return;
+                }
+
+                const response = await fetch(
+                    `/api/communes/maire?cog=${encodeURIComponent(cog)}`,
+                );
+                if (!response.ok) {
+                    throw new Error(
+                        `Erreur lors de la récupération du maire: ${response.statusText}`,
+                    );
+                }
+                const data = await response.json();
+                console.log("Commune executive data:", data);
+                if (!data) {
+                    executiveDiv.innerHTML = "<p>Aucun maire trouvé.</p>";
+                } else {
+                    renderExecutive(
+                        `${communeData.commune} (${communeData.departement})`,
+                        "Maire",
+                        data.prenom,
+                        data.nom,
+                        data.date_mandat,
+                        data.famille_nuance,
+                    );
+                }
+            } catch (error) {
+                executiveDiv.innerHTML = `<p>Erreur : ${error.message}</p>`;
+                console.error(
+                    "Erreur lors de la récupération du maire:",
+                    error,
+                );
+            }
+        }
+
+        function renderExecutive(
+            location,
+            position,
+            prenom,
+            nom,
+            date,
+            familleNuance,
+        ) {
+            const dateLabel = date ? ` depuis le ${formatDate(date)}` : "";
+            const familleLabel = familleNuance
+                ? `<br>Famille politique: <span class="executive-famille">${familleNuance}</span>`
+                : "";
             executiveDiv.innerHTML = `
-                <h3>Ministre de l'Intérieur</h3>
                 <div class="executive-box">
-                    <p><strong>Nom :</strong> ${data.prenom} ${data.nom}</p>
-                    <p><strong>Prise de fonction :</strong> ${formattedDate}</p>
-                    <p><strong>Famille politique :</strong> ${data.famille_nuance}</p>
+                    <p>${position} de ${location}: <span class="executive-name">${prenom} ${nom}</span>${dateLabel}${familleLabel}</p>
                 </div>
             `;
-        } catch (error) {
-            console.error("Erreur lors de la récupération de l'exécutif du pays:", error);
-            executiveDiv.innerHTML = `<p>Erreur : ${error.message}</p>`;
         }
-    }
 
-    /**
-     * Displays department-level executive information (Prefect).
-     * @async
-     * @param {string} departement - Department code
-     */
-    async function showDepartmentExecutive(departement) {
-        const normalizedDept = normalizeDept(departement);
-
-        try {
-            const response = await fetch(`/api/departements/prefet?dept=${normalizedDept}`);
-            if (!response.ok) {
-                throw new Error('Erreur lors de la récupération des données du préfet');
-            }
-
-            const data = await response.json();
-            const deptName = departmentNames[departement] || departement;
-            const formattedDate = formatDate(data.date_poste);
-
-            executiveDiv.innerHTML = `
-                <h3>Préfet de ${deptName}</h3>
-                <div class="executive-box">
-                    <p><strong>Nom :</strong> ${data.prenom} ${data.nom}</p>
-                    <p><strong>Prise de fonction :</strong> ${formattedDate}</p>
-                </div>
-            `;
-        } catch (error) {
-            console.error("Erreur lors de la récupération du préfet:", error);
-            executiveDiv.innerHTML = `<p>Erreur : ${error.message}</p>`;
+        function formatDate(dateStr) {
+            if (!dateStr) return "";
+            const [year, month, day] = dateStr.split("-");
+            return `${day}/${month}/${year}`;
         }
-    }
 
-    /**
-     * Displays commune-level executive information (Mayor).
-     * @async
-     * @param {string} cog - Commune COG code
-     */
-    async function showCommuneExecutive(cog) {
-        try {
-            const response = await fetch(`/api/communes/${cog}/maire`);
-            if (!response.ok) {
-                throw new Error('Erreur lors de la récupération des données du maire');
-            }
-
-            const data = await response.json();
-            const formattedDate = formatDate(data.date_election);
-
-            executiveDiv.innerHTML = `
-                <h3>Maire de ${data.commune}</h3>
-                <div class="executive-box">
-                    <p><strong>Nom :</strong> ${data.prenom} ${data.nom}</p>
-                    <p><strong>Sexe :</strong> ${data.sexe === 'M' ? 'Masculin' : 'Féminin'}</p>
-                    <p><strong>Date d'élection :</strong> ${formattedDate}</p>
-                    <p><strong>Nuance politique :</strong> ${data.nuance_politique || 'Non renseigné'}</p>
-                </div>
-            `;
-        } catch (error) {
-            console.error("Erreur lors de la récupération du maire:", error);
-            executiveDiv.innerHTML = `<p>Erreur : ${error.message}</p>`;
-        }
-    }
-
-    return {
-        showCountryExecutive,
-        showDepartmentExecutive,
-        showCommuneExecutive
+        return {
+            showCountryExecutive,
+            showDepartmentExecutive,
+            showCommuneExecutive,
+        };
     };
-}
-
-// Export for ES6 modules
-export { ExecutiveHandler };
+})();
