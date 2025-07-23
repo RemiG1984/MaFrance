@@ -50,10 +50,10 @@ import { DepartmentNames } from './departmentNames.js';
         resultsDiv,
         departmentNames,
     );
-    
+
     // Lazy load other modules to improve initial page load
     let articleHandler, scoreTableHandler, executiveHandler, mapHandler;
-    
+
     // Initialize article handler when needed
     const getArticleHandler = () => {
         if (!articleHandler) {
@@ -61,7 +61,7 @@ import { DepartmentNames } from './departmentNames.js';
         }
         return articleHandler;
     };
-    
+
     // Initialize score table handler when needed
     const getScoreTableHandler = () => {
         if (!scoreTableHandler) {
@@ -69,7 +69,7 @@ import { DepartmentNames } from './departmentNames.js';
         }
         return scoreTableHandler;
     };
-    
+
     // Initialize executive handler when needed
     const getExecutiveHandler = () => {
         if (!executiveHandler) {
@@ -77,7 +77,7 @@ import { DepartmentNames } from './departmentNames.js';
         }
         return executiveHandler;
     };
-    
+
     // Initialize map handler when needed
     const getMapHandler = () => {
         if (!mapHandler) {

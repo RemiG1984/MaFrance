@@ -1,5 +1,15 @@
 import { DepartmentNames } from './departmentNames.js';
+import { formatNumber, formatPercentage, formatMetricValue } from './utils.js';
+import { displayError, showLoading } from './errorHandler.js';
+import { apiService } from './apiService.js';
 
+/**
+ * RankingsHandler Module
+ *
+ * This module is responsible for fetching and rendering rankings data based on
+ * various criteria such as scope (France, department), metric, and population.
+ * It also handles user interactions with the UI for tweaking parameters.
+ */
 const RankingsHandler = (function () {
     // Use shared department names
     const departmentNames = DepartmentNames;
