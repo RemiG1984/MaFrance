@@ -124,7 +124,7 @@ const validateDirection = [
 const validatePagination = [
   query("limit")
     .optional()
-    .isInt({ min: 1, max: 100 })
+    .isInt({ min: 1, max: 101 })
     .withMessage("Limit doit être un entier entre 1 et 100")
     .toInt(),
   query("offset")

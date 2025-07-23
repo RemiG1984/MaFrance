@@ -163,6 +163,8 @@ const RankingsHandler = (function () {
                 );
 
                 const bottomRankings = filteredBottomData
+                    .sort((a, b) => (b[metric] || 0) - (a[metric] || 0))
+                    .slice(0, limit)
                     .map((dept, index) => ({
                         deptCode: dept.departement,
                         name:
@@ -312,6 +314,8 @@ const RankingsHandler = (function () {
                 );
 
                 const bottomRankings = filteredBottomData
+                    .sort((a, b) => (b[metric] || 0) - (a[metric] || 0))
+                    .slice(0, limit)
                     .map((commune, index) => ({
                         deptCode: commune.departement,
                         name: commune.commune,

@@ -1,0 +1,343 @@
+const MapHandler = (function () {
+    return function (
+        mapDiv,
+        metricSelect,
+        departementSelect,
+        resultsDiv,
+        departmentNames,
+    ) {
+        let map;
+        let geoJsonLayer;
+        let deptData = {};
+        let currentMetric = "total_score";
+        let legendControl = null;
+
+        // Valid department codes (mainland France + Corsica)
+        const validDeptCodes = [
+            ...Array.from({ length: 95 }, (_, i) =>
+                String(i + 1).padStart(2, "0"),
+            ), // 01–95
+            "2A",
+            "2B", // Corsica
+        ];
+
+        // Metrics list (matches your metricSelect options from rankings.js)
+        const metrics = [
+            { value: "total_score", label: "Score Total" },
+            { value: "insecurite_score", label: "Score Insécurité" },
+            {
+                value: "homicides_p100k",
+                label: "Homicides et tentatives (pour 100k hab.)",
+            },
+            {
+                value: "violences_physiques_p1k",
+                label: "Violences physiques (pour mille hab.)",
+            },
+            {
+                value: "violences_sexuelles_p1k",
+                label: "Violences sexuelles (pour mille hab.)",
+            },
+            { value: "vols_p1k", label: "Vols (pour mille hab.)" },
+            {
+                value: "destructions_p1k",
+                label: "Destruction et dégradations (pour mille hab.)",
+            },
+            {
+                value: "stupefiants_p1k",
+                label: "Trafic et usage de stupéfiants (pour mille hab.)",
+            },
+            {
+                value: "escroqueries_p1k",
+                label: "Escroqueries (pour mille hab.)",
+            },
+            { value: "immigration_score", label: "Score Immigration" },
+            {
+                value: "extra_europeen_pct",
+                label: "Prénoms de naissance extra-européen (%)",
+            },
+            { value: "islamisation_score", label: "Score Islamisation" },
+            {
+                value: "musulman_pct",
+                label: "Prénoms de naissance musulmans (%)",
+            },
+            { value: "number_of_mosques", label: "Nombre de Mosquées" },
+            {
+                value: "mosque_p100k",
+                label: "Nombre de Mosquées (pour 100k hab.)",
+            },
+            { value: "defrancisation_score", label: "Score Défrancisation" },
+            {
+                value: "prenom_francais_pct",
+                label: "Prénoms de naissance français (%)",
+            },
+            { value: "wokisme_score", label: "Score Wokisme" },
+            { value: "total_qpv", label: "Nombre de QPV" },
+            { value: "pop_in_qpv_pct", label: "% Population en QPV" },
+        ];
+
+        async function initMap() {
+            // Main map centered on France (mainland + Corsica)
+            map = L.map(mapDiv, {
+                maxBounds: L.latLngBounds([41, -5], [51, 9]), // Constrain to France
+                maxBoundsViscosity: 1.0, // Prevent panning outside
+            }).setView([46.603354, 1.888334], 5); // Zoom 5 for full France view
+
+            // Add basemap
+            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                attribution:
+                    '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            }).addTo(map);
+
+            // Fetch department data
+            try {
+                const response = await fetch(
+                    "/api/rankings/departements?limit=101&sort=total_score&direction=DESC",
+                );
+                if (!response.ok) {
+                    const errorData = await response.text();
+                    console.error("API error details:", errorData);
+                    throw new Error(
+                        `Failed to fetch department rankings: ${response.status} - ${errorData}`,
+                    );
+                }
+                const { data } = await response.json();
+                data.forEach((dept) => {
+                    if (validDeptCodes.includes(dept.departement)) {
+                        deptData[dept.departement] = {
+                            total_score: dept.total_score,
+                            insecurite_score: dept.insecurite_score,
+                            homicides_p100k: dept.homicides_p100k,
+                            violences_physiques_p1k:
+                                dept.violences_physiques_p1k,
+                            violences_sexuelles_p1k:
+                                dept.violences_sexuelles_p1k,
+                            vols_p1k: dept.vols_p1k,
+                            destructions_p1k: dept.destructions_p1k,
+                            stupefiants_p1k: dept.stupefiants_p1k,
+                            escroqueries_p1k: dept.escroqueries_p1k,
+                            immigration_score: dept.immigration_score,
+                            extra_europeen_pct: dept.extra_europeen_pct,
+                            islamisation_score: dept.islamisation_score,
+                            musulman_pct: dept.musulman_pct,
+                            number_of_mosques: dept.number_of_mosques,
+                            mosque_p100k: dept.mosque_p100k,
+                            defrancisation_score: dept.defrancisation_score,
+                            prenom_francais_pct: dept.prenom_francais_pct,
+                            wokisme_score: dept.wokisme_score,
+                            total_qpv: dept.total_qpv,
+                            pop_in_qpv_pct: dept.pop_in_qpv_pct,
+                        };
+                    }
+                });
+            } catch (error) {
+                console.error("Error fetching dept data:", error);
+                resultsDiv.innerHTML += `<p>Erreur carte: ${error.message}</p>`;
+                return;
+            }
+
+            // Fetch GeoJSON
+            try {
+                const geoResponse = await fetch(
+                    "https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements.geojson",
+                );
+                if (!geoResponse.ok) throw new Error("Failed to fetch GeoJSON");
+                const geoData = await geoResponse.json();
+
+                // Filter GeoJSON for mainland France and Corsica
+                geoData.features = geoData.features.filter((feature) =>
+                    validDeptCodes.includes(feature.properties.code),
+                );
+
+                // Add GeoJSON to main map
+                geoJsonLayer = L.geoJSON(geoData, {
+                    style: (feature) => getStyle(feature),
+                    onEachFeature: onEachFeature,
+                }).addTo(map);
+
+                updateLegend();
+            } catch (error) {
+                console.error("Error loading GeoJSON:", error);
+                resultsDiv.innerHTML += `<p>Erreur carte: ${error.message}</p>`;
+            }
+        }
+
+        // Dynamic color scaling based on min/max values
+        function getColor(value, metric) {
+            if (value == null || isNaN(value)) return "#ccc";
+
+            // Get min/max for the current metric
+            const values = Object.values(deptData)
+                .map((data) => data[metric])
+                .filter((v) => v != null && !isNaN(v));
+            const min = Math.min(...values);
+            const max = Math.max(...values);
+            if (min === max) return "#ffeda0"; // Single color if all values are the same
+
+            // Normalize value to 0–1 range
+            let normalized = (value - min) / (max - min);
+
+            // Reverse for prenom_francais_pct (low bad = red, high good = yellow)
+            if (metric === "prenom_francais_pct") {
+                normalized = 1 - normalized;
+            }
+
+            // Color gradient (yellow/low to red/high; reversed for prenom_francais_pct)
+            const colors = [
+                "#ffeda0", // 0% (low/bad)
+                "#feb24c",
+                "#fd8d3c",
+                "#fc4e2a",
+                "#e31a1c",
+                "#b10026", // 100% (high/good)
+            ];
+            const index = Math.min(
+                Math.floor(normalized * (colors.length - 1)),
+                colors.length - 1,
+            );
+            return colors[index];
+        }
+
+        function getStyle(feature) {
+            const code = feature.properties.code;
+            const value = deptData[code] ? deptData[code][currentMetric] : null;
+            return {
+                fillColor: getColor(value, currentMetric),
+                weight: 1,
+                opacity: 1,
+                color: "white",
+                dashArray: "3",
+                fillOpacity: 0.7,
+            };
+        }
+
+        function onEachFeature(feature, layer) {
+            const code = feature.properties.code;
+            const name = feature.properties.nom;
+
+            layer.on({
+                mouseover: (e) => {
+                    e.target.setStyle({
+                        weight: 3,
+                        color: "#666",
+                        dashArray: "",
+                        fillOpacity: 0.9,
+                    });
+                    const value = deptData[code]
+                        ? deptData[code][currentMetric]
+                        : "N/A";
+                    const metricLabel =
+                        metrics.find((m) => m.value === currentMetric)?.label ||
+                        currentMetric;
+                    const formattedValue = formatMetricValue(
+                        value,
+                        currentMetric,
+                    );
+                    layer
+                        .bindPopup(
+                            `<b>${name} (${code})</b><br>${metricLabel}: ${formattedValue}`,
+                        )
+                        .openPopup();
+                },
+                mouseout: (e) => {
+                    geoJsonLayer.resetStyle(e.target);
+                },
+                click: () => {
+                    departementSelect.value = code;
+                    departementSelect.dispatchEvent(new Event("change"));
+                    map.setView([46.603354, 1.888334], 5); // Reset to France center
+                },
+            });
+        }
+
+        function updateMap(metric) {
+            currentMetric = metric;
+            if (geoJsonLayer) {
+                geoJsonLayer.eachLayer((layer) =>
+                    geoJsonLayer.resetStyle(layer),
+                );
+            }
+            updateLegend();
+        }
+
+        function updateLegend() {
+            if (legendControl) {
+                legendControl.remove();
+            }
+
+            legendControl = L.control({ position: "bottomleft" });
+            legendControl.onAdd = () => {
+                const div = L.DomUtil.create("div", "info legend");
+                const values = Object.values(deptData)
+                    .map((data) => data[currentMetric])
+                    .filter((v) => v != null && !isNaN(v));
+                const min = Math.min(...values);
+                const max = Math.max(...values);
+                const grades =
+                    min === max
+                        ? [min]
+                        : [
+                              min,
+                              min + (max - min) * 0.2,
+                              min + (max - min) * 0.4,
+                              min + (max - min) * 0.6,
+                              min + (max - min) * 0.8,
+                              max,
+                          ];
+
+                const metricLabel =
+                    metrics.find((m) => m.value === currentMetric)?.label ||
+                    currentMetric;
+                div.innerHTML = "<h4>Légende: " + metricLabel + "</h4>";
+                for (let i = 0; i < grades.length; i++) {
+                    const formattedGrade = formatMetricValue(
+                        grades[i],
+                        currentMetric,
+                    );
+                    const formattedNextGrade = grades[i + 1]
+                        ? formatMetricValue(grades[i + 1], currentMetric)
+                        : "+";
+                    div.innerHTML +=
+                        '<i style="background:' +
+                        getColor(grades[i], currentMetric) +
+                        '"></i> ' +
+                        formattedGrade +
+                        (grades[i + 1]
+                            ? "–" + formattedNextGrade + "<br>"
+                            : "+");
+                }
+                return div;
+            };
+            legendControl.addTo(map);
+        }
+
+        function formatMetricValue(value, metric) {
+            if (value === undefined || value === null) return "N/A";
+            if (metric.endsWith("_pct")) return value.toFixed(0) + "%"; // Percentages with 1 decimal
+            if (metric.endsWith("_p100k") || metric.endsWith("_p1k"))
+                return value.toFixed(1); // Rates with 1 decimal
+            if (metric.endsWith("_score"))
+                return value.toLocaleString("fr-FR", {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                }); // Scores with comma thousands separator
+            return value.toString(); // Counts or others as string
+        }
+
+        function populateMetricSelect() {
+            metricSelect.innerHTML = metrics
+                .map(
+                    (m) =>
+                        `<option value="${m.value}" ${m.value === currentMetric ? "selected" : ""}>${m.label}</option>`,
+                )
+                .join("");
+            metricSelect.addEventListener("change", () =>
+                updateMap(metricSelect.value),
+            );
+        }
+
+        populateMetricSelect();
+        initMap();
+
+        return { updateMap };
+    };
+})();

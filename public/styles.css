@@ -521,3 +521,90 @@ label {
         gap: 5px;
     }
 }
+
+#map {
+    height: 400px;
+    width: 100%;
+    max-width: 600px; /* Reduced from 800px to fit France shape */
+    margin: 20px auto;
+}
+
+#mapContainer {
+    margin: 20px auto;
+    max-width: 800px;
+    text-align: left;
+}
+
+#mapMetricSelect {
+    width: 100%;
+    max-width: 400px;
+    padding: 8px;
+    margin-bottom: 10px;
+}
+
+.info.legend {
+    padding: 6px 8px;
+    font: 14px/16px Arial, Helvetica, sans-serif;
+    background: white;
+    background: rgba(255,255,255,0.8);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    border-radius: 5px;
+    width: 150px; /* Fixed width */
+    min-height: 100px; /* Minimum height to maintain size */
+    max-height: 200px; /* Prevent overflow if many grades */
+    overflow-y: auto; /* Scroll if needed */
+}
+
+.info.legend h4 {
+    margin: 0 0 5px;
+    text-align: justify; /* Justify long titles */
+    word-break: break-word; /* Wrap long words */
+    hyphens: auto; /* Auto hyphenation for long words */
+}
+
+.info.legend div { /* Each legend item */
+    display: flex;
+    align-items: center; /* Vertically align square and text */
+    margin-bottom: 4px;
+}
+
+.info.legend i {
+    width: 18px;
+    height: 18px;
+    margin-right: 8px; /* Space between square and text */
+    opacity: 0.7;
+    display: inline-block;
+}
+
+.layout-container {
+    display: flex;
+    flex-direction: column; /* Stack on mobile */
+    max-width: 1200px;
+    margin: 20px auto;
+    gap: 20px;
+}
+
+#selections-wrapper {
+    width: 100%;
+    max-width: 400px; /* Keep narrow for selections */
+}
+
+#mapContainer {
+    width: 100%;
+    max-width: 600px; /* Matches reduced map width */
+}
+
+@media (min-width: 768px) { /* Desktop layout */
+    .layout-container {
+        flex-direction: row; /* Side-by-side */
+        justify-content: space-between;
+    }
+
+    #selections-wrapper {
+        width: 30%; /* Left column */
+    }
+
+    #mapContainer {
+        width: 65%; /* Right column for map */
+    }
+}

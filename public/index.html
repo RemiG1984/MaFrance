@@ -9,6 +9,17 @@
             rel="stylesheet"
         />
         <link rel="stylesheet" href="styles.css" />
+        <link
+            rel="stylesheet"
+            href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+            integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+            crossorigin=""
+        />
+        <script
+            src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""
+        ></script>
     </head>
     <body>
         <h1>Où va ma France?</h1>
@@ -33,6 +44,11 @@
             <input id="communeInput" list="communeList" disabled />
             <datalist id="communeList"></datalist>
         </div>
+        <div id="mapContainer">
+            <label for="mapMetricSelect">Colorer la carte par :</label>
+            <select id="mapMetricSelect"></select>
+            <div id="map"></div>
+        </div>
         <div id="results"></div>
         <div id="executiveDetails"></div>
         <div>
@@ -55,12 +71,14 @@
             >
         </div>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script src="chartWatermark.js"></script>
+        <script type="module" src="chartWatermark.js"></script>
         <script src="departmentNames.js"></script>
-        <script src="locationHandler.js"></script>
+        <script type="module" src="locationHandler.js"></script>
         <script src="articleHandler.js"></script>
         <script src="scoreTableHandler.js"></script>
         <script src="executiveHandler.js"></script>
-        <script src="main.js"></script>
+        <script src="mapHandler.js"></script>
+        <script type="module" src="utils.js"></script>
+        <script type="module" src="main.js"></script>
     </body>
 </html>

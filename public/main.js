@@ -1,3 +1,6 @@
+import { debounce } from './utils.js';
+import { LocationHandler } from './locationHandler.js';
+
 (function () {
     // Use shared department names
     const departmentNames = DepartmentNames;
@@ -11,6 +14,8 @@
     const executiveDiv = document.getElementById("executiveDetails");
     const articleListDiv = document.getElementById("articleList");
     const filterButtonsDiv = document.getElementById("filterButtons");
+    const mapDiv = document.getElementById('map');
+    const mapMetricSelect = document.getElementById('mapMetricSelect');
 
     // Validate DOM elements
     if (
@@ -26,6 +31,10 @@
         console.error("One or more DOM elements are missing");
         return;
     }
+    if (!mapDiv || !mapMetricSelect) {
+        console.error('Map elements missing');
+        return;
+    }
 
     // Initialize modules
     const locationHandler = LocationHandler(
@@ -39,6 +48,7 @@
     const articleHandler = ArticleHandler(articleListDiv, filterButtonsDiv);
     const scoreTableHandler = ScoreTableHandler(resultsDiv, departmentNames);
     const executiveHandler = ExecutiveHandler(executiveDiv, departmentNames);
+    const mapHandler = MapHandler(mapDiv, mapMetricSelect, departementSelect, resultsDiv, departmentNames);
 
     // Shared state
     let currentLieu = "";
@@ -73,13 +83,11 @@
         }
     });
 
-    communeInput.addEventListener("input", () => {
+    const debouncedInputHandler = debounce(() => {
         const departement = departementSelect.value;
         const query = communeInput.value;
         locationHandler.handleCommuneInput(departement, query);
-        if (departement && query.length >= 2) {
-            locationHandler.loadCommunes(departement, query);
-        } else {
+        if (!(departement && query.length >= 2)) {
             locationHandler.resetCommuneAndLieux();
             articleHandler.clearArticles();
             currentLieu = "";
@@ -105,7 +113,9 @@
                 articleHandler.clearArticles();
             }
         }
-    });
+    }, 300);
+
+    communeInput.addEventListener("input", debouncedInputHandler);
 
     communeInput.addEventListener("change", async () => {
         const departement = departementSelect.value;

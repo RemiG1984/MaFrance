@@ -85,6 +85,9 @@ router.get(
       }
     }
 
+    // Set secondary sort direction based on primary sort direction
+    const secondarySort = direction === "DESC" ? "l.COG DESC" : "l.COG ASC";
+
     const sql = `
     WITH LatestCommuneNames AS (
       SELECT COG, musulman_pct, africain_pct, asiatique_pct, traditionnel_pct, moderne_pct, annais
@@ -139,7 +142,7 @@ router.get(
       AND cc.annee = (SELECT MAX(annee) FROM commune_crime WHERE COG = l.COG)
     WHERE (l.departement = ? OR ? = '')
     ${populationFilter}
-    ORDER BY ${sort} ${direction}, l.COG ASC
+    ORDER BY ${sort} ${direction}, ${secondarySort}
     LIMIT ? OFFSET ?
   `;
 
