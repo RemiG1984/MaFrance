@@ -30,6 +30,22 @@ function MapHandler(mapDiv, mapMetricSelect, departementSelect, resultsDiv, depa
     const metrics = [
         { value: "total_score", label: "Score Total" },
         { value: "insecurite_score", label: "Score Insécurité" },
+        { value: "immigration_score", label: "Score Immigration" },
+        { value: "islamisation_score", label: "Score Islamisation" },
+        { value: "defrancisation_score", label: "Score Défrancisation" },
+        { value: "wokisme_score", label: "Score Wokisme" },
+        {
+            value: "musulman_pct",
+            label: "Prénoms de naissance musulmans (%)",
+        },
+        {
+            value: "extra_europeen_pct",
+            label: "Prénoms de naissance extra-européen (%)",
+        },
+        {
+            value: "prenom_francais_pct",
+            label: "Prénoms de naissance français (%)",
+        },
         {
             value: "homicides_p100k",
             label: "Homicides et tentatives (pour 100k hab.)",
@@ -55,27 +71,11 @@ function MapHandler(mapDiv, mapMetricSelect, departementSelect, resultsDiv, depa
             value: "escroqueries_p1k",
             label: "Escroqueries (pour mille hab.)",
         },
-        { value: "immigration_score", label: "Score Immigration" },
-        {
-            value: "extra_europeen_pct",
-            label: "Prénoms de naissance extra-européen (%)",
-        },
-        { value: "islamisation_score", label: "Score Islamisation" },
-        {
-            value: "musulman_pct",
-            label: "Prénoms de naissance musulmans (%)",
-        },
         { value: "number_of_mosques", label: "Nombre de Mosquées" },
         {
             value: "mosque_p100k",
             label: "Nombre de Mosquées (pour 100k hab.)",
         },
-        { value: "defrancisation_score", label: "Score Défrancisation" },
-        {
-            value: "prenom_francais_pct",
-            label: "Prénoms de naissance français (%)",
-        },
-        { value: "wokisme_score", label: "Score Wokisme" },
         { value: "total_qpv", label: "Nombre de QPV" },
         { value: "pop_in_qpv_pct", label: "% Population en QPV" },
     ];
@@ -317,7 +317,7 @@ function MapHandler(mapDiv, mapMetricSelect, departementSelect, resultsDiv, depa
             const metricLabel =
                 metrics.find((m) => m.value === currentMetric)?.label ||
                 currentMetric;
-            div.innerHTML = "<h4>Légende: " + metricLabel + "</h4>";
+            div.innerHTML = "<h4>" + metricLabel + "</h4>";
             for (let i = 0; i < grades.length; i++) {
                 const formattedGrade = formatMetricValue(
                     grades[i],

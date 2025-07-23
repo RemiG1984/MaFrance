@@ -1,5 +1,5 @@
 
-import { formatNumber, formatPercentage } from './utils.js';
+import { DepartmentNames } from './departmentNames.js';
 
 /**
  * Names Graph Handler module for displaying historical names data charts.

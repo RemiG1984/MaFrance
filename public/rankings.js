@@ -1,3 +1,5 @@
+import { DepartmentNames } from './departmentNames.js';
+
 const RankingsHandler = (function () {
     // Use shared department names
     const departmentNames = DepartmentNames;

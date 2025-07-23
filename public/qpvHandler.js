@@ -1,5 +1,6 @@
 
 import { formatNumber, formatPercentage } from './utils.js';
+import { DepartmentNames } from './departmentNames.js';
 
 /**
  * QPV (Quartiers Prioritaires de la Ville) Handler module for displaying QPV data.

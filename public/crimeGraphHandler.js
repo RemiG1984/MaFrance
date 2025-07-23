@@ -1,5 +1,5 @@
 
-import { formatNumber, formatPercentage } from './utils.js';
+import { DepartmentNames } from './departmentNames.js';
 
 /**
  * Crime Graph Handler module for displaying crime statistics charts.
