@@ -26,7 +26,7 @@ function ExecutiveHandler(executiveDiv, departmentNames) {
 
             executiveDiv.innerHTML = `
                 <h3>Ministre de l'Intérieur</h3>
-                <div class="executive-info">
+                <div class="executive-box">
                     <p><strong>Nom :</strong> ${data.prenom} ${data.nom}</p>
                     <p><strong>Prise de fonction :</strong> ${formattedDate}</p>
                     <p><strong>Famille politique :</strong> ${data.famille_nuance}</p>
@@ -58,7 +58,7 @@ function ExecutiveHandler(executiveDiv, departmentNames) {
 
             executiveDiv.innerHTML = `
                 <h3>Préfet de ${deptName}</h3>
-                <div class="executive-info">
+                <div class="executive-box">
                     <p><strong>Nom :</strong> ${data.prenom} ${data.nom}</p>
                     <p><strong>Prise de fonction :</strong> ${formattedDate}</p>
                 </div>
@@ -86,7 +86,7 @@ function ExecutiveHandler(executiveDiv, departmentNames) {
 
             executiveDiv.innerHTML = `
                 <h3>Maire de ${data.commune}</h3>
-                <div class="executive-info">
+                <div class="executive-box">
                     <p><strong>Nom :</strong> ${data.prenom} ${data.nom}</p>
                     <p><strong>Sexe :</strong> ${data.sexe === 'M' ? 'Masculin' : 'Féminin'}</p>
                     <p><strong>Date d'élection :</strong> ${formattedDate}</p>
