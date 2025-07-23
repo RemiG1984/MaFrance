@@ -41,6 +41,12 @@ class ApiService {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
 
+            // For external GeoJSON files, return the JSON directly
+            if (url.includes('geojson')) {
+                const data = await response.json();
+                return data;
+            }
+
             const data = await response.json();
 
             // Cache successful responses
@@ -53,7 +59,7 @@ class ApiService {
 
             return data;
         } catch (error) {
-            console.error('API request failed:', { url, error });
+            console.error('API request failed:', { url, error: error.message });
             throw error;
         }
     }
