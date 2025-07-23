@@ -41,7 +41,7 @@ import { DepartmentNames } from './departmentNames.js';
         return;
     }
 
-    // Initialize modules with lazy loading
+    // Initialize location handler immediately as it's needed for basic functionality
     const locationHandler = LocationHandler(
         departementSelect,
         communeInput,
@@ -94,18 +94,18 @@ import { DepartmentNames } from './departmentNames.js';
     departementSelect.addEventListener("change", () => {
         const departement = departementSelect.value;
         locationHandler.resetCommuneAndLieux();
-        articleHandler.clearArticles();
+        getArticleHandler.clearArticles();
         currentLieu = "";
         communeInput.value = "";
-        articleHandler.setFilter(null);
+        getArticleHandler.setFilter(null);
         console.log("Reset filter on department change");
         if (departement) {
-            scoreTableHandler.showDepartmentDetails(departement);
-            executiveHandler.showDepartmentExecutive(departement);
+            getScoreTableHandler.showDepartmentDetails(departement);
+            getExecutiveHandler.showDepartmentExecutive(departement);
             locationHandler.loadCommunes(departement);
-            articleHandler.loadArticles(departement).then(() => {
-                articleHandler.loadArticleCounts(departement).then((counts) => {
-                    articleHandler.renderFilterButtons(
+            getArticleHandler.loadArticles(departement).then(() => {
+                getArticleHandler.loadArticleCounts(departement).then((counts) => {
+                    getArticleHandler.renderFilterButtons(
                         counts,
                         allArticles,
                         currentLieu,
@@ -113,9 +113,9 @@ import { DepartmentNames } from './departmentNames.js';
                 });
             });
         } else {
-            scoreTableHandler.showCountryDetails();
-            executiveHandler.showCountryExecutive();
-            articleHandler.clearArticles();
+            getScoreTableHandler.showCountryDetails();
+            getExecutiveHandler.showCountryExecutive();
+            getArticleHandler.clearArticles();
         }
     });
 
