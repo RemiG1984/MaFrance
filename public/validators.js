@@ -83,7 +83,7 @@ export function validateUrlParams(params) {
  */
 
 /**
- * Validates department code format.
+ * Validates department code format (alternative implementation).
  * @param {string} dept - Department code to validate
  * @returns {Object} Validation result with isValid boolean and errors array
  */
@@ -113,7 +113,7 @@ export function validateDepartment(dept) {
  * @param {string} commune - Commune name to validate
  * @returns {Object} Validation result with isValid boolean and errors array
  */
-function validateCommune(commune) {
+export function validateCommune(commune) {
     const errors = [];
 
     if (!commune) {
@@ -134,13 +134,3 @@ function validateCommune(commune) {
         errors
     };
 }
-
-// Export all validation functions
-export { 
-    isValidDepartmentCode, 
-    isValidCommuneName, 
-    sanitizeInput, 
-    validateUrlParams, 
-    validateDepartment, 
-    validateCommune 
-};

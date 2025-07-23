@@ -74,8 +74,11 @@ export class LoadingManager {
         this.isLoading = false;
     }
 }
-// Default export function
-function ErrorHandler() {
+/**
+ * Default error handler factory function.
+ * @returns {Object} Error handler interface
+ */
+export function ErrorHandler() {
     return {
         handleError: (error, context) => {
             console.error(`Error in ${context}:`, error);
@@ -83,12 +86,6 @@ function ErrorHandler() {
         }
     };
 }
-
-// Named exports
-export { LoadingManager, displayError, ErrorHandler };
-
-// Default export
-export default ErrorHandler;
 
 // Make available globally for backward compatibility
 if (typeof window !== 'undefined') {

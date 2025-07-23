@@ -1,4 +1,3 @@
-
 import { LocationHandler } from './locationHandler.js';
 import { ScoreTableHandler } from './scoreTableHandler.js';
 import { ExecutiveHandler } from './executiveHandler.js';
@@ -16,7 +15,7 @@ import { validateDepartment, validateCommune } from './validators.js';
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize error handler
     const errorHandler = ErrorHandler();
-    
+
     // Get DOM elements
     const departementSelect = document.getElementById('departementSelect');
     const communeInput = document.getElementById('communeInput');
@@ -37,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize handlers
     let locationHandler, scoreTableHandler, executiveHandler, articleHandler, mapHandler;
-    
+
     try {
         locationHandler = LocationHandler(
             departementSelect,
@@ -49,15 +48,15 @@ document.addEventListener('DOMContentLoaded', function() {
         );
 
         scoreTableHandler = ScoreTableHandler(resultsDiv, DepartmentNames);
-        
+
         if (executiveDiv) {
             executiveHandler = ExecutiveHandler(executiveDiv, DepartmentNames);
         }
-        
+
         if (articleListDiv && filterButtonsDiv) {
             articleHandler = ArticleHandler(articleListDiv, filterButtonsDiv);
         }
-        
+
         if (mapDiv && mapMetricSelect) {
             mapHandler = MapHandler(mapDiv, mapMetricSelect, departementSelect, resultsDiv, DepartmentNames);
         }
@@ -77,13 +76,13 @@ document.addEventListener('DOMContentLoaded', function() {
     async function init() {
         try {
             await locationHandler.loadDepartements();
-            
+
             // Show country details by default
-            if (scoreTableHandler && typeof scoreTableHandler.showCountryDetails === 'function') {
+            if (scoreTableHandler) {
                 await scoreTableHandler.showCountryDetails();
             }
-            
-            if (executiveHandler && typeof executiveHandler.showCountryExecutive === 'function') {
+
+            if (executiveHandler) {
                 await executiveHandler.showCountryExecutive();
             }
         } catch (error) {
@@ -96,33 +95,33 @@ document.addEventListener('DOMContentLoaded', function() {
     departementSelect.addEventListener('change', async function() {
         const selectedDept = this.value;
         currentDepartement = selectedDept;
-        
+
         try {
             if (selectedDept) {
                 // Enable commune input
                 communeInput.disabled = false;
                 communeInput.value = '';
-                
+
                 // Reset dependent fields
                 currentCOG = null;
                 currentCommune = null;
                 lieuxSelect.innerHTML = '<option value="">-- Tous les lieux --</option>';
                 lieuxSelect.disabled = true;
-                
+
                 // Clear articles
                 if (articleHandler) {
                     articleHandler.clearArticles();
                 }
-                
+
                 // Show department details
                 if (scoreTableHandler && typeof scoreTableHandler.showDepartmentDetails === 'function') {
                     await scoreTableHandler.showDepartmentDetails(selectedDept);
                 }
-                
+
                 if (executiveHandler && typeof executiveHandler.showDepartmentExecutive === 'function') {
                     await executiveHandler.showDepartmentExecutive(selectedDept);
                 }
-                
+
                 // Load articles for department
                 if (articleHandler) {
                     const articles = await articleHandler.loadArticles(selectedDept);
@@ -135,15 +134,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 currentDepartement = null;
                 currentCOG = null;
                 currentCommune = null;
-                
+
                 if (articleHandler) {
                     articleHandler.clearArticles();
                 }
-                
+
                 if (scoreTableHandler && typeof scoreTableHandler.showCountryDetails === 'function') {
                     await scoreTableHandler.showCountryDetails();
                 }
-                
+
                 if (executiveHandler && typeof executiveHandler.showCountryExecutive === 'function') {
                     await executiveHandler.showCountryExecutive();
                 }
@@ -157,7 +156,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Debounced commune input handler
     const debouncedCommuneHandler = debounce(async function(query) {
         if (!currentDepartement) return;
-        
+
         try {
             await locationHandler.handleCommuneInput(currentDepartement, query);
         } catch (error) {
@@ -173,7 +172,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     communeInput.addEventListener('change', async function() {
         const selectedCommune = this.value.trim();
-        
+
         if (!selectedCommune || !currentDepartement) {
             return;
         }
@@ -184,29 +183,29 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!response.ok) {
                 throw new Error('Failed to fetch commune details');
             }
-            
+
             const communes = await response.json();
             const matchingCommune = communes.find(c => c.commune.toLowerCase() === selectedCommune.toLowerCase());
-            
+
             if (matchingCommune) {
                 currentCOG = matchingCommune.cog;
                 currentCommune = matchingCommune.commune;
-                
+
                 // Enable lieu selection
                 lieuxSelect.disabled = false;
-                
+
                 // Load lieux for the commune
                 await locationHandler.loadLieux(currentDepartement, currentCOG);
-                
+
                 // Show commune details
                 if (scoreTableHandler && typeof scoreTableHandler.showCommuneDetails === 'function') {
                     await scoreTableHandler.showCommuneDetails(currentCOG);
                 }
-                
+
                 if (executiveHandler && typeof executiveHandler.showCommuneExecutive === 'function') {
                     await executiveHandler.showCommuneExecutive(currentCOG);
                 }
-                
+
                 // Load articles for commune
                 if (articleHandler) {
                     const articles = await articleHandler.loadArticles(currentDepartement, currentCOG);
@@ -224,9 +223,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     lieuxSelect.addEventListener('change', async function() {
         const selectedLieu = this.value;
-        
+
         if (!currentDepartement) return;
-        
+
         try {
             if (articleHandler) {
                 if (currentCOG) {
