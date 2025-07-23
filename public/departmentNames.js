@@ -107,3 +107,6 @@ const DepartmentNames = {
   '974': 'La Réunion',
   '976': 'Mayotte'
 };
+
+// Export for ES6 modules
+export { DepartmentNames };
