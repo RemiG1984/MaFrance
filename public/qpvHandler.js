@@ -1,7 +1,19 @@
-const QpvHandler = (function () {
+
+import { formatNumber, formatPercentage } from './utils.js';
+
+/**
+ * QPV (Quartiers Prioritaires de la Ville) Handler module for displaying QPV data.
+ * Manages QPV data visualization and table rendering.
+ * @returns {Object} QPV handler interface
+ */
+function QpvHandler() {
     // Use shared department names
     const departmentNames = DepartmentNames;
 
+    /**
+     * Gets URL parameters for QPV page.
+     * @returns {Object} URL parameters object
+     */
     function getUrlParams() {
         const urlParams = new URLSearchParams(window.location.search);
         return {
@@ -12,34 +24,9 @@ const QpvHandler = (function () {
         };
     }
 
-    function formatNumber(value) {
-        if (
-            value === null ||
-            value === undefined ||
-            value === "" ||
-            (typeof value === "number" && isNaN(value))
-        )
-            return "N/A";
-        if (typeof value === "number") {
-            return value.toLocaleString("fr-FR");
-        }
-        return value;
-    }
-
-    function formatPercentage(value) {
-        if (
-            value === null ||
-            value === undefined ||
-            value === "" ||
-            (typeof value === "number" && isNaN(value))
-        )
-            return "N/A";
-        if (typeof value === "number") {
-            return value.toFixed(1) + "%";
-        }
-        return value;
-    }
-
+    /**
+     * Loads QPV data based on URL parameters.
+     */
     async function loadQpvData() {
         const params = getUrlParams();
         const resultsDiv = document.getElementById("results");
@@ -91,6 +78,10 @@ const QpvHandler = (function () {
         }
     }
 
+    /**
+     * Renders QPV data table.
+     * @param {Array} qpvData - Array of QPV data objects
+     */
     function renderQpvTable(qpvData) {
         const resultsDiv = document.getElementById("results");
 
@@ -144,12 +135,25 @@ const QpvHandler = (function () {
         resultsDiv.innerHTML = tableHtml;
     }
 
-    return {
-        init: function () {
-            document.addEventListener("DOMContentLoaded", loadQpvData);
-        },
-    };
-})();
+    /**
+     * Initializes the QPV handler.
+     */
+    function init() {
+        document.addEventListener("DOMContentLoaded", loadQpvData);
+    }
 
-// Initialize when the script loads
-QpvHandler.init();
+    return {
+        init,
+        loadQpvData,
+        renderQpvTable
+    };
+}
+
+// Export for ES6 modules
+export { QpvHandler };
+
+// Initialize when the script loads (for backward compatibility)
+if (typeof window !== 'undefined') {
+    const qpvHandler = QpvHandler();
+    qpvHandler.init();
+}

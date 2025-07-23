@@ -1,23 +1,41 @@
-(function () {
+
+import { formatNumber, formatPercentage } from './utils.js';
+
+/**
+ * Crime Graph Handler module for displaying crime statistics charts.
+ * Manages Chart.js visualization of crime data over time with comparison lines.
+ * @returns {Object} Crime graph handler interface
+ */
+function CrimeGraphHandler() {
     // Use shared department names
     const departmentNames = DepartmentNames;
 
-    // Parse URL query parameters
-    const urlParams = new URLSearchParams(window.location.search);
-    const type = urlParams.get("type"); // country, department, or commune
-    const code = urlParams.get("code"); // France, dept code, or COG
-    const dept = urlParams.get("dept"); // Department code for communes
-    const communeName = urlParams.get("commune"); // Commune name from URL
-
-    // DOM element for the chart grid
-    const chartGrid = document.getElementById("chartGrid");
-    if (!chartGrid) {
-        console.error('Chart grid element with ID "chartGrid" not found');
-        return;
+    /**
+     * Parses URL parameters for chart configuration.
+     * @returns {Object} URL parameters object
+     */
+    function getUrlParams() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return {
+            type: urlParams.get("type"), // country, department, or commune
+            code: urlParams.get("code"), // France, dept code, or COG
+            dept: urlParams.get("dept"), // Department code for communes
+            communeName: urlParams.get("commune"), // Commune name from URL
+        };
     }
 
-    // Initialize Chart.js
+    /**
+     * Initializes multiple Chart.js instances for crime data visualization.
+     */
     async function initCrimeCharts() {
+        const chartGrid = document.getElementById("chartGrid");
+        if (!chartGrid) {
+            console.error('Chart grid element with ID "chartGrid" not found');
+            return;
+        }
+
+        const { type, code, dept, communeName } = getUrlParams();
+
         try {
             let endpoint,
                 params = {};
@@ -178,336 +196,15 @@
 
             // Create a chart for each category
             categories.forEach((category, index) => {
-                // Create chart container and canvas
-                const chartContainer = document.createElement("div");
-                chartContainer.className = "chart-container";
-                const canvas = document.createElement("canvas");
-                canvas.id = `crimeChart_${index}`;
-                chartContainer.appendChild(canvas);
-                chartGrid.appendChild(chartContainer);
-
-                // Calculate data for the main level
-                const mainDataValues = mainData.map((row) => {
-                    let value;
-                    if (category.key === "homicides_p100k") {
-                        value =
-                            row.homicides_p100k +
-                            row.tentatives_homicides_p100k;
-                    } else if (category.key === "violences_physiques_p1k") {
-                        value =
-                            row.coups_et_blessures_volontaires_p1k +
-                            row.coups_et_blessures_volontaires_intrafamiliaux_p1k +
-                            row.autres_coups_et_blessures_volontaires_p1k +
-                            row.vols_avec_armes_p1k +
-                            row.vols_violents_sans_arme_p1k;
-                    } else if (category.key === "vols_p1k") {
-                        value =
-                            row.vols_avec_armes_p1k +
-                            row.vols_violents_sans_arme_p1k +
-                            row.vols_sans_violence_contre_des_personnes_p1k +
-                            row.cambriolages_de_logement_p1k +
-                            row.vols_de_vehicules_p1k +
-                            row.vols_dans_les_vehicules_p1k +
-                            row.vols_d_accessoires_sur_vehicules_p1k;
-                    } else if (category.key === "stupefiants_p1k") {
-                        value =
-                            row.usage_de_stupefiants_p1k +
-                            row.usage_de_stupefiants_afd_p1k +
-                            row.trafic_de_stupefiants_p1k;
-                    } else if (category.key === "destructions_p1k") {
-                        value =
-                            row.destructions_et_degradations_volontaires_p1k;
-                    } else {
-                        value = row[category.key];
-                    }
-                    return value;
-                });
-
-                // Calculate data for country level (if applicable)
-                let countryDataValues = null;
-                if (
-                    countryData &&
-                    (type === "department" || type === "commune")
-                ) {
-                    countryDataValues = countryData.map((row) => {
-                        let value;
-                        if (category.key === "homicides_p100k") {
-                            value =
-                                row.homicides_p100k +
-                                row.tentatives_homicides_p100k;
-                        } else if (category.key === "violences_physiques_p1k") {
-                            value =
-                                row.coups_et_blessures_volontaires_p1k +
-                                row.coups_et_blessures_volontaires_intrafamiliaux_p1k +
-                                row.autres_coups_et_blessures_volontaires_p1k +
-                                row.vols_avec_armes_p1k +
-                                row.vols_violents_sans_arme_p1k;
-                        } else if (category.key === "vols_p1k") {
-                            value =
-                                row.vols_avec_armes_p1k +
-                                row.vols_violents_sans_arme_p1k +
-                                row.vols_sans_violence_contre_des_personnes_p1k +
-                                row.cambriolages_de_logement_p1k +
-                                row.vols_de_vehicules_p1k +
-                                row.vols_dans_les_vehicules_p1k +
-                                row.vols_d_accessoires_sur_vehicules_p1k;
-                        } else if (category.key === "stupefiants_p1k") {
-                            value =
-                                row.usage_de_stupefiants_p1k +
-                                row.usage_de_stupefiants_afd_p1k +
-                                row.trafic_de_stupefiants_p1k;
-                        } else if (category.key === "destructions_p1k") {
-                            value =
-                                row.destructions_et_degradations_volontaires_p1k;
-                        } else {
-                            value = row[category.key];
-                        }
-                        return Math.min(
-                            value,
-                            category.key === "homicides_p100k" ? 1000 : 100,
-                        );
-                    });
-                }
-
-                // Calculate data for department level (if commune)
-                let deptDataValues = null;
-                if (deptData && type === "commune") {
-                    deptDataValues = deptData.map((row) => {
-                        let value;
-                        if (category.key === "homicides_p100k") {
-                            value =
-                                row.homicides_p100k +
-                                row.tentatives_homicides_p100k;
-                        } else if (category.key === "violences_physiques_p1k") {
-                            value =
-                                row.coups_et_blessures_volontaires_p1k +
-                                row.coups_et_blessures_volontaires_intrafamiliaux_p1k +
-                                row.autres_coups_et_blessures_volontaires_p1k +
-                                row.vols_avec_armes_p1k +
-                                row.vols_violents_sans_arme_p1k;
-                        } else if (category.key === "vols_p1k") {
-                            value =
-                                row.vols_avec_armes_p1k +
-                                row.vols_violents_sans_arme_p1k +
-                                row.vols_sans_violence_contre_des_personnes_p1k +
-                                row.cambriolages_de_logement_p1k +
-                                row.vols_de_vehicules_p1k +
-                                row.vols_dans_les_vehicules_p1k +
-                                row.vols_d_accessoires_sur_vehicules_p1k;
-                        } else if (category.key === "stupefiants_p1k") {
-                            value =
-                                row.usage_de_stupefiants_p1k +
-                                row.usage_de_stupefiants_afd_p1k +
-                                row.trafic_de_stupefiants_p1k;
-                        } else if (category.key === "destructions_p1k") {
-                            value =
-                                row.destructions_et_degradations_volontaires_p1k;
-                        } else {
-                            value = row[category.key];
-                        }
-                        return Math.min(
-                            value,
-                            category.key === "homicides_p100k" ? 1000 : 100,
-                        );
-                    });
-                }
-
-                console.log(
-                    `${category.label} main data values:`,
-                    mainDataValues,
-                );
-                if (countryDataValues)
-                    console.log(
-                        `${category.label} country data values:`,
-                        countryDataValues,
-                    );
-                if (deptDataValues)
-                    console.log(
-                        `${category.label} department data values:`,
-                        deptDataValues,
-                    );
-
-                // Calculate suggestedMax for y-axis
-                const allValues = [...mainDataValues];
-                if (countryDataValues) allValues.push(...countryDataValues);
-                if (deptDataValues) allValues.push(...deptDataValues);
-                const maxDataValue = Math.max(...allValues);
-                const suggestedMax = Math.ceil(maxDataValue * 1.1) || 1;
-                const tickPrecision = 1;
-
-                // Determine y-axis title
-                const yAxisTitle =
-                    category.key === "homicides_p100k"
-                        ? "Taux (pour 100k habitants)"
-                        : "Taux (pour mille habitants)";
-
-                // Prepare datasets
-                const datasets = [
-                    {
-                        label: titleText,
-                        data: mainDataValues,
-                        borderColor: category.color,
-                        backgroundColor: category.color,
-                        fill: false,
-                        tension: 0.4,
-                        pointRadius: 2,
-                        pointHoverRadius: 5,
-                    },
-                ];
-
-                if (
-                    countryDataValues &&
-                    (type === "department" || type === "commune")
-                ) {
-                    datasets.push({
-                        label: "France",
-                        data: countryDataValues,
-                        borderColor: "#808080",
-                        backgroundColor: "#808080",
-                        borderDash: [5, 5],
-                        fill: false,
-                        tension: 0.4,
-                        pointRadius: 0,
-                    });
-                }
-
-                if (deptDataValues && type === "commune") {
-                    datasets.push({
-                        label: `${dept} - ${departmentNames[dept] || dept}`,
-                        data: deptDataValues,
-                        borderColor: "#A9A9A9",
-                        backgroundColor: "#A9A9A9",
-                        borderDash: [10, 5],
-                        fill: false,
-                        tension: 0.4,
-                        pointRadius: 0,
-                    });
-                }
-
-                // Create the chart
-                new Chart(canvas, {
-                    type: "line",
-                    data: {
-                        labels: years,
-                        datasets: datasets,
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: "top",
-                                labels: {
-                                    font: {
-                                        family: "'Roboto', Arial, sans-serif",
-                                        size: 14,
-                                    },
-                                    color: "#343a40",
-                                },
-                            },
-                            title: {
-                                display: true,
-                                text: category.label,
-                                font: {
-                                    family: "'Roboto', Arial, sans-serif",
-                                    size: 18,
-                                    weight: "700",
-                                },
-                                color: "#343a40",
-                                padding: {
-                                    top: 10,
-                                    bottom: 20,
-                                },
-                            },
-                            tooltip: {
-                                backgroundColor: "#fff",
-                                titleColor: "#343a40",
-                                bodyColor: "#343a40",
-                                borderColor: "#dee2e6",
-                                borderWidth: 1,
-                                titleFont: {
-                                    family: "'Roboto', Arial, sans-serif",
-                                    size: 14,
-                                },
-                                bodyFont: {
-                                    family: "'Roboto', Arial, sans-serif",
-                                    size: 12,
-                                },
-                                callbacks: {
-                                    label: function (context) {
-                                        let label = context.dataset.label || "";
-                                        if (label) {
-                                            label += ": ";
-                                        }
-                                        const unit =
-                                            context.dataset.label.includes(
-                                                "Homicides",
-                                            )
-                                                ? " (pour 100k hab.)"
-                                                : " (pour mille hab.)";
-                                        return (
-                                            label +
-                                            context.parsed.y.toFixed(
-                                                tickPrecision,
-                                            ) +
-                                            unit
-                                        );
-                                    },
-                                },
-                            },
-                        },
-                        scales: {
-                            x: {
-                                title: {
-                                    display: true,
-                                    text: "Année",
-                                    font: {
-                                        family: "'Roboto', Arial, sans-serif",
-                                        size: 14,
-                                        weight: "600",
-                                    },
-                                    color: "#343a40",
-                                },
-                                ticks: {
-                                    font: {
-                                        family: "'Roboto', Arial, sans-serif",
-                                        size: 12,
-                                    },
-                                    color: "#343a40",
-                                },
-                                grid: {
-                                    color: "#ececec",
-                                },
-                            },
-                            y: {
-                                beginAtZero: true,
-                                max: suggestedMax,
-                                ticks: {
-                                    font: {
-                                        family: "'Roboto', Arial, sans-serif",
-                                        size: 12,
-                                    },
-                                    color: "#343a40",
-                                    callback: function (value) {
-                                        return value.toFixed(tickPrecision);
-                                    },
-                                },
-                                grid: {
-                                    color: "#ececec",
-                                },
-                                title: {
-                                    display: true,
-                                    text: yAxisTitle,
-                                    font: {
-                                        family: "'Roboto', Arial, sans-serif",
-                                        size: 14,
-                                        weight: "600",
-                                    },
-                                    color: "#343a40",
-                                },
-                            },
-                        },
-                    },
+                createCrimeChart(category, index, {
+                    mainData,
+                    countryData,
+                    deptData,
+                    years,
+                    titleText,
+                    type,
+                    dept,
+                    chartGrid
                 });
             });
         } catch (error) {
@@ -519,5 +216,298 @@
         }
     }
 
-    initCrimeCharts();
-})();
+    /**
+     * Creates an individual crime chart for a specific category.
+     * @param {Object} category - Crime category configuration
+     * @param {number} index - Chart index
+     * @param {Object} data - Chart data and configuration
+     */
+    function createCrimeChart(category, index, { mainData, countryData, deptData, years, titleText, type, dept, chartGrid }) {
+        // Create chart container and canvas
+        const chartContainer = document.createElement("div");
+        chartContainer.className = "chart-container";
+        const canvas = document.createElement("canvas");
+        canvas.id = `crimeChart_${index}`;
+        chartContainer.appendChild(canvas);
+        chartGrid.appendChild(chartContainer);
+
+        // Calculate data for the main level
+        const mainDataValues = mainData.map((row) => {
+            return calculateCrimeValue(row, category.key);
+        });
+
+        // Calculate data for country level (if applicable)
+        let countryDataValues = null;
+        if (countryData && (type === "department" || type === "commune")) {
+            countryDataValues = countryData.map((row) => {
+                const value = calculateCrimeValue(row, category.key);
+                return Math.min(
+                    value,
+                    category.key === "homicides_p100k" ? 1000 : 100,
+                );
+            });
+        }
+
+        // Calculate data for department level (if commune)
+        let deptDataValues = null;
+        if (deptData && type === "commune") {
+            deptDataValues = deptData.map((row) => {
+                const value = calculateCrimeValue(row, category.key);
+                return Math.min(
+                    value,
+                    category.key === "homicides_p100k" ? 1000 : 100,
+                );
+            });
+        }
+
+        console.log(
+            `${category.label} main data values:`,
+            mainDataValues,
+        );
+        if (countryDataValues)
+            console.log(
+                `${category.label} country data values:`,
+                countryDataValues,
+            );
+        if (deptDataValues)
+            console.log(
+                `${category.label} department data values:`,
+                deptDataValues,
+            );
+
+        // Calculate suggestedMax for y-axis
+        const allValues = [...mainDataValues];
+        if (countryDataValues) allValues.push(...countryDataValues);
+        if (deptDataValues) allValues.push(...deptDataValues);
+        const maxDataValue = Math.max(...allValues);
+        const suggestedMax = Math.ceil(maxDataValue * 1.1) || 1;
+        const tickPrecision = 1;
+
+        // Determine y-axis title
+        const yAxisTitle =
+            category.key === "homicides_p100k"
+                ? "Taux (pour 100k habitants)"
+                : "Taux (pour mille habitants)";
+
+        // Prepare datasets
+        const datasets = [
+            {
+                label: titleText,
+                data: mainDataValues,
+                borderColor: category.color,
+                backgroundColor: category.color,
+                fill: false,
+                tension: 0.4,
+                pointRadius: 2,
+                pointHoverRadius: 5,
+            },
+        ];
+
+        if (countryDataValues && (type === "department" || type === "commune")) {
+            datasets.push({
+                label: "France",
+                data: countryDataValues,
+                borderColor: "#808080",
+                backgroundColor: "#808080",
+                borderDash: [5, 5],
+                fill: false,
+                tension: 0.4,
+                pointRadius: 0,
+            });
+        }
+
+        if (deptDataValues && type === "commune") {
+            datasets.push({
+                label: `${dept} - ${departmentNames[dept] || dept}`,
+                data: deptDataValues,
+                borderColor: "#A9A9A9",
+                backgroundColor: "#A9A9A9",
+                borderDash: [10, 5],
+                fill: false,
+                tension: 0.4,
+                pointRadius: 0,
+            });
+        }
+
+        // Create the chart
+        new Chart(canvas, {
+            type: "line",
+            data: {
+                labels: years,
+                datasets: datasets,
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: "top",
+                        labels: {
+                            font: {
+                                family: "'Roboto', Arial, sans-serif",
+                                size: 14,
+                            },
+                            color: "#343a40",
+                        },
+                    },
+                    title: {
+                        display: true,
+                        text: category.label,
+                        font: {
+                            family: "'Roboto', Arial, sans-serif",
+                            size: 18,
+                            weight: "700",
+                        },
+                        color: "#343a40",
+                        padding: {
+                            top: 10,
+                            bottom: 20,
+                        },
+                    },
+                    tooltip: {
+                        backgroundColor: "#fff",
+                        titleColor: "#343a40",
+                        bodyColor: "#343a40",
+                        borderColor: "#dee2e6",
+                        borderWidth: 1,
+                        titleFont: {
+                            family: "'Roboto', Arial, sans-serif",
+                            size: 14,
+                        },
+                        bodyFont: {
+                            family: "'Roboto', Arial, sans-serif",
+                            size: 12,
+                        },
+                        callbacks: {
+                            label: function (context) {
+                                let label = context.dataset.label || "";
+                                if (label) {
+                                    label += ": ";
+                                }
+                                const unit =
+                                    context.dataset.label.includes(
+                                        "Homicides",
+                                    )
+                                        ? " (pour 100k hab.)"
+                                        : " (pour mille hab.)";
+                                return (
+                                    label +
+                                    context.parsed.y.toFixed(
+                                        tickPrecision,
+                                    ) +
+                                    unit
+                                );
+                            },
+                        },
+                    },
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: "Année",
+                            font: {
+                                family: "'Roboto', Arial, sans-serif",
+                                size: 14,
+                                weight: "600",
+                            },
+                            color: "#343a40",
+                        },
+                        ticks: {
+                            font: {
+                                family: "'Roboto', Arial, sans-serif",
+                                size: 12,
+                            },
+                            color: "#343a40",
+                        },
+                        grid: {
+                            color: "#ececec",
+                        },
+                    },
+                    y: {
+                        beginAtZero: true,
+                        max: suggestedMax,
+                        ticks: {
+                            font: {
+                                family: "'Roboto', Arial, sans-serif",
+                                size: 12,
+                            },
+                            color: "#343a40",
+                            callback: function (value) {
+                                return value.toFixed(tickPrecision);
+                            },
+                        },
+                        grid: {
+                            color: "#ececec",
+                        },
+                        title: {
+                            display: true,
+                            text: yAxisTitle,
+                            font: {
+                                family: "'Roboto', Arial, sans-serif",
+                                size: 14,
+                                weight: "600",
+                            },
+                            color: "#343a40",
+                        },
+                    },
+                },
+            },
+        });
+    }
+
+    /**
+     * Calculates crime value based on category key and aggregates sub-categories.
+     * @param {Object} row - Data row
+     * @param {string} key - Category key
+     * @returns {number} Calculated crime value
+     */
+    function calculateCrimeValue(row, key) {
+        let value;
+        if (key === "homicides_p100k") {
+            value = row.homicides_p100k + row.tentatives_homicides_p100k;
+        } else if (key === "violences_physiques_p1k") {
+            value =
+                row.coups_et_blessures_volontaires_p1k +
+                row.coups_et_blessures_volontaires_intrafamiliaux_p1k +
+                row.autres_coups_et_blessures_volontaires_p1k +
+                row.vols_avec_armes_p1k +
+                row.vols_violents_sans_arme_p1k;
+        } else if (key === "vols_p1k") {
+            value =
+                row.vols_avec_armes_p1k +
+                row.vols_violents_sans_arme_p1k +
+                row.vols_sans_violence_contre_des_personnes_p1k +
+                row.cambriolages_de_logement_p1k +
+                row.vols_de_vehicules_p1k +
+                row.vols_dans_les_vehicules_p1k +
+                row.vols_d_accessoires_sur_vehicules_p1k;
+        } else if (key === "stupefiants_p1k") {
+            value =
+                row.usage_de_stupefiants_p1k +
+                row.usage_de_stupefiants_afd_p1k +
+                row.trafic_de_stupefiants_p1k;
+        } else if (key === "destructions_p1k") {
+            value = row.destructions_et_degradations_volontaires_p1k;
+        } else {
+            value = row[key];
+        }
+        return value;
+    }
+
+    return {
+        initCrimeCharts,
+        getUrlParams,
+        createCrimeChart,
+        calculateCrimeValue
+    };
+}
+
+// Export for ES6 modules
+export { CrimeGraphHandler };
+
+// Initialize when the script loads (for backward compatibility)
+if (typeof window !== 'undefined') {
+    const crimeGraphHandler = CrimeGraphHandler();
+    crimeGraphHandler.initCrimeCharts();
+}

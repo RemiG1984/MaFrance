@@ -1,22 +1,40 @@
-(function () {
+
+import { formatNumber, formatPercentage } from './utils.js';
+
+/**
+ * Names Graph Handler module for displaying historical names data charts.
+ * Manages Chart.js visualization of name evolution over time.
+ * @returns {Object} Names graph handler interface
+ */
+function NamesGraphHandler() {
     // Use shared department names
     const departmentNames = DepartmentNames;
 
-    // Parse URL query parameters
-    const urlParams = new URLSearchParams(window.location.search);
-    const type = urlParams.get("type"); // country, department, or commune
-    const code = urlParams.get("code"); // France, dept code, or COG
-    const dept = urlParams.get("dept"); // Department code for communes
-
-    // DOM element for the chart
-    const canvas = document.getElementById("namesChart");
-    if (!canvas) {
-        console.error('Canvas element with ID "namesChart" not found');
-        return;
+    /**
+     * Parses URL parameters for chart configuration.
+     * @returns {Object} URL parameters object
+     */
+    function getUrlParams() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return {
+            type: urlParams.get("type"), // country, department, or commune
+            code: urlParams.get("code"), // France, dept code, or COG
+            dept: urlParams.get("dept"), // Department code for communes
+        };
     }
 
-    // Initialize Chart.js
+    /**
+     * Initializes Chart.js for names data visualization.
+     */
     async function initChart() {
+        const canvas = document.getElementById("namesChart");
+        if (!canvas) {
+            console.error('Canvas element with ID "namesChart" not found');
+            return;
+        }
+
+        const { type, code, dept } = getUrlParams();
+
         try {
             let endpoint;
             let params = {};
@@ -231,5 +249,17 @@
         }
     }
 
-    initChart();
-})();
+    return {
+        initChart,
+        getUrlParams
+    };
+}
+
+// Export for ES6 modules
+export { NamesGraphHandler };
+
+// Initialize when the script loads (for backward compatibility)
+if (typeof window !== 'undefined') {
+    const namesGraphHandler = NamesGraphHandler();
+    namesGraphHandler.initChart();
+}
