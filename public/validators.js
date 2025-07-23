@@ -77,3 +77,60 @@ export function validateUrlParams(params) {
         errors
     };
 }
+
+/**
+ * Validation utilities for data integrity checks.
+ */
+
+/**
+ * Validates department code format.
+ * @param {string} dept - Department code to validate
+ * @returns {Object} Validation result with isValid boolean and errors array
+ */
+export function validateDepartment(dept) {
+    const errors = [];
+
+    if (!dept) {
+        errors.push('Department code is required');
+        return { isValid: false, errors };
+    }
+
+    // Valid department codes: 01-95, 2A, 2B, 971-976
+    const validPattern = /^(0[1-9]|[1-8][0-9]|9[0-5]|2[AB]|97[1-6])$/;
+
+    if (!validPattern.test(dept)) {
+        errors.push('Invalid department code format');
+    }
+
+    return {
+        isValid: errors.length === 0,
+        errors
+    };
+}
+
+/**
+ * Validates commune name format.
+ * @param {string} commune - Commune name to validate
+ * @returns {Object} Validation result with isValid boolean and errors array
+ */
+export function validateCommune(commune) {
+    const errors = [];
+
+    if (!commune) {
+        errors.push('Commune name is required');
+        return { isValid: false, errors };
+    }
+
+    if (commune.length < 2) {
+        errors.push('Commune name must be at least 2 characters');
+    }
+
+    if (commune.length > 100) {
+        errors.push('Commune name too long');
+    }
+
+    return {
+        isValid: errors.length === 0,
+        errors
+    };
+}

@@ -75,12 +75,16 @@ export class LoadingManager {
     }
 }
 // Export for ES6 modules (default export)
-export default LoadingManager;
+export default function ErrorHandler() {
+    return new LoadingManager(document.body);
+}
 
 // Named export for backward compatibility
 export { LoadingManager as ErrorHandler };
 
 // Make available globally for backward compatibility
 if (typeof window !== 'undefined') {
-    window.ErrorHandler = LoadingManager;
+    window.ErrorHandler = function() {
+        return new LoadingManager(document.body);
+    };
 }
