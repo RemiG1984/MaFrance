@@ -49,7 +49,10 @@ document.addEventListener('DOMContentLoaded', function() {
         );
 
         scoreTableHandler = ScoreTableHandler(resultsDiv, DepartmentNames);
-        executiveHandler = ExecutiveHandler(executiveDiv, DepartmentNames);
+        
+        if (executiveDiv) {
+            executiveHandler = ExecutiveHandler(executiveDiv, DepartmentNames);
+        }
         
         if (articleListDiv && filterButtonsDiv) {
             articleHandler = ArticleHandler(articleListDiv, filterButtonsDiv);
@@ -76,11 +79,11 @@ document.addEventListener('DOMContentLoaded', function() {
             await locationHandler.loadDepartements();
             
             // Show country details by default
-            if (scoreTableHandler && scoreTableHandler.showCountryDetails) {
+            if (scoreTableHandler && typeof scoreTableHandler.showCountryDetails === 'function') {
                 await scoreTableHandler.showCountryDetails();
             }
             
-            if (executiveHandler && executiveHandler.showCountryExecutive) {
+            if (executiveHandler && typeof executiveHandler.showCountryExecutive === 'function') {
                 await executiveHandler.showCountryExecutive();
             }
         } catch (error) {
@@ -112,11 +115,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 
                 // Show department details
-                if (scoreTableHandler && scoreTableHandler.showDepartmentDetails) {
+                if (scoreTableHandler && typeof scoreTableHandler.showDepartmentDetails === 'function') {
                     await scoreTableHandler.showDepartmentDetails(selectedDept);
                 }
                 
-                if (executiveHandler && executiveHandler.showDepartmentExecutive) {
+                if (executiveHandler && typeof executiveHandler.showDepartmentExecutive === 'function') {
                     await executiveHandler.showDepartmentExecutive(selectedDept);
                 }
                 
@@ -137,11 +140,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     articleHandler.clearArticles();
                 }
                 
-                if (scoreTableHandler && scoreTableHandler.showCountryDetails) {
+                if (scoreTableHandler && typeof scoreTableHandler.showCountryDetails === 'function') {
                     await scoreTableHandler.showCountryDetails();
                 }
                 
-                if (executiveHandler && executiveHandler.showCountryExecutive) {
+                if (executiveHandler && typeof executiveHandler.showCountryExecutive === 'function') {
                     await executiveHandler.showCountryExecutive();
                 }
             }
@@ -196,11 +199,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 await locationHandler.loadLieux(currentDepartement, currentCOG);
                 
                 // Show commune details
-                if (scoreTableHandler && scoreTableHandler.showCommuneDetails) {
+                if (scoreTableHandler && typeof scoreTableHandler.showCommuneDetails === 'function') {
                     await scoreTableHandler.showCommuneDetails(currentCOG);
                 }
                 
-                if (executiveHandler && executiveHandler.showCommuneExecutive) {
+                if (executiveHandler && typeof executiveHandler.showCommuneExecutive === 'function') {
                     await executiveHandler.showCommuneExecutive(currentCOG);
                 }
                 
