@@ -526,20 +526,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
             const namesResponse = await fetch(
                 `/api/communes/names?dept=${departement}&cog=${encodeURIComponent(cog)}`,
             );
-            let namesData;
-            if (namesResponse.ok) {
-                namesData = await namesResponse.json();
-            } else {
-                // Handle missing names data gracefully
-                namesData = {
-                    musulman_pct: NaN,
-                    africain_pct: NaN,
-                    asiatique_pct: NaN,
-                    traditionnel_pct: NaN,
-                    moderne_pct: NaN,
-                    annais: null,
-                };
-            }
+            const namesData = await namesResponse.json();
             const crimeResponse = await fetch(
                 `/api/communes/crime?dept=${departement}&cog=${encodeURIComponent(cog)}`,
             );
