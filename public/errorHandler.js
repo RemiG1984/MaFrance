@@ -1,4 +1,3 @@
-
 /**
  * Centralized error handling utility for consistent error display and logging.
  */
@@ -19,11 +18,11 @@ export function displayError(container, error, retryCallback = null) {
             ${retryCallback ? '<button class="retry-btn" onclick="retry()">Réessayer</button>' : ''}
         </div>
     `;
-    
+
     if (retryCallback) {
         errorDiv.querySelector('.retry-btn').addEventListener('click', retryCallback);
     }
-    
+
     container.innerHTML = '';
     container.appendChild(errorDiv);
     console.error('Error displayed to user:', error);
@@ -55,23 +54,33 @@ export class LoadingManager {
         this.container = container;
         this.isLoading = false;
     }
-    
+
     show(message = 'Chargement...') {
         if (this.isLoading) return;
         this.isLoading = true;
-        
+
         const loadingDiv = document.createElement('div');
         loadingDiv.className = 'loading-container';
         loadingDiv.innerHTML = `
             <div class="loading-spinner"></div>
             <p>${message}</p>
         `;
-        
+
         this.container.innerHTML = '';
         this.container.appendChild(loadingDiv);
     }
-    
+
     hide() {
         this.isLoading = false;
     }
+}
+// Export for ES6 modules
+export { ErrorHandler };
+
+// Export as default as well for compatibility
+export default ErrorHandler;
+
+// Initialize when the script loads (for backward compatibility)
+if (typeof window !== 'undefined') {
+    window.ErrorHandler = ErrorHandler;
 }
