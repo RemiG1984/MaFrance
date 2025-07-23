@@ -361,5 +361,5 @@ function MapHandler(mapDiv, mapMetricSelect, departementSelect, resultsDiv, depa
     return { updateMap };
 }
 
-// Export for use as module
-window.MapHandler = MapHandler;
+// Export for ES6 modules
+export { MapHandler };

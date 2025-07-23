@@ -1,5 +1,9 @@
 import { debounce } from './utils.js';
 import { LocationHandler } from './locationHandler.js';
+import { ScoreTableHandler } from './scoreTableHandler.js';
+import { ExecutiveHandler } from './executiveHandler.js';
+import { ArticleHandler } from './articleHandler.js';
+import { MapHandler } from './mapHandler.js';
 
 (function () {
     // Use shared department names

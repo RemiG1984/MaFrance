@@ -222,5 +222,5 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
     };
 }
 
-// Export for use as module
-window.ArticleHandler = ArticleHandler;
+// Export for ES6 modules
+export { ArticleHandler };

@@ -230,5 +230,5 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
     };
 }
 
-// Export for use as module
-window.ScoreTableHandler = ScoreTableHandler;
+// Export for ES6 modules
+export { ScoreTableHandler };

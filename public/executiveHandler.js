@@ -107,5 +107,5 @@ function ExecutiveHandler(executiveDiv, departmentNames) {
     };
 }
 
-// Export for use as module
-window.ExecutiveHandler = ExecutiveHandler;
+// Export for ES6 modules
+export { ExecutiveHandler };
