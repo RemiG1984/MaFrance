@@ -160,5 +160,5 @@ function LocationHandler(
     };
 }
 
-// Export for use as module
-window.LocationHandler = LocationHandler;
+// Export for ES6 modules
+export { LocationHandler };
