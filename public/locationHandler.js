@@ -1,164 +1,177 @@
-import { formatNumber, normalizeDept } from './utils.js';
-
-/**
- * Location handler module for managing department, commune, and lieu selection.
- * Handles DOM interactions and API calls for location-based data.
- * @param {HTMLSelectElement} departementSelect - Department selection dropdown
- * @param {HTMLInputElement} communeInput - Commune search input
- * @param {HTMLElement} communeList - Commune suggestions container
- * @param {HTMLSelectElement} lieuxSelect - Location selection dropdown
- * @param {HTMLElement} resultsDiv - Results display container
- * @param {Object} departmentNames - Department names mapping
- * @returns {Object} Location handler interface
- */
-function LocationHandler(
-    departementSelect,
-    communeInput,
-    communeList,
-    lieuxSelect,
-    resultsDiv,
-    departmentNames,
-) {
-    /**
-     * Loads and populates the department dropdown with options.
-     * @async
-     */
-    async function loadDepartements() {
-        try {
-            const response = await fetch("/api/departements");
-            if (!response.ok) {
-                throw new Error(
-                    `Erreur lors de la récupération des départements: ${response.statusText}`,
-                );
+const LocationHandler = (function () {
+    return function (
+        departementSelect,
+        communeInput,
+        communeList,
+        lieuxSelect,
+        resultsDiv,
+        departmentNames,
+    ) {
+        async function loadDepartements() {
+            try {
+                const response = await fetch("/api/departements");
+                if (!response.ok) {
+                    throw new Error(
+                        "Erreur lors du chargement des départements",
+                    );
+                }
+                const departements = await response.json();
+                console.log("Departments fetched:", departements);
+                departementSelect.innerHTML =
+                    '<option value="">-- Choisir un département --</option>';
+                departements.forEach((dept) => {
+                    // Normalize departement code
+                    let deptCode = dept.departement.trim().toUpperCase();
+                    if (/^\d+$/.test(deptCode)) {
+                        deptCode = deptCode.padStart(2, "0");
+                    }
+                    if (
+                        !/^(0[1-9]|[1-8][0-9]|9[0-5]|2[AB]|97[1-6])$/.test(
+                            deptCode,
+                        )
+                    ) {
+                        console.warn(
+                            "Invalid departement code skipped:",
+                            deptCode,
+                        );
+                        return;
+                    }
+                    const option = document.createElement("option");
+                    option.value = deptCode;
+                    const deptName = departmentNames[deptCode] || deptCode;
+                    option.textContent = `${deptCode} - ${deptName}`;
+                    departementSelect.appendChild(option);
+                });
+            } catch (error) {
+                resultsDiv.innerHTML = `<p>Erreur : ${error.message}</p>`;
+                console.error("Erreur chargement départements:", error);
             }
-            const data = await response.json();
-            console.log("Departments fetched:", data);
-
-            departementSelect.innerHTML = '<option value="">Sélectionner un département</option>';
-            data.forEach((item) => {
-                const option = document.createElement("option");
-                option.value = item.departement;
-                const deptName = departmentNames[item.departement] || item.departement;
-                option.textContent = `${item.departement} - ${deptName}`;
-                departementSelect.appendChild(option);
-            });
-        } catch (error) {
-            console.error("Erreur lors du chargement des départements:", error);
-            departementSelect.innerHTML = '<option value="">Erreur de chargement</option>';
-        }
-    }
-
-    /**
-     * Loads communes for a specific department and handles search input.
-     * @async
-     * @param {string} departement - Department code
-     * @param {string} query - Search query for commune
-     */
-    async function handleCommuneInput(departement, query) {
-        if (!departement || query.length < 2) {
-            communeList.innerHTML = "";
-            return;
         }
 
-        try {
-            const response = await fetch(
-                `/api/search?dept=${departement}&q=${encodeURIComponent(query)}`,
-            );
-            if (!response.ok) {
-                throw new Error(
-                    `Erreur lors de la recherche de communes: ${response.statusText}`,
-                );
+        async function loadCommunes(departement, query = "") {
+            // Normalize departement
+            departement = departement.trim().toUpperCase();
+            if (/^\d+$/.test(departement)) {
+                departement = departement.padStart(2, "0");
             }
-            const data = await response.json();
-
-            communeList.innerHTML = "";
-            if (data.length === 0) {
-                communeList.innerHTML = "<p>Aucune commune trouvée.</p>";
+            if (
+                !/^(0[1-9]|[1-8][0-9]|9[0-5]|2[AB]|97[1-6])$/.test(departement)
+            ) {
+                console.error("Invalid departement code:", departement);
+                resultsDiv.innerHTML =
+                    "<p>Erreur : Code département invalide</p>";
                 return;
             }
+            try {
+                const url = `/api/communes?dept=${departement}&q=${encodeURIComponent(query)}`;
+                console.log("Fetching communes from:", url);
+                const response = await fetch(url);
+                console.log(
+                    "Communes response status:",
+                    response.status,
+                    response.statusText,
+                );
 
-            data.forEach((item) => {
-                const div = document.createElement("div");
-                div.className = "commune-item";
-                div.textContent = `${item.commune} (${formatNumber(item.population)} hab.)`;
-                div.addEventListener("click", () => {
-                    communeInput.value = item.commune;
-                    communeList.innerHTML = "";
-                    loadLieux(departement, item.COG);
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error("Communes API error response:", errorText);
+                    throw new Error(
+                        `Erreur ${response.status}: ${response.statusText} - ${errorText}`,
+                    );
+                }
+                const communes = await response.json();
+                console.log("Communes fetched:", communes);
+                communeList.innerHTML = "";
+                communes.forEach((commune) => {
+                    const option = document.createElement("option");
+                    option.value = commune.commune;
+                    option.textContent = commune.commune;
+                    communeList.appendChild(option);
                 });
-                communeList.appendChild(div);
-            });
-        } catch (error) {
-            console.error("Erreur lors de la recherche de communes:", error);
-            communeList.innerHTML = "<p>Erreur lors de la recherche.</p>";
-        }
-    }
-
-    /**
-     * Loads available locations (lieux) for a specific commune.
-     * @async
-     * @param {string} departement - Department code
-     * @param {string} cog - Commune COG code
-     */
-    async function loadLieux(departement, cog) {
-        try {
-            const response = await fetch(`/api/lieux?dept=${departement}&cog=${cog}`);
-            if (!response.ok) {
-                throw new Error(
-                    `Erreur lors de la récupération des lieux: ${response.statusText}`,
-                );
+            } catch (error) {
+                resultsDiv.innerHTML = `<p>Erreur : ${error.message}</p>`;
+                console.error("Erreur chargement communes:", {
+                    error: error.message,
+                    stack: error.stack,
+                    departement: departement,
+                    query: query,
+                });
             }
-            const data = await response.json();
-
-            lieuxSelect.innerHTML = '<option value="">Tous les lieux</option>';
-            data.forEach((item) => {
-                const option = document.createElement("option");
-                option.value = item.lieu;
-                option.textContent = item.lieu;
-                lieuxSelect.appendChild(option);
-            });
-        } catch (error) {
-            console.error("Erreur lors du chargement des lieux:", error);
-            lieuxSelect.innerHTML = '<option value="">Erreur de chargement</option>';
         }
-    }
 
-    /**
-     * Loads communes for a specific department.
-     * @async
-     * @param {string} departement - Department code
-     */
-    async function loadCommunes(departement) {
-        const normalizedDept = normalizeDept(departement);
-        try {
-            const response = await fetch(`/api/communes?dept=${normalizedDept}`);
-            if (!response.ok) {
-                throw new Error(
-                    `Erreur lors de la récupération des communes: ${response.statusText}`,
-                );
+        async function loadLieux(departement, cog) {
+            // Normalize departement
+            departement = departement.trim().toUpperCase();
+            if (/^\d+$/.test(departement)) {
+                departement = departement.padStart(2, "0");
             }
-            // Additional logic for handling commune data can be added here
-        } catch (error) {
-            console.error("Erreur lors du chargement des communes:", error);
+            if (
+                !/^(0[1-9]|[1-8][0-9]|9[0-5]|2[AB]|97[1-6])$/.test(departement)
+            ) {
+                console.error("Invalid departement code:", departement);
+                resultsDiv.innerHTML =
+                    "<p>Erreur : Code département invalide</p>";
+                return;
+            }
+            try {
+                let url = `/api/articles/lieux?dept=${departement}`;
+                if (cog) {
+                    url += `&cog=${encodeURIComponent(cog)}`;
+                }
+
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error("Erreur lors du chargement des lieux");
+                }
+                const lieux = await response.json();
+                console.log("Lieux fetched:", lieux);
+                lieuxSelect.innerHTML =
+                    '<option value="">-- Tous les lieux --</option>';
+                lieux.forEach((lieu) => {
+                    const option = document.createElement("option");
+                    option.value = lieu.lieu;
+                    option.textContent = lieu.lieu;
+                    lieuxSelect.appendChild(option);
+                });
+                lieuxSelect.disabled = lieux.length === 0;
+            } catch (error) {
+                lieuxSelect.innerHTML =
+                    '<option value="">-- Aucun lieu --</option>';
+                lieuxSelect.disabled = true;
+                console.error("Erreur chargement lieux:", error);
+            }
         }
-    }
 
-    /**
-     * Resets commune input and lieu selection to default state.
-     */
-    function resetCommuneAndLieux() {
-        communeList.innerHTML = "";
-        lieuxSelect.innerHTML = '<option value="">Tous les lieux</option>';
-    }
+        function resetCommuneAndLieux() {
+            const isDisabled = departementSelect.value === "";
+            communeInput.disabled = isDisabled;
+            if (isDisabled) {
+                communeInput.value = ""; // Only clear if disabled
+            }
+            communeList.innerHTML = "";
+            lieuxSelect.innerHTML =
+                '<option value="">-- Tous les lieux --</option>';
+            lieuxSelect.disabled = true;
+        }
 
-    return {
-        loadDepartements,
-        loadCommunes,
-        handleCommuneInput,
-        loadLieux,
-        resetCommuneAndLieux,
+        function handleCommuneInput(departement, query) {
+            if (!departement) {
+                resetCommuneAndLieux();
+                return;
+            }
+            if (query.length >= 2) {
+                loadCommunes(departement, query);
+            } else {
+                communeList.innerHTML = ""; // Clear datalist but allow typing
+            }
+        }
+
+        return {
+            loadDepartements,
+            loadCommunes,
+            loadLieux,
+            resetCommuneAndLieux,
+            handleCommuneInput,
+        };
     };
-}
-
-// Export for ES6 modules
-export { LocationHandler };
+})();
