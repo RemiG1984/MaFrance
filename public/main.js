@@ -41,7 +41,7 @@ import { DepartmentNames } from './departmentNames.js';
         return;
     }
 
-    // Initialize location handler immediately as it's needed for basic functionality
+    // Initialize all handlers immediately
     const locationHandler = LocationHandler(
         departementSelect,
         communeInput,
@@ -51,40 +51,10 @@ import { DepartmentNames } from './departmentNames.js';
         departmentNames,
     );
 
-    // Lazy load other modules to improve initial page load
-    let articleHandler, scoreTableHandler, executiveHandler, mapHandler;
-
-    // Initialize article handler when needed
-    const getArticleHandler = () => {
-        if (!articleHandler) {
-            articleHandler = ArticleHandler(articleListDiv, filterButtonsDiv);
-        }
-        return articleHandler;
-    };
-
-    // Initialize score table handler when needed
-    const getScoreTableHandler = () => {
-        if (!scoreTableHandler) {
-            scoreTableHandler = ScoreTableHandler(resultsDiv, departmentNames);
-        }
-        return scoreTableHandler;
-    };
-
-    // Initialize executive handler when needed
-    const getExecutiveHandler = () => {
-        if (!executiveHandler) {
-            executiveHandler = ExecutiveHandler(executiveDiv, departmentNames);
-        }
-        return executiveHandler;
-    };
-
-    // Initialize map handler when needed
-    const getMapHandler = () => {
-        if (!mapHandler) {
-            mapHandler = MapHandler(mapDiv, mapMetricSelect, departementSelect, resultsDiv, departmentNames);
-        }
-        return mapHandler;
-    };
+    const articleHandler = ArticleHandler(articleListDiv, filterButtonsDiv);
+    const scoreTableHandler = ScoreTableHandler(resultsDiv, departmentNames);
+    const executiveHandler = ExecutiveHandler(executiveDiv, departmentNames);
+    const mapHandler = MapHandler(mapDiv, mapMetricSelect, departementSelect, resultsDiv, departmentNames);
 
     // Shared state
     let currentLieu = "";
@@ -94,18 +64,18 @@ import { DepartmentNames } from './departmentNames.js';
     departementSelect.addEventListener("change", () => {
         const departement = departementSelect.value;
         locationHandler.resetCommuneAndLieux();
-        getArticleHandler.clearArticles();
+        articleHandler.clearArticles();
         currentLieu = "";
         communeInput.value = "";
-        getArticleHandler.setFilter(null);
+        articleHandler.setFilter(null);
         console.log("Reset filter on department change");
         if (departement) {
-            getScoreTableHandler.showDepartmentDetails(departement);
-            getExecutiveHandler.showDepartmentExecutive(departement);
+            scoreTableHandler.showDepartmentDetails(departement);
+            executiveHandler.showDepartmentExecutive(departement);
             locationHandler.loadCommunes(departement);
-            getArticleHandler.loadArticles(departement).then(() => {
-                getArticleHandler.loadArticleCounts(departement).then((counts) => {
-                    getArticleHandler.renderFilterButtons(
+            articleHandler.loadArticles(departement).then(() => {
+                articleHandler.loadArticleCounts(departement).then((counts) => {
+                    articleHandler.renderFilterButtons(
                         counts,
                         allArticles,
                         currentLieu,
@@ -113,9 +83,9 @@ import { DepartmentNames } from './departmentNames.js';
                 });
             });
         } else {
-            getScoreTableHandler.showCountryDetails();
-            getExecutiveHandler.showCountryExecutive();
-            getArticleHandler.clearArticles();
+            scoreTableHandler.showCountryDetails();
+            executiveHandler.showCountryExecutive();
+            articleHandler.clearArticles();
         }
     });
 
