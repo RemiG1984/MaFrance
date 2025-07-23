@@ -15,11 +15,10 @@ function ExecutiveHandler(executiveDiv, departmentNames) {
      */
     async function showCountryExecutive() {
         try {
-            const response = await fetch('/api/country/executive');
+            const response = await fetch('/api/country/ministre');
             if (!response.ok) {
                 throw new Error('Erreur lors de la récupération des données de l\'exécutif');
             }
-
             const data = await response.json();
             console.log("Country executive data:", data);
 
