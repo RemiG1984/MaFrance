@@ -1,7 +1,5 @@
 import { DepartmentNames } from './departmentNames.js';
 import { formatNumber, formatPercentage, formatMetricValue } from './utils.js';
-import { displayError, showLoading } from './errorHandler.js';
-import { apiService } from './apiService.js';
 
 /**
  * RankingsHandler Module

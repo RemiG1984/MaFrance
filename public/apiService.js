@@ -53,7 +53,7 @@ class ApiService {
 
             return data;
         } catch (error) {
-            console.error('API request failed:', url, error);
+            console.error('API request failed:', { url, error: error.message || error });
             throw error;
         }
     }
