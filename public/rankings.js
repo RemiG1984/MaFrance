@@ -1,5 +1,5 @@
 import { DepartmentNames } from './departmentNames.js';
-import { formatNumber, formatPercentage, formatMetricValue } from './utils.js';
+import { formatMetricValue } from './utils.js';
 import { MetricsConfig } from './metricsConfig.js';
 
 /**
