@@ -227,8 +227,8 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
             ] = await Promise.all([
                 api.getDepartmentDetails(deptCode),
                 api.getCountryDetails(),
-                apiService.request(`/api/departements/names?dept=${deptCode}`),
-                apiService.request(`/api/departements/crime?dept=${deptCode}`),
+                api.getDepartmentNames(deptCode),
+                api.getDepartmentCrime(deptCode),
                 api.getCountryNames(),
                 api.getCountryCrime(),
             ]);
@@ -349,9 +349,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
     async function showCommuneDetails(cog) {
         try {
             // First get commune details from COG
-            const item = await apiService.request(
-                `/api/communes/details?cog=${encodeURIComponent(cog)}`
-            );
+            const item = await api.getCommuneDetails(cog);
 
             if (!item) {
                 resultsDiv.innerHTML = "<p>Aucune commune trouvée.</p>";
@@ -363,11 +361,11 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
 
             const [deptData, namesData, crimeData, deptNamesData, deptCrimeData] =
                 await Promise.all([
-                    apiService.request(`/api/departements/details?dept=${departement}`),
+                    api.getDepartmentDetails(departement),
                     api.getCommuneNames(cog),
-                    apiService.request(`/api/communes/crime?dept=${departement}&cog=${encodeURIComponent(cog)}`),
-                    apiService.request(`/api/departements/names?dept=${departement}`),
-                    apiService.request(`/api/departements/crime?dept=${departement}`)
+                    api.getCommuneCrime(departement, cog),
+                    api.getDepartmentNames(departement),
+                    api.getDepartmentCrime(departement)
                 ]);
 
             console.log("Commune details:", item);
