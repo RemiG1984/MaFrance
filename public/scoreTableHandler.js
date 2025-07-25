@@ -125,8 +125,8 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
         try {
             const [data, namesData, crimeData] = await Promise.all([
                 api.getCountryDetails(),
-                api.getCountryNamesHistory(),
-                api.getCountryCrimeHistory()
+                api.getCountryNames(),
+                api.getCountryCrime()
             ]);
 
             console.log("Country details:", data);
@@ -227,10 +227,10 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
             ] = await Promise.all([
                 api.getDepartmentDetails(deptCode),
                 api.getCountryDetails(),
-                api.getDepartmentNamesHistory(deptCode),
-                api.getDepartmentCrimeHistory(deptCode),
-                api.getCountryNamesHistory(),
-                api.getCountryCrimeHistory(),
+                apiService.request(`/api/departements/names?dept=${deptCode}`),
+                apiService.request(`/api/departements/crime?dept=${deptCode}`),
+                api.getCountryNames(),
+                api.getCountryCrime(),
             ]);
 
             console.log("Department details:", data);
