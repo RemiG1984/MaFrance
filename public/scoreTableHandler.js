@@ -634,8 +634,8 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                 },
                 {
                     title: MetricsConfig.getMetricLabel("mosque_p100k"),
-                    main: item.mosque_p100k.toFixed(1),
-                    compare: deptData.mosque_p100k.toFixed(1),
+                    main: MetricsConfig.formatMetricValue(item.mosque_p100k, "mosque_p100k"),
+                    compare: MetricsConfig.formatMetricValue(deptData.mosque_p100k, "mosque_p100k"),
                     subRow: true,
                 },
                 {

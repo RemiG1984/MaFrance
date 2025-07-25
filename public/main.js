@@ -215,24 +215,20 @@ import { api } from './apiService.js';
     let appInitialized = false;
 
     // Initialize the application
-    document.addEventListener('DOMContentLoaded', async () => {
+    function initializeApp() {
         if (appInitialized) return;
         appInitialized = true;
 
-        // Load country data using cached API service
-        const countryData = await api.getCountryDetails('France');
-        console.log('Country details:', countryData);
-
-        // Load country executive data using cached API service
-        const executiveData = await api.getCountryExecutive('France');
-        console.log('Country executive data:', executiveData);
-
-        // Load departments using cached API service
-        const departments = await api.getDepartments();
-        console.log('Departments fetched:', departments);
-
+        console.log('Initializing application...');
         scoreTableHandler.showCountryDetails();
         executiveHandler.showCountryExecutive();
         locationHandler.loadDepartements();
-    });
+    }
+
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    } else {
+        initializeApp();
+    }
 })();
