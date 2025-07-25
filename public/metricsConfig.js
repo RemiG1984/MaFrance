@@ -129,7 +129,7 @@ export const MetricsConfig = {
             value: "pop_in_qpv_pct",
             label: "% Population en QPV",
             category: "wokisme",
-            format: "percentage_decimal",
+            format: "percentage",
         },
     ],
 
