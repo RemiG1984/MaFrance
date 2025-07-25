@@ -8,8 +8,8 @@ export const MetricsConfig = {
     metrics: [
         {
             value: "total_score",
-            label: "Score Total",
-            category: "general",
+            label: "Score Total", 
+            category: "général",
             format: "score",
         },
         // Insécurité category

@@ -383,7 +383,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                         },
                         {
                             title: MetricsConfig.getMetricLabel("mosque_p100k"),
-                            main: data.mosque_p100k.toFixed(1),
+                            main: MetricsConfig.formatMetricValue(data.mosque_p100k, "mosque_p100k")Fixed(1),
                             compare: countryData.mosque_p100k.toFixed(1),
                             subRow: true,
                         },
@@ -419,17 +419,8 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                         },
                         {
                             title: MetricsConfig.getMetricLabel("pop_in_qpv_pct"),
-                            main:
-                                data.pop_in_qpv_pct !== null &&
-                                data.pop_in_qpv_pct !== undefined
-                                    ? data.pop_in_qpv_pct.toFixed(1) + "%"
-                                    : "0.0%",
-                            compare:
-                                countryData.pop_in_qpv_pct !== null &&
-                                countryData.pop_in_qpv_pct !== undefined
-                                    ? countryData.pop_in_qpv_pct.toFixed(1) +
-                                      "%"
-                                    : "0.0%",
+                            main: MetricsConfig.formatMetricValue(data.pop_in_qpv_pct || 0, "pop_in_qpv_pct"),
+                            compare: MetricsConfig.formatMetricValue(countryData.pop_in_qpv_pct || 0, "pop_in_qpv_pct"),
                             subRow: true,
                         },
                     ],
