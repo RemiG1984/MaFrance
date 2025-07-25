@@ -146,7 +146,7 @@ const RankingsHandler = (function () {
                         population: dept.population || 0,
                         rank: index + 1,
                     };
-                    
+
                     // Add all metrics from MetricsConfig
                     MetricsConfig.metrics.forEach(metricConfig => {
                         const metricKey = metricConfig.value;
@@ -156,7 +156,7 @@ const RankingsHandler = (function () {
                             ranking[metricKey] = dept[metricKey] || 0;
                         }
                     });
-                    
+
                     return ranking;
                 });
 
@@ -177,7 +177,7 @@ const RankingsHandler = (function () {
                             population: dept.population || 0,
                             rank: totalDepartments - filteredBottomData.length + index + 1,
                         };
-                        
+
                         // Add all metrics from MetricsConfig
                         MetricsConfig.metrics.forEach(metricConfig => {
                             const metricKey = metricConfig.value;
@@ -187,7 +187,7 @@ const RankingsHandler = (function () {
                                 ranking[metricKey] = dept[metricKey] || 0;
                             }
                         });
-                        
+
                         return ranking;
                     });
 
@@ -278,7 +278,7 @@ const RankingsHandler = (function () {
                         population: commune.population || 0,
                         rank: index + 1,
                     };
-                    
+
                     // Add all metrics from MetricsConfig
                     MetricsConfig.metrics.forEach(metricConfig => {
                         const metricKey = metricConfig.value;
@@ -288,7 +288,7 @@ const RankingsHandler = (function () {
                             ranking[metricKey] = commune[metricKey] || 0;
                         }
                     });
-                    
+
                     return ranking;
                 });
 
@@ -307,7 +307,7 @@ const RankingsHandler = (function () {
                             population: commune.population || 0,
                             rank: totalCommunes - filteredBottomData.length + index + 1,
                         };
-                        
+
                         // Add all metrics from MetricsConfig
                         MetricsConfig.metrics.forEach(metricConfig => {
                             const metricKey = metricConfig.value;
@@ -317,7 +317,7 @@ const RankingsHandler = (function () {
                                 ranking[metricKey] = commune[metricKey] || 0;
                             }
                         });
-                        
+
                         return ranking;
                     });
 
@@ -400,7 +400,7 @@ const RankingsHandler = (function () {
             `;
         }
 
-        
+
 
         async function updateRankings() {
             const scope = scopeSelect.value;
@@ -498,7 +498,19 @@ const RankingsHandler = (function () {
         // Initialize
         loadDepartements();
         toggleDepartementVisibility();
+        populateMetricOptions();
         updateRankings();
+
+        // Function to populate metric options from MetricsConfig
+        function populateMetricOptions() {
+            const metricOptions = MetricsConfig.getMetricOptions();
+            metricSelect.innerHTML = `
+                <option value="">-- Choisir une métrique --</option>
+                ${metricOptions.map(option => 
+                    `<option value="${option.value}">${option.label}</option>`
+                ).join('')}
+            `;
+        }
 
         return {
             loadDepartements,
