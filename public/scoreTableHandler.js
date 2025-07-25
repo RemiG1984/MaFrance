@@ -49,11 +49,11 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                         main: formatNumber(data.population),
                     },
                     {
-                        title: "Score Insécurité",
+                        title: MetricsConfig.getMetricLabel("insecurite_score"),
                         main: formatNumber(data.insecurite_score),
                     },
                     {
-                        title: "Homicides et tentatives (pour 100k hab.)",
+                        title: MetricsConfig.getMetricLabel("homicides_p100k"),
                         main:
                             MetricsConfig.calculateMetric(
                                 "homicides_total_p100k",
@@ -63,7 +63,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                         link: `/crime_graph.html?type=country&code=France`,
                     },
                     {
-                        title: "Violences physiques (pour mille hab.)",
+                        title: MetricsConfig.getMetricLabel("violences_physiques_p1k"),
                         main:
                             MetricsConfig.calculateMetric(
                                 "violences_physiques_p1k",
@@ -73,7 +73,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                         link: `/crime_graph.html?type=country&code=France`,
                     },
                     {
-                        title: "Violences sexuelles (pour mille hab.)",
+                        title: MetricsConfig.getMetricLabel("violences_sexuelles_p1k"),
                         main:
                             crimeData.violences_sexuelles_p1k.toFixed(1) +
                             crimeYearLabel,
@@ -81,7 +81,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                         link: `/crime_graph.html?type=country&code=France`,
                     },
                     {
-                        title: "Vols (pour mille hab.)",
+                        title: MetricsConfig.getMetricLabel("vols_p1k"),
                         main:
                             MetricsConfig.calculateMetric(
                                 "vols_p1k",
@@ -91,7 +91,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                         link: `/crime_graph.html?type=country&code=France`,
                     },
                     {
-                        title: "Destruction et dégradations (pour mille hab.)",
+                        title: MetricsConfig.getMetricLabel("destructions_p1k"),
                         main:
                             crimeData.destructions_et_degradations_volontaires_p1k.toFixed(
                                 1,
@@ -100,7 +100,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                         link: `/crime_graph.html?type=country&code=France`,
                     },
                     {
-                        title: "Trafic et usage de stupéfiants (pour mille hab.)",
+                        title: MetricsConfig.getMetricLabel("stupefiants_p1k"),
                         main:
                             MetricsConfig.calculateMetric(
                                 "stupefiants_p1k",
@@ -110,7 +110,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                         link: `/crime_graph.html?type=country&code=France`,
                     },
                     {
-                        title: "Escroqueries (pour mille hab.)",
+                        title: MetricsConfig.getMetricLabel("escroqueries_p1k"),
                         main:
                             crimeData.escroqueries_p1k.toFixed(1) +
                             crimeYearLabel,
@@ -118,56 +118,56 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                         link: `/crime_graph.html?type=country&code=France`,
                     },
                     {
-                        title: "Score Immigration",
+                        title: MetricsConfig.getMetricLabel("immigration_score"),
                         main: formatNumber(data.immigration_score),
                     },
                     {
-                        title: "Prénoms de naissance extra-européen",
+                        title: MetricsConfig.getMetricLabel("extra_europeen_pct"),
                         main: `${extraEuropeenPct}%${yearLabel}`,
                         subRow: true,
                         link: `/names_graph.html?type=country&code=France`,
                     },
                     {
-                        title: "Score Islamisation",
+                        title: MetricsConfig.getMetricLabel("islamisation_score"),
                         main: formatNumber(data.islamisation_score),
                     },
                     {
-                        title: "Prénoms de naissance musulmans",
+                        title: MetricsConfig.getMetricLabel("musulman_pct"),
                         main: `${musulmanPct}%${yearLabel}`,
                         subRow: true,
                         link: `/names_graph.html?type=country&code=France`,
                     },
                     {
-                        title: "Nombre de Mosquées",
+                        title: MetricsConfig.getMetricLabel("number_of_mosques"),
                         main: data.number_of_mosques,
                         subRow: true,
                     },
                     {
-                        title: "Nombre de Mosquées (pour 100k hab.)",
+                        title: MetricsConfig.getMetricLabel("mosque_p100k"),
                         main: data.mosque_p100k.toFixed(1),
                         subRow: true,
                     },
                     {
-                        title: "Score Défrancisation",
+                        title: MetricsConfig.getMetricLabel("defrancisation_score"),
                         main: formatNumber(data.defrancisation_score),
                     },
                     {
-                        title: "Prénoms de naissance français",
+                        title: MetricsConfig.getMetricLabel("prenom_francais_pct"),
                         main: `${MetricsConfig.calculateMetric("prenom_francais_total", namesData)}%${yearLabel}`,
                         subRow: true,
                         link: `/names_graph.html?type=country&code=France`,
                     },
                     {
-                        title: "Score Wokisme",
+                        title: MetricsConfig.getMetricLabel("wokisme_score"),
                         main: formatNumber(data.wokisme_score),
                     },
                     {
-                        title: "Quartiers Prioritaires (QPV)",
+                        title: MetricsConfig.getMetricLabel("total_qpv"),
                         main: data.total_qpv,
                         subRow: true,
                     },
                     {
-                        title: "% de population dans les QPV",
+                        title: MetricsConfig.getMetricLabel("pop_in_qpv_pct"),
                         main: data.pop_in_qpv_pct.toFixed(1) + "%",
                         subRow: true,
                     },
@@ -247,12 +247,12 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                             compare: formatNumber(countryData.population),
                         },
                         {
-                            title: "Score Insécurité",
+                            title: MetricsConfig.getMetricLabel("insecurite_score"),
                             main: formatNumber(data.insecurite_score),
                             compare: formatNumber(countryData.insecurite_score),
                         },
                         {
-                            title: "Homicides et tentatives (pour 100k hab.)",
+                            title: MetricsConfig.getMetricLabel("homicides_p100k"),
                             main:
                                 MetricsConfig.calculateMetric(
                                     "homicides_total_p100k",
@@ -267,7 +267,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                             link: `/crime_graph.html?type=department&code=${deptCode}`,
                         },
                         {
-                            title: "Violences physiques (pour mille hab.)",
+                            title: MetricsConfig.getMetricLabel("violences_physiques_p1k"),
                             main:
                                 MetricsConfig.calculateMetric(
                                     "violences_physiques_p1k",
@@ -282,7 +282,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                             link: `/crime_graph.html?type=department&code=${deptCode}`,
                         },
                         {
-                            title: "Violences sexuelles (pour mille hab.)",
+                            title: MetricsConfig.getMetricLabel("violences_sexuelles_p1k"),
                             main:
                                 crimeData.violences_sexuelles_p1k.toFixed(1) +
                                 crimeYearLabel,
@@ -294,7 +294,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                             link: `/crime_graph.html?type=department&code=${deptCode}`,
                         },
                         {
-                            title: "Vols (pour mille hab.)",
+                            title: MetricsConfig.getMetricLabel("vols_p1k"),
                             main:
                                 MetricsConfig.calculateMetric(
                                     "vols_p1k",
@@ -309,7 +309,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                             link: `/crime_graph.html?type=department&code=${deptCode}`,
                         },
                         {
-                            title: "Destruction et dégradations (pour mille hab.)",
+                            title: MetricsConfig.getMetricLabel("destructions_p1k"),
                             main:
                                 crimeData.destructions_et_degradations_volontaires_p1k.toFixed(
                                     1,
@@ -322,7 +322,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                             link: `/crime_graph.html?type=department&code=${deptCode}`,
                         },
                         {
-                            title: "Trafic et usage de stupéfiants (pour mille hab.)",
+                            title: MetricsConfig.getMetricLabel("stupefiants_p1k"),
                             main:
                                 MetricsConfig.calculateMetric(
                                     "stupefiants_p1k",
@@ -337,7 +337,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                             link: `/crime_graph.html?type=department&code=${deptCode}`,
                         },
                         {
-                            title: "Escroqueries (pour mille hab.)",
+                            title: MetricsConfig.getMetricLabel("escroqueries_p1k"),
                             main:
                                 crimeData.escroqueries_p1k.toFixed(1) +
                                 crimeYearLabel,
@@ -348,66 +348,66 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                             link: `/crime_graph.html?type=department&code=${deptCode}`,
                         },
                         {
-                            title: "Score Immigration",
+                            title: MetricsConfig.getMetricLabel("immigration_score"),
                             main: formatNumber(data.immigration_score),
                             compare: formatNumber(
                                 countryData.immigration_score,
                             ),
                         },
                         {
-                            title: "Prénoms de naissance extra-européen",
+                            title: MetricsConfig.getMetricLabel("extra_europeen_pct"),
                             main: `${extraEuropeenPct}%${yearLabel}`,
                             compare: `${countryExtraEuropeenPct}%${countryYearLabel}`,
                             subRow: true,
                             link: `/names_graph.html?type=department&code=${deptCode}`,
                         },
                         {
-                            title: "Score Islamisation",
+                            title: MetricsConfig.getMetricLabel("islamisation_score"),
                             main: formatNumber(data.islamisation_score),
                             compare: formatNumber(
                                 countryData.islamisation_score,
                             ),
                         },
                         {
-                            title: "Prénoms de naissance musulmans",
+                            title: MetricsConfig.getMetricLabel("musulman_pct"),
                             main: `${musulmanPct}%${yearLabel}`,
                             compare: `${countryMusulmanPct}%${countryYearLabel}`,
                             subRow: true,
                             link: `/names_graph.html?type=department&code=${deptCode}`,
                         },
                         {
-                            title: "Nombre de Mosquées",
+                            title: MetricsConfig.getMetricLabel("number_of_mosques"),
                             main: data.number_of_mosques,
                             compare: countryData.number_of_mosques,
                             subRow: true,
                         },
                         {
-                            title: "Nombre de Mosquées (pour 100k hab.)",
+                            title: MetricsConfig.getMetricLabel("mosque_p100k"),
                             main: data.mosque_p100k.toFixed(1),
                             compare: countryData.mosque_p100k.toFixed(1),
                             subRow: true,
                         },
                         {
-                            title: "Score Défrancisation",
+                            title: MetricsConfig.getMetricLabel("defrancisation_score"),
                             main: formatNumber(data.defrancisation_score),
                             compare: formatNumber(
                                 countryData.defrancisation_score,
                             ),
                         },
                         {
-                            title: "Prénoms de naissance français",
+                            title: MetricsConfig.getMetricLabel("prenom_francais_pct"),
                             main: `${MetricsConfig.calculateMetric("prenom_francais_total", namesData)}%${yearLabel}`,
                             compare: `${MetricsConfig.calculateMetric("prenom_francais_total", countryNamesData)}%${countryYearLabel}`,
                             subRow: true,
                             link: `/names_graph.html?type=department&code=${deptCode}`,
                         },
                         {
-                            title: "Score Wokisme",
+                            title: MetricsConfig.getMetricLabel("wokisme_score"),
                             main: formatNumber(data.wokisme_score),
                             compare: formatNumber(countryData.wokisme_score),
                         },
                         {
-                            title: "Quartiers Prioritaires (QPV)",
+                            title: MetricsConfig.getMetricLabel("total_qpv"),
                             main:
                                 data.total_qpv !== null &&
                                 data.total_qpv !== undefined
@@ -418,7 +418,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                             link: `/qpv.html?type=department&code=${deptCode}`,
                         },
                         {
-                            title: "% de population dans les QPV",
+                            title: MetricsConfig.getMetricLabel("pop_in_qpv_pct"),
                             main:
                                 data.pop_in_qpv_pct !== null &&
                                 data.pop_in_qpv_pct !== undefined
@@ -520,12 +520,12 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     compare: formatNumber(deptData.population),
                 },
                 {
-                    title: "Score Insécurité",
+                    title: MetricsConfig.getMetricLabel("insecurite_score"),
                     main: formatNumber(item.insecurite_score),
                     compare: formatNumber(deptData.insecurite_score),
                 },
                 {
-                    title: "Violences physiques (pour mille hab.)",
+                    title: MetricsConfig.getMetricLabel("violences_physiques_p1k"),
                     main:
                         MetricsConfig.calculateMetric(
                             "violences_physiques_p1k",
@@ -540,7 +540,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     link: `/crime_graph.html?type=commune&code=${cog}&dept=${departement}&commune=${encodeURIComponent(commune)}`,
                 },
                 {
-                    title: "Violences sexuelles (pour mille hab.)",
+                    title: MetricsConfig.getMetricLabel("violences_sexuelles_p1k"),
                     main:
                         crimeData.violences_sexuelles_p1k.toFixed(1) +
                         crimeYearLabel,
@@ -551,7 +551,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     link: `/crime_graph.html?type=commune&code=${cog}&dept=${departement}&commune=${encodeURIComponent(commune)}`,
                 },
                 {
-                    title: "Vols (pour mille hab.)",
+                    title: MetricsConfig.getMetricLabel("vols_p1k"),
                     main:
                         MetricsConfig.calculateMetric(
                             "vols_p1k",
@@ -566,7 +566,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     link: `/crime_graph.html?type=commune&code=${cog}&dept=${departement}&commune=${encodeURIComponent(commune)}`,
                 },
                 {
-                    title: "Destruction et dégradations (pour mille hab.)",
+                    title: MetricsConfig.getMetricLabel("destructions_p1k"),
                     main:
                         crimeData.destructions_et_degradations_volontaires_p1k.toFixed(
                             1,
@@ -579,7 +579,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     link: `/crime_graph.html?type=commune&code=${cog}&dept=${departement}&commune=${encodeURIComponent(commune)}`,
                 },
                 {
-                    title: "Trafic et usage de stupéfiants (pour mille hab.)",
+                    title: MetricsConfig.getMetricLabel("stupefiants_p1k"),
                     main:
                         MetricsConfig.calculateMetric(
                             "stupefiants_p1k",
@@ -594,7 +594,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     link: `/crime_graph.html?type=commune&code=${cog}&dept=${departement}&commune=${encodeURIComponent(commune)}`,
                 },
                 {
-                    title: "Escroqueries (pour mille hab.)",
+                    title: MetricsConfig.getMetricLabel("escroqueries_p1k"),
                     main:
                         crimeData.escroqueries_p1k.toFixed(1) + crimeYearLabel,
                     compare:
@@ -604,7 +604,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     link: `/crime_graph.html?type=commune&code=${cog}&dept=${departement}&commune=${encodeURIComponent(commune)}`,
                 },
                 {
-                    title: "Score Immigration",
+                    title: MetricsConfig.getMetricLabel("immigration_score"),
                     main: formatNumber(item.immigration_score),
                     compare: formatNumber(deptData.immigration_score),
                 },
@@ -613,7 +613,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
             // Conditionally add prenom-related sub-rows only if their values are not NaN
             if (!isNaN(extraEuropeenPct)) {
                 rows.push({
-                    title: "Prénoms de naissance extra-européen",
+                    title: MetricsConfig.getMetricLabel("extra_europeen_pct"),
                     main: `${extraEuropeenPct}%${yearLabel}`,
                     compare: `${deptExtraEuropeenPct}%${deptYearLabel}`,
                     subRow: true,
@@ -621,13 +621,13 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                 });
             }
             rows.push({
-                title: "Score Islamisation",
+                title: MetricsConfig.getMetricLabel("islamisation_score"),
                 main: formatNumber(item.islamisation_score),
                 compare: formatNumber(deptData.islamisation_score),
             });
             if (!isNaN(musulmanPct)) {
                 rows.push({
-                    title: "Prénoms de naissance musulmans",
+                    title: MetricsConfig.getMetricLabel("musulman_pct"),
                     main: `${musulmanPct}%${yearLabel}`,
                     compare: `${deptMusulmanPct}%${deptYearLabel}`,
                     subRow: true,
@@ -636,26 +636,26 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
             }
             rows.push(
                 {
-                    title: "Nombre de Mosquées",
+                    title: MetricsConfig.getMetricLabel("number_of_mosques"),
                     main: item.number_of_mosques,
                     compare: deptData.number_of_mosques,
                     subRow: true,
                 },
                 {
-                    title: "Nombre de Mosquées (pour 100k hab.)",
+                    title: MetricsConfig.getMetricLabel("mosque_p100k"),
                     main: item.mosque_p100k.toFixed(1),
                     compare: deptData.mosque_p100k.toFixed(1),
                     subRow: true,
                 },
                 {
-                    title: "Score Défrancisation",
+                    title: MetricsConfig.getMetricLabel("defrancisation_score"),
                     main: formatNumber(item.defrancisation_score),
                     compare: formatNumber(deptData.defrancisation_score),
                 },
             );
             if (!isNaN(traditionnelPct)) {
                 rows.push({
-                    title: "Prénoms de naissance français",
+                    title: MetricsConfig.getMetricLabel("prenom_francais_pct"),
                     main: `${MetricsConfig.calculateMetric("prenom_francais_total", namesData)}%${yearLabel}`,
                     compare: `${MetricsConfig.calculateMetric("prenom_francais_total", deptNamesData)}%${deptYearLabel}`,
                     subRow: true,
@@ -664,12 +664,12 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
             }
             rows.push(
                 {
-                    title: "Score Wokisme",
+                    title: MetricsConfig.getMetricLabel("wokisme_score"),
                     main: formatNumber(item.wokisme_score),
                     compare: formatNumber(deptData.wokisme_score),
                 },
                 {
-                    title: "Quartiers Prioritaires (QPV)",
+                    title: MetricsConfig.getMetricLabel("total_qpv"),
                     main:
                         item.total_qpv !== null && item.total_qpv !== undefined
                             ? item.total_qpv
@@ -683,7 +683,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     link: `/qpv.html?type=commune&code=${cog}&dept=${departement}&commune=${encodeURIComponent(commune)}`,
                 },
                 {
-                    title: "% de population dans les QPV",
+                    title: MetricsConfig.getMetricLabel("pop_in_qpv_pct"),
                     main:
                         item.pop_in_qpv_pct !== null &&
                         item.pop_in_qpv_pct !== undefined
