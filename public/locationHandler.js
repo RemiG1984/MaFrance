@@ -1,5 +1,6 @@
 
 import { normalizeDept, debounce } from './utils.js';
+import { apiService, api } from './apiService.js';
 
 /**
  * Location handler module for managing department, commune, and lieu selection.
@@ -22,13 +23,7 @@ function LocationHandler(
 ) {
     async function loadDepartements() {
         try {
-            const response = await fetch("/api/departements");
-            if (!response.ok) {
-                throw new Error(
-                    "Erreur lors du chargement des départements",
-                );
-            }
-            const departements = await response.json();
+            const departements = await api.getDepartments();
             console.log("Departments fetched:", departements);
             departementSelect.innerHTML =
                 '<option value="">-- Choisir un département --</option>';
@@ -70,23 +65,8 @@ function LocationHandler(
             return;
         }
         try {
-            const url = `/api/communes?dept=${normalizedDept}&q=${encodeURIComponent(query)}`;
-            console.log("Fetching communes from:", url);
-            const response = await fetch(url);
-            console.log(
-                "Communes response status:",
-                response.status,
-                response.statusText,
-            );
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error("Communes API error response:", errorText);
-                throw new Error(
-                    `Erreur ${response.status}: ${response.statusText} - ${errorText}`,
-                );
-            }
-            const communes = await response.json();
+            console.log("Fetching communes for dept:", normalizedDept, "query:", query);
+            const communes = await apiService.request(`/api/communes?dept=${normalizedDept}&q=${encodeURIComponent(query)}`);
             console.log("Communes fetched:", communes);
             communeList.innerHTML = "";
             communes.forEach((commune) => {

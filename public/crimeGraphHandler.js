@@ -1,6 +1,7 @@
 import { formatNumber, formatPercentage } from './utils.js';
 import { DepartmentNames } from './departmentNames.js';
 import { MetricsConfig } from './metricsConfig.js';
+import { apiService, api } from './apiService.js';
 
 /**
  * Crime Graph Handler module for displaying crime statistics charts.
@@ -73,17 +74,7 @@ function CrimeGraphHandler() {
                 "Fetching main data from:",
                 `${endpoint}?${queryString}`,
             );
-            const response = await fetch(`${endpoint}?${queryString}`);
-            if (!response.ok) {
-                console.error("Fetch failed:", {
-                    status: response.status,
-                    statusText: response.statusText,
-                });
-                throw new Error(
-                    `Erreur lors de la récupération des données: ${response.statusText}`,
-                );
-            }
-            mainData = await response.json();
+            mainData = await apiService.request(`${endpoint}?${queryString}`);
             console.log("Main crime data:", mainData);
 
             if (!mainData || mainData.length === 0) {
@@ -94,36 +85,12 @@ function CrimeGraphHandler() {
 
             // Fetch higher-level data
             if (type === "department" || type === "commune") {
-                const countryResponse = await fetch(
-                    "/api/country/crime_history?country=France",
-                );
-                if (!countryResponse.ok) {
-                    console.error("Country fetch failed:", {
-                        status: countryResponse.status,
-                        statusText: countryResponse.statusText,
-                    });
-                    throw new Error(
-                        `Erreur lors de la récupération des données nationales: ${countryResponse.statusText}`,
-                    );
-                }
-                countryData = await countryResponse.json();
+                countryData = await api.getCountryCrimeHistory("France");
                 console.log("Country crime data:", countryData);
             }
 
             if (type === "commune") {
-                const deptResponse = await fetch(
-                    `/api/departements/crime_history?dept=${dept}`,
-                );
-                if (!deptResponse.ok) {
-                    console.error("Department fetch failed:", {
-                        status: deptResponse.status,
-                        statusText: deptResponse.statusText,
-                    });
-                    throw new Error(
-                        `Erreur lors de la récupération des données départementales: ${deptResponse.statusText}`,
-                    );
-                }
-                deptData = await deptResponse.json();
+                deptData = await api.getDepartmentCrimeHistory(dept);
                 console.log("Department crime data:", deptData);
             }
 

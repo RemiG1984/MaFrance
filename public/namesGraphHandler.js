@@ -1,6 +1,7 @@
 import { formatNumber, formatPercentage } from './utils.js';
 import { DepartmentNames } from './departmentNames.js';
 import { MetricsConfig } from './metricsConfig.js';
+import { apiService, api } from './apiService.js';
 
 /**
  * Names Graph Handler module for displaying historical names data charts.
@@ -57,16 +58,15 @@ function NamesGraphHandler() {
                 throw new Error("Invalid type parameter");
             }
 
-            // Construct query string
-            const queryString = new URLSearchParams(params).toString();
-            const response = await fetch(`${endpoint}?${queryString}`);
-            if (!response.ok) {
-                throw new Error(
-                    `Erreur lors de la récupération des données: ${response.statusText}`,
-                );
+            // Use appropriate API service method based on type
+            let data;
+            if (type === "country") {
+                data = await api.getCountryNamesHistory(params.country);
+            } else if (type === "department") {
+                data = await api.getDepartmentNamesHistory(params.dept);
+            } else if (type === "commune") {
+                data = await api.getCommuneNamesHistory(params.dept, params.cog);
             }
-
-            const data = await response.json();
             console.log("Historical names data:", data);
 
             if (!data || data.length === 0) {

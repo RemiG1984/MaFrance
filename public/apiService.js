@@ -115,5 +115,19 @@ export const api = {
     getArticles: (params) => {
         const queryString = new URLSearchParams(params).toString();
         return apiService.request(`/api/articles?${queryString}`);
+    },
+
+    // Search
+    searchCommunes: (dept, query) => 
+        apiService.request(`/api/search?dept=${dept}&q=${encodeURIComponent(query)}`),
+
+    // Rankings
+    getRankingsDepartments: (params) => {
+        const queryString = new URLSearchParams(params).toString();
+        return apiService.request(`/api/rankings/departements?${queryString}`);
+    },
+    getRankingsCommunes: (params) => {
+        const queryString = new URLSearchParams(params).toString();
+        return apiService.request(`/api/rankings/communes?${queryString}`);
     }
 };

@@ -129,15 +129,7 @@ import { api } from './apiService.js';
         const commune = communeInput.value;
         if (departement && commune) {
             try {
-                const response = await fetch(
-                    `/api/search?dept=${departement}&q=${encodeURIComponent(commune)}`,
-                );
-                if (!response.ok) {
-                    throw new Error(
-                        `Erreur lors de la récupération de la commune: ${response.statusText}`,
-                    );
-                }
-                const data = await response.json();
+                const data = await api.getCommunes(departement);
                 if (data.length === 0) {
                     resultsDiv.innerHTML = "<p>Aucune commune trouvée.</p>";
                     executiveDiv.innerHTML = "<p>Aucune commune trouvée.</p>";
@@ -174,15 +166,7 @@ import { api } from './apiService.js';
         console.log("Current lieu set to:", currentLieu);
         if (departement && commune) {
             try {
-                const response = await fetch(
-                    `/api/search?dept=${departement}&q=${encodeURIComponent(commune)}`,
-                );
-                if (!response.ok) {
-                    throw new Error(
-                        `Erreur lors de la récupération de la commune: ${response.statusText}`,
-                    );
-                }
-                const data = await response.json();
+                const data = await api.getCommunes(departement);
                 if (data.length === 0) {
                     resultsDiv.innerHTML = "<p>Aucune commune trouvée.</p>";
                     executiveDiv.innerHTML = "<p>Aucune commune trouvée.</p>";

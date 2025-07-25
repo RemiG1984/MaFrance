@@ -1,5 +1,6 @@
 import { DepartmentNames } from './departmentNames.js';
 import { MetricsConfig } from './metricsConfig.js';
+import { apiService, api } from './apiService.js';
 
 /**
  * RankingsHandler Module
@@ -77,13 +78,7 @@ const RankingsHandler = (function () {
 
         async function loadDepartements() {
             try {
-                const response = await fetch("/api/departements");
-                if (!response.ok) {
-                    throw new Error(
-                        "Erreur lors du chargement des départements",
-                    );
-                }
-                const departements = await response.json();
+                const departements = await api.getDepartments();
                 departementSelect.innerHTML =
                     '<option value="">-- Tous les départements --</option>';
                 departements.forEach((dept) => {
@@ -109,33 +104,15 @@ const RankingsHandler = (function () {
 
         async function fetchDepartmentRankings(metric, limit) {
             try {
-                const topResponse = await fetch(
-                    `/api/rankings/departements?limit=${limit}&sort=${metric}&direction=DESC`,
+                const topResult = await apiService.request(
+                    `/api/rankings/departements?limit=${limit}&sort=${metric}&direction=DESC`
                 );
-                if (!topResponse.ok) {
-                    const errorData = await topResponse.json();
-                    throw new Error(
-                        errorData.errors
-                            ? errorData.errors.map((e) => e.msg).join("; ")
-                            : "Erreur serveur",
-                    );
-                }
-                const topResult = await topResponse.json();
                 const topData = topResult.data;
                 const totalDepartments = 101;
 
-                const bottomResponse = await fetch(
-                    `/api/rankings/departements?limit=${limit}&sort=${metric}&direction=ASC`,
+                const bottomResult = await apiService.request(
+                    `/api/rankings/departements?limit=${limit}&sort=${metric}&direction=ASC`
                 );
-                if (!bottomResponse.ok) {
-                    const errorData = await bottomResponse.json();
-                    throw new Error(
-                        errorData.errors
-                            ? errorData.errors.map((e) => e.msg).join("; ")
-                            : "Erreur serveur",
-                    );
-                }
-                const bottomResult = await bottomResponse.json();
                 const bottomData = bottomResult.data;
 
                 const topRankings = topData.map((dept, index) => {
@@ -232,16 +209,7 @@ const RankingsHandler = (function () {
 
                 console.log("Request URL (top):", `${baseUrl}&direction=DESC`);
 
-                const topResponse = await fetch(`${baseUrl}&direction=DESC`);
-                if (!topResponse.ok) {
-                    const errorData = await topResponse.json();
-                    throw new Error(
-                        errorData.errors
-                            ? errorData.errors.map((e) => e.msg).join("; ")
-                            : "Erreur serveur",
-                    );
-                }
-                const topResult = await topResponse.json();
+                const topResult = await apiService.request(`${baseUrl}&direction=DESC`);
                 const topData = topResult.data;
                 const totalCommunes = topResult.total_count;
 
@@ -249,16 +217,7 @@ const RankingsHandler = (function () {
                     "Request URL (bottom):",
                     `${baseUrl}&direction=ASC`,
                 );
-                const bottomResponse = await fetch(`${baseUrl}&direction=ASC`);
-                if (!bottomResponse.ok) {
-                    const errorData = await bottomResponse.json();
-                    throw new Error(
-                        errorData.errors
-                            ? errorData.errors.map((e) => e.msg).join("; ")
-                            : "Erreur serveur",
-                    );
-                }
-                const bottomResult = await bottomResponse.json();
+                const bottomResult = await apiService.request(`${baseUrl}&direction=ASC`);
                 const bottomData = bottomResult.data;
 
                 console.log("totalCommunes:", totalCommunes);
