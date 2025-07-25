@@ -1,4 +1,5 @@
 import { debounce, formatNumber } from './utils.js';
+import { MetricsConfig } from './metricsConfig.js';
 
 /**
  * Article handler module for managing news articles display and filtering.
@@ -132,29 +133,11 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
      */
     function renderFilterButtons(counts, allArticles, currentLieu) {
         filterButtonsDiv.innerHTML = "";
-        const categories = [
-            {
-                name: "Insécurité",
-                key: "insecurite",
-                count: counts.insecurite || 0,
-            },
-            {
-                name: "Immigration",
-                key: "immigration",
-                count: counts.immigration || 0,
-            },
-            {
-                name: "Islamisation",
-                key: "islamisme",
-                count: counts.islamisme || 0,
-            },
-            {
-                name: "Défrancisation",
-                key: "defrancisation",
-                count: counts.defrancisation || 0,
-            },
-            { name: "Wokisme", key: "wokisme", count: counts.wokisme || 0 },
-        ];
+        const categories = MetricsConfig.articleCategories.map(category => ({
+            name: category.name,
+            key: category.key,
+            count: counts[category.key] || 0,
+        }));
 
         categories.forEach((category) => {
             const button = document.createElement("button");

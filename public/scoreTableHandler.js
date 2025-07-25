@@ -4,6 +4,7 @@ import {
     formatDate,
     formatMetricValue,
 } from "./utils.js";
+import { MetricsConfig } from "./metricsConfig.js";
 
 /**
  * Score table handler module for displaying detailed score information.

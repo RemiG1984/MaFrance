@@ -1,4 +1,5 @@
 import { formatNumber, formatPercentage, formatMetricValue } from "./utils.js";
+import { MetricsConfig } from "./metricsConfig.js";
 
 /**
  * Map handler module for displaying interactive maps with statistical data.
@@ -23,59 +24,8 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
         "2B", // Corsica
     ];
 
-    // Metrics list (matches your metricSelect options from rankings.js)
-    const metrics = [
-        { value: "total_score", label: "Score Total" },
-        { value: "insecurite_score", label: "Score Insécurité" },
-        { value: "immigration_score", label: "Score Immigration" },
-        { value: "islamisation_score", label: "Score Islamisation" },
-        { value: "defrancisation_score", label: "Score Défrancisation" },
-        { value: "wokisme_score", label: "Score Wokisme" },
-        {
-            value: "musulman_pct",
-            label: "Prénoms de naissance musulmans (%)",
-        },
-        {
-            value: "extra_europeen_pct",
-            label: "Prénoms de naissance extra-européen (%)",
-        },
-        {
-            value: "prenom_francais_pct",
-            label: "Prénoms de naissance français (%)",
-        },
-        {
-            value: "homicides_p100k",
-            label: "Homicides et tentatives (pour 100k hab.)",
-        },
-        {
-            value: "violences_physiques_p1k",
-            label: "Violences physiques (pour mille hab.)",
-        },
-        {
-            value: "violences_sexuelles_p1k",
-            label: "Violences sexuelles (pour mille hab.)",
-        },
-        { value: "vols_p1k", label: "Vols (pour mille hab.)" },
-        {
-            value: "destructions_p1k",
-            label: "Destruction et dégradations (pour mille hab.)",
-        },
-        {
-            value: "stupefiants_p1k",
-            label: "Trafic et usage de stupéfiants (pour mille hab.)",
-        },
-        {
-            value: "escroqueries_p1k",
-            label: "Escroqueries (pour mille hab.)",
-        },
-        { value: "number_of_mosques", label: "Nombre de Mosquées" },
-        {
-            value: "mosque_p100k",
-            label: "Nombre de Mosquées (pour 100k hab.)",
-        },
-        { value: "total_qpv", label: "Nombre de QPV" },
-        { value: "pop_in_qpv_pct", label: "% Population en QPV" },
-    ];
+    // Get metrics from centralized config
+    const metrics = MetricsConfig.getMetricOptions();
 
     /**
      * Initializes the map, fetches data, and applies styling.
@@ -280,10 +230,8 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                 const value = deptData[code]
                     ? deptData[code][currentMetric]
                     : "N/A";
-                const metricLabel =
-                    metrics.find((m) => m.value === currentMetric)?.label ||
-                    currentMetric;
-                const formattedValue = formatMetricValue(value, currentMetric);
+                const metricLabel = MetricsConfig.getMetricLabel(currentMetric);
+                const formattedValue = MetricsConfig.formatMetricValue(value, currentMetric);
                 layer
                     .bindPopup(
                         `<b>${name} (${code})</b><br>${metricLabel}: ${formattedValue}`,
@@ -345,17 +293,15 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                           max,
                       ];
 
-            const metricLabel =
-                metrics.find((m) => m.value === currentMetric)?.label ||
-                currentMetric;
+            const metricLabel = MetricsConfig.getMetricLabel(currentMetric);
             div.innerHTML = "<h4>" + metricLabel + "</h4>";
             for (let i = 0; i < grades.length; i++) {
-                const formattedGrade = formatMetricValue(
+                const formattedGrade = MetricsConfig.formatMetricValue(
                     grades[i],
                     currentMetric,
                 );
                 const formattedNextGrade = grades[i + 1]
-                    ? formatMetricValue(grades[i + 1], currentMetric)
+                    ? MetricsConfig.formatMetricValue(grades[i + 1], currentMetric)
                     : "+";
                 div.innerHTML +=
                     '<i style="background:' +

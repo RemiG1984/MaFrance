@@ -1,5 +1,6 @@
 import { DepartmentNames } from './departmentNames.js';
 import { formatNumber, formatPercentage, formatMetricValue } from './utils.js';
+import { MetricsConfig } from './metricsConfig.js';
 
 /**
  * RankingsHandler Module
@@ -437,15 +438,9 @@ const RankingsHandler = (function () {
             `;
         }
 
+        // Use centralized metric formatting
         function formatMetricValue(value, metric) {
-            if (value === undefined || value === null) return "N/A";
-            if (metric === "pop_in_qpv_pct") return `${value.toFixed(1)}%`;
-            if (metric === "total_qpv") return value.toString();
-            if (metric.includes("_pct")) return `${value}%`;
-            if (metric.includes("_p100k") || metric.includes("_p1k"))
-                return value.toFixed(1);
-            if (metric.includes("_score")) return value.toLocaleString("fr-FR");
-            return value.toString();
+            return MetricsConfig.formatMetricValue(value, metric);
         }
 
         async function updateRankings() {

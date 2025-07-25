@@ -5,6 +5,7 @@ import { ExecutiveHandler } from './executiveHandler.js';
 import { ArticleHandler } from './articleHandler.js';
 import { MapHandler } from './mapHandler.js';
 import { DepartmentNames } from './departmentNames.js';
+import { MetricsConfig } from './metricsConfig.js';
 
 (function () {
     // Use shared department names
