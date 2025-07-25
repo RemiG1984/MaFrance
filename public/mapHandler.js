@@ -16,7 +16,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
     let currentMetric = "total_score";
     let legendControl = null;
 
-    // Valid department codes (mainland France + Corsica)
+    // Valid department codes (mainland France + Corsica but not the DOM)
     const validDeptCodes = [
         ...Array.from({ length: 95 }, (_, i) => String(i + 1).padStart(2, "0")), // 01–95
         "2A",
