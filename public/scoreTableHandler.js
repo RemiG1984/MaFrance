@@ -43,147 +43,135 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                 const crimeYearLabel = crimeData.annee
                     ? ` (${crimeData.annee})`
                     : "";
-                const extraEuropeenPct = MetricsConfig.calculateMetric(
-                    "extra_europeen_pct",
-                    namesData,
-                );
-                const musulmanPct = Math.round(namesData.musulman_pct);
-                const yearLabel = namesData.annais
-                    ? ` (${namesData.annais})`
-                    : "";
-                const crimeYearLabel = crimeData.annee
-                    ? ` (${crimeData.annee})`
-                    : "";
-
                 renderScoreTable(data.country, [
-                        {
-                            title: "Population",
-                            main: formatNumber(data.population),
-                        },
-                        {
-                            title: MetricsConfig.getMetricLabel("insecurite_score"),
-                            main: formatNumber(data.insecurite_score),
-                        },
-                        {
-                            title: MetricsConfig.getMetricLabel("homicides_p100k"),
-                            main:
-                                MetricsConfig.calculateMetric(
-                                    "homicides_total_p100k",
-                                    crimeData,
-                                ).toFixed(2) + crimeYearLabel,
-                            subRow: true,
-                            link: `/crime_graph.html?type=country&code=France`,
-                        },
-                        {
-                            title: MetricsConfig.getMetricLabel("violences_physiques_p1k"),
-                            main:
-                                MetricsConfig.calculateMetric(
-                                    "violences_physiques_p1k",
-                                    crimeData,
-                                ).toFixed(1) + crimeYearLabel,
-                            subRow: true,
-                            link: `/crime_graph.html?type=country&code=France`,
-                        },
-                        {
-                            title: MetricsConfig.getMetricLabel("violences_sexuelles_p1k"),
-                            main:
-                                crimeData.violences_sexuelles_p1k.toFixed(1) +
-                                crimeYearLabel,
-                            subRow: true,
-                            link: `/crime_graph.html?type=country&code=France`,
-                        },
-                        {
-                            title: MetricsConfig.getMetricLabel("vols_p1k"),
-                            main:
-                                MetricsConfig.calculateMetric(
-                                    "vols_p1k",
-                                    crimeData,
-                                ).toFixed(1) + crimeYearLabel,
-                            subRow: true,
-                            link: `/crime_graph.html?type=country&code=France`,
-                        },
-                        {
-                            title: MetricsConfig.getMetricLabel("destructions_p1k"),
-                            main:
-                                crimeData.destructions_et_degradations_volontaires_p1k.toFixed(
-                                    1,
-                                ) + crimeYearLabel,
-                            subRow: true,
-                            link: `/crime_graph.html?type=country&code=France`,
-                        },
-                        {
-                            title: MetricsConfig.getMetricLabel("stupefiants_p1k"),
-                            main:
-                                MetricsConfig.calculateMetric(
-                                    "stupefiants_p1k",
-                                    crimeData,
-                                ).toFixed(1) + crimeYearLabel,
-                            subRow: true,
-                            link: `/crime_graph.html?type=country&code=France`,
-                        },
-                        {
-                            title: MetricsConfig.getMetricLabel("escroqueries_p1k"),
-                            main:
-                                crimeData.escroqueries_p1k.toFixed(1) +
-                                crimeYearLabel,
-                            subRow: true,
-                            link: `/crime_graph.html?type=country&code=France`,
-                        },
-                        {
-                            title: MetricsConfig.getMetricLabel("immigration_score"),
-                            main: formatNumber(data.immigration_score),
-                        },
-                        {
-                            title: MetricsConfig.getMetricLabel("extra_europeen_pct"),
-                            main: `${extraEuropeenPct}%${yearLabel}`,
-                            subRow: true,
-                            link: `/names_graph.html?type=country&code=France`,
-                        },
-                        {
-                            title: MetricsConfig.getMetricLabel("islamisation_score"),
-                            main: formatNumber(data.islamisation_score),
-                        },
-                        {
-                            title: MetricsConfig.getMetricLabel("musulman_pct"),
-                            main: `${musulmanPct}%${yearLabel}`,
-                            subRow: true,
-                            link: `/names_graph.html?type=country&code=France`,
-                        },
-                        {
-                            title: MetricsConfig.getMetricLabel("number_of_mosques"),
-                            main: data.number_of_mosques,
-                            subRow: true,
-                        },
-                        {
-                            title: MetricsConfig.getMetricLabel("mosque_p100k"),
-                            main: data.mosque_p100k.toFixed(1),
-                            subRow: true,
-                        },
-                        {
-                            title: MetricsConfig.getMetricLabel("defrancisation_score"),
-                            main: formatNumber(data.defrancisation_score),
-                        },
-                        {
-                            title: MetricsConfig.getMetricLabel("prenom_francais_pct"),
-                            main: `${MetricsConfig.calculateMetric("prenom_francais_total", namesData)}%${yearLabel}`,
-                            subRow: true,
-                            link: `/names_graph.html?type=country&code=France`,
-                        },
-                        {
-                            title: MetricsConfig.getMetricLabel("wokisme_score"),
-                            main: formatNumber(data.wokisme_score),
-                        },
-                        {
-                            title: MetricsConfig.getMetricLabel("total_qpv"),
-                            main: data.total_qpv,
-                            subRow: true,
-                        },
-                        {
-                            title: MetricsConfig.getMetricLabel("pop_in_qpv_pct"),
-                            main: data.pop_in_qpv_pct.toFixed(1) + "%",
-                            subRow: true,
-                        },
-                    ]);
+                    {
+                        title: "Population",
+                        main: formatNumber(data.population),
+                    },
+                    {
+                        title: MetricsConfig.getMetricLabel("insecurite_score"),
+                        main: formatNumber(data.insecurite_score),
+                    },
+                    {
+                        title: MetricsConfig.getMetricLabel("homicides_p100k"),
+                        main:
+                            MetricsConfig.calculateMetric(
+                                "homicides_total_p100k",
+                                crimeData,
+                            ).toFixed(2) + crimeYearLabel,
+                        subRow: true,
+                        link: `/crime_graph.html?type=country&code=France`,
+                    },
+                    {
+                        title: MetricsConfig.getMetricLabel("violences_physiques_p1k"),
+                        main:
+                            MetricsConfig.calculateMetric(
+                                "violences_physiques_p1k",
+                                crimeData,
+                            ).toFixed(1) + crimeYearLabel,
+                        subRow: true,
+                        link: `/crime_graph.html?type=country&code=France`,
+                    },
+                    {
+                        title: MetricsConfig.getMetricLabel("violences_sexuelles_p1k"),
+                        main:
+                            crimeData.violences_sexuelles_p1k.toFixed(1) +
+                            crimeYearLabel,
+                        subRow: true,
+                        link: `/crime_graph.html?type=country&code=France`,
+                    },
+                    {
+                        title: MetricsConfig.getMetricLabel("vols_p1k"),
+                        main:
+                            MetricsConfig.calculateMetric(
+                                "vols_p1k",
+                                crimeData,
+                            ).toFixed(1) + crimeYearLabel,
+                        subRow: true,
+                        link: `/crime_graph.html?type=country&code=France`,
+                    },
+                    {
+                        title: MetricsConfig.getMetricLabel("destructions_p1k"),
+                        main:
+                            crimeData.destructions_et_degradations_volontaires_p1k.toFixed(
+                                1,
+                            ) + crimeYearLabel,
+                        subRow: true,
+                        link: `/crime_graph.html?type=country&code=France`,
+                    },
+                    {
+                        title: MetricsConfig.getMetricLabel("stupefiants_p1k"),
+                        main:
+                            MetricsConfig.calculateMetric(
+                                "stupefiants_p1k",
+                                crimeData,
+                            ).toFixed(1) + crimeYearLabel,
+                        subRow: true,
+                        link: `/crime_graph.html?type=country&code=France`,
+                    },
+                    {
+                        title: MetricsConfig.getMetricLabel("escroqueries_p1k"),
+                        main:
+                            crimeData.escroqueries_p1k.toFixed(1) +
+                            crimeYearLabel,
+                        subRow: true,
+                        link: `/crime_graph.html?type=country&code=France`,
+                    },
+                    {
+                        title: MetricsConfig.getMetricLabel("immigration_score"),
+                        main: formatNumber(data.immigration_score),
+                    },
+                    {
+                        title: MetricsConfig.getMetricLabel("extra_europeen_pct"),
+                        main: `${extraEuropeenPct}%${yearLabel}`,
+                        subRow: true,
+                        link: `/names_graph.html?type=country&code=France`,
+                    },
+                    {
+                        title: MetricsConfig.getMetricLabel("islamisation_score"),
+                        main: formatNumber(data.islamisation_score),
+                    },
+                    {
+                        title: MetricsConfig.getMetricLabel("musulman_pct"),
+                        main: `${musulmanPct}%${yearLabel}`,
+                        subRow: true,
+                        link: `/names_graph.html?type=country&code=France`,
+                    },
+                    {
+                        title: MetricsConfig.getMetricLabel("number_of_mosques"),
+                        main: data.number_of_mosques,
+                        subRow: true,
+                    },
+                    {
+                        title: MetricsConfig.getMetricLabel("mosque_p100k"),
+                        main: data.mosque_p100k.toFixed(1),
+                        subRow: true,
+                    },
+                    {
+                        title: MetricsConfig.getMetricLabel("defrancisation_score"),
+                        main: formatNumber(data.defrancisation_score),
+                    },
+                    {
+                        title: MetricsConfig.getMetricLabel("prenom_francais_pct"),
+                        main: `${MetricsConfig.calculateMetric("prenom_francais_total", namesData)}%${yearLabel}`,
+                        subRow: true,
+                        link: `/names_graph.html?type=country&code=France`,
+                    },
+                    {
+                        title: MetricsConfig.getMetricLabel("wokisme_score"),
+                        main: formatNumber(data.wokisme_score),
+                    },
+                    {
+                        title: MetricsConfig.getMetricLabel("total_qpv"),
+                        main: data.total_qpv,
+                        subRow: true,
+                    },
+                    {
+                        title: MetricsConfig.getMetricLabel("pop_in_qpv_pct"),
+                        main: data.pop_in_qpv_pct.toFixed(1) + "%",
+                        subRow: true,
+                    },
+                ]);
             }
         } catch (error) {
             resultsDiv.innerHTML = `<p>Erreur : ${error.message}</p>`;
@@ -395,8 +383,8 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                         },
                         {
                             title: MetricsConfig.getMetricLabel("mosque_p100k"),
-                            main: MetricsConfig.formatMetricValue(data.mosque_p100k, "mosque_p100k"),
-                            compare: countryData.mosque_p100k,
+                            main: data.mosque_p100k.toFixed(1),
+                            compare: countryData.mosque_p100k.toFixed(1),
                             subRow: true,
                         },
                         {
@@ -431,8 +419,17 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                         },
                         {
                             title: MetricsConfig.getMetricLabel("pop_in_qpv_pct"),
-                            main: MetricsConfig.formatMetricValue(data.pop_in_qpv_pct || 0, "pop_in_qpv_pct"),
-                            compare: MetricsConfig.formatMetricValue(countryData.pop_in_qpv_pct || 0, "pop_in_qpv_pct"),
+                            main:
+                                data.pop_in_qpv_pct !== null &&
+                                data.pop_in_qpv_pct !== undefined
+                                    ? data.pop_in_qpv_pct.toFixed(1) + "%"
+                                    : "0.0%",
+                            compare:
+                                countryData.pop_in_qpv_pct !== null &&
+                                countryData.pop_in_qpv_pct !== undefined
+                                    ? countryData.pop_in_qpv_pct.toFixed(1) +
+                                      "%"
+                                    : "0.0%",
                             subRow: true,
                         },
                     ],
@@ -646,8 +643,8 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                 },
                 {
                     title: MetricsConfig.getMetricLabel("mosque_p100k"),
-                    main: MetricsConfig.formatMetricValue(item.mosque_p100k, "mosque_p100k"),
-                    compare: MetricsConfig.formatMetricValue(deptData.mosque_p100k, "mosque_p100k"),
+                    main: item.mosque_p100k.toFixed(1),
+                    compare: deptData.mosque_p100k.toFixed(1),
                     subRow: true,
                 },
                 {
