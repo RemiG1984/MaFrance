@@ -106,7 +106,7 @@ router.get("/all", (req, res) => {
 });
 
 // GET /api/communes/names
-router.get("/names", validateDeptAndCOG, (req, res) => {
+router.get("/names", validateCOG, (req, res) => {
   const { cog } = req.query;
   db.get(
     `SELECT musulman_pct, africain_pct, asiatique_pct, traditionnel_pct, moderne_pct, annais
