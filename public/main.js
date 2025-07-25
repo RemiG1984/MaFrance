@@ -20,7 +20,6 @@ import { DepartmentNames } from './departmentNames.js';
     const articleListDiv = document.getElementById("articleList");
     const filterButtonsDiv = document.getElementById("filterButtons");
     const mapDiv = document.getElementById('map');
-    const mapMetricSelect = document.getElementById('mapMetricSelect');
 
     // Validate DOM elements
     if (
@@ -36,7 +35,7 @@ import { DepartmentNames } from './departmentNames.js';
         console.error("One or more DOM elements are missing");
         return;
     }
-    if (!mapDiv || !mapMetricSelect) {
+    if (!mapDiv) {
         console.error('Map elements missing');
         return;
     }
@@ -54,7 +53,7 @@ import { DepartmentNames } from './departmentNames.js';
     const articleHandler = ArticleHandler(articleListDiv, filterButtonsDiv);
     const scoreTableHandler = ScoreTableHandler(resultsDiv, departmentNames);
     const executiveHandler = ExecutiveHandler(executiveDiv, departmentNames);
-    const mapHandler = MapHandler(mapDiv, mapMetricSelect, departementSelect, resultsDiv, departmentNames);
+    const mapHandler = MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames);
 
     // Shared state
     let currentLieu = "";

@@ -473,21 +473,28 @@ label {
 
     #results .score-table {
         font-size: 12px;
+        min-width: 0; /* Remove min-width to prevent overflow */
+        width: 100%; /* Ensure table fits container */
     }
 
     #results .score-header th,
     #results .score-row td {
         padding: 6px 8px;
+        font-size: 12px; /* Consistent font size */
+        white-space: normal; /* Ensure text wraps */
+        word-wrap: break-word; /* Wrap long words */
     }
 
     #results .row-title,
     #results .score-main,
     #results .score-compare {
         font-size: 12px;
+        white-space: normal; /* Ensure text wraps */
+        word-wrap: break-word; /* Wrap long words */
     }
 
     #results .row-title.sub-row {
-        padding-left: 15px;
+        padding-left: 10px; /* Further reduced for mobile */
     }
 
     #namesChart {
@@ -675,7 +682,8 @@ label {
     }
 
     .score-table {
-        min-width: 600px;
+        min-width: 0; /* Remove min-width to prevent overflow */
+        width: 100%; /* Ensure table fits container */
     }
 
     .chart-grid {
@@ -714,6 +722,15 @@ label {
 .form-control:disabled {
     background-color: #e9ecef;
     opacity: 1;
+}
+
+.custom-popup {
+    opacity: 0.85; /* Slightly transparent; adjust as needed (0.0–1.0) */
+    pointer-events: none; /* Allows mouse events to pass through to the map below */
+}
+
+.custom-popup .leaflet-popup-content {
+    padding: 0px 0px; /* Less padding; adjust values as needed */
 }
 
 /* Add any additional styles here */

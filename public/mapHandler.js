@@ -1,16 +1,15 @@
-import { formatNumber, formatPercentage, formatMetricValue } from './utils.js';
+import { formatNumber, formatPercentage, formatMetricValue } from "./utils.js";
 
 /**
  * Map handler module for displaying interactive maps with statistical data.
  * Manages map visualization, metric selection, and data overlays.
  * @param {HTMLElement} mapDiv - Container for the map
- * @param {HTMLSelectElement} mapMetricSelect - Metric selection dropdown
  * @param {HTMLSelectElement} departementSelect - Department selection dropdown
  * @param {HTMLElement} resultsDiv - Results display container
  * @param {Object} departmentNames - Department names mapping
  * @returns {Object} Map handler interface
  */
-function MapHandler(mapDiv, mapMetricSelect, departementSelect, resultsDiv, departmentNames) {
+function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
     let map;
     let geoJsonLayer;
     let deptData = {};
@@ -19,9 +18,7 @@ function MapHandler(mapDiv, mapMetricSelect, departementSelect, resultsDiv, depa
 
     // Valid department codes (mainland France + Corsica)
     const validDeptCodes = [
-        ...Array.from({ length: 95 }, (_, i) =>
-            String(i + 1).padStart(2, "0"),
-        ), // 01–95
+        ...Array.from({ length: 95 }, (_, i) => String(i + 1).padStart(2, "0")), // 01–95
         "2A",
         "2B", // Corsica
     ];
@@ -90,11 +87,18 @@ function MapHandler(mapDiv, mapMetricSelect, departementSelect, resultsDiv, depa
             maxBoundsViscosity: 1.0, // Prevent panning outside
         }).setView([46.603354, 1.888334], 5); // Zoom 5 for full France view
 
-        // Add basemap
+        // Add basemap with custom attribution
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
             attribution:
-                '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                '©<a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> | <a href="https://ouvamafrance.replit.app">https://ouvamafrance.replit.app</a>', // Modified attribution
         }).addTo(map);
+
+        // Add fullscreen control (assuming Leaflet.fullscreen plugin is loaded via script and CSS in HTML)
+        map.addControl(
+            new L.Control.Fullscreen({
+                position: "topleft", // Standard location
+            }),
+        );
 
         // Fetch department data
         try {
@@ -115,10 +119,8 @@ function MapHandler(mapDiv, mapMetricSelect, departementSelect, resultsDiv, depa
                         total_score: dept.total_score,
                         insecurite_score: dept.insecurite_score,
                         homicides_p100k: dept.homicides_p100k,
-                        violences_physiques_p1k:
-                            dept.violences_physiques_p1k,
-                        violences_sexuelles_p1k:
-                            dept.violences_sexuelles_p1k,
+                        violences_physiques_p1k: dept.violences_physiques_p1k,
+                        violences_sexuelles_p1k: dept.violences_sexuelles_p1k,
                         vols_p1k: dept.vols_p1k,
                         destructions_p1k: dept.destructions_p1k,
                         stupefiants_p1k: dept.stupefiants_p1k,
@@ -167,6 +169,36 @@ function MapHandler(mapDiv, mapMetricSelect, departementSelect, resultsDiv, depa
             console.error("Error loading GeoJSON:", error);
             resultsDiv.innerHTML += `<p>Erreur carte: ${error.message}</p>`;
         }
+
+        // Add metric selection control
+        const MetricControl = L.Control.extend({
+            options: { position: "topright" },
+
+            onAdd: function (map) {
+                this._container = L.DomUtil.create(
+                    "div",
+                    "leaflet-control-metric",
+                );
+                this._select = L.DomUtil.create("select", "", this._container);
+
+                metrics.forEach((m) => {
+                    const option = L.DomUtil.create("option", "", this._select);
+                    option.value = m.value;
+                    option.innerHTML = m.label;
+                    if (m.value === currentMetric) option.selected = true;
+                });
+
+                L.DomEvent.on(this._select, "change", this._onChange, this);
+
+                return this._container;
+            },
+
+            _onChange: function (e) {
+                updateMap(e.target.value);
+            },
+        });
+
+        map.addControl(new MetricControl());
     }
 
     /**
@@ -251,13 +283,14 @@ function MapHandler(mapDiv, mapMetricSelect, departementSelect, resultsDiv, depa
                 const metricLabel =
                     metrics.find((m) => m.value === currentMetric)?.label ||
                     currentMetric;
-                const formattedValue = formatMetricValue(
-                    value,
-                    currentMetric,
-                );
+                const formattedValue = formatMetricValue(value, currentMetric);
                 layer
                     .bindPopup(
                         `<b>${name} (${code})</b><br>${metricLabel}: ${formattedValue}`,
+                        {
+                            className: "custom-popup",
+                            closeButton: false,
+                        },
                     )
                     .openPopup();
             },
@@ -279,9 +312,7 @@ function MapHandler(mapDiv, mapMetricSelect, departementSelect, resultsDiv, depa
     function updateMap(metric) {
         currentMetric = metric;
         if (geoJsonLayer) {
-            geoJsonLayer.eachLayer((layer) =>
-                geoJsonLayer.resetStyle(layer),
-            );
+            geoJsonLayer.eachLayer((layer) => geoJsonLayer.resetStyle(layer));
         }
         updateLegend();
     }
@@ -331,31 +362,13 @@ function MapHandler(mapDiv, mapMetricSelect, departementSelect, resultsDiv, depa
                     getColor(grades[i], currentMetric) +
                     '"></i> ' +
                     formattedGrade +
-                    (grades[i + 1]
-                        ? "–" + formattedNextGrade + "<br>"
-                        : "+");
+                    (grades[i + 1] ? "–" + formattedNextGrade + "<br>" : "+");
             }
             return div;
         };
         legendControl.addTo(map);
     }
 
-    /**
-     * Populates the metric select dropdown.
-     */
-    function populateMetricSelect() {
-        mapMetricSelect.innerHTML = metrics
-            .map(
-                (m) =>
-                    `<option value="${m.value}" ${m.value === currentMetric ? "selected" : ""}>${m.label}</option>`,
-            )
-            .join("");
-        mapMetricSelect.addEventListener("change", () =>
-            updateMap(mapMetricSelect.value),
-        );
-    }
-
-    populateMetricSelect();
     initMap();
 
     return { updateMap };
