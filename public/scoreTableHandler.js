@@ -11,7 +11,7 @@ import { apiService } from "./apiService.js";
  * @returns {Object} Score table handler interface
  */
 function ScoreTableHandler(resultsDiv, departmentNames) {
-
+    
     /**
      * Helper function to calculate and format common metrics
      * @param {Object} namesData - Names data
@@ -24,7 +24,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
         const prenomFrancaisPct = MetricsConfig.calculateMetric("prenom_francais_total", namesData);
         const yearLabel = namesData.annais ? ` (${namesData.annais})` : "";
         const crimeYearLabel = crimeData.annee ? ` (${crimeData.annee})` : "";
-
+        
         return {
             extraEuropeenPct,
             musulmanPct,
@@ -114,7 +114,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                 link: linkBase,
             }
         ];
-
+        
         return rows.filter(row => row.compare !== null || compareMetrics === null);
     }
     /**
@@ -135,7 +135,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
             } else {
                 const metrics = calculateCommonMetrics(namesData, crimeData);
                 const crimeRows = createCrimeRows(metrics, crimeData, `/crime_graph.html?type=country&code=France`);
-
+                
                 const rows = [
                     {
                         title: "Population",
@@ -201,7 +201,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                         subRow: true,
                     },
                 ];
-
+                
                 renderScoreTable(data.country, rows);
             }
         } catch (error) {
@@ -227,14 +227,14 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
             ] = await Promise.all([
                 api.getDepartmentDetails(deptCode),
                 api.getCountryDetails(),
-                apiService.getDepartmentNames(deptCode),
-                apiService.getDepartmentCrime(deptCode),
+                apiService.request(`/api/departements/names?dept=${deptCode}`),
+                apiService.request(`/api/departements/crime?dept=${deptCode}`),
                 api.getCountryNames(),
                 api.getCountryCrime(),
             ]);
 
             console.log("Department details:", data);
-
+            
             if (!data) {
                 resultsDiv.innerHTML = "<p>Aucun département trouvé.</p>";
             } else {
@@ -332,7 +332,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                         subRow: true,
                     },
                 ];
-
+                
                 renderScoreTable(`${deptCode} - ${departmentNames[deptCode] || deptCode}`, rows, "France");
             }
         } catch (error) {
@@ -363,11 +363,11 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
 
             const [deptData, namesData, crimeData, deptNamesData, deptCrimeData] =
                 await Promise.all([
-                    api.getDepartmentDetails(departement),
+                    apiService.request(`/api/departements/details?dept=${departement}`),
                     api.getCommuneNames(cog),
-                    api.getCommuneCrime(departement, cog),
-                    api.getDepartmentNames(departement),
-                    api.getDepartmentCrime(departement)
+                    apiService.request(`/api/communes/crime?dept=${departement}&cog=${encodeURIComponent(cog)}`),
+                    apiService.request(`/api/departements/names?dept=${departement}`),
+                    apiService.request(`/api/departements/crime?dept=${departement}`)
                 ]);
 
             console.log("Commune details:", item);
@@ -412,13 +412,13 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     link: `/names_graph.html?type=commune&code=${cog}&dept=${departement}`,
                 });
             }
-
+            
             rows.push({
                 title: MetricsConfig.getMetricLabel("islamisation_score"),
                 main: MetricsConfig.formatMetricValue(item.islamisation_score, "islamisation_score"),
                 compare: MetricsConfig.formatMetricValue(deptData.islamisation_score, "islamisation_score"),
             });
-
+            
             if (!isNaN(communeMetrics.musulmanPct)) {
                 rows.push({
                     title: MetricsConfig.getMetricLabel("musulman_pct"),
@@ -428,7 +428,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     link: `/names_graph.html?type=commune&code=${cog}&dept=${departement}`,
                 });
             }
-
+            
             rows.push(
                 {
                     title: MetricsConfig.getMetricLabel("number_of_mosques"),
@@ -448,7 +448,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     compare: MetricsConfig.formatMetricValue(deptData.defrancisation_score, "defrancisation_score"),
                 },
             );
-
+            
             if (!isNaN(traditionnelPct)) {
                 rows.push({
                     title: MetricsConfig.getMetricLabel("prenom_francais_pct"),
@@ -458,7 +458,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     link: `/names_graph.html?type=commune&code=${cog}&dept=${departement}`,
                 });
             }
-
+            
             rows.push(
                 {
                     title: MetricsConfig.getMetricLabel("wokisme_score"),
