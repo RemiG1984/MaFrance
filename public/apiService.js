@@ -87,10 +87,12 @@ export const api = {
     // Commune data
     getCommuneDetails: (dept, cog) => 
         apiService.request(`/api/communes/details?cog=${cog}`),
+    getCommuneNames: (dept, cog) => 
+        apiService.request(`/api/communes/names?cog=${cog}`),
     getCommuneCrimeHistory: (dept, cog) => 
         apiService.request(`/api/communes/crime_history?dept=${dept}&cog=${cog}`),
     getCommuneNamesHistory: (dept, cog) => 
-        apiService.request(`/api/communes/names_history?dept=${dept}&cog=${cog}`),
+        apiService.request(`/api/communes/names_history?cog=${cog}`),
 
     // Country data
     getCountryDetails: (country = 'France') => 
