@@ -248,10 +248,6 @@ export const MetricsConfig = {
         return this.metrics.filter((metric) => metric.category === category);
     },
 
-    getArticleCategoryByKey(key) {
-        return this.articleCategories.find((cat) => cat.key === key);
-    },
-
     // Calculate a metric if it's a calculated one
     calculateMetric(metricKey, data) {
         const calculation = this.calculatedMetrics[metricKey];
@@ -266,14 +262,6 @@ export const MetricsConfig = {
         return this.metrics.map((metric) => ({
             value: metric.value,
             label: metric.label,
-        }));
-    },
-
-    // Get article categories as options
-    getArticleCategoryOptions() {
-        return this.articleCategories.map((category) => ({
-            value: category.key,
-            label: category.name,
         }));
     },
 
