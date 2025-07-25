@@ -38,24 +38,9 @@ function NamesGraphHandler() {
         const { type, code, dept } = getUrlParams();
 
         try {
-            let endpoint;
-            let params = {};
-
-            // Determine the endpoint based on type
-            if (type === "country") {
-                endpoint = "/api/country/names_history";
-                params = { country: code || "France" };
-            } else if (type === "department") {
-                endpoint = "/api/departements/names_history";
-                params = { dept: code };
-            } else if (type === "commune") {
-                if (!dept) {
-                    throw new Error("Department code is required for commune");
-                }
-                endpoint = "/api/communes/names_history";
-                params = { dept: dept, cog: code };
-            } else {
-                throw new Error("Invalid type parameter");
+            // Validate commune type has department code
+            if (type === "commune" && !dept) {
+                throw new Error("Department code is required for commune");
             }
 
             // Use appropriate API service method based on type
