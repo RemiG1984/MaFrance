@@ -1,7 +1,6 @@
-import { formatNumber, formatPercentage } from './utils.js';
-import { DepartmentNames } from './departmentNames.js';
-import { MetricsConfig } from './metricsConfig.js';
-import { apiService, api } from './apiService.js';
+import { DepartmentNames } from "./departmentNames.js";
+import { MetricsConfig } from "./metricsConfig.js";
+import { api } from "./apiService.js";
 
 /**
  * Names Graph Handler module for displaying historical names data charts.
@@ -239,7 +238,7 @@ function NamesGraphHandler() {
 
     return {
         initChart,
-        getUrlParams
+        getUrlParams,
     };
 }
 
@@ -247,7 +246,7 @@ function NamesGraphHandler() {
 export { NamesGraphHandler };
 
 // Initialize when the script loads (for backward compatibility)
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
     const namesGraphHandler = NamesGraphHandler();
     namesGraphHandler.initChart();
 }
