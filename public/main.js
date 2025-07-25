@@ -6,6 +6,7 @@ import { ArticleHandler } from './articleHandler.js';
 import { MapHandler } from './mapHandler.js';
 import { DepartmentNames } from './departmentNames.js';
 import { MetricsConfig } from './metricsConfig.js';
+import { api } from './apiService.js';
 
 (function () {
     // Use shared department names
@@ -210,8 +211,28 @@ import { MetricsConfig } from './metricsConfig.js';
         }
     });
 
-    // Initialize app
-    scoreTableHandler.showCountryDetails();
-    executiveHandler.showCountryExecutive();
-    locationHandler.loadDepartements();
+    // Prevent duplicate initialization
+    let appInitialized = false;
+
+    // Initialize the application
+    document.addEventListener('DOMContentLoaded', async () => {
+        if (appInitialized) return;
+        appInitialized = true;
+
+        // Load country data using cached API service
+        const countryData = await api.getCountryDetails('France');
+        console.log('Country details:', countryData);
+
+        // Load country executive data using cached API service
+        const executiveData = await api.getCountryExecutive('France');
+        console.log('Country executive data:', executiveData);
+
+        // Load departments using cached API service
+        const departments = await api.getDepartments();
+        console.log('Departments fetched:', departments);
+
+        scoreTableHandler.showCountryDetails();
+        executiveHandler.showCountryExecutive();
+        locationHandler.loadDepartements();
+    });
 })();

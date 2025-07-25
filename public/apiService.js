@@ -90,6 +90,8 @@ export const api = {
     // Country data
     getCountryDetails: (country = 'France') => 
         apiService.request(`/api/country/details?country=${country}`),
+    getCountryExecutive: (country = 'France') => 
+        apiService.request(`/api/country/executive?country=${country}`),
     getCountryCrimeHistory: (country = 'France') => 
         apiService.request(`/api/country/crime_history?country=${country}`),
     getCountryNamesHistory: (country = 'France') => 
