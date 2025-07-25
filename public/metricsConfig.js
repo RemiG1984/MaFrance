@@ -8,7 +8,7 @@ export const MetricsConfig = {
     metrics: [
         {
             value: "total_score",
-            label: "Score Total", 
+            label: "Score Total (somme des 5 scores)", 
             category: "général",
             format: "score",
         },

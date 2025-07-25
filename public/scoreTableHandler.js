@@ -126,7 +126,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                 subRow: true,
                 link: linkBase,
             }
-        ];
+        );
         
         return rows.filter(row => row.compare !== null || compareMetrics === null);
     }
