@@ -13,14 +13,7 @@ function ExecutiveHandler(executiveDiv, departmentNames) {
      */
     async function showCountryExecutive() {
         try {
-            const response = await fetch("/api/country/ministre");
-            if (!response.ok) {
-                throw new Error(
-                    `Erreur lors de la récupération du ministre: ${response.statusText}`,
-                );
-            }
-            const data = await response.json();
-            console.log("Country executive data:", data);
+            const data = await api.getCountryExecutive("France");
             if (!data) {
                 executiveDiv.innerHTML = "<p>Aucun ministre trouvé.</p>";
             } else {

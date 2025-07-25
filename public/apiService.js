@@ -64,6 +64,16 @@ class ApiService {
     clearCache() {
         this.cache.clear();
     }
+
+    // Get country ministre
+    async getCountryMinistre(country = 'France') {
+        return this.request(`/api/country/ministre?country=${country}`);
+    }
+
+    // Get country executive
+    async getCountryExecutive(country = 'France') {
+        return this.request(`/api/country/ministre?country=${country}`);
+    }
 }
 
 // Export singleton instance
