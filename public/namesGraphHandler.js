@@ -65,7 +65,7 @@ function NamesGraphHandler() {
             } else if (type === "department") {
                 data = await api.getDepartmentNamesHistory(params.dept);
             } else if (type === "commune") {
-                data = await api.getCommuneNamesHistory(params.dept, params.cog);
+                data = await api.getCommuneNamesHistory(params.cog);
             }
             console.log("Historical names data:", data);
 

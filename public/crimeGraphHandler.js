@@ -440,7 +440,7 @@ function CrimeGraphHandler() {
         };
 
         const mappedKey = metricMapping[key] || key;
-        
+
         // Use MetricsConfig for calculated metrics, fallback to direct property access
         if (MetricsConfig.calculatedMetrics[mappedKey]) {
             return MetricsConfig.calculateMetric(mappedKey, row);
