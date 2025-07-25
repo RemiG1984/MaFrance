@@ -438,10 +438,7 @@ const RankingsHandler = (function () {
             `;
         }
 
-        // Use centralized metric formatting
-        function formatMetricValue(value, metric) {
-            return MetricsConfig.formatMetricValue(value, metric);
-        }
+        
 
         async function updateRankings() {
             const scope = scopeSelect.value;
