@@ -138,41 +138,22 @@ export const MetricsConfig = {
         {
             name: "Insécurité",
             key: "insecurite",
-            relatedMetrics: [
-                "insecurite_score",
-                "homicides_p100k",
-                "violences_physiques_p1k",
-                "violences_sexuelles_p1k",
-                "vols_p1k",
-                "destructions_p1k",
-                "stupefiants_p1k",
-                "escroqueries_p1k",
-            ],
         },
         {
             name: "Immigration",
             key: "immigration",
-            relatedMetrics: ["immigration_score", "extra_europeen_pct"],
         },
         {
             name: "Islamisme",
             key: "islamisme",
-            relatedMetrics: [
-                "islamisation_score",
-                "musulman_pct",
-                "number_of_mosques",
-                "mosque_p100k",
-            ],
         },
         {
             name: "Défrancisation",
             key: "defrancisation",
-            relatedMetrics: ["defrancisation_score", "prenom_francais_pct"],
         },
         {
             name: "Wokisme",
             key: "wokisme",
-            relatedMetrics: ["wokisme_score", "total_qpv", "pop_in_qpv_pct"],
         },
     ],
 
