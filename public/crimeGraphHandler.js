@@ -62,7 +62,7 @@ function CrimeGraphHandler() {
                     );
                 }
                 endpoint = "/api/communes/crime_history";
-                params = { dept: dept, cog: code };
+                params = { cog: code };
                 titleText = `${communeName} (${dept})`;
             } else {
                 throw new Error("Invalid type parameter");

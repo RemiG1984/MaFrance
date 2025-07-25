@@ -89,10 +89,10 @@ export const api = {
         apiService.request(`/api/communes/details?cog=${cog}`),
     getCommuneNames: (cog) => 
         apiService.request(`/api/communes/names?cog=${cog}`),
-    getCommuneCrime: (dept, cog) => 
-        apiService.request(`/api/communes/crime?dept=${dept}&cog=${cog}`),
-    getCommuneCrimeHistory: (dept, cog) => 
-        apiService.request(`/api/communes/crime_history?dept=${dept}&cog=${cog}`),
+    getCommuneCrime: (cog) => 
+        apiService.request(`/api/communes/crime?cog=${cog}`),
+    getCommuneCrimeHistory: (cog) => 
+        apiService.request(`/api/communes/crime_history?cog=${cog}`),
     getCommuneNamesHistory: (cog) => 
         apiService.request(`/api/communes/names_history?cog=${cog}`),
 

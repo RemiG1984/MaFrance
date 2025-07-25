@@ -363,7 +363,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                 await Promise.all([
                     api.getDepartmentDetails(departement),
                     api.getCommuneNames(cog),
-                    api.getCommuneCrime(departement, cog),
+                    api.getCommuneCrime(cog),
                     api.getDepartmentNames(departement),
                     api.getDepartmentCrime(departement)
                 ]);

@@ -141,7 +141,7 @@ router.get("/names_history", validateCOG, (req, res) => {
 });
 
 // GET /api/communes/crime
-router.get("/crime", validateDeptAndCOG, (req, res) => {
+router.get("/crime", validateCOG, (req, res) => {
   const { cog } = req.query;
   db.get(
     `SELECT * 
@@ -160,7 +160,7 @@ router.get("/crime", validateDeptAndCOG, (req, res) => {
 });
 
 // GET /api/communes/crime_history
-router.get("/crime_history", validateDeptAndCOG, (req, res) => {
+router.get("/crime_history", validateCOG, (req, res) => {
   const { cog } = req.query;
   db.all(
     `SELECT *
