@@ -86,7 +86,7 @@ export const api = {
 
     // Commune data
     getCommuneDetails: (dept, cog) => 
-        apiService.request(`/api/communes/details/${dept}/${cog}`),
+        apiService.request(`/api/communes/details?cog=${cog}`),
     getCommuneCrimeHistory: (dept, cog) => 
         apiService.request(`/api/communes/crime_history?dept=${dept}&cog=${cog}`),
     getCommuneNamesHistory: (dept, cog) => 
@@ -110,7 +110,7 @@ export const api = {
     getDepartments: () => 
         apiService.request('/api/departements'),
     getCommunes: (dept) => 
-        apiService.request(`/api/communes/${dept}`),
+        apiService.request(`/api/communes?dept=${dept}`),
     getLieux: (dept, cog) => 
         apiService.request(`/api/lieux/${dept}/${cog}`),
 
