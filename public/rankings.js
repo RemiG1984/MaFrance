@@ -209,7 +209,12 @@ const RankingsHandler = (function () {
 
                 console.log("Request URL (top):", `${baseUrl}&direction=DESC`);
 
-                const topResult = await apiService.request(`${baseUrl}&direction=DESC`);
+                const topResult = await api.getRankingsCommunes({ 
+                    metric, 
+                    population_min: populationMin, 
+                    dept: scope === 'departement' ? scope.split('_')[1] : undefined,
+                    direction: 'DESC'
+                });
                 const topData = topResult.data;
                 const totalCommunes = topResult.total_count;
 
@@ -217,7 +222,12 @@ const RankingsHandler = (function () {
                     "Request URL (bottom):",
                     `${baseUrl}&direction=ASC`,
                 );
-                const bottomResult = await apiService.request(`${baseUrl}&direction=ASC`);
+                const bottomResult = await api.getRankingsCommunes({ 
+                    metric, 
+                    population_min: populationMin, 
+                    dept: scope === 'departement' ? scope.split('_')[1] : undefined,
+                    direction: 'ASC'
+                });
                 const bottomData = bottomResult.data;
 
                 console.log("totalCommunes:", totalCommunes);

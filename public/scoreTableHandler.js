@@ -234,6 +234,9 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
             ]);
 
             console.log("Department details:", data);
+            
+            // Ensure we don't have duplicate variable declarations
+            const extraEuropeenPct = data.extra_europeen_pct;
             if (!data) {
                 resultsDiv.innerHTML = "<p>Aucun département trouvé.</p>";
             } else {
