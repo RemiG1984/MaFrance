@@ -320,5 +320,5 @@ export const MetricsConfig = {
             default:
                 return value.toString();
         }
-    },
+    }
 };
