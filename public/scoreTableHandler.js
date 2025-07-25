@@ -125,8 +125,8 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
         try {
             const [data, namesData, crimeData] = await Promise.all([
                 api.getCountryDetails(),
-                apiService.request("/api/country/names"),
-                apiService.request("/api/country/crime")
+                api.getCountryNamesHistory(),
+                api.getCountryCrimeHistory()
             ]);
 
             console.log("Country details:", data);
@@ -235,8 +235,6 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
 
             console.log("Department details:", data);
             
-            // Ensure we don't have duplicate variable declarations
-            const extraEuropeenPct = data.extra_europeen_pct;
             if (!data) {
                 resultsDiv.innerHTML = "<p>Aucun département trouvé.</p>";
             } else {
