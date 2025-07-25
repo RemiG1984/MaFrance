@@ -305,7 +305,7 @@ export const MetricsConfig = {
         
         switch (format) {
             case "percentage":
-                return `${value.toFixed(1)}%`;
+                return `${value.toFixed(0)}%`;
             case "score":
                 return value.toLocaleString("fr-FR", {
                     minimumFractionDigits: 0,
