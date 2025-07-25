@@ -78,7 +78,7 @@ export const apiService = new ApiService();
 export const api = {
     // Department data
     getDepartmentDetails: (code) => 
-        apiService.request(`/api/departements/details/${code}`),
+        apiService.request(`/api/departements/details?dept=${code}`),
     getDepartmentCrimeHistory: (code) => 
         apiService.request(`/api/departements/crime_history?dept=${code}`),
     getDepartmentNamesHistory: (code) => 
