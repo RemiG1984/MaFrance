@@ -364,7 +364,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
             const [deptData, namesData, crimeData, deptNamesData, deptCrimeData] =
                 await Promise.all([
                     apiService.request(`/api/departements/details?dept=${departement}`),
-                    api.getCommuneNames(departement, cog),
+                    api.getCommuneNames(cog),
                     apiService.request(`/api/communes/crime?dept=${departement}&cog=${encodeURIComponent(cog)}`),
                     apiService.request(`/api/departements/names?dept=${departement}`),
                     apiService.request(`/api/departements/crime?dept=${departement}`)
