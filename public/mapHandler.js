@@ -231,7 +231,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                     ? deptData[code][currentMetric]
                     : "N/A";
                 const metricLabel = MetricsConfig.getMetricLabel(currentMetric);
-                const formattedValue = MetricsConfig.formatMetricValue(value, currentMetric);
+                const formattedValue = formatMetricValue(value, currentMetric);
                 layer
                     .bindPopup(
                         `<b>${name} (${code})</b><br>${metricLabel}: ${formattedValue}`,
@@ -296,12 +296,12 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             const metricLabel = MetricsConfig.getMetricLabel(currentMetric);
             div.innerHTML = "<h4>" + metricLabel + "</h4>";
             for (let i = 0; i < grades.length; i++) {
-                const formattedGrade = MetricsConfig.formatMetricValue(
+                const formattedGrade = formatMetricValue(
                     grades[i],
                     currentMetric,
                 );
                 const formattedNextGrade = grades[i + 1]
-                    ? MetricsConfig.formatMetricValue(grades[i + 1], currentMetric)
+                    ? formatMetricValue(grades[i + 1], currentMetric)
                     : "+";
                 div.innerHTML +=
                     '<i style="background:' +

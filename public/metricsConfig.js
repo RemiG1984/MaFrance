@@ -251,30 +251,7 @@ export const MetricsConfig = {
         return this.articleCategories.find(cat => cat.key === key);
     },
 
-    // Format metric values based on their type
-    formatMetricValue(value, metricValue) {
-        if (value === undefined || value === null || isNaN(value)) return "N/A";
-
-        const metric = this.getMetricByValue(metricValue);
-        if (!metric) return value.toString();
-
-        switch (metric.format) {
-            case "score":
-                return value.toLocaleString("fr-FR");
-            case "percentage":
-                return `${Math.round(value)}%`;
-            case "percentage_decimal":
-                return `${value.toFixed(1)}%`;
-            case "rate_100k":
-                return value.toFixed(2);
-            case "rate_1k":
-                return value.toFixed(1);
-            case "number":
-                return value.toString();
-            default:
-                return value.toString();
-        }
-    },
+    
 
     // Calculate a metric if it's a calculated one
     calculateMetric(metricKey, data) {
