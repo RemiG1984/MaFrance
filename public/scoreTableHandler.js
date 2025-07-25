@@ -359,19 +359,27 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
             const departement = item.departement;
             const commune = item.commune;
 
-            const [deptData, namesData, crimeData, deptNamesData, deptCrimeData] =
+            // Handle missing commune names data gracefully
+            let namesData = null;
+            try {
+                namesData = await api.getCommuneNames(cog);
+            } catch (error) {
+                console.log('Commune names data not available for COG:', cog);
+                namesData = null;
+            }
+
+            const [deptData, crimeData, deptNamesData, deptCrimeData] =
                 await Promise.all([
                     api.getDepartmentDetails(departement),
-                    api.getCommuneNames(cog),
                     api.getCommuneCrime(cog),
                     api.getDepartmentNames(departement),
                     api.getDepartmentCrime(departement)
                 ]);
 
             console.log("Commune details:", item);
-            const communeMetrics = calculateCommonMetrics(namesData, crimeData);
+            const communeMetrics = namesData ? calculateCommonMetrics(namesData, crimeData) : null;
             const deptMetrics = calculateCommonMetrics(deptNamesData, deptCrimeData);
-            const traditionnelPct = Math.round(namesData.traditionnel_pct);
+            const traditionnelPct = namesData ? Math.round(namesData.traditionnel_pct) : null;
             const crimeRows = createCrimeRows(
                 communeMetrics, 
                 crimeData, 
@@ -400,8 +408,8 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                 },
             ];
 
-            // Conditionally add prenom-related sub-rows only if their values are not NaN
-            if (!isNaN(communeMetrics.extraEuropeenPct)) {
+            // Conditionally add prenom-related sub-rows only if names data exists and values are not NaN
+            if (communeMetrics && !isNaN(communeMetrics.extraEuropeenPct)) {
                 rows.push({
                     title: MetricsConfig.getMetricLabel("extra_europeen_pct"),
                     main: MetricsConfig.formatMetricValue(communeMetrics.extraEuropeenPct, "extra_europeen_pct") + communeMetrics.yearLabel,
@@ -417,7 +425,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                 compare: MetricsConfig.formatMetricValue(deptData.islamisation_score, "islamisation_score"),
             });
             
-            if (!isNaN(communeMetrics.musulmanPct)) {
+            if (communeMetrics && !isNaN(communeMetrics.musulmanPct)) {
                 rows.push({
                     title: MetricsConfig.getMetricLabel("musulman_pct"),
                     main: MetricsConfig.formatMetricValue(communeMetrics.musulmanPct, "musulman_pct") + communeMetrics.yearLabel,
@@ -447,7 +455,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                 },
             );
             
-            if (!isNaN(traditionnelPct)) {
+            if (communeMetrics && traditionnelPct !== null && !isNaN(traditionnelPct)) {
                 rows.push({
                     title: MetricsConfig.getMetricLabel("prenom_francais_pct"),
                     main: MetricsConfig.formatMetricValue(communeMetrics.prenomFrancaisPct, "prenom_francais_pct") + communeMetrics.yearLabel,
