@@ -27,11 +27,11 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
             if (!data) {
                 resultsDiv.innerHTML = "<p>Aucun pays trouvé.</p>";
             } else {
-                const extraEuropeenPct = MetricsConfig.calculateMetric(
+                const countryExtraEuropeenPct = MetricsConfig.calculateMetric(
                     "extra_europeen_pct",
                     namesData,
                 );
-                const musulmanPct = Math.round(namesData.musulman_pct);
+                const countryMusulmanPct = Math.round(namesData.musulman_pct);
                 const yearLabel = namesData.annais
                     ? ` (${namesData.annais})`
                     : "";
@@ -119,7 +119,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     },
                     {
                         title: MetricsConfig.getMetricLabel("extra_europeen_pct"),
-                        main: MetricsConfig.formatMetricValue(extraEuropeenPct, "extra_europeen_pct") + yearLabel,
+                        main: MetricsConfig.formatMetricValue(countryExtraEuropeenPct, "extra_europeen_pct") + yearLabel,
                         subRow: true,
                         link: `/names_graph.html?type=country&code=France`,
                     },
@@ -129,7 +129,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     },
                     {
                         title: MetricsConfig.getMetricLabel("musulman_pct"),
-                        main: MetricsConfig.formatMetricValue(musulmanPct, "musulman_pct") + yearLabel,
+                        main: MetricsConfig.formatMetricValue(countryMusulmanPct, "musulman_pct") + yearLabel,
                         subRow: true,
                         link: `/names_graph.html?type=country&code=France`,
                     },
