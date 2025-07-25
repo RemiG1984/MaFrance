@@ -1,7 +1,7 @@
-
 import { formatNumber } from "./utils.js";
 import { MetricsConfig } from "./metricsConfig.js";
 import { api } from "./apiService.js";
+import { apiService } from "./apiService.js";
 
 /**
  * Score table handler module for displaying detailed score information.
@@ -19,10 +19,10 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
         try {
             const [data, namesData, crimeData] = await Promise.all([
                 api.getCountryDetails(),
-                api.request("/api/country/names"),
-                api.request("/api/country/crime")
+                apiService.request("/api/country/names"),
+                apiService.request("/api/country/crime")
             ]);
-            
+
             console.log("Country details:", data);
             if (!data) {
                 resultsDiv.innerHTML = "<p>Aucun pays trouvé.</p>";
@@ -193,12 +193,12 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                 countryNamesData,
                 countryCrimeData,
             ] = await Promise.all([
-                api.request(`/api/departements/details?dept=${deptCode}`),
+                apiService.request(`/api/departements/details?dept=${deptCode}`),
                 api.getCountryDetails(),
-                api.request(`/api/departements/names?dept=${deptCode}`),
-                api.request(`/api/departements/crime?dept=${deptCode}`),
-                api.request("/api/country/names"),
-                api.request("/api/country/crime"),
+                apiService.request(`/api/departements/names?dept=${deptCode}`),
+                apiService.request(`/api/departements/crime?dept=${deptCode}`),
+                apiService.request("/api/country/names"),
+                apiService.request("/api/country/crime"),
             ]);
 
             console.log("Department details:", data);
@@ -452,10 +452,10 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
     async function showCommuneDetails(cog) {
         try {
             // First get commune details from COG
-            const item = await api.request(
+            const item = await apiService.request(
                 `/api/communes/details?cog=${encodeURIComponent(cog)}`
             );
-            
+
             if (!item) {
                 resultsDiv.innerHTML = "<p>Aucune commune trouvée.</p>";
                 return;
@@ -466,11 +466,11 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
 
             const [deptData, namesData, crimeData, deptNamesData, deptCrimeData] =
                 await Promise.all([
-                    api.request(`/api/departements/details?dept=${departement}`),
-                    api.request(`/api/communes/names?dept=${departement}&cog=${encodeURIComponent(cog)}`),
-                    api.request(`/api/communes/crime?dept=${departement}&cog=${encodeURIComponent(cog)}`),
-                    api.request(`/api/departements/names?dept=${departement}`),
-                    api.request(`/api/departements/crime?dept=${departement}`)
+                    apiService.request(`/api/departements/details?dept=${departement}`),
+                    apiService.request(`/api/communes/names?dept=${departement}&cog=${encodeURIComponent(cog)}`),
+                    apiService.request(`/api/communes/crime?dept=${departement}&cog=${encodeURIComponent(cog)}`),
+                    apiService.request(`/api/departements/names?dept=${departement}`),
+                    apiService.request(`/api/departements/crime?dept=${departement}`)
                 ]);
 
             console.log("Commune details:", item);
@@ -731,7 +731,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                 <table class="score-table">
                     <thead>
                         <tr class="score-header">
-                            <th class="row-title"></th>
+                            <th class="row-title">                            </th>
                             <th class="score-main">${header}</th>
                             ${compareHeader ? `<th class="score-compare">${compareHeader}</th>` : ""}
                         </tr>
