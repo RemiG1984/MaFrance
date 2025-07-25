@@ -37,11 +37,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
             if (!data) {
                 resultsDiv.innerHTML = "<p>Aucun pays trouvé.</p>";
             } else {
-                const extraEuropeenPct = Math.round(
-                    namesData.musulman_pct +
-                        namesData.africain_pct +
-                        namesData.asiatique_pct,
-                );
+                const extraEuropeenPct = MetricsConfig.calculateMetric('extra_europeen_pct', namesData);
                 const musulmanPct = Math.round(namesData.musulman_pct);
                 const traditionnelPct = Math.round(namesData.traditionnel_pct);
                 const modernePct = Math.round(namesData.moderne_pct);
@@ -62,24 +58,13 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     },
                     {
                         title: "Homicides et tentatives (pour 100k hab.)",
-                        main:
-                            (
-                                crimeData.homicides_p100k +
-                                crimeData.tentatives_homicides_p100k
-                            ).toFixed(2) + crimeYearLabel,
+                        main: MetricsConfig.calculateMetric('homicides_total_p100k', crimeData).toFixed(2) + crimeYearLabel,
                         subRow: true,
                         link: `/crime_graph.html?type=country&code=France`,
                     },
                     {
                         title: "Violences physiques (pour mille hab.)",
-                        main:
-                            (
-                                crimeData.coups_et_blessures_volontaires_p1k +
-                                crimeData.coups_et_blessures_volontaires_intrafamiliaux_p1k +
-                                crimeData.autres_coups_et_blessures_volontaires_p1k +
-                                crimeData.vols_avec_armes_p1k +
-                                crimeData.vols_violents_sans_arme_p1k
-                            ).toFixed(1) + crimeYearLabel,
+                        main: MetricsConfig.calculateMetric('violences_physiques_p1k', crimeData).toFixed(1) + crimeYearLabel,
                         subRow: true,
                         link: `/crime_graph.html?type=country&code=France`,
                     },
@@ -93,16 +78,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     },
                     {
                         title: "Vols (pour mille hab.)",
-                        main:
-                            (
-                                crimeData.vols_avec_armes_p1k +
-                                crimeData.vols_violents_sans_arme_p1k +
-                                crimeData.vols_sans_violence_contre_des_personnes_p1k +
-                                crimeData.cambriolages_de_logement_p1k +
-                                crimeData.vols_de_vehicules_p1k +
-                                crimeData.vols_dans_les_vehicules_p1k +
-                                crimeData.vols_d_accessoires_sur_vehicules_p1k
-                            ).toFixed(1) + crimeYearLabel,
+                        main: MetricsConfig.calculateMetric('vols_p1k', crimeData).toFixed(1) + crimeYearLabel,
                         subRow: true,
                         link: `/crime_graph.html?type=country&code=France`,
                     },
@@ -117,12 +93,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     },
                     {
                         title: "Trafic et usage de stupéfiants (pour mille hab.)",
-                        main:
-                            (
-                                crimeData.usage_de_stupefiants_p1k +
-                                crimeData.usage_de_stupefiants_afd_p1k +
-                                crimeData.trafic_de_stupefiants_p1k
-                            ).toFixed(1) + crimeYearLabel,
+                        main: MetricsConfig.calculateMetric('stupefiants_p1k', crimeData).toFixed(1) + crimeYearLabel,
                         subRow: true,
                         link: `/crime_graph.html?type=country&code=France`,
                     },
@@ -170,7 +141,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     },
                     {
                         title: "Prénoms de naissance français",
-                        main: `${traditionnelPct + modernePct}%${yearLabel}`,
+                        main: `${MetricsConfig.calculateMetric('prenom_francais_total', namesData)}%${yearLabel}`,
                         subRow: true,
                         link: `/names_graph.html?type=country&code=France`,
                     },
@@ -231,28 +202,14 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
             if (!data) {
                 resultsDiv.innerHTML = "<p>Aucun département trouvé.</p>";
             } else {
-                const extraEuropeenPct = Math.round(
-                    namesData.musulman_pct +
-                        namesData.africain_pct +
-                        namesData.asiatique_pct,
-                );
-                const countryExtraEuropeenPct = Math.round(
-                    countryNamesData.musulman_pct +
-                        countryNamesData.africain_pct +
-                        countryNamesData.asiatique_pct,
-                );
+                const extraEuropeenPct = MetricsConfig.calculateMetric('extra_europeen_pct', namesData);
+                const countryExtraEuropeenPct = MetricsConfig.calculateMetric('extra_europeen_pct', countryNamesData);
                 const musulmanPct = Math.round(namesData.musulman_pct);
-                const countryMusulmanPct = Math.round(
-                    countryNamesData.musulman_pct,
-                );
+                const countryMusulmanPct = Math.round(countryNamesData.musulman_pct);
                 const traditionnelPct = Math.round(namesData.traditionnel_pct);
-                const countryTraditionnelPct = Math.round(
-                    countryNamesData.traditionnel_pct,
-                );
+                const countryTraditionnelPct = Math.round(countryNamesData.traditionnel_pct);
                 const modernePct = Math.round(namesData.moderne_pct);
-                const countryModernePct = Math.round(
-                    countryNamesData.moderne_pct,
-                );
+                const countryModernePct = Math.round(countryNamesData.moderne_pct);
                 const yearLabel = namesData.annais
                     ? ` (${namesData.annais})`
                     : "";
@@ -280,37 +237,15 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                         },
                         {
                             title: "Homicides et tentatives (pour 100k hab.)",
-                            main:
-                                (
-                                    crimeData.homicides_p100k +
-                                    crimeData.tentatives_homicides_p100k
-                                ).toFixed(2) + crimeYearLabel,
-                            compare:
-                                (
-                                    countryCrimeData.homicides_p100k +
-                                    countryCrimeData.tentatives_homicides_p100k
-                                ).toFixed(2) + countryCrimeYearLabel,
+                            main: MetricsConfig.calculateMetric('homicides_total_p100k', crimeData).toFixed(2) + crimeYearLabel,
+                            compare: MetricsConfig.calculateMetric('homicides_total_p100k', countryCrimeData).toFixed(2) + countryCrimeYearLabel,
                             subRow: true,
                             link: `/crime_graph.html?type=department&code=${deptCode}`,
                         },
                         {
                             title: "Violences physiques (pour mille hab.)",
-                            main:
-                                (
-                                    crimeData.coups_et_blessures_volontaires_p1k +
-                                    crimeData.coups_et_blessures_volontaires_intrafamiliaux_p1k +
-                                    crimeData.autres_coups_et_blessures_volontaires_p1k +
-                                    crimeData.vols_avec_armes_p1k +
-                                    crimeData.vols_violents_sans_arme_p1k
-                                ).toFixed(1) + crimeYearLabel,
-                            compare:
-                                (
-                                    countryCrimeData.coups_et_blessures_volontaires_p1k +
-                                    countryCrimeData.coups_et_blessures_volontaires_intrafamiliaux_p1k +
-                                    countryCrimeData.autres_coups_et_blessures_volontaires_p1k +
-                                    countryCrimeData.vols_avec_armes_p1k +
-                                    countryCrimeData.vols_violents_sans_arme_p1k
-                                ).toFixed(1) + countryCrimeYearLabel,
+                            main: MetricsConfig.calculateMetric('violences_physiques_p1k', crimeData).toFixed(1) + crimeYearLabel,
+                            compare: MetricsConfig.calculateMetric('violences_physiques_p1k', countryCrimeData).toFixed(1) + countryCrimeYearLabel,
                             subRow: true,
                             link: `/crime_graph.html?type=department&code=${deptCode}`,
                         },
@@ -328,26 +263,8 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                         },
                         {
                             title: "Vols (pour mille hab.)",
-                            main:
-                                (
-                                    crimeData.vols_avec_armes_p1k +
-                                    crimeData.vols_violents_sans_arme_p1k +
-                                    crimeData.vols_sans_violence_contre_des_personnes_p1k +
-                                    crimeData.cambriolages_de_logement_p1k +
-                                    crimeData.vols_de_vehicules_p1k +
-                                    crimeData.vols_dans_les_vehicules_p1k +
-                                    crimeData.vols_d_accessoires_sur_vehicules_p1k
-                                ).toFixed(1) + crimeYearLabel,
-                            compare:
-                                (
-                                    countryCrimeData.vols_avec_armes_p1k +
-                                    countryCrimeData.vols_violents_sans_arme_p1k +
-                                    countryCrimeData.vols_sans_violence_contre_des_personnes_p1k +
-                                    countryCrimeData.cambriolages_de_logement_p1k +
-                                    countryCrimeData.vols_de_vehicules_p1k +
-                                    countryCrimeData.vols_dans_les_vehicules_p1k +
-                                    countryCrimeData.vols_d_accessoires_sur_vehicules_p1k
-                                ).toFixed(1) + countryCrimeYearLabel,
+                            main: MetricsConfig.calculateMetric('vols_p1k', crimeData).toFixed(1) + crimeYearLabel,
+                            compare: MetricsConfig.calculateMetric('vols_p1k', countryCrimeData).toFixed(1) + countryCrimeYearLabel,
                             subRow: true,
                             link: `/crime_graph.html?type=department&code=${deptCode}`,
                         },
@@ -366,18 +283,8 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                         },
                         {
                             title: "Trafic et usage de stupéfiants (pour mille hab.)",
-                            main:
-                                (
-                                    crimeData.usage_de_stupefiants_p1k +
-                                    crimeData.usage_de_stupefiants_afd_p1k +
-                                    crimeData.trafic_de_stupefiants_p1k
-                                ).toFixed(1) + crimeYearLabel,
-                            compare:
-                                (
-                                    countryCrimeData.usage_de_stupefiants_p1k +
-                                    countryCrimeData.usage_de_stupefiants_afd_p1k +
-                                    countryCrimeData.trafic_de_stupefiants_p1k
-                                ).toFixed(1) + countryCrimeYearLabel,
+                            main: MetricsConfig.calculateMetric('stupefiants_p1k', crimeData).toFixed(1) + crimeYearLabel,
+                            compare: MetricsConfig.calculateMetric('stupefiants_p1k', countryCrimeData).toFixed(1) + countryCrimeYearLabel,
                             subRow: true,
                             link: `/crime_graph.html?type=department&code=${deptCode}`,
                         },
@@ -441,8 +348,8 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                         },
                         {
                             title: "Prénoms de naissance français",
-                            main: `${traditionnelPct + modernePct}%${yearLabel}`,
-                            compare: `${countryTraditionnelPct + countryModernePct}%${countryYearLabel}`,
+                            main: `${MetricsConfig.calculateMetric('prenom_francais_total', namesData)}%${yearLabel}`,
+                            compare: `${MetricsConfig.calculateMetric('prenom_francais_total', countryNamesData)}%${countryYearLabel}`,
                             subRow: true,
                             link: `/names_graph.html?type=department&code=${deptCode}`,
                         },
@@ -535,22 +442,12 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
             const deptNamesData = await deptNamesResponse.json();
             const deptCrimeData = await deptCrimeResponse.json();
             console.log("Commune details:", item);
-            const extraEuropeenPct = Math.round(
-                namesData.musulman_pct +
-                    namesData.africain_pct +
-                    namesData.asiatique_pct,
-            );
-            const deptExtraEuropeenPct = Math.round(
-                deptNamesData.musulman_pct +
-                    deptNamesData.africain_pct +
-                    deptNamesData.asiatique_pct,
-            );
+            const extraEuropeenPct = MetricsConfig.calculateMetric('extra_europeen_pct', namesData);
+            const deptExtraEuropeenPct = MetricsConfig.calculateMetric('extra_europeen_pct', deptNamesData);
             const musulmanPct = Math.round(namesData.musulman_pct);
             const deptMusulmanPct = Math.round(deptNamesData.musulman_pct);
             const traditionnelPct = Math.round(namesData.traditionnel_pct);
-            const deptTraditionnelPct = Math.round(
-                deptNamesData.traditionnel_pct,
-            );
+            const deptTraditionnelPct = Math.round(deptNamesData.traditionnel_pct);
             const modernePct = Math.round(namesData.moderne_pct);
             const deptModernePct = Math.round(deptNamesData.moderne_pct);
             const yearLabel = namesData.annais ? ` (${namesData.annais})` : "";
@@ -578,22 +475,8 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                 },
                 {
                     title: "Violences physiques (pour mille hab.)",
-                    main:
-                        (
-                            crimeData.coups_et_blessures_volontaires_p1k +
-                            crimeData.coups_et_blessures_volontaires_intrafamiliaux_p1k +
-                            crimeData.autres_coups_et_blessures_volontaires_p1k +
-                            crimeData.vols_avec_armes_p1k +
-                            crimeData.vols_violents_sans_arme_p1k
-                        ).toFixed(1) + crimeYearLabel,
-                    compare:
-                        (
-                            deptCrimeData.coups_et_blessures_volontaires_p1k +
-                            deptCrimeData.coups_et_blessures_volontaires_intrafamiliaux_p1k +
-                            deptCrimeData.autres_coups_et_blessures_volontaires_p1k +
-                            deptCrimeData.vols_avec_armes_p1k +
-                            deptCrimeData.vols_violents_sans_arme_p1k
-                        ).toFixed(1) + deptCrimeYearLabel,
+                    main: MetricsConfig.calculateMetric('violences_physiques_p1k', crimeData).toFixed(1) + crimeYearLabel,
+                    compare: MetricsConfig.calculateMetric('violences_physiques_p1k', deptCrimeData).toFixed(1) + deptCrimeYearLabel,
                     subRow: true,
                     link: `/crime_graph.html?type=commune&code=${cog}&dept=${departement}&commune=${encodeURIComponent(commune)}`,
                 },
@@ -610,26 +493,8 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                 },
                 {
                     title: "Vols (pour mille hab.)",
-                    main:
-                        (
-                            crimeData.vols_avec_armes_p1k +
-                            crimeData.vols_violents_sans_arme_p1k +
-                            crimeData.vols_sans_violence_contre_des_personnes_p1k +
-                            crimeData.cambriolages_de_logement_p1k +
-                            crimeData.vols_de_vehicules_p1k +
-                            crimeData.vols_dans_les_vehicules_p1k +
-                            crimeData.vols_d_accessoires_sur_vehicules_p1k
-                        ).toFixed(1) + crimeYearLabel,
-                    compare:
-                        (
-                            deptCrimeData.vols_avec_armes_p1k +
-                            deptCrimeData.vols_violents_sans_arme_p1k +
-                            deptCrimeData.vols_sans_violence_contre_des_personnes_p1k +
-                            deptCrimeData.cambriolages_de_logement_p1k +
-                            deptCrimeData.vols_de_vehicules_p1k +
-                            deptCrimeData.vols_dans_les_vehicules_p1k +
-                            deptCrimeData.vols_d_accessoires_sur_vehicules_p1k
-                        ).toFixed(1) + deptCrimeYearLabel,
+                    main: MetricsConfig.calculateMetric('vols_p1k', crimeData).toFixed(1) + crimeYearLabel,
+                    compare: MetricsConfig.calculateMetric('vols_p1k', deptCrimeData).toFixed(1) + deptCrimeYearLabel,
                     subRow: true,
                     link: `/crime_graph.html?type=commune&code=${cog}&dept=${departement}&commune=${encodeURIComponent(commune)}`,
                 },
@@ -648,18 +513,8 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                 },
                 {
                     title: "Trafic et usage de stupéfiants (pour mille hab.)",
-                    main:
-                        (
-                            crimeData.usage_de_stupefiants_p1k +
-                            crimeData.usage_de_stupefiants_afd_p1k +
-                            crimeData.trafic_de_stupefiants_p1k
-                        ).toFixed(1) + crimeYearLabel,
-                    compare:
-                        (
-                            deptCrimeData.usage_de_stupefiants_p1k +
-                            deptCrimeData.usage_de_stupefiants_afd_p1k +
-                            deptCrimeData.trafic_de_stupefiants_p1k
-                        ).toFixed(1) + deptCrimeYearLabel,
+                    main: MetricsConfig.calculateMetric('stupefiants_p1k', crimeData).toFixed(1) + crimeYearLabel,
+                    compare: MetricsConfig.calculateMetric('stupefiants_p1k', deptCrimeData).toFixed(1) + deptCrimeYearLabel,
                     subRow: true,
                     link: `/crime_graph.html?type=commune&code=${cog}&dept=${departement}&commune=${encodeURIComponent(commune)}`,
                 },
@@ -726,8 +581,8 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
             if (!isNaN(traditionnelPct)) {
                 rows.push({
                     title: "Prénoms de naissance français",
-                    main: `${traditionnelPct + modernePct}%${yearLabel}`,
-                    compare: `${deptTraditionnelPct + deptModernePct}%${deptYearLabel}`,
+                    main: `${MetricsConfig.calculateMetric('prenom_francais_total', namesData)}%${yearLabel}`,
+                    compare: `${MetricsConfig.calculateMetric('prenom_francais_total', deptNamesData)}%${deptYearLabel}`,
                     subRow: true,
                     link: `/names_graph.html?type=commune&code=${cog}&dept=${departement}`,
                 });

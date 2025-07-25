@@ -139,32 +139,26 @@ const RankingsHandler = (function () {
                 const bottomResult = await bottomResponse.json();
                 const bottomData = bottomResult.data;
 
-                const topRankings = topData.map((dept, index) => ({
-                    deptCode: dept.departement,
-                    name: departmentNames[dept.departement] || dept.departement,
-                    population: dept.population || 0,
-                    insecurite_score: dept.insecurite_score,
-                    homicides_p100k: dept.homicides_p100k || 0,
-                    violences_physiques_p1k: dept.violences_physiques_p1k || 0,
-                    violences_sexuelles_p1k: dept.violences_sexuelles_p1k || 0,
-                    vols_p1k: dept.vols_p1k || 0,
-                    destructions_p1k: dept.destructions_p1k || 0,
-                    stupefiants_p1k: dept.stupefiants_p1k || 0,
-                    escroqueries_p1k: dept.escroqueries_p1k || 0,
-                    immigration_score: dept.immigration_score,
-                    extra_europeen_pct: dept.extra_europeen_pct || 0,
-                    islamisation_score: dept.islamisation_score,
-                    musulman_pct: dept.musulman_pct || 0,
-                    number_of_mosques: dept.number_of_mosques,
-                    mosque_p100k: dept.mosque_p100k,
-                    defrancisation_score: dept.defrancisation_score,
-                    prenom_francais_pct: dept.prenom_francais_pct || 0,
-                    wokisme_score: dept.wokisme_score,
-                    total_score: dept.total_score,
-                    total_qpv: dept.total_qpv || 0,
-                    pop_in_qpv_pct: dept.pop_in_qpv_pct || 0,
-                    rank: index + 1,
-                }));
+                const topRankings = topData.map((dept, index) => {
+                    const ranking = {
+                        deptCode: dept.departement,
+                        name: departmentNames[dept.departement] || dept.departement,
+                        population: dept.population || 0,
+                        rank: index + 1,
+                    };
+                    
+                    // Add all metrics from MetricsConfig
+                    MetricsConfig.metrics.forEach(metricConfig => {
+                        const metricKey = metricConfig.value;
+                        if (MetricsConfig.calculatedMetrics[metricKey]) {
+                            ranking[metricKey] = MetricsConfig.calculateMetric(metricKey, dept);
+                        } else {
+                            ranking[metricKey] = dept[metricKey] || 0;
+                        }
+                    });
+                    
+                    return ranking;
+                });
 
                 const topDeptCodes = new Set(
                     topRankings.map((d) => d.deptCode),
@@ -176,40 +170,26 @@ const RankingsHandler = (function () {
                 const bottomRankings = filteredBottomData
                     .sort((a, b) => (b[metric] || 0) - (a[metric] || 0))
                     .slice(0, limit)
-                    .map((dept, index) => ({
-                        deptCode: dept.departement,
-                        name:
-                            departmentNames[dept.departement] ||
-                            dept.departement,
-                        population: dept.population || 0,
-                        insecurite_score: dept.insecurite_score,
-                        homicides_p100k: dept.homicides_p100k || 0,
-                        violences_physiques_p1k:
-                            dept.violences_physiques_p1k || 0,
-                        violences_sexuelles_p1k:
-                            dept.violences_sexuelles_p1k || 0,
-                        vols_p1k: dept.vols_p1k || 0,
-                        destructions_p1k: dept.destructions_p1k || 0,
-                        stupefiants_p1k: dept.stupefiants_p1k || 0,
-                        escroqueries_p1k: dept.escroqueries_p1k || 0,
-                        immigration_score: dept.immigration_score,
-                        extra_europeen_pct: dept.extra_europeen_pct || 0,
-                        islamisation_score: dept.islamisation_score,
-                        musulman_pct: dept.musulman_pct || 0,
-                        number_of_mosques: dept.number_of_mosques,
-                        mosque_p100k: dept.mosque_p100k,
-                        defrancisation_score: dept.defrancisation_score,
-                        prenom_francais_pct: dept.prenom_francais_pct || 0,
-                        wokisme_score: dept.wokisme_score,
-                        total_score: dept.total_score,
-                        total_qpv: dept.total_qpv || 0,
-                        pop_in_qpv_pct: dept.pop_in_qpv_pct || 0,
-                        rank:
-                            totalDepartments -
-                            filteredBottomData.length +
-                            index +
-                            1,
-                    }));
+                    .map((dept, index) => {
+                        const ranking = {
+                            deptCode: dept.departement,
+                            name: departmentNames[dept.departement] || dept.departement,
+                            population: dept.population || 0,
+                            rank: totalDepartments - filteredBottomData.length + index + 1,
+                        };
+                        
+                        // Add all metrics from MetricsConfig
+                        MetricsConfig.metrics.forEach(metricConfig => {
+                            const metricKey = metricConfig.value;
+                            if (MetricsConfig.calculatedMetrics[metricKey]) {
+                                ranking[metricKey] = MetricsConfig.calculateMetric(metricKey, dept);
+                            } else {
+                                ranking[metricKey] = dept[metricKey] || 0;
+                            }
+                        });
+                        
+                        return ranking;
+                    });
 
                 const rankings = [...topRankings, ...bottomRankings];
                 return rankings;
@@ -291,33 +271,26 @@ const RankingsHandler = (function () {
                     })),
                 );
 
-                const topRankings = topData.map((commune, index) => ({
-                    deptCode: commune.departement,
-                    name: commune.commune,
-                    population: commune.population || 0,
-                    insecurite_score: commune.insecurite_score,
-                    violences_physiques_p1k:
-                        commune.violences_physiques_p1k || 0,
-                    violences_sexuelles_p1k:
-                        commune.violences_sexuelles_p1k || 0,
-                    vols_p1k: commune.vols_p1k || 0,
-                    destructions_p1k: commune.destructions_p1k || 0,
-                    stupefiants_p1k: commune.stupefiants_p1k || 0,
-                    escroqueries_p1k: commune.escroqueries_p1k || 0,
-                    immigration_score: commune.immigration_score,
-                    extra_europeen_pct: commune.extra_europeen_pct || 0,
-                    islamisation_score: commune.islamisation_score,
-                    musulman_pct: commune.musulman_pct || 0,
-                    number_of_mosques: commune.number_of_mosques || 0,
-                    mosque_p100k: commune.mosque_p100k || 0,
-                    defrancisation_score: commune.defrancisation_score,
-                    prenom_francais_pct: commune.prenom_francais_pct || 0,
-                    wokisme_score: commune.wokisme_score,
-                    total_score: commune.total_score,
-                    total_qpv: commune.total_qpv || 0,
-                    pop_in_qpv_pct: commune.pop_in_qpv_pct || 0,
-                    rank: index + 1,
-                }));
+                const topRankings = topData.map((commune, index) => {
+                    const ranking = {
+                        deptCode: commune.departement,
+                        name: commune.commune,
+                        population: commune.population || 0,
+                        rank: index + 1,
+                    };
+                    
+                    // Add all metrics from MetricsConfig
+                    MetricsConfig.metrics.forEach(metricConfig => {
+                        const metricKey = metricConfig.value;
+                        if (MetricsConfig.calculatedMetrics[metricKey]) {
+                            ranking[metricKey] = MetricsConfig.calculateMetric(metricKey, commune);
+                        } else {
+                            ranking[metricKey] = commune[metricKey] || 0;
+                        }
+                    });
+                    
+                    return ranking;
+                });
 
                 const topNames = new Set(topRankings.map((c) => c.name));
                 const filteredBottomData = bottomData.filter(
@@ -327,37 +300,26 @@ const RankingsHandler = (function () {
                 const bottomRankings = filteredBottomData
                     .sort((a, b) => (b[metric] || 0) - (a[metric] || 0))
                     .slice(0, limit)
-                    .map((commune, index) => ({
-                        deptCode: commune.departement,
-                        name: commune.commune,
-                        population: commune.population || 0,
-                        insecurite_score: commune.insecurite_score,
-                        violences_physiques_p1k:
-                            commune.violences_physiques_p1k || 0,
-                        violences_sexuelles_p1k:
-                            commune.violences_sexuelles_p1k || 0,
-                        vols_p1k: commune.vols_p1k || 0,
-                        destructions_p1k: commune.destructions_p1k || 0,
-                        stupefiants_p1k: commune.stupefiants_p1k || 0,
-                        escroqueries_p1k: commune.escroqueries_p1k || 0,
-                        immigration_score: commune.immigration_score,
-                        extra_europeen_pct: commune.extra_europeen_pct || 0,
-                        islamisation_score: commune.islamisation_score,
-                        musulman_pct: commune.musulman_pct || 0,
-                        number_of_mosques: commune.number_of_mosques || 0,
-                        mosque_p100k: commune.mosque_p100k || 0,
-                        defrancisation_score: commune.defrancisation_score,
-                        prenom_francais_pct: commune.prenom_francais_pct || 0,
-                        wokisme_score: commune.wokisme_score,
-                        total_score: commune.total_score,
-                        total_qpv: commune.total_qpv || 0,
-                        pop_in_qpv_pct: commune.pop_in_qpv_pct || 0,
-                        rank:
-                            totalCommunes -
-                            filteredBottomData.length +
-                            index +
-                            1,
-                    }));
+                    .map((commune, index) => {
+                        const ranking = {
+                            deptCode: commune.departement,
+                            name: commune.commune,
+                            population: commune.population || 0,
+                            rank: totalCommunes - filteredBottomData.length + index + 1,
+                        };
+                        
+                        // Add all metrics from MetricsConfig
+                        MetricsConfig.metrics.forEach(metricConfig => {
+                            const metricKey = metricConfig.value;
+                            if (MetricsConfig.calculatedMetrics[metricKey]) {
+                                ranking[metricKey] = MetricsConfig.calculateMetric(metricKey, commune);
+                            } else {
+                                ranking[metricKey] = commune[metricKey] || 0;
+                            }
+                        });
+                        
+                        return ranking;
+                    });
 
                 const rankings = [...topRankings, ...bottomRankings];
                 return rankings;
