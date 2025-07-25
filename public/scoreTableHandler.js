@@ -147,16 +147,30 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                 return;
             }
 
+            const yearLabel = namesData.annais ? ` (${namesData.annais})` : "";
+
             const rows = [
                 { title: "Population", main: formatNumber(data.population) },
                 createRow("insecurite_score", data.insecurite_score),
                 ...createCrimeRows(crimeData, null, "/crime_graph.html?type=country&code=France"),
                 createRow("immigration_score", data.immigration_score),
-                ...createNameRows(namesData, null, "/names_graph.html?type=country&code=France"),
+                createRow("extra_europeen_pct", null, null, namesData, yearLabel, "", { link: "/names_graph.html?type=country&code=France" }),
                 createRow("islamisation_score", data.islamisation_score),
+                {
+                    title: MetricsConfig.getMetricLabel("musulman_pct"),
+                    main: MetricsConfig.formatMetricValue(Math.round(namesData.musulman_pct), "musulman_pct") + yearLabel,
+                    subRow: true,
+                    link: "/names_graph.html?type=country&code=France"
+                },
                 createRow("number_of_mosques", data.number_of_mosques),
                 createRow("mosque_p100k", data.mosque_p100k),
                 createRow("defrancisation_score", data.defrancisation_score),
+                {
+                    title: MetricsConfig.getMetricLabel("prenom_francais_pct"),
+                    main: MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("prenom_francais_total", namesData), "prenom_francais_pct") + yearLabel,
+                    subRow: true,
+                    link: "/names_graph.html?type=country&code=France"
+                },
                 createRow("wokisme_score", data.wokisme_score),
                 createRow("total_qpv", data.total_qpv),
                 createRow("pop_in_qpv_pct", data.pop_in_qpv_pct)
@@ -200,6 +214,9 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                 return;
             }
 
+            const yearLabel = namesData.annais ? ` (${namesData.annais})` : "";
+            const countryYearLabel = countryNamesData?.annais ? ` (${countryNamesData.annais})` : "";
+
             const rows = [
                 { 
                     title: "Population", 
@@ -217,11 +234,24 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     main: formatNumber(data.immigration_score),
                     compare: formatNumber(countryData.immigration_score)
                 },
-                ...createNameRows(namesData, countryNamesData, "/names_graph.html?type=department&code=", deptCode),
+                {
+                    title: MetricsConfig.getMetricLabel("extra_europeen_pct"),
+                    main: MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("extra_europeen_pct", namesData), "extra_europeen_pct") + yearLabel,
+                    compare: MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("extra_europeen_pct", countryNamesData), "extra_europeen_pct") + countryYearLabel,
+                    subRow: true,
+                    link: `/names_graph.html?type=department&code=${deptCode}`
+                },
                 {
                     title: MetricsConfig.getMetricLabel("islamisation_score"),
                     main: formatNumber(data.islamisation_score),
                     compare: formatNumber(countryData.islamisation_score)
+                },
+                {
+                    title: MetricsConfig.getMetricLabel("musulman_pct"),
+                    main: MetricsConfig.formatMetricValue(Math.round(namesData.musulman_pct), "musulman_pct") + yearLabel,
+                    compare: MetricsConfig.formatMetricValue(Math.round(countryNamesData.musulman_pct), "musulman_pct") + countryYearLabel,
+                    subRow: true,
+                    link: `/names_graph.html?type=department&code=${deptCode}`
                 },
                 {
                     title: MetricsConfig.getMetricLabel("number_of_mosques"),
@@ -239,6 +269,13 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     title: MetricsConfig.getMetricLabel("defrancisation_score"),
                     main: formatNumber(data.defrancisation_score),
                     compare: formatNumber(countryData.defrancisation_score)
+                },
+                {
+                    title: MetricsConfig.getMetricLabel("prenom_francais_pct"),
+                    main: MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("prenom_francais_total", namesData), "prenom_francais_pct") + yearLabel,
+                    compare: MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("prenom_francais_total", countryNamesData), "prenom_francais_pct") + countryYearLabel,
+                    subRow: true,
+                    link: `/names_graph.html?type=department&code=${deptCode}`
                 },
                 {
                     title: MetricsConfig.getMetricLabel("wokisme_score"),
@@ -311,6 +348,9 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
 
             const linkParams = `${cog}&dept=${departement}&commune=${encodeURIComponent(commune)}`;
 
+            const yearLabel = namesData.annais ? ` (${namesData.annais})` : "";
+            const deptYearLabel = deptNamesData?.annais ? ` (${deptNamesData.annais})` : "";
+
             const rows = [
                 {
                     title: "Population",
@@ -328,11 +368,24 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     main: formatNumber(item.immigration_score),
                     compare: formatNumber(deptData.immigration_score)
                 },
-                ...createNameRows(namesData, deptNamesData, "/names_graph.html?type=commune&code=", `${cog}&dept=${departement}`),
+                {
+                    title: MetricsConfig.getMetricLabel("extra_europeen_pct"),
+                    main: MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("extra_europeen_pct", namesData), "extra_europeen_pct") + yearLabel,
+                    compare: MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("extra_europeen_pct", deptNamesData), "extra_europeen_pct") + deptYearLabel,
+                    subRow: true,
+                    link: `/names_graph.html?type=commune&code=${cog}&dept=${departement}`
+                },
                 {
                     title: MetricsConfig.getMetricLabel("islamisation_score"),
                     main: formatNumber(item.islamisation_score),
                     compare: formatNumber(deptData.islamisation_score)
+                },
+                {
+                    title: MetricsConfig.getMetricLabel("musulman_pct"),
+                    main: MetricsConfig.formatMetricValue(Math.round(namesData.musulman_pct), "musulman_pct") + yearLabel,
+                    compare: MetricsConfig.formatMetricValue(Math.round(deptNamesData.musulman_pct), "musulman_pct") + deptYearLabel,
+                    subRow: true,
+                    link: `/names_graph.html?type=commune&code=${cog}&dept=${departement}`
                 },
                 {
                     title: MetricsConfig.getMetricLabel("number_of_mosques"),
@@ -350,6 +403,13 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     title: MetricsConfig.getMetricLabel("defrancisation_score"),
                     main: formatNumber(item.defrancisation_score),
                     compare: formatNumber(deptData.defrancisation_score)
+                },
+                {
+                    title: MetricsConfig.getMetricLabel("prenom_francais_pct"),
+                    main: MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("prenom_francais_total", namesData), "prenom_francais_pct") + yearLabel,
+                    compare: MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("prenom_francais_total", deptNamesData), "prenom_francais_pct") + deptYearLabel,
+                    subRow: true,
+                    link: `/names_graph.html?type=commune&code=${cog}&dept=${departement}`
                 },
                 {
                     title: MetricsConfig.getMetricLabel("wokisme_score"),
