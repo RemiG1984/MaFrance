@@ -225,12 +225,12 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                 countryNamesData,
                 countryCrimeData,
             ] = await Promise.all([
-                apiService.request(`/api/departements/details?dept=${deptCode}`),
+                api.getDepartmentDetails(deptCode),
                 api.getCountryDetails(),
-                apiService.request(`/api/departements/names?dept=${deptCode}`),
-                apiService.request(`/api/departements/crime?dept=${deptCode}`),
-                apiService.request("/api/country/names"),
-                apiService.request("/api/country/crime"),
+                api.getDepartmentNamesHistory(deptCode),
+                api.getDepartmentCrimeHistory(deptCode),
+                api.getCountryNamesHistory(),
+                api.getCountryCrimeHistory(),
             ]);
 
             console.log("Department details:", data);
