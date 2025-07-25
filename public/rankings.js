@@ -1,5 +1,4 @@
 import { DepartmentNames } from './departmentNames.js';
-import { formatMetricValue } from './utils.js';
 import { MetricsConfig } from './metricsConfig.js';
 
 /**

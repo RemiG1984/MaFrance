@@ -1,5 +1,6 @@
 import { formatNumber, formatPercentage } from './utils.js';
 import { DepartmentNames } from './departmentNames.js';
+import { MetricsConfig } from './metricsConfig.js';
 
 /**
  * Crime Graph Handler module for displaying crime statistics charts.
@@ -457,42 +458,30 @@ function CrimeGraphHandler() {
     }
 
     /**
-     * Calculates crime value based on category key and aggregates sub-categories.
+     * Calculates crime value based on category key using centralized MetricsConfig.
      * @param {Object} row - Data row
      * @param {string} key - Category key
      * @returns {number} Calculated crime value
      */
     function calculateCrimeValue(row, key) {
-        let value;
-        if (key === "homicides_p100k") {
-            value = row.homicides_p100k + row.tentatives_homicides_p100k;
-        } else if (key === "violences_physiques_p1k") {
-            value =
-                row.coups_et_blessures_volontaires_p1k +
-                row.coups_et_blessures_volontaires_intrafamiliaux_p1k +
-                row.autres_coups_et_blessures_volontaires_p1k +
-                row.vols_avec_armes_p1k +
-                row.vols_violents_sans_arme_p1k;
-        } else if (key === "vols_p1k") {
-            value =
-                row.vols_avec_armes_p1k +
-                row.vols_violents_sans_arme_p1k +
-                row.vols_sans_violence_contre_des_personnes_p1k +
-                row.cambriolages_de_logement_p1k +
-                row.vols_de_vehicules_p1k +
-                row.vols_dans_les_vehicules_p1k +
-                row.vols_d_accessoires_sur_vehicules_p1k;
-        } else if (key === "stupefiants_p1k") {
-            value =
-                row.usage_de_stupefiants_p1k +
-                row.usage_de_stupefiants_afd_p1k +
-                row.trafic_de_stupefiants_p1k;
+        // Map key names to MetricsConfig calculated metrics
+        const metricMapping = {
+            "homicides_p100k": "homicides_total_p100k",
+            "violences_physiques_p1k": "violences_physiques_p1k",
+            "vols_p1k": "vols_p1k",
+            "stupefiants_p1k": "stupefiants_p1k"
+        };
+
+        const mappedKey = metricMapping[key] || key;
+        
+        // Use MetricsConfig for calculated metrics, fallback to direct property access
+        if (MetricsConfig.calculatedMetrics[mappedKey]) {
+            return MetricsConfig.calculateMetric(mappedKey, row);
         } else if (key === "destructions_p1k") {
-            value = row.destructions_et_degradations_volontaires_p1k;
+            return row.destructions_et_degradations_volontaires_p1k;
         } else {
-            value = row[key];
+            return row[key];
         }
-        return value;
     }
 
     return {
