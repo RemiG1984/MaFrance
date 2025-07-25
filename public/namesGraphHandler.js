@@ -46,11 +46,13 @@ function NamesGraphHandler() {
             // Use appropriate API service method based on type
             let data;
             if (type === "country") {
-                data = await api.getCountryNamesHistory(params.country);
+                data = await api.getCountryNamesHistory("France");
             } else if (type === "department") {
-                data = await api.getDepartmentNamesHistory(params.dept);
+                data = await api.getDepartmentNamesHistory(code);
             } else if (type === "commune") {
-                data = await api.getCommuneNamesHistory(params.cog);
+                data = await api.getCommuneNamesHistory(code);
+            } else {
+                throw new Error("Invalid type parameter");
             }
             console.log("Historical names data:", data);
 
