@@ -1,5 +1,4 @@
-import { formatNumber, formatPercentage, formatMetricValue } from "./utils.js";
-import { MetricsConfig } from "./metricsConfig.js";
+import { MetricsConfig } from './metricsConfig.js';
 
 /**
  * Map handler module for displaying interactive maps with statistical data.
@@ -231,7 +230,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                     ? deptData[code][currentMetric]
                     : "N/A";
                 const metricLabel = MetricsConfig.getMetricLabel(currentMetric);
-                const formattedValue = formatMetricValue(value, currentMetric);
+                const formattedValue = MetricsConfig.formatMetricValue(value, currentMetric);
                 layer
                     .bindPopup(
                         `<b>${name} (${code})</b><br>${metricLabel}: ${formattedValue}`,
@@ -296,12 +295,12 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             const metricLabel = MetricsConfig.getMetricLabel(currentMetric);
             div.innerHTML = "<h4>" + metricLabel + "</h4>";
             for (let i = 0; i < grades.length; i++) {
-                const formattedGrade = formatMetricValue(
+                const formattedGrade = MetricsConfig.formatMetricValue(
                     grades[i],
                     currentMetric,
                 );
                 const formattedNextGrade = grades[i + 1]
-                    ? formatMetricValue(grades[i + 1], currentMetric)
+                    ? MetricsConfig.formatMetricValue(grades[i + 1], currentMetric)
                     : "+";
                 div.innerHTML +=
                     '<i style="background:' +

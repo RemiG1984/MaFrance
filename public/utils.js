@@ -62,23 +62,4 @@ export function formatDate(dateStr) {
   return `${day}/${month}/${year}`;
 }
 
-/**
- * Formats metric values based on type (e.g., percentage, score).
- * @param {number|null|undefined} value - The value to format.
- * @param {string} metric - The metric key.
- * @returns {string} Formatted value.
- */
-export function formatMetricValue(value, metric) {
-  if (value == null) return "N/A";
-  if (metric === "pop_in_qpv_pct") return formatPercentage(value, 0);
-  if (metric === "total_qpv") return value.toString();
-  if (metric.includes("_pct")) return `${value.toFixed(0)}%`;
-  if (metric.includes("_p100k") || metric.includes("_p1k"))
-    return value.toFixed(1);
-  if (metric.includes("_score"))
-    return value.toLocaleString("fr-FR", {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    });
-  return value.toString();
-}
+

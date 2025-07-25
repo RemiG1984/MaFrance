@@ -295,4 +295,30 @@ export const MetricsConfig = {
             label: category.name,
         }));
     },
+
+    // Format metric values based on their format property
+    formatMetricValue(value, metricKey) {
+        if (value == null || isNaN(value)) return "N/A";
+        
+        const metric = this.getMetricByValue(metricKey);
+        const format = metric ? metric.format : "number";
+        
+        switch (format) {
+            case "percentage":
+                return `${value.toFixed(1)}%`;
+            case "score":
+                return value.toLocaleString("fr-FR", {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                });
+            case "rate_100k":
+                return value.toFixed(1);
+            case "rate_1k":
+                return value.toFixed(1);
+            case "number":
+                return value.toString();
+            default:
+                return value.toString();
+        }
+    },
 };
