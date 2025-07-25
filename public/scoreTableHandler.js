@@ -49,8 +49,11 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
      * @returns {Array} Array of crime-related table rows
      */
     function createCrimeRows(metrics, crimeData, linkBase, compareMetrics = null, compareCrimeData = null) {
-        const rows = [
-            {
+        const rows = [];
+        
+        // Only add homicide row if metrics exist
+        if (metrics) {
+            rows.push({
                 title: MetricsConfig.getMetricLabel("homicides_p100k"),
                 main: MetricsConfig.formatMetricValue(metrics.homicidesTotal, "homicides_p100k") + metrics.crimeYearLabel,
                 compare: compareMetrics ? 
@@ -58,10 +61,16 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     null,
                 subRow: true,
                 link: linkBase,
-            },
+            });
+        }
+
+        // Add other crime rows that don't depend on metrics
+        rows.push(
             {
                 title: MetricsConfig.getMetricLabel("violences_physiques_p1k"),
-                main: MetricsConfig.formatMetricValue(metrics.violencesPhysiques, "violences_physiques_p1k") + metrics.crimeYearLabel,
+                main: metrics ? 
+                    MetricsConfig.formatMetricValue(metrics.violencesPhysiques, "violences_physiques_p1k") + metrics.crimeYearLabel :
+                    MetricsConfig.formatMetricValue(crimeData.violences_physiques_p1k, "violences_physiques_p1k") + (crimeData.annee ? ` (${crimeData.annee})` : ""),
                 compare: compareMetrics ? 
                     MetricsConfig.formatMetricValue(compareMetrics.violencesPhysiques, "violences_physiques_p1k") + compareMetrics.crimeYearLabel : 
                     null,
@@ -70,16 +79,18 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
             },
             {
                 title: MetricsConfig.getMetricLabel("violences_sexuelles_p1k"),
-                main: MetricsConfig.formatMetricValue(crimeData.violences_sexuelles_p1k, "violences_sexuelles_p1k") + metrics.crimeYearLabel,
+                main: MetricsConfig.formatMetricValue(crimeData.violences_sexuelles_p1k, "violences_sexuelles_p1k") + (metrics ? metrics.crimeYearLabel : (crimeData.annee ? ` (${crimeData.annee})` : "")),
                 compare: compareCrimeData ? 
-                    MetricsConfig.formatMetricValue(compareCrimeData.violences_sexuelles_p1k, "violences_sexuelles_p1k") + compareMetrics.crimeYearLabel : 
+                    MetricsConfig.formatMetricValue(compareCrimeData.violences_sexuelles_p1k, "violences_sexuelles_p1k") + (compareMetrics ? compareMetrics.crimeYearLabel : "") : 
                     null,
                 subRow: true,
                 link: linkBase,
             },
             {
                 title: MetricsConfig.getMetricLabel("vols_p1k"),
-                main: MetricsConfig.formatMetricValue(metrics.volsTotal, "vols_p1k") + metrics.crimeYearLabel,
+                main: metrics ? 
+                    MetricsConfig.formatMetricValue(metrics.volsTotal, "vols_p1k") + metrics.crimeYearLabel :
+                    MetricsConfig.formatMetricValue(crimeData.vols_p1k, "vols_p1k") + (crimeData.annee ? ` (${crimeData.annee})` : ""),
                 compare: compareMetrics ? 
                     MetricsConfig.formatMetricValue(compareMetrics.volsTotal, "vols_p1k") + compareMetrics.crimeYearLabel : 
                     null,
@@ -88,16 +99,18 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
             },
             {
                 title: MetricsConfig.getMetricLabel("destructions_p1k"),
-                main: MetricsConfig.formatMetricValue(crimeData.destructions_et_degradations_volontaires_p1k, "destructions_p1k") + metrics.crimeYearLabel,
+                main: MetricsConfig.formatMetricValue(crimeData.destructions_et_degradations_volontaires_p1k, "destructions_p1k") + (metrics ? metrics.crimeYearLabel : (crimeData.annee ? ` (${crimeData.annee})` : "")),
                 compare: compareCrimeData ? 
-                    MetricsConfig.formatMetricValue(compareCrimeData.destructions_et_degradations_volontaires_p1k, "destructions_p1k") + compareMetrics.crimeYearLabel : 
+                    MetricsConfig.formatMetricValue(compareCrimeData.destructions_et_degradations_volontaires_p1k, "destructions_p1k") + (compareMetrics ? compareMetrics.crimeYearLabel : "") : 
                     null,
                 subRow: true,
                 link: linkBase,
             },
             {
                 title: MetricsConfig.getMetricLabel("stupefiants_p1k"),
-                main: MetricsConfig.formatMetricValue(metrics.stupefiants, "stupefiants_p1k") + metrics.crimeYearLabel,
+                main: metrics ? 
+                    MetricsConfig.formatMetricValue(metrics.stupefiants, "stupefiants_p1k") + metrics.crimeYearLabel :
+                    MetricsConfig.formatMetricValue(crimeData.stupefiants_p1k, "stupefiants_p1k") + (crimeData.annee ? ` (${crimeData.annee})` : ""),
                 compare: compareMetrics ? 
                     MetricsConfig.formatMetricValue(compareMetrics.stupefiants, "stupefiants_p1k") + compareMetrics.crimeYearLabel : 
                     null,
@@ -106,9 +119,9 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
             },
             {
                 title: MetricsConfig.getMetricLabel("escroqueries_p1k"),
-                main: MetricsConfig.formatMetricValue(crimeData.escroqueries_p1k, "escroqueries_p1k") + metrics.crimeYearLabel,
+                main: MetricsConfig.formatMetricValue(crimeData.escroqueries_p1k, "escroqueries_p1k") + (metrics ? metrics.crimeYearLabel : (crimeData.annee ? ` (${crimeData.annee})` : "")),
                 compare: compareCrimeData ? 
-                    MetricsConfig.formatMetricValue(compareCrimeData.escroqueries_p1k, "escroqueries_p1k") + compareMetrics.crimeYearLabel : 
+                    MetricsConfig.formatMetricValue(compareCrimeData.escroqueries_p1k, "escroqueries_p1k") + (compareMetrics ? compareMetrics.crimeYearLabel : "") : 
                     null,
                 subRow: true,
                 link: linkBase,
@@ -400,7 +413,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     main: MetricsConfig.formatMetricValue(item.insecurite_score, "insecurite_score"),
                     compare: MetricsConfig.formatMetricValue(deptData.insecurite_score, "insecurite_score"),
                 },
-                ...crimeRows.slice(1), // Skip homicides for communes, start from violence
+                ...crimeRows, // Crime rows are now conditionally created
                 {
                     title: MetricsConfig.getMetricLabel("immigration_score"),
                     main: MetricsConfig.formatMetricValue(item.immigration_score, "immigration_score"),
