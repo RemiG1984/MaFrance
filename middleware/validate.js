@@ -157,21 +157,6 @@ const validatePopulationRange = [
   handleValidationErrors,
 ];
 
-// Combined validation for dept and cog
-const validateDeptAndCOG = [
-  query("dept")
-    .notEmpty()
-    .withMessage("Département requis")
-    .matches(/^(0[1-9]|[1-8][0-9]|9[0-5]|2[AB]|97[1-6])$/)
-    .withMessage("Code département invalide"),
-  query("cog")
-    .notEmpty()
-    .withMessage("COG requis")
-    .matches(/^(?:[0-9]{5}|2[AB][0-9]{3}|97[1-6][0-9]{2}|[0-9]{4})$/)
-    .withMessage("Code COG invalide"),
-  handleValidationErrors,
-];
-
 // Validation for country
 const validateCountry = [
   query("country")
@@ -225,7 +210,6 @@ module.exports = {
   validateDirection,
   validatePagination,
   validatePopulationRange,
-  validateDeptAndCOG,
   validateCountry,
   validateLieu,
 };
