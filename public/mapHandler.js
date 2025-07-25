@@ -1,4 +1,5 @@
 import { MetricsConfig } from './metricsConfig.js';
+import { normalizeDept } from './utils.js';
 
 /**
  * Map handler module for displaying interactive maps with statistical data.
@@ -16,12 +17,11 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
     let currentMetric = "total_score";
     let legendControl = null;
 
-    // Valid department codes (mainland France + Corsica)
-    const validDeptCodes = [
-        ...Array.from({ length: 95 }, (_, i) => String(i + 1).padStart(2, "0")), // 01–95
-        "2A",
-        "2B", // Corsica
-    ];
+    // Function to validate department codes using utils
+    const isValidDeptCode = (code) => {
+        const normalized = normalizeDept(code);
+        return /^(0[1-9]|[1-8][0-9]|9[0-5]|2[AB]|97[1-6])$/.test(normalized);
+    };
 
     // Get metrics from centralized config
     const metrics = MetricsConfig.getMetricOptions();
@@ -63,8 +63,9 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             }
             const { data } = await response.json();
             data.forEach((dept) => {
-                if (validDeptCodes.includes(dept.departement)) {
-                    deptData[dept.departement] = {
+                const normalizedDept = normalizeDept(dept.departement);
+                if (isValidDeptCode(normalizedDept)) {
+                    deptData[normalizedDept] = {
                         total_score: dept.total_score,
                         insecurite_score: dept.insecurite_score,
                         homicides_p100k: dept.homicides_p100k,
@@ -103,9 +104,10 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             const geoData = await geoResponse.json();
 
             // Filter GeoJSON for mainland France and Corsica
-            geoData.features = geoData.features.filter((feature) =>
-                validDeptCodes.includes(feature.properties.code),
-            );
+            geoData.features = geoData.features.filter((feature) => {
+                const normalizedCode = normalizeDept(feature.properties.code);
+                return isValidDeptCode(normalizedCode);
+            });
 
             // Add GeoJSON to main map
             geoJsonLayer = L.geoJSON(geoData, {
@@ -215,7 +217,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
      * @param {Object} layer - The Leaflet layer.
      */
     function onEachFeature(feature, layer) {
-        const code = feature.properties.code;
+        const code = normalizeDept(feature.properties.code);
         const name = feature.properties.nom;
 
         layer.on({
