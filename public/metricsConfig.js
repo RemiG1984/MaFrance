@@ -14,7 +14,7 @@ export const MetricsConfig = {
         },
         {
             value: "insecurite_score",
-            label: "Score Insécurité",
+            label: "Score Insécurité2",
             category: "score",
             format: "score",
         },
