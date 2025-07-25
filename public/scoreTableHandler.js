@@ -20,7 +20,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
         const row = {
             title: MetricsConfig.getMetricLabel(metricKey),
             main: MetricsConfig.formatMetricValue(calculatedValue, metricKey) + yearLabel,
-            subRow: metric.category !== "général"
+            subRow: metric.format !== "score" && metric.category !== "général"
         };
 
         if (compareValue !== null) {
