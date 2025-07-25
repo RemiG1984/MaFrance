@@ -364,7 +364,7 @@ const RankingsHandler = (function () {
                                     <td>${item.rank}</td>
                                     <td>${type === "Département" ? `${item.name} (${item.deptCode})` : `${item.name} (${item.deptCode})`}</td>
                                     <td>${item.population.toLocaleString("fr-FR")}</td>
-                                    <td>${formatMetricValue(item[metric], metric)}</td>
+                                    <td>${MetricsConfig.formatMetricValue(item[metric], metric)}</td>
                                 </tr>
                             `,
                                 )
@@ -389,7 +389,7 @@ const RankingsHandler = (function () {
                                     <td>${item.rank}</td>
                                     <td>${type === "Département" ? `${item.name} (${item.deptCode})` : `${item.name} (${item.deptCode})`}</td>
                                     <td>${item.population.toLocaleString("fr-FR")}</td>
-                                    <td>${formatMetricValue(item[metric], metric)}</td>
+                                    <td>${MetricsConfig.formatMetricValue(item[metric], metric)}</td>
                                 </tr>
                             `,
                                 )
