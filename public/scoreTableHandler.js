@@ -205,7 +205,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
             if (!data) {
                 resultsDiv.innerHTML = "<p>Aucun département trouvé.</p>";
             } else {
-                const extraEuropeenPct = MetricsConfig.calculateMetric(
+                const deptExtraEuropeenPct = MetricsConfig.calculateMetric(
                     "extra_europeen_pct",
                     namesData,
                 );
@@ -213,7 +213,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     "extra_europeen_pct",
                     countryNamesData,
                 );
-                const musulmanPct = Math.round(namesData.musulman_pct);
+                const deptMusulmanPct = Math.round(namesData.musulman_pct);
                 const countryMusulmanPct = Math.round(
                     countryNamesData.musulman_pct,
                 );
@@ -351,7 +351,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                         },
                         {
                             title: MetricsConfig.getMetricLabel("extra_europeen_pct"),
-                            main: MetricsConfig.formatMetricValue(extraEuropeenPct, "extra_europeen_pct") + yearLabel,
+                            main: MetricsConfig.formatMetricValue(deptExtraEuropeenPct, "extra_europeen_pct") + yearLabel,
                             compare: MetricsConfig.formatMetricValue(countryExtraEuropeenPct, "extra_europeen_pct") + countryYearLabel,
                             subRow: true,
                             link: `/names_graph.html?type=department&code=${deptCode}`,
@@ -366,7 +366,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                         },
                         {
                             title: MetricsConfig.getMetricLabel("musulman_pct"),
-                            main: MetricsConfig.formatMetricValue(musulmanPct, "musulman_pct") + yearLabel,
+                            main: MetricsConfig.formatMetricValue(deptMusulmanPct, "musulman_pct") + yearLabel,
                             compare: MetricsConfig.formatMetricValue(countryMusulmanPct, "musulman_pct") + countryYearLabel,
                             subRow: true,
                             link: `/names_graph.html?type=department&code=${deptCode}`,
