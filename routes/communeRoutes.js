@@ -125,7 +125,7 @@ router.get("/names", validateCOG, (req, res) => {
 });
 
 // GET /api/communes/names_history
-router.get("/names_history", validateDeptAndCOG, (req, res) => {
+router.get("/names_history", validateCOG, (req, res) => {
   const { cog } = req.query;
   db.all(
     `SELECT musulman_pct, africain_pct, asiatique_pct, traditionnel_pct, moderne_pct, invente_pct, europeen_pct, annais
