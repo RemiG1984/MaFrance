@@ -249,14 +249,14 @@ function importScores(db, callback) {
                         )
                     `, (err) => {
                         if (err) {
-                            console.error('Erreur création table departements:', err.message);
+                            console.error('Erreur création table departement:', err.message);
                             reject(err);
                             return;
                         }
 
-                        db.run('CREATE INDEX IF NOT EXISTS idx_departements ON departement(departement)', (err) => {
+                        db.run('CREATE INDEX IF NOT EXISTS idx_departement ON departement(departement)', (err) => {
                             if (err) {
-                                console.error('Erreur création index departements:', err.message);
+                                console.error('Erreur création index departement:', err.message);
                                 reject(err);
                                 return;
                             }
@@ -285,11 +285,11 @@ function importScores(db, callback) {
 
                                 db.run('COMMIT', (err) => {
                                     if (err) {
-                                        console.error('Erreur commit departements:', err.message);
+                                        console.error('Erreur commit departement:', err.message);
                                         db.run('ROLLBACK');
                                         reject(err);
                                     } else {
-                                        console.log(`Importation de ${departmentRows} lignes dans departements terminée`);
+                                        console.log(`Importation de ${departmentRows} lignes dans departement terminée`);
                                         resolve();
                                     }
                                 });
