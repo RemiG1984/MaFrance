@@ -221,6 +221,15 @@ import { api } from './apiService.js';
                 labelToggleBtn.classList.add(stateName);
             }
             
+            // Update page title
+            document.title = MetricsConfig.getCurrentPageTitle();
+            
+            // Update header h1 text
+            const headerH1 = document.querySelector('h1');
+            if (headerH1) {
+                headerH1.textContent = MetricsConfig.getCurrentPageTitle();
+            }
+            
             // Refresh all components that display metric labels
             refreshMetricLabels();
         });

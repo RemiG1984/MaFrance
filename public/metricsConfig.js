@@ -7,6 +7,13 @@
  */
 
 export const MetricsConfig = {
+    // Page titles for different label states
+    pageTitles: {
+        standard: "Où va ma France?",
+        alt1: "Diversité et Inclusion en France",
+        alt2: "Déclin de la France Traditionnelle"
+    },
+
     // Label state: 0 = standard, 1 = alt1, 2 = alt2
     labelState: 0,
 
@@ -341,6 +348,12 @@ export const MetricsConfig = {
             default:
                 return "standard";
         }
+    },
+
+    // Get current page title
+    getCurrentPageTitle() {
+        const stateName = this.getLabelStateName();
+        return this.pageTitles[stateName];
     },
 
     // Format metric values based on their format property
