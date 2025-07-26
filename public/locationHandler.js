@@ -73,6 +73,7 @@ function LocationHandler(
                 const option = document.createElement("option");
                 option.value = commune.commune;
                 option.textContent = commune.commune;
+                option.setAttribute('data-cog', commune.COG);
                 communeList.appendChild(option);
             });
         } catch (error) {
@@ -150,12 +151,23 @@ function LocationHandler(
         }
     }
 
+    function getCOGForCommune(communeName) {
+        const options = communeList.querySelectorAll('option');
+        for (const option of options) {
+            if (option.value === communeName) {
+                return option.getAttribute('data-cog');
+            }
+        }
+        return null;
+    }
+
     return {
         loadDepartements,
         loadCommunes,
         loadLieux,
         resetCommuneAndLieux,
         handleCommuneInput,
+        getCOGForCommune,
     };
 }
 

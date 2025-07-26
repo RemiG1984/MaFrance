@@ -126,32 +126,49 @@ import { api } from './apiService.js';
     communeInput.addEventListener("input", debouncedInputHandler);
 
     communeInput.addEventListener("change", async () => {
+        const selectedCommune = communeInput.value.trim();
         const departement = departementSelect.value;
-        const commune = communeInput.value;
-        if (departement && commune) {
+        
+        if (selectedCommune && departement) {
             try {
-                const data = await api.getCommunes(departement);
-                if (data.length === 0) {
-                    resultsDiv.innerHTML = "<p>Aucune commune trouvée.</p>";
-                    executiveDiv.innerHTML = "<p>Aucune commune trouvée.</p>";
-                    return;
+                // First try to get COG from the datalist options
+                let cog = locationHandler.getCOGForCommune(selectedCommune);
+
+                if (!cog) {
+                    // Fallback: fetch commune details to get COG
+                    const response = await fetch(
+                        `/api/communes?dept=${encodeURIComponent(
+                            departement,
+                        )}&q=${encodeURIComponent(selectedCommune)}`,
+                    );
+                    if (!response.ok) throw new Error("Erreur lors de la recherche");
+                    const communes = await response.json();
+                    const commune = communes.find((c) => c.commune === selectedCommune);
+                    if (commune) {
+                        cog = commune.COG;
+                    }
                 }
-                const item = data[0];
-                const cog = item.COG;
-                scoreTableHandler.showCommuneDetails(cog);
-                executiveHandler.showCommuneExecutive(cog);
-                locationHandler.loadLieux(departement, cog);
-                articleHandler.loadArticles(departement, cog).then(() => {
-                    articleHandler
-                        .loadArticleCounts(departement, cog)
-                        .then((counts) => {
-                            articleHandler.renderFilterButtons(
-                                counts,
-                                allArticles,
-                                currentLieu,
-                            );
-                        });
-                });
+
+                if (cog) {
+                    console.log("Using COG for commune:", selectedCommune, cog);
+                    scoreTableHandler.showCommuneDetails(cog);
+                    executiveHandler.showCommuneExecutive(cog);
+                    locationHandler.loadLieux(departement, cog);
+                    articleHandler.loadArticles(departement, cog).then(() => {
+                        articleHandler
+                            .loadArticleCounts(departement, cog)
+                            .then((counts) => {
+                                articleHandler.renderFilterButtons(
+                                    counts,
+                                    allArticles,
+                                    currentLieu,
+                                );
+                            });
+                    });
+                } else {
+                    resultsDiv.innerHTML = "<p>Commune non trouvée.</p>";
+                    executiveDiv.innerHTML = "<p>Commune non trouvée.</p>";
+                }
             } catch (error) {
                 resultsDiv.innerHTML = `<p>Erreur : ${error.message}</p>`;
                 executiveDiv.innerHTML = `<p>Erreur : ${error.message}</p>`;
@@ -162,32 +179,47 @@ import { api } from './apiService.js';
 
     lieuxSelect.addEventListener("change", async () => {
         const departement = departementSelect.value;
-        const commune = communeInput.value;
+        const commune = communeInput.value.trim();
         currentLieu = lieuxSelect.value;
         console.log("Current lieu set to:", currentLieu);
+        
         if (departement && commune) {
             try {
-                const data = await api.getCommunes(departement);
-                if (data.length === 0) {
-                    resultsDiv.innerHTML = "<p>Aucune commune trouvée.</p>";
-                    executiveDiv.innerHTML = "<p>Aucune commune trouvée.</p>";
-                    return;
+                // Get COG from the datalist options
+                let cog = locationHandler.getCOGForCommune(commune);
+
+                if (!cog) {
+                    // Fallback: fetch commune details to get COG
+                    const response = await fetch(
+                        `/api/communes?dept=${encodeURIComponent(
+                            departement,
+                        )}&q=${encodeURIComponent(commune)}`,
+                    );
+                    if (!response.ok) throw new Error("Erreur lors de la recherche");
+                    const communes = await response.json();
+                    const communeData = communes.find((c) => c.commune === commune);
+                    if (communeData) {
+                        cog = communeData.COG;
+                    }
                 }
-                const item = data[0];
-                const cog = item.COG;
-                articleHandler
-                    .loadArticles(departement, cog, currentLieu)
-                    .then(() => {
-                        articleHandler
-                            .loadArticleCounts(departement, cog, currentLieu)
-                            .then((counts) => {
-                                articleHandler.renderFilterButtons(
-                                    counts,
-                                    allArticles,
-                                    currentLieu,
-                                );
-                            });
-                    });
+
+                if (cog) {
+                    articleHandler
+                        .loadArticles(departement, cog, currentLieu)
+                        .then(() => {
+                            articleHandler
+                                .loadArticleCounts(departement, cog, currentLieu)
+                                .then((counts) => {
+                                    articleHandler.renderFilterButtons(
+                                        counts,
+                                        allArticles,
+                                        currentLieu,
+                                    );
+                                });
+                        });
+                } else {
+                    console.error("COG not found for commune:", commune);
+                }
             } catch (error) {
                 resultsDiv.innerHTML = `<p>Erreur : ${error.message}</p>`;
                 executiveDiv.innerHTML = `<p>Erreur : ${error.message}</p>`;
