@@ -98,14 +98,35 @@ function LocationHandler(
             const communes = await apiService.request(`/api/search?q=${encodeURIComponent(query)}`);
             communeList.innerHTML = "";
             communes.forEach((result) => {
+                // Create option with original name (with accents)
                 const option = document.createElement("option");
                 const displayText = `${result.commune} (${result.departement})`;
                 
-                option.value = displayText; // Use original name with accents
+                option.value = displayText;
                 option.textContent = displayText;
                 option.setAttribute('data-cog', result.COG);
                 option.setAttribute('data-dept', result.departement);
+                option.setAttribute('data-original', result.commune);
                 communeList.appendChild(option);
+                
+                // Also create a normalized version (without accents) for matching
+                const normalizedCommune = result.commune
+                    .toLowerCase()
+                    .normalize("NFD")
+                    .replace(/[\u0300-\u036f]/g, "");
+                
+                if (normalizedCommune !== result.commune.toLowerCase()) {
+                    const normalizedOption = document.createElement("option");
+                    const normalizedDisplayText = `${normalizedCommune} (${result.departement})`;
+                    
+                    normalizedOption.value = normalizedDisplayText;
+                    normalizedOption.style.display = 'none'; // Hide this option
+                    normalizedOption.setAttribute('data-cog', result.COG);
+                    normalizedOption.setAttribute('data-dept', result.departement);
+                    normalizedOption.setAttribute('data-original', result.commune);
+                    normalizedOption.setAttribute('data-normalized', 'true');
+                    communeList.appendChild(normalizedOption);
+                }
             });
         } catch (error) {
             console.error("Erreur recherche globale communes:", {

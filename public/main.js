@@ -147,8 +147,12 @@ import { api } from './apiService.js';
                             cog = option.getAttribute('data-cog');
                             departement = option.getAttribute('data-dept');
                             actualCommuneName = option.getAttribute('data-original') || selectedCommune;
-                            // Update the input to show the original name with accents
-                            communeInput.value = actualCommuneName;
+                            
+                            // If this was a normalized option, update input to show original name with accents
+                            if (option.getAttribute('data-normalized') === 'true') {
+                                const originalDisplayText = `${actualCommuneName} (${departement})`;
+                                communeInput.value = originalDisplayText;
+                            }
                             break;
                         }
                     }
