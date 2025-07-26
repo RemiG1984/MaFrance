@@ -15,6 +15,13 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
     let deptData = {};
     let currentMetric = "total_score";
     let legendControl = null;
+    
+    // Listen for metric label changes
+    window.addEventListener('metricsLabelsToggled', () => {
+        updateLegend();
+        // Update metric selector options if it exists
+        updateMetricSelector();
+    });
 
     // Valid department codes (mainland France + Corsica but not the DOM)
     const validDeptCodes = [
@@ -314,9 +321,31 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
         legendControl.addTo(map);
     }
 
+    /**
+     * Updates the metric selector dropdown with current labels
+     */
+    function updateMetricSelector() {
+        const metricSelect = document.querySelector('.leaflet-control-metric select');
+        if (metricSelect) {
+            const currentValue = metricSelect.value;
+            metricSelect.innerHTML = '';
+            
+            const updatedMetrics = MetricsConfig.getMetricOptions();
+            updatedMetrics.forEach((m) => {
+                const option = L.DomUtil.create("option", "", metricSelect);
+                option.value = m.value;
+                option.innerHTML = m.label;
+                if (m.value === currentValue) option.selected = true;
+            });
+        }
+    }
+
     initMap();
 
-    return { updateMap };
+    return { 
+        updateMap,
+        get currentMetric() { return currentMetric; }
+    };
 }
 
 // Export for ES6 modules

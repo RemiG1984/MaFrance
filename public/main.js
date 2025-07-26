@@ -22,6 +22,7 @@ import { api } from './apiService.js';
     const articleListDiv = document.getElementById("articleList");
     const filterButtonsDiv = document.getElementById("filterButtons");
     const mapDiv = document.getElementById('map');
+    const labelToggleBtn = document.getElementById("labelToggleBtn");
 
     // Validate DOM elements
     if (
@@ -197,6 +198,49 @@ import { api } from './apiService.js';
 
     // Prevent duplicate initialization
     let appInitialized = false;
+
+    // Label toggle functionality
+    if (labelToggleBtn) {
+        labelToggleBtn.addEventListener('click', () => {
+            MetricsConfig.toggleLabels();
+            labelToggleBtn.classList.toggle('active');
+            
+            // Update button text based on state
+            const isActive = labelToggleBtn.classList.contains('active');
+            labelToggleBtn.textContent = isActive ? '🔄 Libellés standards' : '🔄 Libellés alternatifs';
+            
+            // Refresh all components that display metric labels
+            refreshMetricLabels();
+        });
+    }
+
+    // Function to refresh all metric labels across components
+    function refreshMetricLabels() {
+        // Refresh score table if visible
+        const currentDept = departementSelect.value;
+        const currentCommune = communeInput.value;
+        
+        if (currentCommune && currentDept) {
+            // Show commune details with updated labels
+            api.getCommunes(currentDept).then(data => {
+                if (data.length > 0) {
+                    scoreTableHandler.showCommuneDetails(data[0].COG);
+                }
+            }).catch(console.error);
+        } else if (currentDept) {
+            // Show department details with updated labels
+            scoreTableHandler.showDepartmentDetails(currentDept);
+        } else {
+            // Show country details with updated labels
+            scoreTableHandler.showCountryDetails();
+        }
+        
+        // Refresh map if it exists and has an updateMap method
+        if (mapHandler && typeof mapHandler.updateMap === 'function') {
+            // The map handler will get updated labels automatically from MetricsConfig
+            mapHandler.updateMap(mapHandler.currentMetric || 'total_score');
+        }
+    }
 
     // Initialize the application
     function initializeApp() {
