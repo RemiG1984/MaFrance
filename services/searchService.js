@@ -171,7 +171,6 @@ class SearchService {
             }
 
             const normalizedQuery = this.normalizeText(query);
-            console.log(`Debug: Original query: "${query}", Normalized query: "${normalizedQuery}"`);
 
             // Get all communes and filter/rank in JavaScript for proper accent handling
             const sql = `
@@ -191,11 +190,6 @@ class SearchService {
                     .map(row => {
                         const normalizedName = this.normalizeText(row.commune);
                         
-                        // Debug specific case
-                        if (row.commune.toLowerCase().includes('nîmes') || normalizedName.includes('nimes')) {
-                            console.log(`Debug: Found "${row.commune}" -> normalized: "${normalizedName}"`);
-                        }
-
                         // Check if normalized query matches normalized name
                         const normalizedMatches = normalizedName.includes(normalizedQuery);
                         
@@ -225,7 +219,6 @@ class SearchService {
                     .sort((a, b) => b.score - a.score) // Sort by relevance score
                     .slice(0, limit); // Limit results
 
-                console.log(`Debug: Found ${results.length} results for "${query}"`);
                 resolve(results);
             });
         });
