@@ -68,55 +68,50 @@ class SearchService {
             }
 
             const normalizedQuery = this.normalizeText(query);
-            const originalQuery = query.toLowerCase();
 
-            // Search with both normalized and original patterns
-            const normalizedPattern = `%${normalizedQuery}%`;
-            const originalPattern = `%${originalQuery}%`;
+            // Use SQL LIKE for initial filtering to leverage indexes
+            const likePattern = `%${normalizedQuery}%`;
 
             db.all(
                 `SELECT DISTINCT commune, COG, population
                  FROM locations 
                  WHERE departement = ? 
-                 ORDER BY population DESC`,
-                [departement],
+                 AND (
+                     LOWER(commune) LIKE ? 
+                     OR commune LIKE ?
+                 )
+                 ORDER BY population DESC
+                 LIMIT ?`,
+                [departement, likePattern, `%${query}%`, limit * 3], // Get more results for fuzzy ranking
                 (err, rows) => {
                     if (err) return reject(err);
 
-                    // Filter and rank results with proper accent handling
-                    const results = rows
-                        .map(row => {
-                            const normalizedName = this.normalizeText(row.commune);
+                    // Apply fuzzy matching and ranking
+                    const results = rows.map(row => {
+                        const normalizedName = this.normalizeText(row.commune);
 
-                            // Only use normalized comparison for consistent accent handling
-                            const normalizedMatches = normalizedName.includes(normalizedQuery);
-                            
-                            if (!normalizedMatches) {
-                                return null; // Filter out non-matches
-                            }
+                        // Calculate different types of matches for scoring
+                        const exactMatch = normalizedName === normalizedQuery;
+                        const startsWith = normalizedName.startsWith(normalizedQuery);
+                        const contains = normalizedName.includes(normalizedQuery);
+                        const distance = this.levenshteinDistance(normalizedQuery, normalizedName);
 
-                            // Calculate different types of matches for scoring
-                            const exactMatch = normalizedName === normalizedQuery;
-                            const startsWith = normalizedName.startsWith(normalizedQuery);
-                            const distance = this.levenshteinDistance(normalizedQuery, normalizedName);
+                        // Calculate relevance score
+                        let score = 0;
+                        if (exactMatch) score += 1000;
+                        if (startsWith) score += 500;
+                        if (contains) score += 100;
+                        score -= distance * 10; // Penalize edit distance
+                        score += Math.log(row.population || 1); // Boost by population
 
-                            // Calculate relevance score
-                            let score = 0;
-                            if (exactMatch) score += 1000;
-                            if (startsWith) score += 500;
-                            score += 100; // Base score for any match
-                            score -= distance * 10; // Penalize edit distance
-                            score += Math.log(row.population || 1); // Boost by population
-
-                            return {
-                                ...row,
-                                score,
-                                exactMatch,
-                                startsWith,
-                                distance
-                            };
-                        })
-                        .filter(result => result !== null); // Remove null results
+                        return {
+                            ...row,
+                            score,
+                            exactMatch,
+                            startsWith,
+                            distance
+                        };
+                    });
 
                     // Sort by relevance score and return top results
                     const sortedResults = results
@@ -172,54 +167,44 @@ class SearchService {
 
             const normalizedQuery = this.normalizeText(query);
 
-            // Get all communes and filter/rank in JavaScript for proper accent handling
             const sql = `
-                SELECT DISTINCT commune, COG, departement, population
+                SELECT DISTINCT commune, COG, departement
                 FROM locations 
-                ORDER BY population DESC
+                WHERE (
+                    LOWER(commune) LIKE ? 
+                    OR commune LIKE ?
+                )
+                ORDER BY 
+                    CASE 
+                        WHEN LOWER(commune) LIKE ? THEN 1
+                        WHEN commune LIKE ? THEN 2
+                        WHEN LOWER(commune) LIKE ? THEN 3
+                        ELSE 4
+                    END,
+                    commune
+                LIMIT ?
             `;
 
-            db.all(sql, [], (err, rows) => {
+            const normalizedSearchTerm = `%${normalizedQuery}%`;
+            const exactSearchTerm = `%${query}%`;
+            const normalizedExactStart = `${normalizedQuery}%`;
+            const exactStart = `${query}%`;
+            
+            const params = [
+                normalizedSearchTerm,    // Main search (normalized)
+                exactSearchTerm,         // Main search (original)
+                normalizedExactStart,    // Order by: normalized exact start (highest priority)
+                exactStart,              // Order by: original exact start
+                normalizedSearchTerm,    // Order by: normalized contains
+                limit
+            ];
+
+            db.all(sql, params, (err, rows) => {
                 if (err) {
                     reject(err);
-                    return;
+                } else {
+                    resolve(rows);
                 }
-
-                // Filter and rank results with proper accent handling
-                const results = rows
-                    .map(row => {
-                        const normalizedName = this.normalizeText(row.commune);
-                        
-                        // Check if normalized query matches normalized name
-                        const normalizedMatches = normalizedName.includes(normalizedQuery);
-                        
-                        if (!normalizedMatches) {
-                            return null; // Filter out non-matches
-                        }
-
-                        // Calculate different types of matches for scoring
-                        const exactMatch = normalizedName === normalizedQuery;
-                        const startsWith = normalizedName.startsWith(normalizedQuery);
-
-                        // Calculate relevance score
-                        let score = 0;
-                        if (exactMatch) score += 1000;
-                        if (startsWith) score += 500;
-                        score += 100; // Base score for any match
-                        score += Math.log(row.population || 1); // Boost by population
-
-                        return {
-                            commune: row.commune,
-                            COG: row.COG,
-                            departement: row.departement,
-                            score
-                        };
-                    })
-                    .filter(result => result !== null) // Remove null results
-                    .sort((a, b) => b.score - a.score) // Sort by relevance score
-                    .slice(0, limit); // Limit results
-
-                resolve(results);
             });
         });
     }

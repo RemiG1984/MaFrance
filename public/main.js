@@ -95,14 +95,14 @@ import { api } from './apiService.js';
         const departement = departementSelect.value;
         const query = communeInput.value;
         locationHandler.handleCommuneInput(departement, query);
-
+        
         if (query.length === 0) {
             locationHandler.resetCommuneAndLieux();
             articleHandler.clearArticles();
             currentLieu = "";
             articleHandler.setFilter(null);
             console.log("Reset filter on commune input");
-
+            
             if (departement) {
                 scoreTableHandler.showDepartmentDetails(departement);
                 executiveHandler.showDepartmentExecutive(departement);
@@ -127,39 +127,44 @@ import { api } from './apiService.js';
 
     communeInput.addEventListener("input", debouncedInputHandler);
 
-    // Commune input change handler
-    communeInput.addEventListener("change", async function () {
-        const selectedCommune = this.value.trim();
-        console.log("Commune selected:", selectedCommune);
-
+    communeInput.addEventListener("change", async () => {
+        const selectedValue = communeInput.value.trim();
+        // Extract commune name from format "CommuneName (DeptCode)" if needed
+        const selectedCommune = selectedValue.includes(' (') 
+            ? selectedValue.substring(0, selectedValue.lastIndexOf(' ('))
+            : selectedValue;
+        let departement = departementSelect.value;
+        
         if (selectedCommune) {
             try {
-                // Try to get COG from the datalist options first
+                // First try to get COG and department from the datalist options
                 let cog = locationHandler.getCOGForCommune(selectedCommune);
-                let departement = locationHandler.getDepartmentForCommune(selectedCommune);
-                let actualCommuneName = selectedCommune;
+                let communeDept = locationHandler.getDepartmentForCommune(selectedCommune);
 
-                // If not found with the input value, check if we have a matching option with data-original
-                if (!cog) {
-                    const options = communeList.querySelectorAll('option');
-                    for (const option of options) {
-                        if (option.value === selectedCommune) {
-                            cog = option.getAttribute('data-cog');
-                            departement = option.getAttribute('data-dept');
-                            actualCommuneName = option.getAttribute('data-original') || selectedCommune;
-                            
-                            // If this was a normalized option, update input to show original name with accents
-                            if (option.getAttribute('data-normalized') === 'true') {
-                                const originalDisplayText = `${actualCommuneName} (${departement})`;
-                                communeInput.value = originalDisplayText;
-                            }
-                            break;
-                        }
+                // Auto-select department if not already selected
+                if (!departement && communeDept) {
+                    departement = communeDept;
+                    departementSelect.value = departement;
+                    console.log("Auto-selected department:", departement);
+                }
+
+                if (!cog && departement) {
+                    // Fallback: fetch commune details to get COG
+                    const response = await fetch(
+                        `/api/communes?dept=${encodeURIComponent(
+                            departement,
+                        )}&q=${encodeURIComponent(selectedCommune)}`,
+                    );
+                    if (!response.ok) throw new Error("Erreur lors de la recherche");
+                    const communes = await response.json();
+                    const commune = communes.find((c) => c.commune === selectedCommune);
+                    if (commune) {
+                        cog = commune.COG;
                     }
                 }
 
                 if (cog && departement) {
-                    console.log("Using COG for commune:", actualCommuneName, cog);
+                    console.log("Using COG for commune:", selectedCommune, cog);
                     scoreTableHandler.showCommuneDetails(cog);
                     executiveHandler.showCommuneExecutive(cog);
                     locationHandler.loadLieux(departement, cog);
@@ -191,7 +196,7 @@ import { api } from './apiService.js';
         const commune = communeInput.value.trim();
         currentLieu = lieuxSelect.value;
         console.log("Current lieu set to:", currentLieu);
-
+        
         if (departement && commune) {
             try {
                 // Get COG from the datalist options
@@ -327,11 +332,11 @@ import { api } from './apiService.js';
         appInitialized = true;
 
         console.log('Initializing application...');
-
+        
         // Ensure commune input is always enabled for global search
         communeInput.disabled = false;
         communeInput.placeholder = "Rechercher une commune...";
-
+        
         scoreTableHandler.showCountryDetails();
         executiveHandler.showCountryExecutive();
         locationHandler.loadDepartements();

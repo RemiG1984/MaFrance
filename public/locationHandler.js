@@ -95,38 +95,17 @@ function LocationHandler(
         }
         
         try {
-            const communes = await apiService.request(`/api/search?q=${encodeURIComponent(query)}`);
+            console.log("Searching communes globally with query:", query);
+            const communes = await apiService.request(`/api/communes/search?q=${encodeURIComponent(query)}`);
+            console.log("Global communes search results:", communes);
             communeList.innerHTML = "";
-            communes.forEach((result) => {
-                // Create option with original name (with accents)
+            communes.forEach((commune) => {
                 const option = document.createElement("option");
-                const displayText = `${result.commune} (${result.departement})`;
-                
-                option.value = displayText;
-                option.textContent = displayText;
-                option.setAttribute('data-cog', result.COG);
-                option.setAttribute('data-dept', result.departement);
-                option.setAttribute('data-original', result.commune);
+                option.value = `${commune.commune} (${commune.departement})`;
+                option.textContent = `${commune.commune} (${commune.departement})`;
+                option.setAttribute('data-cog', commune.COG);
+                option.setAttribute('data-dept', commune.departement);
                 communeList.appendChild(option);
-                
-                // Also create a normalized version (without accents) for matching
-                const normalizedCommune = result.commune
-                    .toLowerCase()
-                    .normalize("NFD")
-                    .replace(/[\u0300-\u036f]/g, "");
-                
-                if (normalizedCommune !== result.commune.toLowerCase()) {
-                    const normalizedOption = document.createElement("option");
-                    const normalizedDisplayText = `${normalizedCommune} (${result.departement})`;
-                    
-                    normalizedOption.value = normalizedDisplayText;
-                    normalizedOption.style.display = 'none'; // Hide this option
-                    normalizedOption.setAttribute('data-cog', result.COG);
-                    normalizedOption.setAttribute('data-dept', result.departement);
-                    normalizedOption.setAttribute('data-original', result.commune);
-                    normalizedOption.setAttribute('data-normalized', 'true');
-                    communeList.appendChild(normalizedOption);
-                }
             });
         } catch (error) {
             console.error("Erreur recherche globale communes:", {

@@ -17,28 +17,14 @@ const handleDbError = (err, next) => {
 // GET /api/search
 router.get(
   "/search",
-  [validateSearchQuery],
+  [validateDepartement, validateSearchQuery],
   (req, res) => {
     const { dept, q } = req.query;
-    
-    // If no department specified, use global search
-    if (!dept) {
-      const SearchService = require('../services/searchService');
-      SearchService.searchCommunesGlobally(q, 15)
-        .then(results => {
-          res.setHeader('Content-Type', 'application/json; charset=utf-8');
-          res.json(results);
-        })
-        .catch(err => handleDbError(err, res));
-      return;
-    }
 
-    // Normalize the query for consistent accent handling
     const normalizedQuery = q
       .toLowerCase()
       .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .trim();
+      .replace(/[\u0300-\u036f]/g, "");
 
     const sql = `
     SELECT COG, departement, commune, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct
@@ -50,15 +36,13 @@ router.get(
       if (err) return handleDbError(res, err);
 
       const filteredCommunes = rows
-        .filter((row) => {
-          const normalizedName = row.commune
+        .filter((row) =>
+          row.commune
             .toLowerCase()
             .normalize("NFD")
             .replace(/[\u0300-\u036f]/g, "")
-            .trim();
-          
-          return normalizedName.includes(normalizedQuery);
-        })
+            .includes(normalizedQuery),
+        )
         .sort((a, b) => {
           const normA = a.commune
             .toLowerCase()
