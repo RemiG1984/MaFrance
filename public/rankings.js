@@ -66,27 +66,40 @@ const RankingsHandler = (function () {
             tweakingBoxContent.classList.toggle("active");
         });
 
-        // Label toggle functionality
-        if (rankingsLabelToggle) {
-            rankingsLabelToggle.addEventListener('click', () => {
-                MetricsConfig.cycleLabelState();
-
-                // Update button text and style based on state
-                const stateName = MetricsConfig.getLabelStateName();
-
+        // Initialize label toggle functionality (will be set up after URL params are processed)
+        function initializeLabelToggle() {
+            if (rankingsLabelToggle) {
+                // Set initial button text and style
+                const initialStateName = MetricsConfig.getLabelStateName();
                 rankingsLabelToggle.textContent = MetricsConfig.getCurrentToggleButtonLabel();
 
-                // Update button style
+                // Set initial button style
                 rankingsLabelToggle.classList.remove('active', 'alt1', 'alt2');
-                if (stateName !== 'standard') {
+                if (initialStateName !== 'standard') {
                     rankingsLabelToggle.classList.add('active');
-                    rankingsLabelToggle.classList.add(stateName);
+                    rankingsLabelToggle.classList.add(initialStateName);
                 }
 
-                // Refresh metric options and update rankings
-                populateMetricOptions();
-                updateRankings();
-            });
+                rankingsLabelToggle.addEventListener('click', () => {
+                    MetricsConfig.cycleLabelState();
+
+                    // Update button text and style based on state
+                    const stateName = MetricsConfig.getLabelStateName();
+
+                    rankingsLabelToggle.textContent = MetricsConfig.getCurrentToggleButtonLabel();
+
+                    // Update button style
+                    rankingsLabelToggle.classList.remove('active', 'alt1', 'alt2');
+                    if (stateName !== 'standard') {
+                        rankingsLabelToggle.classList.add('active');
+                        rankingsLabelToggle.classList.add(stateName);
+                    }
+
+                    // Refresh metric options and update rankings
+                    populateMetricOptions();
+                    updateRankings();
+                });
+            }
         }
 
         // Toggle department dropdown visibility based on scope
@@ -554,5 +567,44 @@ const RankingsHandler = (function () {
         }
 
         updateNavigationLinks();
+
+        // Initialize label toggle after URL params are processed
+        rankingsHandler.initializeLabelToggle = function() {
+            const rankingsLabelToggle = document.getElementById("rankingsLabelToggle");
+            if (rankingsLabelToggle) {
+                // Set initial button text and style
+                const initialStateName = MetricsConfig.getLabelStateName();
+                rankingsLabelToggle.textContent = MetricsConfig.getCurrentToggleButtonLabel();
+
+                // Set initial button style
+                rankingsLabelToggle.classList.remove('active', 'alt1', 'alt2');
+                if (initialStateName !== 'standard') {
+                    rankingsLabelToggle.classList.add('active');
+                    rankingsLabelToggle.classList.add(initialStateName);
+                }
+
+                rankingsLabelToggle.addEventListener('click', () => {
+                    MetricsConfig.cycleLabelState();
+
+                    // Update button text and style based on state
+                    const stateName = MetricsConfig.getLabelStateName();
+
+                    rankingsLabelToggle.textContent = MetricsConfig.getCurrentToggleButtonLabel();
+
+                    // Update button style
+                    rankingsLabelToggle.classList.remove('active', 'alt1', 'alt2');
+                    if (stateName !== 'standard') {
+                        rankingsLabelToggle.classList.add('active');
+                        rankingsLabelToggle.classList.add(stateName);
+                    }
+
+                    // Refresh metric options and update rankings
+                    rankingsHandler.populateMetricOptions();
+                    rankingsHandler.updateRankings();
+                });
+            }
+        };
+
+        rankingsHandler.initializeLabelToggle();
     });
 })();
