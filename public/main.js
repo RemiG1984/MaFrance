@@ -256,6 +256,25 @@ import { api } from './apiService.js';
             // The map handler will get updated labels automatically from MetricsConfig
             mapHandler.updateMap(mapHandler.currentMetric || 'total_score');
         }
+        
+        // Update all external links with current label state
+        updateExternalLinksWithLabelState();
+    }
+
+    // Function to add label state to external links
+    function updateExternalLinksWithLabelState() {
+        const labelState = MetricsConfig.labelState;
+        const links = document.querySelectorAll('a[href*="crime_graph.html"], a[href*="rankings.html"], a[href*="names_graph.html"]');
+        
+        links.forEach(link => {
+            const url = new URL(link.href, window.location.origin);
+            if (labelState > 0) {
+                url.searchParams.set('labelState', labelState);
+            } else {
+                url.searchParams.delete('labelState');
+            }
+            link.href = url.toString();
+        });
     }
 
     // Initialize the application
@@ -267,6 +286,9 @@ import { api } from './apiService.js';
         scoreTableHandler.showCountryDetails();
         executiveHandler.showCountryExecutive();
         locationHandler.loadDepartements();
+        
+        // Initialize external links with current label state
+        updateExternalLinksWithLabelState();
     }
 
     // Initialize when DOM is ready

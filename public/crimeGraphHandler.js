@@ -23,7 +23,62 @@ function CrimeGraphHandler() {
             code: urlParams.get("code"), // France, dept code, or COG
             dept: urlParams.get("dept"), // Department code for communes
             communeName: urlParams.get("commune"), // Commune name from URL
+            labelState: urlParams.get("labelState"), // Label state from main page
         };
+    }
+
+    /**
+     * Initialize label toggle functionality
+     */
+    function initLabelToggle() {
+        const labelToggleBtn = document.getElementById("labelToggleBtn");
+        if (!labelToggleBtn) return;
+
+        // Set initial state from URL parameter
+        const { labelState } = getUrlParams();
+        if (labelState) {
+            MetricsConfig.labelState = parseInt(labelState);
+        }
+
+        // Set initial button text and style
+        const initialStateName = MetricsConfig.getLabelStateName();
+        labelToggleBtn.textContent = MetricsConfig.getCurrentToggleButtonLabel();
+
+        // Set initial button style
+        labelToggleBtn.classList.remove('active', 'alt1', 'alt2');
+        if (initialStateName !== 'standard') {
+            labelToggleBtn.classList.add('active');
+            labelToggleBtn.classList.add(initialStateName);
+        }
+
+        // Add click event listener
+        labelToggleBtn.addEventListener('click', () => {
+            MetricsConfig.cycleLabelState();
+
+            // Update button text and style based on state
+            const stateName = MetricsConfig.getLabelStateName();
+
+            labelToggleBtn.textContent = MetricsConfig.getCurrentToggleButtonLabel();
+
+            // Update button style
+            labelToggleBtn.classList.remove('active', 'alt1', 'alt2');
+            if (stateName !== 'standard') {
+                labelToggleBtn.classList.add('active');
+                labelToggleBtn.classList.add(stateName);
+            }
+
+            // Update page title
+            document.title = MetricsConfig.getCurrentPageTitle() + " - Graphique de Criminalité";
+
+            // Update header h1 text
+            const headerH1 = document.querySelector('h1');
+            if (headerH1) {
+                headerH1.textContent = "Graphique des Statistiques de Criminalité";
+            }
+
+            // Refresh charts with new labels
+            initCrimeCharts();
+        });
     }
 
     /**
@@ -454,6 +509,7 @@ function CrimeGraphHandler() {
     return {
         initCrimeCharts,
         getUrlParams,
+        initLabelToggle,
         createCrimeChart,
         calculateCrimeValue
     };
@@ -465,5 +521,6 @@ export { CrimeGraphHandler };
 // Initialize when the script loads (for backward compatibility)
 if (typeof window !== 'undefined') {
     const crimeGraphHandler = CrimeGraphHandler();
+    crimeGraphHandler.initLabelToggle();
     crimeGraphHandler.initCrimeCharts();
 }

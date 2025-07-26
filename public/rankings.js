@@ -70,19 +70,19 @@ const RankingsHandler = (function () {
         if (rankingsLabelToggle) {
             rankingsLabelToggle.addEventListener('click', () => {
                 MetricsConfig.cycleLabelState();
-                
+
                 // Update button text and style based on state
                 const stateName = MetricsConfig.getLabelStateName();
-                
+
                 rankingsLabelToggle.textContent = MetricsConfig.getCurrentToggleButtonLabel();
-                
+
                 // Update button style
                 rankingsLabelToggle.classList.remove('active', 'alt1', 'alt2');
                 if (stateName !== 'standard') {
                     rankingsLabelToggle.classList.add('active');
                     rankingsLabelToggle.classList.add(stateName);
                 }
-                
+
                 // Refresh metric options and update rankings
                 populateMetricOptions();
                 updateRankings();
@@ -519,6 +519,24 @@ const RankingsHandler = (function () {
         return;
     }
 
+    // Get URL parameters for label state
+    function getUrlParams() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return {
+            labelState: urlParams.get("labelState"),
+        };
+    }
+
+    // Function to update navigation links with current label state
+    function updateNavigationLinks() {
+        const backLink = document.getElementById("backToMainLink");
+        if (backLink && MetricsConfig.labelState > 0) {
+            const url = new URL(backLink.href, window.location.origin);
+            url.searchParams.set('labelState', MetricsConfig.labelState);
+            backLink.href = url.toString();
+        }
+    }
+
     // Initialize handler
     const rankingsHandler = RankingsHandler(
         scopeSelect,
@@ -526,4 +544,15 @@ const RankingsHandler = (function () {
         metricSelect,
         resultsDiv,
     );
+
+    // Initialize on DOM load
+    document.addEventListener("DOMContentLoaded", () => {
+        // Set initial state from URL parameter
+        const { labelState } = getUrlParams();
+        if (labelState) {
+            MetricsConfig.labelState = parseInt(labelState);
+        }
+
+        updateNavigationLinks();
+    });
 })();
