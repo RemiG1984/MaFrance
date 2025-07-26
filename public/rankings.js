@@ -43,9 +43,6 @@ const RankingsHandler = (function () {
                 <input type="number" id="topLimit" value="10" min="1" max="100">
                 <div class="button-container">
                     <button id="applyFilters">Appliquer</button>
-                    <button id="rankingsLabelToggle" class="label-toggle-btn" title="Basculer entre les libellés standards et alternatifs">
-                        🔄 Vision inclusive
-                    </button>
                 </div>
             </div>
         `;
@@ -55,7 +52,6 @@ const RankingsHandler = (function () {
         const popUpperInput = document.getElementById("popUpper");
         const topLimitInput = document.getElementById("topLimit");
         const applyButton = document.getElementById("applyFilters");
-        const rankingsLabelToggle = document.getElementById("rankingsLabelToggle");
         const tweakingToggle = document.querySelector(".tweaking-toggle");
         const tweakingBoxContent = document.querySelector(".tweaking-box");
         const departementWrapper =
@@ -500,6 +496,7 @@ const RankingsHandler = (function () {
         loadDepartements();
         toggleDepartementVisibility();
         populateMetricOptions();
+        initializeLabelToggle();
         updateRankings();
 
         // Function to populate metric options from MetricsConfig
