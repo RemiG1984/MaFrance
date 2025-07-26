@@ -191,6 +191,14 @@ export const MetricsConfig = {
             category: "wokisme",
             format: "percentage",
         },
+        {
+            value: "logements_sociaux_pct",
+            label: "% Logements sociaux",
+            alt1Label: "% Logements sociaux",
+            alt2Label: "% Logements sociaux",
+            category: "wokisme",
+            format: "percentage",
+        },
     ],
 
     // Article categories mapping

@@ -319,6 +319,7 @@ function importScores(db, callback) {
                         if (!row['departement']) missingFields.push('departement');
                         if (!row['population']) missingFields.push('population');
                         if (!row['Mosque_p100k'] && row['Mosque_p100k'] !== '0') missingFields.push('Mosque_p100k');
+                        if (!row['logements_sociaux_pct'] && row['logements_sociaux_pct'] !== '0') missingFields.push('logements_sociaux_pct');
 
                         if (missingFields.length > 0) {
                             console.warn(`Ligne ignorée dans commune_scores.csv (champs manquants: ${missingFields.join(', ')}):`, row);
@@ -335,6 +336,7 @@ function importScores(db, callback) {
                         }
 
                         const population = parseInt(row['population'].replace(/\s/g, '')) || 0;
+                        const logements_sociaux_pct = parseFloat(row['logements_sociaux_pct']) || 0;
                         const insecurite_score = parseInt(row['Insécurité_Score']) || 0;
                         const immigration_score = parseInt(row['Immigration_Score']) || 0;
                         const islamisation_score = parseInt(row['Islamisation_Score']) || 0;
@@ -350,6 +352,7 @@ function importScores(db, callback) {
                             departement: departement,
                             commune: row['commune'],
                             population: population,
+                            logements_sociaux_pct: logements_sociaux_pct,
                             insecurite_score,
                             immigration_score,
                             islamisation_score,
@@ -384,6 +387,7 @@ function importScores(db, callback) {
                             departement TEXT,
                             commune TEXT,
                             population INTEGER,
+                            logements_sociaux_pct REAL,
                             insecurite_score INTEGER,
                             immigration_score INTEGER,
                             islamisation_score INTEGER,
@@ -423,6 +427,7 @@ function importScores(db, callback) {
                                         loc.departement,
                                         loc.commune,
                                         loc.population,
+                                        loc.logements_sociaux_pct,
                                         loc.insecurite_score,
                                         loc.immigration_score,
                                         loc.islamisation_score,
@@ -437,10 +442,10 @@ function importScores(db, callback) {
                                     locationRows++;
 
                                     if (locationBatch.length >= batchSize) {
-                                        const placeholders = locationBatch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
+                                        const placeholders = locationBatch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
                                         const flatBatch = [].concat(...locationBatch);
                                         db.run(
-                                            `INSERT OR IGNORE INTO locations (COG, departement, commune, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct) VALUES ${placeholders}`,
+                                            `INSERT OR IGNORE INTO locations (COG, departement, commune, population, logements_sociaux_pct, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct) VALUES ${placeholders}`,
                                             flatBatch,
                                             (err) => {
                                                 if (err) {
@@ -453,10 +458,10 @@ function importScores(db, callback) {
                                 }
 
                                 if (locationBatch.length > 0) {
-                                    const placeholders = locationBatch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
+                                    const placeholders = locationBatch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
                                     const flatBatch = [].concat(...locationBatch);
                                     db.run(
-                                        `INSERT OR IGNORE INTO locations (COG, departement, commune, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct) VALUES ${placeholders}`,
+                                        `INSERT OR IGNORE INTO locations (COG, departement, commune, population, logements_sociaux_pct, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct) VALUES ${placeholders}`,
                                         flatBatch,
                                         (err) => {
                                             if (err) {

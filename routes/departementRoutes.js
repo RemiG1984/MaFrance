@@ -39,6 +39,7 @@ router.get("/details", validateDepartement, (req, res) => {
     SELECT 
       d.departement, 
       d.population, 
+      d.logements_sociaux_pct,
       d.insecurite_score, 
       d.immigration_score, 
       d.islamisation_score, 

@@ -16,7 +16,7 @@ router.get("/details", validateCountry, (req, res) => {
   const country = req.query.country || "France";
 
   db.get(
-    `SELECT country, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct 
+    `SELECT country, population, logements_sociaux_pct, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct 
      FROM country 
      WHERE UPPER(country) = ?`,
     [country.toUpperCase()],

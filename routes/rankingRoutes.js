@@ -100,6 +100,7 @@ router.get(
       l.departement, 
       l.commune, 
       l.population, 
+      l.logements_sociaux_pct,
       l.insecurite_score, 
       l.immigration_score, 
       l.islamisation_score, 
@@ -193,6 +194,7 @@ router.get(
     SELECT 
       d.departement, 
       d.population, 
+      d.logements_sociaux_pct,
       d.insecurite_score, 
       d.immigration_score, 
       d.islamisation_score, 

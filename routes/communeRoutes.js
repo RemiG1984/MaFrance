@@ -179,7 +179,7 @@ router.get("/crime_history", validateCOG, (req, res) => {
 router.get("/details", validateCOG, (req, res) => {
   const { cog } = req.query;
   db.get(
-    "SELECT COG, departement, commune, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct FROM locations WHERE COG = ?",
+    'SELECT COG, departement, commune, population, logements_sociaux_pct, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct FROM locations WHERE COG = ?',
     [cog],
     (err, row) => {
       if (err) return handleDbError(res, err);
