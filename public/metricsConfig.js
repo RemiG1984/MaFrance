@@ -163,7 +163,7 @@ export const MetricsConfig = {
         {
             value: "prenom_francais_pct",
             label: "Prénoms de naissance français (%)",
-            alt1Label: "Prénoms français résiduels (%)",
+            alt1Label: "Prénoms franchouillards résiduels (%)",
             alt2Label: "Prénoms de naissance français (%)",
             category: "défrancisation",
             format: "percentage",
