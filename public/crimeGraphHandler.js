@@ -155,70 +155,81 @@ function CrimeGraphHandler() {
             // Extract years (use main data years as reference)
             const years = mainData.map((row) => row.annee);
 
-            // Define crime categories
+            // Define crime categories with labels from MetricsConfig
             const categories =
                 type === "commune"
                     ? [
                           {
                               key: "violences_physiques_p1k",
-                              label: "Violences physiques",
+                              label: MetricsConfig.getMetricLabel("violences_physiques_p1k"),
                               color: "#007bff",
                           },
                           {
                               key: "violences_sexuelles_p1k",
-                              label: "Violences sexuelles",
+                              label: MetricsConfig.getMetricLabel("violences_sexuelles_p1k"),
                               color: "#28a745",
                           },
-                          { key: "vols_p1k", label: "Vols", color: "#ffc107" },
+                          { 
+                              key: "vols_p1k", 
+                              label: MetricsConfig.getMetricLabel("vols_p1k"), 
+                              color: "#ffc107" 
+                          },
                           {
                               key: "destructions_p1k",
-                              label: "Destructions et dégradations",
+                              label: MetricsConfig.getMetricLabel("destructions_p1k"),
                               color: "#e83e8c",
                           },
                           {
                               key: "stupefiants_p1k",
-                              label: "Trafic et usage de stupéfiants",
+                              label: MetricsConfig.getMetricLabel("stupefiants_p1k"),
                               color: "#17a2b8",
                           },
                           {
                               key: "escroqueries_p1k",
-                              label: "Escroqueries",
+                              label: MetricsConfig.getMetricLabel("escroqueries_p1k"),
                               color: "#fd7e14",
                           },
                       ]
                     : [
                           {
                               key: "homicides_p100k",
-                              label: "Homicides et tentatives",
+                              label: MetricsConfig.getMetricLabel("homicides_p100k"),
                               color: "#dc3545",
                           },
                           {
                               key: "violences_physiques_p1k",
-                              label: "Violences physiques",
+                              label: MetricsConfig.getMetricLabel("violences_physiques_p1k"),
                               color: "#007bff",
                           },
                           {
                               key: "violences_sexuelles_p1k",
-                              label: "Violences sexuelles",
+                              label: MetricsConfig.getMetricLabel("violences_sexuelles_p1k"),
                               color: "#28a745",
                           },
-                          { key: "vols_p1k", label: "Vols", color: "#ffc107" },
+                          { 
+                              key: "vols_p1k", 
+                              label: MetricsConfig.getMetricLabel("vols_p1k"), 
+                              color: "#ffc107" 
+                          },
                           {
                               key: "destructions_p1k",
-                              label: "Destructions et dégradations",
+                              label: MetricsConfig.getMetricLabel("destructions_p1k"),
                               color: "#e83e8c",
                           },
                           {
                               key: "stupefiants_p1k",
-                              label: "Trafic et usage de stupéfiants",
+                              label: MetricsConfig.getMetricLabel("stupefiants_p1k"),
                               color: "#17a2b8",
                           },
                           {
                               key: "escroqueries_p1k",
-                              label: "Escroqueries",
+                              label: MetricsConfig.getMetricLabel("escroqueries_p1k"),
                               color: "#fd7e14",
                           },
                       ];
+
+            // Clear existing charts before creating new ones
+            chartGrid.innerHTML = '';
 
             // Create a chart for each category
             categories.forEach((category, index) => {
