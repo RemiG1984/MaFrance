@@ -188,6 +188,7 @@ function importScores(db, callback) {
                         }
 
                         const population = parseInt(row['population'].replace(/\s/g, '')) || 0;
+                        const logements_sociaux_pct = parseFloat(row['logements_sociaux_pct']) || 0;
                         const insecurite_score = parseInt(row['Insécurité_Score']) || 0;
                         const immigration_score = parseInt(row['Immigration_Score']) || 0;
                         const islamisation_score = parseInt(row['Islamisation_Score']) || 0;
@@ -202,6 +203,7 @@ function importScores(db, callback) {
                         departmentBatch.push([
                             departement,
                             population,
+                            logements_sociaux_pct,
                             insecurite_score,
                             immigration_score,
                             islamisation_score,
@@ -231,9 +233,10 @@ function importScores(db, callback) {
             return new Promise((resolve, reject) => {
                 db.serialize(() => {
                     db.run(`
-                        CREATE TABLE IF NOT EXISTS departements (
+                        CREATE TABLE IF NOT EXISTS departement (
                             departement TEXT PRIMARY KEY,
                             population INTEGER,
+                            logements_sociaux_pct REAL,
                             insecurite_score INTEGER,
                             immigration_score INTEGER,
                             islamisation_score INTEGER,
@@ -251,7 +254,7 @@ function importScores(db, callback) {
                             return;
                         }
 
-                        db.run('CREATE INDEX IF NOT EXISTS idx_departements ON departements(departement)', (err) => {
+                        db.run('CREATE INDEX IF NOT EXISTS idx_departements ON departement(departement)', (err) => {
                             if (err) {
                                 console.error('Erreur création index departements:', err.message);
                                 reject(err);
@@ -267,10 +270,10 @@ function importScores(db, callback) {
 
                                 for (let i = 0; i < departmentBatch.length; i += batchSize) {
                                     const batch = departmentBatch.slice(i, i + batchSize);
-                                    const placeholders = batch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
+                                    const placeholders = batch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
                                     const flatBatch = [].concat(...batch);
                                     db.run(
-                                        `INSERT OR IGNORE INTO departements (departement, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct) VALUES ${placeholders}`,
+                                        `INSERT OR IGNORE INTO departement (departement, population, logements_sociaux_pct, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct) VALUES ${placeholders}`,
                                         flatBatch,
                                         (err) => {
                                             if (err) {
