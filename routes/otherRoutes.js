@@ -17,9 +17,18 @@ const handleDbError = (err, next) => {
 // GET /api/search
 router.get(
   "/search",
-  [validateDepartement, validateSearchQuery],
+  [validateSearchQuery],
   (req, res) => {
     const { dept, q } = req.query;
+    
+    // If no department specified, use global search
+    if (!dept) {
+      const SearchService = require('../services/searchService');
+      SearchService.searchCommunesGlobally(q, 15)
+        .then(results => res.json(results))
+        .catch(err => handleDbError(err, res));
+      return;
+    }
 
     // Normalize the query for consistent accent handling
     const normalizedQuery = q

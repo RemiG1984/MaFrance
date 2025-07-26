@@ -96,7 +96,7 @@ function LocationHandler(
         
         try {
             console.log("Searching communes globally with query:", query);
-            const communes = await apiService.request(`/api/communes/search?q=${encodeURIComponent(query)}`);
+            const communes = await apiService.request(`/api/search?q=${encodeURIComponent(query)}`);
             console.log("Global communes search results:", communes);
             communeList.innerHTML = "";
             communes.forEach((commune) => {
