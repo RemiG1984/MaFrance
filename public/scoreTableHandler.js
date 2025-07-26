@@ -51,6 +51,11 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
     function createCrimeRows(metrics, crimeData, linkBase, compareMetrics = null, compareCrimeData = null) {
         const rows = [];
         
+        // Add labelState to link if not in standard mode
+        const linkWithState = MetricsConfig.labelState > 0 ? 
+            `${linkBase}${linkBase.includes('?') ? '&' : '?'}labelState=${MetricsConfig.labelState}` : 
+            linkBase;
+        
         // Only add homicide row if metrics exist
         if (metrics) {
             rows.push({
@@ -60,7 +65,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     MetricsConfig.formatMetricValue(compareMetrics.homicidesTotal, "homicides_p100k") + compareMetrics.crimeYearLabel : 
                     null,
                 subRow: true,
-                link: linkBase,
+                link: linkWithState,
             });
         }
 
@@ -75,7 +80,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     MetricsConfig.formatMetricValue(compareMetrics.violencesPhysiques, "violences_physiques_p1k") + compareMetrics.crimeYearLabel : 
                     null,
                 subRow: true,
-                link: linkBase,
+                link: linkWithState,
             },
             {
                 title: MetricsConfig.getMetricLabel("violences_sexuelles_p1k"),
@@ -84,7 +89,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     MetricsConfig.formatMetricValue(compareCrimeData.violences_sexuelles_p1k, "violences_sexuelles_p1k") + (compareMetrics ? compareMetrics.crimeYearLabel : "") : 
                     null,
                 subRow: true,
-                link: linkBase,
+                link: linkWithState,
             },
             {
                 title: MetricsConfig.getMetricLabel("vols_p1k"),
@@ -95,7 +100,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     MetricsConfig.formatMetricValue(compareMetrics.volsTotal, "vols_p1k") + compareMetrics.crimeYearLabel : 
                     null,
                 subRow: true,
-                link: linkBase,
+                link: linkWithState,
             },
             {
                 title: MetricsConfig.getMetricLabel("destructions_p1k"),
@@ -104,7 +109,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     MetricsConfig.formatMetricValue(compareCrimeData.destructions_et_degradations_volontaires_p1k, "destructions_p1k") + (compareMetrics ? compareMetrics.crimeYearLabel : "") : 
                     null,
                 subRow: true,
-                link: linkBase,
+                link: linkWithState,
             },
             {
                 title: MetricsConfig.getMetricLabel("stupefiants_p1k"),
@@ -115,7 +120,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     MetricsConfig.formatMetricValue(compareMetrics.stupefiants, "stupefiants_p1k") + compareMetrics.crimeYearLabel : 
                     null,
                 subRow: true,
-                link: linkBase,
+                link: linkWithState,
             },
             {
                 title: MetricsConfig.getMetricLabel("escroqueries_p1k"),
@@ -124,7 +129,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     MetricsConfig.formatMetricValue(compareCrimeData.escroqueries_p1k, "escroqueries_p1k") + (compareMetrics ? compareMetrics.crimeYearLabel : "") : 
                     null,
                 subRow: true,
-                link: linkBase,
+                link: linkWithState,
             }
         );
         
