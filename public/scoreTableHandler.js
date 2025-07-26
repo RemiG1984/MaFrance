@@ -11,7 +11,7 @@ import { apiService } from "./apiService.js";
  * @returns {Object} Score table handler interface
  */
 function ScoreTableHandler(resultsDiv, departmentNames) {
-
+    
     /**
      * Helper function to calculate and format common metrics
      * @param {Object} namesData - Names data
@@ -24,7 +24,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
         const prenomFrancaisPct = MetricsConfig.calculateMetric("prenom_francais_total", namesData);
         const yearLabel = namesData.annais ? ` (${namesData.annais})` : "";
         const crimeYearLabel = crimeData.annee ? ` (${crimeData.annee})` : "";
-
+        
         return {
             extraEuropeenPct,
             musulmanPct,
@@ -50,27 +50,9 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
      */
     function createCrimeRows(metrics, crimeData, linkBase, compareMetrics = null, compareCrimeData = null) {
         const rows = [];
-
-        // Function to enhance the link base with the labelState
-        function enhanceLinkBaseWithLabelState(linkBase, labelState) {
-            if (labelState && Object.keys(labelState).length > 0) {
-                let params = [];
-                for (const key in labelState) {
-                    if (labelState[key] !== null && labelState[key] !== undefined && labelState[key] !== '') {
-                        params.push(`${key}=${labelState[key]}`);
-                    }
-                }
-                if (params.length > 0) {
-                    const separator = linkBase.includes('?') ? '&' : '?';
-                    return linkBase + separator + params.join('&');
-                }
-            }
-            return linkBase;
-        }
-
+        
         // Only add homicide row if metrics exist
         if (metrics) {
-            const enhancedLinkBase = enhanceLinkBaseWithLabelState(linkBase, window.labelState);
             rows.push({
                 title: MetricsConfig.getMetricLabel("homicides_p100k"),
                 main: MetricsConfig.formatMetricValue(metrics.homicidesTotal, "homicides_p100k") + metrics.crimeYearLabel,
@@ -78,12 +60,11 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     MetricsConfig.formatMetricValue(compareMetrics.homicidesTotal, "homicides_p100k") + compareMetrics.crimeYearLabel : 
                     null,
                 subRow: true,
-                link: enhancedLinkBase,
+                link: linkBase,
             });
         }
 
         // Add other crime rows that don't depend on metrics
-        const enhancedLinkBase = enhanceLinkBaseWithLabelState(linkBase, window.labelState);
         rows.push(
             {
                 title: MetricsConfig.getMetricLabel("violences_physiques_p1k"),
@@ -94,7 +75,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     MetricsConfig.formatMetricValue(compareMetrics.violencesPhysiques, "violences_physiques_p1k") + compareMetrics.crimeYearLabel : 
                     null,
                 subRow: true,
-                link: enhancedLinkBase,
+                link: linkBase,
             },
             {
                 title: MetricsConfig.getMetricLabel("violences_sexuelles_p1k"),
@@ -103,7 +84,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     MetricsConfig.formatMetricValue(compareCrimeData.violences_sexuelles_p1k, "violences_sexuelles_p1k") + (compareMetrics ? compareMetrics.crimeYearLabel : "") : 
                     null,
                 subRow: true,
-                link: enhancedLinkBase,
+                link: linkBase,
             },
             {
                 title: MetricsConfig.getMetricLabel("vols_p1k"),
@@ -114,7 +95,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     MetricsConfig.formatMetricValue(compareMetrics.volsTotal, "vols_p1k") + compareMetrics.crimeYearLabel : 
                     null,
                 subRow: true,
-                link: enhancedLinkBase,
+                link: linkBase,
             },
             {
                 title: MetricsConfig.getMetricLabel("destructions_p1k"),
@@ -123,7 +104,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     MetricsConfig.formatMetricValue(compareCrimeData.destructions_et_degradations_volontaires_p1k, "destructions_p1k") + (compareMetrics ? compareMetrics.crimeYearLabel : "") : 
                     null,
                 subRow: true,
-                link: enhancedLinkBase,
+                link: linkBase,
             },
             {
                 title: MetricsConfig.getMetricLabel("stupefiants_p1k"),
@@ -134,7 +115,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     MetricsConfig.formatMetricValue(compareMetrics.stupefiants, "stupefiants_p1k") + compareMetrics.crimeYearLabel : 
                     null,
                 subRow: true,
-                link: enhancedLinkBase,
+                link: linkBase,
             },
             {
                 title: MetricsConfig.getMetricLabel("escroqueries_p1k"),
@@ -143,10 +124,10 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     MetricsConfig.formatMetricValue(compareCrimeData.escroqueries_p1k, "escroqueries_p1k") + (compareMetrics ? compareMetrics.crimeYearLabel : "") : 
                     null,
                 subRow: true,
-                link: enhancedLinkBase,
+                link: linkBase,
             }
         );
-
+        
         return rows.filter(row => row.compare !== null || compareMetrics === null);
     }
     /**
@@ -167,7 +148,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
             } else {
                 const metrics = calculateCommonMetrics(namesData, crimeData);
                 const crimeRows = createCrimeRows(metrics, crimeData, `/crime_graph.html?type=country&code=France`);
-
+                
                 const rows = [
                     {
                         title: "Population",
@@ -233,7 +214,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                         subRow: true,
                     },
                 ];
-
+                
                 renderScoreTable(data.country, rows);
             }
         } catch (error) {
@@ -266,7 +247,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
             ]);
 
             console.log("Department details:", data);
-
+            
             if (!data) {
                 resultsDiv.innerHTML = "<p>Aucun département trouvé.</p>";
             } else {
@@ -364,7 +345,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                         subRow: true,
                     },
                 ];
-
+                
                 renderScoreTable(`${deptCode} - ${departmentNames[deptCode] || deptCode}`, rows, "France");
             }
         } catch (error) {
@@ -450,13 +431,13 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     link: `/names_graph.html?type=commune&code=${cog}&dept=${departement}`,
                 });
             }
-
+            
             rows.push({
                 title: MetricsConfig.getMetricLabel("islamisation_score"),
                 main: MetricsConfig.formatMetricValue(item.islamisation_score, "islamisation_score"),
                 compare: MetricsConfig.formatMetricValue(deptData.islamisation_score, "islamisation_score"),
             });
-
+            
             if (communeMetrics && !isNaN(communeMetrics.musulmanPct)) {
                 rows.push({
                     title: MetricsConfig.getMetricLabel("musulman_pct"),
@@ -466,7 +447,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     link: `/names_graph.html?type=commune&code=${cog}&dept=${departement}`,
                 });
             }
-
+            
             rows.push(
                 {
                     title: MetricsConfig.getMetricLabel("number_of_mosques"),
@@ -486,7 +467,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     compare: MetricsConfig.formatMetricValue(deptData.defrancisation_score, "defrancisation_score"),
                 },
             );
-
+            
             if (communeMetrics && traditionnelPct !== null && !isNaN(traditionnelPct)) {
                 rows.push({
                     title: MetricsConfig.getMetricLabel("prenom_francais_pct"),
@@ -496,7 +477,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     link: `/names_graph.html?type=commune&code=${cog}&dept=${departement}`,
                 });
             }
-
+            
             rows.push(
                 {
                     title: MetricsConfig.getMetricLabel("wokisme_score"),
