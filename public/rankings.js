@@ -161,7 +161,7 @@ const RankingsHandler = (function () {
                     const ranking = {
                         deptCode: dept.departement,
                         name: departmentNames[dept.departement] || dept.departement,
-                        population: dept.population || 0,
+                        population: dept.population,
                         rank: index + 1,
                     };
 
@@ -192,7 +192,7 @@ const RankingsHandler = (function () {
                         const ranking = {
                             deptCode: dept.departement,
                             name: departmentNames[dept.departement] || dept.departement,
-                            population: dept.population || 0,
+                            population: dept.population,
                             rank: totalDepartments - filteredBottomData.length + index + 1,
                         };
 
@@ -275,7 +275,7 @@ const RankingsHandler = (function () {
                     const ranking = {
                         deptCode: commune.departement,
                         name: commune.commune,
-                        population: commune.population || 0,
+                        population: commune.population,
                         rank: index + 1,
                     };
 
@@ -304,7 +304,7 @@ const RankingsHandler = (function () {
                         const ranking = {
                             deptCode: commune.departement,
                             name: commune.commune,
-                            population: commune.population || 0,
+                            population: commune.population,
                             rank: totalCommunes - filteredBottomData.length + index + 1,
                         };
 
@@ -499,12 +499,12 @@ const RankingsHandler = (function () {
         loadDepartements();
         toggleDepartementVisibility();
         populateMetricOptions();
-        
+
         // Initialize label toggle after all DOM elements are created
         setTimeout(() => {
             initializeLabelToggle();
         }, 0);
-        
+
         updateRankings();
 
         // Function to populate metric options from MetricsConfig
