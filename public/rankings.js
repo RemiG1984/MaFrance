@@ -41,7 +41,12 @@ const RankingsHandler = (function () {
                 </div>
                 <label for="topLimit">Nombre de résultats (Top/Bottom) :</label>
                 <input type="number" id="topLimit" value="10" min="1" max="100">
-                <button id="applyFilters">Appliquer</button>
+                <div class="button-container">
+                    <button id="applyFilters">Appliquer</button>
+                    <button id="rankingsLabelToggle" class="label-toggle-btn" title="Basculer entre les libellés standards et alternatifs">
+                        🔄 Vision inclusive
+                    </button>
+                </div>
             </div>
         `;
 
@@ -50,6 +55,7 @@ const RankingsHandler = (function () {
         const popUpperInput = document.getElementById("popUpper");
         const topLimitInput = document.getElementById("topLimit");
         const applyButton = document.getElementById("applyFilters");
+        const rankingsLabelToggle = document.getElementById("rankingsLabelToggle");
         const tweakingToggle = document.querySelector(".tweaking-toggle");
         const tweakingBoxContent = document.querySelector(".tweaking-box");
         const departementWrapper =
@@ -59,6 +65,34 @@ const RankingsHandler = (function () {
         tweakingToggle.addEventListener("click", () => {
             tweakingBoxContent.classList.toggle("active");
         });
+
+        // Label toggle functionality
+        if (rankingsLabelToggle) {
+            rankingsLabelToggle.addEventListener('click', () => {
+                MetricsConfig.cycleLabelState();
+                
+                // Update button text and style based on state
+                const stateName = MetricsConfig.getLabelStateName();
+                const stateNames = {
+                    'standard': '🔄 Vision inclusive',
+                    'alt1': '🔄 Vision traditionnelle', 
+                    'alt2': '🔄 Vision neutre'
+                };
+                
+                rankingsLabelToggle.textContent = stateNames[stateName];
+                
+                // Update button style
+                rankingsLabelToggle.classList.remove('active', 'alt1', 'alt2');
+                if (stateName !== 'standard') {
+                    rankingsLabelToggle.classList.add('active');
+                    rankingsLabelToggle.classList.add(stateName);
+                }
+                
+                // Refresh metric options and update rankings
+                populateMetricOptions();
+                updateRankings();
+            });
+        }
 
         // Toggle department dropdown visibility based on scope
         function toggleDepartementVisibility() {

@@ -463,6 +463,16 @@ label {
 
 .tweaking-box input[type="number"] {
     width: 80px;
+    padding: 4px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.button-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 10px;
 }
 
 .tweaking-box button {
