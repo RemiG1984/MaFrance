@@ -203,28 +203,28 @@ import { api } from './apiService.js';
     if (labelToggleBtn) {
         labelToggleBtn.addEventListener('click', () => {
             MetricsConfig.cycleLabelState();
-            
+
             // Update button text and style based on state
             const stateName = MetricsConfig.getLabelStateName();
-            
+
             labelToggleBtn.textContent = MetricsConfig.getCurrentToggleButtonLabel();
-            
+
             // Update button style
             labelToggleBtn.classList.remove('active', 'alt1', 'alt2');
             if (stateName !== 'standard') {
                 labelToggleBtn.classList.add('active');
                 labelToggleBtn.classList.add(stateName);
             }
-            
+
             // Update page title
             document.title = MetricsConfig.getCurrentPageTitle();
-            
+
             // Update header h1 text
             const headerH1 = document.querySelector('h1');
             if (headerH1) {
                 headerH1.textContent = MetricsConfig.getCurrentPageTitle();
             }
-            
+
             // Refresh all components that display metric labels
             refreshMetricLabels();
         });
@@ -235,7 +235,7 @@ import { api } from './apiService.js';
         // Refresh score table if visible
         const currentDept = departementSelect.value;
         const currentCommune = communeInput.value;
-        
+
         if (currentCommune && currentDept) {
             // Show commune details with updated labels
             api.getCommunes(currentDept).then(data => {
@@ -250,13 +250,13 @@ import { api } from './apiService.js';
             // Show country details with updated labels
             scoreTableHandler.showCountryDetails();
         }
-        
+
         // Refresh map if it exists and has an updateMap method
         if (mapHandler && typeof mapHandler.updateMap === 'function') {
             // The map handler will get updated labels automatically from MetricsConfig
             mapHandler.updateMap(mapHandler.currentMetric || 'total_score');
         }
-        
+
         // Update all external links with current label state
         updateExternalLinksWithLabelState();
     }
@@ -265,7 +265,7 @@ import { api } from './apiService.js';
     function updateExternalLinksWithLabelState() {
         const labelState = MetricsConfig.labelState;
         const links = document.querySelectorAll('a[href*="crime_graph.html"], a[href*="rankings.html"], a[href*="names_graph.html"]');
-        
+
         links.forEach(link => {
             const url = new URL(link.href, window.location.origin);
             if (labelState > 0) {
@@ -286,7 +286,7 @@ import { api } from './apiService.js';
         scoreTableHandler.showCountryDetails();
         executiveHandler.showCountryExecutive();
         locationHandler.loadDepartements();
-        
+
         // Initialize external links with current label state
         updateExternalLinksWithLabelState();
     }

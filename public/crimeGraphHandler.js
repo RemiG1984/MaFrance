@@ -76,6 +76,9 @@ function CrimeGraphHandler() {
                 headerH1.textContent = "Graphique des Statistiques de Criminalité";
             }
 
+            // Update navigation links with current label state
+            updateNavigationLinks();
+
             // Refresh charts with new labels
             initCrimeCharts();
         });
@@ -506,12 +509,25 @@ function CrimeGraphHandler() {
         }
     }
 
+    /**
+     * Updates navigation links with current label state
+     */
+    function updateNavigationLinks() {
+        const backLink = document.querySelector('.nav-link[href="index.html"]');
+        if (backLink && MetricsConfig.labelState > 0) {
+            const url = new URL(backLink.href, window.location.origin);
+            url.searchParams.set('labelState', MetricsConfig.labelState);
+            backLink.href = url.toString();
+        }
+    }
+
     return {
         initCrimeCharts,
         getUrlParams,
         initLabelToggle,
         createCrimeChart,
-        calculateCrimeValue
+        calculateCrimeValue,
+        updateNavigationLinks
     };
 }
 
@@ -520,7 +536,22 @@ export { CrimeGraphHandler };
 
 // Initialize when the script loads (for backward compatibility)
 if (typeof window !== 'undefined') {
-    const crimeGraphHandler = CrimeGraphHandler();
-    crimeGraphHandler.initLabelToggle();
-    crimeGraphHandler.initCrimeCharts();
+    document.addEventListener('DOMContentLoaded', () => {
+        const crimeGraphHandler = CrimeGraphHandler();
+        
+        // Set initial state from URL parameter
+        const { labelState } = crimeGraphHandler.getUrlParams();
+        if (labelState) {
+            MetricsConfig.labelState = parseInt(labelState);
+        }
+        
+        // Initialize label toggle with correct state
+        crimeGraphHandler.initLabelToggle();
+        
+        // Update navigation links
+        crimeGraphHandler.updateNavigationLinks();
+        
+        // Initialize charts with correct labels
+        crimeGraphHandler.initCrimeCharts();
+    });
 }
