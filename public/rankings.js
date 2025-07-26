@@ -17,9 +17,6 @@ const RankingsHandler = (function () {
         // Populate existing tweaking box (label toggle button is already in HTML)
         const tweakingBox = document.getElementById("tweakingBox");
         tweakingBox.innerHTML = `
-            <button id="labelToggleBtn" class="label-toggle-btn" title="Basculer entre les libellés standards et alternatifs">
-                🔄 Libellés alternatifs
-            </button>
             <button class="tweaking-toggle">Paramètres</button>
             <div class="tweaking-box">
                 <div class="population-controls">
@@ -48,6 +45,9 @@ const RankingsHandler = (function () {
                     <button id="applyFilters">Appliquer</button>
                 </div>
             </div>
+            <button id="labelToggleBtn" class="label-toggle-btn" title="Basculer entre les libellés standards et alternatifs">
+                🔄 Libellés alternatifs
+            </button>
         `;
 
         // Get tweaking input elements
