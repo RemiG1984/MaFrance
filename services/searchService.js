@@ -165,23 +165,39 @@ class SearchService {
                 return;
             }
 
+            const normalizedQuery = this.normalizeText(query);
+
             const sql = `
                 SELECT DISTINCT commune, COG, departement
                 FROM locations 
-                WHERE commune LIKE ?
+                WHERE (
+                    LOWER(commune) LIKE ? 
+                    OR commune LIKE ?
+                )
                 ORDER BY 
                     CASE 
-                        WHEN commune LIKE ? THEN 1
+                        WHEN LOWER(commune) LIKE ? THEN 1
                         WHEN commune LIKE ? THEN 2
-                        ELSE 3
+                        WHEN LOWER(commune) LIKE ? THEN 3
+                        ELSE 4
                     END,
                     commune
                 LIMIT ?
             `;
 
-            const searchTerm = `%${query}%`;
+            const normalizedSearchTerm = `%${normalizedQuery}%`;
+            const exactSearchTerm = `%${query}%`;
+            const normalizedExactStart = `${normalizedQuery}%`;
             const exactStart = `${query}%`;
-            const params = [searchTerm, exactStart, exactStart, limit];
+            
+            const params = [
+                normalizedSearchTerm,    // Main search (normalized)
+                exactSearchTerm,         // Main search (original)
+                normalizedExactStart,    // Order by: normalized exact start (highest priority)
+                exactStart,              // Order by: original exact start
+                normalizedSearchTerm,    // Order by: normalized contains
+                limit
+            ];
 
             db.all(sql, params, (err, rows) => {
                 if (err) {
