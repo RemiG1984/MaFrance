@@ -100,13 +100,17 @@ function LocationHandler(
             console.log("Global communes search results:", communes);
             communeList.innerHTML = "";
             communes.forEach((result) => {
+                console.log("Creating option for:", result.commune, "Department:", result.departement);
                 const option = document.createElement("option");
-                option.value = `${result.commune} (${result.departement})`;
-                option.textContent = `${result.commune} (${result.departement})`;
+                const displayText = `${result.commune} (${result.departement})`;
+                option.value = displayText;
+                option.textContent = displayText;
                 option.setAttribute('data-cog', result.COG);
                 option.setAttribute('data-dept', result.departement);
+                console.log("Created option with value:", option.value, "textContent:", option.textContent);
                 communeList.appendChild(option);
             });
+            console.log("Total options added to datalist:", communeList.children.length);
         } catch (error) {
             console.error("Erreur recherche globale communes:", {
                 error: error.message,

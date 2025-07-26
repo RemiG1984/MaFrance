@@ -25,7 +25,10 @@ router.get(
     if (!dept) {
       const SearchService = require('../services/searchService');
       SearchService.searchCommunesGlobally(q, 15)
-        .then(results => res.json(results))
+        .then(results => {
+          res.setHeader('Content-Type', 'application/json; charset=utf-8');
+          res.json(results);
+        })
         .catch(err => handleDbError(err, res));
       return;
     }
