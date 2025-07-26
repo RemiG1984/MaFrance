@@ -68,9 +68,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
         rows.push(
             {
                 title: MetricsConfig.getMetricLabel("violences_physiques_p1k"),
-                main: metrics ? 
-                    MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("violences_physiques_p1k", crimeData), "violences_physiques_p1k") + metrics.crimeYearLabel :
-                    MetricsConfig.formatMetricValue(crimeData.violences_physiques_p1k, "violences_physiques_p1k") + (crimeData.annee ? ` (${crimeData.annee})` : ""),
+                main: MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("violences_physiques_p1k", crimeData), "violences_physiques_p1k") + (metrics ? metrics.crimeYearLabel : (crimeData.annee ? ` (${crimeData.annee})` : "")),
                 compare: compareMetrics ? 
                     MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("violences_physiques_p1k", compareCrimeData), "violences_physiques_p1k") + compareMetrics.crimeYearLabel : 
                     null,
@@ -88,9 +86,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
             },
             {
                 title: MetricsConfig.getMetricLabel("vols_p1k"),
-                main: metrics ? 
-                    MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("vols_p1k", crimeData), "vols_p1k") + metrics.crimeYearLabel :
-                    MetricsConfig.formatMetricValue(crimeData.vols_p1k, "vols_p1k") + (crimeData.annee ? ` (${crimeData.annee})` : ""),
+                main: MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("vols_p1k", crimeData), "vols_p1k") + (metrics ? metrics.crimeYearLabel : (crimeData.annee ? ` (${crimeData.annee})` : "")),
                 compare: compareMetrics ? 
                     MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("vols_p1k", compareCrimeData), "vols_p1k") + compareMetrics.crimeYearLabel : 
                     null,
@@ -108,9 +104,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
             },
             {
                 title: MetricsConfig.getMetricLabel("stupefiants_p1k"),
-                main: metrics ? 
-                    MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("stupefiants_p1k", crimeData), "stupefiants_p1k") + metrics.crimeYearLabel :
-                    MetricsConfig.formatMetricValue(crimeData.stupefiants_p1k, "stupefiants_p1k") + (crimeData.annee ? ` (${crimeData.annee})` : ""),
+                main: MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("stupefiants_p1k", crimeData), "stupefiants_p1k") + (metrics ? metrics.crimeYearLabel : (crimeData.annee ? ` (${crimeData.annee})` : "")),
                 compare: compareMetrics ? 
                     MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("stupefiants_p1k", compareCrimeData), "stupefiants_p1k") + compareMetrics.crimeYearLabel : 
                     null,
