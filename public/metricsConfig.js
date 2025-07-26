@@ -9,19 +9,17 @@
 export const MetricsConfig = {
     // Page titles for different label states
     pageTitles: {
-        standard: "Changements sociaux en France",
-        alt1: "Notre France Inclusive",
-        alt2: "Où va ma France?"
+        standard: "Ma France",
+        alt1: "Ma France Inclusive",
+        alt2: "Où va ma France?",
     },
 
     // Toggle button labels for different states
     toggleButtonLabels: {
-        standard: '🔄 Version neutre',
-        alt1: '🔄 Version progressiste', 
-        alt2: '🔄 Version conservatrice'
+        standard: "🔄 Version neutre",
+        alt1: "🔄 Version progressiste",
+        alt2: "🔄 Version conservatrice",
     },
-
-    
 
     // Label state: 0 = standard, 1 = alt1, 2 = alt2
     labelState: 0,
@@ -30,7 +28,7 @@ export const MetricsConfig = {
     metrics: [
         {
             value: "total_score",
-            label: "Indice de changement global",
+            label: "Indice de changement général",
             alt1Label: "Indice d'évolution inclusive",
             alt2Label: "Indice de fragmentation nationale",
             category: "général",
@@ -41,7 +39,7 @@ export const MetricsConfig = {
             value: "insecurite_score",
             label: "Indice d'insécurité",
             alt1Label: "Indice de répression policière",
-            alt2Label: "Indice de désordre public",
+            alt2Label: "Indice d'insécurité",
             category: "insécurité",
             format: "score",
         },
@@ -79,7 +77,7 @@ export const MetricsConfig = {
         },
         {
             value: "destructions_p1k",
-            label: "Destruction et dégradations (pour mille hab.)",
+            label: "Destructions et dégradations (pour mille hab.)",
             alt1Label: "Déconstruction créative (pour mille hab.)",
             alt2Label: "Vandalisme (pour mille hab.)",
             category: "insécurité",
@@ -121,7 +119,7 @@ export const MetricsConfig = {
         // Islamisme category
         {
             value: "islamisation_score",
-            label: "Indice de diversité spirituelle",
+            label: "Indice de progression de l'Islam",
             alt1Label: "Indice d'enrichissement spirituel",
             alt2Label: "Indice d'islamisation",
             category: "islamisme",
@@ -370,8 +368,6 @@ export const MetricsConfig = {
         const stateName = this.getLabelStateName();
         return this.toggleButtonLabels[stateName];
     },
-
-    
 
     // Format metric values based on their format property
     formatMetricValue(value, metricKey) {
