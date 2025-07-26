@@ -27,24 +27,22 @@ body {
 }
 
 .label-toggle-btn {
-    width: 180px;
-    height: 36px;
-    padding: 8px 12px;
+    width: 150px;
+    height: 22px;
+    padding: 0px 0px;
     font-size: 12px;
-    border: 1px solid #007bff;
+    border: 1px solid #ffdd00;
     border-radius: 6px;
-    background-color: #fff;
+    background-color: #ffdd00;
     cursor: pointer;
     transition: all 0.2s;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     box-sizing: border-box;
-}
-
-.label-toggle-btn:hover {
-    background-color: #007bff;
-    color: #fff;
+    display: flex; /* Added */
+    justify-content: center; /* Centers horizontally */
+    align-items: center; /* Centers vertically */
 }
 
 .label-toggle-btn.active {
@@ -53,13 +51,13 @@ body {
 }
 
 .label-toggle-btn.alt1 {
-    background-color: #28a745;
-    border-color: #28a745;
+    background-color: #dc3545;
+    border-color: #dc3545;
 }
 
 .label-toggle-btn.alt2 {
-    background-color: #dc3545;
-    border-color: #dc3545;
+    background-color: #007bff;
+    border-color: #007bff;
 }
 
 #scopeSelect, #departementSelect, #metricSelect {
