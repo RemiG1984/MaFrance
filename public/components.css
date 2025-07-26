@@ -5,9 +5,10 @@
     height: 22px;
     padding: 0px 0px;
     font-size: 12px;
-    border: 1px solid #ffdd00;
+    border: 1px solid #6c757d;
     border-radius: 6px;
-    background-color: #ffdd00;
+    background-color: #6c757d;
+    color: #fff;
     cursor: pointer;
     transition: all 0.2s;
     white-space: nowrap;
