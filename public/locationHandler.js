@@ -159,6 +159,7 @@ function LocationHandler(
     function resetCommuneAndLieux() {
         // Always enable commune input for global search
         communeInput.disabled = false;
+        communeInput.placeholder = "Rechercher une commune...";
         communeList.innerHTML = "";
         lieuxSelect.innerHTML =
             '<option value="">-- Tous les lieux --</option>';

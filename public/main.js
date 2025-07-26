@@ -328,6 +328,11 @@ import { api } from './apiService.js';
         appInitialized = true;
 
         console.log('Initializing application...');
+        
+        // Ensure commune input is always enabled for global search
+        communeInput.disabled = false;
+        communeInput.placeholder = "Rechercher une commune...";
+        
         scoreTableHandler.showCountryDetails();
         executiveHandler.showCountryExecutive();
         locationHandler.loadDepartements();
