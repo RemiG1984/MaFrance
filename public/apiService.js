@@ -150,16 +150,16 @@ export const api = {
         return apiService.request(`/api/rankings/communes?${queryString}`);
     },
     // Fetch communes for autocomplete
-    static async fetchCommunes(departement, query = "") {
+    fetchCommunes: async (departement, query = "") => {
         const params = new URLSearchParams({ dept: departement });
         if (query) params.append("q", query);
-        return this.fetchWithTimeout(`/api/communes?${params}`);
+        return apiService.request(`/api/communes?${params}`);
     },
 
     // Fetch commune suggestions for faster autocomplete
-    static async fetchCommuneSuggestions(departement, query = "") {
+    fetchCommuneSuggestions: async (departement, query = "") => {
         const params = new URLSearchParams({ dept: departement });
         if (query) params.append("q", query);
-        return this.fetchWithTimeout(`/api/communes/suggestions?${params}`);
+        return apiService.request(`/api/communes/suggestions?${params}`);
     },
 };
