@@ -224,6 +224,13 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                         main: MetricsConfig.formatMetricValue(data.wokisme_score, "wokisme_score"),
                     },
                     {
+                        title: MetricsConfig.getMetricLabel("logements_sociaux_pct"),
+                        main: data.logements_sociaux_pct !== null && data.logements_sociaux_pct !== undefined
+                            ? MetricsConfig.formatMetricValue(data.logements_sociaux_pct, "logements_sociaux_pct")
+                            : "N/A",
+                        subRow: true,
+                    },
+                    {
                         title: MetricsConfig.getMetricLabel("total_qpv"),
                         main: MetricsConfig.formatMetricValue(data.total_qpv, "total_qpv"),
                         subRow: true,
@@ -344,6 +351,16 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                         title: MetricsConfig.getMetricLabel("wokisme_score"),
                         main: MetricsConfig.formatMetricValue(data.wokisme_score, "wokisme_score"),
                         compare: MetricsConfig.formatMetricValue(countryData.wokisme_score, "wokisme_score"),
+                    },
+                    {
+                        title: MetricsConfig.getMetricLabel("logements_sociaux_pct"),
+                        main: data.logements_sociaux_pct !== null && data.logements_sociaux_pct !== undefined
+                            ? MetricsConfig.formatMetricValue(data.logements_sociaux_pct, "logements_sociaux_pct")
+                            : "N/A",
+                        compare: countryData.logements_sociaux_pct !== null && countryData.logements_sociaux_pct !== undefined
+                            ? MetricsConfig.formatMetricValue(countryData.logements_sociaux_pct, "logements_sociaux_pct")
+                            : "N/A",
+                        subRow: true,
                     },
                     {
                         title: MetricsConfig.getMetricLabel("total_qpv"),
@@ -503,6 +520,16 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                     title: MetricsConfig.getMetricLabel("wokisme_score"),
                     main: MetricsConfig.formatMetricValue(item.wokisme_score, "wokisme_score"),
                     compare: MetricsConfig.formatMetricValue(deptData.wokisme_score, "wokisme_score"),
+                },
+                {
+                    title: MetricsConfig.getMetricLabel("logements_sociaux_pct"),
+                    main: item.logements_sociaux_pct !== null && item.logements_sociaux_pct !== undefined
+                        ? MetricsConfig.formatMetricValue(item.logements_sociaux_pct, "logements_sociaux_pct")
+                        : "N/A",
+                    compare: deptData.logements_sociaux_pct !== null && deptData.logements_sociaux_pct !== undefined
+                        ? MetricsConfig.formatMetricValue(deptData.logements_sociaux_pct, "logements_sociaux_pct")
+                        : "N/A",
+                    subRow: true,
                 },
                 {
                     title: MetricsConfig.getMetricLabel("total_qpv"),
