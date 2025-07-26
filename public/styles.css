@@ -9,25 +9,37 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 20px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
+    margin-bottom: 10px;
 }
 
 .header-container h1 {
     margin: 0;
+    text-align: center;
+}
+
+.second-line-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+    min-height: 40px;
 }
 
 .label-toggle-btn {
-    padding: 8px 16px;
-    font-size: 13px;
+    width: 180px;
+    height: 36px;
+    padding: 8px 12px;
+    font-size: 12px;
     border: 1px solid #007bff;
     border-radius: 6px;
     background-color: #fff;
-    color: #007bff;
     cursor: pointer;
     transition: all 0.2s;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-sizing: border-box;
 }
 
 .label-toggle-btn:hover {
@@ -490,6 +502,11 @@ label {
 }
 
 @media (max-width: 768px) {
+    .second-line-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+
     .filter-container {
         flex-direction: column;
         align-items: center;
