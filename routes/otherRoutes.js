@@ -40,8 +40,6 @@ router.get(
       .replace(/[\u0300-\u036f]/g, "")
       .trim();
 
-    console.log(`Search debug: Original query: "${q}", Normalized: "${normalizedQuery}"`);
-
     const sql = `
     SELECT COG, departement, commune, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct
     FROM locations 
@@ -58,11 +56,6 @@ router.get(
             .normalize("NFD")
             .replace(/[\u0300-\u036f]/g, "")
             .trim();
-          
-          // Debug specific case
-          if (row.commune.toLowerCase().includes('nîmes') || normalizedName.includes('nimes')) {
-            console.log(`Search debug: Found "${row.commune}" -> normalized: "${normalizedName}"`);
-          }
           
           return normalizedName.includes(normalizedQuery);
         })
