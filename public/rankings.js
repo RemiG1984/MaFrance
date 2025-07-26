@@ -66,7 +66,7 @@ const RankingsHandler = (function () {
             tweakingBoxContent.classList.toggle("active");
         });
 
-        // Label toggle functionality will be initialized after URL params are processed
+        // Initialize label toggle after URL params are processed
         function initializeLabelToggle() {
             if (rankingsLabelToggle) {
                 // Set initial button text and style based on current state
@@ -516,6 +516,7 @@ const RankingsHandler = (function () {
             loadDepartements,
             updateRankings,
             populateMetricOptions,
+            initializeLabelToggle,
         };
     };
 })();
@@ -568,18 +569,8 @@ const RankingsHandler = (function () {
         }
 
         // Initialize label toggle after URL params are processed
-        const rankingsLabelToggle = document.getElementById("rankingsLabelToggle");
-        if (rankingsLabelToggle) {
-            // Set initial button text and style based on current state
-            const initialStateName = MetricsConfig.getLabelStateName();
-            rankingsLabelToggle.textContent = MetricsConfig.getCurrentToggleButtonLabel();
-
-            // Set initial button style
-            rankingsLabelToggle.classList.remove('active', 'alt1', 'alt2');
-            if (initialStateName !== 'standard') {
-                rankingsLabelToggle.classList.add('active');
-                rankingsLabelToggle.classList.add(initialStateName);
-            }
+        if (rankingsHandler && typeof rankingsHandler.initializeLabelToggle === 'function') {
+            rankingsHandler.initializeLabelToggle();
         }
 
         // Refresh metric options with updated labels after state is set
