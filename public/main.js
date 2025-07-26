@@ -233,6 +233,9 @@ import { api } from './apiService.js';
 
     // Label toggle functionality
     if (labelToggleBtn) {
+        // Initialize button text with current state
+        labelToggleBtn.textContent = MetricsConfig.getCurrentToggleButtonLabel();
+
         labelToggleBtn.addEventListener('click', () => {
             MetricsConfig.cycleLabelState();
 
