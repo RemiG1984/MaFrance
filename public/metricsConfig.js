@@ -54,7 +54,7 @@ export const MetricsConfig = {
         {
             value: "violences_physiques_p1k",
             label: "Violences physiques (pour mille hab.)",
-            alt1Label: "Communication corporelle (pour mille hab.)",
+            alt1Label: "Communication corporelle musclée (pour mille hab.)",
             alt2Label: "Agressions brutales (pour mille hab.)",
             category: "insécurité",
             format: "rate_1k",
