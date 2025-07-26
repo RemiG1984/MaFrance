@@ -87,29 +87,24 @@ class SearchService {
                     const results = rows
                         .map(row => {
                             const normalizedName = this.normalizeText(row.commune);
-                            const originalName = row.commune.toLowerCase();
 
-                            // Check if query matches (with or without accents)
+                            // Only use normalized comparison for consistent accent handling
                             const normalizedMatches = normalizedName.includes(normalizedQuery);
-                            const originalMatches = originalName.includes(originalQuery);
                             
-                            if (!normalizedMatches && !originalMatches) {
+                            if (!normalizedMatches) {
                                 return null; // Filter out non-matches
                             }
 
                             // Calculate different types of matches for scoring
-                            const exactMatch = normalizedName === normalizedQuery || originalName === originalQuery;
-                            const startsWith = normalizedName.startsWith(normalizedQuery) || originalName.startsWith(originalQuery);
-                            const distance = Math.min(
-                                this.levenshteinDistance(normalizedQuery, normalizedName),
-                                this.levenshteinDistance(originalQuery, originalName)
-                            );
+                            const exactMatch = normalizedName === normalizedQuery;
+                            const startsWith = normalizedName.startsWith(normalizedQuery);
+                            const distance = this.levenshteinDistance(normalizedQuery, normalizedName);
 
                             // Calculate relevance score
                             let score = 0;
                             if (exactMatch) score += 1000;
                             if (startsWith) score += 500;
-                            if (normalizedMatches || originalMatches) score += 100;
+                            score += 100; // Base score for any match
                             score -= distance * 10; // Penalize edit distance
                             score += Math.log(row.population || 1); // Boost by population
 
@@ -176,7 +171,7 @@ class SearchService {
             }
 
             const normalizedQuery = this.normalizeText(query);
-            const originalQuery = query.toLowerCase();
+            console.log(`Debug: Original query: "${query}", Normalized query: "${normalizedQuery}"`);
 
             // Get all communes and filter/rank in JavaScript for proper accent handling
             const sql = `
@@ -195,25 +190,28 @@ class SearchService {
                 const results = rows
                     .map(row => {
                         const normalizedName = this.normalizeText(row.commune);
-                        const originalName = row.commune.toLowerCase();
-
-                        // Check if query matches (with or without accents)
-                        const normalizedMatches = normalizedName.includes(normalizedQuery);
-                        const originalMatches = originalName.includes(originalQuery);
                         
-                        if (!normalizedMatches && !originalMatches) {
+                        // Debug specific case
+                        if (row.commune.toLowerCase().includes('nîmes') || normalizedName.includes('nimes')) {
+                            console.log(`Debug: Found "${row.commune}" -> normalized: "${normalizedName}"`);
+                        }
+
+                        // Check if normalized query matches normalized name
+                        const normalizedMatches = normalizedName.includes(normalizedQuery);
+                        
+                        if (!normalizedMatches) {
                             return null; // Filter out non-matches
                         }
 
                         // Calculate different types of matches for scoring
-                        const exactMatch = normalizedName === normalizedQuery || originalName === originalQuery;
-                        const startsWith = normalizedName.startsWith(normalizedQuery) || originalName.startsWith(originalQuery);
+                        const exactMatch = normalizedName === normalizedQuery;
+                        const startsWith = normalizedName.startsWith(normalizedQuery);
 
                         // Calculate relevance score
                         let score = 0;
                         if (exactMatch) score += 1000;
                         if (startsWith) score += 500;
-                        if (normalizedMatches || originalMatches) score += 100;
+                        score += 100; // Base score for any match
                         score += Math.log(row.population || 1); // Boost by population
 
                         return {
@@ -227,6 +225,7 @@ class SearchService {
                     .sort((a, b) => b.score - a.score) // Sort by relevance score
                     .slice(0, limit); // Limit results
 
+                console.log(`Debug: Found ${results.length} results for "${query}"`);
                 resolve(results);
             });
         });

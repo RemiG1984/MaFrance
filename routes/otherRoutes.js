@@ -21,10 +21,14 @@ router.get(
   (req, res) => {
     const { dept, q } = req.query;
 
+    // Normalize the query for consistent accent handling
     const normalizedQuery = q
       .toLowerCase()
       .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "");
+      .replace(/[\u0300-\u036f]/g, "")
+      .trim();
+
+    console.log(`Search debug: Original query: "${q}", Normalized: "${normalizedQuery}"`);
 
     const sql = `
     SELECT COG, departement, commune, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct
@@ -36,13 +40,20 @@ router.get(
       if (err) return handleDbError(res, err);
 
       const filteredCommunes = rows
-        .filter((row) =>
-          row.commune
+        .filter((row) => {
+          const normalizedName = row.commune
             .toLowerCase()
             .normalize("NFD")
             .replace(/[\u0300-\u036f]/g, "")
-            .includes(normalizedQuery),
-        )
+            .trim();
+          
+          // Debug specific case
+          if (row.commune.toLowerCase().includes('nîmes') || normalizedName.includes('nimes')) {
+            console.log(`Search debug: Found "${row.commune}" -> normalized: "${normalizedName}"`);
+          }
+          
+          return normalizedName.includes(normalizedQuery);
+        })
         .sort((a, b) => {
           const normA = a.commune
             .toLowerCase()
