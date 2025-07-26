@@ -101,7 +101,7 @@ function LocationHandler(
             communeList.innerHTML = "";
             communes.forEach((commune) => {
                 const option = document.createElement("option");
-                option.value = commune.commune;
+                option.value = `${commune.commune} (${commune.departement})`;
                 option.textContent = `${commune.commune} (${commune.departement})`;
                 option.setAttribute('data-cog', commune.COG);
                 option.setAttribute('data-dept', commune.departement);
@@ -186,7 +186,11 @@ function LocationHandler(
     function getCOGForCommune(communeName) {
         const options = communeList.querySelectorAll('option');
         for (const option of options) {
-            if (option.value === communeName || option.value.startsWith(communeName + ' (')) {
+            // Extract commune name from format "CommuneName (DeptCode)"
+            const optionCommuneName = option.value.includes(' (') 
+                ? option.value.substring(0, option.value.lastIndexOf(' ('))
+                : option.value;
+            if (option.value === communeName || optionCommuneName === communeName) {
                 return option.getAttribute('data-cog');
             }
         }
@@ -196,7 +200,11 @@ function LocationHandler(
     function getDepartmentForCommune(communeName) {
         const options = communeList.querySelectorAll('option');
         for (const option of options) {
-            if (option.value === communeName || option.value.startsWith(communeName + ' (')) {
+            // Extract commune name from format "CommuneName (DeptCode)"
+            const optionCommuneName = option.value.includes(' (') 
+                ? option.value.substring(0, option.value.lastIndexOf(' ('))
+                : option.value;
+            if (option.value === communeName || optionCommuneName === communeName) {
                 return option.getAttribute('data-dept');
             }
         }

@@ -128,7 +128,11 @@ import { api } from './apiService.js';
     communeInput.addEventListener("input", debouncedInputHandler);
 
     communeInput.addEventListener("change", async () => {
-        const selectedCommune = communeInput.value.trim();
+        const selectedValue = communeInput.value.trim();
+        // Extract commune name from format "CommuneName (DeptCode)" if needed
+        const selectedCommune = selectedValue.includes(' (') 
+            ? selectedValue.substring(0, selectedValue.lastIndexOf(' ('))
+            : selectedValue;
         let departement = departementSelect.value;
         
         if (selectedCommune) {
