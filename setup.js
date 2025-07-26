@@ -1,4 +1,3 @@
-
 const sqlite3 = require("sqlite3").verbose();
 const fs = require("fs");
 const config = require("./config");
@@ -81,3 +80,35 @@ function runImports() {
 }
 
 runImports();
+
+// Create indexes for better search performance
+async function createSearchIndexes() {
+    return new Promise((resolve, reject) => {
+        const db = require('./config/db');
+
+        console.log("Creating search indexes...");
+
+        const indexes = [
+            "CREATE INDEX IF NOT EXISTS idx_locations_commune ON locations(commune)",
+            "CREATE INDEX IF NOT EXISTS idx_locations_dept_commune ON locations(departement, commune)",
+            "CREATE INDEX IF NOT EXISTS idx_locations_search ON locations(commune COLLATE NOCASE)",
+        ];
+
+        let completed = 0;
+
+        indexes.forEach(indexQuery => {
+            db.run(indexQuery, (err) => {
+                if (err) {
+                    console.error("Error creating index:", err);
+                    reject(err);
+                    return;
+                }
+                completed++;
+                if (completed === indexes.length) {
+                    console.log("Search indexes created successfully");
+                    resolve();
+                }
+            });
+        });
+    });
+}

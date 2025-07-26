@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../config/db");
+const SearchService = require("../services/searchService");
 const {
   validateDepartement,
   validateCOG,
@@ -21,76 +22,31 @@ const handleDbError = (err, next) => {
 };
 
 // GET /api/communes
-router.get("/", [validateDepartement, validateSearchQuery], (req, res) => {
+router.get("/", [validateDepartement, validateSearchQuery], async (req, res) => {
   const { dept, q = "" } = req.query;
 
-  if (!q) {
-    db.all(
-      `SELECT DISTINCT commune, COG 
-       FROM locations 
-       WHERE departement = ? 
-       ORDER BY commune ASC 
-       LIMIT 10`,
-      [dept],
-      (err, rows) => {
-        if (err) return handleDbError(res, err);
-        res.json(rows);
-      },
-    );
-    return;
+  try {
+    const results = await SearchService.searchCommunes(dept, q, 10);
+    res.json(results);
+  } catch (error) {
+    return handleDbError(error, () => res.status(500).json({ 
+      error: "Erreur lors de la recherche de communes" 
+    }));
   }
+});
 
-  const normalizedQuery = q
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
+// GET /api/communes/suggestions - New endpoint for autocomplete
+router.get("/suggestions", [validateDepartement, validateSearchQuery], async (req, res) => {
+  const { dept, q = "" } = req.query;
 
-  db.all(
-    `SELECT DISTINCT commune, COG 
-     FROM locations 
-     WHERE departement = ?`,
-    [dept],
-    (err, rows) => {
-      if (err) return handleDbError(res, err);
-
-      const filteredCommunes = rows
-        .filter((row) =>
-          row.commune
-            .toLowerCase()
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "")
-            .includes(normalizedQuery),
-        )
-        .sort((a, b) => {
-          const normA = a.commune
-            .toLowerCase()
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "");
-          const normB = b.commune
-            .toLowerCase()
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "");
-
-          // 1. Prioritize exact matches
-          const isExactA = normA === normalizedQuery;
-          const isExactB = normB === normalizedQuery;
-          if (isExactA && !isExactB) return -1;
-          if (!isExactA && isExactB) return 1;
-
-          // 2. Prioritize startsWith
-          const startsA = normA.startsWith(normalizedQuery);
-          const startsB = normB.startsWith(normalizedQuery);
-          if (startsA && !startsB) return -1;
-          if (!startsA && startsB) return 1;
-
-          // 3. Sort alphabetically
-          return a.commune.localeCompare(b.commune);
-        })
-        .slice(0, 5);
-
-      res.json(filteredCommunes);
-    },
-  );
+  try {
+    const suggestions = await SearchService.getCommuneSuggestions(dept, q, 5);
+    res.json(suggestions);
+  } catch (error) {
+    return handleDbError(error, () => res.status(500).json({ 
+      error: "Erreur lors de la récupération des suggestions" 
+    }));
+  }
 });
 
 // GET /api/communes/all
