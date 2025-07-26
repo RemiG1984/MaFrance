@@ -68,9 +68,20 @@ function runImports() {
                 process.exit(1);
               }
               console.log('✓ Importation données QPV terminée');
-              console.log('🎉 Configuration de la base de données terminée !');
-              db.close();
-              process.exit(0);
+              
+              // Create search indexes for better performance
+              createSearchIndexes()
+                .then(() => {
+                  console.log('✓ Index de recherche créés');
+                  console.log('🎉 Configuration de la base de données terminée !');
+                  db.close();
+                  process.exit(0);
+                })
+                .catch((indexErr) => {
+                  console.error('Échec création des index:', indexErr.message);
+                  db.close();
+                  process.exit(1);
+                });
             });
           });
         });
@@ -84,7 +95,8 @@ runImports();
 // Create indexes for better search performance
 async function createSearchIndexes() {
     return new Promise((resolve, reject) => {
-        const db = require('./config/db');
+        const sqlite3 = require("sqlite3").verbose();
+        const indexDb = new sqlite3.Database(config.database.path);
 
         console.log("Creating search indexes...");
 
@@ -97,7 +109,7 @@ async function createSearchIndexes() {
         let completed = 0;
 
         indexes.forEach(indexQuery => {
-            db.run(indexQuery, (err) => {
+            indexDb.run(indexQuery, (err) => {
                 if (err) {
                     console.error("Error creating index:", err);
                     reject(err);
@@ -106,6 +118,7 @@ async function createSearchIndexes() {
                 completed++;
                 if (completed === indexes.length) {
                     console.log("Search indexes created successfully");
+                    indexDb.close();
                     resolve();
                 }
             });
