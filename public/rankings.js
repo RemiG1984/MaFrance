@@ -515,6 +515,7 @@ const RankingsHandler = (function () {
         return {
             loadDepartements,
             updateRankings,
+            populateMetricOptions,
         };
     };
 })();
@@ -579,6 +580,11 @@ const RankingsHandler = (function () {
                 rankingsLabelToggle.classList.add('active');
                 rankingsLabelToggle.classList.add(initialStateName);
             }
+        }
+
+        // Refresh metric options with updated labels after state is set
+        if (rankingsHandler && typeof rankingsHandler.populateMetricOptions === 'function') {
+            rankingsHandler.populateMetricOptions();
         }
 
         updateNavigationLinks();
