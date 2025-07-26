@@ -21,12 +21,7 @@ export const MetricsConfig = {
         alt2: '🔄 Version conservatrice'
     },
 
-    // Toggle button labels for rankings page
-    rankingsToggleButtonLabels: {
-        standard: '🔄 Vision inclusive',
-        alt1: '🔄 Vision traditionnelle', 
-        alt2: '🔄 Vision neutre'
-    },
+    
 
     // Label state: 0 = standard, 1 = alt1, 2 = alt2
     labelState: 0,
@@ -376,11 +371,7 @@ export const MetricsConfig = {
         return this.toggleButtonLabels[stateName];
     },
 
-    // Get current toggle button label for rankings page
-    getCurrentRankingsToggleButtonLabel() {
-        const stateName = this.getLabelStateName();
-        return this.rankingsToggleButtonLabels[stateName];
-    },
+    
 
     // Format metric values based on their format property
     formatMetricValue(value, metricKey) {

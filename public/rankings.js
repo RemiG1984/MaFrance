@@ -74,7 +74,7 @@ const RankingsHandler = (function () {
                 // Update button text and style based on state
                 const stateName = MetricsConfig.getLabelStateName();
                 
-                rankingsLabelToggle.textContent = MetricsConfig.getCurrentRankingsToggleButtonLabel();
+                rankingsLabelToggle.textContent = MetricsConfig.getCurrentToggleButtonLabel();
                 
                 // Update button style
                 rankingsLabelToggle.classList.remove('active', 'alt1', 'alt2');
