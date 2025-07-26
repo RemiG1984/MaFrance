@@ -73,13 +73,8 @@ const RankingsHandler = (function () {
                 
                 // Update button text and style based on state
                 const stateName = MetricsConfig.getLabelStateName();
-                const stateNames = {
-                    'standard': '🔄 Vision inclusive',
-                    'alt1': '🔄 Vision traditionnelle', 
-                    'alt2': '🔄 Vision neutre'
-                };
                 
-                rankingsLabelToggle.textContent = stateNames[stateName];
+                rankingsLabelToggle.textContent = MetricsConfig.getCurrentRankingsToggleButtonLabel();
                 
                 // Update button style
                 rankingsLabelToggle.classList.remove('active', 'alt1', 'alt2');

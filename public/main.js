@@ -206,13 +206,8 @@ import { api } from './apiService.js';
             
             // Update button text and style based on state
             const stateName = MetricsConfig.getLabelStateName();
-            const stateNames = {
-                'standard': '🔄 Version neutre',
-                'alt1': '🔄 Version progressiste', 
-                'alt2': '🔄 Version conservatrice'
-            };
             
-            labelToggleBtn.textContent = stateNames[stateName];
+            labelToggleBtn.textContent = MetricsConfig.getCurrentToggleButtonLabel();
             
             // Update button style
             labelToggleBtn.classList.remove('active', 'alt1', 'alt2');
