@@ -92,6 +92,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                         wokisme_score: dept.wokisme_score,
                         total_qpv: dept.total_qpv,
                         pop_in_qpv_pct: dept.pop_in_qpv_pct,
+                        logements_sociaux_pct: dept.logements_sociaux_pct,
                     };
                 }
             });
