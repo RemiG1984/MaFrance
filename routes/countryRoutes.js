@@ -4,12 +4,11 @@ const db = require("../config/db");
 const { validateCountry } = require("../middleware/validate");
 
 // Centralized error handler for database queries
-const handleDbError = (res, err) => {
-  console.error('Database error:', err.message);
-  return res.status(500).json({ 
-    error: "Erreur lors de la requête à la base de données",
-    details: err.message 
-  });
+const handleDbError = (err, next) => {
+  const error = new Error("Erreur lors de la requête à la base de données");
+  error.status = 500;
+  error.details = err.message;
+  return next(error);
 };
 
 // GET /api/country/details
