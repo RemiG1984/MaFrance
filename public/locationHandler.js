@@ -103,11 +103,20 @@ function LocationHandler(
                 console.log("Creating option for:", result.commune, "Department:", result.departement);
                 const option = document.createElement("option");
                 const displayText = `${result.commune} (${result.departement})`;
-                option.value = displayText;
-                option.textContent = displayText;
+                
+                // Create a normalized value for better datalist matching
+                const normalizedCommune = result.commune
+                    .toLowerCase()
+                    .normalize("NFD")
+                    .replace(/[\u0300-\u036f]/g, "");
+                const normalizedValue = `${normalizedCommune} (${result.departement})`;
+                
+                option.value = normalizedValue; // Use normalized value for matching
+                option.textContent = displayText; // Display original with accents
                 option.setAttribute('data-cog', result.COG);
                 option.setAttribute('data-dept', result.departement);
-                console.log("Created option with value:", option.value, "textContent:", option.textContent);
+                option.setAttribute('data-original', displayText); // Store original for form submission
+                console.log("Created option with normalized value:", option.value, "display text:", option.textContent);
                 communeList.appendChild(option);
             });
             console.log("Total options added to datalist:", communeList.children.length);
