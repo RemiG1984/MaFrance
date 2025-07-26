@@ -9,16 +9,17 @@ const {
 } = require("../middleware/validate");
 
 // Centralized error handler for database queries
-const handleDbError = (err, next) => {
-  const error = new Error("Erreur lors de la requête à la base de données");
-  error.status = 500;
-  error.details = err.message;
-  return next(error);
+const handleDbError = (res, err) => {
+  console.error('Database error:', err.message);
+  res.status(500).json({ 
+    error: "Erreur lors de la requête à la base de données",
+    details: err.message 
+  });
 };
 
 // GET /api/departements
 router.get("/", (req, res) => {
-  db.all("SELECT DISTINCT departement FROM departements", [], (err, rows) => {
+  db.all("SELECT DISTINCT departement FROM departement", [], (err, rows) => {
     if (err) return handleDbError(res, err);
     rows.sort((a, b) =>
       a.departement
@@ -53,7 +54,7 @@ router.get("/details", validateDepartement, (req, res) => {
         WHEN d.population > 0 THEN (COALESCE(qpv_stats.total_population_qpv, 0) * 100.0 / d.population)
         ELSE 0
       END as pop_in_qpv_pct
-    FROM departements d
+    FROM departement d
     LEFT JOIN (
       SELECT 
         insee_dep,
