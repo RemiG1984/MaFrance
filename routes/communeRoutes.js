@@ -96,7 +96,7 @@ router.get("/", [validateDepartement, validateSearchQuery], (req, res) => {
 // GET /api/communes/all
 router.get("/all", (req, res) => {
   db.all(
-    "SELECT COG, departement, commune, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct FROM locations",
+    "SELECT COG, departement, commune, population, logements_sociaux_pct, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct FROM locations",
     [],
     (err, rows) => {
       if (err) return handleDbError(res, err);
