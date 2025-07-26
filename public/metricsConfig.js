@@ -4,15 +4,16 @@
  */
 
 export const MetricsConfig = {
-    // Toggle state for alternative labels
-    useAlternativeLabels: false,
+    // Label state: 0 = standard, 1 = alt1, 2 = alt2
+    labelState: 0,
 
     // All available metrics with their properties
     metrics: [
         {
             value: "total_score",
             label: "Score Total (somme des 5 scores)",
-            altLabel: "Indice de Francité Globale",
+            alt1Label: "Indice de Francité Globale",
+            alt2Label: "Indicateur de Cohésion Nationale",
             category: "général",
             format: "score",
         },
@@ -20,56 +21,64 @@ export const MetricsConfig = {
         {
             value: "insecurite_score",
             label: "Score Insécurité",
-            altLabel: "Indice de Sûreté Publique",
+            alt1Label: "Indice de Sûreté Publique",
+            alt2Label: "Niveau de Tranquillité Sociale",
             category: "insécurité",
             format: "score",
         },
         {
             value: "homicides_p100k",
             label: "Homicides et tentatives (pour 100k hab.)",
-            altLabel: "Atteintes à la vie (pour 100k hab.)",
+            alt1Label: "Atteintes à la vie (pour 100k hab.)",
+            alt2Label: "Crimes contre les personnes (pour 100k hab.)",
             category: "insécurité",
             format: "rate_100k",
         },
         {
             value: "violences_physiques_p1k",
             label: "Violences physiques (pour mille hab.)",
-            altLabel: "Agressions corporelles (pour mille hab.)",
+            alt1Label: "Agressions corporelles (pour mille hab.)",
+            alt2Label: "Conflits interpersonnels (pour mille hab.)",
             category: "insécurité",
             format: "rate_1k",
         },
         {
             value: "violences_sexuelles_p1k",
             label: "Violences sexuelles (pour mille hab.)",
-            altLabel: "Infractions sexuelles (pour mille hab.)",
+            alt1Label: "Infractions sexuelles (pour mille hab.)",
+            alt2Label: "Délits contre l'intégrité (pour mille hab.)",
             category: "insécurité",
             format: "rate_1k",
         },
         {
             value: "vols_p1k",
             label: "Vols (pour mille hab.)",
-            altLabel: "Soustraction frauduleuse (pour mille hab.)",
+            alt1Label: "Soustraction frauduleuse (pour mille hab.)",
+            alt2Label: "Appropriation illégale (pour mille hab.)",
             category: "insécurité",
             format: "rate_1k",
         },
         {
             value: "destructions_p1k",
             label: "Destruction et dégradations (pour mille hab.)",
-            altLabel: "Dommages aux biens (pour mille hab.)",
+            alt1Label: "Dommages aux biens (pour mille hab.)",
+            alt2Label: "Vandalisme urbain (pour mille hab.)",
             category: "insécurité",
             format: "rate_1k",
         },
         {
             value: "stupefiants_p1k",
             label: "Trafic et usage de stupéfiants (pour mille hab.)",
-            altLabel: "Infractions aux stupéfiants (pour mille hab.)",
+            alt1Label: "Infractions aux stupéfiants (pour mille hab.)",
+            alt2Label: "Économie souterraine (pour mille hab.)",
             category: "insécurité",
             format: "rate_1k",
         },
         {
             value: "escroqueries_p1k",
             label: "Escroqueries (pour mille hab.)",
-            altLabel: "Délits économiques (pour mille hab.)",
+            alt1Label: "Délits économiques (pour mille hab.)",
+            alt2Label: "Tromperies financières (pour mille hab.)",
             category: "insécurité",
             format: "rate_1k",
         },
@@ -77,14 +86,16 @@ export const MetricsConfig = {
         {
             value: "immigration_score",
             label: "Score Immigration",
-            altLabel: "Indice de Diversité Culturelle",
+            alt1Label: "Indice de Diversité Culturelle",
+            alt2Label: "Métrique de Brassage Démographique",
             category: "immigration",
             format: "score",
         },
         {
             value: "extra_europeen_pct",
             label: "Prénoms de naissance extra-européen (%)",
-            altLabel: "Diversité onomastique mondiale (%)",
+            alt1Label: "Diversité onomastique mondiale (%)",
+            alt2Label: "Origine géographique élargie (%)",
             category: "immigration",
             format: "percentage",
         },
@@ -92,28 +103,32 @@ export const MetricsConfig = {
         {
             value: "islamisation_score",
             label: "Score Islamisation",
-            altLabel: "Indice de Pluralisme Religieux",
+            alt1Label: "Indice de Pluralisme Religieux",
+            alt2Label: "Coefficient de Diversité Spirituelle",
             category: "islamisme",
             format: "score",
         },
         {
             value: "musulman_pct",
             label: "Prénoms de naissance musulmans (%)",
-            altLabel: "Prénoms d'origine arabo-musulmane (%)",
+            alt1Label: "Prénoms d'origine arabo-musulmane (%)",
+            alt2Label: "Héritage onomastique oriental (%)",
             category: "islamisme",
             format: "percentage",
         },
         {
             value: "number_of_mosques",
             label: "Nombre de Mosquées",
-            altLabel: "Lieux de culte musulman",
+            alt1Label: "Lieux de culte musulman",
+            alt2Label: "Édifices religieux islamiques",
             category: "islamisme",
             format: "number",
         },
         {
             value: "mosque_p100k",
             label: "Nombre de Mosquées (pour 100k hab.)",
-            altLabel: "Densité des lieux de culte musulman (pour 100k hab.)",
+            alt1Label: "Densité des lieux de culte musulman (pour 100k hab.)",
+            alt2Label: "Concentration religieuse islamique (pour 100k hab.)",
             category: "islamisme",
             format: "rate_100k",
         },
@@ -121,14 +136,16 @@ export const MetricsConfig = {
         {
             value: "defrancisation_score",
             label: "Score Défrancisation",
-            altLabel: "Indice de Préservation Culturelle",
+            alt1Label: "Indice de Préservation Culturelle",
+            alt2Label: "Mesure de Continuité Identitaire",
             category: "défrancisation",
             format: "score",
         },
         {
             value: "prenom_francais_pct",
             label: "Prénoms de naissance français (%)",
-            altLabel: "Heritage onomastique français (%)",
+            alt1Label: "Heritage onomastique français (%)",
+            alt2Label: "Tradition nominative nationale (%)",
             category: "défrancisation",
             format: "percentage",
         },
@@ -136,21 +153,24 @@ export const MetricsConfig = {
         {
             value: "wokisme_score",
             label: "Score Wokisme",
-            altLabel: "Indice de Politique Urbaine",
+            alt1Label: "Indice de Politique Urbaine",
+            alt2Label: "Coefficient d'Intervention Sociale",
             category: "wokisme",
             format: "score",
         },
         {
             value: "total_qpv",
             label: "Nombre de QPV",
-            altLabel: "Quartiers en développement prioritaire",
+            alt1Label: "Quartiers en développement prioritaire",
+            alt2Label: "Zones d'attention particulière",
             category: "wokisme",
             format: "number",
         },
         {
             value: "pop_in_qpv_pct",
             label: "% Population en QPV",
-            altLabel: "% Pop. en zones prioritaires",
+            alt1Label: "% Pop. en zones prioritaires",
+            alt2Label: "% Résidents en territoires ciblés",
             category: "wokisme",
             format: "percentage",
         },
@@ -265,7 +285,15 @@ export const MetricsConfig = {
     getMetricLabel(value) {
         const metric = this.getMetricByValue(value);
         if (!metric) return value;
-        return this.useAlternativeLabels && metric.altLabel ? metric.altLabel : metric.label;
+        
+        switch (this.labelState) {
+            case 1:
+                return metric.alt1Label || metric.label;
+            case 2:
+                return metric.alt2Label || metric.label;
+            default:
+                return metric.label;
+        }
     },
 
     getMetricsByCategory(category) {
@@ -285,17 +313,26 @@ export const MetricsConfig = {
     getMetricOptions() {
         return this.metrics.map((metric) => ({
             value: metric.value,
-            label: this.useAlternativeLabels && metric.altLabel ? metric.altLabel : metric.label,
+            label: this.getMetricLabel(metric.value),
         }));
     },
 
-    // Toggle between standard and alternative labels
-    toggleLabels() {
-        this.useAlternativeLabels = !this.useAlternativeLabels;
+    // Cycle between label states (0 -> 1 -> 2 -> 0)
+    cycleLabelState() {
+        this.labelState = (this.labelState + 1) % 3;
         // Dispatch event to notify components of the change
         window.dispatchEvent(new CustomEvent('metricsLabelsToggled', {
-            detail: { useAlternativeLabels: this.useAlternativeLabels }
+            detail: { labelState: this.labelState }
         }));
+    },
+
+    // Get current label state name
+    getLabelStateName() {
+        switch (this.labelState) {
+            case 1: return 'alt1';
+            case 2: return 'alt2';
+            default: return 'standard';
+        }
     },
 
     // Format metric values based on their format property

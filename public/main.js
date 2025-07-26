@@ -202,12 +202,24 @@ import { api } from './apiService.js';
     // Label toggle functionality
     if (labelToggleBtn) {
         labelToggleBtn.addEventListener('click', () => {
-            MetricsConfig.toggleLabels();
-            labelToggleBtn.classList.toggle('active');
+            MetricsConfig.cycleLabelState();
             
-            // Update button text based on state
-            const isActive = labelToggleBtn.classList.contains('active');
-            labelToggleBtn.textContent = isActive ? '🔄 Libellés standards' : '🔄 Libellés alternatifs';
+            // Update button text and style based on state
+            const stateName = MetricsConfig.getLabelStateName();
+            const stateNames = {
+                'standard': '🔄 Libellés alt1',
+                'alt1': '🔄 Libellés alt2', 
+                'alt2': '🔄 Libellés standards'
+            };
+            
+            labelToggleBtn.textContent = stateNames[stateName];
+            
+            // Update button style
+            labelToggleBtn.classList.remove('active', 'alt1', 'alt2');
+            if (stateName !== 'standard') {
+                labelToggleBtn.classList.add('active');
+                labelToggleBtn.classList.add(stateName);
+            }
             
             // Refresh all components that display metric labels
             refreshMetricLabels();

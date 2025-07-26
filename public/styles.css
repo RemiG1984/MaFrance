@@ -40,6 +40,16 @@ body {
     color: #fff;
 }
 
+.label-toggle-btn.alt1 {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.label-toggle-btn.alt2 {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
 #scopeSelect, #departementSelect, #metricSelect {
     width: 100%;
     max-width: 400px;
