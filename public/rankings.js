@@ -14,9 +14,12 @@ const RankingsHandler = (function () {
     const departmentNames = DepartmentNames;
 
     return function (scopeSelect, departementSelect, metricSelect, resultsDiv) {
-        // Populate existing tweaking box
+        // Populate existing tweaking box (label toggle button is already in HTML)
         const tweakingBox = document.getElementById("tweakingBox");
         tweakingBox.innerHTML = `
+            <button id="labelToggleBtn" class="label-toggle-btn" title="Basculer entre les libellés standards et alternatifs">
+                🔄 Libellés alternatifs
+            </button>
             <button class="tweaking-toggle">Paramètres</button>
             <div class="tweaking-box">
                 <div class="population-controls">
@@ -496,7 +499,12 @@ const RankingsHandler = (function () {
         loadDepartements();
         toggleDepartementVisibility();
         populateMetricOptions();
-        initializeLabelToggle();
+        
+        // Initialize label toggle after all DOM elements are created
+        setTimeout(() => {
+            initializeLabelToggle();
+        }, 0);
+        
         updateRankings();
 
         // Function to populate metric options from MetricsConfig
