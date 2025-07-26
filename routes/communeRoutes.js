@@ -49,6 +49,24 @@ router.get("/suggestions", [validateDepartement, validateSearchQuery], async (re
   }
 });
 
+// GET /api/communes/search - Global commune search endpoint
+router.get("/search", [validateSearchQuery], async (req, res) => {
+  const { q = "" } = req.query;
+
+  if (!q || q.length < 2) {
+    return res.json([]);
+  }
+
+  try {
+    const results = await SearchService.searchCommunesGlobally(q, 15);
+    res.json(results);
+  } catch (error) {
+    return handleDbError(error, () => res.status(500).json({ 
+      error: "Erreur lors de la recherche globale de communes" 
+    }));
+  }
+});
+
 // GET /api/communes/all
 router.get("/all", (req, res) => {
   db.all(

@@ -95,13 +95,15 @@ import { api } from './apiService.js';
         const departement = departementSelect.value;
         const query = communeInput.value;
         locationHandler.handleCommuneInput(departement, query);
-        if (!(departement && query.length >= 2)) {
+        
+        if (query.length === 0) {
             locationHandler.resetCommuneAndLieux();
             articleHandler.clearArticles();
             currentLieu = "";
             articleHandler.setFilter(null);
             console.log("Reset filter on commune input");
-            if (departement && query.length === 0) {
+            
+            if (departement) {
                 scoreTableHandler.showDepartmentDetails(departement);
                 executiveHandler.showDepartmentExecutive(departement);
                 articleHandler.loadArticles(departement).then(() => {
@@ -115,7 +117,7 @@ import { api } from './apiService.js';
                             );
                         });
                 });
-            } else if (!departement) {
+            } else {
                 scoreTableHandler.showCountryDetails();
                 executiveHandler.showCountryExecutive();
                 articleHandler.clearArticles();
@@ -127,14 +129,22 @@ import { api } from './apiService.js';
 
     communeInput.addEventListener("change", async () => {
         const selectedCommune = communeInput.value.trim();
-        const departement = departementSelect.value;
+        let departement = departementSelect.value;
         
-        if (selectedCommune && departement) {
+        if (selectedCommune) {
             try {
-                // First try to get COG from the datalist options
+                // First try to get COG and department from the datalist options
                 let cog = locationHandler.getCOGForCommune(selectedCommune);
+                let communeDept = locationHandler.getDepartmentForCommune(selectedCommune);
 
-                if (!cog) {
+                // Auto-select department if not already selected
+                if (!departement && communeDept) {
+                    departement = communeDept;
+                    departementSelect.value = departement;
+                    console.log("Auto-selected department:", departement);
+                }
+
+                if (!cog && departement) {
                     // Fallback: fetch commune details to get COG
                     const response = await fetch(
                         `/api/communes?dept=${encodeURIComponent(
@@ -149,7 +159,7 @@ import { api } from './apiService.js';
                     }
                 }
 
-                if (cog) {
+                if (cog && departement) {
                     console.log("Using COG for commune:", selectedCommune, cog);
                     scoreTableHandler.showCommuneDetails(cog);
                     executiveHandler.showCommuneExecutive(cog);

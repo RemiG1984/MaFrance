@@ -1,4 +1,3 @@
-
 /**
  * Search service for optimized commune searching with fuzzy matching
  */
@@ -20,15 +19,15 @@ class SearchService {
      */
     static levenshteinDistance(str1, str2) {
         const matrix = [];
-        
+
         for (let i = 0; i <= str2.length; i++) {
             matrix[i] = [i];
         }
-        
+
         for (let j = 0; j <= str1.length; j++) {
             matrix[0][j] = j;
         }
-        
+
         for (let i = 1; i <= str2.length; i++) {
             for (let j = 1; j <= str1.length; j++) {
                 if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
@@ -42,7 +41,7 @@ class SearchService {
                 }
             }
         }
-        
+
         return matrix[str2.length][str1.length];
     }
 
@@ -69,10 +68,10 @@ class SearchService {
             }
 
             const normalizedQuery = this.normalizeText(query);
-            
+
             // Use SQL LIKE for initial filtering to leverage indexes
             const likePattern = `%${normalizedQuery}%`;
-            
+
             db.all(
                 `SELECT DISTINCT commune, COG, population
                  FROM locations 
@@ -86,17 +85,17 @@ class SearchService {
                 [departement, likePattern, `%${query}%`, limit * 3], // Get more results for fuzzy ranking
                 (err, rows) => {
                     if (err) return reject(err);
-                    
+
                     // Apply fuzzy matching and ranking
                     const results = rows.map(row => {
                         const normalizedName = this.normalizeText(row.commune);
-                        
+
                         // Calculate different types of matches for scoring
                         const exactMatch = normalizedName === normalizedQuery;
                         const startsWith = normalizedName.startsWith(normalizedQuery);
                         const contains = normalizedName.includes(normalizedQuery);
                         const distance = this.levenshteinDistance(normalizedQuery, normalizedName);
-                        
+
                         // Calculate relevance score
                         let score = 0;
                         if (exactMatch) score += 1000;
@@ -104,7 +103,7 @@ class SearchService {
                         if (contains) score += 100;
                         score -= distance * 10; // Penalize edit distance
                         score += Math.log(row.population || 1); // Boost by population
-                        
+
                         return {
                             ...row,
                             score,
@@ -113,13 +112,13 @@ class SearchService {
                             distance
                         };
                     });
-                    
+
                     // Sort by relevance score and return top results
                     const sortedResults = results
                         .sort((a, b) => b.score - a.score)
                         .slice(0, limit)
                         .map(({ score, exactMatch, startsWith, distance, ...item }) => item);
-                    
+
                     resolve(sortedResults);
                 }
             );
@@ -131,28 +130,66 @@ class SearchService {
      */
     static getCommuneSuggestions(departement, query, limit = 5) {
         return new Promise((resolve, reject) => {
-            if (!query || query.length < 1) {
+            let sql = `
+                SELECT DISTINCT commune, COG, departement
+                FROM locations 
+                WHERE departement = ?
+            `;
+            let params = [departement];
+
+            if (query && query.length >= 2) {
+                sql += ` AND commune LIKE ?`;
+                params.push(`%${query}%`);
+            }
+
+            sql += ` ORDER BY commune LIMIT ?`;
+            params.push(limit);
+
+            db.all(sql, params, (err, rows) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(rows);
+                }
+            });
+        });
+    }
+
+    /**
+     * Search communes globally (without department filter)
+     */
+    static async searchCommunesGlobally(query, limit = 15) {
+        return new Promise((resolve, reject) => {
+            if (!query || query.length < 2) {
                 resolve([]);
                 return;
             }
 
-            const normalizedQuery = this.normalizeText(query);
-            
-            db.all(
-                `SELECT DISTINCT commune, COG
-                 FROM locations 
-                 WHERE departement = ? 
-                 AND LOWER(commune) LIKE ?
-                 ORDER BY 
-                     CASE WHEN LOWER(commune) LIKE ? THEN 0 ELSE 1 END,
-                     population DESC
-                 LIMIT ?`,
-                [departement, `${normalizedQuery}%`, `${normalizedQuery}%`, limit],
-                (err, rows) => {
-                    if (err) return reject(err);
+            const sql = `
+                SELECT DISTINCT commune, COG, departement
+                FROM locations 
+                WHERE commune LIKE ?
+                ORDER BY 
+                    CASE 
+                        WHEN commune LIKE ? THEN 1
+                        WHEN commune LIKE ? THEN 2
+                        ELSE 3
+                    END,
+                    commune
+                LIMIT ?
+            `;
+
+            const searchTerm = `%${query}%`;
+            const exactStart = `${query}%`;
+            const params = [searchTerm, exactStart, exactStart, limit];
+
+            db.all(sql, params, (err, rows) => {
+                if (err) {
+                    reject(err);
+                } else {
                     resolve(rows);
                 }
-            );
+            });
         });
     }
 }

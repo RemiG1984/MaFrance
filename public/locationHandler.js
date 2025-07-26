@@ -74,6 +74,7 @@ function LocationHandler(
                 option.value = commune.commune;
                 option.textContent = commune.commune;
                 option.setAttribute('data-cog', commune.COG);
+                option.setAttribute('data-dept', commune.departement);
                 communeList.appendChild(option);
             });
         } catch (error) {
@@ -82,6 +83,34 @@ function LocationHandler(
                 error: error.message,
                 stack: error.stack,
                 departement: normalizedDept,
+                query: query,
+            });
+        }
+    }
+
+    async function searchCommunesGlobally(query = "") {
+        if (query.length < 2) {
+            communeList.innerHTML = "";
+            return;
+        }
+        
+        try {
+            console.log("Searching communes globally with query:", query);
+            const communes = await apiService.request(`/api/communes/search?q=${encodeURIComponent(query)}`);
+            console.log("Global communes search results:", communes);
+            communeList.innerHTML = "";
+            communes.forEach((commune) => {
+                const option = document.createElement("option");
+                option.value = commune.commune;
+                option.textContent = `${commune.commune} (${commune.departement})`;
+                option.setAttribute('data-cog', commune.COG);
+                option.setAttribute('data-dept', commune.departement);
+                communeList.appendChild(option);
+            });
+        } catch (error) {
+            console.error("Erreur recherche globale communes:", {
+                error: error.message,
+                stack: error.stack,
                 query: query,
             });
         }
@@ -128,11 +157,8 @@ function LocationHandler(
     }
 
     function resetCommuneAndLieux() {
-        const isDisabled = departementSelect.value === "";
-        communeInput.disabled = isDisabled;
-        if (isDisabled) {
-            communeInput.value = ""; // Only clear if disabled
-        }
+        // Always enable commune input for global search
+        communeInput.disabled = false;
         communeList.innerHTML = "";
         lieuxSelect.innerHTML =
             '<option value="">-- Tous les lieux --</option>';
@@ -140,22 +166,37 @@ function LocationHandler(
     }
 
     function handleCommuneInput(departement, query) {
-        if (!departement) {
-            resetCommuneAndLieux();
-            return;
-        }
-        if (query.length >= 2) {
-            loadCommunes(departement, query);
+        if (departement) {
+            if (query.length >= 2) {
+                loadCommunes(departement, query);
+            } else {
+                communeList.innerHTML = ""; // Clear datalist but allow typing
+            }
         } else {
-            communeList.innerHTML = ""; // Clear datalist but allow typing
+            // Global search when no department is selected
+            if (query.length >= 2) {
+                searchCommunesGlobally(query);
+            } else {
+                communeList.innerHTML = "";
+            }
         }
     }
 
     function getCOGForCommune(communeName) {
         const options = communeList.querySelectorAll('option');
         for (const option of options) {
-            if (option.value === communeName) {
+            if (option.value === communeName || option.value.startsWith(communeName + ' (')) {
                 return option.getAttribute('data-cog');
+            }
+        }
+        return null;
+    }
+
+    function getDepartmentForCommune(communeName) {
+        const options = communeList.querySelectorAll('option');
+        for (const option of options) {
+            if (option.value === communeName || option.value.startsWith(communeName + ' (')) {
+                return option.getAttribute('data-dept');
             }
         }
         return null;
@@ -168,6 +209,8 @@ function LocationHandler(
         resetCommuneAndLieux,
         handleCommuneInput,
         getCOGForCommune,
+        getDepartmentForCommune,
+        searchCommunesGlobally,
     };
 }
 
