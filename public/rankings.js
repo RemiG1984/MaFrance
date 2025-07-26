@@ -68,31 +68,32 @@ const RankingsHandler = (function () {
 
         // Initialize label toggle after URL params are processed
         function initializeLabelToggle() {
-            if (rankingsLabelToggle) {
+            const labelToggleBtn = document.getElementById("labelToggleBtn");
+            if (labelToggleBtn) {
                 // Set initial button text and style based on current state
                 const initialStateName = MetricsConfig.getLabelStateName();
-                rankingsLabelToggle.textContent = MetricsConfig.getCurrentToggleButtonLabel();
+                labelToggleBtn.textContent = MetricsConfig.getCurrentToggleButtonLabel();
 
                 // Set initial button style
-                rankingsLabelToggle.classList.remove('active', 'alt1', 'alt2');
+                labelToggleBtn.classList.remove('active', 'alt1', 'alt2');
                 if (initialStateName !== 'standard') {
-                    rankingsLabelToggle.classList.add('active');
-                    rankingsLabelToggle.classList.add(initialStateName);
+                    labelToggleBtn.classList.add('active');
+                    labelToggleBtn.classList.add(initialStateName);
                 }
 
-                rankingsLabelToggle.addEventListener('click', () => {
+                labelToggleBtn.addEventListener('click', () => {
                     MetricsConfig.cycleLabelState();
 
                     // Update button text and style based on state
                     const stateName = MetricsConfig.getLabelStateName();
 
-                    rankingsLabelToggle.textContent = MetricsConfig.getCurrentToggleButtonLabel();
+                    labelToggleBtn.textContent = MetricsConfig.getCurrentToggleButtonLabel();
 
                     // Update button style
-                    rankingsLabelToggle.classList.remove('active', 'alt1', 'alt2');
+                    labelToggleBtn.classList.remove('active', 'alt1', 'alt2');
                     if (stateName !== 'standard') {
-                        rankingsLabelToggle.classList.add('active');
-                        rankingsLabelToggle.classList.add(stateName);
+                        labelToggleBtn.classList.add('active');
+                        labelToggleBtn.classList.add(stateName);
                     }
 
                     // Refresh metric options and update rankings
