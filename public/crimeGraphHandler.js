@@ -441,14 +441,7 @@ function CrimeGraphHandler() {
                 scales: {
                     x: {
                         title: {
-                            display: true,
-                            text: "Année",
-                            font: {
-                                family: "'Roboto', Arial, sans-serif",
-                                size: 14,
-                                weight: "600",
-                            },
-                            color: "#343a40",
+                            display: false,
                         },
                         ticks: {
                             font: {
