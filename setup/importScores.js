@@ -24,6 +24,8 @@ function importScores(db, callback) {
                         if (!row['country']) missingFields.push('country');
                         if (!row['population']) missingFields.push('population');
                         if (!row['Mosque_p100k'] && row['Mosque_p100k'] !== '0') missingFields.push('Mosque_p100k');
+                        if (!row['logements_sociaux_pct'] && row['logements_sociaux_pct'] !== '0') missingFields.push('logements_sociaux_pct');
+
 
                         if (missingFields.length > 0) {
                             console.warn(`Ligne ignorée dans france_scores.csv (champs manquants: ${missingFields.join(', ')}):`, row);
@@ -40,6 +42,7 @@ function importScores(db, callback) {
                         const mosque_p100k = parseFloat(row['Mosque_p100k']) || 0;
                         const total_qpv = parseInt(row['Total_QPV']) || 0;
                         const pop_in_qpv_pct = parseFloat(row['Pop_in_QPV_pct']) || 0;
+                        const logements_sociaux_pct = parseFloat(row['logements_sociaux_pct']) || 0;
 
                         countryRows++;
                         countryBatch.push([
@@ -53,7 +56,8 @@ function importScores(db, callback) {
                             number_of_mosques,
                             mosque_p100k,
                             total_qpv,
-                            pop_in_qpv_pct
+                            pop_in_qpv_pct,
+                            logements_sociaux_pct
                         ]);
                     })
                     .on('end', () => {
@@ -85,7 +89,8 @@ function importScores(db, callback) {
                             number_of_mosques INTEGER,
                             mosque_p100k REAL,
                             total_qpv INTEGER,
-                            pop_in_qpv_pct REAL
+                            pop_in_qpv_pct REAL,
+                            logements_sociaux_pct REAL
                         )
                     `, (err) => {
                         if (err) {
@@ -109,10 +114,10 @@ function importScores(db, callback) {
                                 }
 
                                 if (countryBatch.length > 0) {
-                                    const placeholders = countryBatch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
+                                    const placeholders = countryBatch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
                                     const flatBatch = [].concat(...countryBatch);
                                     db.run(
-                                        `INSERT OR IGNORE INTO country (country, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct) VALUES ${placeholders}`,
+                                        `INSERT OR IGNORE INTO country (country, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct, logements_sociaux_pct) VALUES ${placeholders}`,
                                         flatBatch,
                                         (err) => {
                                             if (err) {
@@ -169,6 +174,7 @@ function importScores(db, callback) {
                         if (!row['departement']) missingFields.push('departement');
                         if (!row['population']) missingFields.push('population');
                         if (!row['Mosque_p100k'] && row['Mosque_p100k'] !== '0') missingFields.push('Mosque_p100k');
+                        if (!row['logements_sociaux_pct'] && row['logements_sociaux_pct'] !== '0') missingFields.push('logements_sociaux_pct');
 
                         if (missingFields.length > 0) {
                             console.warn(`Ligne ignorée dans departement_scores.csv (champs manquants: ${missingFields.join(', ')}):`, row);
@@ -194,6 +200,7 @@ function importScores(db, callback) {
                         const mosque_p100k = parseFloat(row['Mosque_p100k']) || 0;
                         const total_qpv = parseInt(row['Total_QPV']) || 0;
                         const pop_in_qpv_pct = parseFloat(row['Pop_in_QPV_pct']) || 0;
+                        const logements_sociaux_pct = parseFloat(row['logements_sociaux_pct']) || 0;
 
                         departmentRows++;
                         departmentBatch.push([
@@ -207,7 +214,8 @@ function importScores(db, callback) {
                             number_of_mosques,
                             mosque_p100k,
                             total_qpv,
-                            pop_in_qpv_pct
+                            pop_in_qpv_pct,
+                            logements_sociaux_pct
                         ]);
                     })
                     .on('end', () => {
@@ -239,7 +247,8 @@ function importScores(db, callback) {
                             number_of_mosques INTEGER,
                             mosque_p100k REAL,
                             total_qpv INTEGER,
-                            pop_in_qpv_pct REAL
+                            pop_in_qpv_pct REAL,
+                            logements_sociaux_pct REAL
                         )
                     `, (err) => {
                         if (err) {
@@ -264,10 +273,10 @@ function importScores(db, callback) {
 
                                 for (let i = 0; i < departmentBatch.length; i += batchSize) {
                                     const batch = departmentBatch.slice(i, i + batchSize);
-                                    const placeholders = batch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
+                                    const placeholders = batch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
                                     const flatBatch = [].concat(...batch);
                                     db.run(
-                                        `INSERT OR IGNORE INTO departements (departement, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct) VALUES ${placeholders}`,
+                                        `INSERT OR IGNORE INTO departements (departement, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct, logements_sociaux_pct) VALUES ${placeholders}`,
                                         flatBatch,
                                         (err) => {
                                             if (err) {
