@@ -214,6 +214,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             );
             if (!response.ok) throw new Error('Failed to fetch commune rankings');
             const { data } = await response.json();
+            console.log(`Loaded ${data.length} communes for department ${deptCode}:`, data.slice(0, 3));
             data.forEach((comm) => {
                 commData[comm.cog] = {
                     total_score: comm.total_score,
@@ -332,7 +333,8 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
      * @returns {Object} The style object.
      */
     function getStyle(feature, isCommune = false) {
-        const code = feature.properties.code;
+        // For communes, use INSEE code; for departments, use code
+        const code = isCommune ? feature.properties.insee : feature.properties.code;
         const data = isCommune ? commData[code] : deptData[code];
         const value = data ? data[currentMetric] : null;
         return {
@@ -352,7 +354,8 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
      * @param {boolean} isCommune - Flag for commune mode.
      */
     function onEachFeature(feature, layer, isCommune = false) {
-        const code = feature.properties.code;
+        // For communes, use INSEE code; for departments, use code
+        const code = isCommune ? feature.properties.insee : feature.properties.code;
         const name = feature.properties.nom;
         const data = isCommune ? commData[code] : deptData[code];
 

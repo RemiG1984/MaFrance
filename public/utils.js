@@ -57,10 +57,13 @@ export function formatDate(dateStr) {
  * @param {number} number - The number to format
  * @returns {string} Formatted number string
  */
-function formatNumber(number) {
+export function formatNumber(number) {
   if (number == null || isNaN(number)) return "N/A";
   return number.toLocaleString("fr-FR");
 }
 
-// Export for ES6 modules
-export { formatNumber };
+// Department names mapping (import from departmentNames.js)
+import { DepartmentNames } from './departmentNames.js';
+
+// Re-export DepartmentNames for backward compatibility
+export { DepartmentNames };
