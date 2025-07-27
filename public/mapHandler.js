@@ -601,9 +601,13 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                     value,
                     currentMetric,
                 );
+                
+                // For communes, show department code instead of COG
+                const displayCode = isCommune ? currentDept : code;
+                
                 layer
                     .bindPopup(
-                        `<b>${name} (${code})</b><br>${metricLabel}: ${formattedValue}`,
+                        `<b>${name} (${displayCode})</b><br>${metricLabel}: ${formattedValue}`,
                         { className: "custom-popup", closeButton: false, autoPan: false },
                     )
                     .openPopup();
