@@ -211,7 +211,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
         try {
             let allData = [];
             let offset = 0;
-            const limit = 100; // Max allowed by validation
+            const limit = 200; // Use the increased validation limit
             let hasMoreData = true;
 
             // Make multiple API calls to get all communes
