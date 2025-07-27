@@ -1,4 +1,4 @@
-import { MetricsConfig } from './metricsConfig.js';
+import { MetricsConfig } from "./metricsConfig.js";
 
 /**
  * Map handler module for displaying interactive maps with statistical data.
@@ -6,7 +6,7 @@ import { MetricsConfig } from './metricsConfig.js';
  * @param {HTMLElement} mapDiv - Container for the map
  * @param {HTMLSelectElement} departementSelect - Department selection dropdown
  * @param {HTMLElement} resultsDiv - Results display container
- * @param {Object} departmentNames - Department names mapping
+ * @param {Object} departmentNames - Department names mapping (no longer used for GeoJSON fetching)
  * @returns {Object} Map handler interface
  */
 function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
@@ -17,9 +17,8 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
     let legendControl = null;
 
     // Listen for metric label changes
-    window.addEventListener('metricsLabelsToggled', () => {
+    window.addEventListener("metricsLabelsToggled", () => {
         updateLegend();
-        // Update metric selector options if it exists
         updateMetricSelector();
     });
 
@@ -37,8 +36,6 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
     let commData = {}; // Commune data cache (keyed by COG/INSEE code)
     let currentDept = null; // Currently selected department for commune view
 
-    
-
     /**
      * Initializes the map, fetches data, and applies styling.
      */
@@ -52,13 +49,13 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
         // Add basemap with custom attribution
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
             attribution:
-                '©<a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> | <a href="https://ouvamafrance.replit.app">https://ouvamafrance.replit.app</a>', // Modified attribution
+                '©<a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> | <a href="https://ouvamafrance.replit.app">https://ouvamafrance.replit.app</a>',
         }).addTo(map);
 
-        // Add fullscreen control (assuming Leaflet.fullscreen plugin is loaded via script and CSS in HTML)
+        // Add fullscreen control (assuming Leaflet.fullscreen plugin is loaded)
         map.addControl(
             new L.Control.Fullscreen({
-                position: "topleft", // Standard location
+                position: "topleft",
             }),
         );
 
@@ -108,13 +105,18 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             return;
         }
 
-        // Fetch GeoJSON from geo.api.gouv.fr
+        // Fetch Department GeoJSON
         try {
             const geoResponse = await fetch(
-                "https://geo.api.gouv.fr/departements?format=geojson",
+                "https://france-geojson.gregoiredavid.fr/repo/departements.geojson",
             );
-            if (!geoResponse.ok) throw new Error("Failed to fetch GeoJSON");
+            if (!geoResponse.ok)
+                throw new Error("Failed to fetch Department GeoJSON");
             const geoData = await geoResponse.json();
+
+            if (!geoData.features) {
+                throw new Error("Invalid GeoJSON: 'features' property missing");
+            }
 
             // Filter GeoJSON for mainland France and Corsica
             geoData.features = geoData.features.filter((feature) =>
@@ -129,7 +131,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
 
             updateLegend();
         } catch (error) {
-            console.error("Error loading GeoJSON:", error);
+            console.error("Error loading Department GeoJSON:", error);
             resultsDiv.innerHTML += `<p>Erreur carte: ${error.message}</p>`;
         }
 
@@ -164,14 +166,14 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
         map.addControl(new MetricControl());
 
         // Add zoomend listener for auto-hide commune layer
-        map.on('zoomend', () => {
+        map.on("zoomend", () => {
             const zoom = map.getZoom();
-            if (zoom < 8 && communeGeoJsonLayer) { // Adjust threshold as needed
+            if (zoom < 8 && communeGeoJsonLayer) {
                 map.removeLayer(communeGeoJsonLayer);
                 communeGeoJsonLayer = null;
-                geoJsonLayer.setStyle({ fillOpacity: 0.7 }); // Restore department visibility
+                geoJsonLayer.setStyle({ fillOpacity: 0.7 });
                 currentDept = null;
-                map.setView([46.603354, 1.888334], 5); // Reset to France view
+                map.setView([46.603354, 1.888334], 5);
             }
         });
 
@@ -203,36 +205,37 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
     async function loadCommuneData(deptCode) {
         try {
             console.log(`Loading commune data for department ${deptCode}...`);
-
             const response = await fetch(
-                `/api/rankings/communes?dept=${deptCode}&limit=800&sort=total_score&direction=DESC`
+                `/api/rankings/communes?dept=${deptCode}&limit=1000&sort=total_score&direction=DESC`,
             );
-            
+
             if (!response.ok) {
                 const errorText = await response.text();
                 console.error(`API error (${response.status}):`, errorText);
-                throw new Error(`Failed to fetch commune rankings: ${response.status}`);
+                throw new Error(
+                    `Failed to fetch commune rankings: ${response.status}`,
+                );
             }
 
             const responseData = await response.json();
             const allData = responseData.data || responseData;
 
-            console.log(`Loaded ${allData.length} communes for department ${deptCode}`);
+            console.log(
+                `Loaded ${allData.length} communes for department ${deptCode}`,
+            );
 
-            // Process all the commune data
             let processedCount = 0;
             allData.forEach((comm) => {
-                // Map commune data using multiple possible keys for better matching
                 const keys = [
                     comm.cog,
                     comm.COG,
                     comm.code,
                     comm.insee,
-                    comm.COM
+                    comm.COM,
                 ].filter(Boolean);
 
                 if (keys.length === 0) {
-                    console.warn('Commune with no valid COG keys:', comm);
+                    console.warn("Commune with no valid COG keys:", comm);
                     return;
                 }
 
@@ -260,16 +263,20 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                     logements_sociaux_pct: comm.logements_sociaux_pct,
                 };
 
-                // Store the data under all possible keys
-                keys.forEach(key => {
+                keys.forEach((key) => {
                     commData[key] = communeData;
                 });
                 processedCount++;
             });
 
-            console.log(`Processed ${processedCount} communes with valid keys for department ${deptCode}`);
+            console.log(
+                `Processed ${processedCount} communes with valid keys for department ${deptCode}`,
+            );
         } catch (error) {
-            console.error(`Error fetching commune data for ${deptCode}:`, error);
+            console.error(
+                `Error fetching commune data for ${deptCode}:`,
+                error,
+            );
         }
     }
 
@@ -283,24 +290,47 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             communeGeoJsonLayer = null;
         }
 
-        const geoUrl = `https://geo.api.gouv.fr/departements/${deptCode}/communes?format=geojson`;
+        const geoUrl = `https://geo.api.gouv.fr/departements/${deptCode}/communes?format=geojson&geometry=contour`;
 
         try {
             const response = await fetch(geoUrl);
-            if (!response.ok) throw new Error('Failed to fetch commune GeoJSON');
+            if (!response.ok)
+                throw new Error(
+                    `Failed to fetch commune GeoJSON: ${response.status}`,
+                );
             const geoData = await response.json();
+
+            if (!geoData.features) {
+                throw new Error("Invalid GeoJSON: 'features' property missing");
+            }
+
+            // Verify geometry types (Polygon or MultiPolygon)
+            geoData.features = geoData.features.filter((feature) => {
+                const geomType = feature.geometry?.type;
+                if (geomType !== "Polygon" && geomType !== "MultiPolygon") {
+                    console.warn(
+                        `Skipping feature with invalid geometry type: ${geomType}`,
+                        feature,
+                    );
+                    return false;
+                }
+                return true;
+            });
 
             communeGeoJsonLayer = L.geoJSON(geoData, {
                 style: (feature) => getStyle(feature, true),
-                onEachFeature: (feature, layer) => onEachFeature(feature, layer, true),
+                onEachFeature: (feature, layer) =>
+                    onEachFeature(feature, layer, true),
             }).addTo(map);
 
-            // Make department layer semi-transparent
             geoJsonLayer.setStyle({ fillOpacity: 0.1 });
-
             updateLegend();
         } catch (error) {
-            console.error(`Error loading commune GeoJSON for ${deptCode}:`, error);
+            console.error(
+                `Error loading commune GeoJSON for ${deptCode}:`,
+                error,
+            );
+            resultsDiv.innerHTML += `<p>Erreur carte: ${error.message}</p>`;
         }
     }
 
@@ -314,7 +344,6 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
     function getColor(value, metric, isCommune = false) {
         if (value == null || isNaN(value)) return "#ccc";
 
-        // Get min/max for the current metric from the appropriate dataset
         const dataSource = isCommune ? commData : deptData;
         const values = Object.values(dataSource)
             .map((data) => data[metric])
@@ -324,24 +353,21 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
 
         const min = Math.min(...values);
         const max = Math.max(...values);
-        if (min === max) return "#ffeda0"; // Single color if all values are the same
+        if (min === max) return "#ffeda0";
 
-        // Normalize value to 0–1 range
         let normalized = (value - min) / (max - min);
 
-        // Reverse for prenom_francais_pct (low bad = red, high good = yellow)
         if (metric === "prenom_francais_pct") {
             normalized = 1 - normalized;
         }
 
-        // Color gradient (yellow/low to red/high; reversed for prenom_francais_pct)
         const colors = [
-            "#ffeda0", // 0% (low/bad)
+            "#ffeda0",
             "#feb24c",
             "#fd8d3c",
             "#fc4e2a",
             "#e31a1c",
-            "#b10026", // 100% (high/good)
+            "#b10026",
         ];
         const index = Math.min(
             Math.floor(normalized * (colors.length - 1)),
@@ -359,7 +385,6 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
     function getStyle(feature, isCommune = false) {
         let code;
         if (isCommune) {
-            // Try various property names that might contain the COG code
             const possibleCodes = [
                 feature.properties.code,
                 feature.properties.insee,
@@ -368,16 +393,11 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                 feature.properties.COM,
                 feature.properties.Code_INSEE,
                 feature.properties.INSEE_COM,
-                feature.properties.codgeo
+                feature.properties.codgeo,
             ];
-
-            // Find the first code that has data
-            code = possibleCodes.find(c => c && commData[c]);
-
-            if (!code) {
-                // If no match found, try the first non-null code anyway
-                code = possibleCodes.find(c => c);
-            }
+            code =
+                possibleCodes.find((c) => c && commData[c]) ||
+                possibleCodes.find((c) => c);
         } else {
             code = feature.properties.code;
         }
@@ -404,7 +424,6 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
     function onEachFeature(feature, layer, isCommune = false) {
         let code;
         if (isCommune) {
-            // Try various property names that might contain the COG code
             const possibleCodes = [
                 feature.properties.code,
                 feature.properties.insee,
@@ -413,20 +432,19 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                 feature.properties.COM,
                 feature.properties.Code_INSEE,
                 feature.properties.INSEE_COM,
-                feature.properties.codgeo
+                feature.properties.codgeo,
             ];
-
-            // Find the first code that has data
-            code = possibleCodes.find(c => c && commData[c]);
-
-            if (!code) {
-                code = possibleCodes.find(c => c);
-            }
+            code =
+                possibleCodes.find((c) => c && commData[c]) ||
+                possibleCodes.find((c) => c);
         } else {
             code = feature.properties.code;
         }
 
-        const name = feature.properties.nom || feature.properties.NOM || feature.properties.name;
+        const name =
+            feature.properties.nom ||
+            feature.properties.NOM ||
+            feature.properties.name;
         const data = isCommune ? commData[code] : deptData[code];
 
         layer.on({
@@ -439,23 +457,24 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                 });
                 const value = data ? data[currentMetric] : "N/A";
                 const metricLabel = MetricsConfig.getMetricLabel(currentMetric);
-                const formattedValue = MetricsConfig.formatMetricValue(value, currentMetric);
+                const formattedValue = MetricsConfig.formatMetricValue(
+                    value,
+                    currentMetric,
+                );
                 layer
                     .bindPopup(
                         `<b>${name} (${code})</b><br>${metricLabel}: ${formattedValue}`,
-                        {
-                            className: "custom-popup",
-                            closeButton: false,
-                        },
+                        { className: "custom-popup", closeButton: false },
                     )
                     .openPopup();
             },
             mouseout: (e) => {
-                (isCommune ? communeGeoJsonLayer : geoJsonLayer).resetStyle(e.target);
+                (isCommune ? communeGeoJsonLayer : geoJsonLayer).resetStyle(
+                    e.target,
+                );
             },
             click: async () => {
                 if (!isCommune) {
-                    // Department click: Zoom, load communes
                     currentDept = code;
                     const bounds = layer.getBounds();
                     map.fitBounds(bounds);
@@ -463,13 +482,12 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                     await loadCommuneGeoJson(code);
                     departementSelect.value = code;
                     departementSelect.dispatchEvent(new Event("change"));
+                } else if (window.updateSelectedCommune) {
+                    window.updateSelectedCommune(code);
                 } else {
-                   // Commune click: Update main application state
-                    if (window.updateSelectedCommune) {
-                        window.updateSelectedCommune(code); // Call the function in main.js
-                    } else {
-                        console.warn("updateSelectedCommune function not found in main.js");
-                    }
+                    console.warn(
+                        "updateSelectedCommune function not found in main.js",
+                    );
                 }
             },
         });
@@ -485,7 +503,9 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             geoJsonLayer.eachLayer((layer) => geoJsonLayer.resetStyle(layer));
         }
         if (communeGeoJsonLayer) {
-            communeGeoJsonLayer.eachLayer((layer) => communeGeoJsonLayer.resetStyle(layer));
+            communeGeoJsonLayer.eachLayer((layer) =>
+                communeGeoJsonLayer.resetStyle(layer),
+            );
         }
         updateLegend();
     }
@@ -501,8 +521,6 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
         legendControl = L.control({ position: "bottomleft" });
         legendControl.onAdd = () => {
             const div = L.DomUtil.create("div", "info legend");
-
-            // Use commune data if we're in commune view, otherwise department data
             const isInCommuneView = communeGeoJsonLayer !== null;
             const dataSource = isInCommuneView ? commData : deptData;
 
@@ -537,7 +555,10 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                     currentMetric,
                 );
                 const formattedNextGrade = grades[i + 1]
-                    ? MetricsConfig.formatMetricValue(grades[i + 1], currentMetric)
+                    ? MetricsConfig.formatMetricValue(
+                          grades[i + 1],
+                          currentMetric,
+                      )
                     : "+";
                 div.innerHTML +=
                     '<i style="background:' +
@@ -555,10 +576,12 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
      * Updates the metric selector dropdown with current labels
      */
     function updateMetricSelector() {
-        const metricSelect = document.querySelector('.leaflet-control-metric select');
+        const metricSelect = document.querySelector(
+            ".leaflet-control-metric select",
+        );
         if (metricSelect) {
             const currentValue = metricSelect.value;
-            metricSelect.innerHTML = '';
+            metricSelect.innerHTML = "";
 
             const updatedMetrics = MetricsConfig.getMetricOptions();
             updatedMetrics.forEach((m) => {
@@ -572,9 +595,11 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
 
     initMap();
 
-    return { 
+    return {
         updateMap,
-        get currentMetric() { return currentMetric; }
+        get currentMetric() {
+            return currentMetric;
+        },
     };
 }
 
