@@ -94,7 +94,7 @@ import { api } from './apiService.js';
     const debouncedInputHandler = debounce(async () => {
         const departement = departementSelect.value;
         const query = communeInput.value;
-        
+
         // Handle commune search and update autocomplete
         await locationHandler.handleCommuneInput(departement, query);
 
@@ -129,7 +129,7 @@ import { api } from './apiService.js';
 
     communeInput.addEventListener("input", debouncedInputHandler);
 
-    communeInput.addEventListener("change", async () => {
+    async function handleCommuneSelection() {
         const selectedValue = communeInput.value.trim();
         // Extract commune name from format "CommuneName (DeptCode)" if needed
         const selectedCommune = selectedValue.includes(' (') 
@@ -148,7 +148,7 @@ import { api } from './apiService.js';
                     departement = communeDept;
                     departementSelect.value = departement;
                     console.log("Auto-selected/updated department:", departement);
-                    
+
                     // Trigger department change event to update related components
                     departementSelect.dispatchEvent(new Event('change'));
                 }
@@ -170,10 +170,10 @@ import { api } from './apiService.js';
 
                 if (cog && departement) {
                     console.log("Using COG for commune:", selectedCommune, cog);
-                    
+
                     // Keep only the commune name in the input field (remove department code)
                     communeInput.value = selectedCommune;
-                    
+
                     scoreTableHandler.showCommuneDetails(cog);
                     executiveHandler.showCommuneExecutive(cog);
                     locationHandler.loadLieux(departement, cog);
@@ -198,6 +198,12 @@ import { api } from './apiService.js';
                 console.error("Erreur lors de la recherche:", error);
             }
         }
+    }
+
+    communeInput.addEventListener("change", handleCommuneSelection);
+    communeInput.addEventListener("blur", () => {
+        // Small delay to allow click events on suggestions to fire first
+        setTimeout(handleCommuneSelection, 150);
     });
 
     lieuxSelect.addEventListener("change", async () => {

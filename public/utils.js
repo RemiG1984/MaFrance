@@ -96,25 +96,36 @@ export function setupCustomAutocomplete(inputId, suggestionsContainerId, options
 
     // Function to show/hide and populate suggestions
     function updateSuggestions(inputValue) {
+        console.log("Updating suggestions for:", inputValue, "Options available:", options.length);
         suggestionsContainer.innerHTML = '';
         suggestionsContainer.style.display = 'none';
 
-        if (!inputValue) return;
+        if (!inputValue || inputValue.length < 2) return;
 
         const normalizedInput = TextUtils.normalizeText(inputValue);
         const filteredOptions = options.filter(option => 
             TextUtils.normalizeText(option).includes(normalizedInput)
         );
 
+        console.log("Filtered options:", filteredOptions.length);
+
         if (filteredOptions.length === 0) return;
 
-        filteredOptions.forEach(option => {
+        filteredOptions.slice(0, 10).forEach(option => { // Limit to 10 suggestions
             const suggestionItem = document.createElement('div');
             suggestionItem.textContent = option;
-            suggestionItem.style.padding = '8px';
-            suggestionItem.style.cursor = 'pointer';
-            suggestionItem.style.borderBottom = '1px solid #eee';
-            suggestionItem.addEventListener('click', () => {
+            suggestionItem.style.cssText = 'padding: 8px; cursor: pointer; border-bottom: 1px solid #eee; background: white;';
+            
+            suggestionItem.addEventListener('mouseenter', () => {
+                suggestionItem.style.backgroundColor = '#f0f0f0';
+            });
+            
+            suggestionItem.addEventListener('mouseleave', () => {
+                suggestionItem.style.backgroundColor = 'white';
+            });
+            
+            suggestionItem.addEventListener('click', (e) => {
+                e.preventDefault();
                 inputElement.value = option;
                 suggestionsContainer.style.display = 'none';
                 // Trigger change event to process the selected commune
@@ -124,6 +135,7 @@ export function setupCustomAutocomplete(inputId, suggestionsContainerId, options
         });
 
         suggestionsContainer.style.display = 'block';
+        console.log("Suggestions displayed");
     }
 
     // Event listener for input changes

@@ -175,6 +175,7 @@ function LocationHandler(
             
             // Update custom autocomplete with current results
             const suggestions = communesData.map(commune => commune.displayName);
+            console.log("Setting up autocomplete with suggestions:", suggestions.length);
             setupCustomAutocomplete('communeInput', 'communeSuggestions', suggestions);
         } else if (query.length === 0) {
             // Clear suggestions when query is empty
