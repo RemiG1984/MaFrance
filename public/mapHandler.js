@@ -200,7 +200,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                         map.removeLayer(communeGeoJsonLayer);
                         communeGeoJsonLayer = null;
                     }
-                    geoJsonLayer.setStyle({ fillOpacity: 0.7 });
+                    geoJsonLayer.setStyle({ fillOpacity: 0.7, opacity: 1 });
                     currentDept = null;
                     map.setView([46.603354, 1.888334], 5);
                 });
