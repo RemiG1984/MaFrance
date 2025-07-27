@@ -385,13 +385,19 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
             const departement = item.departement;
             const commune = item.commune;
 
-            // Handle missing commune names data gracefully
+            // Only fetch commune names data if metrics that depend on it are available
             let namesData = null;
-            try {
-                namesData = await api.getCommuneNames(cog);
-            } catch (error) {
-                console.log('Commune names data not available for COG:', cog);
-                namesData = null;
+            const needsNamesData = MetricsConfig.isMetricAvailable("extra_europeen_pct", "commune") || 
+                                 MetricsConfig.isMetricAvailable("musulman_pct", "commune") || 
+                                 MetricsConfig.isMetricAvailable("prenom_francais_pct", "commune");
+            
+            if (needsNamesData) {
+                try {
+                    namesData = await api.getCommuneNames(cog);
+                } catch (error) {
+                    console.log('Commune names data not available for COG:', cog);
+                    namesData = null;
+                }
             }
 
             const [deptData, crimeData, deptNamesData, deptCrimeData] =
