@@ -380,65 +380,47 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             "#b10026",
         ];
 
-        const uniqueValues = [...new Set(values)].sort((a, b) => a - b);
-        
-        // Adaptive thresholds and grades based on data distribution
-        let thresholds = [];
-        let grades = [];
-        
+        // Calculate thresholds for color mapping
+        const numColors = colors.length;
+        const thresholds = [];
+        for (let i = 0; i < numColors - 1; i++) {
+            const percentile = (i + 1) / numColors;
+            const index = Math.floor(percentile * values.length);
+            thresholds.push(values[Math.min(index, values.length - 1)]);
+        }
+
+        // Calculate grades for legend
+        const grades = [];
         if (values.length === 1) {
             grades.push(values[0]);
-        } else if (uniqueValues.length <= 4) {
-            // For very few unique values, use them directly
-            grades.push(...uniqueValues);
-            thresholds = uniqueValues.slice(0, -1); // All but the last value as thresholds
         } else {
-            // Try to create meaningful quantile-based breaks
-            const numBreaks = Math.min(6, uniqueValues.length);
-            const targetThresholds = [];
+            const uniqueValues = [...new Set(values)].sort((a, b) => a - b);
             
-            // Calculate initial quantile positions
-            for (let i = 1; i < numBreaks; i++) {
-                const percentile = i / numBreaks;
-                const position = percentile * (values.length - 1);
-                const lowerIndex = Math.floor(position);
-                const upperIndex = Math.ceil(position);
+            if (uniqueValues.length <= 3) {
+                grades.push(...uniqueValues);
+            } else {
+                for (let i = 0; i < numColors; i++) {
+                    const percentile = i / (numColors - 1);
+                    const index = Math.floor(percentile * (values.length - 1));
+                    grades.push(values[index]);
+                }
                 
-                // Interpolate between positions if needed
-                let threshold;
-                if (lowerIndex === upperIndex) {
-                    threshold = values[lowerIndex];
+                const uniqueGrades = [...new Set(grades)].sort((a, b) => a - b);
+                
+                if (uniqueGrades.length < 4 && uniqueValues.length > 3) {
+                    const min = Math.min(...values);
+                    const max = Math.max(...values);
+                    const step = (max - min) / 5;
+                    
+                    grades.length = 0;
+                    for (let i = 0; i <= 5; i++) {
+                        grades.push(min + (step * i));
+                    }
                 } else {
-                    const weight = position - lowerIndex;
-                    threshold = values[lowerIndex] * (1 - weight) + values[upperIndex] * weight;
-                }
-                targetThresholds.push(threshold);
-            }
-            
-            // Remove duplicates and ensure meaningful separation
-            const uniqueThresholds = [];
-            const minSeparation = (Math.max(...values) - Math.min(...values)) / (numBreaks * 2);
-            
-            for (let i = 0; i < targetThresholds.length; i++) {
-                const threshold = targetThresholds[i];
-                const lastThreshold = uniqueThresholds[uniqueThresholds.length - 1];
-                
-                if (uniqueThresholds.length === 0 || 
-                    Math.abs(threshold - lastThreshold) >= minSeparation) {
-                    uniqueThresholds.push(threshold);
+                    grades.length = 0;
+                    grades.push(...uniqueGrades);
                 }
             }
-            
-            thresholds = uniqueThresholds;
-            
-            // Create grades from min value through thresholds to max
-            grades = [Math.min(...values), ...thresholds];
-            if (grades[grades.length - 1] < Math.max(...values)) {
-                grades.push(Math.max(...values));
-            }
-            
-            // Remove any remaining duplicates in grades
-            grades = [...new Set(grades)].sort((a, b) => a - b);
         }
 
         // Cache the results
