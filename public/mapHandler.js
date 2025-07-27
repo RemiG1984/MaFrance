@@ -209,8 +209,9 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
      */
     async function loadCommuneData(deptCode) {
         try {
+            // Try to get all communes with a high limit (most departments have < 1000 communes)
             const response = await fetch(
-                `/api/rankings/communes?dept=${deptCode}&limit=100&sort=total_score&direction=DESC`
+                `/api/rankings/communes?dept=${deptCode}&limit=500&sort=total_score&direction=DESC`
             );
             if (!response.ok) {
                 const errorText = await response.text();
