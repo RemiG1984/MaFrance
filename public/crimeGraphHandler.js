@@ -155,78 +155,51 @@ function CrimeGraphHandler() {
             // Extract years (use main data years as reference)
             const years = mainData.map((row) => row.annee);
 
-            // Define crime categories with labels from MetricsConfig
-            const categories =
-                type === "commune"
-                    ? [
-                          {
-                              key: "violences_physiques_p1k",
-                              label: MetricsConfig.getMetricLabel("violences_physiques_p1k"),
-                              color: "#007bff",
-                          },
-                          {
-                              key: "violences_sexuelles_p1k",
-                              label: MetricsConfig.getMetricLabel("violences_sexuelles_p1k"),
-                              color: "#28a745",
-                          },
-                          { 
-                              key: "vols_p1k", 
-                              label: MetricsConfig.getMetricLabel("vols_p1k"), 
-                              color: "#ffc107" 
-                          },
-                          {
-                              key: "destructions_p1k",
-                              label: MetricsConfig.getMetricLabel("destructions_p1k"),
-                              color: "#e83e8c",
-                          },
-                          {
-                              key: "stupefiants_p1k",
-                              label: MetricsConfig.getMetricLabel("stupefiants_p1k"),
-                              color: "#17a2b8",
-                          },
-                          {
-                              key: "escroqueries_p1k",
-                              label: MetricsConfig.getMetricLabel("escroqueries_p1k"),
-                              color: "#fd7e14",
-                          },
-                      ]
-                    : [
-                          {
-                              key: "homicides_p100k",
-                              label: MetricsConfig.getMetricLabel("homicides_p100k"),
-                              color: "#dc3545",
-                          },
-                          {
-                              key: "violences_physiques_p1k",
-                              label: MetricsConfig.getMetricLabel("violences_physiques_p1k"),
-                              color: "#007bff",
-                          },
-                          {
-                              key: "violences_sexuelles_p1k",
-                              label: MetricsConfig.getMetricLabel("violences_sexuelles_p1k"),
-                              color: "#28a745",
-                          },
-                          { 
-                              key: "vols_p1k", 
-                              label: MetricsConfig.getMetricLabel("vols_p1k"), 
-                              color: "#ffc107" 
-                          },
-                          {
-                              key: "destructions_p1k",
-                              label: MetricsConfig.getMetricLabel("destructions_p1k"),
-                              color: "#e83e8c",
-                          },
-                          {
-                              key: "stupefiants_p1k",
-                              label: MetricsConfig.getMetricLabel("stupefiants_p1k"),
-                              color: "#17a2b8",
-                          },
-                          {
-                              key: "escroqueries_p1k",
-                              label: MetricsConfig.getMetricLabel("escroqueries_p1k"),
-                              color: "#fd7e14",
-                          },
-                      ];
+            // Define all possible crime categories
+            const allCategories = [
+                {
+                    key: "homicides_p100k",
+                    label: MetricsConfig.getMetricLabel("homicides_p100k"),
+                    color: "#dc3545",
+                },
+                {
+                    key: "violences_physiques_p1k",
+                    label: MetricsConfig.getMetricLabel("violences_physiques_p1k"),
+                    color: "#007bff",
+                },
+                {
+                    key: "violences_sexuelles_p1k",
+                    label: MetricsConfig.getMetricLabel("violences_sexuelles_p1k"),
+                    color: "#28a745",
+                },
+                { 
+                    key: "vols_p1k", 
+                    label: MetricsConfig.getMetricLabel("vols_p1k"), 
+                    color: "#ffc107" 
+                },
+                {
+                    key: "destructions_p1k",
+                    label: MetricsConfig.getMetricLabel("destructions_p1k"),
+                    color: "#e83e8c",
+                },
+                {
+                    key: "stupefiants_p1k",
+                    label: MetricsConfig.getMetricLabel("stupefiants_p1k"),
+                    color: "#17a2b8",
+                },
+                {
+                    key: "escroqueries_p1k",
+                    label: MetricsConfig.getMetricLabel("escroqueries_p1k"),
+                    color: "#fd7e14",
+                },
+            ];
+
+            // Filter categories based on availability at current level
+            const currentLevel = type === "commune" ? "commune" : 
+                                type === "department" ? "departement" : "france";
+            const categories = allCategories.filter(category => 
+                MetricsConfig.isMetricAvailable(category.key, currentLevel)
+            );
 
             // Clear existing charts before creating new ones
             chartGrid.innerHTML = '';
