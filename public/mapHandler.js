@@ -209,42 +209,22 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
      */
     async function loadCommuneData(deptCode) {
         try {
-            let allData = [];
-            let offset = 0;
-            const limit = 500; // Use the increased validation limit
-            let hasMoreData = true;
-
             console.log(`Loading commune data for department ${deptCode}...`);
 
-            // Make multiple API calls to get all communes
-            while (hasMoreData) {
-                const response = await fetch(
-                    `/api/rankings/communes?dept=${deptCode}&limit=${limit}&offset=${offset}&sort=total_score&direction=DESC`
-                );
-                
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error(`API error (${response.status}):`, errorText);
-                    throw new Error(`Failed to fetch commune rankings: ${response.status}`);
-                }
-
-                const responseData = await response.json();
-                const data = responseData.data || responseData;
-
-                console.log(`API call ${Math.floor(offset/limit) + 1} for dept ${deptCode}: got ${data.length} communes (offset: ${offset})`);
-
-                if (data.length === 0) {
-                    hasMoreData = false;
-                } else {
-                    allData = allData.concat(data);
-                    offset += limit;
-                    
-                    // If we got fewer results than the limit, we've reached the end
-                    if (data.length < limit) {
-                        hasMoreData = false;
-                    }
-                }
+            const response = await fetch(
+                `/api/rankings/communes?dept=${deptCode}&limit=800&sort=total_score&direction=DESC`
+            );
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error(`API error (${response.status}):`, errorText);
+                throw new Error(`Failed to fetch commune rankings: ${response.status}`);
             }
+
+            const responseData = await response.json();
+            const allData = responseData.data || responseData;
+
+            console.log(`Loaded ${allData.length} communes for department ${deptCode}`);
 
             // Process all the commune data
             let processedCount = 0;
@@ -294,7 +274,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                 processedCount++;
             });
 
-            console.log(`Loaded ${allData.length} communes for department ${deptCode}, processed ${processedCount} with valid keys`);
+            console.log(`Processed ${processedCount} communes with valid keys for department ${deptCode}`);
         } catch (error) {
             console.error(`Error fetching commune data for ${deptCode}:`, error);
         }
