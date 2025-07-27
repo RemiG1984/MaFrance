@@ -215,8 +215,12 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             if (!response.ok) throw new Error('Failed to fetch commune rankings');
             const { data } = await response.json();
             console.log(`Loaded ${data.length} communes for department ${deptCode}:`, data.slice(0, 3));
+            console.log('Sample commune data structure:', data[0]);
             data.forEach((comm) => {
-                commData[comm.cog] = {
+                // Map both COG and potential code variations
+                const communeKey = comm.cog || comm.code || comm.COG;
+                console.log(`Mapping commune: ${comm.commune} with key: ${communeKey}`);
+                commData[communeKey] = {
                     total_score: comm.total_score,
                     insecurite_score: comm.insecurite_score,
                     homicides_p100k: comm.homicides_p100k,
@@ -265,6 +269,12 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             const response = await fetch(geoUrl);
             if (!response.ok) throw new Error('Failed to fetch commune GeoJSON');
             const geoData = await response.json();
+
+            // Debug: Log commune GeoJSON feature properties
+            if (geoData.features && geoData.features.length > 0) {
+                console.log('Sample commune GeoJSON properties:', geoData.features[0].properties);
+                console.log('Available commune codes in data:', Object.keys(commData).slice(0, 10));
+            }
 
             communeGeoJsonLayer = L.geoJSON(geoData, {
                 style: (feature) => getStyle(feature, true),
@@ -333,8 +343,8 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
      * @returns {Object} The style object.
      */
     function getStyle(feature, isCommune = false) {
-        // For communes, use INSEE code; for departments, use code
-        const code = isCommune ? feature.properties.insee : feature.properties.code;
+        // Use 'code' property for both departments and communes
+        const code = feature.properties.code;
         const data = isCommune ? commData[code] : deptData[code];
         const value = data ? data[currentMetric] : null;
         return {
@@ -354,8 +364,8 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
      * @param {boolean} isCommune - Flag for commune mode.
      */
     function onEachFeature(feature, layer, isCommune = false) {
-        // For communes, use INSEE code; for departments, use code
-        const code = isCommune ? feature.properties.insee : feature.properties.code;
+        // Use 'code' property for both departments and communes  
+        const code = feature.properties.code;
         const name = feature.properties.nom;
         const data = isCommune ? commData[code] : deptData[code];
 

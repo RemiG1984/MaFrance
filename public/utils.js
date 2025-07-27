@@ -62,8 +62,9 @@ export function formatNumber(number) {
   return number.toLocaleString("fr-FR");
 }
 
-// Department names mapping (import from departmentNames.js)
-import { DepartmentNames } from './departmentNames.js';
+// Import department names
+import './departmentNames.js'; // This should define DepartmentNames globally
+const DepartmentNames = window.DepartmentNames || {};
 
 // Re-export DepartmentNames for backward compatibility
 export { DepartmentNames };
