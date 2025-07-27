@@ -65,10 +65,7 @@ class ApiService {
         this.cache.clear();
     }
 
-    // Get country ministre
-    async getCountryMinistre(country = 'France') {
-        return this.request(`/api/country/ministre?country=${country}`);
-    }
+    
 }
 
 // Export singleton instance
@@ -136,9 +133,7 @@ export const api = {
         return apiService.request(`/api/articles?${queryString}`);
     },
 
-    // Search
-    searchCommunes: (dept, query) => 
-        apiService.request(`/api/search?dept=${dept}&q=${encodeURIComponent(query)}`),
+    
 
     // Rankings
     getRankingsDepartments: (params) => {
@@ -149,17 +144,7 @@ export const api = {
         const queryString = new URLSearchParams(params).toString();
         return apiService.request(`/api/rankings/communes?${queryString}`);
     },
-    // Fetch communes for autocomplete
-    fetchCommunes: async (departement, query = "") => {
-        const params = new URLSearchParams({ dept: departement });
-        if (query) params.append("q", query);
-        return apiService.request(`/api/communes?${params}`);
-    },
-
-    // Fetch commune suggestions for faster autocomplete
-    fetchCommuneSuggestions: async (departement, query = "") => {
-        const params = new URLSearchParams({ dept: departement });
-        if (query) params.append("q", query);
-        return apiService.request(`/api/communes/suggestions?${params}`);
-    },
+    // Search communes with query support
+    searchCommunes: (dept, query) => 
+        apiService.request(`/api/search?dept=${dept}&q=${encodeURIComponent(query)}`),
 };

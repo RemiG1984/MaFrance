@@ -127,9 +127,26 @@ import { api } from './apiService.js';
 
     communeInput.addEventListener("input", debouncedInputHandler);
 
+    // Helper function to get COG for a commune
+    async function getCOGForCommune(selectedCommune, departement) {
+        let cog = locationHandler.getCOGForCommune(selectedCommune);
+        
+        if (!cog && departement) {
+            const response = await fetch(
+                `/api/communes?dept=${encodeURIComponent(departement)}&q=${encodeURIComponent(selectedCommune)}`
+            );
+            if (!response.ok) throw new Error("Erreur lors de la recherche");
+            const communes = await response.json();
+            const commune = communes.find((c) => c.commune === selectedCommune);
+            if (commune) {
+                cog = commune.COG;
+            }
+        }
+        return cog;
+    }
+
     communeInput.addEventListener("change", async () => {
         const selectedValue = communeInput.value.trim();
-        // Extract commune name from format "CommuneName (DeptCode)" if needed
         const selectedCommune = selectedValue.includes(' (') 
             ? selectedValue.substring(0, selectedValue.lastIndexOf(' ('))
             : selectedValue;
@@ -137,54 +154,26 @@ import { api } from './apiService.js';
 
         if (selectedCommune) {
             try {
-                // First try to get COG and department from the datalist options
-                let cog = locationHandler.getCOGForCommune(selectedCommune);
-                let communeDept = locationHandler.getDepartmentForCommune(selectedCommune);
+                const communeDept = locationHandler.getDepartmentForCommune(selectedCommune);
 
                 // Auto-select department if not already selected, or update if different
                 if (communeDept && (!departement || departement !== communeDept)) {
                     departement = communeDept;
                     departementSelect.value = departement;
-                    console.log("Auto-selected/updated department:", departement);
-                    
-                    // Trigger department change event to update related components
                     departementSelect.dispatchEvent(new Event('change'));
                 }
 
-                if (!cog && departement) {
-                    // Fallback: fetch commune details to get COG
-                    const response = await fetch(
-                        `/api/communes?dept=${encodeURIComponent(
-                            departement,
-                        )}&q=${encodeURIComponent(selectedCommune)}`,
-                    );
-                    if (!response.ok) throw new Error("Erreur lors de la recherche");
-                    const communes = await response.json();
-                    const commune = communes.find((c) => c.commune === selectedCommune);
-                    if (commune) {
-                        cog = commune.COG;
-                    }
-                }
+                const cog = await getCOGForCommune(selectedCommune, departement);
 
                 if (cog && departement) {
-                    console.log("Using COG for commune:", selectedCommune, cog);
-                    
-                    // Keep only the commune name in the input field (remove department code)
                     communeInput.value = selectedCommune;
-                    
                     scoreTableHandler.showCommuneDetails(cog);
                     executiveHandler.showCommuneExecutive(cog);
                     locationHandler.loadLieux(departement, cog);
                     articleHandler.loadArticles(departement, cog).then(() => {
-                        articleHandler
-                            .loadArticleCounts(departement, cog)
-                            .then((counts) => {
-                                articleHandler.renderFilterButtons(
-                                    counts,
-                                    allArticles,
-                                    currentLieu,
-                                );
-                            });
+                        articleHandler.loadArticleCounts(departement, cog).then((counts) => {
+                            articleHandler.renderFilterButtons(counts, allArticles, currentLieu);
+                        });
                     });
                 } else {
                     resultsDiv.innerHTML = "<p>Commune non trouvée.</p>";
@@ -202,42 +191,16 @@ import { api } from './apiService.js';
         const departement = departementSelect.value;
         const commune = communeInput.value.trim();
         currentLieu = lieuxSelect.value;
-        console.log("Current lieu set to:", currentLieu);
 
         if (departement && commune) {
             try {
-                // Get COG from the datalist options
-                let cog = locationHandler.getCOGForCommune(commune);
-
-                if (!cog) {
-                    // Fallback: fetch commune details to get COG
-                    const response = await fetch(
-                        `/api/communes?dept=${encodeURIComponent(
-                            departement,
-                        )}&q=${encodeURIComponent(commune)}`,
-                    );
-                    if (!response.ok) throw new Error("Erreur lors de la recherche");
-                    const communes = await response.json();
-                    const communeData = communes.find((c) => c.commune === commune);
-                    if (communeData) {
-                        cog = communeData.COG;
-                    }
-                }
-
+                const cog = await getCOGForCommune(commune, departement);
                 if (cog) {
-                    articleHandler
-                        .loadArticles(departement, cog, currentLieu)
-                        .then(() => {
-                            articleHandler
-                                .loadArticleCounts(departement, cog, currentLieu)
-                                .then((counts) => {
-                                    articleHandler.renderFilterButtons(
-                                        counts,
-                                        allArticles,
-                                        currentLieu,
-                                    );
-                                });
+                    articleHandler.loadArticles(departement, cog, currentLieu).then(() => {
+                        articleHandler.loadArticleCounts(departement, cog, currentLieu).then((counts) => {
+                            articleHandler.renderFilterButtons(counts, allArticles, currentLieu);
                         });
+                    });
                 } else {
                     console.error("COG not found for commune:", commune);
                 }
@@ -249,79 +212,62 @@ import { api } from './apiService.js';
         }
     });
 
-    // Prevent duplicate initialization
-    let appInitialized = false;
+    // Initialize the application once
+    function initializeApp() {
+        console.log('Initializing application...');
+        communeInput.disabled = false;
+        communeInput.placeholder = "Rechercher une commune...";
+        
+        scoreTableHandler.showCountryDetails();
+        executiveHandler.showCountryExecutive();
+        locationHandler.loadDepartements();
+        updateExternalLinksWithLabelState();
+    }
 
     // Label toggle functionality
     if (labelToggleBtn) {
-        // Initialize button text with current state
         labelToggleBtn.textContent = MetricsConfig.getCurrentToggleButtonLabel();
-
         labelToggleBtn.addEventListener('click', () => {
             MetricsConfig.cycleLabelState();
-
-            // Update button text and style based on state
             const stateName = MetricsConfig.getLabelStateName();
-
+            
             labelToggleBtn.textContent = MetricsConfig.getCurrentToggleButtonLabel();
-
-            // Update button style
             labelToggleBtn.classList.remove('active', 'alt1', 'alt2');
             if (stateName !== 'standard') {
-                labelToggleBtn.classList.add('active');
-                labelToggleBtn.classList.add(stateName);
+                labelToggleBtn.classList.add('active', stateName);
             }
-
-            // Update page title
+            
             document.title = MetricsConfig.getCurrentPageTitle();
-
-            // Update header h1 text
             const headerH1 = document.querySelector('h1');
-            if (headerH1) {
-                headerH1.textContent = MetricsConfig.getCurrentPageTitle();
-            }
-
-            // Refresh all components that display metric labels
+            if (headerH1) headerH1.textContent = MetricsConfig.getCurrentPageTitle();
+            
             refreshMetricLabels();
         });
     }
 
-    // Function to refresh all metric labels across components
     function refreshMetricLabels() {
-        // Refresh score table if visible
         const currentDept = departementSelect.value;
         const currentCommune = communeInput.value;
 
         if (currentCommune && currentDept) {
-            // Show commune details with updated labels
             api.getCommunes(currentDept).then(data => {
-                if (data.length > 0) {
-                    scoreTableHandler.showCommuneDetails(data[0].COG);
-                }
+                if (data.length > 0) scoreTableHandler.showCommuneDetails(data[0].COG);
             }).catch(console.error);
         } else if (currentDept) {
-            // Show department details with updated labels
             scoreTableHandler.showDepartmentDetails(currentDept);
         } else {
-            // Show country details with updated labels
             scoreTableHandler.showCountryDetails();
         }
 
-        // Refresh map if it exists and has an updateMap method
-        if (mapHandler && typeof mapHandler.updateMap === 'function') {
-            // The map handler will get updated labels automatically from MetricsConfig
+        if (mapHandler?.updateMap) {
             mapHandler.updateMap(mapHandler.currentMetric || 'total_score');
         }
-
-        // Update all external links with current label state
         updateExternalLinksWithLabelState();
     }
 
-    // Function to add label state to external links
     function updateExternalLinksWithLabelState() {
         const labelState = MetricsConfig.labelState;
         const links = document.querySelectorAll('a[href*="crime_graph.html"], a[href*="rankings.html"], a[href*="names_graph.html"]');
-
         links.forEach(link => {
             const url = new URL(link.href, window.location.origin);
             if (labelState > 0) {
@@ -331,27 +277,6 @@ import { api } from './apiService.js';
             }
             link.href = url.toString();
         });
-    }
-
-    // Initialize the application
-    function initializeApp() {
-        if (appInitialized) return;
-        appInitialized = true;
-
-        console.log('Initializing application...');
-
-        // Ensure commune input is always enabled for global search
-        communeInput.disabled = false;
-        communeInput.placeholder = "Rechercher une commune...";
-
-        
-
-        scoreTableHandler.showCountryDetails();
-        executiveHandler.showCountryExecutive();
-        locationHandler.loadDepartements();
-
-        // Initialize external links with current label state
-        updateExternalLinksWithLabelState();
     }
 
     // Initialize when DOM is ready
