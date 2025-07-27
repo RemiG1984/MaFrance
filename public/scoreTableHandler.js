@@ -1,6 +1,5 @@
 import { MetricsConfig } from "./metricsConfig.js";
 import { api } from "./apiService.js";
-import { apiService } from "./apiService.js";
 
 /**
  * Score table handler module for displaying detailed score information.
