@@ -279,6 +279,43 @@ import { api } from './apiService.js';
         });
     }
 
+    // Global function for map commune selection
+    window.updateSelectedCommune = async function(cog) {
+        try {
+            // Get commune details to find the commune name and department
+            const communeDetails = await api.getCommuneDetails(cog);
+            if (communeDetails && communeDetails.commune) {
+                const communeName = communeDetails.commune;
+                const deptCode = communeDetails.departement;
+                
+                // Update department selector if different
+                if (deptCode && departementSelect.value !== deptCode) {
+                    departementSelect.value = deptCode;
+                    departementSelect.dispatchEvent(new Event('change'));
+                }
+                
+                // Update commune input
+                communeInput.value = communeName;
+                
+                // Show commune details
+                scoreTableHandler.showCommuneDetails(cog);
+                executiveHandler.showCommuneExecutive(cog);
+                
+                // Load lieux and articles
+                if (deptCode) {
+                    locationHandler.loadLieux(deptCode, cog);
+                    articleHandler.loadArticles(deptCode, cog).then(() => {
+                        articleHandler.loadArticleCounts(deptCode, cog).then((counts) => {
+                            articleHandler.renderFilterButtons(counts, allArticles, currentLieu);
+                        });
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('Error updating selected commune:', error);
+        }
+    };
+
     // Initialize when DOM is ready
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initializeApp);
