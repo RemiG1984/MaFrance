@@ -334,7 +334,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
 
             // Clear cache when switching to commune level
             clearQuantileCache();
-            
+
             // Update metric control options for commune level
             if (metricControl && metricControl.updateOptions) {
                 metricControl.updateOptions();
@@ -663,51 +663,51 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                 }
             },
             click: async () => {
-                if (!isCommune) {
-                    // Check if current metric is available at commune level before drilling down
-                    if (
-                        !MetricsConfig.isMetricAvailable(
-                            currentMetric,
-                            "commune",
-                        )
-                    ) {
-                        // Show notification that this metric is not available at commune level
-                        const popup = L.popup()
-                            .setLatLng(layer.getBounds().getCenter())
-                            .setContent(
-                                `<b>Métrique non disponible</b><br>La métrique "${MetricsConfig.getMetricLabel(currentMetric)}" n'est disponible qu'au niveau départemental.`,
-                            )
-                            .openOn(map);
+                        if (!isCommune) {
+                            // Check if current metric is available at commune level before drilling down
+                            if (
+                                !MetricsConfig.isMetricAvailable(
+                                    currentMetric,
+                                    "commune",
+                                )
+                            ) {
+                                // Show notification that this metric is not available at commune level
+                                const popup = L.popup()
+                                    .setLatLng(layer.getBounds().getCenter())
+                                    .setContent(
+                                        `<b>Métrique non disponible</b><br>La métrique "${MetricsConfig.getMetricLabel(currentMetric)}" n'est disponible qu'au niveau départemental.`,
+                                    )
+                                    .openOn(map);
 
-                        // Close popup after 3 seconds
-                        setTimeout(() => {
-                            map.closePopup(popup);
-                        }, 3000);
-                        return;
-                    }
+                                // Close popup after 3 seconds
+                                setTimeout(() => {
+                                    map.closePopup(popup);
+                                }, 3000);
+                                return;
+                            }
 
-                    const normalizedCode = normalizeDept(code);
-                    currentDept = normalizedCode;
-                    const bounds = layer.getBounds();
-                    map.fitBounds(bounds);
-                    await loadCommuneData(normalizedCode);
-                    await loadCommuneGeoJson(normalizedCode);
-                    // Clear cache when drilling down to commune level
-                    clearQuantileCache();
-                    // Update available metrics for commune level
-                    if (metricControl && metricControl.updateOptions) {
-                        metricControl.updateOptions();
-                    }
-                    departementSelect.value = normalizedCode;
-                    departementSelect.dispatchEvent(new Event("change"));
-                } else if (window.updateSelectedCommune) {
-                    window.updateSelectedCommune(code);
-                } else {
-                    console.warn(
-                        "updateSelectedCommune function not found in main.js",
-                    );
-                }
-            },
+                            const normalizedCode = normalizeDept(code);
+                            currentDept = normalizedCode;
+                            const bounds = layer.getBounds();
+                            map.fitBounds(bounds);
+                            await loadCommuneData(normalizedCode);
+                            await loadCommuneGeoJson(normalizedCode);
+                            // Clear cache when drilling down to commune level
+                            clearQuantileCache();
+                            // Update available metrics for commune level
+                            if (metricControl && metricControl.updateOptions) {
+                                metricControl.updateOptions();
+                            }
+                            departementSelect.value = normalizedCode;
+                            departementSelect.dispatchEvent(new Event("change"));
+                        } else if (window.updateSelectedCommune) {
+                            window.updateSelectedCommune(code);
+                        } else {
+                            console.warn(
+                                "updateSelectedCommune function not found in main.js",
+                            );
+                        }
+                    },
         });
     }
 
@@ -850,11 +850,11 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                         // Zoom to the department bounds first
                         const bounds = layer.getBounds();
                         map.fitBounds(bounds);
-                        
+
                         // Load commune data and GeoJSON for this department
                         const normalizedCode = normalizeDept(deptCode);
                         currentDept = normalizedCode;
-                        
+
                         // Load commune data and GeoJSON, then select the specific commune
                         loadCommuneData(normalizedCode).then(() => {
                             loadCommuneGeoJson(normalizedCode).then(() => {
@@ -864,7 +864,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                                 }, 500); // Small delay to ensure layer is fully loaded
                             });
                         });
-                        
+
                         return false; // Break the loop
                     }
                 });
@@ -908,18 +908,18 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             if (isTargetCommune) {
                 const name = feature.properties.nom || feature.properties.NOM || feature.properties.name;
                 const data = commData[communeCog] || commData[possibleCodes.find(c => c && commData[c])];
-                
+
                 if (data) {
                     const value = data[currentMetric];
                     const metricLabel = MetricsConfig.getMetricLabel(currentMetric);
                     const formattedValue = MetricsConfig.formatMetricValue(value, currentMetric);
-                    
+
                     // Only zoom if requested
                     if (shouldZoom) {
                         const bounds = layer.getBounds();
                         map.fitBounds(bounds);
                     }
-                    
+
                     // Open popup for this commune
                     layer.bindPopup(
                         `<b>${name} (${currentDept})</b><br>${metricLabel}: ${formattedValue}`,
@@ -929,7 +929,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                             autoPan: false,
                         }
                     ).openPopup();
-                    
+
                     // Highlight the commune
                     layer.setStyle({
                         weight: 3,
@@ -938,8 +938,8 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                         fillOpacity: 0.9,
                     });
                 }
-                
-                return false; // Break the loop
+
+                return false; //// Break the loop
             }
         });
     }
@@ -958,13 +958,13 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
         }
         geoJsonLayer.setStyle({ fillOpacity: 0.7, opacity: 1 });
         currentDept = null;
-        
+
         // Reset to France view
         map.setView([46.603354, 1.888334], 5);
-        
+
         // Clear cache when switching back to department level
         clearQuantileCache();
-        
+
         // Update available metrics when switching back to department level
         if (metricControl && metricControl.updateOptions) {
             metricControl.updateOptions();
@@ -976,16 +976,16 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             if (feature.properties.code === deptCode) {
                 const name = feature.properties.nom || feature.properties.NOM || feature.properties.name;
                 const data = deptData[deptCode];
-                
+
                 if (data) {
                     const value = data[currentMetric];
                     const metricLabel = MetricsConfig.getMetricLabel(currentMetric);
                     const formattedValue = MetricsConfig.formatMetricValue(value, currentMetric);
-                    
+
                     // Get the center of the department for popup placement
                     const bounds = layer.getBounds();
                     const center = bounds.getCenter();
-                    
+
                     // Create and open popup at department center
                     const popup = L.popup({
                         className: "custom-popup",
@@ -995,7 +995,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                     .setLatLng(center)
                     .setContent(`<b>${name} (${deptCode})</b><br>${metricLabel}: ${formattedValue}`)
                     .openOn(map);
-                    
+
                     // Highlight the department
                     layer.setStyle({
                         weight: 3,
@@ -1004,7 +1004,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                         fillOpacity: 0.9,
                     });
                 }
-                
+
                 return false; // Break the loop
             }
         });
