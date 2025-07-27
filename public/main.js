@@ -141,11 +141,14 @@ import { api } from './apiService.js';
                 let cog = locationHandler.getCOGForCommune(selectedCommune);
                 let communeDept = locationHandler.getDepartmentForCommune(selectedCommune);
 
-                // Auto-select department if not already selected
-                if (!departement && communeDept) {
+                // Auto-select department if not already selected, or update if different
+                if (communeDept && (!departement || departement !== communeDept)) {
                     departement = communeDept;
                     departementSelect.value = departement;
-                    console.log("Auto-selected department:", departement);
+                    console.log("Auto-selected/updated department:", departement);
+                    
+                    // Trigger department change event to update related components
+                    departementSelect.dispatchEvent(new Event('change'));
                 }
 
                 if (!cog && departement) {
