@@ -86,29 +86,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             const { data } = await response.json();
             data.forEach((dept) => {
                 if (validDeptCodes.includes(dept.departement)) {
-                    deptData[dept.departement] = {
-                        total_score: dept.total_score,
-                        insecurite_score: dept.insecurite_score,
-                        homicides_p100k: dept.homicides_p100k,
-                        violences_physiques_p1k: dept.violences_physiques_p1k,
-                        violences_sexuelles_p1k: dept.violences_sexuelles_p1k,
-                        vols_p1k: dept.vols_p1k,
-                        destructions_p1k: dept.destructions_p1k,
-                        stupefiants_p1k: dept.stupefiants_p1k,
-                        escroqueries_p1k: dept.escroqueries_p1k,
-                        immigration_score: dept.immigration_score,
-                        extra_europeen_pct: dept.extra_europeen_pct,
-                        islamisation_score: dept.islamisation_score,
-                        musulman_pct: dept.musulman_pct,
-                        number_of_mosques: dept.number_of_mosques,
-                        mosque_p100k: dept.mosque_p100k,
-                        defrancisation_score: dept.defrancisation_score,
-                        prenom_francais_pct: dept.prenom_francais_pct,
-                        wokisme_score: dept.wokisme_score,
-                        total_qpv: dept.total_qpv,
-                        pop_in_qpv_pct: dept.pop_in_qpv_pct,
-                        logements_sociaux_pct: dept.logements_sociaux_pct,
-                    };
+                    deptData[dept.departement] = MetricsConfig.extractDataForLevel(dept, 'departement');
                 }
             });
         } catch (error) {
@@ -158,16 +136,30 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                 );
                 this._select = L.DomUtil.create("select", "", this._container);
 
-                metrics.forEach((m) => {
+                this.updateOptions();
+                L.DomEvent.on(this._select, "change", this._onChange, this);
+
+                return this._container;
+            },
+
+            updateOptions: function() {
+                const currentLevel = communeGeoJsonLayer ? 'commune' : 'departement';
+                const availableMetrics = MetricsConfig.getAvailableMetricOptions(currentLevel);
+                
+                this._select.innerHTML = "";
+                availableMetrics.forEach((m) => {
                     const option = L.DomUtil.create("option", "", this._select);
                     option.value = m.value;
                     option.innerHTML = m.label;
                     if (m.value === currentMetric) option.selected = true;
                 });
 
-                L.DomEvent.on(this._select, "change", this._onChange, this);
-
-                return this._container;
+                // If current metric is not available at this level, switch to first available metric
+                if (!MetricsConfig.isMetricAvailable(currentMetric, currentLevel) && availableMetrics.length > 0) {
+                    currentMetric = availableMetrics[0].value;
+                    this._select.value = currentMetric;
+                    updateMap(currentMetric);
+                }
             },
 
             _onChange: function (e) {
@@ -175,7 +167,8 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             },
         });
 
-        map.addControl(new MetricControl());
+        const metricControl = new MetricControl();
+        map.addControl(metricControl);
 
         // Add zoomend listener for auto-hide commune layer
         map.on("zoomend", () => {
@@ -186,6 +179,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                 geoJsonLayer.setStyle({ fillOpacity: 0.7 });
                 currentDept = null;
                 map.setView([46.603354, 1.888334], 5);
+                metricControl.updateOptions(); // Update available metrics when switching back to department level
             }
         });
 
@@ -203,6 +197,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                     geoJsonLayer.setStyle({ fillOpacity: 0.7, opacity: 1 });
                     currentDept = null;
                     map.setView([46.603354, 1.888334], 5);
+                    metricControl.updateOptions(); // Update available metrics when switching back to department level
                 });
                 return btn;
             },
@@ -251,29 +246,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                     return;
                 }
 
-                const communeData = {
-                    total_score: comm.total_score,
-                    insecurite_score: comm.insecurite_score,
-                    homicides_p100k: comm.homicides_p100k,
-                    violences_physiques_p1k: comm.violences_physiques_p1k,
-                    violences_sexuelles_p1k: comm.violences_sexuelles_p1k,
-                    vols_p1k: comm.vols_p1k,
-                    destructions_p1k: comm.destructions_p1k,
-                    stupefiants_p1k: comm.stupefiants_p1k,
-                    escroqueries_p1k: comm.escroqueries_p1k,
-                    immigration_score: comm.immigration_score,
-                    extra_europeen_pct: comm.extra_europeen_pct,
-                    islamisation_score: comm.islamisation_score,
-                    musulman_pct: comm.musulman_pct,
-                    number_of_mosques: comm.number_of_mosques,
-                    mosque_p100k: comm.mosque_p100k,
-                    defrancisation_score: comm.defrancisation_score,
-                    prenom_francais_pct: comm.prenom_francais_pct,
-                    wokisme_score: comm.wokisme_score,
-                    total_qpv: comm.total_qpv,
-                    pop_in_qpv_pct: comm.pop_in_qpv_pct,
-                    logements_sociaux_pct: comm.logements_sociaux_pct,
-                };
+                const communeData = MetricsConfig.extractDataForLevel(comm, 'commune');
 
                 keys.forEach((key) => {
                     commData[key] = communeData;
@@ -632,12 +605,28 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             },
             click: async () => {
                 if (!isCommune) {
+                    // Check if current metric is available at commune level before drilling down
+                    if (!MetricsConfig.isMetricAvailable(currentMetric, 'commune')) {
+                        // Show notification that this metric is not available at commune level
+                        const popup = L.popup()
+                            .setLatLng(layer.getBounds().getCenter())
+                            .setContent(`<b>Métrique non disponible</b><br>La métrique "${MetricsConfig.getMetricLabel(currentMetric)}" n'est disponible qu'au niveau départemental.`)
+                            .openOn(map);
+                        
+                        // Close popup after 3 seconds
+                        setTimeout(() => {
+                            map.closePopup(popup);
+                        }, 3000);
+                        return;
+                    }
+
                     const normalizedCode = normalizeDept(code);
                     currentDept = normalizedCode;
                     const bounds = layer.getBounds();
                     map.fitBounds(bounds);
                     await loadCommuneData(normalizedCode);
                     await loadCommuneGeoJson(normalizedCode);
+                    metricControl.updateOptions(); // Update available metrics for commune level
                     departementSelect.value = normalizedCode;
                     departementSelect.dispatchEvent(new Event("change"));
                 } else if (window.updateSelectedCommune) {
@@ -757,20 +746,8 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
      * Updates the metric selector dropdown with current labels
      */
     function updateMetricSelector() {
-        const metricSelect = document.querySelector(
-            ".leaflet-control-metric select",
-        );
-        if (metricSelect) {
-            const currentValue = metricSelect.value;
-            metricSelect.innerHTML = "";
-
-            const updatedMetrics = MetricsConfig.getMetricOptions();
-            updatedMetrics.forEach((m) => {
-                const option = L.DomUtil.create("option", "", metricSelect);
-                option.value = m.value;
-                option.innerHTML = m.label;
-                if (m.value === currentValue) option.selected = true;
-            });
+        if (metricControl && metricControl.updateOptions) {
+            metricControl.updateOptions();
         }
     }
 
