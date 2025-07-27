@@ -63,7 +63,7 @@ export function formatNumber(number) {
 }
 
 // Import department names
-import './departmentNames.js'; // This should define DepartmentNames globally
+import './departmentNames.js';
 const DepartmentNames = window.DepartmentNames || {};
 
 // Re-export DepartmentNames for backward compatibility

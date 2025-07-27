@@ -305,9 +305,9 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
         const values = Object.values(dataSource)
             .map((data) => data[metric])
             .filter((v) => v != null && !isNaN(v));
-        
+
         if (values.length === 0) return "#ccc";
-        
+
         const min = Math.min(...values);
         const max = Math.max(...values);
         if (min === max) return "#ffeda0"; // Single color if all values are the same
@@ -343,10 +343,29 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
      * @returns {Object} The style object.
      */
     function getStyle(feature, isCommune = false) {
-        // Use 'code' property for both departments and communes
-        const code = feature.properties.code;
+        let code;
+        if (isCommune) {
+            // Try various property names that might contain the COG code
+            code = feature.properties.code || feature.properties.insee || feature.properties.COG || feature.properties.cog || feature.properties.COM;
+            if (!code) {
+                console.log('No commune code found in properties:', Object.keys(feature.properties));
+            } else {
+                console.log(`Found commune code: ${code} in properties`);
+            }
+        } else {
+            code = feature.properties.code;
+        }
+
         const data = isCommune ? commData[code] : deptData[code];
         const value = data ? data[currentMetric] : null;
+
+        if (isCommune) {
+            if (!data) {
+                console.log(`No data found for commune code: ${code}, available data keys:`, Object.keys(commData).slice(0, 10));
+            } else {
+                console.log(`Found data for commune ${code}: ${currentMetric} = ${value}`);
+            }
+        }
         return {
             fillColor: getColor(value, currentMetric, isCommune),
             weight: 1,
@@ -364,9 +383,15 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
      * @param {boolean} isCommune - Flag for commune mode.
      */
     function onEachFeature(feature, layer, isCommune = false) {
-        // Use 'code' property for both departments and communes  
-        const code = feature.properties.code;
-        const name = feature.properties.nom;
+        let code;
+        if (isCommune) {
+            // Try various property names that might contain the COG code
+            code = feature.properties.code || feature.properties.insee || feature.properties.COG || feature.properties.cog || feature.properties.COM;
+        } else {
+            code = feature.properties.code;
+        }
+
+        const name = feature.properties.nom || feature.properties.NOM || feature.properties.name;
         const data = isCommune ? commData[code] : deptData[code];
 
         layer.on({
@@ -436,20 +461,20 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
         legendControl = L.control({ position: "bottomleft" });
         legendControl.onAdd = () => {
             const div = L.DomUtil.create("div", "info legend");
-            
+
             // Use commune data if we're in commune view, otherwise department data
             const isInCommuneView = communeGeoJsonLayer !== null;
             const dataSource = isInCommuneView ? commData : deptData;
-            
+
             const values = Object.values(dataSource)
                 .map((data) => data[currentMetric])
                 .filter((v) => v != null && !isNaN(v));
-            
+
             if (values.length === 0) {
                 div.innerHTML = "<h4>No data available</h4>";
                 return div;
             }
-            
+
             const min = Math.min(...values);
             const max = Math.max(...values);
             const grades =
