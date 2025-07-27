@@ -1,5 +1,5 @@
-import { debounce } from './utils.js';
 import { MetricsConfig } from './metricsConfig.js';
+import { api } from './apiService.js';
 
 /**
  * Article handler module for managing news articles display and filtering.
