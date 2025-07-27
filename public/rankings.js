@@ -115,6 +115,7 @@ const RankingsHandler = (function () {
         // Add event listener for scope selection
         scopeSelect.addEventListener("change", () => {
             toggleDepartementVisibility();
+            populateMetricOptions(); // Refresh metric options when scope changes
             updateRankings();
         });
 
@@ -463,6 +464,14 @@ const RankingsHandler = (function () {
                 return;
             }
 
+            // Validate metric availability for current scope
+            const level = (scope === 'communes_france' || scope === 'communes_dept') ? 'commune' : 'departement';
+            if (!MetricsConfig.isMetricAvailable(metric, level)) {
+                resultsDiv.innerHTML =
+                    `<p>Erreur : La métrique sélectionnée n'est pas disponible au niveau ${level === 'commune' ? 'communal' : 'départemental'}.</p>`;
+                return;
+            }
+
             if (scope === "departements") {
                 const rankings = await fetchDepartmentRankings(metric, limit);
                 renderRankings("Département", rankings, metric);
@@ -509,7 +518,15 @@ const RankingsHandler = (function () {
 
         // Function to populate metric options from MetricsConfig
         function populateMetricOptions() {
-            const metricOptions = MetricsConfig.getMetricOptions();
+            const scope = scopeSelect.value;
+            let level = 'departement'; // Default level
+            
+            // Determine the level based on scope
+            if (scope === 'communes_france' || scope === 'communes_dept') {
+                level = 'commune';
+            }
+            
+            const metricOptions = MetricsConfig.getAvailableMetricOptions(level);
             metricSelect.innerHTML = `
                 <option value="">-- Choisir une métrique --</option>
                 ${metricOptions.map(option => 
