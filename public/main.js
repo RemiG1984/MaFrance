@@ -74,7 +74,7 @@ import { api } from './apiService.js';
         if (departement) {
             scoreTableHandler.showDepartmentDetails(departement);
             executiveHandler.showDepartmentExecutive(departement);
-            locationHandler.loadCommunes(departement);
+            
             articleHandler.loadArticles(departement).then(() => {
                 articleHandler.loadArticleCounts(departement).then((counts) => {
                     articleHandler.renderFilterButtons(

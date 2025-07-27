@@ -18,16 +18,6 @@ export function normalizeDept(code) {
 }
 
 /**
- * Formats a number with French locale or returns 'N/A' if invalid.
- * @param {number|null|undefined} value - The value to format.
- * @returns {string} Formatted number or 'N/A'.
- */
-export function formatNumber(value) {
-  if (value == null || isNaN(value)) return "N/A";
-  return value.toLocaleString("fr-FR");
-}
-
-/**
  * Formats a percentage with one decimal or returns 'N/A' if invalid.
  * @param {number|null|undefined} value - The value to format.
  * @returns {string} Formatted percentage or 'N/A'.

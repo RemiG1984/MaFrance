@@ -144,7 +144,5 @@ export const api = {
         const queryString = new URLSearchParams(params).toString();
         return apiService.request(`/api/rankings/communes?${queryString}`);
     },
-    // Search communes with query support
-    searchCommunes: (dept, query) => 
-        apiService.request(`/api/search?dept=${dept}&q=${encodeURIComponent(query)}`),
+    
 };

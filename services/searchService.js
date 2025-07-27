@@ -125,35 +125,7 @@ class SearchService {
         });
     }
 
-    /**
-     * Get commune suggestions based on partial input
-     */
-    static getCommuneSuggestions(departement, query, limit = 5) {
-        return new Promise((resolve, reject) => {
-            let sql = `
-                SELECT DISTINCT commune, COG, departement
-                FROM locations 
-                WHERE departement = ?
-            `;
-            let params = [departement];
-
-            if (query && query.length >= 2) {
-                sql += ` AND commune LIKE ?`;
-                params.push(`%${query}%`);
-            }
-
-            sql += ` ORDER BY commune LIMIT ?`;
-            params.push(limit);
-
-            db.all(sql, params, (err, rows) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(rows);
-                }
-            });
-        });
-    }
+    
 
     /**
      * Search communes globally (without department filter) with fuzzy matching and ranking

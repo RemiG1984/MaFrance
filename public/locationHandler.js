@@ -52,40 +52,7 @@ function LocationHandler(
         }
     }
 
-    async function loadCommunes(departement, query = "") {
-        // Normalize departement using utils
-        const normalizedDept = normalizeDept(departement);
-        if (
-            !/^(0[1-9]|[1-8][0-9]|9[0-5]|2[AB]|97[1-6])$/.test(normalizedDept)
-        ) {
-            console.error("Invalid departement code:", normalizedDept);
-            resultsDiv.innerHTML =
-                "<p>Erreur : Code département invalide</p>";
-            return;
-        }
-        try {
-            console.log("Fetching communes for dept:", normalizedDept, "query:", query);
-            const communes = await apiService.request(`/api/communes?dept=${normalizedDept}&q=${encodeURIComponent(query)}`);
-            console.log("Communes fetched:", communes);
-            communeList.innerHTML = "";
-            communes.forEach((commune) => {
-                const option = document.createElement("option");
-                option.value = commune.commune;
-                option.textContent = commune.commune;
-                option.setAttribute('data-cog', commune.COG);
-                option.setAttribute('data-dept', commune.departement);
-                communeList.appendChild(option);
-            });
-        } catch (error) {
-            resultsDiv.innerHTML = `<p>Erreur : ${error.message}</p>`;
-            console.error("Erreur chargement communes:", {
-                error: error.message,
-                stack: error.stack,
-                departement: normalizedDept,
-                query: query,
-            });
-        }
-    }
+    
 
     // Store communes data for autocomplete
     let communesData = [];
@@ -232,7 +199,6 @@ function LocationHandler(
 
     return {
         loadDepartements,
-        loadCommunes,
         loadLieux,
         resetCommuneAndLieux,
         handleCommuneInput,
