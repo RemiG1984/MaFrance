@@ -125,32 +125,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
 
         return rows.filter(row => row.compare !== null || compareMetrics === null);
     }
-    /**
-     * Calculates crime value based on category key using centralized MetricsConfig.
-     * @param {Object} row - Data row
-     * @param {string} key - Category key
-     * @returns {number} Calculated crime value
-     */
-    function calculateCrimeValue(row, key) {
-        // Map key names to MetricsConfig calculated metrics
-        const metricMapping = {
-            "homicides_p100k": "homicides_total_p100k",
-            "violences_physiques_p1k": "violences_physiques_p1k",
-            "vols_p1k": "vols_p1k",
-            "stupefiants_p1k": "stupefiants_p1k"
-        };
-
-        const mappedKey = metricMapping[key] || key;
-
-        // Use MetricsConfig for calculated metrics, fallback to direct property access
-        if (MetricsConfig.calculatedMetrics[mappedKey]) {
-            return MetricsConfig.calculateMetric(mappedKey, row);
-        } else if (key === "destructions_p1k") {
-            return row.destructions_et_degradations_volontaires_p1k;
-        } else {
-            return row[key];
-        }
-    }
+    
     /**
      * Displays country-level details with comprehensive statistics.
      * @async
@@ -459,104 +434,139 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                 },
             ];
 
-            // Add prenom-related sub-rows only if available at commune level and data exists
-            if (MetricsConfig.isMetricAvailable("extra_europeen_pct", "commune") && 
-                communeMetrics && !isNaN(communeMetrics.extraEuropeenPct)) {
-                rows.push({
-                    title: MetricsConfig.getMetricLabel("extra_europeen_pct"),
-                    main: MetricsConfig.formatMetricValue(communeMetrics.extraEuropeenPct, "extra_europeen_pct") + communeMetrics.yearLabel,
-                    compare: MetricsConfig.formatMetricValue(deptMetrics.extraEuropeenPct, "extra_europeen_pct") + deptMetrics.yearLabel,
-                    subRow: true,
-                    link: `/names_graph.html?type=commune&code=${cog}&dept=${departement}`,
-                });
-            }
+            // Add conditional metric rows based on availability and data
+            const conditionalRows = [
+                {
+                    metric: "extra_europeen_pct",
+                    condition: () => communeMetrics && !isNaN(communeMetrics.extraEuropeenPct),
+                    row: {
+                        title: MetricsConfig.getMetricLabel("extra_europeen_pct"),
+                        main: communeMetrics ? MetricsConfig.formatMetricValue(communeMetrics.extraEuropeenPct, "extra_europeen_pct") + communeMetrics.yearLabel : "N/A",
+                        compare: MetricsConfig.formatMetricValue(deptMetrics.extraEuropeenPct, "extra_europeen_pct") + deptMetrics.yearLabel,
+                        subRow: true,
+                        link: `/names_graph.html?type=commune&code=${cog}&dept=${departement}`,
+                    }
+                },
+                {
+                    metric: "islamisation_score",
+                    condition: () => true,
+                    row: {
+                        title: MetricsConfig.getMetricLabel("islamisation_score"),
+                        main: MetricsConfig.formatMetricValue(item.islamisation_score, "islamisation_score"),
+                        compare: MetricsConfig.formatMetricValue(deptData.islamisation_score, "islamisation_score"),
+                    }
+                },
+                {
+                    metric: "musulman_pct",
+                    condition: () => communeMetrics && !isNaN(communeMetrics.musulmanPct),
+                    row: {
+                        title: MetricsConfig.getMetricLabel("musulman_pct"),
+                        main: communeMetrics ? MetricsConfig.formatMetricValue(communeMetrics.musulmanPct, "musulman_pct") + communeMetrics.yearLabel : "N/A",
+                        compare: MetricsConfig.formatMetricValue(deptMetrics.musulmanPct, "musulman_pct") + deptMetrics.yearLabel,
+                        subRow: true,
+                        link: `/names_graph.html?type=commune&code=${cog}&dept=${departement}`,
+                    }
+                },
+                {
+                    metric: "number_of_mosques",
+                    condition: () => true,
+                    row: {
+                        title: MetricsConfig.getMetricLabel("number_of_mosques"),
+                        main: MetricsConfig.formatMetricValue(item.number_of_mosques, "number_of_mosques"),
+                        compare: MetricsConfig.formatMetricValue(deptData.number_of_mosques, "number_of_mosques"),
+                        subRow: true,
+                    }
+                },
+                {
+                    metric: "mosque_p100k",
+                    condition: () => true,
+                    row: {
+                        title: MetricsConfig.getMetricLabel("mosque_p100k"),
+                        main: MetricsConfig.formatMetricValue(item.mosque_p100k, "mosque_p100k"),
+                        compare: MetricsConfig.formatMetricValue(deptData.mosque_p100k, "mosque_p100k"),
+                        subRow: true,
+                    }
+                },
+                {
+                    metric: "defrancisation_score",
+                    condition: () => true,
+                    row: {
+                        title: MetricsConfig.getMetricLabel("defrancisation_score"),
+                        main: MetricsConfig.formatMetricValue(item.defrancisation_score, "defrancisation_score"),
+                        compare: MetricsConfig.formatMetricValue(deptData.defrancisation_score, "defrancisation_score"),
+                    }
+                },
+                {
+                    metric: "prenom_francais_pct",
+                    condition: () => communeMetrics && traditionnelPct !== null && !isNaN(traditionnelPct),
+                    row: {
+                        title: MetricsConfig.getMetricLabel("prenom_francais_pct"),
+                        main: communeMetrics ? MetricsConfig.formatMetricValue(communeMetrics.prenomFrancaisPct, "prenom_francais_pct") + communeMetrics.yearLabel : "N/A",
+                        compare: MetricsConfig.formatMetricValue(deptMetrics.prenomFrancaisPct, "prenom_francais_pct") + deptMetrics.yearLabel,
+                        subRow: true,
+                        link: `/names_graph.html?type=commune&code=${cog}&dept=${departement}`,
+                    }
+                },
+                {
+                    metric: "wokisme_score",
+                    condition: () => true,
+                    row: {
+                        title: MetricsConfig.getMetricLabel("wokisme_score"),
+                        main: MetricsConfig.formatMetricValue(item.wokisme_score, "wokisme_score"),
+                        compare: MetricsConfig.formatMetricValue(deptData.wokisme_score, "wokisme_score"),
+                    }
+                },
+                {
+                    metric: "logements_sociaux_pct",
+                    condition: () => true,
+                    row: {
+                        title: MetricsConfig.getMetricLabel("logements_sociaux_pct"),
+                        main: item.logements_sociaux_pct !== null && item.logements_sociaux_pct !== undefined
+                            ? MetricsConfig.formatMetricValue(item.logements_sociaux_pct, "logements_sociaux_pct")
+                            : "N/A",
+                        compare: deptData.logements_sociaux_pct !== null && deptData.logements_sociaux_pct !== undefined
+                            ? MetricsConfig.formatMetricValue(deptData.logements_sociaux_pct, "logements_sociaux_pct")
+                            : "N/A",
+                        subRow: true,
+                    }
+                },
+                {
+                    metric: "total_qpv",
+                    condition: () => true,
+                    row: {
+                        title: MetricsConfig.getMetricLabel("total_qpv"),
+                        main: item.total_qpv !== null && item.total_qpv !== undefined
+                            ? MetricsConfig.formatMetricValue(item.total_qpv, "total_qpv")
+                            : "0",
+                        compare: deptData.total_qpv !== null && deptData.total_qpv !== undefined
+                            ? MetricsConfig.formatMetricValue(deptData.total_qpv, "total_qpv")
+                            : "0",
+                        subRow: true,
+                        link: `/qpv.html?type=commune&code=${cog}&dept=${departement}&commune=${encodeURIComponent(commune)}`,
+                    }
+                },
+                {
+                    metric: "pop_in_qpv_pct",
+                    condition: () => true,
+                    row: {
+                        title: MetricsConfig.getMetricLabel("pop_in_qpv_pct"),
+                        main: item.pop_in_qpv_pct !== null && item.pop_in_qpv_pct !== undefined
+                            ? MetricsConfig.formatMetricValue(item.pop_in_qpv_pct, "pop_in_qpv_pct")
+                            : "0.0%",
+                        compare: deptData.pop_in_qpv_pct !== null && deptData.pop_in_qpv_pct !== undefined
+                            ? MetricsConfig.formatMetricValue(deptData.pop_in_qpv_pct, "pop_in_qpv_pct")
+                            : "0.0%",
+                        subRow: true,
+                    }
+                }
+            ];
 
-            rows.push({
-                title: MetricsConfig.getMetricLabel("islamisation_score"),
-                main: MetricsConfig.formatMetricValue(item.islamisation_score, "islamisation_score"),
-                compare: MetricsConfig.formatMetricValue(deptData.islamisation_score, "islamisation_score"),
+            // Add rows only if metric is available at commune level and condition is met
+            conditionalRows.forEach(({ metric, condition, row }) => {
+                if (MetricsConfig.isMetricAvailable(metric, "commune") && condition()) {
+                    rows.push(row);
+                }
             });
-
-            if (MetricsConfig.isMetricAvailable("musulman_pct", "commune") && 
-                communeMetrics && !isNaN(communeMetrics.musulmanPct)) {
-                rows.push({
-                    title: MetricsConfig.getMetricLabel("musulman_pct"),
-                    main: MetricsConfig.formatMetricValue(communeMetrics.musulmanPct, "musulman_pct") + communeMetrics.yearLabel,
-                    compare: MetricsConfig.formatMetricValue(deptMetrics.musulmanPct, "musulman_pct") + deptMetrics.yearLabel,
-                    subRow: true,
-                    link: `/names_graph.html?type=commune&code=${cog}&dept=${departement}`,
-                });
-            }
-
-            rows.push(
-                {
-                    title: MetricsConfig.getMetricLabel("number_of_mosques"),
-                    main: MetricsConfig.formatMetricValue(item.number_of_mosques, "number_of_mosques"),
-                    compare: MetricsConfig.formatMetricValue(deptData.number_of_mosques, "number_of_mosques"),
-                    subRow: true,
-                },
-                {
-                    title: MetricsConfig.getMetricLabel("mosque_p100k"),
-                    main: MetricsConfig.formatMetricValue(item.mosque_p100k, "mosque_p100k"),
-                    compare: MetricsConfig.formatMetricValue(deptData.mosque_p100k, "mosque_p100k"),
-                    subRow: true,
-                },
-                {
-                    title: MetricsConfig.getMetricLabel("defrancisation_score"),
-                    main: MetricsConfig.formatMetricValue(item.defrancisation_score, "defrancisation_score"),
-                    compare: MetricsConfig.formatMetricValue(deptData.defrancisation_score, "defrancisation_score"),
-                },
-            );
-
-            if (MetricsConfig.isMetricAvailable("prenom_francais_pct", "commune") && 
-                communeMetrics && traditionnelPct !== null && !isNaN(traditionnelPct)) {
-                rows.push({
-                    title: MetricsConfig.getMetricLabel("prenom_francais_pct"),
-                    main: MetricsConfig.formatMetricValue(communeMetrics.prenomFrancaisPct, "prenom_francais_pct") + communeMetrics.yearLabel,
-                    compare: MetricsConfig.formatMetricValue(deptMetrics.prenomFrancaisPct, "prenom_francais_pct") + deptMetrics.yearLabel,
-                    subRow: true,
-                    link: `/names_graph.html?type=commune&code=${cog}&dept=${departement}`,
-                });
-            }
-
-            rows.push(
-                {
-                    title: MetricsConfig.getMetricLabel("wokisme_score"),
-                    main: MetricsConfig.formatMetricValue(item.wokisme_score, "wokisme_score"),
-                    compare: MetricsConfig.formatMetricValue(deptData.wokisme_score, "wokisme_score"),
-                },
-                {
-                    title: MetricsConfig.getMetricLabel("logements_sociaux_pct"),
-                    main: item.logements_sociaux_pct !== null && item.logements_sociaux_pct !== undefined
-                        ? MetricsConfig.formatMetricValue(item.logements_sociaux_pct, "logements_sociaux_pct")
-                        : "N/A",
-                    compare: deptData.logements_sociaux_pct !== null && deptData.logements_sociaux_pct !== undefined
-                        ? MetricsConfig.formatMetricValue(deptData.logements_sociaux_pct, "logements_sociaux_pct")
-                        : "N/A",
-                    subRow: true,
-                },
-                {
-                    title: MetricsConfig.getMetricLabel("total_qpv"),
-                    main: item.total_qpv !== null && item.total_qpv !== undefined
-                        ? MetricsConfig.formatMetricValue(item.total_qpv, "total_qpv")
-                        : "0",
-                    compare: deptData.total_qpv !== null && deptData.total_qpv !== undefined
-                        ? MetricsConfig.formatMetricValue(deptData.total_qpv, "total_qpv")
-                        : "0",
-                    subRow: true,
-                    link: `/qpv.html?type=commune&code=${cog}&dept=${departement}&commune=${encodeURIComponent(commune)}`,
-                },
-                {
-                    title: MetricsConfig.getMetricLabel("pop_in_qpv_pct"),
-                    main: item.pop_in_qpv_pct !== null && item.pop_in_qpv_pct !== undefined
-                        ? MetricsConfig.formatMetricValue(item.pop_in_qpv_pct, "pop_in_qpv_pct")
-                        : "0.0%",
-                    compare: deptData.pop_in_qpv_pct !== null && deptData.pop_in_qpv_pct !== undefined
-                        ? MetricsConfig.formatMetricValue(deptData.pop_in_qpv_pct, "pop_in_qpv_pct")
-                        : "0.0%",
-                    subRow: true,
-                },
-            );
 
             renderScoreTable(
                 `${departement} - ${commune}`,
