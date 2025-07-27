@@ -46,7 +46,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
         grades: null,
         isDiscrete: null,
         uniqueValues: null,
-        colorIndices: null
+        colorIndices: null,
     };
 
     /**
@@ -87,7 +87,8 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             const { data } = await response.json();
             data.forEach((dept) => {
                 if (validDeptCodes.includes(dept.departement)) {
-                    deptData[dept.departement] = MetricsConfig.extractDataForLevel(dept, 'departement');
+                    deptData[dept.departement] =
+                        MetricsConfig.extractDataForLevel(dept, "departement");
                 }
             });
         } catch (error) {
@@ -143,10 +144,13 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                 return this._container;
             },
 
-            updateOptions: function() {
-                const currentLevel = communeGeoJsonLayer ? 'commune' : 'departement';
-                const availableMetrics = MetricsConfig.getAvailableMetricOptions(currentLevel);
-                
+            updateOptions: function () {
+                const currentLevel = communeGeoJsonLayer
+                    ? "commune"
+                    : "departement";
+                const availableMetrics =
+                    MetricsConfig.getAvailableMetricOptions(currentLevel);
+
                 this._select.innerHTML = "";
                 availableMetrics.forEach((m) => {
                     const option = L.DomUtil.create("option", "", this._select);
@@ -156,7 +160,13 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                 });
 
                 // If current metric is not available at this level, switch to first available metric
-                if (!MetricsConfig.isMetricAvailable(currentMetric, currentLevel) && availableMetrics.length > 0) {
+                if (
+                    !MetricsConfig.isMetricAvailable(
+                        currentMetric,
+                        currentLevel,
+                    ) &&
+                    availableMetrics.length > 0
+                ) {
                     currentMetric = availableMetrics[0].value;
                     this._select.value = currentMetric;
                     updateMap(currentMetric);
@@ -253,7 +263,10 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                     return;
                 }
 
-                const communeData = MetricsConfig.extractDataForLevel(comm, 'commune');
+                const communeData = MetricsConfig.extractDataForLevel(
+                    comm,
+                    "commune",
+                );
 
                 keys.forEach((key) => {
                     commData[key] = communeData;
@@ -283,7 +296,14 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             communeGeoJsonLayer = null;
         }
 
-        const geoUrl = `https://geo.api.gouv.fr/departements/${deptCode}/communes?format=geojson&geometry=contour`;
+        let geoUrl;
+        if (deptCode === "75") {
+            // Paris: Fetch arrondissements from official Paris open data
+            geoUrl = `https://geo.api.gouv.fr/communes?codeDepartement=75&type=arrondissement-municipal&format=geojson&geometry=contour`;
+        } else {
+            // Other departments: Fetch communes
+            geoUrl = `https://geo.api.gouv.fr/departements/${deptCode}/communes?format=geojson&geometry=contour`;
+        }
 
         try {
             const response = await fetch(geoUrl);
@@ -317,12 +337,12 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             }).addTo(map);
 
             geoJsonLayer.setStyle({ fillOpacity: 0.1 });
-            
+
             // Update metric control options for commune level
             if (metricControl && metricControl.updateOptions) {
                 metricControl.updateOptions();
             }
-            
+
             updateLegend();
         } catch (error) {
             console.error(
@@ -341,15 +361,17 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
      */
     function calculateQuantiles(metric, isCommune = false) {
         // Check if we have cached results for this metric and data type
-        if (quantileCache.metric === metric && 
-            quantileCache.isCommune === isCommune && 
-            quantileCache.thresholds !== null) {
+        if (
+            quantileCache.metric === metric &&
+            quantileCache.isCommune === isCommune &&
+            quantileCache.thresholds !== null
+        ) {
             return {
                 thresholds: quantileCache.thresholds,
                 grades: quantileCache.grades,
                 isDiscrete: quantileCache.isDiscrete,
                 uniqueValues: quantileCache.uniqueValues,
-                colorIndices: quantileCache.colorIndices
+                colorIndices: quantileCache.colorIndices,
             };
         }
 
@@ -360,14 +382,24 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             .sort((a, b) => a - b);
 
         if (values.length === 0) {
-            return { thresholds: [], grades: [], isDiscrete: false, uniqueValues: [], colorIndices: [] };
+            return {
+                thresholds: [],
+                grades: [],
+                isDiscrete: false,
+                uniqueValues: [],
+                colorIndices: [],
+            };
         }
 
         const uniqueValuesArr = [...new Set(values)].sort((a, b) => a - b);
         const numUnique = uniqueValuesArr.length;
         const numColors = 6;
 
-        let thresholds, grades, isDiscrete = false, uniqueValues = [], colorIndices = [];
+        let thresholds,
+            grades,
+            isDiscrete = false,
+            uniqueValues = [],
+            colorIndices = [];
 
         if (numUnique <= numColors) {
             isDiscrete = true;
@@ -452,11 +484,12 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
     function getColor(value, metric, isCommune = false) {
         if (value == null || isNaN(value)) return "#ccc";
 
-        const { thresholds, isDiscrete, uniqueValues, colorIndices } = calculateQuantiles(metric, isCommune);
+        const { thresholds, isDiscrete, uniqueValues, colorIndices } =
+            calculateQuantiles(metric, isCommune);
 
         const colors = [
             "#ffeda0",
-            "#feb24c", 
+            "#feb24c",
             "#fd8d3c",
             "#fc4e2a",
             "#e31a1c",
@@ -514,14 +547,18 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
 
             // If no exact match, try normalized versions (5-digit to 4-digit for single-digit departments)
             if (!code) {
-                const normalizedCodes = possibleCodes.map(c => {
-                    if (typeof c === 'string' && /^0[1-9]\d{3}$/.test(c)) {
-                        return c.substring(1); // Convert "01002" to "1002"
-                    }
-                    return c;
-                }).filter(Boolean);
+                const normalizedCodes = possibleCodes
+                    .map((c) => {
+                        if (typeof c === "string" && /^0[1-9]\d{3}$/.test(c)) {
+                            return c.substring(1); // Convert "01002" to "1002"
+                        }
+                        return c;
+                    })
+                    .filter(Boolean);
 
-                code = normalizedCodes.find((c) => c && commData[c]) || possibleCodes.find((c) => c);
+                code =
+                    normalizedCodes.find((c) => c && commData[c]) ||
+                    possibleCodes.find((c) => c);
             }
         } else {
             code = feature.properties.code;
@@ -565,14 +602,18 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
 
             // If no exact match, try normalized versions (5-digit to 4-digit for single-digit departments)
             if (!code) {
-                const normalizedCodes = possibleCodes.map(c => {
-                    if (typeof c === 'string' && /^0[1-9]\d{3}$/.test(c)) {
-                        return c.substring(1); // Convert "01002" to "1002"
-                    }
-                    return c;
-                }).filter(Boolean);
+                const normalizedCodes = possibleCodes
+                    .map((c) => {
+                        if (typeof c === "string" && /^0[1-9]\d{3}$/.test(c)) {
+                            return c.substring(1); // Convert "01002" to "1002"
+                        }
+                        return c;
+                    })
+                    .filter(Boolean);
 
-                code = normalizedCodes.find((c) => c && commData[c]) || possibleCodes.find((c) => c);
+                code =
+                    normalizedCodes.find((c) => c && commData[c]) ||
+                    possibleCodes.find((c) => c);
             }
         } else {
             code = feature.properties.code;
@@ -601,14 +642,18 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                     value,
                     currentMetric,
                 );
-                
+
                 // For communes, show department code instead of COG
                 const displayCode = isCommune ? currentDept : code;
-                
+
                 layer
                     .bindPopup(
                         `<b>${name} (${displayCode})</b><br>${metricLabel}: ${formattedValue}`,
-                        { className: "custom-popup", closeButton: false, autoPan: false },
+                        {
+                            className: "custom-popup",
+                            closeButton: false,
+                            autoPan: false,
+                        },
                     )
                     .openPopup();
             },
@@ -623,13 +668,20 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             click: async () => {
                 if (!isCommune) {
                     // Check if current metric is available at commune level before drilling down
-                    if (!MetricsConfig.isMetricAvailable(currentMetric, 'commune')) {
+                    if (
+                        !MetricsConfig.isMetricAvailable(
+                            currentMetric,
+                            "commune",
+                        )
+                    ) {
                         // Show notification that this metric is not available at commune level
                         const popup = L.popup()
                             .setLatLng(layer.getBounds().getCenter())
-                            .setContent(`<b>Métrique non disponible</b><br>La métrique "${MetricsConfig.getMetricLabel(currentMetric)}" n'est disponible qu'au niveau départemental.`)
+                            .setContent(
+                                `<b>Métrique non disponible</b><br>La métrique "${MetricsConfig.getMetricLabel(currentMetric)}" n'est disponible qu'au niveau départemental.`,
+                            )
                             .openOn(map);
-                        
+
                         // Close popup after 3 seconds
                         setTimeout(() => {
                             map.closePopup(popup);
@@ -707,14 +759,15 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             }
 
             // Use cached quantile calculation
-            const { grades, isDiscrete, uniqueValues, colorIndices } = calculateQuantiles(currentMetric, isInCommuneView);
+            const { grades, isDiscrete, uniqueValues, colorIndices } =
+                calculateQuantiles(currentMetric, isInCommuneView);
 
             const metricLabel = MetricsConfig.getMetricLabel(currentMetric);
             const viewLabel = isInCommuneView ? ` (${currentDept})` : "";
             div.innerHTML = "<h4>" + metricLabel + viewLabel + "</h4>";
             const colors = [
                 "#ffeda0",
-                "#feb24c", 
+                "#feb24c",
                 "#fd8d3c",
                 "#fc4e2a",
                 "#e31a1c",
@@ -728,8 +781,16 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                     }
                     // Round value to avoid precision issues before formatting
                     const roundedValue = Math.round(uniqueValues[i] * 10) / 10;
-                    const formattedValue = MetricsConfig.formatMetricValue(roundedValue, currentMetric);
-                    div.innerHTML += '<i style="background:' + colors[ci] + '"></i> ' + formattedValue + "<br>";
+                    const formattedValue = MetricsConfig.formatMetricValue(
+                        roundedValue,
+                        currentMetric,
+                    );
+                    div.innerHTML +=
+                        '<i style="background:' +
+                        colors[ci] +
+                        '"></i> ' +
+                        formattedValue +
+                        "<br>";
                 }
             } else {
                 let legendColors = [...colors];
@@ -754,7 +815,9 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                         legendColors[i] +
                         '"></i> ' +
                         formattedGrade +
-                        (grades[i + 1] ? "–" + formattedNextGrade + "<br>" : "+");
+                        (grades[i + 1]
+                            ? "–" + formattedNextGrade + "<br>"
+                            : "+");
                 }
             }
             return div;

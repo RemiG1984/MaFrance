@@ -9,7 +9,7 @@
 export const MetricsConfig = {
     // Page titles for different label states
     pageTitles: {
-        standard: "Ma France",
+        standard: "Ma France?",
         alt1: "Ma France Inclusive",
         alt2: "Où va ma France?",
     },
