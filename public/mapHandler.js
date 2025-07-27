@@ -418,17 +418,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             const maxVal = Math.max(...values);
             grades = [minVal, ...thresholds];
 
-            const uniqueGrades = [...new Set(grades)].sort((a, b) => a - b);
-            if (uniqueGrades.length < 4 && numUnique > 3) {
-                const step = (maxVal - minVal) / numColors;
-                thresholds = [];
-                for (let i = 1; i < numColors; i++) {
-                    thresholds.push(minVal + step * i);
-                }
-                grades = [minVal, ...thresholds];
-            } else {
-                grades = [minVal, ...thresholds];
-            }
+            grades = [minVal, ...thresholds];
         }
 
         // Cache the results
