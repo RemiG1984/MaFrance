@@ -132,6 +132,10 @@ export const api = {
         const queryString = new URLSearchParams(params).toString();
         return apiService.request(`/api/articles?${queryString}`);
     },
+    getArticleCounts: (params) => {
+        const queryString = new URLSearchParams(params).toString();
+        return apiService.request(`/api/articles/counts?${queryString}`);
+    },
 
     
 

@@ -106,16 +106,7 @@ function LocationHandler(
             return;
         }
         try {
-            let url = `/api/articles/lieux?dept=${normalizedDept}`;
-            if (cog) {
-                url += `&cog=${encodeURIComponent(cog)}`;
-            }
-
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error("Erreur lors du chargement des lieux");
-            }
-            const lieux = await response.json();
+            const lieux = await api.getLieux(normalizedDept, cog);
             console.log("Lieux fetched:", lieux);
             lieuxSelect.innerHTML =
                 '<option value="">-- Tous les lieux --</option>';
