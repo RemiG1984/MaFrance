@@ -54,11 +54,8 @@
         </div>
         <div>
             <label for="communeInput">Rechercher une commune :</label>
-            <div style="position: relative; display: inline-block;">
-                <input type="text" id="communeInput" placeholder="Tapez pour rechercher..." autocomplete="off" />
-                <div id="communeSuggestions" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ccc; border-top: none; max-height: 200px; overflow-y: auto; z-index: 1000; display: none;"></div>
-            </div>
-            <datalist id="communeList" style="display: none;"></datalist>
+            <input type="text" id="communeInput" list="communeList" placeholder="Tapez pour rechercher..." autocomplete="off" />
+            <datalist id="communeList"></datalist>
         </div>
         <div id="mapContainer">
             <div id="map"></div>

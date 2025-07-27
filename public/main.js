@@ -1,4 +1,4 @@
-import { debounce, setupCustomAutocomplete } from './utils.js';
+import { debounce } from './utils.js';
 import { LocationHandler } from './locationHandler.js';
 import { ScoreTableHandler } from './scoreTableHandler.js';
 import { ExecutiveHandler } from './executiveHandler.js';
@@ -344,8 +344,7 @@ import { api } from './apiService.js';
         communeInput.disabled = false;
         communeInput.placeholder = "Rechercher une commune...";
 
-        // Initialize custom autocomplete with empty options
-        setupCustomAutocomplete('communeInput', 'communeSuggestions', []);
+        
 
         scoreTableHandler.showCountryDetails();
         executiveHandler.showCountryExecutive();

@@ -1,4 +1,3 @@
-
 import { normalizeDept, debounce } from './utils.js';
 import { apiService, api } from './apiService.js';
 
@@ -95,12 +94,12 @@ function LocationHandler(
         if (query.length < 2) {
             return;
         }
-        
+
         try {
             console.log("Searching communes globally with query:", query);
             const communes = await apiService.request(`/api/communes/search?q=${encodeURIComponent(query)}`);
             console.log("Global communes search results:", communes);
-            
+
             // Store the communes data for getCOGForCommune and getDepartmentForCommune
             communesData = communes.map(commune => ({
                 displayName: `${commune.commune} (${commune.departement})`,
@@ -108,7 +107,7 @@ function LocationHandler(
                 COG: commune.COG,
                 departement: commune.departement
             }));
-            
+
         } catch (error) {
             console.error("Erreur recherche globale communes:", {
                 error: error.message,
@@ -172,12 +171,16 @@ function LocationHandler(
         // Always use global search regardless of department selection
         if (query.length >= 2) {
             await searchCommunesGlobally(query);
-            
-            // Update custom autocomplete with current results
-            if (typeof setupCustomAutocomplete === 'function') {
-                const suggestions = communesData.map(commune => commune.displayName);
-                setupCustomAutocomplete('communeInput', 'communeSuggestions', suggestions);
-            }
+
+            // Update datalist with current results
+            communeList.innerHTML = "";
+            communesData.forEach((commune) => {
+                const option = document.createElement("option");
+                option.value = commune.displayName;
+                option.setAttribute('data-cog', commune.COG);
+                option.setAttribute('data-dept', commune.departement);  
+                communeList.appendChild(option);
+            });
         }
     }
 
@@ -188,7 +191,7 @@ function LocationHandler(
                 return commune.COG;
             }
         }
-        
+
         // Fallback to datalist options if any exist
         const options = communeList.querySelectorAll('option');
         for (const option of options) {
@@ -209,7 +212,7 @@ function LocationHandler(
                 return commune.departement;
             }
         }
-        
+
         // Fallback to datalist options if any exist
         const options = communeList.querySelectorAll('option');
         for (const option of options) {
