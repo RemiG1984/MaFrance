@@ -167,19 +167,11 @@ function LocationHandler(
     }
 
     function handleCommuneInput(departement, query) {
-        if (departement) {
-            if (query.length >= 2) {
-                loadCommunes(departement, query);
-            } else {
-                communeList.innerHTML = ""; // Clear datalist but allow typing
-            }
+        // Always use global search regardless of department selection
+        if (query.length >= 2) {
+            searchCommunesGlobally(query);
         } else {
-            // Global search when no department is selected
-            if (query.length >= 2) {
-                searchCommunesGlobally(query);
-            } else {
-                communeList.innerHTML = "";
-            }
+            communeList.innerHTML = "";
         }
     }
 

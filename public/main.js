@@ -95,14 +95,14 @@ import { api } from './apiService.js';
         const departement = departementSelect.value;
         const query = communeInput.value;
         locationHandler.handleCommuneInput(departement, query);
-        
+
         if (query.length === 0) {
             locationHandler.resetCommuneAndLieux();
             articleHandler.clearArticles();
             currentLieu = "";
             articleHandler.setFilter(null);
             console.log("Reset filter on commune input");
-            
+
             if (departement) {
                 scoreTableHandler.showDepartmentDetails(departement);
                 executiveHandler.showDepartmentExecutive(departement);
@@ -134,7 +134,7 @@ import { api } from './apiService.js';
             ? selectedValue.substring(0, selectedValue.lastIndexOf(' ('))
             : selectedValue;
         let departement = departementSelect.value;
-        
+
         if (selectedCommune) {
             try {
                 // First try to get COG and department from the datalist options
@@ -196,7 +196,7 @@ import { api } from './apiService.js';
         const commune = communeInput.value.trim();
         currentLieu = lieuxSelect.value;
         console.log("Current lieu set to:", currentLieu);
-        
+
         if (departement && commune) {
             try {
                 // Get COG from the datalist options
@@ -332,11 +332,11 @@ import { api } from './apiService.js';
         appInitialized = true;
 
         console.log('Initializing application...');
-        
+
         // Ensure commune input is always enabled for global search
         communeInput.disabled = false;
         communeInput.placeholder = "Rechercher une commune...";
-        
+
         scoreTableHandler.showCountryDetails();
         executiveHandler.showCountryExecutive();
         locationHandler.loadDepartements();
