@@ -147,15 +147,19 @@ const RankingsHandler = (function () {
 
         async function fetchDepartmentRankings(metric, limit) {
             try {
-                const topResult = await apiService.request(
-                    `/api/rankings/departements?limit=${limit}&sort=${metric}&direction=DESC`
-                );
+                const topResult = await api.getDepartmentRankings({
+                    limit: limit,
+                    sort: metric,
+                    direction: 'DESC'
+                });
                 const topData = topResult.data;
                 const totalDepartments = 101;
 
-                const bottomResult = await apiService.request(
-                    `/api/rankings/departements?limit=${limit}&sort=${metric}&direction=ASC`
-                );
+                const bottomResult = await api.getDepartmentRankings({
+                    limit: limit,
+                    sort: metric,
+                    direction: 'ASC'
+                });
                 const bottomData = bottomResult.data;
 
                 const topRankings = topData.map((dept, index) => {
@@ -239,28 +243,23 @@ const RankingsHandler = (function () {
                     "populationRange =",
                     populationRange,
                 );
-                const popFilter = populationRange
-                    ? `&population_range=${encodeURIComponent(populationRange)}`
-                    : "";
-                const queryParams = [];
-                if (deptCode) queryParams.push(`dept=${deptCode}`);
-                queryParams.push(`limit=${limit}`);
-                queryParams.push(`sort=${metric}`);
-                if (popFilter) queryParams.push(popFilter.slice(1)); // Remove leading &
-                const queryString = queryParams.join("&");
-                const baseUrl = `/api/rankings/communes?${queryString}`;
+                const baseParams = {
+                    limit: limit,
+                    sort: metric
+                };
+                if (deptCode) baseParams.dept = deptCode;
+                if (populationRange) baseParams.population_range = populationRange;
 
-                console.log("Request URL (top):", `${baseUrl}&direction=DESC`);
+                console.log("Base params for commune rankings:", baseParams);
 
-                const topResult = await apiService.request(`${baseUrl}&direction=DESC`);
+                const topParams = { ...baseParams, direction: 'DESC' };
+                const topResult = await api.getCommuneRankings(topParams);
                 const topData = topResult.data;
                 const totalCommunes = topResult.total_count;
 
-                console.log(
-                    "Request URL (bottom):",
-                    `${baseUrl}&direction=ASC`,
-                );
-                const bottomResult = await apiService.request(`${baseUrl}&direction=ASC`);
+                const bottomParams = { ...baseParams, direction: 'ASC' };
+                console.log("Fetching bottom rankings with params:", bottomParams);
+                const bottomResult = await api.getCommuneRankings(bottomParams);
                 const bottomData = bottomResult.data;
 
                 console.log("totalCommunes:", totalCommunes);

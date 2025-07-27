@@ -126,13 +126,15 @@ function CrimeGraphHandler() {
                 throw new Error("Invalid type parameter");
             }
 
-            // Fetch main data
-            const queryString = new URLSearchParams(params).toString();
-            console.log(
-                "Fetching main data from:",
-                `${endpoint}?${queryString}`,
-            );
-            mainData = await apiService.request(`${endpoint}?${queryString}`);
+            // Fetch main data using convenience methods
+            if (type === "country") {
+                mainData = await api.getCountryCrimeHistory(code || "France");
+            } else if (type === "department") {
+                mainData = await api.getDepartmentCrimeHistory(code);
+            } else if (type === "commune") {
+                mainData = await api.getCommuneCrimeHistory(code);
+            }
+            console.log("Main crime data:", mainData);
             console.log("Main crime data:", mainData);
 
             if (!mainData || mainData.length === 0) {

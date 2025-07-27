@@ -74,17 +74,11 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
 
         // Fetch department data
         try {
-            const response = await fetch(
-                "/api/rankings/departements?limit=101&sort=total_score&direction=DESC",
-            );
-            if (!response.ok) {
-                const errorData = await response.text();
-                console.error("API error details:", errorData);
-                throw new Error(
-                    `Failed to fetch department rankings: ${response.status} - ${errorData}`,
-                );
-            }
-            const { data } = await response.json();
+            const { data } = await api.getDepartmentRankings({
+                limit: 101,
+                sort: 'total_score',
+                direction: 'DESC'
+            });
             data.forEach((dept) => {
                 if (validDeptCodes.includes(dept.departement)) {
                     deptData[dept.departement] =
@@ -235,19 +229,12 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
     async function loadCommuneData(deptCode) {
         try {
             console.log(`Loading commune data for department ${deptCode}...`);
-            const response = await fetch(
-                `/api/rankings/communes?dept=${deptCode}&limit=1000&sort=total_score&direction=DESC`,
-            );
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error(`API error (${response.status}):`, errorText);
-                throw new Error(
-                    `Failed to fetch commune rankings: ${response.status}`,
-                );
-            }
-
-            const responseData = await response.json();
+            const responseData = await api.getCommuneRankings({
+                dept: deptCode,
+                limit: 1000,
+                sort: 'total_score',
+                direction: 'DESC'
+            });
             const allData = responseData.data || responseData;
 
             console.log(

@@ -137,6 +137,24 @@ export const api = {
     searchCommunes: (query) => 
         apiService.request(`/api/communes/search?q=${encodeURIComponent(query)}`),
 
+    // Crime history data
+    getCountryCrimeHistory: (country) => 
+        apiService.request(`/api/country/crime_history?country=${encodeURIComponent(country)}`),
+    getDepartmentCrimeHistory: (deptCode) => 
+        apiService.request(`/api/departements/crime_history?dept=${deptCode}`),
+    getCommuneCrimeHistory: (cog) => 
+        apiService.request(`/api/communes/crime_history?cog=${cog}`),
+
+    // Rankings data
+    getDepartmentRankings: (params) => {
+        const queryString = new URLSearchParams(params).toString();
+        return apiService.request(`/api/rankings/departements?${queryString}`);
+    },
+    getCommuneRankings: (params) => {
+        const queryString = new URLSearchParams(params).toString();
+        return apiService.request(`/api/rankings/communes?${queryString}`);
+    },
+
     // Articles
     getArticles: (params) => {
         const queryString = new URLSearchParams(params).toString();
