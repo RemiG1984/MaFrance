@@ -92,7 +92,6 @@ function LocationHandler(
 
     async function searchCommunesGlobally(query = "") {
         if (query.length < 2) {
-            communesData = [];
             return;
         }
 
@@ -110,7 +109,16 @@ function LocationHandler(
             }));
 
             communesData = newCommunesData;
-            console.log("Processed commune data:", communesData);
+
+            // Add to allCommunesData cache, avoiding duplicates
+            newCommunesData.forEach(newCommune => {
+                const exists = allCommunesData.some(existing => 
+                    existing.COG === newCommune.COG
+                );
+                if (!exists) {
+                    allCommunesData.push(newCommune);
+                }
+            });
 
         } catch (error) {
             console.error("Erreur recherche globale communes:", {
@@ -118,7 +126,6 @@ function LocationHandler(
                 stack: error.stack,
                 query: query,
             });
-            communesData = [];
         }
     }
 
@@ -207,30 +214,25 @@ function LocationHandler(
     }
 
     async function handleCommuneInput(departement, query) {
-        if (!query || query.length < 2) {
-            communeList.innerHTML = "";
-            communesData = [];
-            return;
+        // If we don't have all communes data yet, fetch it
+        if (allCommunesData.length === 0 && query.length >= 2) {
+            await searchCommunesGlobally(query);
+            // Store the fetched data for future filtering
+            allCommunesData = [...communesData];
         }
 
-        // Always search globally to get fresh results
-        await searchCommunesGlobally(query);
-        
-        // Now filter the results with accent-insensitive matching
-        const normalizedQuery = normalizeText(query);
-        const filteredCommunes = communesData.filter(commune => {
-            const normalizedDisplayName = normalizeText(commune.displayName);
-            const normalizedCommuneName = normalizeText(commune.commune);
-            
-            return normalizedDisplayName.includes(normalizedQuery) || 
-                   normalizedCommuneName.includes(normalizedQuery);
-        });
-
-        // Update datalist with filtered results
-        updateDatalist(filteredCommunes);
-        
-        // Update communesData to match current filter for other functions
-        communesData = filteredCommunes;
+        // If we have enough data, filter locally for better performance
+        if (allCommunesData.length > 0) {
+            const filteredCommunes = filterCommunesLocally(query);
+            updateDatalist(filteredCommunes);
+            // Update communesData to match current filter for other functions
+            communesData = filteredCommunes;
+        } else if (query.length >= 2) {
+            // Fallback to server search if no local data
+            await searchCommunesGlobally(query);
+            allCommunesData = [...communesData];
+            updateDatalist(communesData);
+        }
     }
 
     function getCOGForCommune(communeName) {

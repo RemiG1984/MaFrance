@@ -146,7 +146,7 @@ import { api } from './apiService.js';
                     departement = communeDept;
                     departementSelect.value = departement;
                     console.log("Auto-selected/updated department:", departement);
-
+                    
                     // Trigger department change event to update related components
                     departementSelect.dispatchEvent(new Event('change'));
                 }
@@ -168,10 +168,10 @@ import { api } from './apiService.js';
 
                 if (cog && departement) {
                     console.log("Using COG for commune:", selectedCommune, cog);
-
+                    
                     // Keep only the commune name in the input field (remove department code)
                     communeInput.value = selectedCommune;
-
+                    
                     scoreTableHandler.showCommuneDetails(cog);
                     executiveHandler.showCommuneExecutive(cog);
                     locationHandler.loadLieux(departement, cog);
@@ -344,7 +344,7 @@ import { api } from './apiService.js';
         communeInput.disabled = false;
         communeInput.placeholder = "Rechercher une commune...";
 
-
+        
 
         scoreTableHandler.showCountryDetails();
         executiveHandler.showCountryExecutive();
@@ -353,21 +353,6 @@ import { api } from './apiService.js';
         // Initialize external links with current label state
         updateExternalLinksWithLabelState();
     }
-
-    // Debounced commune input handler with accent-insensitive filtering
-    const debouncedCommuneInput = debounce(async (query) => {
-        console.log("Commune input triggered:", query);
-        await locationHandler.handleCommuneInput(
-            departementSelect.value,
-            query,
-        );
-    }, 300);
-
-    communeInput.addEventListener("input", (e) => {
-        const query = e.target.value.trim();
-        console.log("Input event - query:", query);
-        debouncedCommuneInput(query);
-    });
 
     // Initialize when DOM is ready
     if (document.readyState === 'loading') {
