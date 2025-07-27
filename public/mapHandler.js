@@ -834,7 +834,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
     }
 
     /**
-     * Shows a department view and selects a specific commune without changing zoom level
+     * Shows a department view and selects a specific commune by zooming to department first
      * @param {string} deptCode - Department code
      * @param {string} communeCog - Commune COG code
      */
@@ -842,11 +842,15 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
         if (!deptCode || !communeCog) return;
 
         try {
-            // First, find the department feature
+            // First, find the department feature and zoom to it
             if (geoJsonLayer) {
                 geoJsonLayer.eachLayer((layer) => {
                     const feature = layer.feature;
                     if (feature.properties.code === deptCode) {
+                        // Zoom to the department bounds first
+                        const bounds = layer.getBounds();
+                        map.fitBounds(bounds);
+                        
                         // Load commune data and GeoJSON for this department
                         const normalizedCode = normalizeDept(deptCode);
                         currentDept = normalizedCode;
@@ -856,7 +860,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                             loadCommuneGeoJson(normalizedCode).then(() => {
                                 // After commune layer is loaded, find and select the specific commune
                                 setTimeout(() => {
-                                    selectCommuneOnMap(communeCog, false); // Don't zoom to commune
+                                    selectCommuneOnMap(communeCog, false); // Don't zoom further to commune
                                 }, 500); // Small delay to ensure layer is fully loaded
                             });
                         });
@@ -941,11 +945,31 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
     }
 
     /**
-     * Shows a popup for a department without changing the map view
+     * Shows a popup for a department while ensuring the map stays at France zoom level
      * @param {string} deptCode - Department code
      */
     function showDepartmentPopup(deptCode) {
         if (!deptCode || !geoJsonLayer) return;
+
+        // First ensure we're back to France view if we were in commune mode
+        if (communeGeoJsonLayer) {
+            map.removeLayer(communeGeoJsonLayer);
+            communeGeoJsonLayer = null;
+        }
+        geoJsonLayer.setStyle({ fillOpacity: 0.7, opacity: 1 });
+        currentDept = null;
+        
+        // Reset to France view
+        map.setView([46.603354, 1.888334], 5);
+        
+        // Clear cache when switching back to department level
+        clearQuantileCache();
+        
+        // Update available metrics when switching back to department level
+        if (metricControl && metricControl.updateOptions) {
+            metricControl.updateOptions();
+        }
+        updateLegend();
 
         geoJsonLayer.eachLayer((layer) => {
             const feature = layer.feature;
