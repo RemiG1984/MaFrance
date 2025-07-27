@@ -336,7 +336,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
     }
 
     /**
-     * Determines color based on the metric value.
+     * Determines color based on the metric value using quantile-based distribution.
      * @param {number} value - The metric value.
      * @param {string} metric - The metric type.
      * @param {boolean} isCommune - Whether this is for commune data.
@@ -348,33 +348,54 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
         const dataSource = isCommune ? commData : deptData;
         const values = Object.values(dataSource)
             .map((data) => data[metric])
-            .filter((v) => v != null && !isNaN(v));
+            .filter((v) => v != null && !isNaN(v))
+            .sort((a, b) => a - b);
 
         if (values.length === 0) return "#ccc";
-
-        const min = Math.min(...values);
-        const max = Math.max(...values);
-        if (min === max) return "#ffeda0";
-
-        let normalized = (value - min) / (max - min);
-
-        if (metric === "prenom_francais_pct") {
-            normalized = 1 - normalized;
-        }
+        if (values.length === 1) return "#ffeda0";
 
         const colors = [
             "#ffeda0",
-            "#feb24c",
+            "#feb24c", 
             "#fd8d3c",
             "#fc4e2a",
             "#e31a1c",
             "#b10026",
         ];
-        const index = Math.min(
-            Math.floor(normalized * (colors.length - 1)),
-            colors.length - 1,
-        );
-        return colors[index];
+
+        // Calculate quantile thresholds
+        const numColors = colors.length;
+        const thresholds = [];
+        for (let i = 0; i < numColors - 1; i++) {
+            const percentile = (i + 1) / numColors;
+            const index = Math.floor(percentile * values.length);
+            thresholds.push(values[Math.min(index, values.length - 1)]);
+        }
+
+        // Handle prenom_francais_pct reverse logic
+        let adjustedValue = value;
+        let adjustedThresholds = thresholds;
+        
+        if (metric === "prenom_francais_pct") {
+            // For this metric, higher values should get lighter colors
+            adjustedValue = value;
+            adjustedThresholds = [...thresholds].reverse();
+        }
+
+        // Find appropriate color based on thresholds
+        let colorIndex = 0;
+        for (let i = 0; i < adjustedThresholds.length; i++) {
+            if (adjustedValue > adjustedThresholds[i]) {
+                colorIndex = i + 1;
+            }
+        }
+
+        // For prenom_francais_pct, reverse the color index
+        if (metric === "prenom_francais_pct") {
+            colorIndex = colors.length - 1 - colorIndex;
+        }
+
+        return colors[Math.min(colorIndex, colors.length - 1)];
     }
 
     /**
