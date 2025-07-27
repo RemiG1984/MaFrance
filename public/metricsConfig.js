@@ -305,29 +305,70 @@ export const MetricsConfig = {
     // Data availability by geographic level
     dataAvailability: {
         france: [
-            "total_score", "insecurite_score", "homicides_p100k", "violences_physiques_p1k",
-            "violences_sexuelles_p1k", "vols_p1k", "destructions_p1k", "stupefiants_p1k",
-            "escroqueries_p1k", "immigration_score", "extra_europeen_pct", "islamisation_score",
-            "musulman_pct", "number_of_mosques", "mosque_p100k", "defrancisation_score",
-            "prenom_francais_pct", "wokisme_score", "total_qpv", "pop_in_qpv_pct",
-            "logements_sociaux_pct"
+            "total_score",
+            "insecurite_score",
+            "homicides_p100k",
+            "violences_physiques_p1k",
+            "violences_sexuelles_p1k",
+            "vols_p1k",
+            "destructions_p1k",
+            "stupefiants_p1k",
+            "escroqueries_p1k",
+            "immigration_score",
+            "extra_europeen_pct",
+            "islamisation_score",
+            "musulman_pct",
+            "number_of_mosques",
+            "mosque_p100k",
+            "defrancisation_score",
+            "prenom_francais_pct",
+            "wokisme_score",
+            "total_qpv",
+            "pop_in_qpv_pct",
+            "logements_sociaux_pct",
         ],
         departement: [
-            "total_score", "insecurite_score", "homicides_p100k", "violences_physiques_p1k",
-            "violences_sexuelles_p1k", "vols_p1k", "destructions_p1k", "stupefiants_p1k",
-            "escroqueries_p1k", "immigration_score", "extra_europeen_pct", "islamisation_score",
-            "musulman_pct", "number_of_mosques", "mosque_p100k", "defrancisation_score",
-            "prenom_francais_pct", "wokisme_score", "total_qpv", "pop_in_qpv_pct",
-            "logements_sociaux_pct"
+            "total_score",
+            "insecurite_score",
+            "homicides_p100k",
+            "violences_physiques_p1k",
+            "violences_sexuelles_p1k",
+            "vols_p1k",
+            "destructions_p1k",
+            "stupefiants_p1k",
+            "escroqueries_p1k",
+            "immigration_score",
+            "extra_europeen_pct",
+            "islamisation_score",
+            "musulman_pct",
+            "number_of_mosques",
+            "mosque_p100k",
+            "defrancisation_score",
+            "prenom_francais_pct",
+            "wokisme_score",
+            "total_qpv",
+            "pop_in_qpv_pct",
+            "logements_sociaux_pct",
         ],
         commune: [
-            "total_score", "insecurite_score", "violences_physiques_p1k",
-            "violences_sexuelles_p1k", "vols_p1k", "destructions_p1k", "stupefiants_p1k",
-            "escroqueries_p1k", "immigration_score", "extra_europeen_pct", "islamisation_score",
-            "musulman_pct", "number_of_mosques", "mosque_p100k", "defrancisation_score",
-            "prenom_francais_pct", "wokisme_score", "total_qpv", "pop_in_qpv_pct",
-            "logements_sociaux_pct"
-        ]
+            "total_score",
+            "insecurite_score",
+            "violences_physiques_p1k",
+            "violences_sexuelles_p1k",
+            "vols_p1k",
+            "destructions_p1k",
+            "stupefiants_p1k",
+            "escroqueries_p1k",
+            "immigration_score",
+            "islamisation_score",
+            "number_of_mosques",
+            "mosque_p100k",
+            "defrancisation_score",
+            "wokisme_score",
+            "total_qpv",
+            "pop_in_qpv_pct",
+            "logements_sociaux_pct",
+        ],
     },
 
     // Utility functions
@@ -407,7 +448,10 @@ export const MetricsConfig = {
 
     // Check if a metric is available at a specific geographic level
     isMetricAvailable(metricKey, level) {
-        return this.dataAvailability[level] && this.dataAvailability[level].includes(metricKey);
+        return (
+            this.dataAvailability[level] &&
+            this.dataAvailability[level].includes(metricKey)
+        );
     },
 
     // Get available metrics for a specific geographic level
@@ -419,8 +463,8 @@ export const MetricsConfig = {
     getAvailableMetricOptions(level) {
         const availableMetrics = this.getAvailableMetrics(level);
         return this.metrics
-            .filter(metric => availableMetrics.includes(metric.value))
-            .map(metric => ({
+            .filter((metric) => availableMetrics.includes(metric.value))
+            .map((metric) => ({
                 value: metric.value,
                 label: this.getMetricLabel(metric.value),
             }));
@@ -430,15 +474,17 @@ export const MetricsConfig = {
     extractDataForLevel(sourceData, level, additionalFields = []) {
         const availableMetrics = this.getAvailableMetrics(level);
         const result = {};
-        
+
         // Always include basic fields
-        const basicFields = ['population', 'commune', 'departement', 'COG'];
-        [...basicFields, ...availableMetrics, ...additionalFields].forEach(field => {
-            if (sourceData.hasOwnProperty(field)) {
-                result[field] = sourceData[field];
-            }
-        });
-        
+        const basicFields = ["population", "commune", "departement", "COG"];
+        [...basicFields, ...availableMetrics, ...additionalFields].forEach(
+            (field) => {
+                if (sourceData.hasOwnProperty(field)) {
+                    result[field] = sourceData[field];
+                }
+            },
+        );
+
         return result;
     },
 
