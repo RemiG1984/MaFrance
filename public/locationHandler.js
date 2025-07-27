@@ -1,4 +1,4 @@
-import { normalizeDept, debounce, normalizeText } from './utils.js';
+import { normalizeDept, debounce } from './utils.js';
 import { apiService, api } from './apiService.js';
 
 /**
@@ -101,23 +101,21 @@ function LocationHandler(
             console.log("Global communes search results:", communes);
 
             // Store the communes data for getCOGForCommune and getDepartmentForCommune
-            const newCommunesData = communes.map(commune => ({
+            communesData = communes.map(commune => ({
                 displayName: `${commune.commune} (${commune.departement})`,
                 commune: commune.commune,
                 COG: commune.COG,
                 departement: commune.departement
             }));
 
-            communesData = newCommunesData;
-
-            // Add to allCommunesData cache, avoiding duplicates
-            newCommunesData.forEach(newCommune => {
-                const exists = allCommunesData.some(existing => 
-                    existing.COG === newCommune.COG
-                );
-                if (!exists) {
-                    allCommunesData.push(newCommune);
-                }
+            // Update datalist with global search results
+            communeList.innerHTML = "";
+            communesData.forEach((commune) => {
+                const option = document.createElement("option");
+                option.value = commune.displayName;
+                option.setAttribute('data-cog', commune.COG);
+                option.setAttribute('data-dept', commune.departement);
+                communeList.appendChild(option);
             });
 
         } catch (error) {
@@ -179,59 +177,18 @@ function LocationHandler(
         lieuxSelect.disabled = true;
     }
 
-    // Store all communes for client-side filtering
-    let allCommunesData = [];
-
-    
-
-    // Function to filter communes based on normalized input
-    function filterCommunesLocally(query) {
-        if (!query || query.length < 2) {
-            return [];
-        }
-
-        const normalizedQuery = normalizeText(query);
-        
-        return allCommunesData.filter(commune => {
-            const normalizedCommune = normalizeText(commune.displayName);
-            const normalizedCommuneName = normalizeText(commune.commune);
-            
-            return normalizedCommune.includes(normalizedQuery) || 
-                   normalizedCommuneName.includes(normalizedQuery);
-        }).slice(0, 15); // Limit results for performance
-    }
-
-    // Function to update datalist with filtered results
-    function updateDatalist(filteredCommunes) {
-        communeList.innerHTML = "";
-        filteredCommunes.forEach((commune) => {
-            const option = document.createElement("option");
-            option.value = commune.displayName;
-            option.setAttribute('data-cog', commune.COG);
-            option.setAttribute('data-dept', commune.departement);  
-            communeList.appendChild(option);
-        });
-    }
-
     async function handleCommuneInput(departement, query) {
-        // If we don't have all communes data yet, fetch it
-        if (allCommunesData.length === 0 && query.length >= 2) {
-            await searchCommunesGlobally(query);
-            // Store the fetched data for future filtering
-            allCommunesData = [...communesData];
+        if (!query || query.length < 2) {
+            communeList.innerHTML = "";
+            communesData = [];
+            return;
         }
 
-        // If we have enough data, filter locally for better performance
-        if (allCommunesData.length > 0) {
-            const filteredCommunes = filterCommunesLocally(query);
-            updateDatalist(filteredCommunes);
-            // Update communesData to match current filter for other functions
-            communesData = filteredCommunes;
-        } else if (query.length >= 2) {
-            // Fallback to server search if no local data
+        // If no department is selected, use global search
+        if (!departement) {
             await searchCommunesGlobally(query);
-            allCommunesData = [...communesData];
-            updateDatalist(communesData);
+        } else {
+            await loadCommunes(departement, query);
         }
     }
 
