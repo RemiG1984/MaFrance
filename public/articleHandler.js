@@ -1,4 +1,4 @@
-import { debounce, formatNumber } from './utils.js';
+import { debounce } from './utils.js';
 import { MetricsConfig } from './metricsConfig.js';
 
 /**

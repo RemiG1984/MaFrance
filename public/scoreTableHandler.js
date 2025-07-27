@@ -1,4 +1,3 @@
-import { formatNumber } from "./utils.js";
 import { MetricsConfig } from "./metricsConfig.js";
 import { api } from "./apiService.js";
 import { apiService } from "./apiService.js";
@@ -172,7 +171,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                 const rows = [
                     {
                         title: "Population",
-                        main: formatNumber(data.population),
+                        main: 0,
                     },
                     {
                         title: MetricsConfig.getMetricLabel("insecurite_score"),
@@ -290,8 +289,8 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                 const rows = [
                     {
                         title: "Population",
-                        main: formatNumber(data.population),
-                        compare: formatNumber(countryData.population),
+                        main: 0,
+                        compare: 0,
                     },
                     {
                         title: MetricsConfig.getMetricLabel("insecurite_score"),
@@ -442,8 +441,8 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
             const rows = [
                 {
                     title: "Population",
-                    main: formatNumber(item.population),
-                    compare: formatNumber(deptData.population),
+                    main: 0,
+                    compare: 0,
                 },
                 {
                     title: MetricsConfig.getMetricLabel("insecurite_score"),

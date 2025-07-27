@@ -15,7 +15,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
     let deptData = {};
     let currentMetric = "total_score";
     let legendControl = null;
-    
+
     // Listen for metric label changes
     window.addEventListener('metricsLabelsToggled', () => {
         updateLegend();
@@ -330,7 +330,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
         if (metricSelect) {
             const currentValue = metricSelect.value;
             metricSelect.innerHTML = '';
-            
+
             const updatedMetrics = MetricsConfig.getMetricOptions();
             updatedMetrics.forEach((m) => {
                 const option = L.DomUtil.create("option", "", metricSelect);
