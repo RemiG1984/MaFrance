@@ -574,7 +574,8 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                       ];
 
             const metricLabel = MetricsConfig.getMetricLabel(currentMetric);
-            div.innerHTML = "<h4>" + metricLabel + "</h4>";
+            const viewLabel = isInCommuneView ? ` (${currentDept})` : "";
+            div.innerHTML = "<h4>" + metricLabel + viewLabel + "</h4>";
             for (let i = 0; i < grades.length; i++) {
                 const formattedGrade = MetricsConfig.formatMetricValue(
                     grades[i],
