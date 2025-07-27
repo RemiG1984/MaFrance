@@ -209,9 +209,6 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
      */
     async function loadCommuneData(deptCode) {
         try {
-            console.log(`Fetching commune data for department: ${deptCode}`);
-            console.log(`API URL: /api/rankings/communes?dept=${deptCode}&limit=1000&sort=total_score&direction=DESC`);
-            
             const response = await fetch(
                 `/api/rankings/communes?dept=${deptCode}&limit=100&sort=total_score&direction=DESC`
             );
@@ -220,25 +217,11 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                 console.error(`API error (${response.status}):`, errorText);
                 throw new Error(`Failed to fetch commune rankings: ${response.status}`);
             }
-            
+
             const responseData = await response.json();
-            console.log('Full API response:', responseData);
-            
+
             const data = responseData.data || responseData;
-            console.log(`Loaded ${data.length} communes for department ${deptCode}`);
-            console.log('First 3 commune records:', data.slice(0, 3));
-            
-            if (data.length > 0) {
-                console.log('Sample commune data structure (all keys):', Object.keys(data[0]));
-                console.log('Sample commune metrics:', {
-                    total_score: data[0].total_score,
-                    cog: data[0].cog,
-                    COG: data[0].COG,
-                    code: data[0].code,
-                    commune: data[0].commune,
-                    insecurite_score: data[0].insecurite_score
-                });
-            }
+
             data.forEach((comm) => {
                 // Map commune data using multiple possible keys for better matching
                 const keys = [
@@ -248,7 +231,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                     comm.insee,
                     comm.COM
                 ].filter(Boolean);
-                
+
                 const communeData = {
                     total_score: comm.total_score,
                     insecurite_score: comm.insecurite_score,
@@ -272,17 +255,12 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                     pop_in_qpv_pct: comm.pop_in_qpv_pct,
                     logements_sociaux_pct: comm.logements_sociaux_pct,
                 };
-                
+
                 // Store the data under all possible keys
                 keys.forEach(key => {
                     commData[key] = communeData;
                 });
-                
-                if (keys.length > 0) {
-                    console.log(`Mapped commune: ${comm.commune} with keys: ${keys.join(', ')}`);
-                } else {
-                    console.log(`Warning: No valid key found for commune: ${comm.commune}`, comm);
-                }
+
             });
         } catch (error) {
             console.error(`Error fetching commune data for ${deptCode}:`, error);
@@ -309,33 +287,6 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             const response = await fetch(geoUrl);
             if (!response.ok) throw new Error('Failed to fetch commune GeoJSON');
             const geoData = await response.json();
-
-            // Debug: Log commune GeoJSON feature properties
-            if (geoData.features && geoData.features.length > 0) {
-                console.log(`Department ${deptCode} - Total features: ${geoData.features.length}`);
-                console.log('First 3 commune GeoJSON properties:', geoData.features.slice(0, 3).map(f => f.properties));
-                console.log(`Available commune data codes (${Object.keys(commData).length}):`, Object.keys(commData).slice(0, 10));
-                
-                // Test property matching
-                const sampleFeature = geoData.features[0];
-                const possibleCodes = [
-                    sampleFeature.properties.code,
-                    sampleFeature.properties.insee,
-                    sampleFeature.properties.COG,
-                    sampleFeature.properties.cog,
-                    sampleFeature.properties.COM
-                ].filter(Boolean);
-                console.log('Possible codes from first feature:', possibleCodes);
-                
-                // Check if any match our data
-                possibleCodes.forEach(code => {
-                    if (commData[code]) {
-                        console.log(`✓ Found matching data for code: ${code}`);
-                    } else {
-                        console.log(`✗ No data found for code: ${code}`);
-                    }
-                });
-            }
 
             communeGeoJsonLayer = L.geoJSON(geoData, {
                 style: (feature) => getStyle(feature, true),
@@ -417,26 +368,20 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                 feature.properties.INSEE_COM,
                 feature.properties.codgeo
             ];
-            
+
             // Find the first code that has data
             code = possibleCodes.find(c => c && commData[c]);
-            
+
             if (!code) {
                 // If no match found, try the first non-null code anyway
                 code = possibleCodes.find(c => c);
-                console.log(`No matching data found for commune. Properties:`, Object.keys(feature.properties), 'Trying code:', code);
             }
         } else {
             code = feature.properties.code;
         }
 
         const data = isCommune ? commData[code] : deptData[code];
-        const value = data ? data[currentMetric] : null;
 
-        // Minimal logging for communes
-        if (isCommune && !data && code) {
-            console.log(`No data for commune code: ${code}`);
-        }
         return {
             fillColor: getColor(value, currentMetric, isCommune),
             weight: 1,
@@ -467,10 +412,10 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                 feature.properties.INSEE_COM,
                 feature.properties.codgeo
             ];
-            
+
             // Find the first code that has data
             code = possibleCodes.find(c => c && commData[c]);
-            
+
             if (!code) {
                 code = possibleCodes.find(c => c);
             }
@@ -516,7 +461,12 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                     departementSelect.value = code;
                     departementSelect.dispatchEvent(new Event("change"));
                 } else {
-                    // Commune click: Handle if needed
+                   // Commune click: Update main application state
+                    if (window.updateSelectedCommune) {
+                        window.updateSelectedCommune(code); // Call the function in main.js
+                    } else {
+                        console.warn("updateSelectedCommune function not found in main.js");
+                    }
                 }
             },
         });
