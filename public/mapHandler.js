@@ -167,7 +167,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             },
         });
 
-        const metricControl = new MetricControl();
+        let metricControl = new MetricControl();
         map.addControl(metricControl);
 
         // Add zoomend listener for auto-hide commune layer
@@ -179,7 +179,10 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                 geoJsonLayer.setStyle({ fillOpacity: 0.7 });
                 currentDept = null;
                 map.setView([46.603354, 1.888334], 5);
-                metricControl.updateOptions(); // Update available metrics when switching back to department level
+                // Update available metrics when switching back to department level
+                if (metricControl && metricControl.updateOptions) {
+                    metricControl.updateOptions();
+                }
             }
         });
 
@@ -197,7 +200,10 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                     geoJsonLayer.setStyle({ fillOpacity: 0.7, opacity: 1 });
                     currentDept = null;
                     map.setView([46.603354, 1.888334], 5);
-                    metricControl.updateOptions(); // Update available metrics when switching back to department level
+                    // Update available metrics when switching back to department level
+                    if (metricControl && metricControl.updateOptions) {
+                        metricControl.updateOptions();
+                    }
                 });
                 return btn;
             },
@@ -310,6 +316,12 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             }).addTo(map);
 
             geoJsonLayer.setStyle({ fillOpacity: 0.1 });
+            
+            // Update metric control options for commune level
+            if (metricControl && metricControl.updateOptions) {
+                metricControl.updateOptions();
+            }
+            
             updateLegend();
         } catch (error) {
             console.error(
@@ -626,7 +638,10 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                     map.fitBounds(bounds);
                     await loadCommuneData(normalizedCode);
                     await loadCommuneGeoJson(normalizedCode);
-                    metricControl.updateOptions(); // Update available metrics for commune level
+                    // Update available metrics for commune level
+                    if (metricControl && metricControl.updateOptions) {
+                        metricControl.updateOptions();
+                    }
                     departementSelect.value = normalizedCode;
                     departementSelect.dispatchEvent(new Event("change"));
                 } else if (window.updateSelectedCommune) {
@@ -742,14 +757,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
         legendControl.addTo(map);
     }
 
-    /**
-     * Updates the metric selector dropdown with current labels
-     */
-    function updateMetricSelector() {
-        if (metricControl && metricControl.updateOptions) {
-            metricControl.updateOptions();
-        }
-    }
+    
 
     initMap();
 
