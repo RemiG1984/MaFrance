@@ -587,16 +587,37 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                 grades.push(values[0]);
             } else {
                 const numColors = 6; // Number of color grades
-                for (let i = 0; i < numColors; i++) {
-                    const percentile = i / (numColors - 1);
-                    const index = Math.floor(percentile * (values.length - 1));
-                    grades.push(values[index]);
-                }
+                const uniqueValues = [...new Set(values)].sort((a, b) => a - b);
                 
-                // Ensure we don't have duplicate grades
-                const uniqueGrades = [...new Set(grades)].sort((a, b) => a - b);
-                grades.length = 0;
-                grades.push(...uniqueGrades);
+                if (uniqueValues.length <= 3) {
+                    // For very few unique values, just use all of them
+                    grades.push(...uniqueValues);
+                } else {
+                    // Calculate quantiles based on actual data distribution
+                    for (let i = 0; i < numColors; i++) {
+                        const percentile = i / (numColors - 1);
+                        const index = Math.floor(percentile * (values.length - 1));
+                        grades.push(values[index]);
+                    }
+                    
+                    // Remove duplicates and ensure we have meaningful breaks
+                    const uniqueGrades = [...new Set(grades)].sort((a, b) => a - b);
+                    
+                    // If we still have too few categories, create intermediate values
+                    if (uniqueGrades.length < 4 && uniqueValues.length > 3) {
+                        const min = Math.min(...values);
+                        const max = Math.max(...values);
+                        const step = (max - min) / 5;
+                        
+                        grades.length = 0;
+                        for (let i = 0; i <= 5; i++) {
+                            grades.push(min + (step * i));
+                        }
+                    } else {
+                        grades.length = 0;
+                        grades.push(...uniqueGrades);
+                    }
+                }
             }
 
             const metricLabel = MetricsConfig.getMetricLabel(currentMetric);
