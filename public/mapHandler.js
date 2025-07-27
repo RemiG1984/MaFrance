@@ -190,10 +190,13 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                 geoJsonLayer.setStyle({ fillOpacity: 0.7 });
                 currentDept = null;
                 map.setView([46.603354, 1.888334], 5);
+                // Clear cache when switching back to department level
+                clearQuantileCache();
                 // Update available metrics when switching back to department level
                 if (metricControl && metricControl.updateOptions) {
                     metricControl.updateOptions();
                 }
+                updateLegend();
             }
         });
 
@@ -211,10 +214,13 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                     geoJsonLayer.setStyle({ fillOpacity: 0.7, opacity: 1 });
                     currentDept = null;
                     map.setView([46.603354, 1.888334], 5);
+                    // Clear cache when switching back to department level
+                    clearQuantileCache();
                     // Update available metrics when switching back to department level
                     if (metricControl && metricControl.updateOptions) {
                         metricControl.updateOptions();
                     }
+                    updateLegend();
                 });
                 return btn;
             },
@@ -338,6 +344,9 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
 
             geoJsonLayer.setStyle({ fillOpacity: 0.1 });
 
+            // Clear cache when switching to commune level
+            clearQuantileCache();
+            
             // Update metric control options for commune level
             if (metricControl && metricControl.updateOptions) {
                 metricControl.updateOptions();
@@ -695,6 +704,8 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                     map.fitBounds(bounds);
                     await loadCommuneData(normalizedCode);
                     await loadCommuneGeoJson(normalizedCode);
+                    // Clear cache when drilling down to commune level
+                    clearQuantileCache();
                     // Update available metrics for commune level
                     if (metricControl && metricControl.updateOptions) {
                         metricControl.updateOptions();
