@@ -396,9 +396,21 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                 feature.properties.INSEE_COM,
                 feature.properties.codgeo,
             ];
-            code =
-                possibleCodes.find((c) => c && commData[c]) ||
-                possibleCodes.find((c) => c);
+            
+            // First try to find exact match
+            code = possibleCodes.find((c) => c && commData[c]);
+            
+            // If no exact match, try normalized versions (5-digit to 4-digit for single-digit departments)
+            if (!code) {
+                const normalizedCodes = possibleCodes.map(c => {
+                    if (typeof c === 'string' && /^0[1-9]\d{3}$/.test(c)) {
+                        return c.substring(1); // Convert "01002" to "1002"
+                    }
+                    return c;
+                }).filter(Boolean);
+                
+                code = normalizedCodes.find((c) => c && commData[c]) || possibleCodes.find((c) => c);
+            }
         } else {
             code = feature.properties.code;
         }
@@ -435,9 +447,21 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                 feature.properties.INSEE_COM,
                 feature.properties.codgeo,
             ];
-            code =
-                possibleCodes.find((c) => c && commData[c]) ||
-                possibleCodes.find((c) => c);
+            
+            // First try to find exact match
+            code = possibleCodes.find((c) => c && commData[c]);
+            
+            // If no exact match, try normalized versions (5-digit to 4-digit for single-digit departments)
+            if (!code) {
+                const normalizedCodes = possibleCodes.map(c => {
+                    if (typeof c === 'string' && /^0[1-9]\d{3}$/.test(c)) {
+                        return c.substring(1); // Convert "01002" to "1002"
+                    }
+                    return c;
+                }).filter(Boolean);
+                
+                code = normalizedCodes.find((c) => c && commData[c]) || possibleCodes.find((c) => c);
+            }
         } else {
             code = feature.properties.code;
         }
