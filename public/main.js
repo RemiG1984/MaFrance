@@ -168,6 +168,10 @@ import { api } from './apiService.js';
 
                 if (cog && departement) {
                     console.log("Using COG for commune:", selectedCommune, cog);
+                    
+                    // Keep only the commune name in the input field (remove department code)
+                    communeInput.value = selectedCommune;
+                    
                     scoreTableHandler.showCommuneDetails(cog);
                     executiveHandler.showCommuneExecutive(cog);
                     locationHandler.loadLieux(departement, cog);
