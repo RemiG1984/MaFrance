@@ -127,6 +127,9 @@ export function setupCustomAutocomplete(inputId, suggestionsContainerId, options
     // Event listener for input changes
     inputElement.addEventListener('input', (e) => {
         updateSuggestions(e.target.value);
+        // Trigger the existing input event handler for commune search
+        const existingEvent = new Event('input', { bubbles: true });
+        e.target.dispatchEvent(existingEvent);
     });
 
     // Hide suggestions when clicking outside

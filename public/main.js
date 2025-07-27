@@ -91,10 +91,12 @@ import { api } from './apiService.js';
         }
     });
 
-    const debouncedInputHandler = debounce(() => {
+    const debouncedInputHandler = debounce(async () => {
         const departement = departementSelect.value;
         const query = communeInput.value;
-        locationHandler.handleCommuneInput(departement, query);
+        
+        // Handle commune search and update autocomplete
+        await locationHandler.handleCommuneInput(departement, query);
 
         if (query.length === 0) {
             locationHandler.resetCommuneAndLieux();
