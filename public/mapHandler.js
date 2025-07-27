@@ -37,14 +37,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
     let commData = {}; // Commune data cache (keyed by COG/INSEE code)
     let currentDept = null; // Currently selected department for commune view
 
-    // Helper function: Slugify Department Name
-    function slugify(name) {
-        return name.toLowerCase()
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .replace(/ /g, '-')
-            .replace(/[^a-z0-9-]/g, ''); // Extra cleanup for safety
-    }
+    
 
     /**
      * Initializes the map, fetches data, and applies styling.
@@ -115,10 +108,10 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             return;
         }
 
-        // Fetch GeoJSON
+        // Fetch GeoJSON from geo.api.gouv.fr
         try {
             const geoResponse = await fetch(
-                "https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements.geojson",
+                "https://geo.api.gouv.fr/departements?format=geojson",
             );
             if (!geoResponse.ok) throw new Error("Failed to fetch GeoJSON");
             const geoData = await geoResponse.json();
@@ -290,11 +283,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             communeGeoJsonLayer = null;
         }
 
-        const deptName = departmentNames[deptCode];
-        if (!deptName) return;
-
-        const slug = slugify(deptName);
-        const geoUrl = `https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements/${deptCode}-${slug}/communes-${deptCode}-${slug}.geojson`;
+        const geoUrl = `https://geo.api.gouv.fr/departements/${deptCode}/communes?format=geojson`;
 
         try {
             const response = await fetch(geoUrl);
