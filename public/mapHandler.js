@@ -33,6 +33,19 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
     // Get metrics from centralized config
     const metrics = MetricsConfig.getMetricOptions();
 
+    let communeGeoJsonLayer = null;
+    let commData = {}; // Commune data cache (keyed by COG/INSEE code)
+    let currentDept = null; // Currently selected department for commune view
+
+    // Helper function: Slugify Department Name
+    function slugify(name) {
+        return name.toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/ /g, '-')
+            .replace(/[^a-z0-9-]/g, ''); // Extra cleanup for safety
+    }
+
     /**
      * Initializes the map, fetches data, and applies styling.
      */
@@ -156,6 +169,114 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
         });
 
         map.addControl(new MetricControl());
+
+        // Add zoomend listener for auto-hide commune layer
+        map.on('zoomend', () => {
+            const zoom = map.getZoom();
+            if (zoom < 8 && communeGeoJsonLayer) { // Adjust threshold as needed
+                map.removeLayer(communeGeoJsonLayer);
+                communeGeoJsonLayer = null;
+                geoJsonLayer.setStyle({ fillOpacity: 0.7 }); // Restore department visibility
+                currentDept = null;
+                map.setView([46.603354, 1.888334], 5); // Reset to France view
+            }
+        });
+
+        // Add back button control
+        const BackControl = L.Control.extend({
+            options: { position: "topright" },
+            onAdd: function (map) {
+                const btn = L.DomUtil.create("button", "leaflet-control-back");
+                btn.innerHTML = "Retour à la France";
+                L.DomEvent.on(btn, "click", () => {
+                    if (communeGeoJsonLayer) {
+                        map.removeLayer(communeGeoJsonLayer);
+                        communeGeoJsonLayer = null;
+                    }
+                    geoJsonLayer.setStyle({ fillOpacity: 0.7 });
+                    currentDept = null;
+                    map.setView([46.603354, 1.888334], 5);
+                });
+                return btn;
+            },
+        });
+        map.addControl(new BackControl());
+    }
+
+    /**
+     * Loads commune data for a department.
+     * @param {string} deptCode - Department code
+     */
+    async function loadCommuneData(deptCode) {
+        try {
+            const response = await fetch(
+                `/api/rankings/communes?dept=${deptCode}&limit=1000&sort=total_score&direction=DESC`
+            );
+            if (!response.ok) throw new Error('Failed to fetch commune rankings');
+            const { data } = await response.json();
+            data.forEach((comm) => {
+                commData[comm.cog] = {
+                    total_score: comm.total_score,
+                    insecurite_score: comm.insecurite_score,
+                    homicides_p100k: comm.homicides_p100k,
+                    violences_physiques_p1k: comm.violences_physiques_p1k,
+                    violences_sexuelles_p1k: comm.violences_sexuelles_p1k,
+                    vols_p1k: comm.vols_p1k,
+                    destructions_p1k: comm.destructions_p1k,
+                    stupefiants_p1k: comm.stupefiants_p1k,
+                    escroqueries_p1k: comm.escroqueries_p1k,
+                    immigration_score: comm.immigration_score,
+                    extra_europeen_pct: comm.extra_europeen_pct,
+                    islamisation_score: comm.islamisation_score,
+                    musulman_pct: comm.musulman_pct,
+                    number_of_mosques: comm.number_of_mosques,
+                    mosque_p100k: comm.mosque_p100k,
+                    defrancisation_score: comm.defrancisation_score,
+                    prenom_francais_pct: comm.prenom_francais_pct,
+                    wokisme_score: comm.wokisme_score,
+                    total_qpv: comm.total_qpv,
+                    pop_in_qpv_pct: comm.pop_in_qpv_pct,
+                    logements_sociaux_pct: comm.logements_sociaux_pct,
+                };
+            });
+        } catch (error) {
+            console.error(`Error fetching commune data for ${deptCode}:`, error);
+        }
+    }
+
+    /**
+     * Loads commune GeoJSON for a department.
+     * @param {string} deptCode - Department code
+     */
+    async function loadCommuneGeoJson(deptCode) {
+        if (communeGeoJsonLayer) {
+            map.removeLayer(communeGeoJsonLayer);
+            communeGeoJsonLayer = null;
+        }
+
+        const deptName = departmentNames[deptCode];
+        if (!deptName) return;
+
+        const slug = slugify(deptName);
+        const geoUrl = `https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements/${deptCode}-${slug}/communes-${deptCode}-${slug}.geojson`;
+
+        try {
+            const response = await fetch(geoUrl);
+            if (!response.ok) throw new Error('Failed to fetch commune GeoJSON');
+            const geoData = await response.json();
+
+            communeGeoJsonLayer = L.geoJSON(geoData, {
+                style: (feature) => getStyle(feature, true),
+                onEachFeature: (feature, layer) => onEachFeature(feature, layer, true),
+            }).addTo(map);
+
+            // Make department layer semi-transparent
+            geoJsonLayer.setStyle({ fillOpacity: 0.1 });
+
+            updateLegend();
+        } catch (error) {
+            console.error(`Error loading commune GeoJSON for ${deptCode}:`, error);
+        }
     }
 
     /**
@@ -202,11 +323,13 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
     /**
      * Gets the style for a GeoJSON feature.
      * @param {Object} feature - The GeoJSON feature.
+     * @param {boolean} isCommune - Flag for commune mode.
      * @returns {Object} The style object.
      */
-    function getStyle(feature) {
+    function getStyle(feature, isCommune = false) {
         const code = feature.properties.code;
-        const value = deptData[code] ? deptData[code][currentMetric] : null;
+        const data = isCommune ? commData[code] : deptData[code];
+        const value = data ? data[currentMetric] : null;
         return {
             fillColor: getColor(value, currentMetric),
             weight: 1,
@@ -221,10 +344,12 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
      * Handles each GeoJSON feature.
      * @param {Object} feature - The GeoJSON feature.
      * @param {Object} layer - The Leaflet layer.
+     * @param {boolean} isCommune - Flag for commune mode.
      */
-    function onEachFeature(feature, layer) {
+    function onEachFeature(feature, layer, isCommune = false) {
         const code = feature.properties.code;
         const name = feature.properties.nom;
+        const data = isCommune ? commData[code] : deptData[code];
 
         layer.on({
             mouseover: (e) => {
@@ -234,9 +359,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                     dashArray: "",
                     fillOpacity: 0.9,
                 });
-                const value = deptData[code]
-                    ? deptData[code][currentMetric]
-                    : "N/A";
+                const value = data ? data[currentMetric] : "N/A";
                 const metricLabel = MetricsConfig.getMetricLabel(currentMetric);
                 const formattedValue = MetricsConfig.formatMetricValue(value, currentMetric);
                 layer
@@ -250,12 +373,21 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                     .openPopup();
             },
             mouseout: (e) => {
-                geoJsonLayer.resetStyle(e.target);
+                (isCommune ? communeGeoJsonLayer : geoJsonLayer).resetStyle(e.target);
             },
-            click: () => {
-                departementSelect.value = code;
-                departementSelect.dispatchEvent(new Event("change"));
-                map.setView([46.603354, 1.888334], 5); // Reset to France center
+            click: async () => {
+                if (!isCommune) {
+                    // Department click: Zoom, load communes
+                    currentDept = code;
+                    const bounds = layer.getBounds();
+                    map.fitBounds(bounds);
+                    await loadCommuneData(code);
+                    await loadCommuneGeoJson(code);
+                    departementSelect.value = code;
+                    departementSelect.dispatchEvent(new Event("change"));
+                } else {
+                    // Commune click: Handle if needed
+                }
             },
         });
     }
@@ -268,6 +400,9 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
         currentMetric = metric;
         if (geoJsonLayer) {
             geoJsonLayer.eachLayer((layer) => geoJsonLayer.resetStyle(layer));
+        }
+        if (communeGeoJsonLayer) {
+            communeGeoJsonLayer.eachLayer((layer) => communeGeoJsonLayer.resetStyle(layer));
         }
         updateLegend();
     }
