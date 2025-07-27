@@ -707,7 +707,9 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                     if (currentMetric === "prenom_francais_pct") {
                         ci = colors.length - 1 - ci;
                     }
-                    const formattedValue = MetricsConfig.formatMetricValue(uniqueValues[i], currentMetric);
+                    // Round value to avoid precision issues before formatting
+                    const roundedValue = Math.round(uniqueValues[i] * 10) / 10;
+                    const formattedValue = MetricsConfig.formatMetricValue(roundedValue, currentMetric);
                     div.innerHTML += '<i style="background:' + colors[ci] + '"></i> ' + formattedValue + "<br>";
                 }
             } else {
@@ -716,13 +718,15 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                     legendColors.reverse();
                 }
                 for (let i = 0; i < grades.length; i++) {
+                    // Round values to avoid precision issues before formatting
+                    const roundedGrade = Math.round(grades[i] * 10) / 10;
                     const formattedGrade = MetricsConfig.formatMetricValue(
-                        grades[i],
+                        roundedGrade,
                         currentMetric,
                     );
                     const formattedNextGrade = grades[i + 1]
                         ? MetricsConfig.formatMetricValue(
-                              grades[i + 1],
+                              Math.round(grades[i + 1] * 10) / 10,
                               currentMetric,
                           )
                         : "+";
