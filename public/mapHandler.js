@@ -600,12 +600,15 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
 
         layer.on({
             mouseover: (e) => {
-                e.target.setStyle({
-                    weight: 3,
-                    color: "#666",
-                    dashArray: "",
-                    fillOpacity: 0.9,
-                });
+                // Only apply styling changes if not in commune view or if this is a commune layer
+                if (isCommune || !communeGeoJsonLayer) {
+                    e.target.setStyle({
+                        weight: 3,
+                        color: "#666",
+                        dashArray: "",
+                        fillOpacity: 0.9,
+                    });
+                }
                 const value = data ? data[currentMetric] : "N/A";
                 const metricLabel = MetricsConfig.getMetricLabel(currentMetric);
                 const formattedValue = MetricsConfig.formatMetricValue(
@@ -620,9 +623,12 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                     .openPopup();
             },
             mouseout: (e) => {
-                (isCommune ? communeGeoJsonLayer : geoJsonLayer).resetStyle(
-                    e.target,
-                );
+                // Only reset style if not in commune view or if this is a commune layer
+                if (isCommune || !communeGeoJsonLayer) {
+                    (isCommune ? communeGeoJsonLayer : geoJsonLayer).resetStyle(
+                        e.target,
+                    );
+                }
             },
             click: async () => {
                 if (!isCommune) {
