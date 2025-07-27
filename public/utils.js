@@ -58,9 +58,9 @@ export function formatDate(dateStr) {
  * @returns {string} Formatted number string
  */
 function formatNumber(number) {
-    if (number == null || isNaN(number)) return "N/A";
-    return number.toLocaleString('fr-FR');
+  if (number == null || isNaN(number)) return "N/A";
+  return number.toLocaleString("fr-FR");
 }
 
 // Export for ES6 modules
-export { DepartmentNames, formatNumber };
+export { formatNumber };
