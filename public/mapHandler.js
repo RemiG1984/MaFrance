@@ -36,13 +36,16 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
     let communeGeoJsonLayer = null;
     let commData = {}; // Commune data cache (keyed by COG/INSEE code)
     let currentDept = null; // Currently selected department for commune view
-    
+
     // Cache for quantile calculations
     let quantileCache = {
         metric: null,
         isCommune: null,
         thresholds: null,
-        grades: null
+        grades: null,
+        isDiscrete: null,
+        uniqueValues: null,
+        colorIndices: null
     };
 
     /**
@@ -357,7 +360,10 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             quantileCache.thresholds !== null) {
             return {
                 thresholds: quantileCache.thresholds,
-                grades: quantileCache.grades
+                grades: quantileCache.grades,
+                isDiscrete: quantileCache.isDiscrete,
+                uniqueValues: quantileCache.uniqueValues,
+                colorIndices: quantileCache.colorIndices
             };
         }
 
@@ -368,58 +374,60 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             .sort((a, b) => a - b);
 
         if (values.length === 0) {
-            return { thresholds: [], grades: [] };
+            return { thresholds: [], grades: [], isDiscrete: false, uniqueValues: [], colorIndices: [] };
         }
 
-        const colors = [
-            "#ffeda0",
-            "#feb24c", 
-            "#fd8d3c",
-            "#fc4e2a",
-            "#e31a1c",
-            "#b10026",
-        ];
+        const uniqueValuesArr = [...new Set(values)].sort((a, b) => a - b);
+        const numUnique = uniqueValuesArr.length;
+        const numColors = 6;
 
-        // Calculate thresholds for color mapping
-        const numColors = colors.length;
-        const thresholds = [];
-        for (let i = 0; i < numColors - 1; i++) {
-            const percentile = (i + 1) / numColors;
-            const index = Math.floor(percentile * values.length);
-            thresholds.push(values[Math.min(index, values.length - 1)]);
-        }
+        let thresholds, grades, isDiscrete = false, uniqueValues = [], colorIndices = [];
 
-        // Calculate grades for legend
-        const grades = [];
-        if (values.length === 1) {
-            grades.push(values[0]);
-        } else {
-            const uniqueValues = [...new Set(values)].sort((a, b) => a - b);
-            
-            if (uniqueValues.length <= 3) {
-                grades.push(...uniqueValues);
+        if (numUnique <= numColors) {
+            isDiscrete = true;
+            uniqueValues = uniqueValuesArr;
+            grades = uniqueValuesArr;
+            thresholds = []; // Not used in discrete mode
+
+            if (numUnique === 1) {
+                colorIndices.push(0);
             } else {
-                for (let i = 0; i < numColors; i++) {
-                    const percentile = i / (numColors - 1);
-                    const index = Math.floor(percentile * (values.length - 1));
-                    grades.push(values[index]);
+                const colorStep = (numColors - 1) / (numUnique - 1);
+                for (let i = 0; i < numUnique; i++) {
+                    colorIndices.push(Math.floor(i * colorStep));
                 }
-                
-                const uniqueGrades = [...new Set(grades)].sort((a, b) => a - b);
-                
-                if (uniqueGrades.length < 4 && uniqueValues.length > 3) {
-                    const min = Math.min(...values);
-                    const max = Math.max(...values);
-                    const step = (max - min) / 5;
-                    
-                    grades.length = 0;
-                    for (let i = 0; i <= 5; i++) {
-                        grades.push(min + (step * i));
-                    }
-                } else {
-                    grades.length = 0;
-                    grades.push(...uniqueGrades);
+            }
+
+            // Set thresholds to midpoints for consistency, though not used
+            for (let i = 0; i < numUnique - 1; i++) {
+                thresholds.push((uniqueValues[i] + uniqueValues[i + 1]) / 2);
+            }
+        } else {
+            isDiscrete = false;
+            uniqueValues = [];
+            colorIndices = [];
+
+            thresholds = [];
+            for (let i = 0; i < numColors - 1; i++) {
+                const percentile = (i + 1) / numColors;
+                const index = Math.floor(percentile * (values.length - 1));
+                thresholds.push(values[Math.min(index, values.length - 1)]);
+            }
+
+            const minVal = Math.min(...values);
+            const maxVal = Math.max(...values);
+            grades = [minVal, ...thresholds];
+
+            const uniqueGrades = [...new Set(grades)].sort((a, b) => a - b);
+            if (uniqueGrades.length < 4 && numUnique > 3) {
+                const step = (maxVal - minVal) / numColors;
+                thresholds = [];
+                for (let i = 1; i < numColors; i++) {
+                    thresholds.push(minVal + step * i);
                 }
+                grades = [minVal, ...thresholds];
+            } else {
+                grades = [minVal, ...thresholds];
             }
         }
 
@@ -428,8 +436,11 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
         quantileCache.isCommune = isCommune;
         quantileCache.thresholds = thresholds;
         quantileCache.grades = grades;
+        quantileCache.isDiscrete = isDiscrete;
+        quantileCache.uniqueValues = uniqueValues;
+        quantileCache.colorIndices = colorIndices;
 
-        return { thresholds, grades };
+        return { thresholds, grades, isDiscrete, uniqueValues, colorIndices };
     }
 
     /**
@@ -440,6 +451,9 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
         quantileCache.isCommune = null;
         quantileCache.thresholds = null;
         quantileCache.grades = null;
+        quantileCache.isDiscrete = null;
+        quantileCache.uniqueValues = null;
+        quantileCache.colorIndices = null;
     }
 
     /**
@@ -452,9 +466,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
     function getColor(value, metric, isCommune = false) {
         if (value == null || isNaN(value)) return "#ccc";
 
-        const { thresholds } = calculateQuantiles(metric, isCommune);
-        
-        if (thresholds.length === 0) return "#ccc";
+        const { thresholds, isDiscrete, uniqueValues, colorIndices } = calculateQuantiles(metric, isCommune);
 
         const colors = [
             "#ffeda0",
@@ -465,29 +477,30 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             "#b10026",
         ];
 
-        // Handle prenom_francais_pct reverse logic
-        let adjustedValue = value;
-        let adjustedThresholds = thresholds;
-        
-        if (metric === "prenom_francais_pct") {
-            adjustedValue = value;
-            adjustedThresholds = [...thresholds].reverse();
-        }
+        let colorIndex;
 
-        // Find appropriate color based on thresholds
-        let colorIndex = 0;
-        for (let i = 0; i < adjustedThresholds.length; i++) {
-            if (adjustedValue > adjustedThresholds[i]) {
-                colorIndex = i + 1;
+        if (isDiscrete) {
+            const idx = uniqueValues.indexOf(value);
+            if (idx === -1) return "#ccc";
+            colorIndex = colorIndices[idx];
+            if (metric === "prenom_francais_pct") {
+                colorIndex = colors.length - 1 - colorIndex;
+            }
+        } else {
+            let adjustedValue = value;
+            let adjustedThresholds = thresholds;
+            colorIndex = 0;
+            for (let i = 0; i < adjustedThresholds.length; i++) {
+                if (adjustedValue >= adjustedThresholds[i]) {
+                    colorIndex = i + 1;
+                }
+            }
+            if (metric === "prenom_francais_pct") {
+                colorIndex = colors.length - 1 - colorIndex;
             }
         }
 
-        // For prenom_francais_pct, reverse the color index
-        if (metric === "prenom_francais_pct") {
-            colorIndex = colors.length - 1 - colorIndex;
-        }
-
-        return colors[Math.min(colorIndex, colors.length - 1)];
+        return colors[colorIndex];
     }
 
     /**
@@ -509,10 +522,10 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                 feature.properties.INSEE_COM,
                 feature.properties.codgeo,
             ];
-            
+
             // First try to find exact match
             code = possibleCodes.find((c) => c && commData[c]);
-            
+
             // If no exact match, try normalized versions (5-digit to 4-digit for single-digit departments)
             if (!code) {
                 const normalizedCodes = possibleCodes.map(c => {
@@ -521,7 +534,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                     }
                     return c;
                 }).filter(Boolean);
-                
+
                 code = normalizedCodes.find((c) => c && commData[c]) || possibleCodes.find((c) => c);
             }
         } else {
@@ -560,10 +573,10 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                 feature.properties.INSEE_COM,
                 feature.properties.codgeo,
             ];
-            
+
             // First try to find exact match
             code = possibleCodes.find((c) => c && commData[c]);
-            
+
             // If no exact match, try normalized versions (5-digit to 4-digit for single-digit departments)
             if (!code) {
                 const normalizedCodes = possibleCodes.map(c => {
@@ -572,7 +585,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                     }
                     return c;
                 }).filter(Boolean);
-                
+
                 code = normalizedCodes.find((c) => c && commData[c]) || possibleCodes.find((c) => c);
             }
         } else {
@@ -675,28 +688,51 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             }
 
             // Use cached quantile calculation
-            const { grades } = calculateQuantiles(currentMetric, isInCommuneView);
+            const { grades, isDiscrete, uniqueValues, colorIndices } = calculateQuantiles(currentMetric, isInCommuneView);
 
             const metricLabel = MetricsConfig.getMetricLabel(currentMetric);
             const viewLabel = isInCommuneView ? ` (${currentDept})` : "";
             div.innerHTML = "<h4>" + metricLabel + viewLabel + "</h4>";
-            for (let i = 0; i < grades.length; i++) {
-                const formattedGrade = MetricsConfig.formatMetricValue(
-                    grades[i],
-                    currentMetric,
-                );
-                const formattedNextGrade = grades[i + 1]
-                    ? MetricsConfig.formatMetricValue(
-                          grades[i + 1],
-                          currentMetric,
-                      )
-                    : "+";
-                div.innerHTML +=
-                    '<i style="background:' +
-                    getColor(grades[i], currentMetric, isInCommuneView) +
-                    '"></i> ' +
-                    formattedGrade +
-                    (grades[i + 1] ? "–" + formattedNextGrade + "<br>" : "+");
+            const colors = [
+                "#ffeda0",
+                "#feb24c", 
+                "#fd8d3c",
+                "#fc4e2a",
+                "#e31a1c",
+                "#b10026",
+            ];
+            if (isDiscrete) {
+                for (let i = 0; i < uniqueValues.length; i++) {
+                    let ci = colorIndices[i];
+                    if (currentMetric === "prenom_francais_pct") {
+                        ci = colors.length - 1 - ci;
+                    }
+                    const formattedValue = MetricsConfig.formatMetricValue(uniqueValues[i], currentMetric);
+                    div.innerHTML += '<i style="background:' + colors[ci] + '"></i> ' + formattedValue + "<br>";
+                }
+            } else {
+                let legendColors = [...colors];
+                if (currentMetric === "prenom_francais_pct") {
+                    legendColors.reverse();
+                }
+                for (let i = 0; i < grades.length; i++) {
+                    const formattedGrade = MetricsConfig.formatMetricValue(
+                        grades[i],
+                        currentMetric,
+                    );
+                    const formattedNextGrade = grades[i + 1]
+                        ? MetricsConfig.formatMetricValue(
+                              grades[i + 1],
+                              currentMetric,
+                          )
+                        : "+";
+                    div.innerHTML +=
+                        '<i style="background:' +
+                        legendColors[i] +
+                        '"></i> ' +
+                        formattedGrade +
+                        (grades[i + 1] ? "–" + formattedNextGrade + "<br>" : "+");
+                }
             }
             return div;
         };
