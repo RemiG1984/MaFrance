@@ -1,0 +1,625 @@
+main.js:217 Initializing application...
+locationHandler.js:26 Departments fetched: (101) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, …]
+scoreTableHandler.js:164 Country details: {country: 'France', population: 68034066, logements_sociaux_pct: 17.22, insecurite_score: 81, immigration_score: 68, …}
+scoreTableHandler.js:574 Rendering table with header: France rows: (21) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}] compareHeader: 
+mapHandler.js:212 Fetching commune data for department: 86
+mapHandler.js:213 API URL: /api/rankings/communes?dept=86&limit=1000&sort=total_score&direction=DESC
+mapHandler.js:215  GET https://ccfbc9aa-5090-4af0-90de-762081b314b7-00-28xht4x6ewgrz.spock.replit.dev/api/rankings/communes?dept=86&limit=1000&sort=total_score&direction=DESC 400 (Bad Request)
+loadCommuneData @ mapHandler.js:215
+click @ mapHandler.js:514
+fire @ Events.js:195
+_fireDOMEvent @ Map.js:1452
+_handleDOMEvent @ Map.js:1401
+o @ DomEvent.js:108
+mapHandler.js:220 API error (400): {"errors":[{"type":"field","value":"1000","msg":"Limit doit être un entier entre 1 et 100","path":"limit","location":"query"}]}
+loadCommuneData @ mapHandler.js:220
+await in loadCommuneData
+click @ mapHandler.js:514
+fire @ Events.js:195
+_fireDOMEvent @ Map.js:1452
+_handleDOMEvent @ Map.js:1401
+o @ DomEvent.js:108
+mapHandler.js:288 Error fetching commune data for 86: Error: Failed to fetch commune rankings: 400
+    at loadCommuneData (mapHandler.js:221:23)
+    at async e.click (mapHandler.js:514:21)
+loadCommuneData @ mapHandler.js:288
+await in loadCommuneData
+click @ mapHandler.js:514
+fire @ Events.js:195
+_fireDOMEvent @ Map.js:1452
+_handleDOMEvent @ Map.js:1401
+o @ DomEvent.js:108
+mapHandler.js:315 Department 86 - Total features: 274
+mapHandler.js:316 First 3 commune GeoJSON properties: (3) [{…}, {…}, {…}]
+mapHandler.js:317 Available commune data codes (0): []
+mapHandler.js:328 Possible codes from first feature: ['86019']
+mapHandler.js:335 ✗ No data found for code: 86019
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86019
+mapHandler.js:438 No data for commune code: 86019
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86028
+mapHandler.js:438 No data for commune code: 86028
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86031
+mapHandler.js:438 No data for commune code: 86031
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86058
+mapHandler.js:438 No data for commune code: 86058
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86070
+mapHandler.js:438 No data for commune code: 86070
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86095
+mapHandler.js:438 No data for commune code: 86095
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86114
+mapHandler.js:438 No data for commune code: 86114
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86124
+mapHandler.js:438 No data for commune code: 86124
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86135
+mapHandler.js:438 No data for commune code: 86135
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86198
+mapHandler.js:438 No data for commune code: 86198
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86202
+mapHandler.js:438 No data for commune code: 86202
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86226
+mapHandler.js:438 No data for commune code: 86226
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86239
+mapHandler.js:438 No data for commune code: 86239
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86256
+mapHandler.js:438 No data for commune code: 86256
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86261
+mapHandler.js:438 No data for commune code: 86261
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86268
+mapHandler.js:438 No data for commune code: 86268
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86045
+mapHandler.js:438 No data for commune code: 86045
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86053
+mapHandler.js:438 No data for commune code: 86053
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86080
+mapHandler.js:438 No data for commune code: 86080
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86083
+mapHandler.js:438 No data for commune code: 86083
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86116
+mapHandler.js:438 No data for commune code: 86116
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86139
+mapHandler.js:438 No data for commune code: 86139
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86213
+mapHandler.js:438 No data for commune code: 86213
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86244
+mapHandler.js:438 No data for commune code: 86244
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86281
+mapHandler.js:438 No data for commune code: 86281
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86047
+mapHandler.js:438 No data for commune code: 86047
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86096
+mapHandler.js:438 No data for commune code: 86096
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86128
+mapHandler.js:438 No data for commune code: 86128
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86182
+mapHandler.js:438 No data for commune code: 86182
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86184
+mapHandler.js:438 No data for commune code: 86184
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86217
+mapHandler.js:438 No data for commune code: 86217
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86221
+mapHandler.js:438 No data for commune code: 86221
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86224
+mapHandler.js:438 No data for commune code: 86224
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86257
+mapHandler.js:438 No data for commune code: 86257
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86258
+mapHandler.js:438 No data for commune code: 86258
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86260
+mapHandler.js:438 No data for commune code: 86260
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86265
+ No data for commune code: 86265
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86004
+ No data for commune code: 86004
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86007
+ No data for commune code: 86007
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86009
+ No data for commune code: 86009
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86014
+ No data for commune code: 86014
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86020
+ No data for commune code: 86020
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86032
+ No data for commune code: 86032
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86042
+ No data for commune code: 86042
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86046
+ No data for commune code: 86046
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86066
+ No data for commune code: 86066
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86072
+ No data for commune code: 86072
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86081
+ No data for commune code: 86081
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86086
+ No data for commune code: 86086
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86092
+ No data for commune code: 86092
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86111
+ No data for commune code: 86111
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86125
+ No data for commune code: 86125
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86127
+ No data for commune code: 86127
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86129
+ No data for commune code: 86129
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86130
+ No data for commune code: 86130
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86143
+ No data for commune code: 86143
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86162
+ No data for commune code: 86162
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86164
+ No data for commune code: 86164
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86174
+ No data for commune code: 86174
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86183
+ No data for commune code: 86183
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86186
+ No data for commune code: 86186
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86193
+ No data for commune code: 86193
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86195
+ No data for commune code: 86195
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86207
+ No data for commune code: 86207
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86241
+ No data for commune code: 86241
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86245
+ No data for commune code: 86245
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86272
+ No data for commune code: 86272
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86275
+ No data for commune code: 86275
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86279
+ No data for commune code: 86279
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86280
+ No data for commune code: 86280
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86288
+ No data for commune code: 86288
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86298
+ No data for commune code: 86298
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86024
+ No data for commune code: 86024
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86027
+ No data for commune code: 86027
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86041
+ No data for commune code: 86041
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86062
+ No data for commune code: 86062
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86088
+ No data for commune code: 86088
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86091
+ No data for commune code: 86091
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86100
+ No data for commune code: 86100
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86115
+ No data for commune code: 86115
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86133
+ No data for commune code: 86133
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86157
+ No data for commune code: 86157
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86158
+ No data for commune code: 86158
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86163
+ No data for commune code: 86163
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86194
+ No data for commune code: 86194
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86214
+ No data for commune code: 86214
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86222
+ No data for commune code: 86222
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86253
+ No data for commune code: 86253
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86297
+ No data for commune code: 86297
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86018
+ No data for commune code: 86018
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86013
+ No data for commune code: 86013
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86132
+ No data for commune code: 86132
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86273
+ No data for commune code: 86273
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86005
+ No data for commune code: 86005
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86008
+ No data for commune code: 86008
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86022
+ No data for commune code: 86022
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86023
+ No data for commune code: 86023
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86026
+ No data for commune code: 86026
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86036
+ No data for commune code: 86036
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86044
+ No data for commune code: 86044
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86049
+ No data for commune code: 86049
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86079
+ No data for commune code: 86079
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86090
+ No data for commune code: 86090
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86093
+ No data for commune code: 86093
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86106
+ No data for commune code: 86106
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86109
+ No data for commune code: 86109
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86137
+ No data for commune code: 86137
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86149
+ No data for commune code: 86149
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86151
+ No data for commune code: 86151
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86156
+ No data for commune code: 86156
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86161
+ No data for commune code: 86161
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86167
+ No data for commune code: 86167
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86169
+ No data for commune code: 86169
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86173
+ No data for commune code: 86173
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86181
+ No data for commune code: 86181
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86196
+ No data for commune code: 86196
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86197
+ No data for commune code: 86197
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86201
+ No data for commune code: 86201
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86205
+ No data for commune code: 86205
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86206
+ No data for commune code: 86206
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86210
+ No data for commune code: 86210
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86227
+ No data for commune code: 86227
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86229
+ No data for commune code: 86229
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86250
+ No data for commune code: 86250
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86252
+ No data for commune code: 86252
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86269
+ No data for commune code: 86269
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86274
+ No data for commune code: 86274
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86287
+ No data for commune code: 86287
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86006
+ No data for commune code: 86006
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86025
+ No data for commune code: 86025
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86040
+ No data for commune code: 86040
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86059
+ No data for commune code: 86059
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86098
+ No data for commune code: 86098
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86099
+ No data for commune code: 86099
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86105
+ No data for commune code: 86105
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86110
+ No data for commune code: 86110
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86117
+ No data for commune code: 86117
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86118
+ No data for commune code: 86118
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86122
+ No data for commune code: 86122
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86126
+ No data for commune code: 86126
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86131
+ No data for commune code: 86131
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86175
+ No data for commune code: 86175
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86178
+ No data for commune code: 86178
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86180
+ No data for commune code: 86180
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86187
+ No data for commune code: 86187
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86191
+ No data for commune code: 86191
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86209
+ No data for commune code: 86209
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86223
+ No data for commune code: 86223
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86233
+ No data for commune code: 86233
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86236
+ No data for commune code: 86236
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86246
+ No data for commune code: 86246
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86263
+ No data for commune code: 86263
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86290
+ No data for commune code: 86290
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86291
+ No data for commune code: 86291
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86002
+ No data for commune code: 86002
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86010
+ No data for commune code: 86010
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86016
+ No data for commune code: 86016
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86017
+ No data for commune code: 86017
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86021
+ No data for commune code: 86021
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86048
+ No data for commune code: 86048
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86050
+ No data for commune code: 86050
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86056
+ No data for commune code: 86056
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86069
+ No data for commune code: 86069
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86073
+ No data for commune code: 86073
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86074
+ No data for commune code: 86074
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86075
+ No data for commune code: 86075
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86076
+ No data for commune code: 86076
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86085
+ No data for commune code: 86085
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86087
+ No data for commune code: 86087
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86089
+ No data for commune code: 86089
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86102
+ No data for commune code: 86102
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86108
+ No data for commune code: 86108
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86113
+ No data for commune code: 86113
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86121
+ No data for commune code: 86121
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86123
+ No data for commune code: 86123
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86142
+ No data for commune code: 86142
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86144
+ No data for commune code: 86144
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86145
+ No data for commune code: 86145
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86150
+ No data for commune code: 86150
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86154
+ No data for commune code: 86154
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86160
+ No data for commune code: 86160
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86166
+ No data for commune code: 86166
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86177
+ No data for commune code: 86177
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86204
+ No data for commune code: 86204
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86218
+ No data for commune code: 86218
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86225
+ No data for commune code: 86225
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86249
+ No data for commune code: 86249
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86271
+ No data for commune code: 86271
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86277
+ No data for commune code: 86277
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86286
+ No data for commune code: 86286
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86292
+ No data for commune code: 86292
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86293
+ No data for commune code: 86293
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86294
+ No data for commune code: 86294
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86299
+ No data for commune code: 86299
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86300
+ No data for commune code: 86300
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86103
+ No data for commune code: 86103
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86242
+ No data for commune code: 86242
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86003
+ No data for commune code: 86003
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86012
+ No data for commune code: 86012
+ No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86029
+ No data for commune code: 86029
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86039
+mapHandler.js:438 No data for commune code: 86039
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86043
+mapHandler.js:438 No data for commune code: 86043
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86051
+mapHandler.js:438 No data for commune code: 86051
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86052
+mapHandler.js:438 No data for commune code: 86052
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86054
+mapHandler.js:438 No data for commune code: 86054
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86055
+mapHandler.js:438 No data for commune code: 86055
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86061
+mapHandler.js:438 No data for commune code: 86061
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86063
+mapHandler.js:438 No data for commune code: 86063
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86064
+mapHandler.js:438 No data for commune code: 86064
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86065
+mapHandler.js:438 No data for commune code: 86065
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86067
+mapHandler.js:438 No data for commune code: 86067
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86068
+mapHandler.js:438 No data for commune code: 86068
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86078
+mapHandler.js:438 No data for commune code: 86078
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86082
+mapHandler.js:438 No data for commune code: 86082
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86097
+mapHandler.js:438 No data for commune code: 86097
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86104
+mapHandler.js:438 No data for commune code: 86104
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86134
+mapHandler.js:438 No data for commune code: 86134
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86136
+mapHandler.js:438 No data for commune code: 86136
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86141
+mapHandler.js:438 No data for commune code: 86141
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86147
+mapHandler.js:438 No data for commune code: 86147
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86148
+mapHandler.js:438 No data for commune code: 86148
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86188
+mapHandler.js:438 No data for commune code: 86188
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86211
+mapHandler.js:438 No data for commune code: 86211
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86220
+mapHandler.js:438 No data for commune code: 86220
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86231
+mapHandler.js:438 No data for commune code: 86231
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86235
+mapHandler.js:438 No data for commune code: 86235
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86237
+mapHandler.js:438 No data for commune code: 86237
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86247
+mapHandler.js:438 No data for commune code: 86247
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86255
+mapHandler.js:438 No data for commune code: 86255
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86264
+mapHandler.js:438 No data for commune code: 86264
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86266
+mapHandler.js:438 No data for commune code: 86266
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86278
+mapHandler.js:438 No data for commune code: 86278
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86295
+mapHandler.js:438 No data for commune code: 86295
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86296
+mapHandler.js:438 No data for commune code: 86296
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86035
+mapHandler.js:438 No data for commune code: 86035
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86084
+mapHandler.js:438 No data for commune code: 86084
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86270
+mapHandler.js:438 No data for commune code: 86270
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86037
+mapHandler.js:438 No data for commune code: 86037
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86230
+mapHandler.js:438 No data for commune code: 86230
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86034
+mapHandler.js:438 No data for commune code: 86034
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86038
+mapHandler.js:438 No data for commune code: 86038
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86077
+mapHandler.js:438 No data for commune code: 86077
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86094
+mapHandler.js:438 No data for commune code: 86094
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86107
+mapHandler.js:438 No data for commune code: 86107
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86112
+mapHandler.js:438 No data for commune code: 86112
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86119
+mapHandler.js:438 No data for commune code: 86119
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86140
+mapHandler.js:438 No data for commune code: 86140
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86152
+mapHandler.js:438 No data for commune code: 86152
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86153
+mapHandler.js:438 No data for commune code: 86153
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86159
+mapHandler.js:438 No data for commune code: 86159
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86171
+mapHandler.js:438 No data for commune code: 86171
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86172
+mapHandler.js:438 No data for commune code: 86172
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86176
+mapHandler.js:438 No data for commune code: 86176
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86189
+mapHandler.js:438 No data for commune code: 86189
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86190
+mapHandler.js:438 No data for commune code: 86190
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86192
+mapHandler.js:438 No data for commune code: 86192
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86203
+mapHandler.js:438 No data for commune code: 86203
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86228
+mapHandler.js:438 No data for commune code: 86228
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86234
+mapHandler.js:438 No data for commune code: 86234
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86248
+mapHandler.js:438 No data for commune code: 86248
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86262
+mapHandler.js:438 No data for commune code: 86262
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86276
+mapHandler.js:438 No data for commune code: 86276
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86284
+mapHandler.js:438 No data for commune code: 86284
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86285
+mapHandler.js:438 No data for commune code: 86285
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86289
+mapHandler.js:438 No data for commune code: 86289
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86001
+mapHandler.js:438 No data for commune code: 86001
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86011
+mapHandler.js:438 No data for commune code: 86011
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86015
+mapHandler.js:438 No data for commune code: 86015
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86120
+mapHandler.js:438 No data for commune code: 86120
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86138
+mapHandler.js:438 No data for commune code: 86138
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86165
+mapHandler.js:438 No data for commune code: 86165
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86170
+mapHandler.js:438 No data for commune code: 86170
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86200
+mapHandler.js:438 No data for commune code: 86200
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86254
+mapHandler.js:438 No data for commune code: 86254
+main.js:73 Reset filter on department change
+apiService.js:25 Using cached data for: /api/country/details?country=France
+apiService.js:25 Using cached data for: /api/country/names?country=France
+apiService.js:25 Using cached data for: /api/country/crime?country=France
+articleHandler.js:26 Fetching articles from: /api/articles?dept=86
+executiveHandler.js:54 Department executive data: {code: '86', prenom: 'Serge', nom: 'BOULANGER', date_poste: '2024-11-06'}
+articleHandler.js:28 Articles response status: 200 OK
+scoreTableHandler.js:275 Department details: {departement: '86', population: 438688, logements_sociaux_pct: 11.59, insecurite_score: 57, immigration_score: 52, …}
+scoreTableHandler.js:574 Rendering table with header: 86 - Vienne rows: (21) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}] compareHeader: France
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86222
+mapHandler.js:438 No data for commune code: 86222
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86163
+mapHandler.js:438 No data for commune code: 86163
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86028
+mapHandler.js:438 No data for commune code: 86028
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86194
+mapHandler.js:438 No data for commune code: 86194
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86261
+mapHandler.js:438 No data for commune code: 86261
+articleHandler.js:36 Articles fetched: (327) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, …]
+articleHandler.js:56 Fetching article counts from: /api/articles/counts?dept=86
+articleHandler.js:58 Article counts response status: 200 OK
+articleHandler.js:66 Article counts: {insecurite: 231, immigration: 154, islamisme: 103, defrancisation: 135, wokisme: 57}
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86261
+mapHandler.js:438 No data for commune code: 86261
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86256
+mapHandler.js:438 No data for commune code: 86256
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86256
+mapHandler.js:438 No data for commune code: 86256
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86180
+mapHandler.js:438 No data for commune code: 86180
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86178
+mapHandler.js:438 No data for commune code: 86178
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86099
+mapHandler.js:438 No data for commune code: 86099
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86233
+mapHandler.js:438 No data for commune code: 86233
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86006
+mapHandler.js:438 No data for commune code: 86006
+mapHandler.js:427 No matching data found for commune. Properties: (2) ['code', 'nom'] Trying code: 86132
+mapHandler.js:438 No data for commune code: 86132
