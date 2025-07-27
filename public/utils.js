@@ -85,7 +85,7 @@ class TextUtils {
  * - Call: setupCustomAutocomplete('searchInput', 'suggestions', apiCities);
  * - Update options dynamically if needed by calling the function again with new options.
  */
-function setupCustomAutocomplete(inputId, suggestionsContainerId, options) {
+export function setupCustomAutocomplete(inputId, suggestionsContainerId, options) {
     const inputElement = document.getElementById(inputId);
     const suggestionsContainer = document.getElementById(suggestionsContainerId);
 

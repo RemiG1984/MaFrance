@@ -88,9 +88,11 @@ function LocationHandler(
         }
     }
 
+    // Store communes data for autocomplete
+    let communesData = [];
+
     async function searchCommunesGlobally(query = "") {
         if (query.length < 2) {
-            communeList.innerHTML = "";
             return;
         }
         
@@ -98,15 +100,15 @@ function LocationHandler(
             console.log("Searching communes globally with query:", query);
             const communes = await apiService.request(`/api/communes/search?q=${encodeURIComponent(query)}`);
             console.log("Global communes search results:", communes);
-            communeList.innerHTML = "";
-            communes.forEach((commune) => {
-                const option = document.createElement("option");
-                option.value = `${commune.commune} (${commune.departement})`;
-                option.textContent = `${commune.commune} (${commune.departement})`;
-                option.setAttribute('data-cog', commune.COG);
-                option.setAttribute('data-dept', commune.departement);
-                communeList.appendChild(option);
-            });
+            
+            // Store the communes data for getCOGForCommune and getDepartmentForCommune
+            communesData = communes.map(commune => ({
+                displayName: `${commune.commune} (${commune.departement})`,
+                commune: commune.commune,
+                COG: commune.COG,
+                departement: commune.departement
+            }));
+            
         } catch (error) {
             console.error("Erreur recherche globale communes:", {
                 error: error.message,
@@ -166,19 +168,30 @@ function LocationHandler(
         lieuxSelect.disabled = true;
     }
 
-    function handleCommuneInput(departement, query) {
+    async function handleCommuneInput(departement, query) {
         // Always use global search regardless of department selection
         if (query.length >= 2) {
-            searchCommunesGlobally(query);
-        } else {
-            communeList.innerHTML = "";
+            await searchCommunesGlobally(query);
+            
+            // Update custom autocomplete with current results
+            if (typeof setupCustomAutocomplete === 'function') {
+                const suggestions = communesData.map(commune => commune.displayName);
+                setupCustomAutocomplete('communeInput', 'communeSuggestions', suggestions);
+            }
         }
     }
 
     function getCOGForCommune(communeName) {
+        // First try to find in stored communes data
+        for (const commune of communesData) {
+            if (commune.displayName === communeName || commune.commune === communeName) {
+                return commune.COG;
+            }
+        }
+        
+        // Fallback to datalist options if any exist
         const options = communeList.querySelectorAll('option');
         for (const option of options) {
-            // Extract commune name from format "CommuneName (DeptCode)"
             const optionCommuneName = option.value.includes(' (') 
                 ? option.value.substring(0, option.value.lastIndexOf(' ('))
                 : option.value;
@@ -190,9 +203,16 @@ function LocationHandler(
     }
 
     function getDepartmentForCommune(communeName) {
+        // First try to find in stored communes data
+        for (const commune of communesData) {
+            if (commune.displayName === communeName || commune.commune === communeName) {
+                return commune.departement;
+            }
+        }
+        
+        // Fallback to datalist options if any exist
         const options = communeList.querySelectorAll('option');
         for (const option of options) {
-            // Extract commune name from format "CommuneName (DeptCode)"
             const optionCommuneName = option.value.includes(' (') 
                 ? option.value.substring(0, option.value.lastIndexOf(' ('))
                 : option.value;
