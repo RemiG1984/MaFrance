@@ -61,6 +61,7 @@ import { api } from './apiService.js';
     // Shared state
     let currentLieu = "";
     let allArticles = [];
+    window.isMapClickInProgress = false; // Flag to prevent circular reference
 
     // Event listeners
     departementSelect.addEventListener("change", () => {
@@ -75,8 +76,8 @@ import { api } from './apiService.js';
             scoreTableHandler.showDepartmentDetails(departement);
             executiveHandler.showDepartmentExecutive(departement);
             
-            // Show department popup on map without changing view
-            if (mapHandler && mapHandler.showDepartmentPopup) {
+            // Only show department popup if this isn't from a map click
+            if (mapHandler && mapHandler.showDepartmentPopup && !window.isMapClickInProgress) {
                 mapHandler.showDepartmentPopup(departement);
             }
             

@@ -698,8 +698,12 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                             if (metricControl && metricControl.updateOptions) {
                                 metricControl.updateOptions();
                             }
+                            
+                            // Set flag to prevent circular reference and update department selection
+                            window.isMapClickInProgress = true;
                             departementSelect.value = normalizedCode;
                             departementSelect.dispatchEvent(new Event("change"));
+                            window.isMapClickInProgress = false;
                         } else if (window.updateSelectedCommune) {
                             window.updateSelectedCommune(code);
                         } else {
