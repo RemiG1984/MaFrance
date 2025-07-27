@@ -213,7 +213,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             console.log(`API URL: /api/rankings/communes?dept=${deptCode}&limit=1000&sort=total_score&direction=DESC`);
             
             const response = await fetch(
-                `/api/rankings/communes?dept=${deptCode}&limit=1000&sort=total_score&direction=DESC`
+                `/api/rankings/communes?dept=${deptCode}&limit=100&sort=total_score&direction=DESC`
             );
             if (!response.ok) {
                 const errorText = await response.text();
