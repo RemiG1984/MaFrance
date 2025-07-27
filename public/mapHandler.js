@@ -36,6 +36,14 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
     let communeGeoJsonLayer = null;
     let commData = {}; // Commune data cache (keyed by COG/INSEE code)
     let currentDept = null; // Currently selected department for commune view
+    
+    // Cache for quantile calculations
+    let quantileCache = {
+        metric: null,
+        isCommune: null,
+        thresholds: null,
+        grades: null
+    };
 
     /**
      * Initializes the map, fetches data, and applies styling.
@@ -273,6 +281,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             console.log(
                 `Processed ${processedCount} communes with valid keys for department ${deptCode}`,
             );
+            clearQuantileCache(); // Clear cache when new commune data is loaded
         } catch (error) {
             console.error(
                 `Error fetching commune data for ${deptCode}:`,
@@ -336,14 +345,21 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
     }
 
     /**
-     * Determines color based on the metric value using quantile-based distribution.
-     * @param {number} value - The metric value.
+     * Calculates quantiles for the current metric and data type, with caching.
      * @param {string} metric - The metric type.
      * @param {boolean} isCommune - Whether this is for commune data.
-     * @returns {string} The color code.
+     * @returns {Object} Object containing thresholds and grades.
      */
-    function getColor(value, metric, isCommune = false) {
-        if (value == null || isNaN(value)) return "#ccc";
+    function calculateQuantiles(metric, isCommune = false) {
+        // Check if we have cached results for this metric and data type
+        if (quantileCache.metric === metric && 
+            quantileCache.isCommune === isCommune && 
+            quantileCache.thresholds !== null) {
+            return {
+                thresholds: quantileCache.thresholds,
+                grades: quantileCache.grades
+            };
+        }
 
         const dataSource = isCommune ? commData : deptData;
         const values = Object.values(dataSource)
@@ -351,8 +367,9 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             .filter((v) => v != null && !isNaN(v))
             .sort((a, b) => a - b);
 
-        if (values.length === 0) return "#ccc";
-        if (values.length === 1) return "#ffeda0";
+        if (values.length === 0) {
+            return { thresholds: [], grades: [] };
+        }
 
         const colors = [
             "#ffeda0",
@@ -363,7 +380,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             "#b10026",
         ];
 
-        // Calculate quantile thresholds
+        // Calculate thresholds for color mapping
         const numColors = colors.length;
         const thresholds = [];
         for (let i = 0; i < numColors - 1; i++) {
@@ -372,12 +389,87 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             thresholds.push(values[Math.min(index, values.length - 1)]);
         }
 
+        // Calculate grades for legend
+        const grades = [];
+        if (values.length === 1) {
+            grades.push(values[0]);
+        } else {
+            const uniqueValues = [...new Set(values)].sort((a, b) => a - b);
+            
+            if (uniqueValues.length <= 3) {
+                grades.push(...uniqueValues);
+            } else {
+                for (let i = 0; i < numColors; i++) {
+                    const percentile = i / (numColors - 1);
+                    const index = Math.floor(percentile * (values.length - 1));
+                    grades.push(values[index]);
+                }
+                
+                const uniqueGrades = [...new Set(grades)].sort((a, b) => a - b);
+                
+                if (uniqueGrades.length < 4 && uniqueValues.length > 3) {
+                    const min = Math.min(...values);
+                    const max = Math.max(...values);
+                    const step = (max - min) / 5;
+                    
+                    grades.length = 0;
+                    for (let i = 0; i <= 5; i++) {
+                        grades.push(min + (step * i));
+                    }
+                } else {
+                    grades.length = 0;
+                    grades.push(...uniqueGrades);
+                }
+            }
+        }
+
+        // Cache the results
+        quantileCache.metric = metric;
+        quantileCache.isCommune = isCommune;
+        quantileCache.thresholds = thresholds;
+        quantileCache.grades = grades;
+
+        return { thresholds, grades };
+    }
+
+    /**
+     * Clears the quantile cache when data changes.
+     */
+    function clearQuantileCache() {
+        quantileCache.metric = null;
+        quantileCache.isCommune = null;
+        quantileCache.thresholds = null;
+        quantileCache.grades = null;
+    }
+
+    /**
+     * Determines color based on the metric value using quantile-based distribution.
+     * @param {number} value - The metric value.
+     * @param {string} metric - The metric type.
+     * @param {boolean} isCommune - Whether this is for commune data.
+     * @returns {string} The color code.
+     */
+    function getColor(value, metric, isCommune = false) {
+        if (value == null || isNaN(value)) return "#ccc";
+
+        const { thresholds } = calculateQuantiles(metric, isCommune);
+        
+        if (thresholds.length === 0) return "#ccc";
+
+        const colors = [
+            "#ffeda0",
+            "#feb24c", 
+            "#fd8d3c",
+            "#fc4e2a",
+            "#e31a1c",
+            "#b10026",
+        ];
+
         // Handle prenom_francais_pct reverse logic
         let adjustedValue = value;
         let adjustedThresholds = thresholds;
         
         if (metric === "prenom_francais_pct") {
-            // For this metric, higher values should get lighter colors
             adjustedValue = value;
             adjustedThresholds = [...thresholds].reverse();
         }
@@ -546,6 +638,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
      */
     function updateMap(metric) {
         currentMetric = metric;
+        clearQuantileCache(); // Clear cache when metric changes
         if (geoJsonLayer) {
             geoJsonLayer.eachLayer((layer) => geoJsonLayer.resetStyle(layer));
         }
@@ -581,44 +674,8 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                 return div;
             }
 
-            // Calculate quantiles for even distribution
-            const grades = [];
-            if (values.length === 1) {
-                grades.push(values[0]);
-            } else {
-                const numColors = 6; // Number of color grades
-                const uniqueValues = [...new Set(values)].sort((a, b) => a - b);
-                
-                if (uniqueValues.length <= 3) {
-                    // For very few unique values, just use all of them
-                    grades.push(...uniqueValues);
-                } else {
-                    // Calculate quantiles based on actual data distribution
-                    for (let i = 0; i < numColors; i++) {
-                        const percentile = i / (numColors - 1);
-                        const index = Math.floor(percentile * (values.length - 1));
-                        grades.push(values[index]);
-                    }
-                    
-                    // Remove duplicates and ensure we have meaningful breaks
-                    const uniqueGrades = [...new Set(grades)].sort((a, b) => a - b);
-                    
-                    // If we still have too few categories, create intermediate values
-                    if (uniqueGrades.length < 4 && uniqueValues.length > 3) {
-                        const min = Math.min(...values);
-                        const max = Math.max(...values);
-                        const step = (max - min) / 5;
-                        
-                        grades.length = 0;
-                        for (let i = 0; i <= 5; i++) {
-                            grades.push(min + (step * i));
-                        }
-                    } else {
-                        grades.length = 0;
-                        grades.push(...uniqueGrades);
-                    }
-                }
-            }
+            // Use cached quantile calculation
+            const { grades } = calculateQuantiles(currentMetric, isInCommuneView);
 
             const metricLabel = MetricsConfig.getMetricLabel(currentMetric);
             const viewLabel = isInCommuneView ? ` (${currentDept})` : "";
