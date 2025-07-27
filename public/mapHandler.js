@@ -283,15 +283,20 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
      * Determines color based on the metric value.
      * @param {number} value - The metric value.
      * @param {string} metric - The metric type.
+     * @param {boolean} isCommune - Whether this is for commune data.
      * @returns {string} The color code.
      */
-    function getColor(value, metric) {
+    function getColor(value, metric, isCommune = false) {
         if (value == null || isNaN(value)) return "#ccc";
 
-        // Get min/max for the current metric
-        const values = Object.values(deptData)
+        // Get min/max for the current metric from the appropriate dataset
+        const dataSource = isCommune ? commData : deptData;
+        const values = Object.values(dataSource)
             .map((data) => data[metric])
             .filter((v) => v != null && !isNaN(v));
+        
+        if (values.length === 0) return "#ccc";
+        
         const min = Math.min(...values);
         const max = Math.max(...values);
         if (min === max) return "#ffeda0"; // Single color if all values are the same
@@ -331,7 +336,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
         const data = isCommune ? commData[code] : deptData[code];
         const value = data ? data[currentMetric] : null;
         return {
-            fillColor: getColor(value, currentMetric),
+            fillColor: getColor(value, currentMetric, isCommune),
             weight: 1,
             opacity: 1,
             color: "white",
@@ -418,9 +423,20 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
         legendControl = L.control({ position: "bottomleft" });
         legendControl.onAdd = () => {
             const div = L.DomUtil.create("div", "info legend");
-            const values = Object.values(deptData)
+            
+            // Use commune data if we're in commune view, otherwise department data
+            const isInCommuneView = communeGeoJsonLayer !== null;
+            const dataSource = isInCommuneView ? commData : deptData;
+            
+            const values = Object.values(dataSource)
                 .map((data) => data[currentMetric])
                 .filter((v) => v != null && !isNaN(v));
+            
+            if (values.length === 0) {
+                div.innerHTML = "<h4>No data available</h4>";
+                return div;
+            }
+            
             const min = Math.min(...values);
             const max = Math.max(...values);
             const grades =
@@ -447,7 +463,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                     : "+";
                 div.innerHTML +=
                     '<i style="background:' +
-                    getColor(grades[i], currentMetric) +
+                    getColor(grades[i], currentMetric, isInCommuneView) +
                     '"></i> ' +
                     formattedGrade +
                     (grades[i + 1] ? "–" + formattedNextGrade + "<br>" : "+");
