@@ -211,8 +211,10 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
         try {
             let allData = [];
             let offset = 0;
-            const limit = 200; // Use the increased validation limit
+            const limit = 500; // Use the increased validation limit
             let hasMoreData = true;
+
+            console.log(`Loading commune data for department ${deptCode}...`);
 
             // Make multiple API calls to get all communes
             while (hasMoreData) {
@@ -229,6 +231,8 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                 const responseData = await response.json();
                 const data = responseData.data || responseData;
 
+                console.log(`API call ${Math.floor(offset/limit) + 1} for dept ${deptCode}: got ${data.length} communes (offset: ${offset})`);
+
                 if (data.length === 0) {
                     hasMoreData = false;
                 } else {
@@ -243,6 +247,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             }
 
             // Process all the commune data
+            let processedCount = 0;
             allData.forEach((comm) => {
                 // Map commune data using multiple possible keys for better matching
                 const keys = [
@@ -252,6 +257,11 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                     comm.insee,
                     comm.COM
                 ].filter(Boolean);
+
+                if (keys.length === 0) {
+                    console.warn('Commune with no valid COG keys:', comm);
+                    return;
+                }
 
                 const communeData = {
                     total_score: comm.total_score,
@@ -281,9 +291,10 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                 keys.forEach(key => {
                     commData[key] = communeData;
                 });
+                processedCount++;
             });
 
-            console.log(`Loaded ${allData.length} communes for department ${deptCode}`);
+            console.log(`Loaded ${allData.length} communes for department ${deptCode}, processed ${processedCount} with valid keys`);
         } catch (error) {
             console.error(`Error fetching commune data for ${deptCode}:`, error);
         }
