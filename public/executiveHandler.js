@@ -42,7 +42,7 @@ function ExecutiveHandler(executiveDiv, departmentNames) {
      */
     async function showDepartmentExecutive(deptCode) {
         try {
-            const data = await apiService.request(`/api/departements/prefet?dept=${deptCode}`);
+            const data = await api.getDepartmentExecutive(deptCode);
             console.log("Department executive data:", data);
             if (!data) {
                 executiveDiv.innerHTML = "<p>Aucun préfet trouvé.</p>";
@@ -78,7 +78,7 @@ function ExecutiveHandler(executiveDiv, departmentNames) {
                 return;
             }
 
-            const data = await apiService.request(`/api/communes/maire?cog=${encodeURIComponent(cog)}`);
+            const data = await api.getCommuneExecutive(cog);
             console.log("Commune executive data:", data);
             if (!data) {
                 executiveDiv.innerHTML = "<p>Aucun maire trouvé.</p>";

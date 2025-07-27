@@ -127,6 +127,16 @@ export const api = {
     getQpvCommune: (code) => 
         apiService.request(`/api/qpv/commune/${code}`),
 
+    // Executive data
+    getDepartmentExecutive: (deptCode) => 
+        apiService.request(`/api/departements/prefet?dept=${deptCode}`),
+    getCommuneExecutive: (cog) => 
+        apiService.request(`/api/communes/maire?cog=${encodeURIComponent(cog)}`),
+
+    // Search functionality
+    searchCommunes: (query) => 
+        apiService.request(`/api/communes/search?q=${encodeURIComponent(query)}`),
+
     // Articles
     getArticles: (params) => {
         const queryString = new URLSearchParams(params).toString();

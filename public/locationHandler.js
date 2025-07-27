@@ -64,7 +64,7 @@ function LocationHandler(
 
         try {
             console.log("Searching communes globally with query:", query);
-            const communes = await apiService.request(`/api/communes/search?q=${encodeURIComponent(query)}`);
+            const communes = await api.searchCommunes(query);
             console.log("Global communes search results:", communes);
 
             // Store the communes data for getCOGForCommune and getDepartmentForCommune
