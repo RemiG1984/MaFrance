@@ -1,4 +1,5 @@
 import { MetricsConfig } from "./metricsConfig.js";
+import { normalizeDept } from "./utils.js";
 
 /**
  * Map handler module for displaying interactive maps with statistical data.
@@ -475,12 +476,13 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             },
             click: async () => {
                 if (!isCommune) {
-                    currentDept = code;
+                    const normalizedCode = normalizeDept(code);
+                    currentDept = normalizedCode;
                     const bounds = layer.getBounds();
                     map.fitBounds(bounds);
-                    await loadCommuneData(code);
-                    await loadCommuneGeoJson(code);
-                    departementSelect.value = code;
+                    await loadCommuneData(normalizedCode);
+                    await loadCommuneGeoJson(normalizedCode);
+                    departementSelect.value = normalizedCode;
                     departementSelect.dispatchEvent(new Event("change"));
                 } else if (window.updateSelectedCommune) {
                     window.updateSelectedCommune(code);
