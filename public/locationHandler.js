@@ -1,4 +1,4 @@
-import { normalizeDept, debounce } from './utils.js';
+import { normalizeDept, debounce, normalizeText } from './utils.js';
 import { apiService, api } from './apiService.js';
 
 /**
@@ -101,12 +101,24 @@ function LocationHandler(
             console.log("Global communes search results:", communes);
 
             // Store the communes data for getCOGForCommune and getDepartmentForCommune
-            communesData = communes.map(commune => ({
+            const newCommunesData = communes.map(commune => ({
                 displayName: `${commune.commune} (${commune.departement})`,
                 commune: commune.commune,
                 COG: commune.COG,
                 departement: commune.departement
             }));
+
+            communesData = newCommunesData;
+
+            // Add to allCommunesData cache, avoiding duplicates
+            newCommunesData.forEach(newCommune => {
+                const exists = allCommunesData.some(existing => 
+                    existing.COG === newCommune.COG
+                );
+                if (!exists) {
+                    allCommunesData.push(newCommune);
+                }
+            });
 
         } catch (error) {
             console.error("Erreur recherche globale communes:", {
@@ -167,20 +179,59 @@ function LocationHandler(
         lieuxSelect.disabled = true;
     }
 
-    async function handleCommuneInput(departement, query) {
-        // Always use global search regardless of department selection
-        if (query.length >= 2) {
-            await searchCommunesGlobally(query);
+    // Store all communes for client-side filtering
+    let allCommunesData = [];
 
-            // Update datalist with current results
-            communeList.innerHTML = "";
-            communesData.forEach((commune) => {
-                const option = document.createElement("option");
-                option.value = commune.displayName;
-                option.setAttribute('data-cog', commune.COG);
-                option.setAttribute('data-dept', commune.departement);  
-                communeList.appendChild(option);
-            });
+    
+
+    // Function to filter communes based on normalized input
+    function filterCommunesLocally(query) {
+        if (!query || query.length < 2) {
+            return [];
+        }
+
+        const normalizedQuery = normalizeText(query);
+        
+        return allCommunesData.filter(commune => {
+            const normalizedCommune = normalizeText(commune.displayName);
+            const normalizedCommuneName = normalizeText(commune.commune);
+            
+            return normalizedCommune.includes(normalizedQuery) || 
+                   normalizedCommuneName.includes(normalizedQuery);
+        }).slice(0, 15); // Limit results for performance
+    }
+
+    // Function to update datalist with filtered results
+    function updateDatalist(filteredCommunes) {
+        communeList.innerHTML = "";
+        filteredCommunes.forEach((commune) => {
+            const option = document.createElement("option");
+            option.value = commune.displayName;
+            option.setAttribute('data-cog', commune.COG);
+            option.setAttribute('data-dept', commune.departement);  
+            communeList.appendChild(option);
+        });
+    }
+
+    async function handleCommuneInput(departement, query) {
+        // If we don't have all communes data yet, fetch it
+        if (allCommunesData.length === 0 && query.length >= 2) {
+            await searchCommunesGlobally(query);
+            // Store the fetched data for future filtering
+            allCommunesData = [...communesData];
+        }
+
+        // If we have enough data, filter locally for better performance
+        if (allCommunesData.length > 0) {
+            const filteredCommunes = filterCommunesLocally(query);
+            updateDatalist(filteredCommunes);
+            // Update communesData to match current filter for other functions
+            communesData = filteredCommunes;
+        } else if (query.length >= 2) {
+            // Fallback to server search if no local data
+            await searchCommunesGlobally(query);
+            allCommunesData = [...communesData];
+            updateDatalist(communesData);
         }
     }
 

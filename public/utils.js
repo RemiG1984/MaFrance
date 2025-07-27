@@ -61,3 +61,15 @@ export function formatDate(dateStr) {
   const [year, month, day] = dateStr.split("-");
   return `${day}/${month}/${year}`;
 }
+
+/**
+ * Normalizes text by removing accents and converting to lowercase for comparison.
+ * @param {string} text - The text to normalize.
+ * @returns {string} Normalized text without accents and in lowercase.
+ */
+export function normalizeText(text) {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
