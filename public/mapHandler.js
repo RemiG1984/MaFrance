@@ -209,21 +209,41 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
      */
     async function loadCommuneData(deptCode) {
         try {
-            // Try to get all communes with a high limit (most departments have < 1000 communes)
-            const response = await fetch(
-                `/api/rankings/communes?dept=${deptCode}&limit=500&sort=total_score&direction=DESC`
-            );
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error(`API error (${response.status}):`, errorText);
-                throw new Error(`Failed to fetch commune rankings: ${response.status}`);
+            let allData = [];
+            let offset = 0;
+            const limit = 100; // Max allowed by validation
+            let hasMoreData = true;
+
+            // Make multiple API calls to get all communes
+            while (hasMoreData) {
+                const response = await fetch(
+                    `/api/rankings/communes?dept=${deptCode}&limit=${limit}&offset=${offset}&sort=total_score&direction=DESC`
+                );
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error(`API error (${response.status}):`, errorText);
+                    throw new Error(`Failed to fetch commune rankings: ${response.status}`);
+                }
+
+                const responseData = await response.json();
+                const data = responseData.data || responseData;
+
+                if (data.length === 0) {
+                    hasMoreData = false;
+                } else {
+                    allData = allData.concat(data);
+                    offset += limit;
+                    
+                    // If we got fewer results than the limit, we've reached the end
+                    if (data.length < limit) {
+                        hasMoreData = false;
+                    }
+                }
             }
 
-            const responseData = await response.json();
-
-            const data = responseData.data || responseData;
-
-            data.forEach((comm) => {
+            // Process all the commune data
+            allData.forEach((comm) => {
                 // Map commune data using multiple possible keys for better matching
                 const keys = [
                     comm.cog,
@@ -261,8 +281,9 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                 keys.forEach(key => {
                     commData[key] = communeData;
                 });
-
             });
+
+            console.log(`Loaded ${allData.length} communes for department ${deptCode}`);
         } catch (error) {
             console.error(`Error fetching commune data for ${deptCode}:`, error);
         }
