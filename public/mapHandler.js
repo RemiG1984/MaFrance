@@ -381,6 +381,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
         }
 
         const data = isCommune ? commData[code] : deptData[code];
+        const value = data ? data[currentMetric] : null;
 
         return {
             fillColor: getColor(value, currentMetric, isCommune),
