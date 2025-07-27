@@ -217,10 +217,16 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             console.log(`Loaded ${data.length} communes for department ${deptCode}:`, data.slice(0, 3));
             console.log('Sample commune data structure:', data[0]);
             data.forEach((comm) => {
-                // Map both COG and potential code variations
-                const communeKey = comm.cog || comm.code || comm.COG;
-                console.log(`Mapping commune: ${comm.commune} with key: ${communeKey}`);
-                commData[communeKey] = {
+                // Map commune data using multiple possible keys for better matching
+                const keys = [
+                    comm.cog,
+                    comm.COG,
+                    comm.code,
+                    comm.insee,
+                    comm.COM
+                ].filter(Boolean);
+                
+                const communeData = {
                     total_score: comm.total_score,
                     insecurite_score: comm.insecurite_score,
                     homicides_p100k: comm.homicides_p100k,
@@ -243,6 +249,17 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                     pop_in_qpv_pct: comm.pop_in_qpv_pct,
                     logements_sociaux_pct: comm.logements_sociaux_pct,
                 };
+                
+                // Store the data under all possible keys
+                keys.forEach(key => {
+                    commData[key] = communeData;
+                });
+                
+                if (keys.length > 0) {
+                    console.log(`Mapped commune: ${comm.commune} with keys: ${keys.join(', ')}`);
+                } else {
+                    console.log(`Warning: No valid key found for commune: ${comm.commune}`, comm);
+                }
             });
         } catch (error) {
             console.error(`Error fetching commune data for ${deptCode}:`, error);
@@ -272,8 +289,29 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
 
             // Debug: Log commune GeoJSON feature properties
             if (geoData.features && geoData.features.length > 0) {
-                console.log('Sample commune GeoJSON properties:', geoData.features[0].properties);
-                console.log('Available commune codes in data:', Object.keys(commData).slice(0, 10));
+                console.log(`Department ${deptCode} - Total features: ${geoData.features.length}`);
+                console.log('First 3 commune GeoJSON properties:', geoData.features.slice(0, 3).map(f => f.properties));
+                console.log(`Available commune data codes (${Object.keys(commData).length}):`, Object.keys(commData).slice(0, 10));
+                
+                // Test property matching
+                const sampleFeature = geoData.features[0];
+                const possibleCodes = [
+                    sampleFeature.properties.code,
+                    sampleFeature.properties.insee,
+                    sampleFeature.properties.COG,
+                    sampleFeature.properties.cog,
+                    sampleFeature.properties.COM
+                ].filter(Boolean);
+                console.log('Possible codes from first feature:', possibleCodes);
+                
+                // Check if any match our data
+                possibleCodes.forEach(code => {
+                    if (commData[code]) {
+                        console.log(`✓ Found matching data for code: ${code}`);
+                    } else {
+                        console.log(`✗ No data found for code: ${code}`);
+                    }
+                });
             }
 
             communeGeoJsonLayer = L.geoJSON(geoData, {
@@ -346,11 +384,24 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
         let code;
         if (isCommune) {
             // Try various property names that might contain the COG code
-            code = feature.properties.code || feature.properties.insee || feature.properties.COG || feature.properties.cog || feature.properties.COM;
+            const possibleCodes = [
+                feature.properties.code,
+                feature.properties.insee,
+                feature.properties.COG,
+                feature.properties.cog,
+                feature.properties.COM,
+                feature.properties.Code_INSEE,
+                feature.properties.INSEE_COM,
+                feature.properties.codgeo
+            ];
+            
+            // Find the first code that has data
+            code = possibleCodes.find(c => c && commData[c]);
+            
             if (!code) {
-                console.log('No commune code found in properties:', Object.keys(feature.properties));
-            } else {
-                console.log(`Found commune code: ${code} in properties`);
+                // If no match found, try the first non-null code anyway
+                code = possibleCodes.find(c => c);
+                console.log(`No matching data found for commune. Properties:`, Object.keys(feature.properties), 'Trying code:', code);
             }
         } else {
             code = feature.properties.code;
@@ -359,12 +410,9 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
         const data = isCommune ? commData[code] : deptData[code];
         const value = data ? data[currentMetric] : null;
 
-        if (isCommune) {
-            if (!data) {
-                console.log(`No data found for commune code: ${code}, available data keys:`, Object.keys(commData).slice(0, 10));
-            } else {
-                console.log(`Found data for commune ${code}: ${currentMetric} = ${value}`);
-            }
+        // Minimal logging for communes
+        if (isCommune && !data && code) {
+            console.log(`No data for commune code: ${code}`);
         }
         return {
             fillColor: getColor(value, currentMetric, isCommune),
@@ -386,7 +434,23 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
         let code;
         if (isCommune) {
             // Try various property names that might contain the COG code
-            code = feature.properties.code || feature.properties.insee || feature.properties.COG || feature.properties.cog || feature.properties.COM;
+            const possibleCodes = [
+                feature.properties.code,
+                feature.properties.insee,
+                feature.properties.COG,
+                feature.properties.cog,
+                feature.properties.COM,
+                feature.properties.Code_INSEE,
+                feature.properties.INSEE_COM,
+                feature.properties.codgeo
+            ];
+            
+            // Find the first code that has data
+            code = possibleCodes.find(c => c && commData[c]);
+            
+            if (!code) {
+                code = possibleCodes.find(c => c);
+            }
         } else {
             code = feature.properties.code;
         }
