@@ -552,26 +552,31 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
 
             const values = Object.values(dataSource)
                 .map((data) => data[currentMetric])
-                .filter((v) => v != null && !isNaN(v));
+                .filter((v) => v != null && !isNaN(v))
+                .sort((a, b) => a - b); // Sort for quantile calculation
 
             if (values.length === 0) {
                 div.innerHTML = "<h4>No data available</h4>";
                 return div;
             }
 
-            const min = Math.min(...values);
-            const max = Math.max(...values);
-            const grades =
-                min === max
-                    ? [min]
-                    : [
-                          min,
-                          min + (max - min) * 0.2,
-                          min + (max - min) * 0.4,
-                          min + (max - min) * 0.6,
-                          min + (max - min) * 0.8,
-                          max,
-                      ];
+            // Calculate quantiles for even distribution
+            const grades = [];
+            if (values.length === 1) {
+                grades.push(values[0]);
+            } else {
+                const numColors = 6; // Number of color grades
+                for (let i = 0; i < numColors; i++) {
+                    const percentile = i / (numColors - 1);
+                    const index = Math.floor(percentile * (values.length - 1));
+                    grades.push(values[index]);
+                }
+                
+                // Ensure we don't have duplicate grades
+                const uniqueGrades = [...new Set(grades)].sort((a, b) => a - b);
+                grades.length = 0;
+                grades.push(...uniqueGrades);
+            }
 
             const metricLabel = MetricsConfig.getMetricLabel(currentMetric);
             const viewLabel = isInCommuneView ? ` (${currentDept})` : "";
