@@ -36,6 +36,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
     let communeGeoJsonLayer = null;
     let commData = {}; // Commune data cache (keyed by COG/INSEE code)
     let currentDept = null; // Currently selected department for commune view
+    let metricControl = null; // Metric control instance
 
     // Cache for quantile calculations
     let quantileCache = {
@@ -167,7 +168,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             },
         });
 
-        let metricControl = new MetricControl();
+        metricControl = new MetricControl();
         map.addControl(metricControl);
 
         // Add zoomend listener for auto-hide commune layer
@@ -757,7 +758,14 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
         legendControl.addTo(map);
     }
 
-    
+    /**
+     * Updates the metric selector dropdown with current labels
+     */
+    function updateMetricSelector() {
+        if (metricControl && metricControl.updateOptions) {
+            metricControl.updateOptions();
+        }
+    }
 
     initMap();
 
