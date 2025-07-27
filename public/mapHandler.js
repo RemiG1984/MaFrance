@@ -209,13 +209,36 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
      */
     async function loadCommuneData(deptCode) {
         try {
+            console.log(`Fetching commune data for department: ${deptCode}`);
+            console.log(`API URL: /api/rankings/communes?dept=${deptCode}&limit=1000&sort=total_score&direction=DESC`);
+            
             const response = await fetch(
                 `/api/rankings/communes?dept=${deptCode}&limit=1000&sort=total_score&direction=DESC`
             );
-            if (!response.ok) throw new Error('Failed to fetch commune rankings');
-            const { data } = await response.json();
-            console.log(`Loaded ${data.length} communes for department ${deptCode}:`, data.slice(0, 3));
-            console.log('Sample commune data structure:', data[0]);
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error(`API error (${response.status}):`, errorText);
+                throw new Error(`Failed to fetch commune rankings: ${response.status}`);
+            }
+            
+            const responseData = await response.json();
+            console.log('Full API response:', responseData);
+            
+            const data = responseData.data || responseData;
+            console.log(`Loaded ${data.length} communes for department ${deptCode}`);
+            console.log('First 3 commune records:', data.slice(0, 3));
+            
+            if (data.length > 0) {
+                console.log('Sample commune data structure (all keys):', Object.keys(data[0]));
+                console.log('Sample commune metrics:', {
+                    total_score: data[0].total_score,
+                    cog: data[0].cog,
+                    COG: data[0].COG,
+                    code: data[0].code,
+                    commune: data[0].commune,
+                    insecurite_score: data[0].insecurite_score
+                });
+            }
             data.forEach((comm) => {
                 // Map commune data using multiple possible keys for better matching
                 const keys = [
