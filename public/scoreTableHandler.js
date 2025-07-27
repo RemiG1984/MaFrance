@@ -171,7 +171,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                 const rows = [
                     {
                         title: "Population",
-                        main: 0,
+                        main: data.population ? data.population.toLocaleString("fr-FR") : "N/A",
                     },
                     {
                         title: MetricsConfig.getMetricLabel("insecurite_score"),
@@ -289,8 +289,8 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                 const rows = [
                     {
                         title: "Population",
-                        main: 0,
-                        compare: 0,
+                        main: data.population ? data.population.toLocaleString("fr-FR") : "N/A",
+                        compare: countryData.population ? countryData.population.toLocaleString("fr-FR") : "N/A",
                     },
                     {
                         title: MetricsConfig.getMetricLabel("insecurite_score"),
@@ -441,8 +441,8 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
             const rows = [
                 {
                     title: "Population",
-                    main: 0,
-                    compare: 0,
+                    main: item.population ? item.population.toLocaleString("fr-FR") : "N/A",
+                    compare: deptData.population ? deptData.population.toLocaleString("fr-FR") : "N/A",
                 },
                 {
                     title: MetricsConfig.getMetricLabel("insecurite_score"),
