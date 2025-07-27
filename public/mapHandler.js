@@ -615,7 +615,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                 layer
                     .bindPopup(
                         `<b>${name} (${code})</b><br>${metricLabel}: ${formattedValue}`,
-                        { className: "custom-popup", closeButton: false },
+                        { className: "custom-popup", closeButton: false, autoPan: false },
                     )
                     .openPopup();
             },
