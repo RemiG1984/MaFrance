@@ -660,6 +660,10 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
         clearQuantileCache(); // Clear cache when metric changes
         if (geoJsonLayer) {
             geoJsonLayer.eachLayer((layer) => geoJsonLayer.resetStyle(layer));
+            // If we're in commune view, keep the department layer hidden
+            if (communeGeoJsonLayer) {
+                geoJsonLayer.setStyle({ fillOpacity: 0.1, opacity: 1 });
+            }
         }
         if (communeGeoJsonLayer) {
             communeGeoJsonLayer.eachLayer((layer) =>
