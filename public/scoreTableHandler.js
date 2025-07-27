@@ -50,8 +50,11 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
             `${linkBase}${linkBase.includes('?') ? '&' : '?'}labelState=${MetricsConfig.labelState}` : 
             linkBase;
 
-        // Only add homicide row if metrics exist
-        if (metrics) {
+        // Only add homicide row if available at current level
+        const currentLevel = linkBase.includes('country') ? 'france' : 
+                           linkBase.includes('department') ? 'departement' : 'commune';
+        
+        if (MetricsConfig.isMetricAvailable("homicides_p100k", currentLevel) && metrics) {
             rows.push({
                 title: MetricsConfig.getMetricLabel("homicides_p100k"),
                 main: MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("homicides_total_p100k", crimeData), "homicides_p100k") + metrics.crimeYearLabel,
@@ -457,8 +460,9 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                 },
             ];
 
-            // Conditionally add prenom-related sub-rows only if names data exists and values are not NaN
-            if (communeMetrics && !isNaN(communeMetrics.extraEuropeenPct)) {
+            // Add prenom-related sub-rows only if available at commune level and data exists
+            if (MetricsConfig.isMetricAvailable("extra_europeen_pct", "commune") && 
+                communeMetrics && !isNaN(communeMetrics.extraEuropeenPct)) {
                 rows.push({
                     title: MetricsConfig.getMetricLabel("extra_europeen_pct"),
                     main: MetricsConfig.formatMetricValue(communeMetrics.extraEuropeenPct, "extra_europeen_pct") + communeMetrics.yearLabel,
@@ -474,7 +478,8 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                 compare: MetricsConfig.formatMetricValue(deptData.islamisation_score, "islamisation_score"),
             });
 
-            if (communeMetrics && !isNaN(communeMetrics.musulmanPct)) {
+            if (MetricsConfig.isMetricAvailable("musulman_pct", "commune") && 
+                communeMetrics && !isNaN(communeMetrics.musulmanPct)) {
                 rows.push({
                     title: MetricsConfig.getMetricLabel("musulman_pct"),
                     main: MetricsConfig.formatMetricValue(communeMetrics.musulmanPct, "musulman_pct") + communeMetrics.yearLabel,
@@ -504,7 +509,8 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                 },
             );
 
-            if (communeMetrics && traditionnelPct !== null && !isNaN(traditionnelPct)) {
+            if (MetricsConfig.isMetricAvailable("prenom_francais_pct", "commune") && 
+                communeMetrics && traditionnelPct !== null && !isNaN(traditionnelPct)) {
                 rows.push({
                     title: MetricsConfig.getMetricLabel("prenom_francais_pct"),
                     main: MetricsConfig.formatMetricValue(communeMetrics.prenomFrancaisPct, "prenom_francais_pct") + communeMetrics.yearLabel,
