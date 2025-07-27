@@ -1,5 +1,5 @@
-import { normalizeDept, debounce } from './utils.js';
-import { apiService, api } from './apiService.js';
+import { normalizeDept } from './utils.js';
+import { api } from './apiService.js';
 
 /**
  * Location handler module for managing department, commune, and lieu selection.

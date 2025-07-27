@@ -1,5 +1,5 @@
 import { formatDate } from './utils.js';
-import { apiService, api } from './apiService.js';
+import { api } from './apiService.js';
 
 /**
  * Executive Handler module for displaying executive information (ministers, prefects, mayors).

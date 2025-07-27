@@ -1,5 +1,4 @@
 import { DepartmentNames } from "./departmentNames.js";
-import { MetricsConfig } from "./metricsConfig.js";
 import { api } from "./apiService.js";
 
 /**

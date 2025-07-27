@@ -1,5 +1,6 @@
 import { MetricsConfig } from "./metricsConfig.js";
 import { normalizeDept } from "./utils.js";
+import { api } from './apiService.js';
 
 /**
  * Map handler module for displaying interactive maps with statistical data.

@@ -1,6 +1,6 @@
 import { DepartmentNames } from './departmentNames.js';
 import { MetricsConfig } from './metricsConfig.js';
-import { apiService, api } from './apiService.js';
+import { api } from './apiService.js';
 
 /**
  * RankingsHandler Module
