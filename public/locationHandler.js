@@ -1,5 +1,5 @@
 
-import { normalizeDept, debounce, setupCustomAutocomplete } from './utils.js';
+import { normalizeDept, debounce } from './utils.js';
 import { apiService, api } from './apiService.js';
 
 /**
@@ -174,12 +174,10 @@ function LocationHandler(
             await searchCommunesGlobally(query);
             
             // Update custom autocomplete with current results
-            const suggestions = communesData.map(commune => commune.displayName);
-            console.log("Setting up autocomplete with suggestions:", suggestions.length);
-            setupCustomAutocomplete('communeInput', 'communeSuggestions', suggestions);
-        } else if (query.length === 0) {
-            // Clear suggestions when query is empty
-            setupCustomAutocomplete('communeInput', 'communeSuggestions', []);
+            if (typeof setupCustomAutocomplete === 'function') {
+                const suggestions = communesData.map(commune => commune.displayName);
+                setupCustomAutocomplete('communeInput', 'communeSuggestions', suggestions);
+            }
         }
     }
 
