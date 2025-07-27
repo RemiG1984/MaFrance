@@ -156,7 +156,7 @@ class SearchService {
     }
 
     /**
-     * Search communes globally (without department filter)
+     * Search communes globally (without department filter) with fuzzy matching and ranking
      */
     static async searchCommunesGlobally(query, limit = 15) {
         return new Promise((resolve, reject) => {
@@ -167,44 +167,57 @@ class SearchService {
 
             const normalizedQuery = this.normalizeText(query);
 
+            // Use SQL LIKE for initial filtering to leverage indexes
+            const likePattern = `%${normalizedQuery}%`;
+
             const sql = `
-                SELECT DISTINCT commune, COG, departement
+                SELECT DISTINCT commune, COG, departement, population
                 FROM locations 
                 WHERE (
                     LOWER(commune) LIKE ? 
                     OR commune LIKE ?
                 )
-                ORDER BY 
-                    CASE 
-                        WHEN LOWER(commune) LIKE ? THEN 1
-                        WHEN commune LIKE ? THEN 2
-                        WHEN LOWER(commune) LIKE ? THEN 3
-                        ELSE 4
-                    END,
-                    commune
+                ORDER BY population DESC
                 LIMIT ?
             `;
 
-            const normalizedSearchTerm = `%${normalizedQuery}%`;
-            const exactSearchTerm = `%${query}%`;
-            const normalizedExactStart = `${normalizedQuery}%`;
-            const exactStart = `${query}%`;
-            
-            const params = [
-                normalizedSearchTerm,    // Main search (normalized)
-                exactSearchTerm,         // Main search (original)
-                normalizedExactStart,    // Order by: normalized exact start (highest priority)
-                exactStart,              // Order by: original exact start
-                normalizedSearchTerm,    // Order by: normalized contains
-                limit
-            ];
+            db.all(sql, [likePattern, `%${query}%`, limit * 3], (err, rows) => {
+                if (err) return reject(err);
 
-            db.all(sql, params, (err, rows) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(rows);
-                }
+                // Apply fuzzy matching and ranking
+                const results = rows.map(row => {
+                    const normalizedName = this.normalizeText(row.commune);
+
+                    // Calculate different types of matches for scoring
+                    const exactMatch = normalizedName === normalizedQuery;
+                    const startsWith = normalizedName.startsWith(normalizedQuery);
+                    const contains = normalizedName.includes(normalizedQuery);
+                    const distance = this.levenshteinDistance(normalizedQuery, normalizedName);
+
+                    // Calculate relevance score
+                    let score = 0;
+                    if (exactMatch) score += 1000;
+                    if (startsWith) score += 500;
+                    if (contains) score += 100;
+                    score -= distance * 10; // Penalize edit distance
+                    score += Math.log(row.population || 1); // Boost by population
+
+                    return {
+                        ...row,
+                        score,
+                        exactMatch,
+                        startsWith,
+                        distance
+                    };
+                });
+
+                // Sort by relevance score and return top results
+                const sortedResults = results
+                    .sort((a, b) => b.score - a.score)
+                    .slice(0, limit)
+                    .map(({ score, exactMatch, startsWith, distance, population, ...item }) => item);
+
+                resolve(sortedResults);
             });
         });
     }

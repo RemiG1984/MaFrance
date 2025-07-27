@@ -184,12 +184,8 @@ function LocationHandler(
             return;
         }
 
-        // If no department is selected, use global search
-        if (!departement) {
-            await searchCommunesGlobally(query);
-        } else {
-            await loadCommunes(departement, query);
-        }
+        // Always use global search with fuzzy matching and ranking
+        await searchCommunesGlobally(query);
     }
 
     function getCOGForCommune(communeName) {
