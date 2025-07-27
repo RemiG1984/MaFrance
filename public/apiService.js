@@ -167,14 +167,6 @@ export const api = {
 
     
 
-    // Rankings
-    getRankingsDepartments: (params) => {
-        const queryString = new URLSearchParams(params).toString();
-        return apiService.request(`/api/rankings/departements?${queryString}`);
-    },
-    getRankingsCommunes: (params) => {
-        const queryString = new URLSearchParams(params).toString();
-        return apiService.request(`/api/rankings/communes?${queryString}`);
-    },
+    
     
 };
