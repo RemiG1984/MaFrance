@@ -175,6 +175,11 @@ import { api } from './apiService.js';
                             articleHandler.renderFilterButtons(counts, allArticles, currentLieu);
                         });
                     });
+
+                    // Update map to center on department and select the commune
+                    if (mapHandler && mapHandler.centerOnDepartmentAndSelectCommune) {
+                        mapHandler.centerOnDepartmentAndSelectCommune(departement, cog);
+                    }
                 } else {
                     resultsDiv.innerHTML = "<p>Commune non trouvée.</p>";
                     executiveDiv.innerHTML = "<p>Commune non trouvée.</p>";

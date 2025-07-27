@@ -833,10 +833,118 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
         }
     }
 
+    /**
+     * Centers the map on a department and selects a specific commune
+     * @param {string} deptCode - Department code
+     * @param {string} communeCog - Commune COG code
+     */
+    async function centerOnDepartmentAndSelectCommune(deptCode, communeCog) {
+        if (!deptCode || !communeCog) return;
+
+        try {
+            // First, find the department feature and center on it
+            if (geoJsonLayer) {
+                geoJsonLayer.eachLayer((layer) => {
+                    const feature = layer.feature;
+                    if (feature.properties.code === deptCode) {
+                        const bounds = layer.getBounds();
+                        map.fitBounds(bounds);
+                        
+                        // Load commune data and GeoJSON for this department
+                        const normalizedCode = normalizeDept(deptCode);
+                        currentDept = normalizedCode;
+                        
+                        // Load commune data and GeoJSON, then select the specific commune
+                        loadCommuneData(normalizedCode).then(() => {
+                            loadCommuneGeoJson(normalizedCode).then(() => {
+                                // After commune layer is loaded, find and select the specific commune
+                                setTimeout(() => {
+                                    selectCommuneOnMap(communeCog);
+                                }, 500); // Small delay to ensure layer is fully loaded
+                            });
+                        });
+                        
+                        return false; // Break the loop
+                    }
+                });
+            }
+        } catch (error) {
+            console.error('Error centering on department and selecting commune:', error);
+        }
+    }
+
+    /**
+     * Selects a specific commune on the map by opening its popup
+     * @param {string} communeCog - Commune COG code
+     */
+    function selectCommuneOnMap(communeCog) {
+        if (!communeGeoJsonLayer || !communeCog) return;
+
+        communeGeoJsonLayer.eachLayer((layer) => {
+            const feature = layer.feature;
+            const possibleCodes = [
+                feature.properties.code,
+                feature.properties.insee,
+                feature.properties.COG,
+                feature.properties.cog,
+                feature.properties.COM,
+                feature.properties.Code_INSEE,
+                feature.properties.INSEE_COM,
+                feature.properties.codgeo,
+            ];
+
+            // Check if this is the commune we're looking for
+            const isTargetCommune = possibleCodes.some(code => {
+                if (code === communeCog) return true;
+                // Also check normalized versions for single-digit departments
+                if (typeof code === "string" && /^0[1-9]\d{3}$/.test(code)) {
+                    return code.substring(1) === communeCog;
+                }
+                return false;
+            });
+
+            if (isTargetCommune) {
+                const name = feature.properties.nom || feature.properties.NOM || feature.properties.name;
+                const data = commData[communeCog] || commData[possibleCodes.find(c => c && commData[c])];
+                
+                if (data) {
+                    const value = data[currentMetric];
+                    const metricLabel = MetricsConfig.getMetricLabel(currentMetric);
+                    const formattedValue = MetricsConfig.formatMetricValue(value, currentMetric);
+                    
+                    // Center the map on this commune
+                    const bounds = layer.getBounds();
+                    map.fitBounds(bounds);
+                    
+                    // Open popup for this commune
+                    layer.bindPopup(
+                        `<b>${name} (${currentDept})</b><br>${metricLabel}: ${formattedValue}`,
+                        {
+                            className: "custom-popup",
+                            closeButton: false,
+                            autoPan: false,
+                        }
+                    ).openPopup();
+                    
+                    // Highlight the commune
+                    layer.setStyle({
+                        weight: 3,
+                        color: "#666",
+                        dashArray: "",
+                        fillOpacity: 0.9,
+                    });
+                }
+                
+                return false; // Break the loop
+            }
+        });
+    }
+
     initMap();
 
     return {
         updateMap,
+        centerOnDepartmentAndSelectCommune,
         get currentMetric() {
             return currentMetric;
         },
