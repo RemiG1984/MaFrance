@@ -75,6 +75,11 @@ import { api } from './apiService.js';
             scoreTableHandler.showDepartmentDetails(departement);
             executiveHandler.showDepartmentExecutive(departement);
             
+            // Show department popup on map without changing view
+            if (mapHandler && mapHandler.showDepartmentPopup) {
+                mapHandler.showDepartmentPopup(departement);
+            }
+            
             articleHandler.loadArticles(departement).then(() => {
                 articleHandler.loadArticleCounts(departement).then((counts) => {
                     articleHandler.renderFilterButtons(

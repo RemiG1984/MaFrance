@@ -834,7 +834,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
     }
 
     /**
-     * Centers the map on a department and selects a specific commune
+     * Shows a department view and selects a specific commune without changing zoom level
      * @param {string} deptCode - Department code
      * @param {string} communeCog - Commune COG code
      */
@@ -842,14 +842,11 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
         if (!deptCode || !communeCog) return;
 
         try {
-            // First, find the department feature and center on it
+            // First, find the department feature
             if (geoJsonLayer) {
                 geoJsonLayer.eachLayer((layer) => {
                     const feature = layer.feature;
                     if (feature.properties.code === deptCode) {
-                        const bounds = layer.getBounds();
-                        map.fitBounds(bounds);
-                        
                         // Load commune data and GeoJSON for this department
                         const normalizedCode = normalizeDept(deptCode);
                         currentDept = normalizedCode;
@@ -859,7 +856,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                             loadCommuneGeoJson(normalizedCode).then(() => {
                                 // After commune layer is loaded, find and select the specific commune
                                 setTimeout(() => {
-                                    selectCommuneOnMap(communeCog);
+                                    selectCommuneOnMap(communeCog, false); // Don't zoom to commune
                                 }, 500); // Small delay to ensure layer is fully loaded
                             });
                         });
@@ -869,15 +866,16 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                 });
             }
         } catch (error) {
-            console.error('Error centering on department and selecting commune:', error);
+            console.error('Error loading department and selecting commune:', error);
         }
     }
 
     /**
      * Selects a specific commune on the map by opening its popup
      * @param {string} communeCog - Commune COG code
+     * @param {boolean} shouldZoom - Whether to zoom to the commune (default: true)
      */
-    function selectCommuneOnMap(communeCog) {
+    function selectCommuneOnMap(communeCog, shouldZoom = true) {
         if (!communeGeoJsonLayer || !communeCog) return;
 
         communeGeoJsonLayer.eachLayer((layer) => {
@@ -912,9 +910,11 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                     const metricLabel = MetricsConfig.getMetricLabel(currentMetric);
                     const formattedValue = MetricsConfig.formatMetricValue(value, currentMetric);
                     
-                    // Center the map on this commune
-                    const bounds = layer.getBounds();
-                    map.fitBounds(bounds);
+                    // Only zoom if requested
+                    if (shouldZoom) {
+                        const bounds = layer.getBounds();
+                        map.fitBounds(bounds);
+                    }
                     
                     // Open popup for this commune
                     layer.bindPopup(
@@ -940,11 +940,58 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
         });
     }
 
+    /**
+     * Shows a popup for a department without changing the map view
+     * @param {string} deptCode - Department code
+     */
+    function showDepartmentPopup(deptCode) {
+        if (!deptCode || !geoJsonLayer) return;
+
+        geoJsonLayer.eachLayer((layer) => {
+            const feature = layer.feature;
+            if (feature.properties.code === deptCode) {
+                const name = feature.properties.nom || feature.properties.NOM || feature.properties.name;
+                const data = deptData[deptCode];
+                
+                if (data) {
+                    const value = data[currentMetric];
+                    const metricLabel = MetricsConfig.getMetricLabel(currentMetric);
+                    const formattedValue = MetricsConfig.formatMetricValue(value, currentMetric);
+                    
+                    // Get the center of the department for popup placement
+                    const bounds = layer.getBounds();
+                    const center = bounds.getCenter();
+                    
+                    // Create and open popup at department center
+                    const popup = L.popup({
+                        className: "custom-popup",
+                        closeButton: false,
+                        autoPan: false,
+                    })
+                    .setLatLng(center)
+                    .setContent(`<b>${name} (${deptCode})</b><br>${metricLabel}: ${formattedValue}`)
+                    .openOn(map);
+                    
+                    // Highlight the department
+                    layer.setStyle({
+                        weight: 3,
+                        color: "#666",
+                        dashArray: "",
+                        fillOpacity: 0.9,
+                    });
+                }
+                
+                return false; // Break the loop
+            }
+        });
+    }
+
     initMap();
 
     return {
         updateMap,
         centerOnDepartmentAndSelectCommune,
+        showDepartmentPopup,
         get currentMetric() {
             return currentMetric;
         },
