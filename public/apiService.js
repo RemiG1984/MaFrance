@@ -10,56 +10,19 @@ class ApiService {
     }
 
     /**
-     * Shows spinner on specified container
+     * Shows spinner on specified container (deprecated - no-op)
      * @param {HTMLElement} container - Container to show spinner on
      */
     showSpinner(container) {
-        if (!container) return;
-        
-        // Store original position to restore later
-        if (!container.dataset.originalPosition) {
-            container.dataset.originalPosition = getComputedStyle(container).position;
-        }
-        
-        // Ensure container has relative positioning for absolute spinner
-        if (getComputedStyle(container).position === 'static') {
-            container.style.position = 'relative';
-        }
-        
-        // Remove existing spinner if any
-        const existingSpinner = container.querySelector('.spinner-overlay');
-        if (existingSpinner) {
-            existingSpinner.remove();
-        }
-        
-        // Create and add spinner
-        const spinnerOverlay = document.createElement('div');
-        spinnerOverlay.className = 'spinner-overlay';
-        spinnerOverlay.innerHTML = '<div class="spinner"></div>';
-        container.appendChild(spinnerOverlay);
+        // Spinner functionality removed
     }
 
     /**
-     * Hides spinner on specified container
+     * Hides spinner on specified container (deprecated - no-op)
      * @param {HTMLElement} container - Container to hide spinner on
      */
     hideSpinner(container) {
-        if (!container) return;
-        
-        const spinner = container.querySelector('.spinner-overlay');
-        if (spinner) {
-            spinner.remove();
-        }
-        
-        // Restore original position if it was changed
-        if (container.dataset.originalPosition) {
-            if (container.dataset.originalPosition === 'static') {
-                container.style.position = '';
-            } else {
-                container.style.position = container.dataset.originalPosition;
-            }
-            delete container.dataset.originalPosition;
-        }
+        // Spinner functionality removed
     }
 
     /**
@@ -67,10 +30,9 @@ class ApiService {
      * @param {string} url - API endpoint
      * @param {Object} options - Fetch options
      * @param {boolean} useCache - Whether to use caching
-     * @param {HTMLElement} spinnerContainer - Container to show spinner on
      * @returns {Promise} API response data
      */
-    async request(url, options = {}, useCache = true, spinnerContainer = null) {
+    async request(url, options = {}, useCache = true) {
         const cacheKey = `${url}_${JSON.stringify(options)}`;
 
         // Check cache first
