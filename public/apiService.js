@@ -69,7 +69,7 @@ class ApiService {
         // Restore original inline position style
         if (container.dataset.originalInlinePosition !== undefined) {
             if (container.dataset.originalInlinePosition === '') {
-                container.style.position = '';
+                container.style.removeProperty('position');
             } else {
                 container.style.position = container.dataset.originalInlinePosition;
             }
