@@ -555,6 +555,24 @@
     .grid.lg\:grid-cols-2 {
         grid-template-columns: 1fr;
     }
+    
+    /* Mobile ordering: location selectors -> map -> scores -> executive -> articles -> links */
+    .mobile-reorder > div:nth-child(1) { order: 1; } /* Location selectors */
+    .mobile-reorder > div:nth-child(2) { order: 2; } /* Map */
+    .mobile-reorder > div:nth-child(3) { order: 3; } /* Score table */
+    .mobile-reorder > div:nth-child(4) { order: 4; } /* Executive details */
+    .mobile-reorder > div:nth-child(5) { order: 5; } /* Articles */
+    .mobile-reorder > div:nth-child(6) { order: 6; } /* Links */
+}
+
+/* Desktop layout: maintain 2-column grid */
+@media (min-width: 1025px) {
+    .mobile-reorder > div:nth-child(1) { grid-column: 1; grid-row: 1; } /* Location selectors */
+    .mobile-reorder > div:nth-child(2) { grid-column: 1; grid-row: 2; } /* Map */
+    .mobile-reorder > div:nth-child(3) { grid-column: 2; grid-row: 1; } /* Score table */
+    .mobile-reorder > div:nth-child(4) { grid-column: 2; grid-row: 2; } /* Executive details */
+    .mobile-reorder > div:nth-child(5) { grid-column: 1; grid-row: 3; } /* Articles */
+    .mobile-reorder > div:nth-child(6) { grid-column: 2; grid-row: 3; } /* Links */
 }
 
 @media (max-width: 768px) {
