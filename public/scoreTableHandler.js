@@ -132,7 +132,6 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
      */
     async function showCountryDetails() {
         try {
-            apiService.showSpinner(resultsDiv);
             const [data, namesData, crimeData] = await Promise.all([
                 api.getCountryDetails(),
                 api.getCountryNames(),
@@ -224,8 +223,6 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
         } catch (error) {
             resultsDiv.innerHTML = `<p>Erreur : ${error.message}</p>`;
             console.error("Erreur lors de la recherche pays:", error);
-        } finally {
-            apiService.hideSpinner(resultsDiv);
         }
     }
 
@@ -236,7 +233,6 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
      */
     async function showDepartmentDetails(deptCode) {
         try {
-            apiService.showSpinner(resultsDiv);
             const [
                 data,
                 countryData,
@@ -368,8 +364,6 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
         } catch (error) {
             resultsDiv.innerHTML = `<p>Erreur : ${error.message}</p>`;
             console.error("Erreur lors de la recherche département:", error);
-        } finally {
-            apiService.hideSpinner(resultsDiv);
         }
     }
 
@@ -380,7 +374,6 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
      */
     async function showCommuneDetails(cog) {
         try {
-            apiService.showSpinner(resultsDiv);
             // First get commune details from COG
             const item = await api.getCommuneDetails(cog);
 
@@ -589,8 +582,6 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
         } catch (error) {
             resultsDiv.innerHTML = `<p>Erreur : ${error.message}</p>`;
             console.error("Erreur lors de la recherche:", error);
-        } finally {
-            apiService.hideSpinner(resultsDiv);
         }
     }
 
