@@ -527,7 +527,7 @@
     .grid.lg\:grid-cols-2 {
         grid-template-columns: 1fr;
     }
-    
+
     /* Mobile ordering: location selectors -> map -> scores -> executive -> articles -> links */
     .mobile-reorder > div:nth-child(1) { order: 1; } /* Location selectors */
     .mobile-reorder > div:nth-child(2) { order: 2; } /* Map */
@@ -537,14 +537,22 @@
     .mobile-reorder > div:nth-child(6) { order: 6; } /* Links */
 }
 
-/* Desktop layout: maintain 2-column grid */
+/* Desktop layout: 2-column grid with vertical flow */
 @media (min-width: 1025px) {
-    .mobile-reorder > div:nth-child(1) { grid-column: 1; grid-row: 1; } /* Location selectors */
-    .mobile-reorder > div:nth-child(2) { grid-column: 1; grid-row: 2; } /* Map */
-    .mobile-reorder > div:nth-child(3) { grid-column: 2; grid-row: 1; } /* Score table */
-    .mobile-reorder > div:nth-child(4) { grid-column: 2; grid-row: 2; } /* Executive details */
-    .mobile-reorder > div:nth-child(5) { grid-column: 1; grid-row: 3; } /* Articles */
-    .mobile-reorder > div:nth-child(6) { grid-column: 2; grid-row: 3; } /* Links */
+    .mobile-reorder {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); /* Two equal columns */
+        grid-auto-flow: column; /* Tiles flow down each column */
+        gap: 1rem; /* Adjust gap as needed */
+    }
+
+    /* Assign tiles to columns explicitly */
+    .mobile-reorder > div:nth-child(1) { grid-column: 1; } /* Location selectors -> Column 1 */
+    .mobile-reorder > div:nth-child(2) { grid-column: 1; } /* Map -> Column 1 */
+    .mobile-reorder > div:nth-child(5) { grid-column: 1; } /* Articles -> Column 1 */
+    .mobile-reorder > div:nth-child(3) { grid-column: 2; } /* Score table -> Column 2 */
+    .mobile-reorder > div:nth-child(4) { grid-column: 2; } /* Executive details -> Column 2 */
+    .mobile-reorder > div:nth-child(6) { grid-column: 2; } /* Links -> Column 2 */
 }
 
 @media (max-width: 768px) {
