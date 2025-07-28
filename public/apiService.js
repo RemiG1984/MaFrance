@@ -78,6 +78,16 @@ class ApiService {
 
         // Force a reflow to ensure layout is recalculated
         container.offsetHeight;
+        
+        // Force grid layout recalculation if container uses CSS Grid
+        const computedStyle = window.getComputedStyle(container);
+        if (computedStyle.display === 'grid') {
+            const originalDisplay = container.style.display;
+            container.style.display = 'block';
+            container.offsetHeight; // Force reflow
+            container.style.display = originalDisplay || '';
+            container.offsetHeight; // Force another reflow
+        }
     }
 
     /**
