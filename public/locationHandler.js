@@ -23,10 +23,20 @@ function LocationHandler(
     async function loadDepartements() {
         try {
             departementSelect.disabled = true;
-            // Add loading-container class to ensure proper layout
+            // Store original container properties
             const container = departementSelect.parentElement;
+            const originalDisplay = getComputedStyle(container).display;
+            
             if (!container.classList.contains('loading-container')) {
                 container.classList.add('loading-container');
+                // Preserve original display type
+                if (originalDisplay === 'grid') {
+                    container.classList.add('grid');
+                } else if (originalDisplay === 'inline-flex') {
+                    container.classList.add('inline-flex');
+                } else if (originalDisplay === 'inline-block') {
+                    container.classList.add('inline-block');
+                }
             }
             apiService.showSpinner(container);
             

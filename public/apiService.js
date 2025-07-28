@@ -16,6 +16,16 @@ class ApiService {
     showSpinner(container) {
         if (!container) return;
         
+        // Store original styles to restore later
+        if (!container.dataset.originalPosition) {
+            container.dataset.originalPosition = getComputedStyle(container).position;
+        }
+        
+        // Ensure container has relative positioning for absolute spinner
+        if (getComputedStyle(container).position === 'static') {
+            container.style.position = 'relative';
+        }
+        
         // Add loading-container class if not present
         if (!container.classList.contains('loading-container')) {
             container.classList.add('loading-container');
@@ -44,6 +54,14 @@ class ApiService {
         const spinner = container.querySelector('.spinner-overlay');
         if (spinner) {
             spinner.remove();
+        }
+        
+        // Restore original position if it was changed
+        if (container.dataset.originalPosition) {
+            if (container.dataset.originalPosition === 'static') {
+                container.style.position = '';
+            }
+            delete container.dataset.originalPosition;
         }
     }
 
