@@ -81,7 +81,7 @@ import { api } from './apiService.js';
                 mapHandler.showDepartmentPopup(departement);
             }
             
-            articleHandler.loadArticles(departement).then(() => {
+            articleHandler.loadArticles(departement, "", "", locationHandler).then(() => {
                 articleHandler.loadArticleCounts(departement).then((counts) => {
                     articleHandler.renderFilterButtons(
                         counts,
@@ -112,7 +112,7 @@ import { api } from './apiService.js';
             if (departement) {
                 scoreTableHandler.showDepartmentDetails(departement);
                 executiveHandler.showDepartmentExecutive(departement);
-                articleHandler.loadArticles(departement).then(() => {
+                articleHandler.loadArticles(departement, "", "", locationHandler).then(() => {
                     articleHandler
                         .loadArticleCounts(departement)
                         .then((counts) => {
@@ -176,7 +176,7 @@ import { api } from './apiService.js';
                     scoreTableHandler.showCommuneDetails(cog);
                     executiveHandler.showCommuneExecutive(cog);
                     locationHandler.loadLieux(departement, cog);
-                    articleHandler.loadArticles(departement, cog).then(() => {
+                    articleHandler.loadArticles(departement, cog, "", locationHandler).then(() => {
                         articleHandler.loadArticleCounts(departement, cog).then((counts) => {
                             articleHandler.renderFilterButtons(counts, allArticles, currentLieu);
                         });
@@ -207,7 +207,7 @@ import { api } from './apiService.js';
             try {
                 const cog = await getCOGForCommune(commune, departement);
                 if (cog) {
-                    articleHandler.loadArticles(departement, cog, currentLieu).then(() => {
+                    articleHandler.loadArticles(departement, cog, currentLieu, locationHandler).then(() => {
                         articleHandler.loadArticleCounts(departement, cog, currentLieu).then((counts) => {
                             articleHandler.renderFilterButtons(counts, allArticles, currentLieu);
                         });
@@ -315,7 +315,7 @@ import { api } from './apiService.js';
                 // Load lieux and articles
                 if (deptCode) {
                     locationHandler.loadLieux(deptCode, cog);
-                    articleHandler.loadArticles(deptCode, cog).then(() => {
+                    articleHandler.loadArticles(deptCode, cog, "", locationHandler).then(() => {
                         articleHandler.loadArticleCounts(deptCode, cog).then((counts) => {
                             articleHandler.renderFilterButtons(counts, allArticles, currentLieu);
                         });

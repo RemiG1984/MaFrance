@@ -12,42 +12,7 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
     let currentFilter = null;
     let filteredArticles = [];
 
-    /**
-     * Loads lieux for commune level only.
-     * @async
-     * @param {string} departement - Department code
-     * @param {string} cog - Commune COG code
-     * @returns {Promise<void>}
-     */
-    async function loadLieux(departement, cog) {
-        const lieuxSelect = document.getElementById('lieuxSelect');
-        if (!lieuxSelect || !cog) return; // Only load at commune level
-
-        try {
-            lieuxSelect.disabled = true;
-            apiService.showSpinner(lieuxSelect.parentElement);
-
-            const lieux = await api.getLieux(departement, cog);
-            console.log("Lieux fetched:", lieux);
-            lieuxSelect.innerHTML = '<option value="">-- Tous les lieux --</option>';
-
-            lieux.forEach((lieu) => {
-                const option = document.createElement("option");
-                option.value = lieu.lieu;
-                option.textContent = lieu.lieu;
-                lieuxSelect.appendChild(option);
-            });
-
-            // Don't show/hide here - let renderFilterButtons handle visibility
-            lieuxSelect.disabled = false;
-        } catch (error) {
-            lieuxSelect.innerHTML = '<option value="">-- Aucun lieu --</option>';
-            lieuxSelect.disabled = true;
-            console.error("Erreur chargement lieux:", error);
-        } finally {
-            apiService.hideSpinner(lieuxSelect.parentElement);
-        }
-    }
+    
 
     /**
      * Loads articles for a specific location.
@@ -55,9 +20,10 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
      * @param {string} departement - Department code
      * @param {string} cog - Commune COG code (optional)
      * @param {string} lieu - Specific location (optional)
+     * @param {Object} locationHandler - LocationHandler instance for loading lieux
      * @returns {Promise<Array>} Array of articles
      */
-    async function loadArticles(departement, cog = "", lieu = "") {
+    async function loadArticles(departement, cog = "", lieu = "", locationHandler = null) {
         try {
             articleListDiv.parentElement.classList.add('loading-container');
             apiService.showSpinner(articleListDiv.parentElement);
@@ -71,9 +37,9 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
             console.log("Articles fetched:", articles);
             window.allArticles = articles; // Store globally for access in main.js
 
-            // Load lieux selector only at commune level
-            if (cog) {
-                await loadLieux(departement, cog);
+            // Load lieux selector only at commune level using locationHandler
+            if (cog && locationHandler && locationHandler.loadLieux) {
+                await locationHandler.loadLieux(departement, cog);
             }
 
             renderArticles(articles, lieu, currentFilter);
