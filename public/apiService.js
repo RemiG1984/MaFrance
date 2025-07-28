@@ -15,27 +15,26 @@ class ApiService {
      */
     showSpinner(container) {
         if (!container) return;
-        
-        // Store original position to restore later
-        if (!container.dataset.originalPosition) {
-            container.dataset.originalPosition = getComputedStyle(container).position;
+
+        // Avoid duplicate spinners
+        if (container.querySelector('.spinner-overlay')) return;
+
+        // Store original classes and position
+        if (!container.dataset.originalClasses) {
+            container.dataset.originalClasses = container.className;
         }
-        
-        // Ensure container has relative positioning for absolute spinner
-        if (getComputedStyle(container).position === 'static') {
+
+        // Ensure container has relative positioning for absolute overlay
+        const computedStyle = window.getComputedStyle(container);
+        if (computedStyle.position === 'static') {
+            container.dataset.originalPosition = 'static';
             container.style.position = 'relative';
         }
-        
-        // Remove existing spinner if any
-        const existingSpinner = container.querySelector('.spinner-overlay');
-        if (existingSpinner) {
-            existingSpinner.remove();
-        }
-        
-        // Create and add spinner
+
         const spinnerOverlay = document.createElement('div');
         spinnerOverlay.className = 'spinner-overlay';
         spinnerOverlay.innerHTML = '<div class="spinner"></div>';
+
         container.appendChild(spinnerOverlay);
     }
 
@@ -45,12 +44,21 @@ class ApiService {
      */
     hideSpinner(container) {
         if (!container) return;
-        
+
         const spinner = container.querySelector('.spinner-overlay');
         if (spinner) {
             spinner.remove();
         }
-        
+
+        // Remove loading-container class if it was added
+        container.classList.remove('loading-container');
+
+        // Restore original classes if they were stored
+        if (container.dataset.originalClasses) {
+            container.className = container.dataset.originalClasses;
+            delete container.dataset.originalClasses;
+        }
+
         // Restore original position if it was changed
         if (container.dataset.originalPosition) {
             if (container.dataset.originalPosition === 'static') {
@@ -90,7 +98,7 @@ class ApiService {
 
         try {
             this.activeRequests.add(url);
-            
+
             const response = await fetch(url, {
                 ...options,
                 headers: {
@@ -119,7 +127,7 @@ class ApiService {
             throw error;
         } finally {
             this.activeRequests.delete(url);
-            
+
             // Hide spinner if container provided
             if (spinnerContainer) {
                 this.hideSpinner(spinnerContainer);
@@ -134,7 +142,7 @@ class ApiService {
         this.cache.clear();
     }
 
-    
+
 }
 
 // Export singleton instance
@@ -234,8 +242,8 @@ export const api = {
         return apiService.request(`/api/articles/counts?${queryString}`);
     },
 
-    
 
-    
-    
+
+
+
 };

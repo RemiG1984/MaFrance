@@ -505,6 +505,12 @@
     100% { transform: rotate(360deg); }
 }
 
+/* Ensure loading-container doesn't interfere with normal layout */
+.loading-container {
+    /* Remove flexbox properties that interfere with grid/normal layout */
+    position: relative; /* Only ensure relative positioning for spinner overlay */
+}
+
 /* Map legend styles */
 .info.legend {
     line-height: 18px;
