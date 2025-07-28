@@ -82,6 +82,14 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
         articleListDiv.innerHTML = "";
         let filteredArticles = [...articles];
 
+        // Show/hide the filters container based on whether articles exist
+        const filtersContainer = document.getElementById('articleFilters');
+        if (articles && articles.length > 0) {
+            filtersContainer.classList.remove('hidden');
+        } else {
+            filtersContainer.classList.add('hidden');
+        }
+
         if (lieu) {
             filteredArticles = filteredArticles.filter(
                 (article) =>
@@ -185,6 +193,12 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
         filterButtonsDiv.innerHTML = "";
         window.allArticles = [];
         currentFilter = null;
+        
+        // Hide the filters container
+        const filtersContainer = document.getElementById('articleFilters');
+        if (filtersContainer) {
+            filtersContainer.classList.add('hidden');
+        }
     }
 
     function setFilter(filter) {

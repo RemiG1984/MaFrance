@@ -665,3 +665,34 @@
 #articles select:enabled {
     background-color: white;
 }
+
+/* Filter Button Styling for Inline Layout */
+.filter-button {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    background-color: white;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    font-size: 0.875rem;
+    white-space: nowrap;
+}
+
+.filter-button:hover {
+    background-color: #f9fafb;
+    border-color: #9ca3af;
+}
+
+.filter-button.active {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+    color: white;
+}
+
+/* Ensure lieu selector matches filter button height */
+#lieuxSelect {
+    height: auto;
+    min-width: 150px;
+    max-width: 200px;
+}
