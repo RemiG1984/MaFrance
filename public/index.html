@@ -59,7 +59,7 @@
                 <!-- First Column: Location selectors, map, lieux selector, and articles -->
                 <div class="space-y-6">
                     <div class="bg-white p-6 rounded-lg shadow h-fit">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="flex flex-col">
                                 <label
                                     for="departementSelect"
@@ -91,21 +91,6 @@
                                 />
                                 <datalist id="communeList"></datalist>
                             </div>
-                            <div class="flex flex-col">
-                                <label
-                                    for="lieuxSelect"
-                                    class="block text-sm font-medium text-gray-700 mb-2"
-                                    >Sélectionner un lieu :</label
-                                >
-                                <select
-                                    id="lieuxSelect"
-                                    disabled
-                                    class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:text-gray-500"
-                                    style="display: none;"
-                                >
-                                    <option value="">-- Tous les lieux --</option>
-                                </select>
-                            </div>
                         </div>
                     </div>
                     <div
@@ -119,7 +104,16 @@
                             Articles FdeSouche associés
                         </h2>
                         <div id="articleFilters" class="mb-4 hidden">
-                            <div id="filterButtons" class="flex flex-wrap gap-2"></div>
+                            <div class="flex flex-wrap gap-2 items-center mb-4">
+                                <select
+                                    id="lieuxSelect"
+                                    disabled
+                                    class="p-2 border border-gray-300 rounded-md bg-gray-100 text-sm"
+                                >
+                                    <option value="">-- Tous les lieux --</option>
+                                </select>
+                                <div id="filterButtons" class="flex flex-wrap gap-2"></div>
+                            </div>
                         </div>
                         <div id="articleList" class="article-list"></div>
                     </div>

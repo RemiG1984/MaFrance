@@ -690,45 +690,29 @@
     color: white;
 }
 
-/* Filter buttons container */
+/* Ensure lieu selector matches filter button height */
 #articleFilters {
     margin-bottom: 1rem;
 }
 
-#filterButtons {
+#articleFilters .flex {
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+#lieuxSelect {
+    min-width: 150px;
+    max-width: 200px;
+    font-size: 0.875rem;
+    display: none; /* Hidden by default, only shown at commune level */
+}
+
+/* Ensure consistent layout regardless of department or commune level */
+#articleFilters > .flex {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     gap: 0.5rem;
-}
-
-/* Lieu selector in location section */
-#lieuxSelect {
-    transition: opacity 0.2s ease;
-}
-
-#lieuxSelect[style*="display: none"] {
-    opacity: 0;
-    pointer-events: none;
-}
-
-#lieuxSelect:not([style*="display: none"]) {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-/* Responsive grid adjustments for location selectors */
-@media (max-width: 768px) {
-    .grid.md\\:grid-cols-3 {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (min-width: 769px) and (max-width: 1024px) {
-    .grid.md\\:grid-cols-3 {
-        grid-template-columns: 1fr 1fr;
-    }
-    
-    .grid.md\\:grid-cols-3 > div:nth-child(3) {
-        grid-column: 1 / -1;
-    }
+    margin-bottom: 1rem;
 }
