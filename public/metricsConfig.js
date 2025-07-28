@@ -16,9 +16,9 @@ export const MetricsConfig = {
 
     // Toggle button labels for different states
     toggleButtonLabels: {
-        standard: "🔄 Version neutre⚖️",
-        alt1: "🔄 Version progressiste🌈",
-        alt2: "🔄 Version conservatrice🦅",
+        standard: "🔄 Version neutre ⚖️",
+        alt1: "🔄 Version progressiste 🌈",
+        alt2: "🔄 Version conservatrice 🦅",
     },
 
     // Label state: 0 = standard, 1 = alt1, 2 = alt2
