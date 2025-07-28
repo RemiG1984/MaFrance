@@ -60,7 +60,7 @@
 }
 
 .filter-button {
-    padding: 8px 14px;
+    padding: 6px 14px;
     font-size: 13px;
     border: 1px solid #dee2e6;
     border-radius: 6px;
@@ -404,36 +404,6 @@
     margin: 0;
     text-align: left;
     width: 100%;
-}
-
-/* Spinner component */
-.spinner-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(255, 255, 255, 0.8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    border-radius: 0.5rem;
-    pointer-events: none; /* Prevent interaction issues */
-}
-
-.spinner {
-    width: 2rem;
-    height: 2rem;
-    border: 3px solid #f3f4f6;
-    border-top: 3px solid #3b82f6;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
 }
 
 .loading-container {
