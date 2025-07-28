@@ -48,21 +48,6 @@
                 🔄 Version neutre
             </button>
         </div>
-        <div class="location-selectors" style="max-width: 800px; margin: 20px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label for="departementSelect" class="block text-sm font-medium text-gray-700 mb-2">Sélectionner un département :</label>
-                    <select id="departementSelect" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <option value="">-- Choisir un département --</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="communeInput" class="block text-sm font-medium text-gray-700 mb-2">Rechercher une commune :</label>
-                    <input type="text" id="communeInput" list="communeList" placeholder="Tapez pour rechercher..." autocomplete="off" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-                    <datalist id="communeList"></datalist>
-                </div>
-            </div>
-        </div>
         <div class="chart-grid" id="chartGrid"></div>
         <div class="navigation">
             <a href="index.html" class="nav-link">Retour à la page principale</a>
@@ -75,8 +60,6 @@
         <!-- Load Watermark Plugin -->
         <script type="module" src="chartWatermark.js"></script>
         <script type="module" src="departmentNames.js"></script>
-        <script type="module" src="utils.js"></script>
-        <script type="module" src="locationHandler.js"></script>
         <script type="module" src="crimeGraphHandler.js"></script>
     </body>
 </html>

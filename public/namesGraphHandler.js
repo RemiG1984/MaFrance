@@ -9,33 +9,6 @@ import { api } from "./apiService.js";
 function NamesGraphHandler() {
     // Use shared department names
     const departmentNames = DepartmentNames;
-    import { LocationHandler } from './locationHandler.js';
-        const departmentNames = DepartmentNames;
-
-        // DOM elements for location selection
-        const departementSelect = document.getElementById("departementSelect");
-        const communeList = document.createElement("datalist"); // Placeholder
-        let locationHandler = null;
-
-        // Initialize location handler
-        if (departementSelect) {
-            locationHandler = LocationHandler(
-                departementSelect,
-                null, // No commune input needed
-                communeList,
-                null, // No lieu select needed
-                document.body, // Results div placeholder
-                departmentNames
-            );
-            locationHandler.loadDepartements();
-
-            // Add event listener for department changes
-            departementSelect.addEventListener("change", () => {
-                const dept = departementSelect.value;
-                // Reload chart with selected department
-                loadNamesData(dept || 'France');
-            });
-        }
 
     /**
      * Parses URL parameters for chart configuration.

@@ -10,12 +10,6 @@ import { api } from './apiService.js';
 function CrimeGraphHandler() {
     // Use shared department names
     const departmentNames = DepartmentNames;
-    
-    // DOM elements for location selection
-    const departementSelect = document.getElementById("departementSelect");
-    const communeInput = document.getElementById("communeInput");
-    const communeList = document.getElementById("communeList");
-    let locationHandler = null;
 
     /**
      * Parses URL parameters for chart configuration.
@@ -48,54 +42,6 @@ function CrimeGraphHandler() {
         // Set initial button text and style
         const initialStateName = MetricsConfig.getLabelStateName();
         labelToggleBtn.textContent = MetricsConfig.getCurrentToggleButtonLabel();
-        
-        // Initialize location handler if elements exist
-        if (departementSelect && communeInput && communeList) {
-            import('./locationHandler.js').then(({ LocationHandler }) => {
-                locationHandler = LocationHandler(
-                    departementSelect,
-                    communeInput,
-                    communeList,
-                    null, // No lieu select needed
-                    document.body, // Results div placeholder
-                    departmentNames
-                );
-                locationHandler.loadDepartements();
-                
-                // Add event listeners for location changes
-                departementSelect.addEventListener("change", () => {
-                    const dept = departementSelect.value;
-                    if (dept) {
-                        window.location.href = `/crime_graph.html?type=department&code=${dept}`;
-                    } else {
-                        window.location.href = '/crime_graph.html?type=country&code=France';
-                    }
-                });
-                
-                communeInput.addEventListener("change", async () => {
-                    const selectedValue = communeInput.value.trim();
-                    const selectedCommune = selectedValue.includes(' (') 
-                        ? selectedValue.substring(0, selectedValue.lastIndexOf(' ('))
-                        : selectedValue;
-                    
-                    if (selectedCommune && locationHandler) {
-                        const cog = locationHandler.getCOGForCommune(selectedCommune);
-                        const dept = locationHandler.getDepartmentForCommune(selectedCommune);
-                        if (cog && dept) {
-                            window.location.href = `/crime_graph.html?type=commune&code=${cog}&dept=${dept}&commune=${encodeURIComponent(selectedCommune)}`;
-                        }
-                    }
-                });
-                
-                // Set initial values based on URL params
-                const { type, code, dept } = getUrlParams();
-                if (type === 'department' && code) {
-                    departementSelect.value = code;
-                } else if (type === 'commune' && dept) {
-                    departementSelect.value = dept;
-                }
-            });
-        }
 
         // Set initial button style
         labelToggleBtn.classList.remove('active', 'alt1', 'alt2');
