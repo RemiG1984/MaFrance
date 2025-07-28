@@ -82,10 +82,17 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
         articleListDiv.innerHTML = "";
         let filteredArticles = [...articles];
 
-        // Show/hide the filters container based on whether articles exist
+        // Always show the filters container if articles exist, regardless of level
         const filtersContainer = document.getElementById('articleFilters');
+        const lieuxSelect = document.getElementById('lieuxSelect');
+        
         if (articles && articles.length > 0) {
             filtersContainer.classList.remove('hidden');
+            // Ensure lieu select is visible and enabled if it has options
+            if (lieuxSelect && lieuxSelect.options.length > 1) {
+                lieuxSelect.style.display = 'block';
+                lieuxSelect.disabled = false;
+            }
         } else {
             filtersContainer.classList.add('hidden');
         }
@@ -194,10 +201,18 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
         window.allArticles = [];
         currentFilter = null;
         
-        // Hide the filters container
+        // Hide the filters container and reset lieu selection
         const filtersContainer = document.getElementById('articleFilters');
+        const lieuxSelect = document.getElementById('lieuxSelect');
+        
         if (filtersContainer) {
             filtersContainer.classList.add('hidden');
+        }
+        
+        if (lieuxSelect) {
+            lieuxSelect.innerHTML = '<option value="">-- Tous les lieux --</option>';
+            lieuxSelect.disabled = true;
+            lieuxSelect.style.display = 'none';
         }
     }
 

@@ -691,8 +691,32 @@
 }
 
 /* Ensure lieu selector matches filter button height */
+#articleFilters {
+    margin-bottom: 1rem;
+}
+
+#articleFilters .flex {
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
 #lieuxSelect {
-    height: auto;
     min-width: 150px;
     max-width: 200px;
+    font-size: 0.875rem;
+    display: none; /* Hidden by default, shown when needed */
+}
+
+#lieuxSelect:not([disabled]):not(:empty) {
+    display: block;
+}
+
+/* Ensure consistent layout regardless of department or commune level */
+#articleFilters > .flex {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
 }
