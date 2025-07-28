@@ -173,7 +173,7 @@ export const api = {
     getCommunes: (dept) => 
         apiService.request(`/api/communes?dept=${dept}`),
     getLieux: (dept, cog) => 
-        apiService.request(`/api/lieux/${dept}/${cog}`),
+        apiService.request(`/api/articles/lieux?dept=${dept}&cog=${cog}`),
 
     // QPV data
     getQpvDepartment: (code) => 
