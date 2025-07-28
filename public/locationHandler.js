@@ -160,6 +160,36 @@ function LocationHandler(
         return null;
     }
 
+    async function loadLieux(departement, cog) {
+        const lieuxSelect = document.getElementById('lieuxSelect');
+        if (!lieuxSelect || !cog) return; // Only load at commune level
+
+        try {
+            lieuxSelect.disabled = true;
+            apiService.showSpinner(lieuxSelect.parentElement);
+
+            const lieux = await api.getLieux(departement, cog);
+            console.log("Lieux fetched:", lieux);
+            lieuxSelect.innerHTML = '<option value="">-- Tous les lieux --</option>';
+
+            lieux.forEach((lieu) => {
+                const option = document.createElement("option");
+                option.value = lieu.lieu;
+                option.textContent = lieu.lieu;
+                lieuxSelect.appendChild(option);
+            });
+
+            // Don't show/hide here - let renderFilterButtons handle visibility
+            lieuxSelect.disabled = false;
+        } catch (error) {
+            lieuxSelect.innerHTML = '<option value="">-- Aucun lieu --</option>';
+            lieuxSelect.disabled = true;
+            console.error("Erreur chargement lieux:", error);
+        } finally {
+            apiService.hideSpinner(lieuxSelect.parentElement);
+        }
+    }
+
     return {
         loadDepartements,
         resetCommuneAndLieux,
@@ -167,6 +197,7 @@ function LocationHandler(
         getCOGForCommune,
         getDepartmentForCommune,
         searchCommunesGlobally,
+        loadLieux,
     };
 }
 
