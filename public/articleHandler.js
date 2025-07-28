@@ -129,9 +129,16 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
         } else {
             filteredArticles.forEach((article) => {
                 const articleItem = document.createElement("div");
-                articleItem.className = "article-item";
+                articleItem.className = "article-card";
                 articleItem.innerHTML = `
-                    <p><strong>${article.date}</strong>${article.lieu ? ` (${article.lieu})` : ""}${article.commune ? ` [${article.commune}]` : ""}: <a href="${article.url}" target="_blank">${article.title}</a></p>
+                    <div class="article-header">
+                        <span class="article-date">${article.date}</span>
+                        ${article.lieu ? `<span class="article-location">(${article.lieu})</span>` : ""}
+                        ${article.commune ? `<span class="article-commune">[${article.commune}]</span>` : ""}
+                    </div>
+                    <div class="article-content">
+                        <a href="${article.url}" target="_blank" class="article-title">${article.title}</a>
+                    </div>
                 `;
                 articleListDiv.appendChild(articleItem);
             });
