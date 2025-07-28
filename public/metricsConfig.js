@@ -29,7 +29,7 @@ export const MetricsConfig = {
         {
             value: "total_score",
             label: "Indice de changement général",
-            alt1Label: "Indice d'évolution inclusive",
+            alt1Label: "Indice général d'évolution inclusive",
             alt2Label: "Indice de fragmentation nationale",
             category: "général",
             format: "score",
@@ -154,7 +154,7 @@ export const MetricsConfig = {
             value: "defrancisation_score",
             label: "Indice d'évolution culturelle",
             alt1Label: "Indice de dépoussiérage culturel",
-            alt2Label: "Indice de défrancisation",
+            alt2Label: "Indice de défrancisation (petit remplacement)",
             category: "défrancisation",
             format: "score",
         },
