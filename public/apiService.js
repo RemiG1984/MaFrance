@@ -16,7 +16,7 @@ class ApiService {
     showSpinner(container) {
         if (!container) return;
         
-        // Store original styles to restore later
+        // Store original position to restore later
         if (!container.dataset.originalPosition) {
             container.dataset.originalPosition = getComputedStyle(container).position;
         }
@@ -24,11 +24,6 @@ class ApiService {
         // Ensure container has relative positioning for absolute spinner
         if (getComputedStyle(container).position === 'static') {
             container.style.position = 'relative';
-        }
-        
-        // Add loading-container class if not present
-        if (!container.classList.contains('loading-container')) {
-            container.classList.add('loading-container');
         }
         
         // Remove existing spinner if any
@@ -60,6 +55,8 @@ class ApiService {
         if (container.dataset.originalPosition) {
             if (container.dataset.originalPosition === 'static') {
                 container.style.position = '';
+            } else {
+                container.style.position = container.dataset.originalPosition;
             }
             delete container.dataset.originalPosition;
         }

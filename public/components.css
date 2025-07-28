@@ -438,23 +438,6 @@
 
 .loading-container {
     position: relative;
-    /* Ensure consistent flex properties */
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-}
-
-/* Ensure loading containers maintain their original display properties */
-.loading-container.grid {
-    display: grid;
-}
-
-.loading-container.inline-flex {
-    display: inline-flex;
-}
-
-.loading-container.inline-block {
-    display: inline-block;
 }
 
 /* Map legend styles */

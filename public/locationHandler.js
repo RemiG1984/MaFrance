@@ -23,21 +23,17 @@ function LocationHandler(
     async function loadDepartements() {
         try {
             departementSelect.disabled = true;
-            // Store original container properties
             const container = departementSelect.parentElement;
-            const originalDisplay = getComputedStyle(container).display;
             
-            if (!container.classList.contains('loading-container')) {
-                container.classList.add('loading-container');
-                // Preserve original display type
-                if (originalDisplay === 'grid') {
-                    container.classList.add('grid');
-                } else if (originalDisplay === 'inline-flex') {
-                    container.classList.add('inline-flex');
-                } else if (originalDisplay === 'inline-block') {
-                    container.classList.add('inline-block');
-                }
-            }
+            // Store original layout properties before modifying
+            const originalStyles = {
+                display: getComputedStyle(container).display,
+                flexDirection: getComputedStyle(container).flexDirection,
+                alignItems: getComputedStyle(container).alignItems,
+                justifyContent: getComputedStyle(container).justifyContent
+            };
+            container.dataset.originalStyles = JSON.stringify(originalStyles);
+            
             apiService.showSpinner(container);
             
             const departements = await api.getDepartments();
@@ -71,6 +67,19 @@ function LocationHandler(
             departementSelect.disabled = false;
             const container = departementSelect.parentElement;
             apiService.hideSpinner(container);
+            
+            // Restore original layout properties
+            if (container.dataset.originalStyles) {
+                const originalStyles = JSON.parse(container.dataset.originalStyles);
+                container.style.display = originalStyles.display;
+                container.style.flexDirection = originalStyles.flexDirection;
+                container.style.alignItems = originalStyles.alignItems;
+                container.style.justifyContent = originalStyles.justifyContent;
+                delete container.dataset.originalStyles;
+                
+                // Remove loading-container class and its variants
+                container.classList.remove('loading-container', 'grid', 'inline-flex', 'inline-block');
+            }
         }
     }
 
