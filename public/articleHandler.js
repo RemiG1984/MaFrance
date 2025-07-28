@@ -22,22 +22,22 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
     async function loadLieux(departement, cog) {
         const lieuxSelect = document.getElementById('lieuxSelect');
         if (!lieuxSelect || !cog) return; // Only load at commune level
-        
+
         try {
             lieuxSelect.disabled = true;
             apiService.showSpinner(lieuxSelect.parentElement);
-            
+
             const lieux = await api.getLieux(departement, cog);
             console.log("Lieux fetched:", lieux);
             lieuxSelect.innerHTML = '<option value="">-- Tous les lieux --</option>';
-            
+
             lieux.forEach((lieu) => {
                 const option = document.createElement("option");
                 option.value = lieu.lieu;
                 option.textContent = lieu.lieu;
                 lieuxSelect.appendChild(option);
             });
-            
+
             // Don't show/hide here - let renderFilterButtons handle visibility
             lieuxSelect.disabled = false;
         } catch (error) {
@@ -70,12 +70,12 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
             const articles = await api.getArticles(params);
             console.log("Articles fetched:", articles);
             window.allArticles = articles; // Store globally for access in main.js
-            
+
             // Load lieux selector only at commune level
             if (cog) {
                 await loadLieux(departement, cog);
             }
-            
+
             renderArticles(articles, lieu, currentFilter);
             return articles;
         } catch (error) {
@@ -127,7 +127,7 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
 
         // Show filters container if articles exist
         const filtersContainer = document.getElementById('articleFilters');
-        
+
         if (articles && articles.length > 0) {
             filtersContainer.classList.remove('hidden');
         } else {
@@ -180,19 +180,20 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
      */
     function renderFilterButtons(counts, allArticles, currentLieu) {
         filterButtonsDiv.innerHTML = "";
-        
+
         // Show lieuxSelect if we have lieux data and we're at commune level
         const lieuxSelect = document.getElementById('lieuxSelect');
         const hasCOG = window.location.search.includes('cog=') || document.getElementById('communeInput').value.trim() !== '';
-        
-        if (lieuxSelect && hasCOG && lieuxSelect.options.length > 1) {
+
+        if (lieuxSelect && hasCOG) {
+            // Show lieuxSelect at commune level regardless of lieux availability
             lieuxSelect.style.display = 'block';
             lieuxSelect.disabled = false;
         } else if (lieuxSelect) {
             lieuxSelect.style.display = 'none';
             lieuxSelect.disabled = true;
         }
-        
+
         const categories = MetricsConfig.articleCategories.map(category => ({
             name: category.name,
             key: category.key,
@@ -250,15 +251,15 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
         filterButtonsDiv.innerHTML = "";
         window.allArticles = [];
         currentFilter = null;
-        
+
         // Hide the filters container and lieu selector
         const filtersContainer = document.getElementById('articleFilters');
         const lieuxSelect = document.getElementById('lieuxSelect');
-        
+
         if (filtersContainer) {
             filtersContainer.classList.add('hidden');
         }
-        
+
         if (lieuxSelect) {
             lieuxSelect.innerHTML = '<option value="">-- Tous les lieux --</option>';
             lieuxSelect.disabled = true;
@@ -281,3 +282,4 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
 
 // Export for ES6 modules
 export { ArticleHandler };
+```
