@@ -10,22 +10,6 @@ class ApiService {
     }
 
     /**
-     * Shows spinner on specified container (deprecated - no-op)
-     * @param {HTMLElement} container - Container to show spinner on
-     */
-    showSpinner(container) {
-        // Spinner functionality removed
-    }
-
-    /**
-     * Hides spinner on specified container (deprecated - no-op)
-     * @param {HTMLElement} container - Container to hide spinner on
-     */
-    hideSpinner(container) {
-        // Spinner functionality removed
-    }
-
-    /**
      * Makes cached API requests with consistent error handling.
      * @param {string} url - API endpoint
      * @param {Object} options - Fetch options
@@ -43,11 +27,6 @@ class ApiService {
                 return cached.data;
             }
             this.cache.delete(cacheKey);
-        }
-
-        // Show spinner if container provided
-        if (spinnerContainer) {
-            this.showSpinner(spinnerContainer);
         }
 
         try {
@@ -81,11 +60,6 @@ class ApiService {
             throw error;
         } finally {
             this.activeRequests.delete(url);
-            
-            // Hide spinner if container provided
-            if (spinnerContainer) {
-                this.hideSpinner(spinnerContainer);
-            }
         }
     }
 
