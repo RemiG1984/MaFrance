@@ -282,4 +282,3 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
 
 // Export for ES6 modules
 export { ArticleHandler };
-```
