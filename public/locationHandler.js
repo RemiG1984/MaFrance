@@ -16,7 +16,6 @@ function LocationHandler(
     departementSelect,
     communeInput,
     communeList,
-    lieuxSelect,
     resultsDiv,
     departmentNames,
 ) {
