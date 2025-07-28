@@ -25,15 +25,6 @@ function LocationHandler(
             departementSelect.disabled = true;
             const container = departementSelect.parentElement;
             
-            // Store original layout properties before modifying
-            const originalStyles = {
-                display: getComputedStyle(container).display,
-                flexDirection: getComputedStyle(container).flexDirection,
-                alignItems: getComputedStyle(container).alignItems,
-                justifyContent: getComputedStyle(container).justifyContent
-            };
-            container.dataset.originalStyles = JSON.stringify(originalStyles);
-            
             apiService.showSpinner(container);
             
             const departements = await api.getDepartments();
@@ -67,19 +58,6 @@ function LocationHandler(
             departementSelect.disabled = false;
             const container = departementSelect.parentElement;
             apiService.hideSpinner(container);
-            
-            // Restore original layout properties
-            if (container.dataset.originalStyles) {
-                const originalStyles = JSON.parse(container.dataset.originalStyles);
-                container.style.display = originalStyles.display;
-                container.style.flexDirection = originalStyles.flexDirection;
-                container.style.alignItems = originalStyles.alignItems;
-                container.style.justifyContent = originalStyles.justifyContent;
-                delete container.dataset.originalStyles;
-                
-                // Remove loading-container class and its variants
-                container.classList.remove('loading-container', 'grid', 'inline-flex', 'inline-block');
-            }
         }
     }
 
