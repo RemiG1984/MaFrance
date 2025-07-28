@@ -1,5 +1,5 @@
 import { MetricsConfig } from "./metricsConfig.js";
-import { api } from "./apiService.js";
+import { api, apiService } from "./apiService.js";
 
 /**
  * Score table handler module for displaying detailed score information.
@@ -52,7 +52,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
         // Only add homicide row if available at current level
         const currentLevel = linkBase.includes('country') ? 'france' : 
                            linkBase.includes('department') ? 'departement' : 'commune';
-        
+
         if (MetricsConfig.isMetricAvailable("homicides_p100k", currentLevel) && metrics) {
             rows.push({
                 title: MetricsConfig.getMetricLabel("homicides_p100k"),
@@ -125,13 +125,14 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
 
         return rows.filter(row => row.compare !== null || compareMetrics === null);
     }
-    
+
     /**
      * Displays country-level details with comprehensive statistics.
      * @async
      */
     async function showCountryDetails() {
         try {
+            apiService.showSpinner(resultsDiv);
             const [data, namesData, crimeData] = await Promise.all([
                 api.getCountryDetails(),
                 api.getCountryNames(),
@@ -223,6 +224,8 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
         } catch (error) {
             resultsDiv.innerHTML = `<p>Erreur : ${error.message}</p>`;
             console.error("Erreur lors de la recherche pays:", error);
+        } finally {
+            apiService.hideSpinner(resultsDiv);
         }
     }
 
@@ -233,6 +236,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
      */
     async function showDepartmentDetails(deptCode) {
         try {
+            apiService.showSpinner(resultsDiv);
             const [
                 data,
                 countryData,
@@ -364,6 +368,8 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
         } catch (error) {
             resultsDiv.innerHTML = `<p>Erreur : ${error.message}</p>`;
             console.error("Erreur lors de la recherche département:", error);
+        } finally {
+            apiService.hideSpinner(resultsDiv);
         }
     }
 
@@ -374,6 +380,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
      */
     async function showCommuneDetails(cog) {
         try {
+            apiService.showSpinner(resultsDiv);
             // First get commune details from COG
             const item = await api.getCommuneDetails(cog);
 
@@ -390,7 +397,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
             const needsNamesData = MetricsConfig.isMetricAvailable("extra_europeen_pct", "commune") || 
                                  MetricsConfig.isMetricAvailable("musulman_pct", "commune") || 
                                  MetricsConfig.isMetricAvailable("prenom_francais_pct", "commune");
-            
+
             if (needsNamesData) {
                 try {
                     namesData = await api.getCommuneNames(cog);
@@ -582,6 +589,8 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
         } catch (error) {
             resultsDiv.innerHTML = `<p>Erreur : ${error.message}</p>`;
             console.error("Erreur lors de la recherche:", error);
+        } finally {
+            apiService.hideSpinner(resultsDiv);
         }
     }
 

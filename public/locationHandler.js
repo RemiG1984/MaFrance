@@ -1,5 +1,5 @@
 import { normalizeDept } from './utils.js';
-import { api } from './apiService.js';
+import { api, apiService } from './apiService.js';
 
 /**
  * Location handler module for managing department, commune, and lieu selection.
@@ -22,6 +22,9 @@ function LocationHandler(
 ) {
     async function loadDepartements() {
         try {
+            departementSelect.disabled = true;
+            apiService.showSpinner(departementSelect.parentElement);
+            
             const departements = await api.getDepartments();
             console.log("Departments fetched:", departements);
             departementSelect.innerHTML =
@@ -49,6 +52,9 @@ function LocationHandler(
         } catch (error) {
             resultsDiv.innerHTML = `<p>Erreur : ${error.message}</p>`;
             console.error("Erreur chargement départements:", error);
+        } finally {
+            departementSelect.disabled = false;
+            apiService.hideSpinner(departementSelect.parentElement);
         }
     }
 
@@ -106,6 +112,9 @@ function LocationHandler(
             return;
         }
         try {
+            lieuxSelect.disabled = true;
+            apiService.showSpinner(lieuxSelect.parentElement);
+            
             const lieux = await api.getLieux(normalizedDept, cog);
             console.log("Lieux fetched:", lieux);
             lieuxSelect.innerHTML =
@@ -122,6 +131,11 @@ function LocationHandler(
                 '<option value="">-- Aucun lieu --</option>';
             lieuxSelect.disabled = true;
             console.error("Erreur chargement lieux:", error);
+        } finally {
+            if (lieuxSelect.innerHTML !== '<option value="">-- Aucun lieu --</option>') {
+                lieuxSelect.disabled = false;
+            }
+            apiService.hideSpinner(lieuxSelect.parentElement);
         }
     }
 

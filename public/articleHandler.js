@@ -1,5 +1,5 @@
 import { MetricsConfig } from './metricsConfig.js';
-import { api } from './apiService.js';
+import { api, apiService } from './apiService.js';
 
 /**
  * Article handler module for managing news articles display and filtering.
@@ -22,10 +22,13 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
      */
     async function loadArticles(departement, cog = "", lieu = "") {
         try {
+            articleListDiv.parentElement.classList.add('loading-container');
+            apiService.showSpinner(articleListDiv.parentElement);
+
             const params = { dept: departement };
             if (cog) params.cog = cog;
             if (lieu) params.lieu = lieu;
-            
+
             console.log("Fetching articles with params:", params);
             const articles = await api.getArticles(params);
             console.log("Articles fetched:", articles);
@@ -42,6 +45,8 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
                 lieu: lieu
             });
             return [];
+        } finally {
+            apiService.hideSpinner(articleListDiv.parentElement);
         }
     }
 
@@ -50,7 +55,7 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
             const params = { dept: departement };
             if (cog) params.cog = cog;
             if (lieu) params.lieu = lieu;
-            
+
             console.log("Fetching article counts with params:", params);
             const counts = await api.getArticleCounts(params);
             console.log("Article counts:", counts);

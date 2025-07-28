@@ -1,4 +1,3 @@
-
 /* Buttons and interactive elements */
 .label-toggle-btn {
     min-width: 150px;
@@ -415,38 +414,55 @@
     width: 100%;
 }
 
-.info.legend {
-    padding: 6px 8px;
-    font: 14px/16px Arial, Helvetica, sans-serif;
-    background: white;
-    background: rgba(255,255,255,0.8);
-    box-shadow: 0 0 15px rgba(0,0,0,0.2);
-    border-radius: 5px;
-    width: 150px;
-    min-height: 100px;
-    max-height: 200px;
-    overflow-y: auto;
-}
-
-.info.legend h4 {
-    margin: 0 0 5px;
-    text-align: justify;
-    word-break: break-word;
-    hyphens: auto;
-}
-
-.info.legend div {
+/* Spinner component */
+.spinner-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
     display: flex;
     align-items: center;
-    margin-bottom: 4px;
+    justify-content: center;
+    z-index: 1000;
+    border-radius: 0.5rem;
+}
+
+.spinner {
+    width: 2rem;
+    height: 2rem;
+    border: 3px solid #f3f4f6;
+    border-top: 3px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-container {
+    position: relative;
+}
+
+/* Map legend styles */
+.info.legend {
+    line-height: 18px;
+    color: #555;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 6px 8px;
+    border-radius: 4px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
 }
 
 .info.legend i {
     width: 18px;
     height: 18px;
+    float: left;
     margin-right: 8px;
     opacity: 0.7;
-    display: inline-block;
 }
 
 .custom-popup {

@@ -6,6 +6,45 @@ class ApiService {
     constructor() {
         this.cache = new Map();
         this.cacheExpiry = 5 * 60 * 1000; // 5 minutes
+        this.activeRequests = new Set();
+    }
+
+    /**
+     * Shows spinner on specified container
+     * @param {HTMLElement} container - Container to show spinner on
+     */
+    showSpinner(container) {
+        if (!container) return;
+        
+        // Add loading-container class if not present
+        if (!container.classList.contains('loading-container')) {
+            container.classList.add('loading-container');
+        }
+        
+        // Remove existing spinner if any
+        const existingSpinner = container.querySelector('.spinner-overlay');
+        if (existingSpinner) {
+            existingSpinner.remove();
+        }
+        
+        // Create and add spinner
+        const spinnerOverlay = document.createElement('div');
+        spinnerOverlay.className = 'spinner-overlay';
+        spinnerOverlay.innerHTML = '<div class="spinner"></div>';
+        container.appendChild(spinnerOverlay);
+    }
+
+    /**
+     * Hides spinner on specified container
+     * @param {HTMLElement} container - Container to hide spinner on
+     */
+    hideSpinner(container) {
+        if (!container) return;
+        
+        const spinner = container.querySelector('.spinner-overlay');
+        if (spinner) {
+            spinner.remove();
+        }
     }
 
     /**
@@ -13,9 +52,10 @@ class ApiService {
      * @param {string} url - API endpoint
      * @param {Object} options - Fetch options
      * @param {boolean} useCache - Whether to use caching
+     * @param {HTMLElement} spinnerContainer - Container to show spinner on
      * @returns {Promise} API response data
      */
-    async request(url, options = {}, useCache = true) {
+    async request(url, options = {}, useCache = true, spinnerContainer = null) {
         const cacheKey = `${url}_${JSON.stringify(options)}`;
 
         // Check cache first
@@ -28,7 +68,14 @@ class ApiService {
             this.cache.delete(cacheKey);
         }
 
+        // Show spinner if container provided
+        if (spinnerContainer) {
+            this.showSpinner(spinnerContainer);
+        }
+
         try {
+            this.activeRequests.add(url);
+            
             const response = await fetch(url, {
                 ...options,
                 headers: {
@@ -55,6 +102,13 @@ class ApiService {
         } catch (error) {
             console.error('API request failed:', { url, error: error.message || error });
             throw error;
+        } finally {
+            this.activeRequests.delete(url);
+            
+            // Hide spinner if container provided
+            if (spinnerContainer) {
+                this.hideSpinner(spinnerContainer);
+            }
         }
     }
 
