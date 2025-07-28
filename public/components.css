@@ -705,11 +705,7 @@
     min-width: 150px;
     max-width: 200px;
     font-size: 0.875rem;
-    display: none; /* Hidden by default, shown when needed */
-}
-
-#lieuxSelect:not([disabled]):not(:empty) {
-    display: block;
+    display: none; /* Hidden by default, only shown at commune level */
 }
 
 /* Ensure consistent layout regardless of department or commune level */

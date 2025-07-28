@@ -13,6 +13,50 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
     let filteredArticles = [];
 
     /**
+     * Loads lieux for commune level only.
+     * @async
+     * @param {string} departement - Department code
+     * @param {string} cog - Commune COG code
+     * @returns {Promise<void>}
+     */
+    async function loadLieux(departement, cog) {
+        const lieuxSelect = document.getElementById('lieuxSelect');
+        if (!lieuxSelect || !cog) return; // Only load at commune level
+        
+        try {
+            lieuxSelect.disabled = true;
+            apiService.showSpinner(lieuxSelect.parentElement);
+            
+            const lieux = await api.getLieux(departement, cog);
+            console.log("Lieux fetched:", lieux);
+            lieuxSelect.innerHTML = '<option value="">-- Tous les lieux --</option>';
+            
+            lieux.forEach((lieu) => {
+                const option = document.createElement("option");
+                option.value = lieu.lieu;
+                option.textContent = lieu.lieu;
+                lieuxSelect.appendChild(option);
+            });
+            
+            // Show and enable selector only if we have lieux
+            if (lieux.length > 0) {
+                lieuxSelect.style.display = 'block';
+                lieuxSelect.disabled = false;
+            } else {
+                lieuxSelect.style.display = 'none';
+                lieuxSelect.disabled = true;
+            }
+        } catch (error) {
+            lieuxSelect.innerHTML = '<option value="">-- Aucun lieu --</option>';
+            lieuxSelect.style.display = 'none';
+            lieuxSelect.disabled = true;
+            console.error("Erreur chargement lieux:", error);
+        } finally {
+            apiService.hideSpinner(lieuxSelect.parentElement);
+        }
+    }
+
+    /**
      * Loads articles for a specific location.
      * @async
      * @param {string} departement - Department code
@@ -33,6 +77,12 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
             const articles = await api.getArticles(params);
             console.log("Articles fetched:", articles);
             window.allArticles = articles; // Store globally for access in main.js
+            
+            // Load lieux selector only at commune level
+            if (cog) {
+                await loadLieux(departement, cog);
+            }
+            
             renderArticles(articles, lieu, currentFilter);
             return articles;
         } catch (error) {
@@ -82,17 +132,11 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
         articleListDiv.innerHTML = "";
         let filteredArticles = [...articles];
 
-        // Always show the filters container if articles exist, regardless of level
+        // Show filters container if articles exist
         const filtersContainer = document.getElementById('articleFilters');
-        const lieuxSelect = document.getElementById('lieuxSelect');
         
         if (articles && articles.length > 0) {
             filtersContainer.classList.remove('hidden');
-            // Ensure lieu select is visible and enabled if it has options
-            if (lieuxSelect && lieuxSelect.options.length > 1) {
-                lieuxSelect.style.display = 'block';
-                lieuxSelect.disabled = false;
-            }
         } else {
             filtersContainer.classList.add('hidden');
         }
@@ -201,7 +245,7 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
         window.allArticles = [];
         currentFilter = null;
         
-        // Hide the filters container and reset lieu selection
+        // Hide the filters container and lieu selector
         const filtersContainer = document.getElementById('articleFilters');
         const lieuxSelect = document.getElementById('lieuxSelect');
         

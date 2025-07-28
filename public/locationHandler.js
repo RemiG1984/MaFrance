@@ -100,53 +100,11 @@ function LocationHandler(
         }
     }
 
-    async function loadLieux(departement, cog) {
-        // Normalize departement using utils
-        const normalizedDept = normalizeDept(departement);
-        if (
-            !/^(0[1-9]|[1-8][0-9]|9[0-5]|2[AB]|97[1-6])$/.test(normalizedDept)
-        ) {
-            console.error("Invalid departement code:", normalizedDept);
-            resultsDiv.innerHTML =
-                "<p>Erreur : Code département invalide</p>";
-            return;
-        }
-        try {
-            lieuxSelect.disabled = true;
-            apiService.showSpinner(lieuxSelect.parentElement);
-            
-            const lieux = await api.getLieux(normalizedDept, cog);
-            console.log("Lieux fetched:", lieux);
-            lieuxSelect.innerHTML =
-                '<option value="">-- Tous les lieux --</option>';
-            lieux.forEach((lieu) => {
-                const option = document.createElement("option");
-                option.value = lieu.lieu;
-                option.textContent = lieu.lieu;
-                lieuxSelect.appendChild(option);
-            });
-            lieuxSelect.disabled = lieux.length === 0;
-        } catch (error) {
-            lieuxSelect.innerHTML =
-                '<option value="">-- Aucun lieu --</option>';
-            lieuxSelect.disabled = true;
-            console.error("Erreur chargement lieux:", error);
-        } finally {
-            if (lieuxSelect.innerHTML !== '<option value="">-- Aucun lieu --</option>') {
-                lieuxSelect.disabled = false;
-            }
-            apiService.hideSpinner(lieuxSelect.parentElement);
-        }
-    }
-
     function resetCommuneAndLieux() {
         // Always enable commune input for global search
         communeInput.disabled = false;
         communeInput.placeholder = "Rechercher une commune...";
         communeList.innerHTML = "";
-        lieuxSelect.innerHTML =
-            '<option value="">-- Tous les lieux --</option>';
-        lieuxSelect.disabled = true;
     }
 
     async function handleCommuneInput(departement, query) {
@@ -204,7 +162,6 @@ function LocationHandler(
 
     return {
         loadDepartements,
-        loadLieux,
         resetCommuneAndLieux,
         handleCommuneInput,
         getCOGForCommune,
