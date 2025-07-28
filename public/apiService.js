@@ -19,27 +19,26 @@ class ApiService {
         // Avoid duplicate spinners
         if (container.querySelector('.spinner-overlay')) return;
 
-        // Store original state
+        // Store original classes
         if (!container.dataset.originalClasses) {
             container.dataset.originalClasses = container.className;
         }
 
-        // Store original inline styles that we might modify
-        const computedStyle = window.getComputedStyle(container);
-        const originalPosition = container.style.position;
-        
-        if (!container.dataset.originalInlinePosition) {
-            container.dataset.originalInlinePosition = originalPosition || '';
-        }
-
         // Ensure container has relative positioning for absolute overlay
+        const computedStyle = window.getComputedStyle(container);
         if (computedStyle.position === 'static') {
+            container.dataset.originalPosition = 'static';
             container.style.position = 'relative';
         }
 
+        // Create spinner overlay
         const spinnerOverlay = document.createElement('div');
         spinnerOverlay.className = 'spinner-overlay';
-        spinnerOverlay.innerHTML = '<div class="spinner"></div>';
+        spinnerOverlay.innerHTML = `
+            <div class="spinner">
+                <div class="spinner-inner"></div>
+            </div>
+        `;
 
         container.appendChild(spinnerOverlay);
     }
@@ -78,7 +77,7 @@ class ApiService {
 
         // Force a reflow to ensure layout is recalculated
         container.offsetHeight;
-        
+
         // Force grid layout recalculation if container uses CSS Grid
         const computedStyle = window.getComputedStyle(container);
         if (computedStyle.display === 'grid') {
