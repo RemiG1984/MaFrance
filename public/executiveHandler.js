@@ -1,5 +1,6 @@
 import { formatDate } from './utils.js';
 import { api, apiService } from './apiService.js';
+import { spinner } from './spinner.js';
 
 /**
  * Executive Handler module for displaying executive information (ministers, prefects, mayors).
@@ -13,6 +14,7 @@ function ExecutiveHandler(executiveDiv, departmentNames) {
      * Shows country-level executive (Minister of Interior)
      */
     async function showCountryExecutive() {
+        const spinnerId = spinner.show(executiveDiv, 'Chargement des données exécutives...');
         try {
             const data = await api.getCountryExecutive("France");
             if (!data) {
@@ -33,6 +35,8 @@ function ExecutiveHandler(executiveDiv, departmentNames) {
                 "Erreur lors de la récupération du ministre:",
                 error,
             );
+        } finally {
+            spinner.hide(spinnerId);
         }
     }
 
@@ -41,6 +45,7 @@ function ExecutiveHandler(executiveDiv, departmentNames) {
      * @param {string} deptCode - Department code
      */
     async function showDepartmentExecutive(deptCode) {
+        const spinnerId = spinner.show(executiveDiv, 'Chargement des données exécutives...');
         try {
             const data = await api.getDepartmentExecutive(deptCode);
             console.log("Department executive data:", data);
@@ -62,6 +67,8 @@ function ExecutiveHandler(executiveDiv, departmentNames) {
                 "Erreur lors de la récupération du préfet:",
                 error,
             );
+        } finally {
+            spinner.hide(spinnerId);
         }
     }
 
@@ -70,6 +77,7 @@ function ExecutiveHandler(executiveDiv, departmentNames) {
      * @param {string} cog - Commune COG code
      */
     async function showCommuneExecutive(cog) {
+        const spinnerId = spinner.show(executiveDiv, 'Chargement des données exécutives...');
         try {
             // First get commune details from COG
             const communeData = await api.getCommuneDetails(cog);
@@ -98,6 +106,8 @@ function ExecutiveHandler(executiveDiv, departmentNames) {
                 "Erreur lors de la récupération du maire:",
                 error,
             );
+        } finally {
+            spinner.hide(spinnerId);
         }
     }
 

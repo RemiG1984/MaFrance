@@ -1,5 +1,6 @@
 import { normalizeDept } from './utils.js';
 import { api, apiService } from './apiService.js';
+import { spinner } from './spinner.js';
 
 /**
  * Location handler module for managing department, commune, and lieu selection.
@@ -20,6 +21,7 @@ function LocationHandler(
     departmentNames,
 ) {
     async function loadDepartements() {
+        const spinnerId = spinner.show(departementSelect.parentElement, 'Chargement des départements...');
         try {
             departementSelect.disabled = true;
             
@@ -52,6 +54,7 @@ function LocationHandler(
             console.error("Erreur chargement départements:", error);
         } finally {
             departementSelect.disabled = false;
+            spinner.hide(spinnerId);
         }
     }
 
@@ -161,6 +164,7 @@ function LocationHandler(
         const lieuxSelect = document.getElementById('lieuxSelect');
         if (!lieuxSelect || !cog) return; // Only load at commune level
 
+        const spinnerId = spinner.show(lieuxSelect.parentElement, 'Chargement des lieux...');
         try {
             lieuxSelect.disabled = true;
 
@@ -182,7 +186,7 @@ function LocationHandler(
             lieuxSelect.disabled = true;
             console.error("Erreur chargement lieux:", error);
         } finally {
-            // Cleanup handled above
+            spinner.hide(spinnerId);
         }
     }
 

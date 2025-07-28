@@ -7,6 +7,7 @@ import { MapHandler } from './mapHandler.js';
 import { DepartmentNames } from './departmentNames.js';
 import { MetricsConfig } from './metricsConfig.js';
 import { api } from './apiService.js';
+import { spinner } from './spinner.js';
 
 (function () {
     // Use shared department names
