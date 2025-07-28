@@ -1,6 +1,7 @@
 import { MetricsConfig } from "./metricsConfig.js";
 import { normalizeDept } from "./utils.js";
 import { api, apiService } from './apiService.js';
+import { spinner } from './spinner.js';
 
 /**
  * Map handler module for displaying interactive maps with statistical data.
@@ -54,27 +55,29 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
      * Initializes the map, fetches data, and applies styling.
      */
     async function initMap() {
-        // Main map centered on France (mainland + Corsica)
-        map = L.map(mapDiv, {
-            maxBounds: L.latLngBounds([41, -5], [51, 9]), // Constrain to France
-            maxBoundsViscosity: 1.0, // Prevent panning outside
-        }).setView([46.603354, 1.888334], 5); // Zoom 5 for full France view
-
-        // Add basemap with custom attribution
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-            attribution:
-                '©<a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> | <a href="https://ouvamafrance.replit.app">https://ouvamafrance.replit.app</a>',
-        }).addTo(map);
-
-        // Add fullscreen control (assuming Leaflet.fullscreen plugin is loaded)
-        map.addControl(
-            new L.Control.Fullscreen({
-                position: "topleft",
-            }),
-        );
-
-        // Fetch department data
+        const mapSpinnerId = spinner.show(mapDiv, 'Initialisation de la carte...');
+        
         try {
+            // Main map centered on France (mainland + Corsica)
+            map = L.map(mapDiv, {
+                maxBounds: L.latLngBounds([41, -5], [51, 9]), // Constrain to France
+                maxBoundsViscosity: 1.0, // Prevent panning outside
+            }).setView([46.603354, 1.888334], 5); // Zoom 5 for full France view
+
+            // Add basemap with custom attribution
+            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                attribution:
+                    '©<a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> | <a href="https://ouvamafrance.replit.app">https://ouvamafrance.replit.app</a>',
+            }).addTo(map);
+
+            // Add fullscreen control (assuming Leaflet.fullscreen plugin is loaded)
+            map.addControl(
+                new L.Control.Fullscreen({
+                    position: "topleft",
+                }),
+            );
+
+            // Fetch department data
             const { data } = await api.getDepartmentRankings({
                 limit: 101,
                 sort: 'total_score',
@@ -90,6 +93,8 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             console.error("Error fetching dept data:", error);
             resultsDiv.innerHTML += `<p>Erreur carte: ${error.message}</p>`;
             return;
+        } finally {
+            spinner.hide(mapSpinnerId);
         }
 
         // Fetch Department GeoJSON
@@ -228,6 +233,8 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
      * @param {string} deptCode - Department code
      */
     async function loadCommuneData(deptCode) {
+        const communeSpinnerId = spinner.show(mapDiv, `Chargement des communes (${deptCode})...`);
+        
         try {
             console.log(`Loading commune data for department ${deptCode}...`);
             const responseData = await api.getCommuneRankings({
@@ -277,6 +284,8 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                 `Error fetching commune data for ${deptCode}:`,
                 error,
             );
+        } finally {
+            spinner.hide(communeSpinnerId);
         }
     }
 
@@ -285,21 +294,23 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
      * @param {string} deptCode - Department code
      */
     async function loadCommuneGeoJson(deptCode) {
-        if (communeGeoJsonLayer) {
-            map.removeLayer(communeGeoJsonLayer);
-            communeGeoJsonLayer = null;
-        }
-
-        let geoUrl;
-        if (deptCode === "75") {
-            // Paris: Fetch arrondissements from official Paris open data
-            geoUrl = `https://geo.api.gouv.fr/communes?codeDepartement=75&type=arrondissement-municipal&format=geojson&geometry=contour`;
-        } else {
-            // Other departments: Fetch communes
-            geoUrl = `https://geo.api.gouv.fr/departements/${deptCode}/communes?format=geojson&geometry=contour`;
-        }
-
+        const geoSpinnerId = spinner.show(mapDiv, `Chargement de la géographie (${deptCode})...`);
+        
         try {
+            if (communeGeoJsonLayer) {
+                map.removeLayer(communeGeoJsonLayer);
+                communeGeoJsonLayer = null;
+            }
+
+            let geoUrl;
+            if (deptCode === "75") {
+                // Paris: Fetch arrondissements from official Paris open data
+                geoUrl = `https://geo.api.gouv.fr/communes?codeDepartement=75&type=arrondissement-municipal&format=geojson&geometry=contour`;
+            } else {
+                // Other departments: Fetch communes
+                geoUrl = `https://geo.api.gouv.fr/departements/${deptCode}/communes?format=geojson&geometry=contour`;
+            }
+
             const response = await fetch(geoUrl);
             if (!response.ok)
                 throw new Error(
@@ -347,6 +358,8 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                 error,
             );
             resultsDiv.innerHTML += `<p>Erreur carte: ${error.message}</p>`;
+        } finally {
+            spinner.hide(geoSpinnerId);
         }
     }
 

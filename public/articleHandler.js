@@ -1,5 +1,6 @@
 import { MetricsConfig } from './metricsConfig.js';
 import { api, apiService } from './apiService.js';
+import { spinner } from './spinner.js';
 
 /**
  * Article handler module for managing news articles display and filtering.
@@ -24,6 +25,8 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
      * @returns {Promise<Array>} Array of articles
      */
     async function loadArticles(departement, cog = "", lieu = "", locationHandler = null) {
+        const articleSpinnerId = spinner.show(articleListDiv, 'Chargement des articles...');
+        
         try {
             const params = { dept: departement };
             if (cog) params.cog = cog;
@@ -52,11 +55,13 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
             });
             return [];
         } finally {
-            // Cleanup handled elsewhere
+            spinner.hide(articleSpinnerId);
         }
     }
 
     async function loadArticleCounts(departement, cog = "", lieu = "") {
+        const countsSpinnerId = spinner.show(filterButtonsDiv, 'Chargement des compteurs...');
+        
         try {
             const params = { dept: departement };
             if (cog) params.cog = cog;
@@ -81,6 +86,8 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
                 defrancisation: 0,
                 wokisme: 0,
             };
+        } finally {
+            spinner.hide(countsSpinnerId);
         }
     }
 
