@@ -170,6 +170,16 @@
     background-color: #f0f0f0;
 }
 
+#results .score-table a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+#results .score-table a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
 #results .score-table th:nth-child(3),
 #results .score-table td:nth-child(3),
 #results .score-table th:nth-child(4),
