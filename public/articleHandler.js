@@ -38,17 +38,10 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
                 lieuxSelect.appendChild(option);
             });
             
-            // Show and enable selector only if we have lieux
-            if (lieux.length > 0) {
-                lieuxSelect.style.display = 'block';
-                lieuxSelect.disabled = false;
-            } else {
-                lieuxSelect.style.display = 'none';
-                lieuxSelect.disabled = true;
-            }
+            // Don't show/hide here - let renderFilterButtons handle visibility
+            lieuxSelect.disabled = false;
         } catch (error) {
             lieuxSelect.innerHTML = '<option value="">-- Aucun lieu --</option>';
-            lieuxSelect.style.display = 'none';
             lieuxSelect.disabled = true;
             console.error("Erreur chargement lieux:", error);
         } finally {
@@ -187,6 +180,19 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
      */
     function renderFilterButtons(counts, allArticles, currentLieu) {
         filterButtonsDiv.innerHTML = "";
+        
+        // Show lieuxSelect if we have lieux data and we're at commune level
+        const lieuxSelect = document.getElementById('lieuxSelect');
+        const hasCOG = window.location.search.includes('cog=') || document.getElementById('communeInput').value.trim() !== '';
+        
+        if (lieuxSelect && hasCOG && lieuxSelect.options.length > 1) {
+            lieuxSelect.style.display = 'block';
+            lieuxSelect.disabled = false;
+        } else if (lieuxSelect) {
+            lieuxSelect.style.display = 'none';
+            lieuxSelect.disabled = true;
+        }
+        
         const categories = MetricsConfig.articleCategories.map(category => ({
             name: category.name,
             key: category.key,
