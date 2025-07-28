@@ -15,31 +15,27 @@ class ApiService {
      */
     showSpinner(container) {
         if (!container) return;
-
-        // Avoid duplicate spinners
-        if (container.querySelector('.spinner-overlay')) return;
-
-        // Store original classes
-        if (!container.dataset.originalClasses) {
-            container.dataset.originalClasses = container.className;
+        
+        // Store original position to restore later
+        if (!container.dataset.originalPosition) {
+            container.dataset.originalPosition = getComputedStyle(container).position;
         }
-
-        // Ensure container has relative positioning for absolute overlay
-        const computedStyle = window.getComputedStyle(container);
-        if (computedStyle.position === 'static') {
-            container.dataset.originalPosition = 'static';
+        
+        // Ensure container has relative positioning for absolute spinner
+        if (getComputedStyle(container).position === 'static') {
             container.style.position = 'relative';
         }
-
-        // Create spinner overlay
+        
+        // Remove existing spinner if any
+        const existingSpinner = container.querySelector('.spinner-overlay');
+        if (existingSpinner) {
+            existingSpinner.remove();
+        }
+        
+        // Create and add spinner
         const spinnerOverlay = document.createElement('div');
         spinnerOverlay.className = 'spinner-overlay';
-        spinnerOverlay.innerHTML = `
-            <div class="spinner">
-                <div class="spinner-inner"></div>
-            </div>
-        `;
-
+        spinnerOverlay.innerHTML = '<div class="spinner"></div>';
         container.appendChild(spinnerOverlay);
     }
 
@@ -49,43 +45,20 @@ class ApiService {
      */
     hideSpinner(container) {
         if (!container) return;
-
-        // Remove spinner overlay
+        
         const spinner = container.querySelector('.spinner-overlay');
         if (spinner) {
             spinner.remove();
         }
-
-        // Remove any loading-container class that might have been added
-        container.classList.remove('loading-container');
-
-        // Restore original classes
-        if (container.dataset.originalClasses) {
-            container.className = container.dataset.originalClasses;
-            delete container.dataset.originalClasses;
-        }
-
-        // Restore original inline position style
-        if (container.dataset.originalInlinePosition !== undefined) {
-            if (container.dataset.originalInlinePosition === '') {
-                container.style.removeProperty('position');
+        
+        // Restore original position if it was changed
+        if (container.dataset.originalPosition) {
+            if (container.dataset.originalPosition === 'static') {
+                container.style.position = '';
             } else {
-                container.style.position = container.dataset.originalInlinePosition;
+                container.style.position = container.dataset.originalPosition;
             }
-            delete container.dataset.originalInlinePosition;
-        }
-
-        // Force a reflow to ensure layout is recalculated
-        container.offsetHeight;
-
-        // Force grid layout recalculation if container uses CSS Grid
-        const computedStyle = window.getComputedStyle(container);
-        if (computedStyle.display === 'grid') {
-            const originalDisplay = container.style.display;
-            container.style.display = 'block';
-            container.offsetHeight; // Force reflow
-            container.style.display = originalDisplay || '';
-            container.offsetHeight; // Force another reflow
+            delete container.dataset.originalPosition;
         }
     }
 
@@ -117,7 +90,7 @@ class ApiService {
 
         try {
             this.activeRequests.add(url);
-
+            
             const response = await fetch(url, {
                 ...options,
                 headers: {
@@ -146,7 +119,7 @@ class ApiService {
             throw error;
         } finally {
             this.activeRequests.delete(url);
-
+            
             // Hide spinner if container provided
             if (spinnerContainer) {
                 this.hideSpinner(spinnerContainer);
@@ -161,7 +134,7 @@ class ApiService {
         this.cache.clear();
     }
 
-
+    
 }
 
 // Export singleton instance
@@ -261,8 +234,8 @@ export const api = {
         return apiService.request(`/api/articles/counts?${queryString}`);
     },
 
+    
 
-
-
-
+    
+    
 };

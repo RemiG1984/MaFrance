@@ -25,6 +25,7 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
      */
     async function loadArticles(departement, cog = "", lieu = "", locationHandler = null) {
         try {
+            articleListDiv.parentElement.classList.add('loading-container');
             apiService.showSpinner(articleListDiv.parentElement);
 
             const params = { dept: departement };
@@ -128,16 +129,9 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
         } else {
             filteredArticles.forEach((article) => {
                 const articleItem = document.createElement("div");
-                articleItem.className = "article-card";
+                articleItem.className = "article-item";
                 articleItem.innerHTML = `
-                    <div class="article-header">
-                        <span class="article-date">${article.date}</span>
-                        ${article.lieu ? `<span class="article-location">(${article.lieu})</span>` : ""}
-                        ${article.commune ? `<span class="article-commune">[${article.commune}]</span>` : ""}
-                    </div>
-                    <div class="article-content">
-                        <a href="${article.url}" target="_blank" class="article-title">${article.title}</a>
-                    </div>
+                    <p><strong>${article.date}</strong>${article.lieu ? ` (${article.lieu})` : ""}${article.commune ? ` [${article.commune}]` : ""}: <a href="${article.url}" target="_blank">${article.title}</a></p>
                 `;
                 articleListDiv.appendChild(articleItem);
             });

@@ -168,8 +168,12 @@ label {
 
 /* Loading and error states */
 .loading-container {
-    position: relative;
-    /* Removed flexbox properties that interfere with layout */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    text-align: center;
 }
 
 .loading-spinner {
