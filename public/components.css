@@ -96,8 +96,6 @@
 
 /* Filter buttons container */
 #filterButtons {
-    margin: 12px auto;
-    max-width: 800px;
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
@@ -107,22 +105,21 @@
 
 /* Results and data display */
 #results {
-    margin: 20px auto;
     font-size: 16px;
-    max-width: 800px;
 }
 
 #results .data-box {
     background-color: #fff;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    margin: 10px 0;
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
+    margin: 0;
 }
 
 #results .score-table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: fixed;
 }
 
 #results .score-header {
@@ -213,15 +210,12 @@
 
 /* Executive details */
 .executive-box {
-    background-color: #fff;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    margin: 10px 0;
+    background-color: transparent;
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
+    margin: 0;
     width: 100%;
-    max-width: 760px;
-    margin-left: auto;
-    margin-right: auto;
     text-align: left;
     overflow-wrap: break-word;
 }
@@ -242,14 +236,12 @@
 
 /* Articles section */
 #articles {
-    margin: 20px auto;
-    max-width: 800px;
     text-align: left;
 }
 
 #articles h2 {
     font-size: 20px;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
     color: #343a40;
 }
 
@@ -562,6 +554,12 @@
 }
 
 /* Mobile responsive adjustments */
+@media (max-width: 1024px) {
+    .grid.lg\\:grid-cols-2 {
+        grid-template-columns: 1fr;
+    }
+}
+
 @media (max-width: 768px) {
     #tweakingBox {
         margin-top: 10px;
@@ -604,7 +602,7 @@
     }
 
     .executive-box {
-        padding: 10px;
+        padding: 0;
     }
 
     .executive-box p {
@@ -627,6 +625,10 @@
 
     .chart-container canvas {
         height: 250px !important;
+    }
+
+    .grid.md\\:grid-cols-2 {
+        grid-template-columns: 1fr;
     }
 }
 
