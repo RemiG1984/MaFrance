@@ -184,7 +184,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                 communeGeoJsonLayer = null;
                 geoJsonLayer.setStyle({ fillOpacity: 0.7 });
                 currentDept = null;
-                map.setView([46.603354, 1.888334], 5);
+                map.setView([46.603354, 1.888334], 6);
                 // Clear cache when switching back to department level
                 clearQuantileCache();
                 // Update available metrics when switching back to department level
@@ -208,7 +208,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                     }
                     geoJsonLayer.setStyle({ fillOpacity: 0.7, opacity: 1 });
                     currentDept = null;
-                    map.setView([46.603354, 1.888334], 5);
+                    map.setView([46.603354, 1.888334], 6);
                     // Clear cache when switching back to department level
                     clearQuantileCache();
                     // Update available metrics when switching back to department level
@@ -698,7 +698,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                             if (metricControl && metricControl.updateOptions) {
                                 metricControl.updateOptions();
                             }
-                            
+
                             // Set flag to prevent circular reference and update department selection
                             window.isMapClickInProgress = true;
                             departementSelect.value = normalizedCode;
@@ -964,7 +964,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
         currentDept = null;
 
         // Reset to France view
-        map.setView([46.603354, 1.888334], 5);
+        map.setView([46.603354, 1.888334], 6);
 
         // Clear cache when switching back to department level
         clearQuantileCache();
