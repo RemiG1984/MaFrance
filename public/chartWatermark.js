@@ -15,7 +15,7 @@
                 ctx.textBaseline = "bottom";
 
                 // Watermark text
-                const watermarkText = "ouvamafrance.replit.app";
+                const watermarkText = "https://ouvamafrance.replit.app";
                 const padding = 10; // Consistent with spacing in styles.css (e.g., padding: 10px)
                 const x = chart.chartArea.right - padding;
                 const y = chart.chartArea.bottom - padding;

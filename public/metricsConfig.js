@@ -62,7 +62,7 @@ export const MetricsConfig = {
         {
             value: "violences_sexuelles_p1k",
             label: "Violences sexuelles /1k hab.",
-            alt1Label: "Amour non consenti /1k hab.",
+            alt1Label: "Libération de la parole /1k hab.",
             alt2Label: "Violences sexuelles /1k hab.",
             category: "insécurité",
             format: "rate_1k",
