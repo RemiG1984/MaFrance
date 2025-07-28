@@ -23,7 +23,12 @@ function LocationHandler(
     async function loadDepartements() {
         try {
             departementSelect.disabled = true;
-            apiService.showSpinner(departementSelect.parentElement);
+            // Add loading-container class to ensure proper layout
+            const container = departementSelect.parentElement;
+            if (!container.classList.contains('loading-container')) {
+                container.classList.add('loading-container');
+            }
+            apiService.showSpinner(container);
             
             const departements = await api.getDepartments();
             console.log("Departments fetched:", departements);
@@ -54,7 +59,8 @@ function LocationHandler(
             console.error("Erreur chargement départements:", error);
         } finally {
             departementSelect.disabled = false;
-            apiService.hideSpinner(departementSelect.parentElement);
+            const container = departementSelect.parentElement;
+            apiService.hideSpinner(container);
         }
     }
 
