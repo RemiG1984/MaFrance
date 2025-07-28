@@ -14,6 +14,7 @@ function ExecutiveHandler(executiveDiv, departmentNames) {
      */
     async function showCountryExecutive() {
         try {
+            apiService.showSpinner(executiveDiv);
             const data = await api.getCountryExecutive("France");
             if (!data) {
                 executiveDiv.innerHTML = "<p>Aucun ministre trouvé.</p>";
@@ -33,6 +34,8 @@ function ExecutiveHandler(executiveDiv, departmentNames) {
                 "Erreur lors de la récupération du ministre:",
                 error,
             );
+        } finally {
+            apiService.hideSpinner(executiveDiv);
         }
     }
 
@@ -42,6 +45,7 @@ function ExecutiveHandler(executiveDiv, departmentNames) {
      */
     async function showDepartmentExecutive(deptCode) {
         try {
+            apiService.showSpinner(executiveDiv);
             const data = await api.getDepartmentExecutive(deptCode);
             console.log("Department executive data:", data);
             if (!data) {
@@ -62,6 +66,8 @@ function ExecutiveHandler(executiveDiv, departmentNames) {
                 "Erreur lors de la récupération du préfet:",
                 error,
             );
+        } finally {
+            apiService.hideSpinner(executiveDiv);
         }
     }
 
@@ -71,6 +77,7 @@ function ExecutiveHandler(executiveDiv, departmentNames) {
      */
     async function showCommuneExecutive(cog) {
         try {
+            apiService.showSpinner(executiveDiv);
             // First get commune details from COG
             const communeData = await api.getCommuneDetails(cog);
             if (!communeData) {
@@ -98,6 +105,8 @@ function ExecutiveHandler(executiveDiv, departmentNames) {
                 "Erreur lors de la récupération du maire:",
                 error,
             );
+        } finally {
+            apiService.hideSpinner(executiveDiv);
         }
     }
 

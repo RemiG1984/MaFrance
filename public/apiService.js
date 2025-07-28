@@ -10,13 +10,67 @@ class ApiService {
     }
 
     /**
+     * Shows spinner on specified container
+     * @param {HTMLElement} container - Container to show spinner on
+     */
+    showSpinner(container) {
+        if (!container) return;
+        
+        // Store original position to restore later
+        if (!container.dataset.originalPosition) {
+            container.dataset.originalPosition = getComputedStyle(container).position;
+        }
+        
+        // Ensure container has relative positioning for absolute spinner
+        if (getComputedStyle(container).position === 'static') {
+            container.style.position = 'relative';
+        }
+        
+        // Remove existing spinner if any
+        const existingSpinner = container.querySelector('.spinner-overlay');
+        if (existingSpinner) {
+            existingSpinner.remove();
+        }
+        
+        // Create and add spinner
+        const spinnerOverlay = document.createElement('div');
+        spinnerOverlay.className = 'spinner-overlay';
+        spinnerOverlay.innerHTML = '<div class="spinner"></div>';
+        container.appendChild(spinnerOverlay);
+    }
+
+    /**
+     * Hides spinner on specified container
+     * @param {HTMLElement} container - Container to hide spinner on
+     */
+    hideSpinner(container) {
+        if (!container) return;
+        
+        const spinner = container.querySelector('.spinner-overlay');
+        if (spinner) {
+            spinner.remove();
+        }
+        
+        // Restore original position if it was changed
+        if (container.dataset.originalPosition) {
+            if (container.dataset.originalPosition === 'static') {
+                container.style.position = '';
+            } else {
+                container.style.position = container.dataset.originalPosition;
+            }
+            delete container.dataset.originalPosition;
+        }
+    }
+
+    /**
      * Makes cached API requests with consistent error handling.
      * @param {string} url - API endpoint
      * @param {Object} options - Fetch options
      * @param {boolean} useCache - Whether to use caching
+     * @param {HTMLElement} spinnerContainer - Container to show spinner on
      * @returns {Promise} API response data
      */
-    async request(url, options = {}, useCache = true) {
+    async request(url, options = {}, useCache = true, spinnerContainer = null) {
         const cacheKey = `${url}_${JSON.stringify(options)}`;
 
         // Check cache first
@@ -27,6 +81,11 @@ class ApiService {
                 return cached.data;
             }
             this.cache.delete(cacheKey);
+        }
+
+        // Show spinner if container provided
+        if (spinnerContainer) {
+            this.showSpinner(spinnerContainer);
         }
 
         try {
@@ -60,6 +119,11 @@ class ApiService {
             throw error;
         } finally {
             this.activeRequests.delete(url);
+            
+            // Hide spinner if container provided
+            if (spinnerContainer) {
+                this.hideSpinner(spinnerContainer);
+            }
         }
     }
 

@@ -75,6 +75,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
 
         // Fetch department data
         try {
+            apiService.showSpinner(mapDiv);
             const { data } = await api.getDepartmentRankings({
                 limit: 101,
                 sort: 'total_score',
@@ -90,6 +91,8 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             console.error("Error fetching dept data:", error);
             resultsDiv.innerHTML += `<p>Erreur carte: ${error.message}</p>`;
             return;
+        } finally {
+            apiService.hideSpinner(mapDiv);
         }
 
         // Fetch Department GeoJSON

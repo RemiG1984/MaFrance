@@ -25,6 +25,9 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
      */
     async function loadArticles(departement, cog = "", lieu = "", locationHandler = null) {
         try {
+            articleListDiv.parentElement.classList.add('loading-container');
+            apiService.showSpinner(articleListDiv.parentElement);
+
             const params = { dept: departement };
             if (cog) params.cog = cog;
             if (lieu) params.lieu = lieu;
@@ -52,7 +55,7 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
             });
             return [];
         } finally {
-            // Cleanup handled elsewhere
+            apiService.hideSpinner(articleListDiv.parentElement);
         }
     }
 

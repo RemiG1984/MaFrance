@@ -23,6 +23,9 @@ function LocationHandler(
     async function loadDepartements() {
         try {
             departementSelect.disabled = true;
+            const container = departementSelect.parentElement;
+            
+            apiService.showSpinner(container);
             
             const departements = await api.getDepartments();
             console.log("Departments fetched:", departements);
@@ -53,6 +56,8 @@ function LocationHandler(
             console.error("Erreur chargement départements:", error);
         } finally {
             departementSelect.disabled = false;
+            const container = departementSelect.parentElement;
+            apiService.hideSpinner(container);
         }
     }
 
@@ -164,6 +169,7 @@ function LocationHandler(
 
         try {
             lieuxSelect.disabled = true;
+            apiService.showSpinner(lieuxSelect.parentElement);
 
             const lieux = await api.getLieux(departement, cog);
             console.log("Lieux fetched:", lieux);
@@ -183,7 +189,7 @@ function LocationHandler(
             lieuxSelect.disabled = true;
             console.error("Erreur chargement lieux:", error);
         } finally {
-            // Cleanup handled above
+            apiService.hideSpinner(lieuxSelect.parentElement);
         }
     }
 
