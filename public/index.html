@@ -50,37 +50,38 @@
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
-                <div class="bg-white p-4 rounded-lg shadow">
-                    <label for="departementSelect" class="block text-sm font-medium text-gray-700 mb-2">Sélectionner un département :</label>
-                    <select id="departementSelect" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <option value="">-- Choisir un département --</option>
-                    </select>
+                <!-- First Column: Location selectors, map, lieux selector, and rankings link -->
+                <div class="space-y-5">
+                    <div class="bg-white p-4 rounded-lg shadow">
+                        <label for="departementSelect" class="block text-sm font-medium text-gray-700 mb-2">Sélectionner un département :</label>
+                        <select id="departementSelect" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">-- Choisir un département --</option>
+                        </select>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow">
+                        <label for="communeInput" class="block text-sm font-medium text-gray-700 mb-2">Rechercher une commune :</label>
+                        <input type="text" id="communeInput" list="communeList" placeholder="Tapez pour rechercher..." autocomplete="off" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                        <datalist id="communeList"></datalist>
+                    </div>
+                    <div id="mapContainer" class="bg-white rounded-lg shadow overflow-hidden">
+                        <div id="map" class="h-96"></div>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow">
+                        <label for="lieuxSelect" class="block text-sm font-medium text-gray-700 mb-2">Sélectionner un lieu :</label>
+                        <select id="lieuxSelect" disabled class="w-full p-2 border border-gray-300 rounded-md bg-gray-100">
+                            <option value="">-- Tous les lieux --</option>
+                        </select>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow">
+                        <a href="rankings.html" class="text-blue-600 hover:text-blue-800 underline">Lien vers les classements</a>
+                    </div>
                 </div>
-                <div class="bg-white p-4 rounded-lg shadow">
-                    <label for="communeInput" class="block text-sm font-medium text-gray-700 mb-2">Rechercher une commune :</label>
-                    <input type="text" id="communeInput" list="communeList" placeholder="Tapez pour rechercher..." autocomplete="off" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-                    <datalist id="communeList"></datalist>
+                
+                <!-- Second Column: Score table and executive details -->
+                <div class="space-y-5">
+                    <div id="results" class="bg-white p-4 rounded-lg shadow"></div>
+                    <div id="executiveDetails" class="bg-white p-4 rounded-lg shadow"></div>
                 </div>
-            </div>
-            
-            <div id="mapContainer" class="bg-white rounded-lg shadow mb-6 overflow-hidden">
-                <div id="map" class="h-96"></div>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
-                <div id="results" class="bg-white p-4 rounded-lg shadow"></div>
-                <div id="executiveDetails" class="bg-white p-4 rounded-lg shadow"></div>
-            </div>
-            
-            <div class="bg-white p-4 rounded-lg shadow mb-6">
-                <a href="rankings.html" class="text-blue-600 hover:text-blue-800 underline">Lien vers les classements</a>
-            </div>
-            
-            <div class="bg-white p-4 rounded-lg shadow mb-6">
-                <label for="lieuxSelect" class="block text-sm font-medium text-gray-700 mb-2">Sélectionner un lieu :</label>
-                <select id="lieuxSelect" disabled class="w-full p-2 border border-gray-300 rounded-md bg-gray-100">
-                    <option value="">-- Tous les lieux --</option>
-                </select>
             </div>
             
             <div id="filterButtons" class="mb-6"></div>
