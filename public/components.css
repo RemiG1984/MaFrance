@@ -542,17 +542,16 @@
     .mobile-reorder {
         display: grid;
         grid-template-columns: repeat(2, 1fr); /* Two equal columns */
-        grid-auto-flow: column; /* Tiles flow down each column */
         gap: 1rem; /* Adjust gap as needed */
     }
 
-    /* Assign tiles to columns explicitly */
-    .mobile-reorder > div:nth-child(1) { grid-column: 1; } /* Location selectors -> Column 1 */
-    .mobile-reorder > div:nth-child(2) { grid-column: 1; } /* Map -> Column 1 */
-    .mobile-reorder > div:nth-child(5) { grid-column: 1; } /* Articles -> Column 1 */
-    .mobile-reorder > div:nth-child(3) { grid-column: 2; } /* Score table -> Column 2 */
-    .mobile-reorder > div:nth-child(4) { grid-column: 2; } /* Executive details -> Column 2 */
-    .mobile-reorder > div:nth-child(6) { grid-column: 2; } /* Links -> Column 2 */
+    /* Assign tiles to columns explicitly with row positioning */
+    .mobile-reorder > div:nth-child(1) { grid-column: 1; grid-row: 1; } /* Location selectors -> Column 1, Row 1 */
+    .mobile-reorder > div:nth-child(2) { grid-column: 1; grid-row: 2; } /* Map -> Column 1, Row 2 */
+    .mobile-reorder > div:nth-child(5) { grid-column: 1; grid-row: 3; } /* Articles -> Column 1, Row 3 */
+    .mobile-reorder > div:nth-child(3) { grid-column: 2; grid-row: 1; } /* Score table -> Column 2, Row 1 */
+    .mobile-reorder > div:nth-child(4) { grid-column: 2; grid-row: 2; } /* Executive details -> Column 2, Row 2 */
+    .mobile-reorder > div:nth-child(6) { grid-column: 2; grid-row: 3; } /* Links -> Column 2, Row 3 */
 }
 
 @media (max-width: 768px) {
