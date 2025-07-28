@@ -19,15 +19,21 @@ class ApiService {
         // Avoid duplicate spinners
         if (container.querySelector('.spinner-overlay')) return;
 
-        // Store original classes and position
+        // Store original state
         if (!container.dataset.originalClasses) {
             container.dataset.originalClasses = container.className;
         }
 
-        // Ensure container has relative positioning for absolute overlay
+        // Store original inline styles that we might modify
         const computedStyle = window.getComputedStyle(container);
+        const originalPosition = container.style.position;
+        
+        if (!container.dataset.originalInlinePosition) {
+            container.dataset.originalInlinePosition = originalPosition || '';
+        }
+
+        // Ensure container has relative positioning for absolute overlay
         if (computedStyle.position === 'static') {
-            container.dataset.originalPosition = 'static';
             container.style.position = 'relative';
         }
 
@@ -45,29 +51,33 @@ class ApiService {
     hideSpinner(container) {
         if (!container) return;
 
+        // Remove spinner overlay
         const spinner = container.querySelector('.spinner-overlay');
         if (spinner) {
             spinner.remove();
         }
 
-        // Remove loading-container class if it was added
+        // Remove any loading-container class that might have been added
         container.classList.remove('loading-container');
 
-        // Restore original classes if they were stored
+        // Restore original classes
         if (container.dataset.originalClasses) {
             container.className = container.dataset.originalClasses;
             delete container.dataset.originalClasses;
         }
 
-        // Restore original position if it was changed
-        if (container.dataset.originalPosition) {
-            if (container.dataset.originalPosition === 'static') {
+        // Restore original inline position style
+        if (container.dataset.originalInlinePosition !== undefined) {
+            if (container.dataset.originalInlinePosition === '') {
                 container.style.position = '';
             } else {
-                container.style.position = container.dataset.originalPosition;
+                container.style.position = container.dataset.originalInlinePosition;
             }
-            delete container.dataset.originalPosition;
+            delete container.dataset.originalInlinePosition;
         }
+
+        // Force a reflow to ensure layout is recalculated
+        container.offsetHeight;
     }
 
     /**
