@@ -41,8 +41,9 @@ function CrimeGraphHandler() {
         
         // Listen for label state changes
         window.addEventListener('metricsLabelsToggled', () => {
-            // Only update crime-specific elements and charts if we're on the crime graph page
-            if (document.getElementById('crimeChartGrid')) {
+            // Only update crime-specific elements and charts if we're on the crime graph page AND have valid URL parameters
+            const { type } = getUrlParams();
+            if (document.getElementById('crimeChartGrid') && type) {
                 // Update page title
                 document.title = MetricsConfig.getCurrentPageTitle() + " - Graphique de Criminalité";
 
