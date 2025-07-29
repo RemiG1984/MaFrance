@@ -41,20 +41,23 @@ function CrimeGraphHandler() {
         
         // Listen for label state changes
         window.addEventListener('metricsLabelsToggled', () => {
-            // Update page title
-            document.title = MetricsConfig.getCurrentPageTitle() + " - Graphique de Criminalité";
+            // Only update crime-specific elements and charts if we're on the crime graph page
+            if (document.getElementById('crimeChartGrid')) {
+                // Update page title
+                document.title = MetricsConfig.getCurrentPageTitle() + " - Graphique de Criminalité";
 
-            // Update header h1 text
-            const headerH1 = document.querySelector('h1');
-            if (headerH1) {
-                headerH1.textContent = "Graphique des Statistiques de Criminalité";
+                // Update header h1 text
+                const headerH1 = document.querySelector('h1');
+                if (headerH1) {
+                    headerH1.textContent = "Graphique des Statistiques de Criminalité";
+                }
+
+                // Refresh charts with new labels
+                initCrimeCharts();
             }
 
-            // Update navigation links with current label state
+            // Always update navigation links with current label state
             updateNavigationLinks();
-
-            // Refresh charts with new labels
-            initCrimeCharts();
         });
     }
 
