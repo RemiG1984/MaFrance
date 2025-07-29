@@ -270,7 +270,7 @@ import { spinner } from './spinner.js';
             // Create charts using the crime graph handler
             const years = mainData.map((row) => row.annee);
             
-            // Define crime categories for main page (reduced set)
+            // Define all available crime categories
             const categories = [
                 {
                     key: "homicides_p100k",
@@ -283,9 +283,29 @@ import { spinner } from './spinner.js';
                     color: "#007bff",
                 },
                 {
-                    key: "vols_p1k",
-                    label: MetricsConfig.getMetricLabel("vols_p1k"),
-                    color: "#ffc107",
+                    key: "violences_sexuelles_p1k",
+                    label: MetricsConfig.getMetricLabel("violences_sexuelles_p1k"),
+                    color: "#28a745",
+                },
+                { 
+                    key: "vols_p1k", 
+                    label: MetricsConfig.getMetricLabel("vols_p1k"), 
+                    color: "#ffc107" 
+                },
+                {
+                    key: "destructions_p1k",
+                    label: MetricsConfig.getMetricLabel("destructions_p1k"),
+                    color: "#e83e8c",
+                },
+                {
+                    key: "stupefiants_p1k",
+                    label: MetricsConfig.getMetricLabel("stupefiants_p1k"),
+                    color: "#17a2b8",
+                },
+                {
+                    key: "escroqueries_p1k",
+                    label: MetricsConfig.getMetricLabel("escroqueries_p1k"),
+                    color: "#fd7e14",
                 },
             ];
 
