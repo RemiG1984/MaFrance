@@ -616,6 +616,32 @@
 }
 
 @media (max-width: 768px) {
+    /* Fix viewport overflow for all containers */
+    body {
+        overflow-x: hidden;
+        max-width: 100vw;
+    }
+    
+    .container {
+        overflow-x: hidden;
+        max-width: 100vw;
+        padding: 10px;
+        box-sizing: border-box;
+    }
+    
+    /* Ensure all tiles respect viewport width */
+    .bg-white {
+        overflow-x: hidden;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+    
+    /* Fix text wrapping in all containers */
+    * {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto;
+    }
     #tweakingBox {
         margin-top: 10px;
     }
