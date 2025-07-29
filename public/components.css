@@ -309,6 +309,16 @@
     min-height: 400px;
 }
 
+#namesChartContainer:empty {
+    min-height: auto;
+    padding: 15px;
+}
+
+#namesChartContainer:has(p:only-child) {
+    min-height: auto;
+    padding: 15px;
+}
+
 .chart-container canvas {
     height: 300px !important;
     width: 100% !important;
