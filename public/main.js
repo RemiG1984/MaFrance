@@ -4,6 +4,7 @@ import { ScoreTableHandler } from './scoreTableHandler.js';
 import { ExecutiveHandler } from './executiveHandler.js';
 import { ArticleHandler } from './articleHandler.js';
 import { MapHandler } from './mapHandler.js';
+import { CrimeGraphHandler } from './crimeGraphHandler.js';
 import { DepartmentNames } from './departmentNames.js';
 import { MetricsConfig } from './metricsConfig.js';
 import { api } from './apiService.js';
@@ -23,6 +24,8 @@ import { spinner } from './spinner.js';
     const articleListDiv = document.getElementById("articleList");
     const filterButtonsDiv = document.getElementById("filterButtons");
     const mapDiv = document.getElementById('map');
+    const crimeGraphsDiv = document.getElementById("crimeGraphs");
+    const crimeChartGrid = document.getElementById("crimeChartGrid");
     const labelToggleBtn = document.getElementById("labelToggleBtn");
 
     // Validate DOM elements
@@ -34,7 +37,9 @@ import { spinner } from './spinner.js';
         !resultsDiv ||
         !executiveDiv ||
         !articleListDiv ||
-        !filterButtonsDiv
+        !filterButtonsDiv ||
+        !crimeGraphsDiv ||
+        !crimeChartGrid
     ) {
         console.error("One or more DOM elements are missing");
         return;
@@ -58,6 +63,7 @@ import { spinner } from './spinner.js';
     const scoreTableHandler = ScoreTableHandler(resultsDiv, departmentNames);
     const executiveHandler = ExecutiveHandler(executiveDiv, departmentNames);
     const mapHandler = MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames);
+    const crimeGraphHandler = CrimeGraphHandler();
 
     // Shared state
     let currentLieu = "";
@@ -76,6 +82,7 @@ import { spinner } from './spinner.js';
         if (departement) {
             scoreTableHandler.showDepartmentDetails(departement);
             executiveHandler.showDepartmentExecutive(departement);
+            showCrimeGraphs("department", departement);
             
             // Only show department popup if this isn't from a map click
             if (mapHandler && mapHandler.showDepartmentPopup && !window.isMapClickInProgress) {
@@ -94,6 +101,7 @@ import { spinner } from './spinner.js';
         } else {
             scoreTableHandler.showCountryDetails();
             executiveHandler.showCountryExecutive();
+            showCrimeGraphs("country", "France");
             articleHandler.clearArticles();
         }
     });
@@ -113,6 +121,7 @@ import { spinner } from './spinner.js';
             if (departement) {
                 scoreTableHandler.showDepartmentDetails(departement);
                 executiveHandler.showDepartmentExecutive(departement);
+                showCrimeGraphs("department", departement);
                 articleHandler.loadArticles(departement, "", "", locationHandler).then(() => {
                     articleHandler
                         .loadArticleCounts(departement)
@@ -127,6 +136,7 @@ import { spinner } from './spinner.js';
             } else {
                 scoreTableHandler.showCountryDetails();
                 executiveHandler.showCountryExecutive();
+                showCrimeGraphs("country", "France");
                 articleHandler.clearArticles();
             }
         }
@@ -176,6 +186,7 @@ import { spinner } from './spinner.js';
                     communeInput.value = selectedCommune;
                     scoreTableHandler.showCommuneDetails(cog);
                     executiveHandler.showCommuneExecutive(cog);
+                    showCrimeGraphs("commune", cog, departement, selectedCommune);
                     locationHandler.loadLieux(departement, cog);
                     articleHandler.loadArticles(departement, cog, "", locationHandler).then(() => {
                         articleHandler.loadArticleCounts(departement, cog).then((counts) => {
@@ -190,6 +201,7 @@ import { spinner } from './spinner.js';
                 } else {
                     resultsDiv.innerHTML = "<p>Commune non trouvée.</p>";
                     executiveDiv.innerHTML = "<p>Commune non trouvée.</p>";
+                    crimeChartGrid.innerHTML = "";
                 }
             } catch (error) {
                 resultsDiv.innerHTML = `<p>Erreur : ${error.message}</p>`;
@@ -224,6 +236,86 @@ import { spinner } from './spinner.js';
         }
     });
 
+    // Function to show crime graphs based on selection
+    async function showCrimeGraphs(type, code, dept = null, communeName = null) {
+        try {
+            crimeChartGrid.innerHTML = "";
+            
+            let endpoint, params = {};
+            let mainData = null, countryData = null, deptData = null;
+            let titleText;
+
+            // Determine the data to fetch and title
+            if (type === "country") {
+                mainData = await api.getCountryCrimeHistory(code || "France");
+                titleText = "France";
+            } else if (type === "department") {
+                mainData = await api.getDepartmentCrimeHistory(code);
+                countryData = await api.getCountryCrimeHistory("France");
+                titleText = `${code} - ${departmentNames[code] || code}`;
+            } else if (type === "commune") {
+                mainData = await api.getCommuneCrimeHistory(code);
+                countryData = await api.getCountryCrimeHistory("France");
+                if (dept) {
+                    deptData = await api.getDepartmentCrimeHistory(dept);
+                }
+                titleText = `${communeName} (${dept})`;
+            }
+
+            if (!mainData || mainData.length === 0) {
+                crimeChartGrid.innerHTML = "<p>Aucune donnée disponible pour cet emplacement.</p>";
+                return;
+            }
+
+            // Create charts using the crime graph handler
+            const years = mainData.map((row) => row.annee);
+            
+            // Define crime categories for main page (reduced set)
+            const categories = [
+                {
+                    key: "homicides_p100k",
+                    label: MetricsConfig.getMetricLabel("homicides_p100k"),
+                    color: "#dc3545",
+                },
+                {
+                    key: "violences_physiques_p1k",
+                    label: MetricsConfig.getMetricLabel("violences_physiques_p1k"),
+                    color: "#007bff",
+                },
+                {
+                    key: "vols_p1k",
+                    label: MetricsConfig.getMetricLabel("vols_p1k"),
+                    color: "#ffc107",
+                },
+            ];
+
+            // Filter categories based on availability at current level
+            const currentLevel = type === "commune" ? "commune" : 
+                                type === "department" ? "departement" : "france";
+            const availableCategories = categories.filter(category => 
+                MetricsConfig.isMetricAvailable(category.key, currentLevel)
+            );
+
+            // Create charts
+            availableCategories.forEach((category, index) => {
+                crimeGraphHandler.createCrimeChart(category, index, {
+                    mainData,
+                    countryData,
+                    deptData,
+                    years,
+                    titleText,
+                    type,
+                    dept,
+                    chartGrid: crimeChartGrid
+                });
+            });
+
+        } catch (error) {
+            crimeChartGrid.innerHTML = `<p>Erreur : ${error.message}</p>`;
+            console.error("Erreur lors de la création des graphiques de criminalité:", error);
+        }
+    }
+
     // Initialize the application once
     function initializeApp() {
         console.log('Initializing application...');
@@ -232,6 +324,7 @@ import { spinner } from './spinner.js';
         
         scoreTableHandler.showCountryDetails();
         executiveHandler.showCountryExecutive();
+        showCrimeGraphs("country", "France");
         locationHandler.loadDepartements();
         updateExternalLinksWithLabelState();
     }
@@ -263,12 +356,18 @@ import { spinner } from './spinner.js';
 
         if (currentCommune && currentDept) {
             api.getCommunes(currentDept).then(data => {
-                if (data.length > 0) scoreTableHandler.showCommuneDetails(data[0].COG);
+                if (data.length > 0) {
+                    const cog = data[0].COG;
+                    scoreTableHandler.showCommuneDetails(cog);
+                    showCrimeGraphs("commune", cog, currentDept, currentCommune);
+                }
             }).catch(console.error);
         } else if (currentDept) {
             scoreTableHandler.showDepartmentDetails(currentDept);
+            showCrimeGraphs("department", currentDept);
         } else {
             scoreTableHandler.showCountryDetails();
+            showCrimeGraphs("country", "France");
         }
 
         if (mapHandler?.updateMap) {
@@ -312,6 +411,7 @@ import { spinner } from './spinner.js';
                 // Show commune details
                 scoreTableHandler.showCommuneDetails(cog);
                 executiveHandler.showCommuneExecutive(cog);
+                showCrimeGraphs("commune", cog, deptCode, communeName);
                 
                 // Load lieux and articles
                 if (deptCode) {
