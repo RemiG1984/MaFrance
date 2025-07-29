@@ -1,4 +1,4 @@
-// Removed normalizeDept import as it's causing issues
+import { normalizeDept } from './utils.js';
 import { api, apiService } from './apiService.js';
 import { spinner } from './spinner.js';
 
@@ -29,27 +29,26 @@ function LocationHandler(
             console.log("Departments fetched:", departements);
             departementSelect.innerHTML =
                 '<option value="">-- Choisir un département --</option>';
-            
             departements.forEach((dept) => {
-                // Use the raw departement code from the API
-                const deptCode = dept.departement;
-                console.log("Processing department:", deptCode);
-                
-                // Basic validation for French department codes
-                if (!deptCode || typeof deptCode !== 'string') {
-                    console.warn("Invalid departement code skipped:", deptCode);
+                // Normalize departement code using utils
+                const deptCode = normalizeDept(dept.departement);
+                if (
+                    !/^(0[1-9]|[1-8][0-9]|9[0-5]|2[AB]|97[1-6])$/.test(
+                        deptCode,
+                    )
+                ) {
+                    console.warn(
+                        "Invalid departement code skipped:",
+                        deptCode,
+                    );
                     return;
                 }
-                
                 const option = document.createElement("option");
                 option.value = deptCode;
                 const deptName = departmentNames[deptCode] || deptCode;
                 option.textContent = `${deptCode} - ${deptName}`;
                 departementSelect.appendChild(option);
-                console.log("Added department option:", option.textContent);
             });
-            
-            console.log("Total department options added:", departementSelect.options.length - 1);
         } catch (error) {
             resultsDiv.innerHTML = `<p>Erreur : ${error.message}</p>`;
             console.error("Erreur chargement départements:", error);
