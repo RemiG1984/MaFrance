@@ -516,20 +516,23 @@ export { CrimeGraphHandler };
 if (typeof window !== 'undefined') {
     document.addEventListener('DOMContentLoaded', () => {
         const crimeGraphHandler = CrimeGraphHandler();
-        
+
         // Set initial state from URL parameter
         const { labelState } = crimeGraphHandler.getUrlParams();
         if (labelState) {
             MetricsConfig.labelState = parseInt(labelState);
         }
-        
+
         // Initialize label toggle with correct state
         crimeGraphHandler.initLabelToggle();
-        
+
         // Update navigation links
         crimeGraphHandler.updateNavigationLinks();
-        
-        // Initialize charts with correct labels
-        crimeGraphHandler.initCrimeCharts();
+
+        // Only auto-initialize on the dedicated crime graph page
+        if (document.getElementById('crimeChartGrid')) {
+            // Initialize charts with correct labels
+            crimeGraphHandler.initCrimeCharts();
+        }
     });
 }
