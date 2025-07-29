@@ -323,7 +323,7 @@ import { spinner } from './spinner.js';
             }
 
             if (!mainData || mainData.length === 0) {
-                crimeChartGrid.innerHTML = "<p>Aucune donnée disponible pour cet emplacement.</p>";
+                crimeChartGrid.innerHTML = "<p>Aucune donnée disponible au niveau commune.</p>";
                 return;
             }
 
@@ -434,7 +434,7 @@ import { spinner } from './spinner.js';
                         <h2 class="text-2xl font-bold text-gray-800 mb-4">
                             Évolution des Prénoms
                         </h2>
-                        <p>Aucune donnée disponible pour cet emplacement.</p>
+                        <p>Aucune donnée disponible au niveau commune.</p>
                     `;
                 }
                 return;
@@ -642,7 +642,7 @@ import { spinner } from './spinner.js';
             }
 
             if (!data || data.length === 0) {
-                qpvContainer.innerHTML = "<p>Aucun QPV trouvé pour cette zone.</p>";
+                qpvContainer.innerHTML = "<p>Aucun QPV trouvé pour cette commune.</p>";
                 return;
             }
 
