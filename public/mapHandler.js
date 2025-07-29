@@ -1016,10 +1016,31 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
 
     initMap();
 
+    /**
+     * Resets the map to the initial France view, removing any commune layers
+     */
+    function resetToFranceView() {
+        if (communeGeoJsonLayer) {
+            map.removeLayer(communeGeoJsonLayer);
+            communeGeoJsonLayer = null;
+        }
+        geoJsonLayer.setStyle({ fillOpacity: 0.7, opacity: 1 });
+        currentDept = null;
+        map.setView([46.603354, 1.888334], 5);
+        // Clear cache when switching back to department level
+        clearQuantileCache();
+        // Update available metrics when switching back to department level
+        if (metricControl && metricControl.updateOptions) {
+            metricControl.updateOptions();
+        }
+        updateLegend();
+    }
+
     return {
         updateMap,
         centerOnDepartmentAndSelectCommune,
         showDepartmentPopup,
+        resetToFranceView,
         get currentMetric() {
             return currentMetric;
         },

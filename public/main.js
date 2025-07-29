@@ -104,9 +104,9 @@ import { spinner } from './spinner.js';
             showNamesGraph("country", "France");
             showQpvData("country", "France");
             
-            // Clear map selections
-            if (mapHandler && mapHandler.clearSelection) {
-                mapHandler.clearSelection();
+            // Restore map to initial France view (same as "Retour à la France" button)
+            if (mapHandler && mapHandler.resetToFranceView) {
+                mapHandler.resetToFranceView();
             }
             
             console.log("France level selected");
