@@ -1,4 +1,4 @@
-import { normalizeDept } from './utils.js';
+import { DepartmentNames } from './departmentNames.js';
 import { api, apiService } from './apiService.js';
 import { spinner } from './spinner.js';
 
@@ -20,41 +20,28 @@ function LocationHandler(
     resultsDiv,
     departmentNames,
 ) {
-    async function loadDepartements() {
-        const spinnerId = spinner.show(departementSelect.parentElement, 'Chargement des départements...');
+    function loadDepartements() {
         try {
             departementSelect.disabled = true;
             
-            const departements = await api.getDepartments();
-            console.log("Departments fetched:", departements);
+            console.log("Loading departments from static data");
             departementSelect.innerHTML =
                 '<option value="">-- Choisir un département --</option>';
-            departements.forEach((dept) => {
-                // Normalize departement code using utils
-                const deptCode = normalizeDept(dept.departement);
-                if (
-                    !/^(0[1-9]|[1-8][0-9]|9[0-5]|2[AB]|97[1-6])$/.test(
-                        deptCode,
-                    )
-                ) {
-                    console.warn(
-                        "Invalid departement code skipped:",
-                        deptCode,
-                    );
-                    return;
-                }
+            
+            // Use static department data directly
+            Object.entries(DepartmentNames).forEach(([deptCode, deptName]) => {
                 const option = document.createElement("option");
                 option.value = deptCode;
-                const deptName = departmentNames[deptCode] || deptCode;
                 option.textContent = `${deptCode} - ${deptName}`;
                 departementSelect.appendChild(option);
             });
+            
+            console.log("Departments loaded:", Object.keys(DepartmentNames).length);
         } catch (error) {
             resultsDiv.innerHTML = `<p>Erreur : ${error.message}</p>`;
             console.error("Erreur chargement départements:", error);
         } finally {
             departementSelect.disabled = false;
-            spinner.hide(spinnerId);
         }
     }
 
