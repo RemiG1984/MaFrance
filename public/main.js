@@ -83,6 +83,36 @@ import { spinner } from './spinner.js';
     window.isMapClickInProgress = false; // Flag to prevent circular reference
     let isCommuneSelectionInProgress = false; // Flag to prevent department graphs during commune selection
 
+    // France button functionality
+    const franceButton = document.getElementById('franceButton');
+    if (franceButton) {
+        franceButton.addEventListener('click', () => {
+            // Reset all selections
+            departementSelect.value = '';
+            communeInput.value = '';
+            currentLieu = "";
+            
+            // Clear other components
+            locationHandler.resetCommuneAndLieux();
+            articleHandler.clearArticles();
+            articleHandler.setFilter(null);
+            
+            // Show country-level data
+            scoreTableHandler.showCountryDetails();
+            executiveHandler.showCountryExecutive();
+            showCrimeGraphs("country", "France");
+            showNamesGraph("country", "France");
+            showQpvData("country", "France");
+            
+            // Clear map selections
+            if (mapHandler && mapHandler.clearSelection) {
+                mapHandler.clearSelection();
+            }
+            
+            console.log("France level selected");
+        });
+    }
+
     // Event listeners
     departementSelect.addEventListener("change", () => {
         const departement = departementSelect.value;
