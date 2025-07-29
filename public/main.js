@@ -427,7 +427,16 @@ import { spinner } from './spinner.js';
             }
 
             if (!data || data.length === 0) {
-                namesChartContainer.innerHTML = "<p>Aucune donnée disponible pour cet emplacement.</p>";
+                // Replace the entire chart container content with just the message
+                const namesGraphSection = document.getElementById('namesGraph');
+                if (namesGraphSection) {
+                    namesGraphSection.innerHTML = `
+                        <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                            Évolution des Prénoms
+                        </h2>
+                        <p>Aucune donnée disponible pour cet emplacement.</p>
+                    `;
+                }
                 return;
             }
 
