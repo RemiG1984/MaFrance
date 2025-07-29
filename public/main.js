@@ -358,8 +358,17 @@ import { spinner } from './spinner.js';
     // Function to show names graph based on selection
     async function showNamesGraph(type, code, dept = null, communeName = null) {
         try {
-            // Clear previous chart
-            namesChartContainer.innerHTML = '<canvas id="namesChart" style="max-height: 400px;"></canvas>';
+            if (!namesChartContainer) {
+                console.error('Names chart container not found');
+                return;
+            }
+
+            // Clear previous chart and create new canvas
+            namesChartContainer.innerHTML = '';
+            const canvas = document.createElement('canvas');
+            canvas.id = 'namesChart';
+            canvas.style.maxHeight = '400px';
+            namesChartContainer.appendChild(canvas);
             
             let data;
             let titleText;
@@ -381,10 +390,10 @@ import { spinner } from './spinner.js';
                 return;
             }
 
-            // Create the names chart using the names graph handler
-            const canvas = document.getElementById("namesChart");
-            if (!canvas) {
-                console.error('Canvas element with ID "namesChart" not found');
+            // Verify canvas was created properly
+            if (!canvas || !canvas.getContext) {
+                console.error('Canvas element not properly created');
+                namesChartContainer.innerHTML = "<p>Erreur lors de la création du graphique.</p>";
                 return;
             }
 
