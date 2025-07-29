@@ -478,14 +478,18 @@ export const MetricsConfig = {
                 labelToggleBtn.classList.add('active', stateName);
             }
             
-            // Update page title if applicable
-            if (document.title.includes("Ma France")) {
+            // Update page title if applicable (check for any of the France titles)
+            if (document.title.includes("Ma France") || 
+                document.title.includes("Ma France Inclusive") || 
+                document.title.includes("Où va ma France?")) {
                 document.title = this.getCurrentPageTitle();
             }
             
-            // Update header h1 if exists
+            // Update header h1 if exists (check for any of the France titles)
             const headerH1 = document.querySelector('h1');
-            if (headerH1 && headerH1.textContent.includes("Ma France")) {
+            if (headerH1 && (headerH1.textContent.includes("Ma France") || 
+                             headerH1.textContent.includes("Ma France Inclusive") || 
+                             headerH1.textContent.includes("Où va ma France?"))) {
                 headerH1.textContent = this.getCurrentPageTitle();
             }
         });
