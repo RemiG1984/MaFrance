@@ -414,6 +414,7 @@ export const MetricsConfig = {
     // Cycle between label states (0 -> 1 -> 2 -> 0)
     cycleLabelState() {
         this.labelState = (this.labelState + 1) % 3;
+        console.log("Label state cycled to:", this.labelState, "(" + this.getLabelStateName() + ")");
         // Dispatch event to notify components of the change
         window.dispatchEvent(
             new CustomEvent("metricsLabelsToggled", {
@@ -443,6 +444,7 @@ export const MetricsConfig = {
     // Get current toggle button label for main page
     getCurrentToggleButtonLabel() {
         const stateName = this.getLabelStateName();
+        console.log("getCurrentToggleButtonLabel: labelState =", this.labelState, "stateName =", stateName, "returning =", this.toggleButtonLabels[stateName]);
         return this.toggleButtonLabels[stateName];
     },
 
