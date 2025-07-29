@@ -87,9 +87,9 @@ function CrimeGraphHandler() {
      * Initializes multiple Chart.js instances for crime data visualization.
      */
     async function initCrimeCharts() {
-        const chartGrid = document.getElementById("chartGrid");
+        const chartGrid = document.getElementById("crimeChartGrid");
         if (!chartGrid) {
-            console.error('Chart grid element with ID "chartGrid" not found');
+            console.error('Chart grid element with ID "crimeChartGrid" not found');
             return;
         }
 
