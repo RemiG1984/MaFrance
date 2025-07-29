@@ -149,8 +149,8 @@ function QpvHandler() {
 // Export for ES6 modules
 export { QpvHandler };
 
-// Initialize when the script loads (for backward compatibility)
-if (typeof window !== 'undefined') {
+// Initialize when the script loads (only on the qpv.html page)
+if (typeof window !== 'undefined' && window.location.pathname.includes('qpv.html')) {
     const qpvHandler = QpvHandler();
     qpvHandler.init();
 }
