@@ -713,6 +713,33 @@
     }
 }
 
+/* France Button Styles */
+.france-button {
+    height: 42px;
+    font-size: 16px;
+    line-height: 1.5;
+    padding: 8px 16px;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    background-color: white;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.france-button:hover {
+    background-color: #f9fafb;
+    border-color: #9ca3af;
+}
+
+.france-button:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
 /* Location Selector Styles */
 .location-selector select,
 #articles select {
