@@ -30,42 +30,17 @@ function CrimeGraphHandler() {
      * Initialize label toggle functionality
      */
     function initLabelToggle() {
-        const labelToggleBtn = document.getElementById("labelToggleBtn");
-        if (!labelToggleBtn) return;
-
         // Set initial state from URL parameter
         const { labelState } = getUrlParams();
         if (labelState) {
             MetricsConfig.labelState = parseInt(labelState);
         }
 
-        // Set initial button text and style
-        const initialStateName = MetricsConfig.getLabelStateName();
-        labelToggleBtn.textContent = MetricsConfig.getCurrentToggleButtonLabel();
-
-        // Set initial button style
-        labelToggleBtn.classList.remove('active', 'alt1', 'alt2');
-        if (initialStateName !== 'standard') {
-            labelToggleBtn.classList.add('active');
-            labelToggleBtn.classList.add(initialStateName);
-        }
-
-        // Add click event listener
-        labelToggleBtn.addEventListener('click', () => {
-            MetricsConfig.cycleLabelState();
-
-            // Update button text and style based on state
-            const stateName = MetricsConfig.getLabelStateName();
-
-            labelToggleBtn.textContent = MetricsConfig.getCurrentToggleButtonLabel();
-
-            // Update button style
-            labelToggleBtn.classList.remove('active', 'alt1', 'alt2');
-            if (stateName !== 'standard') {
-                labelToggleBtn.classList.add('active');
-                labelToggleBtn.classList.add(stateName);
-            }
-
+        // Use centralized toggle button initialization
+        MetricsConfig.initializeToggleButton();
+        
+        // Listen for label state changes
+        window.addEventListener('metricsLabelsToggled', () => {
             // Update page title
             document.title = MetricsConfig.getCurrentPageTitle() + " - Graphique de Criminalité";
 

@@ -67,39 +67,14 @@ const RankingsHandler = (function () {
 
         // Initialize label toggle after URL params are processed
         function initializeLabelToggle() {
-            const labelToggleBtn = document.getElementById("labelToggleBtn");
-            if (labelToggleBtn) {
-                // Set initial button text and style based on current state
-                const initialStateName = MetricsConfig.getLabelStateName();
-                labelToggleBtn.textContent = MetricsConfig.getCurrentToggleButtonLabel();
-
-                // Set initial button style
-                labelToggleBtn.classList.remove('active', 'alt1', 'alt2');
-                if (initialStateName !== 'standard') {
-                    labelToggleBtn.classList.add('active');
-                    labelToggleBtn.classList.add(initialStateName);
-                }
-
-                labelToggleBtn.addEventListener('click', () => {
-                    MetricsConfig.cycleLabelState();
-
-                    // Update button text and style based on state
-                    const stateName = MetricsConfig.getLabelStateName();
-
-                    labelToggleBtn.textContent = MetricsConfig.getCurrentToggleButtonLabel();
-
-                    // Update button style
-                    labelToggleBtn.classList.remove('active', 'alt1', 'alt2');
-                    if (stateName !== 'standard') {
-                        labelToggleBtn.classList.add('active');
-                        labelToggleBtn.classList.add(stateName);
-                    }
-
-                    // Refresh metric options and update rankings
-                    populateMetricOptions();
-                    updateRankings();
-                });
-            }
+            // Use centralized toggle button initialization
+            MetricsConfig.initializeToggleButton();
+            
+            // Listen for label state changes
+            window.addEventListener('metricsLabelsToggled', () => {
+                populateMetricOptions();
+                updateRankings();
+            });
         }
 
         // Toggle department dropdown visibility based on scope

@@ -683,26 +683,13 @@ import { spinner } from './spinner.js';
         updateExternalLinksWithLabelState();
     }
 
-    // Label toggle functionality
-    if (labelToggleBtn) {
-        labelToggleBtn.textContent = MetricsConfig.getCurrentToggleButtonLabel();
-        labelToggleBtn.addEventListener('click', () => {
-            MetricsConfig.cycleLabelState();
-            const stateName = MetricsConfig.getLabelStateName();
-            
-            labelToggleBtn.textContent = MetricsConfig.getCurrentToggleButtonLabel();
-            labelToggleBtn.classList.remove('active', 'alt1', 'alt2');
-            if (stateName !== 'standard') {
-                labelToggleBtn.classList.add('active', stateName);
-            }
-            
-            document.title = MetricsConfig.getCurrentPageTitle();
-            const headerH1 = document.querySelector('h1');
-            if (headerH1) headerH1.textContent = MetricsConfig.getCurrentPageTitle();
-            
-            refreshMetricLabels();
-        });
-    }
+    // Initialize label toggle functionality (centralized to prevent multiple listeners)
+    MetricsConfig.initializeToggleButton();
+    
+    // Listen for label state changes from the centralized toggle
+    window.addEventListener('metricsLabelsToggled', () => {
+        refreshMetricLabels();
+    });
 
     function refreshMetricLabels() {
         const currentDept = departementSelect.value;

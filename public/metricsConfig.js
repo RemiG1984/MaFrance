@@ -414,7 +414,6 @@ export const MetricsConfig = {
     // Cycle between label states (0 -> 1 -> 2 -> 0)
     cycleLabelState() {
         this.labelState = (this.labelState + 1) % 3;
-        console.log("Label state cycled to:", this.labelState, "(" + this.getLabelStateName() + ")");
         // Dispatch event to notify components of the change
         window.dispatchEvent(
             new CustomEvent("metricsLabelsToggled", {
@@ -444,8 +443,52 @@ export const MetricsConfig = {
     // Get current toggle button label for main page
     getCurrentToggleButtonLabel() {
         const stateName = this.getLabelStateName();
-        console.log("getCurrentToggleButtonLabel: labelState =", this.labelState, "stateName =", stateName, "returning =", this.toggleButtonLabels[stateName]);
         return this.toggleButtonLabels[stateName];
+    },
+
+    // Initialize toggle button (prevents multiple event listeners)
+    initializeToggleButton() {
+        const labelToggleBtn = document.getElementById("labelToggleBtn");
+        if (!labelToggleBtn || labelToggleBtn.dataset.initialized) return;
+        
+        // Mark as initialized to prevent multiple event listeners
+        labelToggleBtn.dataset.initialized = "true";
+        
+        // Set initial button text and style
+        const initialStateName = this.getLabelStateName();
+        labelToggleBtn.textContent = this.getCurrentToggleButtonLabel();
+        
+        // Set initial button style
+        labelToggleBtn.classList.remove('active', 'alt1', 'alt2');
+        if (initialStateName !== 'standard') {
+            labelToggleBtn.classList.add('active', initialStateName);
+        }
+        
+        // Add single click event listener
+        labelToggleBtn.addEventListener('click', () => {
+            this.cycleLabelState();
+            
+            // Update button text and style
+            const stateName = this.getLabelStateName();
+            labelToggleBtn.textContent = this.getCurrentToggleButtonLabel();
+            
+            // Update button style
+            labelToggleBtn.classList.remove('active', 'alt1', 'alt2');
+            if (stateName !== 'standard') {
+                labelToggleBtn.classList.add('active', stateName);
+            }
+            
+            // Update page title if applicable
+            if (document.title.includes("Ma France")) {
+                document.title = this.getCurrentPageTitle();
+            }
+            
+            // Update header h1 if exists
+            const headerH1 = document.querySelector('h1');
+            if (headerH1 && headerH1.textContent.includes("Ma France")) {
+                headerH1.textContent = this.getCurrentPageTitle();
+            }
+        });
     },
 
     // Check if a metric is available at a specific geographic level
