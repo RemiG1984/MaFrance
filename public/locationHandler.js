@@ -28,8 +28,18 @@ function LocationHandler(
             departementSelect.innerHTML =
                 '<option value="">-- Choisir un département --</option>';
             
-            // Use static department data directly
-            Object.entries(DepartmentNames).forEach(([deptCode, deptName]) => {
+            // Use static department data directly with proper ordering
+            const sortedDepartments = Object.entries(DepartmentNames).sort(([a], [b]) => {
+                // Custom sort function for proper department code ordering
+                const parseCode = (code) => {
+                    if (code === '2A') return 20.1;
+                    if (code === '2B') return 20.2;
+                    return parseInt(code, 10);
+                };
+                return parseCode(a) - parseCode(b);
+            });
+            
+            sortedDepartments.forEach(([deptCode, deptName]) => {
                 const option = document.createElement("option");
                 option.value = deptCode;
                 option.textContent = `${deptCode} - ${deptName}`;
