@@ -288,7 +288,8 @@
 
 @media (max-width: 768px) {
     .chart-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
     }
 }
 
@@ -677,8 +678,12 @@
         gap: 5px;
     }
 
+    .chart-container {
+        padding: 10px;
+    }
+    
     .chart-container canvas {
-        height: 250px !important;
+        height: 200px !important;
     }
 
     .grid.md\:grid-cols-2 {
