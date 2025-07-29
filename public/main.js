@@ -582,17 +582,19 @@ import { spinner } from './spinner.js';
                 return;
             }
 
-            // Clear previous content
+            // Determine the data to fetch and title
+            if (type === "country") {
+                qpvContainer.innerHTML = "<p>Sélectionnez un département ou une commune pour voir les QPV.</p>";
+                return;
+            }
+
+            // Clear previous content and show loading
             qpvContainer.innerHTML = "<p>Chargement des données QPV...</p>";
 
             let data;
             let titleText;
 
-            // Determine the data to fetch and title
-            if (type === "country") {
-                qpvContainer.innerHTML = "<p>Sélectionnez un département ou une commune pour voir les QPV.</p>";
-                return;
-            } else if (type === "department") {
+            if (type === "department") {
                 data = await api.getQpvDepartment(code);
                 titleText = `${code} - ${departmentNames[code] || code}`;
             } else if (type === "commune") {
