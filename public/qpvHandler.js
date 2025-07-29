@@ -84,7 +84,7 @@ function QpvHandler() {
 
         const tableHtml = `
             <div class="data-box">
-                <div class="table-container">
+                <div class="table-container" style="max-height: 400px; overflow-y: auto;">
                     <table class="qpv-table">
                         <thead>
                             <tr class="score-header">
