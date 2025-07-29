@@ -529,8 +529,9 @@ if (typeof window !== 'undefined') {
         // Update navigation links
         crimeGraphHandler.updateNavigationLinks();
 
-        // Only auto-initialize on the dedicated crime graph page
-        if (document.getElementById('crimeChartGrid')) {
+        // Only auto-initialize on the dedicated crime graph page with valid URL parameters
+        const { type } = crimeGraphHandler.getUrlParams();
+        if (document.getElementById('crimeChartGrid') && type) {
             // Initialize charts with correct labels
             crimeGraphHandler.initCrimeCharts();
         }
