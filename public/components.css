@@ -607,10 +607,102 @@
     background-color: #0056b3;
 }
 
+/* Desktop tile ordering - place names graph and QPV in first column */
+@media (min-width: 1024px) {
+    .grid.lg\:grid-cols-2 > div:first-child {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .grid.lg\:grid-cols-2 > div:first-child > div:nth-child(1) { order: 1; } /* Location selectors */
+    .grid.lg\:grid-cols-2 > div:first-child > div:nth-child(2) { order: 2; } /* Map */
+    .grid.lg\:grid-cols-2 > div:first-child > div:nth-child(3) { order: 3; } /* Articles */
+    
+    .grid.lg\:grid-cols-2 > div:nth-child(2) {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .grid.lg\:grid-cols-2 > div:nth-child(2) > div:nth-child(1) { order: 1; } /* Results */
+    .grid.lg\:grid-cols-2 > div:nth-child(2) > div:nth-child(2) { order: 2; } /* Executive details */
+    .grid.lg\:grid-cols-2 > div:nth-child(2) > div:nth-child(3) { order: 3; } /* Crime graphs */
+    .grid.lg\:grid-cols-2 > div:nth-child(2) > div:nth-child(4) { order: 7; } /* Names graph - move to first column */
+    .grid.lg\:grid-cols-2 > div:nth-child(2) > div:nth-child(5) { order: 8; } /* QPV - move to first column */
+    .grid.lg\:grid-cols-2 > div:nth-child(2) > div:nth-child(6) { order: 4; } /* Links */
+    
+    /* Move names graph and QPV to first column */
+    .grid.lg\:grid-cols-2 > div:nth-child(2) > #namesGraph,
+    .grid.lg\:grid-cols-2 > div:nth-child(2) > #qpvData {
+        position: absolute;
+        left: 0;
+        width: calc(50% - 0.75rem);
+        position: static;
+    }
+    
+    .grid.lg\:grid-cols-2 > div:first-child {
+        position: relative;
+    }
+    
+    .grid.lg\:grid-cols-2 > div:first-child::after {
+        content: '';
+        order: 4;
+        flex: 1;
+    }
+}
+
+/* Alternative approach using CSS Grid areas */
+@media (min-width: 1024px) {
+    .grid.lg\:grid-cols-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-areas: 
+            "col1 col2";
+        gap: 1.5rem;
+    }
+    
+    .grid.lg\:grid-cols-2 > div:first-child {
+        grid-area: col1;
+        display: contents;
+    }
+    
+    .grid.lg\:grid-cols-2 > div:nth-child(2) {
+        grid-area: col2;
+        display: contents;
+    }
+    
+    /* First column items */
+    .grid.lg\:grid-cols-2 > div:first-child > div:nth-child(1) { grid-column: 1; grid-row: 1; }
+    .grid.lg\:grid-cols-2 > div:first-child > div:nth-child(2) { grid-column: 1; grid-row: 2; }
+    .grid.lg\:grid-cols-2 > div:first-child > div:nth-child(3) { grid-column: 1; grid-row: 3; }
+    
+    /* Move names graph and QPV to first column */
+    .grid.lg\:grid-cols-2 #namesGraph { grid-column: 1; grid-row: 4; }
+    .grid.lg\:grid-cols-2 #qpvData { grid-column: 1; grid-row: 5; }
+    
+    /* Second column items */
+    .grid.lg\:grid-cols-2 > div:nth-child(2) > div:nth-child(1) { grid-column: 2; grid-row: 1; }
+    .grid.lg\:grid-cols-2 > div:nth-child(2) > div:nth-child(2) { grid-column: 2; grid-row: 2; }
+    .grid.lg\:grid-cols-2 > div:nth-child(2) > div:nth-child(3) { grid-column: 2; grid-row: 3; }
+    .grid.lg\:grid-cols-2 > div:nth-child(2) > div:nth-child(6) { grid-column: 2; grid-row: 4; }
+}
+
 /* Mobile responsive adjustments */
 @media (max-width: 1024px) {
     .grid.lg\:grid-cols-2 {
         grid-template-columns: 1fr;
+        display: block;
+    }
+    
+    .grid.lg\:grid-cols-2 > div:first-child,
+    .grid.lg\:grid-cols-2 > div:nth-child(2) {
+        display: block;
+    }
+    
+    .grid.lg\:grid-cols-2 > div:first-child > div,
+    .grid.lg\:grid-cols-2 > div:nth-child(2) > div {
+        order: initial;
+        grid-column: initial;
+        grid-row: initial;
     }
 }
 
