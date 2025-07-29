@@ -5,6 +5,7 @@ import { ExecutiveHandler } from './executiveHandler.js';
 import { ArticleHandler } from './articleHandler.js';
 import { MapHandler } from './mapHandler.js';
 import { CrimeGraphHandler } from './crimeGraphHandler.js';
+import { NamesGraphHandler } from './namesGraphHandler.js';
 import { DepartmentNames } from './departmentNames.js';
 import { MetricsConfig } from './metricsConfig.js';
 import { api } from './apiService.js';
@@ -26,6 +27,8 @@ import { spinner } from './spinner.js';
     const mapDiv = document.getElementById('map');
     const crimeGraphsDiv = document.getElementById("crimeGraphs");
     const crimeChartGrid = document.getElementById("crimeChartGrid");
+    const namesGraphDiv = document.getElementById("namesGraph");
+    const namesChartContainer = document.getElementById("namesChartContainer");
     const labelToggleBtn = document.getElementById("labelToggleBtn");
 
     // Validate DOM elements
@@ -39,7 +42,9 @@ import { spinner } from './spinner.js';
         !articleListDiv ||
         !filterButtonsDiv ||
         !crimeGraphsDiv ||
-        !crimeChartGrid
+        !crimeChartGrid ||
+        !namesGraphDiv ||
+        !namesChartContainer
     ) {
         console.error("One or more DOM elements are missing");
         return;
@@ -64,6 +69,7 @@ import { spinner } from './spinner.js';
     const executiveHandler = ExecutiveHandler(executiveDiv, departmentNames);
     const mapHandler = MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames);
     const crimeGraphHandler = CrimeGraphHandler();
+    const namesGraphHandler = NamesGraphHandler();
 
     // Shared state
     let currentLieu = "";
@@ -87,6 +93,7 @@ import { spinner } from './spinner.js';
             // Only show crime graphs if this isn't from a commune selection
             if (!isCommuneSelectionInProgress) {
                 showCrimeGraphs("department", departement);
+                showNamesGraph("department", departement);
             }
             
             // Only show department popup if this isn't from a map click
@@ -107,6 +114,7 @@ import { spinner } from './spinner.js';
             scoreTableHandler.showCountryDetails();
             executiveHandler.showCountryExecutive();
             showCrimeGraphs("country", "France");
+            showNamesGraph("country", "France");
             articleHandler.clearArticles();
         }
     });
@@ -127,6 +135,7 @@ import { spinner } from './spinner.js';
                 scoreTableHandler.showDepartmentDetails(departement);
                 executiveHandler.showDepartmentExecutive(departement);
                 showCrimeGraphs("department", departement);
+                showNamesGraph("department", departement);
                 articleHandler.loadArticles(departement, "", "", locationHandler).then(() => {
                     articleHandler
                         .loadArticleCounts(departement)
@@ -142,6 +151,7 @@ import { spinner } from './spinner.js';
                 scoreTableHandler.showCountryDetails();
                 executiveHandler.showCountryExecutive();
                 showCrimeGraphs("country", "France");
+                showNamesGraph("country", "France");
                 articleHandler.clearArticles();
             }
         }
@@ -193,6 +203,7 @@ import { spinner } from './spinner.js';
                     scoreTableHandler.showCommuneDetails(cog);
                     executiveHandler.showCommuneExecutive(cog);
                     showCrimeGraphs("commune", cog, departement, selectedCommune);
+                    showNamesGraph("commune", cog, departement, selectedCommune);
                     locationHandler.loadLieux(departement, cog);
                     articleHandler.loadArticles(departement, cog, "", locationHandler).then(() => {
                         articleHandler.loadArticleCounts(departement, cog).then((counts) => {
@@ -344,6 +355,205 @@ import { spinner } from './spinner.js';
         }
     }
 
+    // Function to show names graph based on selection
+    async function showNamesGraph(type, code, dept = null, communeName = null) {
+        try {
+            // Clear previous chart
+            namesChartContainer.innerHTML = '<canvas id="namesChart" style="max-height: 400px;"></canvas>';
+            
+            let data;
+            let titleText;
+
+            // Determine the data to fetch and title
+            if (type === "country") {
+                data = await api.getCountryNamesHistory(code || "France");
+                titleText = "France";
+            } else if (type === "department") {
+                data = await api.getDepartmentNamesHistory(code);
+                titleText = `${code} - ${departmentNames[code] || code}`;
+            } else if (type === "commune") {
+                data = await api.getCommuneNamesHistory(code);
+                titleText = `${communeName} (${dept})`;
+            }
+
+            if (!data || data.length === 0) {
+                namesChartContainer.innerHTML = "<p>Aucune donnée disponible pour cet emplacement.</p>";
+                return;
+            }
+
+            // Create the names chart using the names graph handler
+            const canvas = document.getElementById("namesChart");
+            if (!canvas) {
+                console.error('Canvas element with ID "namesChart" not found');
+                return;
+            }
+
+            // Extract years and datasets
+            const years = data.map((row) => row.annais);
+            const categories = [
+                {
+                    key: "traditionnel_pct",
+                    label: "Prénoms français traditionnels",
+                    color: "#455a64",
+                    order: 2,
+                },
+                {
+                    key: "moderne_pct",
+                    label: "Prénoms français modernes",
+                    color: "#dc3545",
+                    order: 3,
+                },
+                {
+                    key: "europeen_pct",
+                    label: "Prénoms européens",
+                    color: "#007bff",
+                    order: 4,
+                },
+                {
+                    key: "invente_pct",
+                    label: "Prénoms inventés",
+                    color: "#17a2b8",
+                    order: 5,
+                },
+                {
+                    key: "musulman_pct",
+                    label: "Prénoms musulmans",
+                    color: "#28a745",
+                    order: 1,
+                },
+                {
+                    key: "africain_pct",
+                    label: "Prénoms africains",
+                    color: "#6c757d",
+                    order: 6,
+                },
+                {
+                    key: "asiatique_pct",
+                    label: "Prénoms asiatiques",
+                    color: "#ffc107",
+                    order: 7,
+                },
+            ];
+
+            const datasets = categories.map((category) => ({
+                label: category.label,
+                data: data.map((row) => row[category.key] || 0),
+                borderColor: category.color,
+                backgroundColor: category.color,
+                fill: false,
+                tension: 0.4,
+                pointRadius: 2,
+                pointHoverRadius: 5,
+                order: category.order,
+            }));
+
+            // Create the chart
+            new Chart(canvas, {
+                type: "line",
+                data: {
+                    labels: years,
+                    datasets: datasets,
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: "top",
+                            align: "start",
+                            labels: {
+                                font: {
+                                    family: "'Roboto', Arial, sans-serif",
+                                    size: 14,
+                                },
+                                color: "#343a40",
+                                boxWidth: 12,
+                                padding: 10,
+                            },
+                        },
+                        title: {
+                            display: true,
+                            text: `Évolution des prénoms de naissance (${titleText})`,
+                            font: {
+                                family: "'Roboto', Arial, sans-serif",
+                                size: 22,
+                                weight: "700",
+                            },
+                            color: "#343a40",
+                            padding: {
+                                top: 10,
+                                bottom: 20,
+                            },
+                        },
+                        tooltip: {
+                            backgroundColor: "#fff",
+                            titleColor: "#343a40",
+                            bodyColor: "#343a40",
+                            borderColor: "#dee2e6",
+                            borderWidth: 1,
+                            titleFont: {
+                                family: "'Roboto', Arial, sans-serif",
+                                size: 14,
+                            },
+                            bodyFont: {
+                                family: "'Roboto', Arial, sans-serif",
+                                size: 12,
+                            },
+                        },
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: "Année",
+                                font: {
+                                    family: "'Roboto', Arial, sans-serif",
+                                    size: 16,
+                                    weight: "600",
+                                },
+                                color: "#343a40",
+                            },
+                            ticks: {
+                                font: {
+                                    family: "'Roboto', Arial, sans-serif",
+                                    size: 12,
+                                },
+                                color: "#343a40",
+                            },
+                            grid: {
+                                color: "#ececec",
+                            },
+                        },
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: {
+                                display: false,
+                            },
+                            ticks: {
+                                font: {
+                                    family: "'Roboto', Arial, sans-serif",
+                                    size: 12,
+                                },
+                                color: "#343a40",
+                                callback: function (value) {
+                                    return value + "%";
+                                },
+                            },
+                            grid: {
+                                color: "#ececec",
+                            },
+                        },
+                    },
+                },
+            });
+
+        } catch (error) {
+            namesChartContainer.innerHTML = `<p>Erreur : ${error.message}</p>`;
+            console.error("Erreur lors de la création du graphique des prénoms:", error);
+        }
+    }
+
     // Initialize the application once
     function initializeApp() {
         console.log('Initializing application...');
@@ -353,6 +563,7 @@ import { spinner } from './spinner.js';
         scoreTableHandler.showCountryDetails();
         executiveHandler.showCountryExecutive();
         showCrimeGraphs("country", "France");
+        showNamesGraph("country", "France");
         locationHandler.loadDepartements();
         updateExternalLinksWithLabelState();
     }
@@ -388,14 +599,17 @@ import { spinner } from './spinner.js';
                     const cog = data[0].COG;
                     scoreTableHandler.showCommuneDetails(cog);
                     showCrimeGraphs("commune", cog, currentDept, currentCommune);
+                    showNamesGraph("commune", cog, currentDept, currentCommune);
                 }
             }).catch(console.error);
         } else if (currentDept) {
             scoreTableHandler.showDepartmentDetails(currentDept);
             showCrimeGraphs("department", currentDept);
+            showNamesGraph("department", currentDept);
         } else {
             scoreTableHandler.showCountryDetails();
             showCrimeGraphs("country", "France");
+            showNamesGraph("country", "France");
         }
 
         if (mapHandler?.updateMap) {
@@ -440,6 +654,7 @@ import { spinner } from './spinner.js';
                 scoreTableHandler.showCommuneDetails(cog);
                 executiveHandler.showCommuneExecutive(cog);
                 showCrimeGraphs("commune", cog, deptCode, communeName);
+                showNamesGraph("commune", cog, deptCode, communeName);
                 
                 // Load lieux and articles
                 if (deptCode) {
