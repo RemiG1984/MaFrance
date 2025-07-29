@@ -616,27 +616,6 @@
 }
 
 @media (max-width: 768px) {
-    /* Constrain all main containers to viewport width */
-    .container {
-        max-width: 100vw;
-        overflow-x: hidden;
-        box-sizing: border-box;
-    }
-    
-    /* Ensure grid containers don't overflow */
-    .grid {
-        max-width: 100%;
-        overflow-x: hidden;
-        box-sizing: border-box;
-    }
-    
-    /* Constrain all tile containers */
-    .bg-white {
-        max-width: 100%;
-        overflow-x: hidden;
-        box-sizing: border-box;
-    }
-    
     #tweakingBox {
         margin-top: 10px;
     }
