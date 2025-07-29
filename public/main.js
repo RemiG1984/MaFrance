@@ -69,6 +69,7 @@ import { spinner } from './spinner.js';
     let currentLieu = "";
     let allArticles = [];
     window.isMapClickInProgress = false; // Flag to prevent circular reference
+    let isCommuneSelectionInProgress = false; // Flag to prevent department graphs during commune selection
 
     // Event listeners
     departementSelect.addEventListener("change", () => {
@@ -82,7 +83,11 @@ import { spinner } from './spinner.js';
         if (departement) {
             scoreTableHandler.showDepartmentDetails(departement);
             executiveHandler.showDepartmentExecutive(departement);
-            showCrimeGraphs("department", departement);
+            
+            // Only show crime graphs if this isn't from a commune selection
+            if (!isCommuneSelectionInProgress) {
+                showCrimeGraphs("department", departement);
+            }
             
             // Only show department popup if this isn't from a map click
             if (mapHandler && mapHandler.showDepartmentPopup && !window.isMapClickInProgress) {
@@ -170,6 +175,7 @@ import { spinner } from './spinner.js';
         let departement = departementSelect.value;
 
         if (selectedCommune) {
+            isCommuneSelectionInProgress = true; // Set flag to prevent department graphs
             try {
                 const communeDept = locationHandler.getDepartmentForCommune(selectedCommune);
 
@@ -207,6 +213,8 @@ import { spinner } from './spinner.js';
                 resultsDiv.innerHTML = `<p>Erreur : ${error.message}</p>`;
                 executiveDiv.innerHTML = `<p>Erreur : ${error.message}</p>`;
                 console.error("Erreur lors de la recherche:", error);
+            } finally {
+                isCommuneSelectionInProgress = false; // Clear flag after commune selection
             }
         }
     });
