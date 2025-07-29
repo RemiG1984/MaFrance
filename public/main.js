@@ -91,24 +91,24 @@ import { spinner } from './spinner.js';
             departementSelect.value = '';
             communeInput.value = '';
             currentLieu = "";
-
+            
             // Clear other components
             locationHandler.resetCommuneAndLieux();
             articleHandler.clearArticles();
             articleHandler.setFilter(null);
-
+            
             // Show country-level data
             scoreTableHandler.showCountryDetails();
             executiveHandler.showCountryExecutive();
             showCrimeGraphs("country", "France");
             showNamesGraph("country", "France");
             showQpvData("country", "France");
-
+            
             // Restore map to initial France view (same as "Retour à la France" button)
             if (mapHandler && mapHandler.resetToFranceView) {
                 mapHandler.resetToFranceView();
             }
-
+            
             console.log("France level selected");
         });
     }
@@ -125,19 +125,19 @@ import { spinner } from './spinner.js';
         if (departement) {
             scoreTableHandler.showDepartmentDetails(departement);
             executiveHandler.showDepartmentExecutive(departement);
-
+            
             // Only show crime graphs if this isn't from a commune selection
             if (!isCommuneSelectionInProgress) {
                 showCrimeGraphs("department", departement);
                 showNamesGraph("department", departement);
                 showQpvData("department", departement);
             }
-
+            
             // Only show department popup if this isn't from a map click
             if (mapHandler && mapHandler.showDepartmentPopup && !window.isMapClickInProgress) {
                 mapHandler.showDepartmentPopup(departement);
             }
-
+            
             articleHandler.loadArticles(departement, "", "", locationHandler).then(() => {
                 articleHandler.loadArticleCounts(departement).then((counts) => {
                     articleHandler.renderFilterButtons(
@@ -202,7 +202,7 @@ import { spinner } from './spinner.js';
     // Helper function to get COG for a commune
     async function getCOGForCommune(selectedCommune, departement) {
         let cog = locationHandler.getCOGForCommune(selectedCommune);
-
+        
         if (!cog && departement) {
             const response = await fetch(
                 `/api/communes?dept=${encodeURIComponent(departement)}&q=${encodeURIComponent(selectedCommune)}`
@@ -300,7 +300,7 @@ import { spinner } from './spinner.js';
     async function showCrimeGraphs(type, code, dept = null, communeName = null) {
         try {
             crimeChartGrid.innerHTML = "";
-
+            
             let endpoint, params = {};
             let mainData = null, countryData = null, deptData = null;
             let titleText;
@@ -329,7 +329,7 @@ import { spinner } from './spinner.js';
 
             // Create charts using the crime graph handler
             const years = mainData.map((row) => row.annee);
-
+            
             // Define all available crime categories
             const categories = [
                 {
@@ -431,7 +431,7 @@ import { spinner } from './spinner.js';
             canvas.id = 'namesChart';
             canvas.style.maxHeight = '400px';
             namesChartContainer.appendChild(canvas);
-
+            
             let data;
             let titleText;
 
@@ -673,37 +673,13 @@ import { spinner } from './spinner.js';
         console.log('Initializing application...');
         communeInput.disabled = false;
         communeInput.placeholder = "Rechercher une commune...";
-
+        
         scoreTableHandler.showCountryDetails();
         executiveHandler.showCountryExecutive();
         showCrimeGraphs("country", "France");
         showNamesGraph("country", "France");
         showQpvData("country", "France");
         locationHandler.loadDepartements();
-
-        // Handle URL parameters for label state
-        const urlParams = new URLSearchParams(window.location.search);
-        const labelState = urlParams.get('labelState');
-        if (labelState) {
-            MetricsConfig.labelState = parseInt(labelState);
-        }
-
-        // Update page title based on current label state
-        document.title = MetricsConfig.getCurrentPageTitle();
-        const headerH1 = document.querySelector('h1');
-        if (headerH1) headerH1.textContent = MetricsConfig.getCurrentPageTitle();
-
-        // Initialize label toggle button state after URL params are processed
-        if (labelToggleBtn) {
-            const initialStateName = MetricsConfig.getLabelStateName();
-            labelToggleBtn.textContent = MetricsConfig.getCurrentToggleButtonLabel();
-
-            // Set initial button style
-            labelToggleBtn.classList.remove('active', 'alt1', 'alt2');
-            if (initialStateName !== 'standard') {
-                labelToggleBtn.classList.add('active', initialStateName);
-            }
-        }
         updateExternalLinksWithLabelState();
     }
 
@@ -713,17 +689,17 @@ import { spinner } from './spinner.js';
         labelToggleBtn.addEventListener('click', () => {
             MetricsConfig.cycleLabelState();
             const stateName = MetricsConfig.getLabelStateName();
-
+            
             labelToggleBtn.textContent = MetricsConfig.getCurrentToggleButtonLabel();
             labelToggleBtn.classList.remove('active', 'alt1', 'alt2');
             if (stateName !== 'standard') {
                 labelToggleBtn.classList.add('active', stateName);
             }
-
+            
             document.title = MetricsConfig.getCurrentPageTitle();
             const headerH1 = document.querySelector('h1');
             if (headerH1) headerH1.textContent = MetricsConfig.getCurrentPageTitle();
-
+            
             refreshMetricLabels();
         });
     }
@@ -782,23 +758,23 @@ import { spinner } from './spinner.js';
             if (communeDetails && communeDetails.commune) {
                 const communeName = communeDetails.commune;
                 const deptCode = communeDetails.departement;
-
+                
                 // Update department selector if different
                 if (deptCode && departementSelect.value !== deptCode) {
                     departementSelect.value = deptCode;
                     departementSelect.dispatchEvent(new Event('change'));
                 }
-
+                
                 // Update commune input
                 communeInput.value = communeName;
-
+                
                 // Show commune details
                 scoreTableHandler.showCommuneDetails(cog);
                 executiveHandler.showCommuneExecutive(cog);
                 showCrimeGraphs("commune", cog, deptCode, communeName);
                 showNamesGraph("commune", cog, deptCode, communeName);
                 showQpvData("commune", cog, deptCode, communeName);
-
+                
                 // Load lieux and articles
                 if (deptCode) {
                     locationHandler.loadLieux(deptCode, cog);
