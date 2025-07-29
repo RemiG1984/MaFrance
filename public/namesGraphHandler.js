@@ -244,8 +244,8 @@ function NamesGraphHandler() {
 // Export for ES6 modules
 export { NamesGraphHandler };
 
-// Initialize when the script loads (for backward compatibility)
-if (typeof window !== "undefined") {
+// Initialize when the script loads (only on the names_graph.html page)
+if (typeof window !== "undefined" && window.location.pathname.includes('names_graph.html')) {
     const namesGraphHandler = NamesGraphHandler();
     namesGraphHandler.initChart();
 }
