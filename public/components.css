@@ -625,30 +625,57 @@
         width: 100%;
     }
 
+    #results {
+        overflow-x: auto;
+        width: 100%;
+    }
+
     #results .score-table {
         font-size: 12px;
         min-width: 0;
         width: 100%;
+        table-layout: fixed;
     }
 
     #results .score-header th,
     #results .score-row td {
-        padding: 6px 8px;
+        padding: 6px 4px;
         font-size: 12px;
         white-space: normal;
         word-wrap: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto;
     }
 
-    #results .row-title,
-    #results .score-main,
+    #results .row-title {
+        font-size: 12px;
+        white-space: normal;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        width: 45%;
+        max-width: 45%;
+    }
+
+    #results .score-main {
+        font-size: 12px;
+        white-space: normal;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        width: 30%;
+        max-width: 30%;
+    }
+
     #results .score-compare {
         font-size: 12px;
         white-space: normal;
         word-wrap: break-word;
+        overflow-wrap: break-word;
+        width: 25%;
+        max-width: 25%;
     }
 
     #results .row-title.sub-row {
-        padding-left: 10px;
+        padding-left: 8px;
     }
 
     #namesChart {
