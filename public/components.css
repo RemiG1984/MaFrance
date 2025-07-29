@@ -715,18 +715,20 @@
 
 /* France Button Styles */
 .france-button {
-    height: 42px;
-    font-size: 16px;
-    line-height: 1.5;
-    padding: 8px 16px;
-    border: 1px solid #d1d5db;
-    border-radius: 0.375rem;
+    padding: 6px; /* Matches #departementSelect padding */
+    border: 1px solid #ccc; /* Matches #departementSelect border */
+    border-radius: 6px; /* Matches #departementSelect border-radius */
     background-color: white;
     color: #374151;
     cursor: pointer;
     transition: all 0.2s ease-in-out;
     text-align: left;
     white-space: nowrap;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    width: 100%; /* Full width on small screens */
+    margin: 8px 0; /* Matches #departementSelect margin */
 }
 
 .france-button:hover {
