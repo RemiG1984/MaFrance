@@ -399,6 +399,27 @@ import { spinner } from './spinner.js';
     // Function to show names graph based on selection
     async function showNamesGraph(type, code, dept = null, communeName = null) {
         try {
+            // Ensure the names graph section has the proper structure
+            const namesGraphSection = document.getElementById('namesGraph');
+            if (!namesGraphSection) {
+                console.error('Names graph section not found');
+                return;
+            }
+
+            // Restore proper structure if it was replaced with error message
+            let namesChartContainer = document.getElementById('namesChartContainer');
+            if (!namesChartContainer) {
+                namesGraphSection.innerHTML = `
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                        Évolution des Prénoms
+                    </h2>
+                    <div id="namesChartContainer" class="chart-container">
+                        <canvas id="namesChart" style="max-height: 400px;"></canvas>
+                    </div>
+                `;
+                namesChartContainer = document.getElementById('namesChartContainer');
+            }
+
             if (!namesChartContainer) {
                 console.error('Names chart container not found');
                 return;
@@ -427,16 +448,8 @@ import { spinner } from './spinner.js';
             }
 
             if (!data || data.length === 0) {
-                // Replace the entire chart container content with just the message
-                const namesGraphSection = document.getElementById('namesGraph');
-                if (namesGraphSection) {
-                    namesGraphSection.innerHTML = `
-                        <h2 class="text-2xl font-bold text-gray-800 mb-4">
-                            Évolution des Prénoms
-                        </h2>
-                        <p>Aucune donnée disponible au niveau commune.</p>
-                    `;
-                }
+                // Replace only the chart container content with the message
+                namesChartContainer.innerHTML = "<p>Aucune donnée disponible au niveau commune.</p>";
                 return;
             }
 
