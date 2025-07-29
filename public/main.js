@@ -6,6 +6,7 @@ import { ArticleHandler } from './articleHandler.js';
 import { MapHandler } from './mapHandler.js';
 import { CrimeGraphHandler } from './crimeGraphHandler.js';
 import { NamesGraphHandler } from './namesGraphHandler.js';
+import { QpvHandler } from './qpvHandler.js';
 import { DepartmentNames } from './departmentNames.js';
 import { MetricsConfig } from './metricsConfig.js';
 import { api } from './apiService.js';
@@ -29,6 +30,8 @@ import { spinner } from './spinner.js';
     const crimeChartGrid = document.getElementById("crimeChartGrid");
     const namesGraphDiv = document.getElementById("namesGraph");
     const namesChartContainer = document.getElementById("namesChartContainer");
+    const qpvDataDiv = document.getElementById("qpvData");
+    const qpvContainer = document.getElementById("qpvContainer");
     const labelToggleBtn = document.getElementById("labelToggleBtn");
 
     // Validate DOM elements
@@ -44,7 +47,9 @@ import { spinner } from './spinner.js';
         !crimeGraphsDiv ||
         !crimeChartGrid ||
         !namesGraphDiv ||
-        !namesChartContainer
+        !namesChartContainer ||
+        !qpvDataDiv ||
+        !qpvContainer
     ) {
         console.error("One or more DOM elements are missing");
         return;
@@ -70,6 +75,7 @@ import { spinner } from './spinner.js';
     const mapHandler = MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames);
     const crimeGraphHandler = CrimeGraphHandler();
     const namesGraphHandler = NamesGraphHandler();
+    const qpvHandler = QpvHandler();
 
     // Shared state
     let currentLieu = "";
@@ -94,6 +100,7 @@ import { spinner } from './spinner.js';
             if (!isCommuneSelectionInProgress) {
                 showCrimeGraphs("department", departement);
                 showNamesGraph("department", departement);
+                showQpvData("department", departement);
             }
             
             // Only show department popup if this isn't from a map click
@@ -115,6 +122,7 @@ import { spinner } from './spinner.js';
             executiveHandler.showCountryExecutive();
             showCrimeGraphs("country", "France");
             showNamesGraph("country", "France");
+            showQpvData("country", "France");
             articleHandler.clearArticles();
         }
     });
@@ -136,6 +144,7 @@ import { spinner } from './spinner.js';
                 executiveHandler.showDepartmentExecutive(departement);
                 showCrimeGraphs("department", departement);
                 showNamesGraph("department", departement);
+                showQpvData("department", departement);
                 articleHandler.loadArticles(departement, "", "", locationHandler).then(() => {
                     articleHandler
                         .loadArticleCounts(departement)
@@ -152,6 +161,7 @@ import { spinner } from './spinner.js';
                 executiveHandler.showCountryExecutive();
                 showCrimeGraphs("country", "France");
                 showNamesGraph("country", "France");
+                showQpvData("country", "France");
                 articleHandler.clearArticles();
             }
         }
@@ -204,6 +214,7 @@ import { spinner } from './spinner.js';
                     executiveHandler.showCommuneExecutive(cog);
                     showCrimeGraphs("commune", cog, departement, selectedCommune);
                     showNamesGraph("commune", cog, departement, selectedCommune);
+                    showQpvData("commune", cog, departement, selectedCommune);
                     locationHandler.loadLieux(departement, cog);
                     articleHandler.loadArticles(departement, cog, "", locationHandler).then(() => {
                         articleHandler.loadArticleCounts(departement, cog).then((counts) => {
@@ -563,6 +574,46 @@ import { spinner } from './spinner.js';
         }
     }
 
+    // Function to show QPV data based on selection
+    async function showQpvData(type, code, dept = null, communeName = null) {
+        try {
+            if (!qpvContainer) {
+                console.error('QPV container not found');
+                return;
+            }
+
+            // Clear previous content
+            qpvContainer.innerHTML = "<p>Chargement des données QPV...</p>";
+
+            let data;
+            let titleText;
+
+            // Determine the data to fetch and title
+            if (type === "country") {
+                qpvContainer.innerHTML = "<p>Sélectionnez un département ou une commune pour voir les QPV.</p>";
+                return;
+            } else if (type === "department") {
+                data = await api.getQpvDepartment(code);
+                titleText = `${code} - ${departmentNames[code] || code}`;
+            } else if (type === "commune") {
+                data = await api.getQpvCommune(code);
+                titleText = `${communeName} (${dept})`;
+            }
+
+            if (!data || data.length === 0) {
+                qpvContainer.innerHTML = "<p>Aucun QPV trouvé pour cette zone.</p>";
+                return;
+            }
+
+            // Use QPV handler to render the table
+            qpvHandler.renderQpvTable(data, qpvContainer);
+
+        } catch (error) {
+            qpvContainer.innerHTML = `<p>Erreur : ${error.message}</p>`;
+            console.error("Erreur lors de la création du tableau QPV:", error);
+        }
+    }
+
     // Initialize the application once
     function initializeApp() {
         console.log('Initializing application...');
@@ -573,6 +624,7 @@ import { spinner } from './spinner.js';
         executiveHandler.showCountryExecutive();
         showCrimeGraphs("country", "France");
         showNamesGraph("country", "France");
+        showQpvData("country", "France");
         locationHandler.loadDepartements();
         updateExternalLinksWithLabelState();
     }
@@ -609,16 +661,19 @@ import { spinner } from './spinner.js';
                     scoreTableHandler.showCommuneDetails(cog);
                     showCrimeGraphs("commune", cog, currentDept, currentCommune);
                     showNamesGraph("commune", cog, currentDept, currentCommune);
+                    showQpvData("commune", cog, currentDept, currentCommune);
                 }
             }).catch(console.error);
         } else if (currentDept) {
             scoreTableHandler.showDepartmentDetails(currentDept);
             showCrimeGraphs("department", currentDept);
             showNamesGraph("department", currentDept);
+            showQpvData("department", currentDept);
         } else {
             scoreTableHandler.showCountryDetails();
             showCrimeGraphs("country", "France");
             showNamesGraph("country", "France");
+            showQpvData("country", "France");
         }
 
         if (mapHandler?.updateMap) {
@@ -664,6 +719,7 @@ import { spinner } from './spinner.js';
                 executiveHandler.showCommuneExecutive(cog);
                 showCrimeGraphs("commune", cog, deptCode, communeName);
                 showNamesGraph("commune", cog, deptCode, communeName);
+                showQpvData("commune", cog, deptCode, communeName);
                 
                 // Load lieux and articles
                 if (deptCode) {

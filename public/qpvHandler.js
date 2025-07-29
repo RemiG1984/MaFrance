@@ -77,9 +77,10 @@ function QpvHandler() {
     /**
      * Renders QPV data table.
      * @param {Array} qpvData - Array of QPV data objects
+     * @param {HTMLElement} container - Container element to render the table in (optional)
      */
-    function renderQpvTable(qpvData) {
-        const resultsDiv = document.getElementById("results");
+    function renderQpvTable(qpvData, container = null) {
+        const resultsDiv = container || document.getElementById("results");
 
         const tableHtml = `
             <div class="data-box">
