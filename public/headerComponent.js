@@ -17,6 +17,7 @@ export class HeaderComponent {
         this.highlightActivePage();
         this.initializeVersionDropdown();
         this.updatePageTitle();
+        this.updateVersionDisplay();
     }
 
     /**
@@ -211,6 +212,18 @@ export class HeaderComponent {
             targetElement.innerHTML = this.getHeaderHTML();
             this.init();
             this.loadTwitterWidget();
+        }
+    }
+
+    /**
+     * Update version display based on current state
+     */
+    updateVersionDisplay() {
+        if (typeof window !== 'undefined' && window.MetricsConfig) {
+            const versionText = document.querySelector('.version-text');
+            if (versionText) {
+                versionText.textContent = window.MetricsConfig.getCurrentVersionLabel();
+            }
         }
     }
 

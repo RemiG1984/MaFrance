@@ -22,7 +22,7 @@ export const MetricsConfig = {
     },
 
     // Label state: 0 = standard, 1 = alt1, 2 = alt2
-    labelState: 0,
+    labelState: parseInt(localStorage.getItem('metricsLabelState')) || 0,
 
     // All available metrics with their properties
     metrics: [
@@ -414,6 +414,8 @@ export const MetricsConfig = {
     // Cycle between label states (0 -> 1 -> 2 -> 0)
     cycleLabelState() {
         this.labelState = (this.labelState + 1) % 3;
+        // Save to localStorage
+        localStorage.setItem('metricsLabelState', this.labelState.toString());
         // Dispatch event to notify components of the change
         window.dispatchEvent(
             new CustomEvent("metricsLabelsToggled", {
@@ -487,6 +489,8 @@ export const MetricsConfig = {
                 
                 // Set label state based on clicked option
                 this.labelState = index;
+                // Save to localStorage
+                localStorage.setItem('metricsLabelState', this.labelState.toString());
                 
                 // Update version text
                 const stateName = this.getLabelStateName();
