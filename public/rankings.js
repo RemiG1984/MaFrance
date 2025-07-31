@@ -14,7 +14,7 @@ const RankingsHandler = (function () {
     const departmentNames = DepartmentNames;
 
     return function (scopeSelect, departementSelect, metricSelect, resultsDiv) {
-        // Populate existing tweaking box (label toggle button is already in HTML)
+        // Populate existing tweaking box
         const tweakingBox = document.getElementById("tweakingBox");
         tweakingBox.innerHTML = `
             <button class="tweaking-toggle">Paramètres</button>
@@ -45,9 +45,6 @@ const RankingsHandler = (function () {
                     <button id="applyFilters">Appliquer</button>
                 </div>
             </div>
-            <button id="labelToggleBtn" class="label-toggle-btn" title="Basculer entre les libellés standards et alternatifs">
-                🔄 Libellés alternatifs
-            </button>
         `;
 
         // Get tweaking input elements
@@ -65,10 +62,10 @@ const RankingsHandler = (function () {
             tweakingBoxContent.classList.toggle("active");
         });
 
-        // Initialize label toggle after URL params are processed
-        function initializeLabelToggle() {
-            // Use centralized toggle button initialization
-            MetricsConfig.initializeToggleButton();
+        // Initialize version dropdown after URL params are processed
+        function initializeVersionDropdown() {
+            // Use centralized version dropdown initialization
+            MetricsConfig.initializeVersionDropdown();
             
             // Listen for label state changes
             window.addEventListener('metricsLabelsToggled', () => {
@@ -483,9 +480,9 @@ const RankingsHandler = (function () {
         toggleDepartementVisibility();
         populateMetricOptions();
 
-        // Initialize label toggle after all DOM elements are created
+        // Initialize version dropdown after all DOM elements are created
         setTimeout(() => {
-            initializeLabelToggle();
+            initializeVersionDropdown();
         }, 0);
 
         updateRankings();
@@ -513,7 +510,7 @@ const RankingsHandler = (function () {
             loadDepartements,
             updateRankings,
             populateMetricOptions,
-            initializeLabelToggle,
+            initializeVersionDropdown,
         };
     };
 })();
@@ -565,9 +562,9 @@ const RankingsHandler = (function () {
             MetricsConfig.labelState = parseInt(labelState);
         }
 
-        // Initialize label toggle after URL params are processed
-        if (rankingsHandler && typeof rankingsHandler.initializeLabelToggle === 'function') {
-            rankingsHandler.initializeLabelToggle();
+        // Initialize version dropdown after URL params are processed
+        if (rankingsHandler && typeof rankingsHandler.initializeVersionDropdown === 'function') {
+            rankingsHandler.initializeVersionDropdown();
         }
 
         // Refresh metric options with updated labels after state is set
