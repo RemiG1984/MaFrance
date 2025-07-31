@@ -94,8 +94,10 @@ export class HeaderComponent {
 
             // Close menu when clicking outside
             document.addEventListener('click', (e) => {
-                // Only close if clicking outside both the menu toggle and the entire nav menu
-                if (!menuToggle.contains(e.target) && !navMenu.contains(e.target)) {
+                // Don't close if clicking on menu toggle, nav menu, or any version dropdown elements
+                const isVersionDropdownClick = e.target.closest('.version-dropdown');
+                
+                if (!menuToggle.contains(e.target) && !navMenu.contains(e.target) && !isVersionDropdownClick) {
                     menuToggle.classList.remove('active');
                     navMenu.classList.remove('active');
                 }
