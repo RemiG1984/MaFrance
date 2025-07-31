@@ -470,6 +470,7 @@ export const MetricsConfig = {
         versionToggle.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
+            e.stopImmediatePropagation(); // Prevent any other listeners from running
             versionMenu.classList.toggle('active');
         });
         
@@ -486,6 +487,7 @@ export const MetricsConfig = {
             option.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
+                e.stopImmediatePropagation(); // Prevent any other listeners from running
                 
                 // Set label state based on clicked option
                 this.labelState = index;
