@@ -96,24 +96,24 @@ window.MetricsConfig = MetricsConfig;
             departementSelect.value = '';
             communeInput.value = '';
             currentLieu = "";
-            
+
             // Clear other components
             locationHandler.resetCommuneAndLieux();
             articleHandler.clearArticles();
             articleHandler.setFilter(null);
-            
+
             // Show country-level data
             scoreTableHandler.showCountryDetails();
             executiveHandler.showCountryExecutive();
             showCrimeGraphs("country", "France");
             showNamesGraph("country", "France");
             showQpvData("country", "France");
-            
+
             // Restore map to initial France view (same as "Retour à la France" button)
             if (mapHandler && mapHandler.resetToFranceView) {
                 mapHandler.resetToFranceView();
             }
-            
+
             console.log("France level selected");
         });
     }
@@ -130,19 +130,19 @@ window.MetricsConfig = MetricsConfig;
         if (departement) {
             scoreTableHandler.showDepartmentDetails(departement);
             executiveHandler.showDepartmentExecutive(departement);
-            
+
             // Only show crime graphs if this isn't from a commune selection
             if (!isCommuneSelectionInProgress) {
                 showCrimeGraphs("department", departement);
                 showNamesGraph("department", departement);
                 showQpvData("department", departement);
             }
-            
+
             // Only show department popup if this isn't from a map click
             if (mapHandler && mapHandler.showDepartmentPopup && !window.isMapClickInProgress) {
                 mapHandler.showDepartmentPopup(departement);
             }
-            
+
             articleHandler.loadArticles(departement, "", "", locationHandler).then(() => {
                 articleHandler.loadArticleCounts(departement).then((counts) => {
                     articleHandler.renderFilterButtons(
@@ -207,7 +207,7 @@ window.MetricsConfig = MetricsConfig;
     // Helper function to get COG for a commune
     async function getCOGForCommune(selectedCommune, departement) {
         let cog = locationHandler.getCOGForCommune(selectedCommune);
-        
+
         if (!cog && departement) {
             const response = await fetch(
                 `/api/communes?dept=${encodeURIComponent(departement)}&q=${encodeURIComponent(selectedCommune)}`
@@ -305,7 +305,7 @@ window.MetricsConfig = MetricsConfig;
     async function showCrimeGraphs(type, code, dept = null, communeName = null) {
         try {
             crimeChartGrid.innerHTML = "";
-            
+
             let endpoint, params = {};
             let mainData = null, countryData = null, deptData = null;
             let titleText;
@@ -334,7 +334,7 @@ window.MetricsConfig = MetricsConfig;
 
             // Create charts using the crime graph handler
             const years = mainData.map((row) => row.annee);
-            
+
             // Define all available crime categories
             const categories = [
                 {
@@ -436,7 +436,7 @@ window.MetricsConfig = MetricsConfig;
             canvas.id = 'namesChart';
             canvas.style.maxHeight = '400px';
             namesChartContainer.appendChild(canvas);
-            
+
             let data;
             let titleText;
 
@@ -690,7 +690,7 @@ window.MetricsConfig = MetricsConfig;
 
     // Initialize version dropdown functionality (centralized to prevent multiple listeners)
     MetricsConfig.initializeVersionDropdown();
-    
+
     // Listen for label state changes from the centralized toggle
     window.addEventListener('metricsLabelsToggled', () => {
         refreshMetricLabels();
@@ -750,29 +750,29 @@ window.MetricsConfig = MetricsConfig;
             if (communeDetails && communeDetails.commune) {
                 const communeName = communeDetails.commune;
                 const deptCode = communeDetails.departement;
-                
+
                 // Update department selector if different
                 if (deptCode && departementSelect.value !== deptCode) {
                     departementSelect.value = deptCode;
                     departementSelect.dispatchEvent(new Event('change'));
                 }
-                
+
                 // Update commune input
                 communeInput.value = communeName;
-                
+
                 // Show commune details
                 scoreTableHandler.showCommuneDetails(cog);
                 executiveHandler.showCommuneExecutive(cog);
                 showCrimeGraphs("commune", cog, deptCode, communeName);
                 showNamesGraph("commune", cog, deptCode, communeName);
                 showQpvData("commune", cog, deptCode, communeName);
-                
+
                 // Load lieux and articles
                 if (deptCode) {
                     locationHandler.loadLieux(deptCode, cog);
                     articleHandler.loadArticles(deptCode, cog, "", locationHandler).then(() => {
                         articleHandler.loadArticleCounts(deptCode, cog).then((counts) => {
-                            articleHandler.renderFilterButtons(counts, allArticles, currentLieu);
+                            articleHandler.renderFilterButtons(counts, window.allArticles, currentLieu);
                         });
                     });
                 }
