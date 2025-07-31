@@ -209,12 +209,16 @@ function LocationHandler(
             });
             console.log("=== loadLieux SUCCESS ===");
             
-            // Force a small delay to ensure DOM is fully updated
+            // Force DOM update and verify it's complete
             return new Promise(resolve => {
-                setTimeout(() => {
-                    console.log("✓ loadLieux DOM update confirmed");
-                    resolve();
-                }, 5);
+                // Use requestAnimationFrame to ensure DOM has been painted
+                requestAnimationFrame(() => {
+                    setTimeout(() => {
+                        console.log("✓ loadLieux DOM update confirmed");
+                        console.log("Final verification - lieuxSelect options:", lieuxSelect.options.length);
+                        resolve();
+                    }, 10);
+                });
             });
         } catch (error) {
             console.error("=== loadLieux ERROR ===");

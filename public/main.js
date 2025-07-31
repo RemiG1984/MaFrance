@@ -156,11 +156,12 @@ window.MetricsConfig = MetricsConfig;
                     countsType: typeof counts
                 });
                 console.log("Rendering filter buttons for department...");
-                // Use setTimeout to ensure DOM is ready and lieux selector is properly hidden
+                // Ensure DOM is ready before rendering filter buttons
                 setTimeout(() => {
+                    console.log("=== DEPARTMENT SELECTION: About to render filter buttons ===");
                     articleHandler.renderFilterButtons(counts, articles, currentLieu);
                     console.log("=== DEPARTMENT SELECTION: Filter buttons render completed ===");
-                }, 0);
+                }, 5);
             }).catch((error) => {
                 console.error("=== DEPARTMENT SELECTION: ERROR in parallel loading ===");
                 console.error("Error details:", error);
@@ -290,11 +291,23 @@ window.MetricsConfig = MetricsConfig;
                             currentLieu 
                         });
                         
-                        // Use setTimeout to ensure DOM updates from loadLieux are complete
+                        // Wait for DOM to be fully updated before rendering filter buttons
                         setTimeout(() => {
-                            articleHandler.renderFilterButtons(counts, articles, currentLieu);
-                            console.log("=== COMMUNE SELECTION: Filter buttons render completed ===");
-                        }, 10);
+                            // Verify lieux are actually loaded in DOM before proceeding
+                            const lieuxSelect = document.getElementById('lieuxSelect');
+                            if (lieuxSelect && lieuxSelect.options.length > 1) {
+                                console.log("✓ DOM verified: lieuxSelect has", lieuxSelect.options.length, "options");
+                                articleHandler.renderFilterButtons(counts, articles, currentLieu);
+                                console.log("=== COMMUNE SELECTION: Filter buttons render completed ===");
+                            } else {
+                                console.log("⚠️ DOM not ready, retrying...");
+                                // Retry after a longer delay if DOM isn't ready
+                                setTimeout(() => {
+                                    articleHandler.renderFilterButtons(counts, articles, currentLieu);
+                                    console.log("=== COMMUNE SELECTION: Filter buttons render completed (retry) ===");
+                                }, 50);
+                            }
+                        }, 25);
                     }).catch((error) => {
                         console.error("=== COMMUNE SELECTION: ERROR in loading sequence ===");
                         console.error("Error details:", error);

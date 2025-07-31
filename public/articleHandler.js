@@ -191,10 +191,14 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
                 console.log("✓ Showing lieux selector at commune level");
                 console.log("LieuxSelect current options count:", lieuxSelect.options.length);
                 console.log("LieuxSelect innerHTML length:", lieuxSelect.innerHTML.length);
+                console.log("LieuxSelect sample content:", lieuxSelect.innerHTML.substring(0, 100) + "...");
                 
-                // Preserve existing options - don't clear if they're already loaded
+                // Check if lieux are actually loaded
                 if (lieuxSelect.options.length <= 1) {
-                    console.log("⚠️ LieuxSelect has no options loaded yet - this may be a timing issue");
+                    console.warn("⚠️ LieuxSelect has only default option - timing issue detected");
+                    console.warn("This suggests renderFilterButtons was called before lieux finished loading");
+                } else {
+                    console.log("✓ LieuxSelect properly populated with", lieuxSelect.options.length, "options");
                 }
             } else {
                 lieuxSelect.style.display = 'none';
