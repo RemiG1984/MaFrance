@@ -969,7 +969,7 @@
 /* Responsive Styles */
 @media (max-width: 768px) {
     .nav-menu {
-        display: none;
+        display: none !important;
         position: absolute;
         top: 100%;
         left: 0;
@@ -978,10 +978,11 @@
         flex-direction: column;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         padding: 15px 0;
+        z-index: 1001;
     }
 
     .nav-menu.active {
-        display: flex;
+        display: flex !important;
     }
 
     .nav-menu li {
