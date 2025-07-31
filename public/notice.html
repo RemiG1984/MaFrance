@@ -66,137 +66,181 @@
         <link rel="stylesheet" href="base.css" />
         <link rel="stylesheet" href="components.css" />
     </head>
-    <body>
-        <h1>Explications des termes et de la logique</h1>
-        <div
-            id="explanations"
-            style="margin: 30px auto; max-width: 800px; text-align: left"
-        >
-            <h2>Site en béta ouverte</h2>
-            <p>
-                Le site est en béta ouverte. Il est possible que des bugs ou
-                erreurs soient présents. Des fonctions et données
-                supplémentaires sont ajoutées régulièrement.
-            </p>
+    <body class="min-h-screen bg-gray-50">
+        <header class="site-header bg-white shadow">
+            <div
+                class="header-content container mx-auto px-4 flex justify-between items-center py-4"
+            >
+                <div class="branding flex items-center gap-4">
+                    <h1 class="text-3xl font-bold text-gray-800">Ma France: état des lieux</h1>
+                </div>
+                <nav class="site-nav flex items-center gap-4">
+                    <button class="menu-toggle" aria-label="Toggle menu">
+                        <span class="hamburger"></span>
+                    </button>
+                    <ul class="nav-menu flex gap-4">
+                        <li>
+                            <a href="index.html" class="nav-link">Accueil</a>
+                        </li>
+                        <li>
+                            <a href="rankings.html" class="nav-link">Classements</a>
+                        </li>
+                        <li>
+                            <a href="notice.html" class="nav-link active">Méthodologie</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+        <div class="container mx-auto px-4 py-6">
+            <div class="bg-white p-8 rounded-lg shadow max-w-4xl mx-auto">
+                <h1 class="text-3xl font-bold text-gray-800 mb-6">Explications des termes et de la logique</h1>
+                <div
+                    id="explanations"
+                    class="prose prose-lg max-w-none"
+                >
+            <h2 class="text-2xl font-semibold text-gray-800 mt-8 mb-4">Site en béta ouverte</h2>
+                    <p class="text-gray-700 mb-6">
+                        Le site est en béta ouverte. Il est possible que des bugs ou
+                        erreurs soient présents. Des fonctions et données
+                        supplémentaires sont ajoutées régulièrement.
+                    </p>
 
-            <h2>Insécurité</h2>
-            <p>
-                Les données de l'insécurité sont issues de la base SSMSI du
-                Ministère de l'Intérieur, mise à jour pour 2024.
-                <a
-                    href="https://www.data.gouv.fr/fr/datasets/bases-statistiques-communale-departementale-et-regionale-de-la-delinquance-enregistree-par-la-police-et-la-gendarmerie-nationales/"
-                    target="_blank"
-                    >Lien vers la source</a
-                >.
-            </p>
-            <p>
-                Pour les petites communes, certaines données sont anonymisées si
-                moins de 5 faits ont été enregistrés pendant 3 années
-                successives. Dans ce cas, le taux moyen dans le département par
-                classe de commune est utilisé. Si la valeur est à 0, c'est qu'il
-                n'y a pas eu de faits de ce type. For the official data mapping,
-                consider https://ssmsi.shinyapps.io/donneesterritoriales/
-            </p>
+                    <h2 class="text-2xl font-semibold text-gray-800 mt-8 mb-4">Insécurité</h2>
+            <p class="text-gray-700 mb-4">
+                        Les données de l'insécurité sont issues de la base SSMSI du
+                        Ministère de l'Intérieur, mise à jour pour 2024.
+                        <a
+                            href="https://www.data.gouv.fr/fr/datasets/bases-statistiques-communale-departementale-et-regionale-de-la-delinquance-enregistree-par-la-police-et-la-gendarmerie-nationales/"
+                            target="_blank"
+                            class="text-blue-600 hover:text-blue-800 underline"
+                            >Lien vers la source</a
+                        >.
+                    </p>
+                    <p class="text-gray-700 mb-6">
+                        Pour les petites communes, certaines données sont anonymisées si
+                        moins de 5 faits ont été enregistrés pendant 3 années
+                        successives. Dans ce cas, le taux moyen dans le département par
+                        classe de commune est utilisé. Si la valeur est à 0, c'est qu'il
+                        n'y a pas eu de faits de ce type. For the official data mapping,
+                        consider https://ssmsi.shinyapps.io/donneesterritoriales/
+                    </p>
 
-            <h2>Lieux de culte musulmans</h2>
-            <p>
-                Les données ont été récupérés de divers sites internet. Il est
-                possible que les données soient incomplètes, obsolètes ou
-                erronées.
-            </p>
+                    <h2 class="text-2xl font-semibold text-gray-800 mt-8 mb-4">Lieux de culte musulmans</h2>
+                    <p class="text-gray-700 mb-6">
+                        Les données ont été récupérés de divers sites internet. Il est
+                        possible que les données soient incomplètes, obsolètes ou
+                        erronées.
+                    </p>
 
-            <h2>Quartiers Prioritaires de la Ville</h2>
-            <p>
-                Les données sont issues de la base publique et du site internet
-                officiel https://sig.ville.gouv.fr/ Le taux de logements sociaux
-                au sein de chaque QPV a été recalculé.
-            </p>
+                    <h2 class="text-2xl font-semibold text-gray-800 mt-8 mb-4">Quartiers Prioritaires de la Ville</h2>
+                    <p class="text-gray-700 mb-6">
+                        Les données sont issues de la base publique et du site internet
+                        officiel https://sig.ville.gouv.fr/ Le taux de logements sociaux
+                        au sein de chaque QPV a été recalculé.
+                    </p>
 
-            <h2>Prénoms de naissance</h2>
-            <p>
-                Les données de prénoms sont issus des bases publiques
-                disponibles sur data.gouv.fr
-            </p>
-            <p>
-                L'ensemble des prénoms de naissances a été catégorisé. Il s'agit
-                d'une approche subjective aidée par intelligence artificielle.
-            </p>
+                    <h2 class="text-2xl font-semibold text-gray-800 mt-8 mb-4">Prénoms de naissance</h2>
+                    <p class="text-gray-700 mb-4">
+                        Les données de prénoms sont issus des bases publiques
+                        disponibles sur data.gouv.fr
+                    </p>
+                    <p class="text-gray-700 mb-6">
+                        L'ensemble des prénoms de naissances a été catégorisé. Il s'agit
+                        d'une approche subjective aidée par intelligence artificielle.
+                    </p>
 
-            <h2>Catégories d'articles</h2>
-            <p>
-                Les articles du site fdesouche.com ont été catégorisés et
-                localisés. Il s'agit d'une approche subjective aidée par
-                intelligence artificielle.
-            </p>
+                    <h2 class="text-2xl font-semibold text-gray-800 mt-8 mb-4">Catégories d'articles</h2>
+                    <p class="text-gray-700 mb-6">
+                        Les articles du site fdesouche.com ont été catégorisés et
+                        localisés. Il s'agit d'une approche subjective aidée par
+                        intelligence artificielle.
+                    </p>
 
-            <h2>Indice d'insécurité</h2>
-            <p>
-                Utilise l'ensemble des données à propos d'activités illégales
-                (violences, vols, vandalisme...), les comportements antisociaux
-                ou le sentiment d'insécurité en général. Dénominations
-                alternatives: indice de répression policière.
-            </p>
+                    <h2 class="text-2xl font-semibold text-gray-800 mt-8 mb-4">Indice d'insécurité</h2>
+                    <p class="text-gray-700 mb-6">
+                        Utilise l'ensemble des données à propos d'activités illégales
+                        (violences, vols, vandalisme...), les comportements antisociaux
+                        ou le sentiment d'insécurité en général. Dénominations
+                        alternatives: indice de répression policière.
+                    </p>
 
-            <h2>Indice d'immigration</h2>
-            <p>
-                Décrit l'ensemble des données à propos de personnes ou de
-                groupes dont l'origine et l'identité n'est pas française de
-                souche, indépendamment de la nationalité administrative
-                actuelle. Dénominations alternatives: indice de créolisation,
-                indice de grand remplacement.
-            </p>
+                    <h2 class="text-2xl font-semibold text-gray-800 mt-8 mb-4">Indice d'immigration</h2>
+                    <p class="text-gray-700 mb-6">
+                        Décrit l'ensemble des données à propos de personnes ou de
+                        groupes dont l'origine et l'identité n'est pas française de
+                        souche, indépendamment de la nationalité administrative
+                        actuelle. Dénominations alternatives: indice de créolisation,
+                        indice de grand remplacement.
+                    </p>
 
-            <h2>Indice de progression de l'Islam</h2>
-            <p>
-                Décrit l'ensemble des données ayant trait à la religion
-                musulmane, et sa progression dans l'espace Français.
-                Dénominations alternatives: indice d'enrichissement spirituel,
-                indice d'islamisation.
-            </p>
+                    <h2 class="text-2xl font-semibold text-gray-800 mt-8 mb-4">Indice de progression de l'Islam</h2>
+                    <p class="text-gray-700 mb-6">
+                        Décrit l'ensemble des données ayant trait à la religion
+                        musulmane, et sa progression dans l'espace Français.
+                        Dénominations alternatives: indice d'enrichissement spirituel,
+                        indice d'islamisation.
+                    </p>
 
-            <h2>Indice d'évolution culturelle</h2>
-            <p>
-                Décrit l'ensemble des données ayant trait à l'érosion sociétale
-                de l'identité culturelle Française, ainsi que la promotion de
-                cultures non-françaises sur le territoire. Sont inclus les
-                cultures d'immigration, ainsi que l'américanisation de la
-                société. Dénominations alternatives: indice de dépoussiérage
-                culturel, indice de défrancisation.
-            </p>
+                    <h2 class="text-2xl font-semibold text-gray-800 mt-8 mb-4">Indice d'évolution culturelle</h2>
+                    <p class="text-gray-700 mb-6">
+                        Décrit l'ensemble des données ayant trait à l'érosion sociétale
+                        de l'identité culturelle Française, ainsi que la promotion de
+                        cultures non-françaises sur le territoire. Sont inclus les
+                        cultures d'immigration, ainsi que l'américanisation de la
+                        société. Dénominations alternatives: indice de dépoussiérage
+                        culturel, indice de défrancisation.
+                    </p>
 
-            <h2>Indice d'interventionnisme social</h2>
-            <p>
-                Décrit l'ensemble des données reflétant une idéologie gauchiste
-                promouvant un changement sociétal. Sont inclus
-                l'immigrationnisme, le féminisme excessif, le socialisme, le
-                racisme anti-blanc, le combat contre le 'patriarcat',
-                l'intersectionnalité, la promotion dans l'espace public de
-                l'idéologie LGBTQ, la promotion de la diversité ou du métissage,
-                l'idéologie de l'inclusif, l'idéologie de la 'discrimination
-                positive', l'idéologie de la 'justice sociale', les mouvances
-                'antifa'... Dénominations alternatives: indice de progressisme,
-                indice de wokisme.
-            </p>
+                    <h2 class="text-2xl font-semibold text-gray-800 mt-8 mb-4">Indice d'interventionnisme social</h2>
+                    <p class="text-gray-700 mb-6">
+                        Décrit l'ensemble des données reflétant une idéologie gauchiste
+                        promouvant un changement sociétal. Sont inclus
+                        l'immigrationnisme, le féminisme excessif, le socialisme, le
+                        racisme anti-blanc, le combat contre le 'patriarcat',
+                        l'intersectionnalité, la promotion dans l'espace public de
+                        l'idéologie LGBTQ, la promotion de la diversité ou du métissage,
+                        l'idéologie de l'inclusif, l'idéologie de la 'discrimination
+                        positive', l'idéologie de la 'justice sociale', les mouvances
+                        'antifa'... Dénominations alternatives: indice de progressisme,
+                        indice de wokisme.
+                    </p>
 
-            <h2>Indice de changement général</h2>
-            <p>
-                Représente la somme des indices précédents. Dénominations
-                alternatives: indice d'évolution inclusive, indice de
-                fragmentation nationale.
-            </p>
+                    <h2 class="text-2xl font-semibold text-gray-800 mt-8 mb-4">Indice de changement général</h2>
+                    <p class="text-gray-700 mb-6">
+                        Représente la somme des indices précédents. Dénominations
+                        alternatives: indice d'évolution inclusive, indice de
+                        fragmentation nationale.
+                    </p>
 
-            <h2>RGPD compliance</h2>
-            <p>
-                Aucune donnée personnelle n'est stockée sur ce site. L'ensemble
-                des données utilisées sont publiques et anonymisées.
-            </p>
+                    <h2 class="text-2xl font-semibold text-gray-800 mt-8 mb-4">RGPD compliance</h2>
+                    <p class="text-gray-700 mb-6">
+                        Aucune donnée personnelle n'est stockée sur ce site. L'ensemble
+                        des données utilisées sont publiques et anonymisées.
+                    </p>
 
-            <h2>L'auteur</h2>
-            <p>GRATION, Rémi</p>
+                    <h2 class="text-2xl font-semibold text-gray-800 mt-8 mb-4">L'auteur</h2>
+                    <p class="text-gray-700 mb-8">GRATION, Rémi</p>
 
-            <div style="margin-top: 20px">
-                <a href="index.html">Retour à la page principale</a>
+                    <div class="mt-8 pt-6 border-t border-gray-200">
+                        <a href="index.html" class="text-blue-600 hover:text-blue-800 underline">Retour à la page principale</a>
+                    </div>
+        </div>
             </div>
         </div>
+        <script>
+            // Add mobile menu functionality
+            document.addEventListener('DOMContentLoaded', function() {
+                const menuToggle = document.querySelector('.menu-toggle');
+                const navMenu = document.querySelector('.nav-menu');
+                
+                if (menuToggle && navMenu) {
+                    menuToggle.addEventListener('click', function() {
+                        menuToggle.classList.toggle('active');
+                        navMenu.classList.toggle('active');
+                    });
+                }
+            });
+        </script>
     </body>
 </html>
