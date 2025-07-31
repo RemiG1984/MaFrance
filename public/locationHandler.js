@@ -176,8 +176,8 @@ function LocationHandler(
                 lieuxSelect.appendChild(option);
             });
 
-            // Don't show/hide here - let renderFilterButtons handle visibility
             lieuxSelect.disabled = false;
+            console.log("Lieux loaded successfully:", lieux.length, "lieux found");
         } catch (error) {
             lieuxSelect.innerHTML = '<option value="">-- Aucun lieu --</option>';
             lieuxSelect.disabled = true;

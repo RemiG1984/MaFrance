@@ -249,11 +249,12 @@ window.MetricsConfig = MetricsConfig;
                     showCrimeGraphs("commune", cog, departement, selectedCommune);
                     showNamesGraph("commune", cog, departement, selectedCommune);
                     showQpvData("commune", cog, departement, selectedCommune);
-                    locationHandler.loadLieux(departement, cog);
                     
-                    // Clear any existing articles and load fresh commune-level data
-                    articleHandler.clearArticles();
-                    articleHandler.loadArticles(departement, cog, "", locationHandler).then((articles) => {
+                    // Load lieux and articles together to ensure proper sequencing
+                    Promise.all([
+                        locationHandler.loadLieux(departement, cog),
+                        articleHandler.loadArticles(departement, cog, "", locationHandler)
+                    ]).then(([_, articles]) => {
                         articleHandler.loadArticleCounts(departement, cog).then((counts) => {
                             articleHandler.renderFilterButtons(counts, articles, currentLieu);
                         });
