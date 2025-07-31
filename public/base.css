@@ -3,7 +3,8 @@
 body {
     font-family: 'Roboto', Arial, sans-serif;
     text-align: center;
-    margin: 50px 20px;
+    margin: 0 20px;
+    padding-top: 80px; /* Add padding for fixed header */
     background-color: #f4f6f8;
 }
 
