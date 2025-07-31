@@ -158,32 +158,66 @@ function LocationHandler(
     }
 
     async function loadLieux(departement, cog) {
+        console.log("=== loadLieux START ===");
+        console.log("Input params:", { departement, cog });
+        
         const lieuxSelect = document.getElementById('lieuxSelect');
-        if (!lieuxSelect || !cog) return; // Only load at commune level
+        console.log("lieuxSelect element:", lieuxSelect ? 'found' : 'NOT FOUND');
+        
+        if (!lieuxSelect || !cog) {
+            console.log("Early return from loadLieux:", {
+                lieuxSelectExists: !!lieuxSelect,
+                cogProvided: !!cog,
+                reason: !lieuxSelect ? 'lieuxSelect not found' : 'no COG provided'
+            });
+            return;
+        }
 
+        console.log("Starting lieux loading process...");
         const spinnerId = spinner.show(lieuxSelect.parentElement, 'Chargement des lieux...');
+        
         try {
+            console.log("Disabling lieuxSelect and making API call...");
             lieuxSelect.disabled = true;
 
             const lieux = await api.getLieux(departement, cog);
-            console.log("Lieux fetched:", lieux);
+            console.log("Lieux API response:", lieux);
+            console.log("Lieux count:", lieux ? lieux.length : 0);
+            console.log("Lieux type:", typeof lieux);
+            
+            console.log("Populating lieuxSelect dropdown...");
             lieuxSelect.innerHTML = '<option value="">-- Tous les lieux --</option>';
 
-            lieux.forEach((lieu) => {
-                const option = document.createElement("option");
-                option.value = lieu.lieu;
-                option.textContent = lieu.lieu;
-                lieuxSelect.appendChild(option);
-            });
+            if (lieux && Array.isArray(lieux)) {
+                lieux.forEach((lieu, index) => {
+                    console.log(`Adding lieu ${index + 1}/${lieux.length}:`, lieu);
+                    const option = document.createElement("option");
+                    option.value = lieu.lieu;
+                    option.textContent = lieu.lieu;
+                    lieuxSelect.appendChild(option);
+                });
+            } else {
+                console.warn("Lieux is not an array or is null/undefined");
+            }
 
             lieuxSelect.disabled = false;
-            console.log("Lieux loaded successfully:", lieux.length, "lieux found");
+            console.log("✓ Lieux loaded successfully");
+            console.log("Final lieuxSelect state:", {
+                optionsCount: lieuxSelect.options.length,
+                disabled: lieuxSelect.disabled,
+                innerHTML: lieuxSelect.innerHTML.substring(0, 100) + '...'
+            });
+            console.log("=== loadLieux SUCCESS ===");
         } catch (error) {
+            console.error("=== loadLieux ERROR ===");
+            console.error("Error details:", error);
             lieuxSelect.innerHTML = '<option value="">-- Aucun lieu --</option>';
             lieuxSelect.disabled = true;
-            console.error("Erreur chargement lieux:", error);
+            console.log("Set lieuxSelect to error state");
         } finally {
+            console.log("Hiding spinner...");
             spinner.hide(spinnerId);
+            console.log("=== loadLieux END ===");
         }
     }
 

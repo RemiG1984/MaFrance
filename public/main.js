@@ -142,13 +142,26 @@ window.MetricsConfig = MetricsConfig;
                 mapHandler.showDepartmentPopup(departement);
             }
             
+            console.log("=== DEPARTMENT SELECTION: Starting parallel loading ===");
+            console.log("Loading articles and counts for department:", departement);
+            
             Promise.all([
                 articleHandler.loadArticles(departement, "", "", null),
                 articleHandler.loadArticleCounts(departement)
             ]).then(([articles, counts]) => {
+                console.log("=== DEPARTMENT SELECTION: Parallel loading completed ===");
+                console.log("Results:", { 
+                    articlesLength: articles?.length,
+                    counts,
+                    countsType: typeof counts
+                });
+                console.log("Rendering filter buttons for department...");
                 articleHandler.renderFilterButtons(counts, articles, currentLieu);
+                console.log("=== DEPARTMENT SELECTION: Filter buttons render completed ===");
             }).catch((error) => {
-                console.error("Error loading department articles:", error);
+                console.error("=== DEPARTMENT SELECTION: ERROR in parallel loading ===");
+                console.error("Error details:", error);
+                console.error("Stack trace:", error.stack);
             });
         } else {
             scoreTableHandler.showCountryDetails();
@@ -246,17 +259,37 @@ window.MetricsConfig = MetricsConfig;
                     showNamesGraph("commune", cog, departement, selectedCommune);
                     showQpvData("commune", cog, departement, selectedCommune);
                     
+                    console.log("=== COMMUNE SELECTION: Starting parallel loading ===");
+                    console.log("Loading lieux and articles for:", { departement, cog });
+                    
                     // Load lieux and articles in parallel, then load counts and render buttons
                     Promise.all([
                         locationHandler.loadLieux(departement, cog),
                         articleHandler.loadArticles(departement, cog, "", null)
-                    ]).then(([_, articles]) => {
+                    ]).then(([lieuxResult, articles]) => {
+                        console.log("=== COMMUNE SELECTION: Parallel loading completed ===");
+                        console.log("Results:", { 
+                            lieuxResult, 
+                            articlesLength: articles?.length,
+                            articlesType: typeof articles
+                        });
+                        
+                        console.log("Now loading article counts...");
                         return articleHandler.loadArticleCounts(departement, cog).then((counts) => {
-                            console.log("About to render filter buttons with:", { counts, articlesLength: articles?.length });
+                            console.log("=== COMMUNE SELECTION: About to render filter buttons ===");
+                            console.log("Final data for renderFilterButtons:", { 
+                                counts, 
+                                countsType: typeof counts,
+                                articlesLength: articles?.length,
+                                currentLieu 
+                            });
                             articleHandler.renderFilterButtons(counts, articles, currentLieu);
+                            console.log("=== COMMUNE SELECTION: Filter buttons render completed ===");
                         });
                     }).catch((error) => {
-                        console.error("Error in commune selection article/lieux loading:", error);
+                        console.error("=== COMMUNE SELECTION: ERROR in parallel loading ===");
+                        console.error("Error details:", error);
+                        console.error("Stack trace:", error.stack);
                     });
 
                     // Update map to center on department and select the commune

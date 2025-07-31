@@ -54,30 +54,39 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
     }
 
     async function loadArticleCounts(departement, cog = "", lieu = "") {
+        console.log("=== loadArticleCounts START ===");
+        console.log("Input params:", { departement, cog, lieu });
+        
         try {
             const params = { dept: departement };
             if (cog) params.cog = cog;
             if (lieu) params.lieu = lieu;
 
-            console.log("Fetching article counts with params:", params);
+            console.log("API request params for article counts:", params);
             const counts = await api.getArticleCounts(params);
-            console.log("Article counts:", counts);
+            console.log("Article counts received:", counts);
+            console.log("Article counts type:", typeof counts);
+            console.log("Article counts keys:", counts ? Object.keys(counts) : 'no keys - null/undefined');
+            console.log("=== loadArticleCounts SUCCESS ===");
             return counts;
         } catch (error) {
-            console.error("Erreur chargement comptes articles:", {
+            console.error("=== loadArticleCounts ERROR ===");
+            console.error("Error details:", {
                 error: error.message,
                 stack: error.stack,
                 departement: departement,
                 cog: cog,
                 lieu: lieu
             });
-            return {
+            const fallbackCounts = {
                 insecurite: 0,
                 immigration: 0,
                 islamisme: 0,
                 defrancisation: 0,
                 wokisme: 0,
             };
+            console.log("Returning fallback counts:", fallbackCounts);
+            return fallbackCounts;
         }
     }
 
@@ -139,36 +148,79 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
      * @param {string} currentLieu - Currently selected location
      */
     function renderFilterButtons(counts, allArticles, currentLieu) {
-        console.log("renderFilterButtons called with:", { counts, articlesLength: allArticles?.length, currentLieu });
+        console.log("=== renderFilterButtons START ===");
+        console.log("Input parameters:", { 
+            counts, 
+            countsType: typeof counts,
+            countsKeys: counts ? Object.keys(counts) : 'null/undefined',
+            articlesLength: allArticles?.length, 
+            articlesType: typeof allArticles,
+            currentLieu,
+            currentLieuType: typeof currentLieu
+        });
+        
+        // Check DOM elements
+        const lieuxSelect = document.getElementById('lieuxSelect');
+        const communeInput = document.getElementById('communeInput');
+        const filtersContainer = document.getElementById('articleFilters');
+        
+        console.log("DOM elements check:", {
+            filterButtonsDiv: filterButtonsDiv ? 'found' : 'NOT FOUND',
+            lieuxSelect: lieuxSelect ? 'found' : 'NOT FOUND',
+            communeInput: communeInput ? 'found' : 'NOT FOUND',
+            filtersContainer: filtersContainer ? 'found' : 'NOT FOUND',
+            communeInputValue: communeInput ? communeInput.value : 'N/A'
+        });
         
         filterButtonsDiv.innerHTML = "";
 
         // Show lieuxSelect if we're at commune level (commune input has value)
-        const lieuxSelect = document.getElementById('lieuxSelect');
-        const communeInput = document.getElementById('communeInput');
         const isAtCommuneLevel = communeInput && communeInput.value.trim() !== '';
+        console.log("Commune level detection:", {
+            isAtCommuneLevel,
+            communeInputExists: !!communeInput,
+            communeInputValue: communeInput ? `"${communeInput.value}"` : 'N/A',
+            communeInputTrimmed: communeInput ? `"${communeInput.value.trim()}"` : 'N/A'
+        });
 
         if (lieuxSelect) {
+            console.log("Processing lieuxSelect visibility...");
             if (isAtCommuneLevel) {
                 lieuxSelect.style.display = 'block';
                 lieuxSelect.disabled = false;
-                console.log("Showing lieux selector at commune level");
+                console.log("✓ Showing lieux selector at commune level");
+                console.log("LieuxSelect current options:", lieuxSelect.innerHTML);
             } else {
                 lieuxSelect.style.display = 'none';
                 lieuxSelect.disabled = true;
-                console.log("Hiding lieux selector - not at commune level");
+                console.log("✗ Hiding lieux selector - not at commune level");
             }
+        } else {
+            console.error("⚠️ lieuxSelect element not found!");
         }
 
         // Ensure we have valid counts and articles
         if (!counts) {
-            console.warn("No counts provided to renderFilterButtons");
+            console.warn("⚠️ No counts provided to renderFilterButtons - using empty object");
             counts = {};
         }
         if (!allArticles) {
-            console.warn("No articles provided to renderFilterButtons");
+            console.warn("⚠️ No articles provided to renderFilterButtons - using empty array");
             allArticles = [];
         }
+
+        console.log("Data validation after fallbacks:", {
+            countsAfterFallback: counts,
+            articlesAfterFallback: allArticles?.length || 0
+        });
+
+        // Check if MetricsConfig is available
+        if (!MetricsConfig || !MetricsConfig.articleCategories) {
+            console.error("⚠️ MetricsConfig or articleCategories not available!");
+            return;
+        }
+
+        console.log("MetricsConfig.articleCategories:", MetricsConfig.articleCategories);
 
         const categories = MetricsConfig.articleCategories.map(category => ({
             name: category.name,
@@ -176,14 +228,17 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
             count: counts[category.key] || 0,
         }));
 
-        console.log("Creating filter buttons for categories:", categories);
+        console.log("Mapped categories for filter buttons:", categories);
 
-        categories.forEach((category) => {
+        console.log("Starting filter button creation...");
+        categories.forEach((category, index) => {
+            console.log(`Creating button ${index + 1}/${categories.length} for category:`, category);
             const button = document.createElement("button");
             button.className = `filter-button${currentFilter === category.key ? " active" : ""}`;
             button.textContent = `${category.name} (${category.count})`;
             button.dataset.category = category.key;
             button.addEventListener("click", () => {
+                console.log(`Filter button clicked: ${category.key}`);
                 currentFilter = category.key;
                 renderArticles(allArticles, currentLieu, currentFilter);
                 document
@@ -192,12 +247,18 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
                 button.classList.add("active");
             });
             filterButtonsDiv.appendChild(button);
+            console.log(`✓ Button created and appended for: ${category.key}`);
         });
 
+        console.log("Creating 'All' button...");
+        const allCount = getFilteredArticleCount(allArticles, currentLieu);
+        console.log("All articles count:", allCount);
+        
         const allButton = document.createElement("button");
         allButton.className = `filter-button${currentFilter === null ? " active" : ""}`;
-        allButton.textContent = `Tous (${getFilteredArticleCount(allArticles, currentLieu)})`;
+        allButton.textContent = `Tous (${allCount})`;
         allButton.addEventListener("click", () => {
+            console.log("'All' filter button clicked");
             currentFilter = null;
             renderArticles(allArticles, currentLieu);
             document
@@ -206,8 +267,15 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
             allButton.classList.add("active");
         });
         filterButtonsDiv.appendChild(allButton);
+        console.log("✓ 'All' button created and appended");
         
-        console.log("Filter buttons created, total buttons:", filterButtonsDiv.children.length);
+        console.log("=== renderFilterButtons COMPLETE ===");
+        console.log("Final state:", {
+            totalButtons: filterButtonsDiv.children.length,
+            filterButtonsDivHTML: filterButtonsDiv.innerHTML.length > 0 ? 'has content' : 'EMPTY',
+            lieuxSelectVisible: lieuxSelect ? (lieuxSelect.style.display !== 'none') : false,
+            lieuxSelectDisabled: lieuxSelect ? lieuxSelect.disabled : 'N/A'
+        });
     }
 
     function getFilteredArticleCount(articles, lieu) {
