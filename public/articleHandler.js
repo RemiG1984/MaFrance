@@ -145,6 +145,9 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
     function renderFilterButtons(counts, allArticles, currentLieu) {
         filterButtonsDiv.innerHTML = "";
 
+        // Store current articles for this render to avoid stale closures
+        filteredArticles = [...allArticles];
+
         // Show lieuxSelect if we have lieux data and we're at commune level
         const lieuxSelect = document.getElementById('lieuxSelect');
         const hasCOG = window.location.search.includes('cog=') || document.getElementById('communeInput').value.trim() !== '';
@@ -171,7 +174,7 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
             button.dataset.category = category.key;
             button.addEventListener("click", () => {
                 currentFilter = category.key;
-                renderArticles(allArticles, currentLieu, currentFilter);
+                renderArticles(filteredArticles, currentLieu, currentFilter);
                 document
                     .querySelectorAll(".filter-button")
                     .forEach((btn) => btn.classList.remove("active"));
@@ -182,10 +185,10 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
 
         const allButton = document.createElement("button");
         allButton.className = `filter-button${currentFilter === null ? " active" : ""}`;
-        allButton.textContent = `Tous (${getFilteredArticleCount(allArticles, currentLieu)})`;
+        allButton.textContent = `Tous (${getFilteredArticleCount(filteredArticles, currentLieu)})`;
         allButton.addEventListener("click", () => {
             currentFilter = null;
-            renderArticles(allArticles, currentLieu);
+            renderArticles(filteredArticles, currentLieu);
             document
                 .querySelectorAll(".filter-button")
                 .forEach((btn) => btn.classList.remove("active"));
