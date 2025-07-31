@@ -5,6 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "build-css": "tailwindcss -i ./public/tailwind.css -o ./public/tailwind-output.css --watch",
+    "build-css-prod": "tailwindcss -i ./public/tailwind.css -o ./public/tailwind-output.css --minify",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
