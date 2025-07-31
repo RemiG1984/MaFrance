@@ -169,7 +169,8 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
             lieuxSelect: lieuxSelect ? 'found' : 'NOT FOUND',
             communeInput: communeInput ? 'found' : 'NOT FOUND',
             filtersContainer: filtersContainer ? 'found' : 'NOT FOUND',
-            communeInputValue: communeInput ? communeInput.value : 'N/A'
+            communeInputValue: communeInput ? communeInput.value : 'N/A',
+            lieuxSelectOptionsCount: lieuxSelect ? lieuxSelect.options.length : 'N/A'
         });
         
         filterButtonsDiv.innerHTML = "";
@@ -197,6 +198,8 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
                 if (lieuxSelect.options.length <= 1) {
                     console.warn("⚠️ LieuxSelect has only default option - timing issue detected");
                     console.warn("This suggests renderFilterButtons was called before lieux finished loading");
+                    console.warn("Expected > 1 options, got:", lieuxSelect.options.length);
+                    // Don't hide the selector even if timing issue - let the polling mechanism in main.js handle it
                 } else {
                     console.log("✓ LieuxSelect properly populated with", lieuxSelect.options.length, "options");
                 }

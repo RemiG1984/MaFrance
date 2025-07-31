@@ -291,23 +291,23 @@ window.MetricsConfig = MetricsConfig;
                             currentLieu 
                         });
                         
-                        // Wait for DOM to be fully updated before rendering filter buttons
-                        setTimeout(() => {
-                            // Verify lieux are actually loaded in DOM before proceeding
+                        // Use a more reliable DOM readiness check with polling
+                        const waitForLieuxDOM = () => {
                             const lieuxSelect = document.getElementById('lieuxSelect');
-                            if (lieuxSelect && lieuxSelect.options.length > 1) {
+                            const expectedMinOptions = 2; // At least default + one lieu
+                            
+                            if (lieuxSelect && lieuxSelect.options.length >= expectedMinOptions) {
                                 console.log("✓ DOM verified: lieuxSelect has", lieuxSelect.options.length, "options");
                                 articleHandler.renderFilterButtons(counts, articles, currentLieu);
                                 console.log("=== COMMUNE SELECTION: Filter buttons render completed ===");
                             } else {
-                                console.log("⚠️ DOM not ready, retrying...");
-                                // Retry after a longer delay if DOM isn't ready
-                                setTimeout(() => {
-                                    articleHandler.renderFilterButtons(counts, articles, currentLieu);
-                                    console.log("=== COMMUNE SELECTION: Filter buttons render completed (retry) ===");
-                                }, 50);
+                                console.log("⚠️ DOM not ready, retrying in 25ms... Current options:", lieuxSelect?.options.length || 0);
+                                setTimeout(waitForLieuxDOM, 25);
                             }
-                        }, 25);
+                        };
+                        
+                        // Start checking after a small initial delay
+                        setTimeout(waitForLieuxDOM, 10);
                     }).catch((error) => {
                         console.error("=== COMMUNE SELECTION: ERROR in loading sequence ===");
                         console.error("Error details:", error);

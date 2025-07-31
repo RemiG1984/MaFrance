@@ -209,15 +209,18 @@ function LocationHandler(
             });
             console.log("=== loadLieux SUCCESS ===");
             
-            // Force DOM update and verify it's complete
+            // Force DOM update and ensure it's completely rendered
             return new Promise(resolve => {
-                // Use requestAnimationFrame to ensure DOM has been painted
+                // Use double requestAnimationFrame to ensure complete rendering
                 requestAnimationFrame(() => {
-                    setTimeout(() => {
-                        console.log("✓ loadLieux DOM update confirmed");
-                        console.log("Final verification - lieuxSelect options:", lieuxSelect.options.length);
-                        resolve();
-                    }, 10);
+                    requestAnimationFrame(() => {
+                        // Add a small timeout to ensure all DOM operations are complete
+                        setTimeout(() => {
+                            console.log("✓ loadLieux DOM update confirmed");
+                            console.log("Final verification - lieuxSelect options:", lieuxSelect.options.length);
+                            resolve();
+                        }, 15);
+                    });
                 });
             });
         } catch (error) {
@@ -228,10 +231,12 @@ function LocationHandler(
             console.log("Set lieuxSelect to error state");
             
             return new Promise(resolve => {
-                setTimeout(() => {
-                    console.log("✓ loadLieux error state DOM update confirmed");
-                    resolve();
-                }, 5);
+                requestAnimationFrame(() => {
+                    setTimeout(() => {
+                        console.log("✓ loadLieux error state DOM update confirmed");
+                        resolve();
+                    }, 10);
+                });
             });
         } finally {
             console.log("Hiding spinner...");
