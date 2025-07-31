@@ -29,58 +29,7 @@
         <script src="https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js"></script>
     </head>
     <body class="min-h-screen bg-gray-50">
-        <header class="site-header bg-white shadow">
-            <div
-                class="header-content container mx-auto px-4 flex justify-between items-center py-4"
-            >
-                <div class="branding flex items-center gap-4">
-                    <h1 class="text-3xl font-bold text-gray-800">Ma France: état des lieux</h1>
-                    <a
-                        href="https://twitter.com/ou_va_ma_France?ref_src=twsrc%5Etfw"
-                        class="twitter-follow-button"
-                        data-show-count="false"
-                    ></a>
-                    <script
-                        async
-                        src="https://platform.twitter.com/widgets.js"
-                        charset="utf-8"
-                    ></script>
-                </div>
-                <nav class="site-nav flex items-center gap-4">
-                    <button class="menu-toggle" aria-label="Toggle menu">
-                        <span class="hamburger"></span>
-                    </button>
-                    <ul class="nav-menu flex gap-4">
-                        <li>
-                            <a href="index.html" class="nav-link active"
-                                >Accueil</a
-                            >
-                        </li>
-                        <li>
-                            <a href="rankings.html" class="nav-link"
-                                >Classements</a
-                            >
-                        </li>
-                        <li>
-                            <a href="notice.html" class="nav-link"
-                                >Méthodologie</a
-                            >
-                        </li>
-                        <li class="version-dropdown">
-                            <a href="#" class="nav-link version-toggle">
-                                <span class="version-text">Version neutre ⚖️</span>
-                                <span class="dropdown-arrow">▼</span>
-                            </a>
-                            <ul class="version-menu">
-                                <li><a href="#" class="version-option">Version neutre ⚖️</a></li>
-                                <li><a href="#" class="version-option">Version inclusive 🌈</a></li>
-                                <li><a href="#" class="version-option">Version identitaire 🦅</a></li>
-                            </ul>
-                        </li>
-                    </ul>
-                </nav>
-            </div>
-        </header>
+        <div id="header-container"></div>
         <div class="container mx-auto px-4 py-6">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                 <!-- First Column: Location selectors, map, lieux selector, and articles -->
@@ -221,6 +170,7 @@
             </div>
         </div>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script type="module" src="headerComponent.js"></script>
         <script type="module" src="chartWatermark.js"></script>
         <script type="module" src="departmentNames.js"></script>
         <script type="module" src="utils.js"></script>

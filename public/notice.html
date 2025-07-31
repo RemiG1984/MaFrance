@@ -67,46 +67,7 @@
         <link rel="stylesheet" href="components.css" />
     </head>
     <body class="min-h-screen bg-gray-50">
-        <header class="site-header bg-white shadow">
-            <div
-                class="header-content container mx-auto px-4 flex justify-between items-center py-4"
-            >
-                <div class="branding flex items-center gap-4">
-                    <h1 class="text-3xl font-bold text-gray-800">Ma France: état des lieux</h1>
-                </div>
-                <nav class="site-nav flex items-center gap-4">
-                    <button class="menu-toggle" aria-label="Toggle menu">
-                        <span class="hamburger"></span>
-                    </button>
-                    <ul class="nav-menu flex gap-4">
-                        <li>
-                            <a href="index.html" class="nav-link">Accueil</a>
-                        </li>
-                        <li>
-                            <a href="rankings.html" class="nav-link"
-                                >Classements</a
-                            >
-                        </li>
-                        <li>
-                            <a href="notice.html" class="nav-link active"
-                                >Méthodologie</a
-                            >
-                        </li>
-                        <li class="version-dropdown">
-                            <a href="#" class="nav-link version-toggle">
-                                <span class="version-text">Version neutre ⚖️</span>
-                                <span class="dropdown-arrow">▼</span>
-                            </a>
-                            <ul class="version-menu">
-                                <li><a href="#" class="version-option">Version neutre ⚖️</a></li>
-                                <li><a href="#" class="version-option">Version inclusive 🌈</a></li>
-                                <li><a href="#" class="version-option">Version identitaire 🦅</a></li>
-                            </ul>
-                        </li>
-                    </ul>
-                </nav>
-            </div>
-        </header>
+        <div id="header-container"></div>
         <div class="container mx-auto px-4 py-6">
             <div class="bg-white p-8 rounded-lg shadow max-w-4xl mx-auto">
                 <h1 class="text-3xl font-bold text-gray-800 mb-6">Explications des termes et de la logique</h1>
@@ -241,6 +202,7 @@
         </div>
             </div>
         </div>
+        <script type="module" src="headerComponent.js"></script>
         <script>
             // Add mobile menu functionality
             document.addEventListener('DOMContentLoaded', function() {
