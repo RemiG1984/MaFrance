@@ -5,7 +5,7 @@
 class ApiService {
     constructor() {
         this.cache = new Map();
-        this.cacheExpiry = 5 * 60 * 1000; // 5 minutes
+        this.cacheExpiry = 60 * 60 * 1000; // 60 minutes
         this.activeRequests = new Set();
     }
 
@@ -23,7 +23,7 @@ class ApiService {
         if (useCache && this.cache.has(cacheKey)) {
             const cached = this.cache.get(cacheKey);
             if (Date.now() - cached.timestamp < this.cacheExpiry) {
-                console.log('Using cached data for:', url);
+                console.log("Using cached data for:", url);
                 return cached.data;
             }
             this.cache.delete(cacheKey);
@@ -31,17 +31,19 @@ class ApiService {
 
         try {
             this.activeRequests.add(url);
-            
+
             const response = await fetch(url, {
                 ...options,
                 headers: {
-                    'Content-Type': 'application/json',
-                    ...options.headers
-                }
+                    "Content-Type": "application/json",
+                    ...options.headers,
+                },
             });
 
             if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                throw new Error(
+                    `HTTP ${response.status}: ${response.statusText}`,
+                );
             }
 
             const data = await response.json();
@@ -50,13 +52,16 @@ class ApiService {
             if (useCache) {
                 this.cache.set(cacheKey, {
                     data,
-                    timestamp: Date.now()
+                    timestamp: Date.now(),
                 });
             }
 
             return data;
         } catch (error) {
-            console.error('API request failed:', { url, error: error.message || error });
+            console.error("API request failed:", {
+                url,
+                error: error.message || error,
+            });
             throw error;
         } finally {
             this.activeRequests.delete(url);
@@ -69,8 +74,6 @@ class ApiService {
     clearCache() {
         this.cache.clear();
     }
-
-    
 }
 
 // Export singleton instance
@@ -79,75 +82,78 @@ export const apiService = new ApiService();
 // Convenience methods for common endpoints
 export const api = {
     // Department data
-    getDepartmentDetails: (code) => 
+    getDepartmentDetails: (code) =>
         apiService.request(`/api/departements/details?dept=${code}`),
-    getDepartmentCrimeHistory: (code) => 
+    getDepartmentCrimeHistory: (code) =>
         apiService.request(`/api/departements/crime_history?dept=${code}`),
-    getDepartmentNamesHistory: (code) => 
+    getDepartmentNamesHistory: (code) =>
         apiService.request(`/api/departements/names_history?dept=${code}`),
 
     // Commune data
-    getCommuneDetails: (cog) => 
+    getCommuneDetails: (cog) =>
         apiService.request(`/api/communes/details?cog=${cog}`),
-    getCommuneNames: (cog) => 
+    getCommuneNames: (cog) =>
         apiService.request(`/api/communes/names?cog=${cog}`),
-    getCommuneCrime: (cog) => 
+    getCommuneCrime: (cog) =>
         apiService.request(`/api/communes/crime?cog=${cog}`),
-    getCommuneCrimeHistory: (cog) => 
+    getCommuneCrimeHistory: (cog) =>
         apiService.request(`/api/communes/crime_history?cog=${cog}`),
-    getCommuneNamesHistory: (cog) => 
+    getCommuneNamesHistory: (cog) =>
         apiService.request(`/api/communes/names_history?cog=${cog}`),
 
     // Additional department data
-    getDepartmentNames: (code) => 
+    getDepartmentNames: (code) =>
         apiService.request(`/api/departements/names?dept=${code}`),
-    getDepartmentCrime: (code) => 
+    getDepartmentCrime: (code) =>
         apiService.request(`/api/departements/crime?dept=${code}`),
 
     // Country data
-    getCountryDetails: (country = 'France') => 
+    getCountryDetails: (country = "France") =>
         apiService.request(`/api/country/details?country=${country}`),
-    getCountryExecutive: (country = 'France') => 
+    getCountryExecutive: (country = "France") =>
         apiService.request(`/api/country/ministre?country=${country}`),
-    getCountryNames: (country = 'France') => 
+    getCountryNames: (country = "France") =>
         apiService.request(`/api/country/names?country=${country}`),
-    getCountryCrime: (country = 'France') => 
+    getCountryCrime: (country = "France") =>
         apiService.request(`/api/country/crime?country=${country}`),
-    getCountryCrimeHistory: (country = 'France') => 
+    getCountryCrimeHistory: (country = "France") =>
         apiService.request(`/api/country/crime_history?country=${country}`),
-    getCountryNamesHistory: (country = 'France') => 
+    getCountryNamesHistory: (country = "France") =>
         apiService.request(`/api/country/names_history?country=${country}`),
 
     // Location data
-    getDepartments: () => 
-        apiService.request('/api/departements'),
-    getCommunes: (dept) => 
-        apiService.request(`/api/communes?dept=${dept}`),
-    getLieux: (dept, cog) => 
+    getDepartments: () => apiService.request("/api/departements"),
+    getCommunes: (dept) => apiService.request(`/api/communes?dept=${dept}`),
+    getLieux: (dept, cog) =>
         apiService.request(`/api/articles/lieux?dept=${dept}&cog=${cog}`),
 
     // QPV data
-    getQpvDepartment: (code) => 
+    getQpvDepartment: (code) =>
         apiService.request(`/api/qpv/departement/${code}`),
-    getQpvCommune: (code) => 
-        apiService.request(`/api/qpv/commune/${code}`),
+    getQpvCommune: (code) => apiService.request(`/api/qpv/commune/${code}`),
 
     // Executive data
-    getDepartmentExecutive: (deptCode) => 
+    getDepartmentExecutive: (deptCode) =>
         apiService.request(`/api/departements/prefet?dept=${deptCode}`),
-    getCommuneExecutive: (cog) => 
-        apiService.request(`/api/communes/maire?cog=${encodeURIComponent(cog)}`),
+    getCommuneExecutive: (cog) =>
+        apiService.request(
+            `/api/communes/maire?cog=${encodeURIComponent(cog)}`,
+        ),
 
     // Search functionality
-    searchCommunes: (query) => 
-        apiService.request(`/api/communes/search?q=${encodeURIComponent(query)}`),
+    searchCommunes: (query) =>
+        apiService.request(
+            `/api/communes/search?q=${encodeURIComponent(query)}`,
+        ),
 
     // Crime history data
-    getCountryCrimeHistory: (country) => 
-        apiService.request(`/api/country/crime_history?country=${encodeURIComponent(country)}`),
-    getDepartmentCrimeHistory: (deptCode) => 
+    getCountryCrimeHistory: (country) =>
+        apiService.request(
+            `/api/country/crime_history?country=${encodeURIComponent(country)}`,
+        ),
+    getDepartmentCrimeHistory: (deptCode) =>
         apiService.request(`/api/departements/crime_history?dept=${deptCode}`),
-    getCommuneCrimeHistory: (cog) => 
+    getCommuneCrimeHistory: (cog) =>
         apiService.request(`/api/communes/crime_history?cog=${cog}`),
 
     // Rankings data
@@ -169,9 +175,4 @@ export const api = {
         const queryString = new URLSearchParams(params).toString();
         return apiService.request(`/api/articles/counts?${queryString}`);
     },
-
-    
-
-    
-    
 };
