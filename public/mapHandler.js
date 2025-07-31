@@ -56,7 +56,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
     async function initMap() {
         // Main map centered on France (mainland + Corsica)
         map = L.map(mapDiv, {
-            maxBounds: L.latLngBounds([41, -5], [51, 9]), // Constrain to France
+            maxBounds: L.latLngBounds([41, -5], [51.5, 9]), // Constrain to France with buffer for northern tooltips
             maxBoundsViscosity: 1.0, // Prevent panning outside
         }).setView([46.603354, 1.888334], 5); // Zoom 5 for full France view
 
