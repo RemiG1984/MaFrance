@@ -170,7 +170,7 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
             button.dataset.category = category.key;
             button.addEventListener("click", () => {
                 currentFilter = category.key;
-                renderArticles(window.allArticles, currentLieu, currentFilter);
+                renderArticles(allArticles, currentLieu, currentFilter);
                 document
                     .querySelectorAll(".filter-button")
                     .forEach((btn) => btn.classList.remove("active"));
@@ -181,10 +181,10 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
 
         const allButton = document.createElement("button");
         allButton.className = `filter-button${currentFilter === null ? " active" : ""}`;
-        allButton.textContent = `Tous (${getFilteredArticleCount(window.allArticles, currentLieu)})`;
+        allButton.textContent = `Tous (${getFilteredArticleCount(allArticles, currentLieu)})`;
         allButton.addEventListener("click", () => {
             currentFilter = null;
-            renderArticles(window.allArticles, currentLieu);
+            renderArticles(allArticles, currentLieu);
             document
                 .querySelectorAll(".filter-button")
                 .forEach((btn) => btn.classList.remove("active"));
