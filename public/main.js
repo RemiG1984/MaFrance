@@ -229,12 +229,12 @@ window.MetricsConfig = MetricsConfig;
         let departement = departementSelect.value;
 
         if (selectedCommune) {
-            isCommuneSelectionInProgress = true; // Set flag to prevent department graphs
             try {
                 const communeDept = locationHandler.getDepartmentForCommune(selectedCommune);
 
-                // Auto-select department if not already selected, or update if different
+                // Set flag BEFORE auto-selecting department to prevent unnecessary department data fetching
                 if (communeDept && (!departement || departement !== communeDept)) {
+                    isCommuneSelectionInProgress = true;
                     departement = communeDept;
                     departementSelect.value = departement;
                     departementSelect.dispatchEvent(new Event('change'));
