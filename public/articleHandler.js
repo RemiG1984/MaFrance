@@ -34,11 +34,7 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
             console.log("Articles fetched:", articles);
 
             // Articles are returned and handled by the caller
-
-            // Load lieux selector only at commune level using locationHandler
-            if (cog && locationHandler && locationHandler.loadLieux) {
-                await locationHandler.loadLieux(departement, cog);
-            }
+            // Note: lieux loading is now handled exclusively by locationHandler
 
             renderArticles(articles, lieu, currentFilter);
             return articles;

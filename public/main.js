@@ -142,7 +142,7 @@ window.MetricsConfig = MetricsConfig;
                 mapHandler.showDepartmentPopup(departement);
             }
             
-            articleHandler.loadArticles(departement, "", "", locationHandler).then((articles) => {
+            articleHandler.loadArticles(departement, "", "", null).then((articles) => {
                 articleHandler.loadArticleCounts(departement).then((counts) => {
                     articleHandler.renderFilterButtons(
                         counts,
@@ -179,7 +179,7 @@ window.MetricsConfig = MetricsConfig;
                 showCrimeGraphs("department", departement);
                 showNamesGraph("department", departement);
                 showQpvData("department", departement);
-                articleHandler.loadArticles(departement, "", "", locationHandler).then((articles) => {
+                articleHandler.loadArticles(departement, "", "", null).then((articles) => {
                     articleHandler
                         .loadArticleCounts(departement)
                         .then((counts) => {
@@ -250,9 +250,9 @@ window.MetricsConfig = MetricsConfig;
                     showNamesGraph("commune", cog, departement, selectedCommune);
                     showQpvData("commune", cog, departement, selectedCommune);
                     
-                    // Load lieux first, then articles and counts
+                    // Load lieux first, then articles and counts in sequence
                     locationHandler.loadLieux(departement, cog).then(() => {
-                        return articleHandler.loadArticles(departement, cog, "", locationHandler);
+                        return articleHandler.loadArticles(departement, cog, "", null); // No locationHandler needed since lieux already loaded
                     }).then((articles) => {
                         return articleHandler.loadArticleCounts(departement, cog).then((counts) => {
                             console.log("About to render filter buttons with:", { counts, articlesLength: articles?.length });
@@ -290,7 +290,7 @@ window.MetricsConfig = MetricsConfig;
             try {
                 const cog = await getCOGForCommune(commune, departement);
                 if (cog) {
-                    articleHandler.loadArticles(departement, cog, currentLieu, locationHandler).then((articles) => {
+                    articleHandler.loadArticles(departement, cog, currentLieu, null).then((articles) => {
                         articleHandler.loadArticleCounts(departement, cog, currentLieu).then((counts) => {
                             articleHandler.renderFilterButtons(counts, articles, currentLieu);
                         });
@@ -775,7 +775,7 @@ window.MetricsConfig = MetricsConfig;
                 // Load lieux and articles
                 if (deptCode) {
                     locationHandler.loadLieux(deptCode, cog);
-                    articleHandler.loadArticles(deptCode, cog, "", locationHandler).then((articles) => {
+                    articleHandler.loadArticles(deptCode, cog, "", null).then((articles) => {
                         articleHandler.loadArticleCounts(deptCode, cog).then((counts) => {
                             articleHandler.renderFilterButtons(counts, articles, currentLieu);
                         });
