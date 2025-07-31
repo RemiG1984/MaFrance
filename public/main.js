@@ -156,8 +156,11 @@ window.MetricsConfig = MetricsConfig;
                     countsType: typeof counts
                 });
                 console.log("Rendering filter buttons for department...");
-                articleHandler.renderFilterButtons(counts, articles, currentLieu);
-                console.log("=== DEPARTMENT SELECTION: Filter buttons render completed ===");
+                // Use setTimeout to ensure DOM is ready and lieux selector is properly hidden
+                setTimeout(() => {
+                    articleHandler.renderFilterButtons(counts, articles, currentLieu);
+                    console.log("=== DEPARTMENT SELECTION: Filter buttons render completed ===");
+                }, 0);
             }).catch((error) => {
                 console.error("=== DEPARTMENT SELECTION: ERROR in parallel loading ===");
                 console.error("Error details:", error);
@@ -259,35 +262,41 @@ window.MetricsConfig = MetricsConfig;
                     showNamesGraph("commune", cog, departement, selectedCommune);
                     showQpvData("commune", cog, departement, selectedCommune);
                     
-                    console.log("=== COMMUNE SELECTION: Starting parallel loading ===");
+                    console.log("=== COMMUNE SELECTION: Starting sequential loading ===");
                     console.log("Loading lieux and articles for:", { departement, cog });
                     
-                    // Load lieux and articles in parallel, then load counts and render buttons
-                    Promise.all([
-                        locationHandler.loadLieux(departement, cog),
-                        articleHandler.loadArticles(departement, cog, "", null)
-                    ]).then(([lieuxResult, articles]) => {
-                        console.log("=== COMMUNE SELECTION: Parallel loading completed ===");
+                    // Load lieux first, then articles and counts in parallel, then render buttons
+                    locationHandler.loadLieux(departement, cog).then(() => {
+                        console.log("=== COMMUNE SELECTION: Lieux loading completed ===");
+                        
+                        // Now load articles and counts in parallel
+                        return Promise.all([
+                            articleHandler.loadArticles(departement, cog, "", null),
+                            articleHandler.loadArticleCounts(departement, cog)
+                        ]);
+                    }).then(([articles, counts]) => {
+                        console.log("=== COMMUNE SELECTION: Articles and counts loading completed ===");
                         console.log("Results:", { 
-                            lieuxResult, 
                             articlesLength: articles?.length,
-                            articlesType: typeof articles
+                            counts,
+                            countsType: typeof counts
                         });
                         
-                        console.log("Now loading article counts...");
-                        return articleHandler.loadArticleCounts(departement, cog).then((counts) => {
-                            console.log("=== COMMUNE SELECTION: About to render filter buttons ===");
-                            console.log("Final data for renderFilterButtons:", { 
-                                counts, 
-                                countsType: typeof counts,
-                                articlesLength: articles?.length,
-                                currentLieu 
-                            });
+                        console.log("=== COMMUNE SELECTION: About to render filter buttons ===");
+                        console.log("Final data for renderFilterButtons:", { 
+                            counts, 
+                            countsType: typeof counts,
+                            articlesLength: articles?.length,
+                            currentLieu 
+                        });
+                        
+                        // Use setTimeout to ensure DOM updates from loadLieux are complete
+                        setTimeout(() => {
                             articleHandler.renderFilterButtons(counts, articles, currentLieu);
                             console.log("=== COMMUNE SELECTION: Filter buttons render completed ===");
-                        });
+                        }, 10);
                     }).catch((error) => {
-                        console.error("=== COMMUNE SELECTION: ERROR in parallel loading ===");
+                        console.error("=== COMMUNE SELECTION: ERROR in loading sequence ===");
                         console.error("Error details:", error);
                         console.error("Stack trace:", error.stack);
                     });
@@ -324,7 +333,9 @@ window.MetricsConfig = MetricsConfig;
                         articleHandler.loadArticles(departement, cog, currentLieu, null),
                         articleHandler.loadArticleCounts(departement, cog, currentLieu)
                     ]).then(([articles, counts]) => {
-                        articleHandler.renderFilterButtons(counts, articles, currentLieu);
+                        setTimeout(() => {
+                            articleHandler.renderFilterButtons(counts, articles, currentLieu);
+                        }, 0);
                     }).catch((error) => {
                         console.error("Error loading lieu articles:", error);
                     });

@@ -208,12 +208,27 @@ function LocationHandler(
                 innerHTML: lieuxSelect.innerHTML.substring(0, 100) + '...'
             });
             console.log("=== loadLieux SUCCESS ===");
+            
+            // Force a small delay to ensure DOM is fully updated
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    console.log("✓ loadLieux DOM update confirmed");
+                    resolve();
+                }, 5);
+            });
         } catch (error) {
             console.error("=== loadLieux ERROR ===");
             console.error("Error details:", error);
             lieuxSelect.innerHTML = '<option value="">-- Aucun lieu --</option>';
             lieuxSelect.disabled = true;
             console.log("Set lieuxSelect to error state");
+            
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    console.log("✓ loadLieux error state DOM update confirmed");
+                    resolve();
+                }, 5);
+            });
         } finally {
             console.log("Hiding spinner...");
             spinner.hide(spinnerId);

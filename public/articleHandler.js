@@ -159,7 +159,7 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
             currentLieuType: typeof currentLieu
         });
         
-        // Check DOM elements
+        // Check DOM elements with retries if needed
         const lieuxSelect = document.getElementById('lieuxSelect');
         const communeInput = document.getElementById('communeInput');
         const filtersContainer = document.getElementById('articleFilters');
@@ -189,7 +189,13 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
                 lieuxSelect.style.display = 'block';
                 lieuxSelect.disabled = false;
                 console.log("✓ Showing lieux selector at commune level");
-                console.log("LieuxSelect current options:", lieuxSelect.innerHTML);
+                console.log("LieuxSelect current options count:", lieuxSelect.options.length);
+                console.log("LieuxSelect innerHTML length:", lieuxSelect.innerHTML.length);
+                
+                // Preserve existing options - don't clear if they're already loaded
+                if (lieuxSelect.options.length <= 1) {
+                    console.log("⚠️ LieuxSelect has no options loaded yet - this may be a timing issue");
+                }
             } else {
                 lieuxSelect.style.display = 'none';
                 lieuxSelect.disabled = true;
