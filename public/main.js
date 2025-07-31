@@ -83,6 +83,35 @@ import { spinner } from './spinner.js';
     window.isMapClickInProgress = false; // Flag to prevent circular reference
     let isCommuneSelectionInProgress = false; // Flag to prevent department graphs during commune selection
 
+    // Menu toggle functionality
+    const menuToggle = document.querySelector('.menu-toggle');
+    const navMenu = document.querySelector('.nav-menu');
+
+    if (menuToggle && navMenu) {
+        menuToggle.addEventListener('click', () => {
+            menuToggle.classList.toggle('active');
+            navMenu.classList.toggle('active');
+        });
+
+        // Close menu when a link is clicked
+        navMenu.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                menuToggle.classList.remove('active');
+                navMenu.classList.remove('active');
+            });
+        });
+    }
+
+    // Highlight active page
+    const currentPath = window.location.pathname.split('/').pop() || 'index.html';
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(link => {
+        const href = link.getAttribute('href');
+        if (href === currentPath) {
+            link.classList.add('active');
+        }
+    });
+
     // France button functionality
     const franceButton = document.getElementById('franceButton');
     if (franceButton) {
@@ -668,12 +697,12 @@ import { spinner } from './spinner.js';
         }
     }
 
-    // Initialize the application once
+    // Initialize the application
     function initializeApp() {
         console.log('Initializing application...');
         communeInput.disabled = false;
         communeInput.placeholder = "Rechercher une commune...";
-        
+
         scoreTableHandler.showCountryDetails();
         executiveHandler.showCountryExecutive();
         showCrimeGraphs("country", "France");

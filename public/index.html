@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Ma France?</title>
+        <title>Ma France: état des lieux</title>
         <link
             href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
             rel="stylesheet"
@@ -29,43 +29,65 @@
         <script src="https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js"></script>
     </head>
     <body class="min-h-screen bg-gray-50">
-        <div class="container mx-auto px-4 py-6">
-            <div class="header-container text-center mb-6">
-                <h1 class="text-3xl font-bold text-gray-800">Ma France?</h1>
-            </div>
+        <header class="site-header bg-white shadow">
             <div
-                class="second-line-container flex justify-center items-center gap-4 mb-6"
+                class="header-content container mx-auto px-4 flex justify-between items-center py-4"
             >
-                <a
-                    href="https://twitter.com/ou_va_ma_France?ref_src=twsrc%5Etfw"
-                    class="twitter-follow-button"
-                    data-show-count="false"
-                ></a>
-                <script
-                    async
-                    src="https://platform.twitter.com/widgets.js"
-                    charset="utf-8"
-                ></script>
-                <button
-                    id="labelToggleBtn"
-                    class="label-toggle-btn"
-                    title="Basculer entre les libellés standards et alternatifs"
-                >
-                    🔄 Version neutre
-                </button>
+                <div class="branding flex items-center gap-4">
+                    <h1 class="text-3xl font-bold text-gray-800">Ma France: état des lieux</h1>
+                    <a
+                        href="https://twitter.com/ou_va_ma_France?ref_src=twsrc%5Etfw"
+                        class="twitter-follow-button"
+                        data-show-count="false"
+                    ></a>
+                    <script
+                        async
+                        src="https://platform.twitter.com/widgets.js"
+                        charset="utf-8"
+                    ></script>
+                </div>
+                <nav class="site-nav flex items-center gap-4">
+                    <button class="menu-toggle" aria-label="Toggle menu">
+                        <span class="hamburger"></span>
+                    </button>
+                    <ul class="nav-menu flex gap-4">
+                        <li>
+                            <a href="index.html" class="nav-link active"
+                                >Accueil</a
+                            >
+                        </li>
+                        <li>
+                            <a href="rankings.html" class="nav-link"
+                                >Classements</a
+                            >
+                        </li>
+                        <li>
+                            <a href="notice.html" class="nav-link"
+                                >Méthodologie</a
+                            >
+                        </li>
+                    </ul>
+                    <button
+                        id="labelToggleBtn"
+                        class="label-toggle-btn"
+                        title="Basculer entre les libellés standards et alternatifs"
+                    >
+                        🔄 Version neutre
+                    </button>
+                </nav>
             </div>
-
+        </header>
+        <div class="container mx-auto px-4 py-6">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                 <!-- First Column: Location selectors, map, lieux selector, and articles -->
                 <div class="space-y-6">
                     <div class="bg-white p-6 rounded-lg shadow h-fit">
-                        <h2 class="text-lg font-semibold text-gray-800 mb-4">Sélection du niveau de visualisation</h2>
+                        <h2 class="text-lg font-semibold text-gray-800 mb-4">
+                            Sélection du niveau de visualisation
+                        </h2>
                         <div class="flex flex-col lg:flex-row gap-4">
                             <div class="flex flex-col">
-                                <button
-                                    id="franceButton"
-                                    class="france-button"
-                                >
+                                <button id="franceButton" class="france-button">
                                     France
                                 </button>
                             </div>
@@ -98,7 +120,10 @@
                     >
                         <div id="map" class="h-[500px]"></div>
                     </div>
-                    <div id="articles" class="bg-white p-6 rounded-lg shadow h-fit">
+                    <div
+                        id="articles"
+                        class="bg-white p-6 rounded-lg shadow h-fit"
+                    >
                         <h2 class="text-2xl font-bold text-gray-800 mb-4">
                             Articles FdeSouche associés
                         </h2>
@@ -108,9 +133,14 @@
                                     id="lieuxSelect"
                                     class="p-2 border border-gray-300 rounded-md bg-gray-100 text-sm"
                                 >
-                                    <option value="">-- Tous les lieux --</option>
+                                    <option value="">
+                                        -- Tous les lieux --
+                                    </option>
                                 </select>
-                                <div id="filterButtons" class="flex flex-wrap gap-2"></div>
+                                <div
+                                    id="filterButtons"
+                                    class="flex flex-wrap gap-2"
+                                ></div>
                             </div>
                         </div>
                         <div id="articleList" class="article-list"></div>
@@ -123,7 +153,10 @@
                             Évolution des Prénoms
                         </h2>
                         <div id="namesChartContainer" class="chart-container">
-                            <canvas id="namesChart" style="max-height: 400px;"></canvas>
+                            <canvas
+                                id="namesChart"
+                                style="max-height: 400px"
+                            ></canvas>
                         </div>
                     </div>
                     <div
@@ -134,7 +167,10 @@
                             Quartiers Prioritaires (QPV)
                         </h2>
                         <div id="qpvContainer">
-                            <p>Sélectionnez un département ou une commune pour voir les QPV.</p>
+                            <p>
+                                Sélectionnez un département ou une commune pour
+                                voir les QPV.
+                            </p>
                         </div>
                     </div>
                     <div

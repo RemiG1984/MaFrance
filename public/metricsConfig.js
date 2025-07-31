@@ -9,16 +9,16 @@
 export const MetricsConfig = {
     // Page titles for different label states
     pageTitles: {
-        standard: "Ma France?",
-        alt1: "Ma France Inclusive",
+        standard: "Ma France: état des lieux",
+        alt1: "Ma France inclusive",
         alt2: "Où va ma France?",
     },
 
     // Toggle button labels for different states
     toggleButtonLabels: {
         standard: "🔄 Version neutre ⚖️",
-        alt1: "🔄 Version progressiste 🌈",
-        alt2: "🔄 Version conservatrice 🦅",
+        alt1: "🔄 Version inclusive 🌈",
+        alt2: "🔄 Version identitaire 🦅",
     },
 
     // Label state: 0 = standard, 1 = alt1, 2 = alt2
