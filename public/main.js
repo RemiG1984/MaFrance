@@ -143,11 +143,11 @@ window.MetricsConfig = MetricsConfig;
                 mapHandler.showDepartmentPopup(departement);
             }
             
-            articleHandler.loadArticles(departement, "", "", locationHandler).then(() => {
+            articleHandler.loadArticles(departement, "", "", locationHandler).then((articles) => {
                 articleHandler.loadArticleCounts(departement).then((counts) => {
                     articleHandler.renderFilterButtons(
                         counts,
-                        allArticles,
+                        articles,
                         currentLieu,
                     );
                 });
@@ -180,13 +180,13 @@ window.MetricsConfig = MetricsConfig;
                 showCrimeGraphs("department", departement);
                 showNamesGraph("department", departement);
                 showQpvData("department", departement);
-                articleHandler.loadArticles(departement, "", "", locationHandler).then(() => {
+                articleHandler.loadArticles(departement, "", "", locationHandler).then((articles) => {
                     articleHandler
                         .loadArticleCounts(departement)
                         .then((counts) => {
                             articleHandler.renderFilterButtons(
                                 counts,
-                                allArticles,
+                                articles,
                                 currentLieu,
                             );
                         });
@@ -251,9 +251,9 @@ window.MetricsConfig = MetricsConfig;
                     showNamesGraph("commune", cog, departement, selectedCommune);
                     showQpvData("commune", cog, departement, selectedCommune);
                     locationHandler.loadLieux(departement, cog);
-                    articleHandler.loadArticles(departement, cog, "", locationHandler).then(() => {
+                    articleHandler.loadArticles(departement, cog, "", locationHandler).then((articles) => {
                         articleHandler.loadArticleCounts(departement, cog).then((counts) => {
-                            articleHandler.renderFilterButtons(counts, allArticles, currentLieu);
+                            articleHandler.renderFilterButtons(counts, articles, currentLieu);
                         });
                     });
 
@@ -285,9 +285,9 @@ window.MetricsConfig = MetricsConfig;
             try {
                 const cog = await getCOGForCommune(commune, departement);
                 if (cog) {
-                    articleHandler.loadArticles(departement, cog, currentLieu, locationHandler).then(() => {
+                    articleHandler.loadArticles(departement, cog, currentLieu, locationHandler).then((articles) => {
                         articleHandler.loadArticleCounts(departement, cog, currentLieu).then((counts) => {
-                            articleHandler.renderFilterButtons(counts, allArticles, currentLieu);
+                            articleHandler.renderFilterButtons(counts, articles, currentLieu);
                         });
                     });
                 } else {
@@ -770,9 +770,9 @@ window.MetricsConfig = MetricsConfig;
                 // Load lieux and articles
                 if (deptCode) {
                     locationHandler.loadLieux(deptCode, cog);
-                    articleHandler.loadArticles(deptCode, cog, "", locationHandler).then(() => {
+                    articleHandler.loadArticles(deptCode, cog, "", locationHandler).then((articles) => {
                         articleHandler.loadArticleCounts(deptCode, cog).then((counts) => {
-                            articleHandler.renderFilterButtons(counts, allArticles, currentLieu);
+                            articleHandler.renderFilterButtons(counts, articles, currentLieu);
                         });
                     });
                 }

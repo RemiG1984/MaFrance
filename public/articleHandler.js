@@ -32,7 +32,9 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
             console.log("Fetching articles with params:", params);
             const articles = await api.getArticles(params);
             console.log("Articles fetched:", articles);
-            window.allArticles = articles; // Store globally for access in main.js
+            
+            // Store globally for access in main.js IMMEDIATELY after fetching
+            window.allArticles = articles;
 
             // Load lieux selector only at commune level using locationHandler
             if (cog && locationHandler && locationHandler.loadLieux) {
@@ -144,6 +146,9 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
     function renderFilterButtons(counts, allArticles, currentLieu) {
         filterButtonsDiv.innerHTML = "";
 
+        // Store the articles in a closure to ensure event listeners use the correct data
+        const articlesForThisRender = allArticles;
+
         // Show lieuxSelect if we have lieux data and we're at commune level
         const lieuxSelect = document.getElementById('lieuxSelect');
         const hasCOG = window.location.search.includes('cog=') || document.getElementById('communeInput').value.trim() !== '';
@@ -170,7 +175,7 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
             button.dataset.category = category.key;
             button.addEventListener("click", () => {
                 currentFilter = category.key;
-                renderArticles(window.allArticles, currentLieu, currentFilter);
+                renderArticles(articlesForThisRender, currentLieu, currentFilter);
                 document
                     .querySelectorAll(".filter-button")
                     .forEach((btn) => btn.classList.remove("active"));
@@ -181,10 +186,10 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
 
         const allButton = document.createElement("button");
         allButton.className = `filter-button${currentFilter === null ? " active" : ""}`;
-        allButton.textContent = `Tous (${getFilteredArticleCount(window.allArticles, currentLieu)})`;
+        allButton.textContent = `Tous (${getFilteredArticleCount(articlesForThisRender, currentLieu)})`;
         allButton.addEventListener("click", () => {
             currentFilter = null;
-            renderArticles(window.allArticles, currentLieu);
+            renderArticles(articlesForThisRender, currentLieu);
             document
                 .querySelectorAll(".filter-button")
                 .forEach((btn) => btn.classList.remove("active"));
