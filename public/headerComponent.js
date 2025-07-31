@@ -17,7 +17,8 @@ export class HeaderComponent {
         this.highlightActivePage();
         this.initializeVersionDropdown();
         this.updatePageTitle();
-        this.updateVersionDisplay();
+        // Delay version display update to ensure MetricsConfig is loaded
+        setTimeout(() => this.updateVersionDisplay(), 100);
     }
 
     /**
@@ -219,11 +220,20 @@ export class HeaderComponent {
      * Update version display based on current state
      */
     updateVersionDisplay() {
+        const versionText = document.querySelector('.version-text');
+        if (!versionText) return;
+
         if (typeof window !== 'undefined' && window.MetricsConfig) {
-            const versionText = document.querySelector('.version-text');
-            if (versionText) {
-                versionText.textContent = window.MetricsConfig.getCurrentVersionLabel();
-            }
+            versionText.textContent = window.MetricsConfig.getCurrentVersionLabel();
+        } else {
+            // If MetricsConfig isn't available yet, try to read from localStorage directly
+            const savedState = parseInt(localStorage.getItem('metricsLabelState')) || 0;
+            const versionLabels = [
+                "Version neutre ⚖️",
+                "Version inclusive 🌈", 
+                "Version identitaire 🦅"
+            ];
+            versionText.textContent = versionLabels[savedState] || versionLabels[0];
         }
     }
 
@@ -242,6 +252,17 @@ export class HeaderComponent {
 document.addEventListener('DOMContentLoaded', () => {
     const headerContainer = document.querySelector('#header-container');
     if (headerContainer) {
-        HeaderComponent.create(headerContainer);
+        const header = HeaderComponent.create(headerContainer);
+        
+        // Listen for MetricsConfig to become available and update version display
+        const checkMetricsConfig = () => {
+            if (typeof window !== 'undefined' && window.MetricsConfig) {
+                header.updateVersionDisplay();
+                header.updatePageTitle();
+            } else {
+                setTimeout(checkMetricsConfig, 50);
+            }
+        };
+        checkMetricsConfig();
     }
 });
