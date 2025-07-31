@@ -250,6 +250,9 @@ window.MetricsConfig = MetricsConfig;
                     showNamesGraph("commune", cog, departement, selectedCommune);
                     showQpvData("commune", cog, departement, selectedCommune);
                     locationHandler.loadLieux(departement, cog);
+                    
+                    // Clear any existing articles and load fresh commune-level data
+                    articleHandler.clearArticles();
                     articleHandler.loadArticles(departement, cog, "", locationHandler).then((articles) => {
                         articleHandler.loadArticleCounts(departement, cog).then((counts) => {
                             articleHandler.renderFilterButtons(counts, articles, currentLieu);
