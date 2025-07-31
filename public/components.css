@@ -1059,8 +1059,21 @@
         background: #f8f9fa;
     }
 
-    /* Mobile title styling */
+    /* Mobile title styling - responsive font size */
     .branding h1 {
-        font-size: 1.5rem !important;
+        font-size: clamp(1.1rem, 4vw, 1.5rem) !important;
+    }
+    
+    /* Additional mobile breakpoints for very small screens */
+    @media (max-width: 480px) {
+        .branding h1 {
+            font-size: clamp(0.9rem, 3.5vw, 1.2rem) !important;
+        }
+    }
+    
+    @media (max-width: 360px) {
+        .branding h1 {
+            font-size: clamp(0.8rem, 3vw, 1rem) !important;
+        }
     }
 }
