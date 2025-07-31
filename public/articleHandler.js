@@ -12,7 +12,7 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
     let currentFilter = null;
     let filteredArticles = [];
 
-    
+
 
     /**
      * Loads articles for a specific location.
@@ -32,7 +32,7 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
             console.log("Fetching articles with params:", params);
             const articles = await api.getArticles(params);
             console.log("Articles fetched:", articles);
-            
+
             // Articles are returned and handled by the caller
 
             // Load lieux selector only at commune level using locationHandler
