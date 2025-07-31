@@ -250,14 +250,16 @@ window.MetricsConfig = MetricsConfig;
                     showNamesGraph("commune", cog, departement, selectedCommune);
                     showQpvData("commune", cog, departement, selectedCommune);
                     
-                    // Load lieux and articles together to ensure proper sequencing
-                    Promise.all([
-                        locationHandler.loadLieux(departement, cog),
-                        articleHandler.loadArticles(departement, cog, "", locationHandler)
-                    ]).then(([_, articles]) => {
-                        articleHandler.loadArticleCounts(departement, cog).then((counts) => {
+                    // Load lieux first, then articles and counts
+                    locationHandler.loadLieux(departement, cog).then(() => {
+                        return articleHandler.loadArticles(departement, cog, "", locationHandler);
+                    }).then((articles) => {
+                        return articleHandler.loadArticleCounts(departement, cog).then((counts) => {
+                            console.log("About to render filter buttons with:", { counts, articlesLength: articles?.length });
                             articleHandler.renderFilterButtons(counts, articles, currentLieu);
                         });
+                    }).catch((error) => {
+                        console.error("Error in commune selection article/lieux loading:", error);
                     });
 
                     // Update map to center on department and select the commune

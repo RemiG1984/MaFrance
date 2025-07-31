@@ -143,19 +143,35 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
      * @param {string} currentLieu - Currently selected location
      */
     function renderFilterButtons(counts, allArticles, currentLieu) {
+        console.log("renderFilterButtons called with:", { counts, articlesLength: allArticles?.length, currentLieu });
+        
         filterButtonsDiv.innerHTML = "";
 
-        // Show lieuxSelect if we have lieux data and we're at commune level
+        // Show lieuxSelect if we're at commune level (commune input has value)
         const lieuxSelect = document.getElementById('lieuxSelect');
-        const hasCOG = window.location.search.includes('cog=') || document.getElementById('communeInput').value.trim() !== '';
+        const communeInput = document.getElementById('communeInput');
+        const isAtCommuneLevel = communeInput && communeInput.value.trim() !== '';
 
-        if (lieuxSelect && hasCOG) {
-            // Show lieuxSelect at commune level regardless of lieux availability
-            lieuxSelect.style.display = 'block';
-            lieuxSelect.disabled = false;
-        } else if (lieuxSelect) {
-            lieuxSelect.style.display = 'none';
-            lieuxSelect.disabled = true;
+        if (lieuxSelect) {
+            if (isAtCommuneLevel) {
+                lieuxSelect.style.display = 'block';
+                lieuxSelect.disabled = false;
+                console.log("Showing lieux selector at commune level");
+            } else {
+                lieuxSelect.style.display = 'none';
+                lieuxSelect.disabled = true;
+                console.log("Hiding lieux selector - not at commune level");
+            }
+        }
+
+        // Ensure we have valid counts and articles
+        if (!counts) {
+            console.warn("No counts provided to renderFilterButtons");
+            counts = {};
+        }
+        if (!allArticles) {
+            console.warn("No articles provided to renderFilterButtons");
+            allArticles = [];
         }
 
         const categories = MetricsConfig.articleCategories.map(category => ({
@@ -163,6 +179,8 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
             key: category.key,
             count: counts[category.key] || 0,
         }));
+
+        console.log("Creating filter buttons for categories:", categories);
 
         categories.forEach((category) => {
             const button = document.createElement("button");
@@ -192,6 +210,8 @@ function ArticleHandler(articleListDiv, filterButtonsDiv) {
             allButton.classList.add("active");
         });
         filterButtonsDiv.appendChild(allButton);
+        
+        console.log("Filter buttons created, total buttons:", filterButtonsDiv.children.length);
     }
 
     function getFilteredArticleCount(articles, lieu) {
