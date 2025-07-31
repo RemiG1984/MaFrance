@@ -626,7 +626,7 @@ function ScoreTableHandler(resultsDiv, departmentNames) {
                                 (row, index) => `
                             <tr class="score-row${row.subRow ? ` sub-row group-${row.groupId}` : ""}" ${!row.subRow ? `data-group-id="${row.groupId}"` : ""}>
                                 <td class="row-title${row.subRow ? " sub-row" : ""}">
-                                    ${row.link ? `<a href="${row.link}" target="_blank">${row.title}</a>` : row.title}
+                                    ${row.link ? `<a href="${row.link}">${row.title}</a>` : row.title}
                                 </td>
                                 <td class="score-main">${row.main}</td>
                                 ${row.compare ? `<td class="score-compare">${row.compare}</td>` : compareHeader ? "<td></td>" : ""}
