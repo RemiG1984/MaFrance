@@ -39,19 +39,74 @@
             }
         </style>
     </head>
-    <body>
-        <div class="header-container">
+    <body class="min-h-screen bg-gray-50">
+        <header class="site-header bg-white shadow">
+            <div
+                class="header-content container mx-auto px-4 flex justify-between items-center py-4"
+            >
+                <div class="branding flex items-center gap-4">
+                    <h1 class="text-3xl font-bold text-gray-800">Ma France: état des lieux</h1>
+                </div>
+                <nav class="site-nav flex items-center gap-4">
+                    <button class="menu-toggle" aria-label="Toggle menu">
+                        <span class="hamburger"></span>
+                    </button>
+                    <ul class="nav-menu flex gap-4">
+                        <li>
+                            <a href="index.html" class="nav-link">Accueil</a>
+                        </li>
+                        <li>
+                            <a href="rankings.html" class="nav-link">Classements</a>
+                        </li>
+                        <li>
+                            <a href="notice.html" class="nav-link">Méthodologie</a>
+                        </li>
+                    </ul>
+                    <button id="labelToggleBtn" class="label-toggle-btn" title="Basculer entre les libellés standards et alternatifs">
+                        🔄 Version neutre
+                    </button>
+                </nav>
+            </div>
+        </header>
+        <div class="container mx-auto px-4 py-6">
             <h1>Graphique des Statistiques de Criminalité</h1>
-        </div>
-        <div class="second-line-container">
-            <button id="labelToggleBtn" class="label-toggle-btn" title="Basculer entre les libellés standards et alternatifs">
-                🔄 Version neutre
-            </button>
-        </div>
         <div class="chart-grid" id="crimeChartGrid"></div>
         <div class="navigation">
-            <a href="index.html" class="nav-link">Retour à la page principale</a>
+                <a href="index.html" class="nav-link">Retour à la page principale</a>
+            </div>
         </div>
+        <script>
+            // Add mobile menu functionality
+            document.addEventListener('DOMContentLoaded', function() {
+                const menuToggle = document.querySelector('.menu-toggle');
+                const navMenu = document.querySelector('.nav-menu');
+                
+                if (menuToggle && navMenu) {
+                    menuToggle.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        menuToggle.classList.toggle('active');
+                        navMenu.classList.toggle('active');
+                    });
+
+                    // Close menu when a link is clicked
+                    navMenu.querySelectorAll('.nav-link').forEach(link => {
+                        link.addEventListener('click', () => {
+                            menuToggle.classList.remove('active');
+                            navMenu.classList.remove('active');
+                        });
+                    });
+
+                    // Close menu when clicking outside
+                    document.addEventListener('click', (e) => {
+                        if (!menuToggle.contains(e.target) && !navMenu.contains(e.target)) {
+                            menuToggle.classList.remove('active');
+                            navMenu.classList.remove('active');
+                        }
+                    });
+                }
+            });
+        </script>
         <!-- Load Chart.js -->
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <!-- Load Watermark Plugin -->
