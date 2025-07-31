@@ -88,9 +88,13 @@ import { spinner } from './spinner.js';
     const navMenu = document.querySelector('.nav-menu');
 
     if (menuToggle && navMenu) {
-        menuToggle.addEventListener('click', () => {
+        menuToggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Menu toggle clicked');
             menuToggle.classList.toggle('active');
             navMenu.classList.toggle('active');
+            console.log('Menu active class:', navMenu.classList.contains('active'));
         });
 
         // Close menu when a link is clicked
@@ -99,6 +103,14 @@ import { spinner } from './spinner.js';
                 menuToggle.classList.remove('active');
                 navMenu.classList.remove('active');
             });
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!menuToggle.contains(e.target) && !navMenu.contains(e.target)) {
+                menuToggle.classList.remove('active');
+                navMenu.classList.remove('active');
+            }
         });
     }
 
