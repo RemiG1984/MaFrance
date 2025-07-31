@@ -988,7 +988,7 @@
     }
 
     .nav-menu {
-        display: none; /* Remove !important */
+        display: none !important;
         position: absolute;
         top: 100%;
         left: 0;
@@ -1001,7 +1001,7 @@
     }
 
     .nav-menu.active {
-        display: flex; /* Remove !important */
+        display: flex !important;
     }
 
     .nav-menu li {
