@@ -1,4 +1,3 @@
-
 /**
  * Header Component
  * Provides reusable header functionality across all pages
@@ -137,38 +136,39 @@ export class HeaderComponent {
         const versionDropdown = document.querySelector('.version-dropdown');
         const versionToggle = document.querySelector('.version-toggle');
         const versionMenu = document.querySelector('.version-menu');
-        
+
         if (!versionDropdown || versionDropdown.dataset.initialized) return;
-        
+
         versionDropdown.dataset.initialized = "true";
-        
+
         // Toggle dropdown menu visibility
         versionToggle.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
             versionMenu.classList.toggle('active');
         });
-        
+
         // Close dropdown when clicking outside
         document.addEventListener('click', (e) => {
             if (!versionDropdown.contains(e.target)) {
                 versionMenu.classList.remove('active');
             }
         });
-        
+
         // Add click listeners to version options
         const versionOptions = versionMenu.querySelectorAll('.version-option');
         versionOptions.forEach((option, index) => {
             option.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                
+
                 const versionText = versionToggle.querySelector('.version-text');
                 if (versionText) {
                     versionText.textContent = option.textContent;
                 }
-                
+
                 versionMenu.classList.remove('active');
+                // Don't close hamburger menu here - let user continue interacting
             });
         });
     }
@@ -179,7 +179,7 @@ export class HeaderComponent {
     updatePageTitle() {
         if (typeof window !== 'undefined' && window.MetricsConfig) {
             document.title = window.MetricsConfig.getCurrentPageTitle();
-            
+
             const headerH1 = document.querySelector('h1');
             if (headerH1) {
                 headerH1.textContent = window.MetricsConfig.getCurrentPageTitle();
@@ -208,7 +208,7 @@ export class HeaderComponent {
         const targetElement = typeof container === 'string' 
             ? document.querySelector(container) 
             : container;
-            
+
         if (targetElement) {
             targetElement.innerHTML = this.getHeaderHTML();
             this.init();
@@ -253,7 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const headerContainer = document.querySelector('#header-container');
     if (headerContainer) {
         const header = HeaderComponent.create(headerContainer);
-        
+
         // Wait a bit for MetricsConfig to be available, then update
         setTimeout(() => {
             header.updateVersionDisplay();
