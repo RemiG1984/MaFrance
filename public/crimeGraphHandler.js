@@ -36,8 +36,8 @@ function CrimeGraphHandler() {
             MetricsConfig.labelState = parseInt(labelState);
         }
 
-        // Use centralized toggle button initialization
-        MetricsConfig.initializeToggleButton();
+        // Use centralized version dropdown initialization
+        MetricsConfig.initializeVersionDropdown();
         
         // Listen for label state changes
         window.addEventListener('metricsLabelsToggled', () => {

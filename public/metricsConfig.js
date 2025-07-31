@@ -14,11 +14,11 @@ export const MetricsConfig = {
         alt2: "Où va ma France?",
     },
 
-    // Toggle button labels for different states
-    toggleButtonLabels: {
-        standard: "🔄 Version neutre ⚖️",
-        alt1: "🔄 Version inclusive 🌈",
-        alt2: "🔄 Version identitaire 🦅",
+    // Version labels for different states
+    versionLabels: {
+        standard: "Version neutre ⚖️",
+        alt1: "Version inclusive 🌈",
+        alt2: "Version identitaire 🦅",
     },
 
     // Label state: 0 = standard, 1 = alt1, 2 = alt2
@@ -440,52 +440,79 @@ export const MetricsConfig = {
         return this.pageTitles[stateName];
     },
 
-    // Get current toggle button label for main page
-    getCurrentToggleButtonLabel() {
+    // Get current version label
+    getCurrentVersionLabel() {
         const stateName = this.getLabelStateName();
-        return this.toggleButtonLabels[stateName];
+        return this.versionLabels[stateName];
     },
 
-    // Initialize toggle button (prevents multiple event listeners)
-    initializeToggleButton() {
-        const labelToggleBtn = document.getElementById("labelToggleBtn");
-        if (!labelToggleBtn || labelToggleBtn.dataset.initialized) return;
+    // Initialize version dropdown (prevents multiple event listeners)
+    initializeVersionDropdown() {
+        const versionDropdown = document.querySelector('.version-dropdown');
+        const versionToggle = document.querySelector('.version-toggle');
+        const versionMenu = document.querySelector('.version-menu');
+        
+        if (!versionDropdown || versionDropdown.dataset.initialized) return;
         
         // Mark as initialized to prevent multiple event listeners
-        labelToggleBtn.dataset.initialized = "true";
+        versionDropdown.dataset.initialized = "true";
         
-        // Set initial button text and style
+        // Set initial version text
         const initialStateName = this.getLabelStateName();
-        labelToggleBtn.textContent = this.getCurrentToggleButtonLabel();
-        
-        // Set initial button style
-        labelToggleBtn.classList.remove('active', 'alt1', 'alt2');
-        if (initialStateName !== 'standard') {
-            labelToggleBtn.classList.add('active', initialStateName);
+        const versionText = versionToggle.querySelector('.version-text');
+        if (versionText) {
+            versionText.textContent = this.getCurrentVersionLabel();
         }
         
-        // Add single click event listener
-        labelToggleBtn.addEventListener('click', () => {
-            this.cycleLabelState();
-            
-            // Update button text and style
-            const stateName = this.getLabelStateName();
-            labelToggleBtn.textContent = this.getCurrentToggleButtonLabel();
-            
-            // Update button style
-            labelToggleBtn.classList.remove('active', 'alt1', 'alt2');
-            if (stateName !== 'standard') {
-                labelToggleBtn.classList.add('active', stateName);
+        // Toggle dropdown menu visibility
+        versionToggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            versionMenu.classList.toggle('active');
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!versionDropdown.contains(e.target)) {
+                versionMenu.classList.remove('active');
             }
-            
-            // Update page title - always set to current page title based on label state
-            document.title = this.getCurrentPageTitle();
-            
-            // Update header h1 if exists - always set to current page title based on label state
-            const headerH1 = document.querySelector('h1');
-            if (headerH1) {
-                headerH1.textContent = this.getCurrentPageTitle();
-            }
+        });
+        
+        // Add click listeners to version options
+        const versionOptions = versionMenu.querySelectorAll('.version-option');
+        versionOptions.forEach((option, index) => {
+            option.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Set label state based on clicked option
+                this.labelState = index;
+                
+                // Update version text
+                const stateName = this.getLabelStateName();
+                if (versionText) {
+                    versionText.textContent = this.getCurrentVersionLabel();
+                }
+                
+                // Close dropdown
+                versionMenu.classList.remove('active');
+                
+                // Update page title
+                document.title = this.getCurrentPageTitle();
+                
+                // Update header h1 if exists
+                const headerH1 = document.querySelector('h1');
+                if (headerH1) {
+                    headerH1.textContent = this.getCurrentPageTitle();
+                }
+                
+                // Dispatch event to notify components of the change
+                window.dispatchEvent(
+                    new CustomEvent("metricsLabelsToggled", {
+                        detail: { labelState: this.labelState },
+                    }),
+                );
+            });
         });
     },
 

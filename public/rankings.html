@@ -29,10 +29,25 @@
                             <a href="index.html" class="nav-link">Accueil</a>
                         </li>
                         <li>
-                            <a href="rankings.html" class="nav-link active">Classements</a>
+                            <a href="rankings.html" class="nav-link active"
+                                >Classements</a
+                            >
                         </li>
                         <li>
-                            <a href="notice.html" class="nav-link">Méthodologie</a>
+                            <a href="notice.html" class="nav-link"
+                                >Méthodologie</a
+                            >
+                        </li>
+                        <li class="version-dropdown">
+                            <a href="#" class="nav-link version-toggle">
+                                <span class="version-text">Version neutre ⚖️</span>
+                                <span class="dropdown-arrow">▼</span>
+                            </a>
+                            <ul class="version-menu">
+                                <li><a href="#" class="version-option">Version neutre ⚖️</a></li>
+                                <li><a href="#" class="version-option">Version inclusive 🌈</a></li>
+                                <li><a href="#" class="version-option">Version identitaire 🦅</a></li>
+                            </ul>
                         </li>
                     </ul>
                 </nav>
@@ -89,7 +104,7 @@
             document.addEventListener('DOMContentLoaded', function() {
                 const menuToggle = document.querySelector('.menu-toggle');
                 const navMenu = document.querySelector('.nav-menu');
-                
+
                 if (menuToggle && navMenu) {
                     menuToggle.addEventListener('click', function(e) {
                         e.preventDefault();

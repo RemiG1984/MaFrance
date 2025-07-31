@@ -724,8 +724,8 @@ import { spinner } from './spinner.js';
         updateExternalLinksWithLabelState();
     }
 
-    // Initialize label toggle functionality (centralized to prevent multiple listeners)
-    MetricsConfig.initializeToggleButton();
+    // Initialize version dropdown functionality (centralized to prevent multiple listeners)
+    MetricsConfig.initializeVersionDropdown();
     
     // Listen for label state changes from the centralized toggle
     window.addEventListener('metricsLabelsToggled', () => {
