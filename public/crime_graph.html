@@ -47,38 +47,6 @@
         
         </div>
         <script type="module" src="headerComponent.js"></script>
-        <script>
-            // Add mobile menu functionality
-            document.addEventListener('DOMContentLoaded', function() {
-                const menuToggle = document.querySelector('.menu-toggle');
-                const navMenu = document.querySelector('.nav-menu');
-
-                if (menuToggle && navMenu) {
-                    menuToggle.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        menuToggle.classList.toggle('active');
-                        navMenu.classList.toggle('active');
-                    });
-
-                    // Close menu when a link is clicked
-                    navMenu.querySelectorAll('.nav-link').forEach(link => {
-                        link.addEventListener('click', () => {
-                            menuToggle.classList.remove('active');
-                            navMenu.classList.remove('active');
-                        });
-                    });
-
-                    // Close menu when clicking outside
-                    document.addEventListener('click', (e) => {
-                        if (!menuToggle.contains(e.target) && !navMenu.contains(e.target)) {
-                            menuToggle.classList.remove('active');
-                            navMenu.classList.remove('active');
-                        }
-                    });
-                }
-            });
-        </script>
         <!-- Load Chart.js -->
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <!-- Load Watermark Plugin -->
