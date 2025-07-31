@@ -142,14 +142,13 @@ window.MetricsConfig = MetricsConfig;
                 mapHandler.showDepartmentPopup(departement);
             }
             
-            articleHandler.loadArticles(departement, "", "", null).then((articles) => {
-                articleHandler.loadArticleCounts(departement).then((counts) => {
-                    articleHandler.renderFilterButtons(
-                        counts,
-                        articles,
-                        currentLieu,
-                    );
-                });
+            Promise.all([
+                articleHandler.loadArticles(departement, "", "", null),
+                articleHandler.loadArticleCounts(departement)
+            ]).then(([articles, counts]) => {
+                articleHandler.renderFilterButtons(counts, articles, currentLieu);
+            }).catch((error) => {
+                console.error("Error loading department articles:", error);
             });
         } else {
             scoreTableHandler.showCountryDetails();
@@ -179,16 +178,13 @@ window.MetricsConfig = MetricsConfig;
                 showCrimeGraphs("department", departement);
                 showNamesGraph("department", departement);
                 showQpvData("department", departement);
-                articleHandler.loadArticles(departement, "", "", null).then((articles) => {
-                    articleHandler
-                        .loadArticleCounts(departement)
-                        .then((counts) => {
-                            articleHandler.renderFilterButtons(
-                                counts,
-                                articles,
-                                currentLieu,
-                            );
-                        });
+                Promise.all([
+                    articleHandler.loadArticles(departement, "", "", null),
+                    articleHandler.loadArticleCounts(departement)
+                ]).then(([articles, counts]) => {
+                    articleHandler.renderFilterButtons(counts, articles, currentLieu);
+                }).catch((error) => {
+                    console.error("Error loading department articles:", error);
                 });
             } else {
                 scoreTableHandler.showCountryDetails();
@@ -250,10 +246,11 @@ window.MetricsConfig = MetricsConfig;
                     showNamesGraph("commune", cog, departement, selectedCommune);
                     showQpvData("commune", cog, departement, selectedCommune);
                     
-                    // Load lieux first, then articles and counts in sequence
-                    locationHandler.loadLieux(departement, cog).then(() => {
-                        return articleHandler.loadArticles(departement, cog, "", null); // No locationHandler needed since lieux already loaded
-                    }).then((articles) => {
+                    // Load lieux and articles in parallel, then load counts and render buttons
+                    Promise.all([
+                        locationHandler.loadLieux(departement, cog),
+                        articleHandler.loadArticles(departement, cog, "", null)
+                    ]).then(([_, articles]) => {
                         return articleHandler.loadArticleCounts(departement, cog).then((counts) => {
                             console.log("About to render filter buttons with:", { counts, articlesLength: articles?.length });
                             articleHandler.renderFilterButtons(counts, articles, currentLieu);
@@ -290,10 +287,13 @@ window.MetricsConfig = MetricsConfig;
             try {
                 const cog = await getCOGForCommune(commune, departement);
                 if (cog) {
-                    articleHandler.loadArticles(departement, cog, currentLieu, null).then((articles) => {
-                        articleHandler.loadArticleCounts(departement, cog, currentLieu).then((counts) => {
-                            articleHandler.renderFilterButtons(counts, articles, currentLieu);
-                        });
+                    Promise.all([
+                        articleHandler.loadArticles(departement, cog, currentLieu, null),
+                        articleHandler.loadArticleCounts(departement, cog, currentLieu)
+                    ]).then(([articles, counts]) => {
+                        articleHandler.renderFilterButtons(counts, articles, currentLieu);
+                    }).catch((error) => {
+                        console.error("Error loading lieu articles:", error);
                     });
                 } else {
                     console.error("COG not found for commune:", commune);
