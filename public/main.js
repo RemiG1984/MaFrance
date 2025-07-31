@@ -12,6 +12,9 @@ import { MetricsConfig } from './metricsConfig.js';
 import { api } from './apiService.js';
 import { spinner } from './spinner.js';
 
+// Expose MetricsConfig globally for HeaderComponent
+window.MetricsConfig = MetricsConfig;
+
 (function () {
     // Use shared department names
     const departmentNames = DepartmentNames;

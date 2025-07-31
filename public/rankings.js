@@ -1,6 +1,9 @@
-import { DepartmentNames } from './departmentNames.js';
 import { MetricsConfig } from './metricsConfig.js';
+import { DepartmentNames } from './departmentNames.js';
 import { api } from './apiService.js';
+
+// Expose MetricsConfig globally for HeaderComponent
+window.MetricsConfig = MetricsConfig;
 
 /**
  * RankingsHandler Module
@@ -66,7 +69,7 @@ const RankingsHandler = (function () {
         function initializeVersionDropdown() {
             // Use centralized version dropdown initialization
             MetricsConfig.initializeVersionDropdown();
-            
+
             // Listen for label state changes
             window.addEventListener('metricsLabelsToggled', () => {
                 populateMetricOptions();
@@ -491,12 +494,12 @@ const RankingsHandler = (function () {
         function populateMetricOptions() {
             const scope = scopeSelect.value;
             let level = 'departement'; // Default level
-            
+
             // Determine the level based on scope
             if (scope === 'communes_france' || scope === 'communes_dept') {
                 level = 'commune';
             }
-            
+
             const metricOptions = MetricsConfig.getAvailableMetricOptions(level);
             metricSelect.innerHTML = `
                 <option value="">-- Choisir une métrique --</option>

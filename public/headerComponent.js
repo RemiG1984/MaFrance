@@ -254,15 +254,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (headerContainer) {
         const header = HeaderComponent.create(headerContainer);
         
-        // Listen for MetricsConfig to become available and update version display
-        const checkMetricsConfig = () => {
-            if (typeof window !== 'undefined' && window.MetricsConfig) {
-                header.updateVersionDisplay();
-                header.updatePageTitle();
-            } else {
-                setTimeout(checkMetricsConfig, 50);
-            }
-        };
-        checkMetricsConfig();
+        // Wait a bit for MetricsConfig to be available, then update
+        setTimeout(() => {
+            header.updateVersionDisplay();
+            header.updatePageTitle();
+        }, 200);
     }
 });

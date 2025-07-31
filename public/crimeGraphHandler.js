@@ -1,6 +1,9 @@
-import { DepartmentNames } from './departmentNames.js';
 import { MetricsConfig } from './metricsConfig.js';
+import { DepartmentNames } from './departmentNames.js';
 import { api } from './apiService.js';
+
+// Make MetricsConfig available globally
+window.MetricsConfig = MetricsConfig;
 
 /**
  * Crime Graph Handler module for displaying crime statistics charts.
@@ -38,7 +41,7 @@ function CrimeGraphHandler() {
 
         // Use centralized version dropdown initialization
         MetricsConfig.initializeVersionDropdown();
-        
+
         // Listen for label state changes
         window.addEventListener('metricsLabelsToggled', () => {
             // Only update crime-specific elements and charts if we're on the crime graph page AND have valid URL parameters
