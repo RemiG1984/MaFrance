@@ -871,6 +871,7 @@
     background-color: #fff;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     z-index: 1000;
+    overflow: visible;
 }
 
 .header-content {
@@ -987,7 +988,7 @@
     }
 
     .nav-menu {
-        display: none !important;
+        display: none; /* Remove !important */
         position: absolute;
         top: 100%;
         left: 0;
@@ -1000,7 +1001,7 @@
     }
 
     .nav-menu.active {
-        display: flex !important;
+        display: flex; /* Remove !important */
     }
 
     .nav-menu li {
