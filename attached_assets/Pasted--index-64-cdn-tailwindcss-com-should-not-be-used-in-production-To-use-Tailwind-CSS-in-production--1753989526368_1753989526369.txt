@@ -1,0 +1,204 @@
+(index):64 cdn.tailwindcss.com should not be used in production. To use Tailwind CSS in production, install it as a PostCSS plugin or use the Tailwind CLI: https://tailwindcss.com/docs/installation
+(anonyme) @ (index):64
+(anonyme) @ (index):64
+main.js:727 Initializing application...
+locationHandler.js:27 Loading departments from static data
+locationHandler.js:49 Departments loaded: 101
+scoreTableHandler.js:141 Country details: {country: 'France', population: 68034066, logements_sociaux_pct: 17.22, insecurite_score: 81, immigration_score: 68, …}
+scoreTableHandler.js:595 Rendering table with header: France rows: (21) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}] compareHeader: 
+crimeGraphHandler.js:256 Homicides et tentatives /100k hab. main data values: (9) [4.7585, 4.6705000000000005, 4.9665, 5.3476, 5.7892, 5.8759999999999994, 6.6778, 7.3671999999999995, 7.7951]
+crimeGraphHandler.js:256 Violences physiques /1k hab. main data values: (9) [8.0329, 8.102400000000001, 8.399899999999999, 8.8269, 8.5879, 9.2914, 10.414, 10.7727, 10.7424]
+crimeGraphHandler.js:256 Violences sexuelles /1k hab. main data values: (9) [0.7793, 0.8536, 1.0072, 1.1202, 1.1434, 1.4245, 1.5601, 1.6772, 1.8026]
+crimeGraphHandler.js:256 Vols /1k hab. main data values: (9) [27.6142, 27.291999999999998, 26.131299999999996, 26.167499999999997, 20.7926, 21.1714, 23.5824, 23.4741, 22.964399999999998]
+crimeGraphHandler.js:256 Destructions et dégradations /1k hab. main data values: (9) [9.4053, 9.3546, 9.0057, 8.9641, 7.6875, 7.8441, 7.8999, 8.1158, 7.7592]
+crimeGraphHandler.js:256 Trafic et usage de stupéfiants /1k hab. main data values: (9) [3.3577, 3.4939, 3.4771, 3.3476, 3.4395, 5.5263, 6.531600000000001, 6.977099999999999, 7.8562]
+crimeGraphHandler.js:256 Escroqueries /1k hab. main data values: (9) [3.7449, 3.8195, 3.858, 4.3519, 4.5508, 5.2929, 5.6934, 6.013, 6.0183]
+locationHandler.js:69 Searching communes globally with query: paris
+locationHandler.js:71 Global communes search results: (15) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+main.js:128 Reset filter on department change
+apiService.js:26 Using cached data for: /api/country/details?country=France
+apiService.js:26 Using cached data for: /api/country/names?country=France
+apiService.js:26 Using cached data for: /api/country/crime?country=France
+main.js:145 === DEPARTMENT SELECTION: Starting parallel loading ===
+main.js:146 Loading articles and counts for department: 75
+articleHandler.js:32 Fetching articles with params: {dept: '75'}
+articleHandler.js:57 === loadArticleCounts START ===
+articleHandler.js:58 Input params: {departement: '75', cog: '', lieu: ''}
+articleHandler.js:65 API request params for article counts: {dept: '75'}
+main.js:265 === COMMUNE SELECTION: Starting sequential loading ===
+main.js:266 Loading lieux and articles for: {departement: '75', cog: '75101'}
+locationHandler.js:161 === loadLieux START ===
+locationHandler.js:162 Input params: {departement: '75', cog: '75101'}
+locationHandler.js:165 lieuxSelect element: found
+locationHandler.js:176 Starting lieux loading process...
+locationHandler.js:180 Disabling lieuxSelect and making API call...
+mapHandler.js:232 Loading commune data for department 75...
+scoreTableHandler.js:252 Department details: {departement: '75', population: 2113705, logements_sociaux_pct: 24.4, insecurite_score: 257, immigration_score: 132, …}
+scoreTableHandler.js:595 Rendering table with header: 75 - Paris rows: (21) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}] compareHeader: France
+executiveHandler.js:46 Department executive data: {code: '75', prenom: 'Olivier', nom: 'MAUREL', date_poste: '2023-01-30'}
+articleHandler.js:34 Articles fetched: (5902) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, …]
+locationHandler.js:69 Searching communes globally with query: Paris 1e
+articleHandler.js:67 Article counts received: {insecurite: 4371, immigration: 2787, islamisme: 1065, defrancisation: 1806, wokisme: 1522}
+articleHandler.js:68 Article counts type: object
+articleHandler.js:69 Article counts keys: (5) ['insecurite', 'immigration', 'islamisme', 'defrancisation', 'wokisme']
+articleHandler.js:70 === loadArticleCounts SUCCESS ===
+main.js:152 === DEPARTMENT SELECTION: Parallel loading completed ===
+main.js:153 Results: {articlesLength: 5902, counts: {…}, countsType: 'object'}
+main.js:158 Rendering filter buttons for department...
+articleHandler.js:151 === renderFilterButtons START ===
+articleHandler.js:152 Input parameters: {counts: {…}, countsType: 'object', countsKeys: Array(5), articlesLength: 5902, articlesType: 'object', …}
+articleHandler.js:167 DOM elements check: {filterButtonsDiv: 'found', lieuxSelect: 'NOT FOUND', communeInput: 'found', filtersContainer: 'found', communeInputValue: 'Paris 1e'}
+articleHandler.js:179 Commune level detection: {isAtCommuneLevel: true, communeInputExists: true, communeInputValue: '"Paris 1e"', communeInputTrimmed: '"Paris 1e"'}
+articleHandler.js:205 ⚠️ lieuxSelect element not found!
+renderFilterButtons @ articleHandler.js:205
+(anonyme) @ main.js:161
+setTimeout
+(anonyme) @ main.js:160
+Promise.then
+(anonyme) @ main.js:151
+(anonyme) @ main.js:252
+articleHandler.js:218 Data validation after fallbacks: {countsAfterFallback: {…}, articlesAfterFallback: 5902}
+articleHandler.js:229 MetricsConfig.articleCategories: (5) [{…}, {…}, {…}, {…}, {…}]
+articleHandler.js:237 Mapped categories for filter buttons: (5) [{…}, {…}, {…}, {…}, {…}]
+articleHandler.js:239 Starting filter button creation...
+articleHandler.js:241 Creating button 1/5 for category: {name: 'Insécurité', key: 'insecurite', count: 4371}
+articleHandler.js:256 ✓ Button created and appended for: insecurite
+articleHandler.js:241 Creating button 2/5 for category: {name: 'Immigration', key: 'immigration', count: 2787}
+articleHandler.js:256 ✓ Button created and appended for: immigration
+articleHandler.js:241 Creating button 3/5 for category: {name: 'Islamisme', key: 'islamisme', count: 1065}
+articleHandler.js:256 ✓ Button created and appended for: islamisme
+articleHandler.js:241 Creating button 4/5 for category: {name: 'Défrancisation', key: 'defrancisation', count: 1806}
+articleHandler.js:256 ✓ Button created and appended for: defrancisation
+articleHandler.js:241 Creating button 5/5 for category: {name: 'Wokisme', key: 'wokisme', count: 1522}
+articleHandler.js:256 ✓ Button created and appended for: wokisme
+articleHandler.js:259 Creating 'All' button...
+articleHandler.js:261 All articles count: 5902
+articleHandler.js:276 ✓ 'All' button created and appended
+articleHandler.js:278 === renderFilterButtons COMPLETE ===
+articleHandler.js:279 Final state: {totalButtons: 6, filterButtonsDivHTML: 'has content', lieuxSelectVisible: false, lieuxSelectDisabled: 'N/A'}
+main.js:162 === DEPARTMENT SELECTION: Filter buttons render completed ===
+apiService.js:26 Using cached data for: /api/departements/details?dept=75
+apiService.js:26 Using cached data for: /api/departements/names?dept=75
+apiService.js:26 Using cached data for: /api/departements/crime?dept=75
+apiService.js:26 Using cached data for: /api/country/crime_history?country=France
+locationHandler.js:184 Lieux API response: (44) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+locationHandler.js:185 Lieux count: 44
+locationHandler.js:186 Lieux type: object
+locationHandler.js:188 Populating lieuxSelect dropdown...
+locationHandler.js:193 Adding lieu 1/44: {lieu: '36 quai des Orfèvres'}
+locationHandler.js:193 Adding lieu 2/44: {lieu: 'Ancienne Mairie du 1e'}
+locationHandler.js:193 Adding lieu 3/44: {lieu: 'Au Nègre Joyeux'}
+locationHandler.js:193 Adding lieu 4/44: {lieu: 'Bastion'}
+locationHandler.js:193 Adding lieu 5/44: {lieu: 'Boulevard Sébastopol'}
+locationHandler.js:193 Adding lieu 6/44: {lieu: 'Carrousel du Louvre'}
+locationHandler.js:193 Adding lieu 7/44: {lieu: 'Châtelet'}
+locationHandler.js:193 Adding lieu 8/44: {lieu: 'Conseil Constitutionnel'}
+locationHandler.js:193 Adding lieu 9/44: {lieu: 'Conseil d’État'}
+locationHandler.js:193 Adding lieu 10/44: {lieu: "Cour d'appel de Paris"}
+locationHandler.js:193 Adding lieu 11/44: {lieu: 'Hôtel Meurice'}
+locationHandler.js:193 Adding lieu 12/44: {lieu: 'Jardin des Tuileries'}
+locationHandler.js:193 Adding lieu 13/44: {lieu: 'La Samaritaine'}
+locationHandler.js:193 Adding lieu 14/44: {lieu: 'Le Ritz'}
+locationHandler.js:193 Adding lieu 15/44: {lieu: 'Les Halles'}
+locationHandler.js:193 Adding lieu 16/44: {lieu: 'Ministère de la Culture'}
+locationHandler.js:193 Adding lieu 17/44: {lieu: 'Ministère de la Justice'}
+locationHandler.js:193 Adding lieu 18/44: {lieu: 'Musée du Louvre'}
+locationHandler.js:193 Adding lieu 19/44: {lieu: 'Métro'}
+locationHandler.js:193 Adding lieu 20/44: {lieu: 'Métro Tuileries'}
+locationHandler.js:193 Adding lieu 21/44: {lieu: 'Palais de Justice'}
+locationHandler.js:193 Adding lieu 22/44: {lieu: 'Parquet de Paris'}
+locationHandler.js:193 Adding lieu 23/44: {lieu: 'Place Vendôme'}
+locationHandler.js:193 Adding lieu 24/44: {lieu: 'Place du Palais Royal'}
+locationHandler.js:193 Adding lieu 25/44: {lieu: 'Pont Neuf'}
+locationHandler.js:193 Adding lieu 26/44: {lieu: 'Pont au Change'}
+locationHandler.js:193 Adding lieu 27/44: {lieu: 'Quai des Orfèvres'}
+locationHandler.js:193 Adding lieu 28/44: {lieu: 'RER'}
+locationHandler.js:193 Adding lieu 29/44: {lieu: 'RER B'}
+locationHandler.js:193 Adding lieu 30/44: {lieu: 'Samaritaine'}
+locationHandler.js:193 Adding lieu 31/44: {lieu: 'Seine'}
+locationHandler.js:193 Adding lieu 32/44: {lieu: 'Théâtre du Châtelet'}
+locationHandler.js:193 Adding lieu 33/44: {lieu: 'Université Paris 1 – Sorbonne'}
+locationHandler.js:193 Adding lieu 34/44: {lieu: 'VIP Room'}
+locationHandler.js:193 Adding lieu 35/44: {lieu: 'musée du Louvre'}
+locationHandler.js:193 Adding lieu 36/44: {lieu: 'rue Saint-Honoré'}
+locationHandler.js:193 Adding lieu 37/44: {lieu: 'rue de Rivoli'}
+locationHandler.js:193 Adding lieu 38/44: {lieu: 'rue du Désir'}
+locationHandler.js:193 Adding lieu 39/44: {lieu: 'station Châtelet-les-Halles'}
+locationHandler.js:193 Adding lieu 40/44: {lieu: 'station Etienne-Marcel'}
+locationHandler.js:193 Adding lieu 41/44: {lieu: "statue de Jeanne d'Arc"}
+locationHandler.js:193 Adding lieu 42/44: {lieu: 'Église St-Eustache'}
+locationHandler.js:193 Adding lieu 43/44: {lieu: 'église Saint-Leu-Saint-Gilles'}
+locationHandler.js:193 Adding lieu 44/44: {lieu: 'église Saint-Roch'}
+locationHandler.js:204 ✓ Lieux loaded successfully
+locationHandler.js:205 Final lieuxSelect state: {optionsCount: 45, disabled: false, innerHTML: '<option value="">-- Tous les lieux --</option><opt…value="36 quai des Orfèvres">36 quai des Orfèv...'}
+locationHandler.js:210 === loadLieux SUCCESS ===
+locationHandler.js:233 Hiding spinner...
+locationHandler.js:235 === loadLieux END ===
+mapHandler.js:241 Loaded 20 communes for department 75
+mapHandler.js:271 Processed 20 communes with valid keys for department 75
+locationHandler.js:215 ✓ loadLieux DOM update confirmed
+main.js:270 === COMMUNE SELECTION: Lieux loading completed ===
+articleHandler.js:32 Fetching articles with params: {dept: '75', cog: '75101'}
+articleHandler.js:57 === loadArticleCounts START ===
+articleHandler.js:58 Input params: {departement: '75', cog: '75101', lieu: ''}
+articleHandler.js:65 API request params for article counts: {dept: '75', cog: '75101'}
+locationHandler.js:71 Global communes search results: [{…}]
+scoreTableHandler.js:411 Commune details: {COG: '75101', departement: '75', commune: 'Paris 1e', population: 15475, logements_sociaux_pct: 12.5, …}
+scoreTableHandler.js:595 Rendering table with header: 75 - Paris 1e rows: (17) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}] compareHeader: Paris
+crimeGraphHandler.js:256 Violences physiques /1k hab. main data values: (9) [71.37, 73.89, 71.58, 89.34, 56.89, 74.88, 88.4, 79.62, 71.21000000000001]
+crimeGraphHandler.js:261 Violences physiques /1k hab. country data values: (9) [8.0329, 8.102400000000001, 8.399899999999999, 8.8269, 8.5879, 9.2914, 10.414, 10.7727, 10.7424]
+crimeGraphHandler.js:266 Violences physiques /1k hab. department data values: (9) [17.8859, 18.2745, 18.1747, 19.4147, 16.3828, 16.7098, 18.848300000000002, 17.177, 15.7355]
+crimeGraphHandler.js:256 Violences sexuelles /1k hab. main data values: (9) [5.05, 5.04, 8.08, 7.16, 7.36, 7.48, 9.18, 10.73, 12.08]
+crimeGraphHandler.js:261 Violences sexuelles /1k hab. country data values: (9) [0.7793, 0.8536, 1.0072, 1.1202, 1.1434, 1.4245, 1.5601, 1.6772, 1.8026]
+crimeGraphHandler.js:266 Violences sexuelles /1k hab. department data values: (9) [1.3108, 1.259, 1.6795, 1.7138, 1.597, 2.0632, 2.4327, 2.4772, 2.7804]
+crimeGraphHandler.js:256 Vols /1k hab. main data values: (9) [486.68999999999994, 555.0999999999999, 668.3599999999999, 784.46, 443.69, 426.11999999999995, 559.2800000000001, 501.89, 431.9]
+crimeGraphHandler.js:261 Vols /1k hab. country data values: (9) [27.6142, 27.291999999999998, 26.131299999999996, 26.167499999999997, 20.7926, 21.1714, 23.5824, 23.4741, 22.964399999999998]
+crimeGraphHandler.js:266 Vols /1k hab. department data values: (9) [88.2527, 89.148, 94.24929999999999, 100, 78.41949999999999, 75.6771, 84.7587, 78.90719999999999, 67.15150000000001]
+crimeGraphHandler.js:256 Destructions et dégradations /1k hab. main data values: (9) [25.6, 27.05, 27.22, 31.73, 21.65, 25.06, 23.59, 25.65, 22.36]
+crimeGraphHandler.js:261 Destructions et dégradations /1k hab. country data values: (9) [9.4053, 9.3546, 9.0057, 8.9641, 7.6875, 7.8441, 7.8999, 8.1158, 7.7592]
+crimeGraphHandler.js:266 Destructions et dégradations /1k hab. department data values: (9) [12.2735, 11.8207, 12.3479, 12.8058, 10.4506, 10.3215, 10.0279, 9.745, 8.4629]
+crimeGraphHandler.js:256 Trafic et usage de stupéfiants /1k hab. main data values: (9) [39.93, 34.120000000000005, 15.91, 15.14, 23.46, 58.480000000000004, 85.69, 127.31, 212.54000000000002]
+crimeGraphHandler.js:261 Trafic et usage de stupéfiants /1k hab. country data values: (9) [3.3577, 3.4939, 3.4771, 3.3476, 3.4395, 5.5263, 6.531600000000001, 6.977099999999999, 7.8562]
+crimeGraphHandler.js:266 Trafic et usage de stupéfiants /1k hab. department data values: (9) [5.932, 6.5458, 6.7737, 6.1156999999999995, 5.7635000000000005, 9.639000000000001, 13.9366, 17.7334, 27.273400000000002]
+crimeGraphHandler.js:256 Escroqueries /1k hab. main data values: (9) [32.55, 29.08, 26.97, 19.48, 15.35, 17.4, 28.3, 22.1, 20.74]
+crimeGraphHandler.js:261 Escroqueries /1k hab. country data values: (9) [3.7449, 3.8195, 3.858, 4.3519, 4.5508, 5.2929, 5.6934, 6.013, 6.0183]
+crimeGraphHandler.js:266 Escroqueries /1k hab. department data values: (9) [9.8113, 10.244, 9.9743, 10.8533, 9.8131, 12.1583, 12.5765, 12.1498, 11.4013]
+executiveHandler.js:82 Commune executive data: {cog: '75101', commune: 'Paris 1e', prenom: 'Anne', nom: 'HIDALGO', sexe: 'F', …}
+articleHandler.js:67 Article counts received: {insecurite: 96, immigration: 42, islamisme: 10, defrancisation: 33, wokisme: 34}
+articleHandler.js:68 Article counts type: object
+articleHandler.js:69 Article counts keys: (5) ['insecurite', 'immigration', 'islamisme', 'defrancisation', 'wokisme']
+articleHandler.js:70 === loadArticleCounts SUCCESS ===
+articleHandler.js:34 Articles fetched: (121) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, …]
+main.js:278 === COMMUNE SELECTION: Articles and counts loading completed ===
+main.js:279 Results: {articlesLength: 121, counts: {…}, countsType: 'object'}
+main.js:285 === COMMUNE SELECTION: About to render filter buttons ===
+main.js:286 Final data for renderFilterButtons: {counts: {…}, countsType: 'object', articlesLength: 121, currentLieu: ''}
+articleHandler.js:151 === renderFilterButtons START ===
+articleHandler.js:152 Input parameters: {counts: {…}, countsType: 'object', countsKeys: Array(5), articlesLength: 121, articlesType: 'object', …}
+articleHandler.js:167 DOM elements check: {filterButtonsDiv: 'found', lieuxSelect: 'found', communeInput: 'found', filtersContainer: 'found', communeInputValue: 'Paris 1e'}
+articleHandler.js:179 Commune level detection: {isAtCommuneLevel: true, communeInputExists: true, communeInputValue: '"Paris 1e"', communeInputTrimmed: '"Paris 1e"'}
+articleHandler.js:187 Processing lieuxSelect visibility...
+articleHandler.js:191 ✓ Showing lieux selector at commune level
+articleHandler.js:192 LieuxSelect current options count: 1
+articleHandler.js:193 LieuxSelect innerHTML length: 46
+articleHandler.js:197 ⚠️ LieuxSelect has no options loaded yet - this may be a timing issue
+articleHandler.js:218 Data validation after fallbacks: {countsAfterFallback: {…}, articlesAfterFallback: 121}
+articleHandler.js:229 MetricsConfig.articleCategories: (5) [{…}, {…}, {…}, {…}, {…}]
+articleHandler.js:237 Mapped categories for filter buttons: (5) [{…}, {…}, {…}, {…}, {…}]
+articleHandler.js:239 Starting filter button creation...
+articleHandler.js:241 Creating button 1/5 for category: {name: 'Insécurité', key: 'insecurite', count: 96}
+articleHandler.js:256 ✓ Button created and appended for: insecurite
+articleHandler.js:241 Creating button 2/5 for category: {name: 'Immigration', key: 'immigration', count: 42}
+articleHandler.js:256 ✓ Button created and appended for: immigration
+articleHandler.js:241 Creating button 3/5 for category: {name: 'Islamisme', key: 'islamisme', count: 10}
+articleHandler.js:256 ✓ Button created and appended for: islamisme
+articleHandler.js:241 Creating button 4/5 for category: {name: 'Défrancisation', key: 'defrancisation', count: 33}
+articleHandler.js:256 ✓ Button created and appended for: defrancisation
+articleHandler.js:241 Creating button 5/5 for category: {name: 'Wokisme', key: 'wokisme', count: 34}
+articleHandler.js:256 ✓ Button created and appended for: wokisme
+articleHandler.js:259 Creating 'All' button...
+articleHandler.js:261 All articles count: 121
+articleHandler.js:276 ✓ 'All' button created and appended
+articleHandler.js:278 === renderFilterButtons COMPLETE ===
+articleHandler.js:279 Final state: {totalButtons: 6, filterButtonsDivHTML: 'has content', lieuxSelectVisible: true, lieuxSelectDisabled: false}
+main.js:296 === COMMUNE SELECTION: Filter buttons render completed ===
