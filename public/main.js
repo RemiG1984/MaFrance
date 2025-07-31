@@ -82,7 +82,6 @@ window.MetricsConfig = MetricsConfig;
 
     // Shared state
     let currentLieu = "";
-    let allArticles = [];
     window.isMapClickInProgress = false; // Flag to prevent circular reference
     let isCommuneSelectionInProgress = false; // Flag to prevent department graphs during commune selection
 
