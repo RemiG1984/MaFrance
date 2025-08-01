@@ -133,4 +133,4 @@ dist
 .breakpoints
 
 #Setup directory
-setup/
+setup/*.csv
