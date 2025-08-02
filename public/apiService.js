@@ -6,7 +6,6 @@ class ApiService {
     constructor() {
         this.cache = new Map();
         this.cacheExpiry = 60 * 60 * 1000; // 60 minutes
-        this.geoJsonCacheExpiry = 30 * 24 * 60 * 60 * 1000; // 30 days
         this.activeRequests = new Set();
     }
 
@@ -60,63 +59,6 @@ class ApiService {
             return data;
         } catch (error) {
             console.error("API request failed:", {
-                url,
-                error: error.message || error,
-            });
-            throw error;
-        } finally {
-            this.activeRequests.delete(url);
-        }
-    }
-
-    /**
-     * Makes cached GeoJSON requests with extended 30-day caching.
-     * @param {string} url - GeoJSON endpoint
-     * @param {Object} options - Fetch options
-     * @returns {Promise} GeoJSON data
-     */
-    async requestGeoJson(url, options = {}) {
-        const cacheKey = `geojson_${url}_${JSON.stringify(options)}`;
-
-        // Check cache first with extended expiry for GeoJSON
-        if (this.cache.has(cacheKey)) {
-            const cached = this.cache.get(cacheKey);
-            if (Date.now() - cached.timestamp < this.geoJsonCacheExpiry) {
-                console.log("Using cached GeoJSON data for:", url);
-                return cached.data;
-            }
-            this.cache.delete(cacheKey);
-        }
-
-        try {
-            this.activeRequests.add(url);
-
-            const response = await fetch(url, {
-                ...options,
-                headers: {
-                    "Content-Type": "application/json",
-                    ...options.headers,
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error(
-                    `HTTP ${response.status}: ${response.statusText}`,
-                );
-            }
-
-            const data = await response.json();
-
-            // Cache GeoJSON with extended expiry
-            this.cache.set(cacheKey, {
-                data,
-                timestamp: Date.now(),
-            });
-
-            console.log("GeoJSON cached for 30 days:", url);
-            return data;
-        } catch (error) {
-            console.error("GeoJSON request failed:", {
                 url,
                 error: error.message || error,
             });
@@ -233,10 +175,4 @@ export const api = {
         const queryString = new URLSearchParams(params).toString();
         return apiService.request(`/api/articles/counts?${queryString}`);
     },
-
-    // GeoJSON data with extended caching
-    getDepartmentGeoJson: () =>
-        apiService.requestGeoJson("/data/departements.geojson"),
-    getCommuneGeoJson: (deptCode) =>
-        apiService.requestGeoJson(`/data/communes/${deptCode}.geojson`),
 };
