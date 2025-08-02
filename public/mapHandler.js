@@ -698,7 +698,7 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
                             if (metricControl && metricControl.updateOptions) {
                                 metricControl.updateOptions();
                             }
-                            
+
                             // Set flag to prevent circular reference and update department selection
                             window.isMapClickInProgress = true;
                             departementSelect.value = normalizedCode;
