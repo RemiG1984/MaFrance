@@ -5,8 +5,46 @@
 class ApiService {
     constructor() {
         this.cache = new Map();
-        this.cacheExpiry = 60 * 60 * 1000; // 60 minutes
+        this.cacheExpiry = 24 * 60 * 60 * 1000; // 24 hours - longer cache for reduced data transfer
         this.activeRequests = new Set();
+        this.persistentStorage = this.initPersistentStorage();
+    }
+
+    /**
+     * Initialize persistent storage for cross-session caching
+     */
+    initPersistentStorage() {
+        try {
+            return {
+                get: (key) => {
+                    const item = localStorage.getItem(`api_cache_${key}`);
+                    return item ? JSON.parse(item) : null;
+                },
+                set: (key, value) => {
+                    try {
+                        localStorage.setItem(`api_cache_${key}`, JSON.stringify(value));
+                    } catch (e) {
+                        // Handle quota exceeded errors
+                        console.warn('Cache storage full, clearing old entries');
+                        this.clearOldCacheEntries();
+                    }
+                },
+                remove: (key) => localStorage.removeItem(`api_cache_${key}`)
+            };
+        } catch (e) {
+            // Fallback if localStorage is not available
+            return { get: () => null, set: () => {}, remove: () => {} };
+        }
+    }
+
+    /**
+     * Clear old cache entries when storage is full
+     */
+    clearOldCacheEntries() {
+        const keys = Object.keys(localStorage).filter(key => key.startsWith('api_cache_'));
+        // Remove oldest 25% of cached items
+        const keysToRemove = keys.slice(0, Math.floor(keys.length * 0.25));
+        keysToRemove.forEach(key => localStorage.removeItem(key));
     }
 
     /**
@@ -17,16 +55,50 @@ class ApiService {
      * @returns {Promise} API response data
      */
     async request(url, options = {}, useCache = true) {
-        const cacheKey = `${url}_${JSON.stringify(options)}`;
+        const cacheKey = this.generateCacheKey(url, options);
 
-        // Check cache first
-        if (useCache && this.cache.has(cacheKey)) {
-            const cached = this.cache.get(cacheKey);
-            if (Date.now() - cached.timestamp < this.cacheExpiry) {
-                console.log("Using cached data for:", url);
-                return cached.data;
+        if (useCache) {
+            // Check memory cache first
+            if (this.cache.has(cacheKey)) {
+                const cached = this.cache.get(cacheKey);
+                if (Date.now() - cached.timestamp < this.cacheExpiry) {
+                    console.log("Using memory cached data for:", url);
+                    return cached.data;
+                }
+                this.cache.delete(cacheKey);
             }
-            this.cache.delete(cacheKey);
+
+            // Check persistent storage
+            const persistentCached = this.persistentStorage.get(cacheKey);
+            if (persistentCached && Date.now() - persistentCached.timestamp < this.cacheExpiry) {
+                console.log("Using persistent cached data for:", url);
+                // Also store in memory cache for faster subsequent access
+                this.cache.set(cacheKey, persistentCached);
+                return persistentCached.data;
+            } else if (persistentCached) {
+                // Remove expired persistent cache
+                this.persistentStorage.remove(cacheKey);
+            }
+        }
+
+        // Check if request is already in progress
+        if (this.activeRequests.has(url)) {
+            console.log("Request already in progress, waiting...", url);
+            return new Promise((resolve, reject) => {
+                const checkRequest = () => {
+                    if (!this.activeRequests.has(url)) {
+                        // Request completed, try cache again
+                        if (this.cache.has(cacheKey)) {
+                            resolve(this.cache.get(cacheKey).data);
+                        } else {
+                            reject(new Error("Request completed but no cached result"));
+                        }
+                    } else {
+                        setTimeout(checkRequest, 100);
+                    }
+                };
+                setTimeout(checkRequest, 100);
+            });
         }
 
         try {
@@ -49,11 +121,19 @@ class ApiService {
             const data = await response.json();
 
             // Cache successful responses
-            if (useCache) {
-                this.cache.set(cacheKey, {
+            if (useCache && data) {
+                const cacheEntry = {
                     data,
                     timestamp: Date.now(),
-                });
+                };
+                
+                // Store in memory cache
+                this.cache.set(cacheKey, cacheEntry);
+                
+                // Store in persistent cache for specific data types
+                if (this.shouldPersistCache(url)) {
+                    this.persistentStorage.set(cacheKey, cacheEntry);
+                }
             }
 
             return data;
@@ -69,10 +149,60 @@ class ApiService {
     }
 
     /**
+     * Generate consistent cache key
+     */
+    generateCacheKey(url, options) {
+        const optionsStr = JSON.stringify(options || {});
+        return btoa(encodeURIComponent(`${url}_${optionsStr}`)).replace(/[^a-zA-Z0-9]/g, '_');
+    }
+
+    /**
+     * Determine if data should be persistently cached
+     */
+    shouldPersistCache(url) {
+        const persistentEndpoints = [
+            '/api/departements/crime_history',
+            '/api/departements/names_history', 
+            '/api/communes/crime_history',
+            '/api/communes/names_history',
+            '/api/country/crime_history',
+            '/api/country/names_history',
+            '/api/qpv/',
+            '/api/departements/details',
+            '/api/communes/details',
+            '/api/country/details',
+            '/api/articles/lieux'
+        ];
+        
+        return persistentEndpoints.some(endpoint => url.includes(endpoint));
+    }
+
+    /**
      * Clears the API cache.
      */
     clearCache() {
         this.cache.clear();
+        
+        // Clear persistent cache
+        const keys = Object.keys(localStorage).filter(key => key.startsWith('api_cache_'));
+        keys.forEach(key => localStorage.removeItem(key));
+        
+        console.log("All caches cleared");
+    }
+
+    /**
+     * Get cache statistics
+     */
+    getCacheStats() {
+        const memorySize = this.cache.size;
+        const persistentKeys = Object.keys(localStorage).filter(key => key.startsWith('api_cache_'));
+        const persistentSize = persistentKeys.length;
+        
+        return {
+            memory: memorySize,
+            persistent: persistentSize,
+            total: memorySize + persistentSize
+        };
     }
 }
 
