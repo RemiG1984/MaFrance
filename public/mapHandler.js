@@ -34,6 +34,35 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
     // Get metrics from centralized config
     const metrics = MetricsConfig.getMetricOptions();
 
+    // GeoJSON cache with expiration
+    const geoJsonCache = {
+        data: new Map(),
+        expiry: 24 * 60 * 60 * 1000, // 24 hours
+        
+        set(key, value) {
+            this.data.set(key, {
+                value,
+                timestamp: Date.now()
+            });
+        },
+        
+        get(key) {
+            const cached = this.data.get(key);
+            if (!cached) return null;
+            
+            if (Date.now() - cached.timestamp > this.expiry) {
+                this.data.delete(key);
+                return null;
+            }
+            
+            return cached.value;
+        },
+        
+        clear() {
+            this.data.clear();
+        }
+    };
+
     let communeGeoJsonLayer = null;
     let commData = {}; // Commune data cache (keyed by COG/INSEE code)
     let currentDept = null; // Currently selected department for commune view
@@ -92,14 +121,22 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
             return;
         }
 
-        // Fetch Department GeoJSON
+        // Fetch Department GeoJSON with caching
         try {
-            const geoResponse = await fetch(
-                "https://france-geojson.gregoiredavid.fr/repo/departements.geojson",
-            );
-            if (!geoResponse.ok)
-                throw new Error("Failed to fetch Department GeoJSON");
-            const geoData = await geoResponse.json();
+            const deptGeoJsonUrl = "https://france-geojson.gregoiredavid.fr/repo/departements.geojson";
+            let geoData = geoJsonCache.get('departments');
+            
+            if (!geoData) {
+                console.log("Fetching department GeoJSON from external source...");
+                const geoResponse = await fetch(deptGeoJsonUrl);
+                if (!geoResponse.ok)
+                    throw new Error("Failed to fetch Department GeoJSON");
+                geoData = await geoResponse.json();
+                geoJsonCache.set('departments', geoData);
+                console.log("Department GeoJSON cached successfully");
+            } else {
+                console.log("Using cached department GeoJSON");
+            }
 
             if (!geoData.features) {
                 throw new Error("Invalid GeoJSON: 'features' property missing");
@@ -300,12 +337,22 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
         }
 
         try {
-            const response = await fetch(geoUrl);
-            if (!response.ok)
-                throw new Error(
-                    `Failed to fetch commune GeoJSON: ${response.status}`,
-                );
-            const geoData = await response.json();
+            const cacheKey = `commune_${deptCode}`;
+            let geoData = geoJsonCache.get(cacheKey);
+            
+            if (!geoData) {
+                console.log(`Fetching commune GeoJSON for ${deptCode} from external source...`);
+                const response = await fetch(geoUrl);
+                if (!response.ok)
+                    throw new Error(
+                        `Failed to fetch commune GeoJSON: ${response.status}`,
+                    );
+                geoData = await response.json();
+                geoJsonCache.set(cacheKey, geoData);
+                console.log(`Commune GeoJSON for ${deptCode} cached successfully`);
+            } else {
+                console.log(`Using cached commune GeoJSON for ${deptCode}`);
+            }
 
             if (!geoData.features) {
                 throw new Error("Invalid GeoJSON: 'features' property missing");
@@ -1041,6 +1088,11 @@ function MapHandler(mapDiv, departementSelect, resultsDiv, departmentNames) {
         centerOnDepartmentAndSelectCommune,
         showDepartmentPopup,
         resetToFranceView,
+        clearGeoJsonCache: () => geoJsonCache.clear(),
+        getCacheStatus: () => ({
+            size: geoJsonCache.data.size,
+            keys: Array.from(geoJsonCache.data.keys())
+        }),
         get currentMetric() {
             return currentMetric;
         },
