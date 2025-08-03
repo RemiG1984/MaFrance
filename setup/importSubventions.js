@@ -21,13 +21,8 @@ function importSubventions(db, callback) {
                 fs.createReadStream('setup/france_subventions.csv')
                     .pipe(csv())
                     .on('data', (row) => {
-                        if (!row['country']) {
-                            console.warn(`Ligne ignorée dans france_subventions.csv (champ country manquant):`, row);
-                            return;
-                        }
-
                         // Extract subvention fields (exclude non-subvention fields)
-                        const excludedFields = ['country', 'commune', 'population', 'total_subventions'];
+                        const excludedFields = ['commune', 'population', 'total_subventions'];
                         const subventionFields = Object.keys(row).filter(key => 
                             !excludedFields.includes(key)
                         );
@@ -52,7 +47,7 @@ function importSubventions(db, callback) {
 
                         countryRows++;
                         countryBatch.push([
-                            row['country'],
+                            'france',
                             JSON.stringify(values)
                         ]);
                     })
