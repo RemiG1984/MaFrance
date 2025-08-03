@@ -155,13 +155,13 @@ function importSubventions(db, callback) {
                 fs.createReadStream('setup/departement_subventions.csv')
                     .pipe(csv())
                     .on('data', (row) => {
-                        if (!row['DEP']) {
-                            console.warn(`Ligne ignorée dans departement_subventions.csv (champ DEP manquant):`, row);
+                        if (!row['dept_code']) {
+                            console.warn(`Ligne ignorée dans departement_subventions.csv (champ dept_code manquant):`, row);
                             return;
                         }
 
                         // Normalize department code
-                        let dep = row['DEP'].trim().toUpperCase();
+                        let dep = row['dept_code'].trim().toUpperCase();
                         if (/^\d+$/.test(dep)) {
                             dep = dep.padStart(2, '0');
                         }
@@ -171,7 +171,7 @@ function importSubventions(db, callback) {
                         }
 
                         // Extract subvention fields (exclude non-subvention fields)
-                        const excludedFields = ['DEP', 'commune', 'population', 'total_subventions'];
+                        const excludedFields = ['dept_code', 'commune', 'population', 'total_subventions'];
                         const subventionFields = Object.keys(row).filter(key => 
                             !excludedFields.includes(key)
                         );
