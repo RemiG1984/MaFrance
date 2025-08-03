@@ -1,11 +1,31 @@
 
 const express = require('express');
 const router = express.Router();
+const { param, validationResult } = require('express-validator');
 const { handleDbError } = require('../middleware/errorHandler');
-const { validateDepartement, validateCOG, validateCountry } = require('../middleware/validate');
+const { validateDepartement, validateCOG, validateCountry, validateDepartementParam, validateCOGParam, validatePagination } = require('../middleware/validate');
+
+// Middleware to handle validation errors
+const handleValidationErrors = (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+};
+
+// Validate country parameter
+const validateCountryParam = [
+    param('country')
+        .notEmpty()
+        .withMessage('Pays requis')
+        .isIn(['france', 'France', 'FRANCE'])
+        .withMessage('Pays doit être France'),
+    handleValidationErrors,
+];
 
 // Get country subventions
-router.get('/country/:country', validateCountry, (req, res) => {
+router.get('/country/:country', validateCountryParam, (req, res) => {
     const db = req.app.locals.db;
     const { country } = req.params;
 
@@ -38,7 +58,7 @@ router.get('/country/:country', validateCountry, (req, res) => {
 });
 
 // Get department subventions
-router.get('/departement/:dep', validateDepartement, (req, res) => {
+router.get('/departement/:dep', validateDepartementParam, (req, res) => {
     const db = req.app.locals.db;
     const { dep } = req.params;
 
@@ -71,7 +91,7 @@ router.get('/departement/:dep', validateDepartement, (req, res) => {
 });
 
 // Get commune subventions
-router.get('/commune/:cog', validateCOG, (req, res) => {
+router.get('/commune/:cog', validateCOGParam, (req, res) => {
     const db = req.app.locals.db;
     const { cog } = req.params;
 
@@ -104,7 +124,7 @@ router.get('/commune/:cog', validateCOG, (req, res) => {
 });
 
 // Get all departments with subventions (for listing/overview)
-router.get('/departements', (req, res) => {
+router.get('/departements', validatePagination, (req, res) => {
     const db = req.app.locals.db;
     const { page = 1, limit = 50 } = req.query;
     const offset = (page - 1) * limit;
@@ -156,7 +176,7 @@ router.get('/departements', (req, res) => {
 });
 
 // Get communes with subventions by department
-router.get('/communes/departement/:dep', validateDepartement, (req, res) => {
+router.get('/communes/departement/:dep', [validateDepartementParam, validatePagination], (req, res) => {
     const db = req.app.locals.db;
     const { dep } = req.params;
     const { page = 1, limit = 100 } = req.query;
