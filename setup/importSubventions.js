@@ -30,7 +30,7 @@ function importSubventions(db, callback) {
 
                         // Extract and validate subvention fields
                         const subventionFields = Object.keys(row).filter(key => 
-                            key !== 'country'
+                            key !== 'country' && key !== 'total_subventions' && key !== 'population'
                         );
 
                         const values = {};
@@ -178,7 +178,7 @@ function importSubventions(db, callback) {
 
                         // Extract and validate subvention fields
                         const subventionFields = Object.keys(row).filter(key => 
-                            key !== 'DEP'
+                            key !== 'DEP' && key !== 'total_subventions' && key !== 'population'
                         );
 
                         const values = {};
@@ -353,7 +353,7 @@ function importSubventions(db, callback) {
 
                         // Extract and validate subvention fields
                         const subventionFields = Object.keys(row).filter(key => 
-                            key !== 'COG' && key !== 'commune' && key !== 'population'
+                            key !== 'COG' && key !== 'commune' && key !== 'population' && key !== 'total_subventions'
                         );
 
                         const values = {};
