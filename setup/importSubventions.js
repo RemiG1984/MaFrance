@@ -1,3 +1,4 @@
+
 const fs = require('fs');
 const csv = require('csv-parser');
 
@@ -13,30 +14,27 @@ function importSubventions(db, callback) {
             return new Promise((resolve, reject) => {
                 if (!fs.existsSync('setup/france_subventions.csv')) {
                     console.error('Erreur: setup/france_subventions.csv n\'existe pas dans le répertoire courant');
-                    resolve(); // Continue with empty data
+                    resolve();
                     return;
                 }
 
                 fs.createReadStream('setup/france_subventions.csv')
                     .pipe(csv())
                     .on('data', (row) => {
-                        const missingFields = [];
-                        if (!row['country']) missingFields.push('country');
-
-                        if (missingFields.length > 0) {
-                            console.warn(`Ligne ignorée dans france_subventions.csv (champs manquants: ${missingFields.join(', ')}):`, row);
+                        if (!row['country']) {
+                            console.warn(`Ligne ignorée dans france_subventions.csv (champ country manquant):`, row);
                             return;
                         }
 
-                        // Extract and validate subvention fields
+                        // Extract subvention fields (exclude non-subvention fields)
+                        const excludedFields = ['country', 'commune', 'population', 'total_subventions'];
                         const subventionFields = Object.keys(row).filter(key => 
-                            key !== 'country'
+                            !excludedFields.includes(key)
                         );
 
                         const values = {};
                         const invalidFields = [];
 
-                        // Validate each subvention field
                         subventionFields.forEach(field => {
                             const value = row[field];
                             if (value !== undefined && value !== '' && !isNaN(parseFloat(value))) {
@@ -55,7 +53,7 @@ function importSubventions(db, callback) {
                         countryRows++;
                         countryBatch.push([
                             row['country'],
-                            JSON.stringify(values) // Store all subvention data as JSON
+                            JSON.stringify(values)
                         ]);
                     })
                     .on('end', () => {
@@ -94,6 +92,12 @@ function importSubventions(db, callback) {
                                 return;
                             }
 
+                            if (countryBatch.length === 0) {
+                                console.log('Aucune donnée à insérer dans country_subventions');
+                                resolve();
+                                return;
+                            }
+
                             db.run('BEGIN TRANSACTION', (err) => {
                                 if (err) {
                                     console.error('Erreur début transaction country_subventions:', err.message);
@@ -101,37 +105,30 @@ function importSubventions(db, callback) {
                                     return;
                                 }
 
-                                if (countryBatch.length > 0) {
-                                    const placeholders = countryBatch.map(() => '(?, ?)').join(',');
-                                    const flatBatch = [].concat(...countryBatch);
-                                    db.run(
-                                        `INSERT OR REPLACE INTO country_subventions (country, subventions_data) VALUES ${placeholders}`,
-                                        flatBatch,
-                                        (err) => {
+                                const placeholders = countryBatch.map(() => '(?, ?)').join(',');
+                                const flatBatch = [].concat(...countryBatch);
+                                db.run(
+                                    `INSERT OR REPLACE INTO country_subventions (country, subventions_data) VALUES ${placeholders}`,
+                                    flatBatch,
+                                    (err) => {
+                                        if (err) {
+                                            console.error('Erreur insertion batch country_subventions:', err.message);
+                                            db.run('ROLLBACK');
+                                            reject(err);
+                                            return;
+                                        }
+                                        db.run('COMMIT', (err) => {
                                             if (err) {
-                                                console.error('Erreur insertion batch country_subventions:', err.message);
+                                                console.error('Erreur commit country_subventions:', err.message);
                                                 db.run('ROLLBACK');
                                                 reject(err);
-                                                return;
+                                            } else {
+                                                console.log(`Importation de ${countryRows} lignes dans country_subventions terminée`);
+                                                resolve();
                                             }
-                                            db.run('COMMIT', (err) => {
-                                                if (err) {
-                                                    console.error('Erreur commit country_subventions:', err.message);
-                                                    db.run('ROLLBACK');
-                                                    reject(err);
-                                                } else {
-                                                    console.log(`Importation de ${countryRows} lignes dans country_subventions terminée`);
-                                                    resolve();
-                                                }
-                                            });
-                                        }
-                                    );
-                                } else {
-                                    db.run('COMMIT', () => {
-                                        console.log('Aucune donnée à insérer dans country_subventions');
-                                        resolve();
-                                    });
-                                }
+                                        });
+                                    }
+                                );
                             });
                         });
                     });
@@ -151,18 +148,15 @@ function importSubventions(db, callback) {
             return new Promise((resolve, reject) => {
                 if (!fs.existsSync('setup/departement_subventions.csv')) {
                     console.error('Erreur: setup/departement_subventions.csv n\'existe pas dans le répertoire courant');
-                    resolve(); // Continue with empty data
+                    resolve();
                     return;
                 }
 
                 fs.createReadStream('setup/departement_subventions.csv')
                     .pipe(csv())
                     .on('data', (row) => {
-                        const missingFields = [];
-                        if (!row['DEP']) missingFields.push('DEP');
-
-                        if (missingFields.length > 0) {
-                            console.warn(`Ligne ignorée dans departement_subventions.csv (champs manquants: ${missingFields.join(', ')}):`, row);
+                        if (!row['DEP']) {
+                            console.warn(`Ligne ignorée dans departement_subventions.csv (champ DEP manquant):`, row);
                             return;
                         }
 
@@ -176,15 +170,15 @@ function importSubventions(db, callback) {
                             return;
                         }
 
-                        // Extract and validate subvention fields
+                        // Extract subvention fields (exclude non-subvention fields)
+                        const excludedFields = ['DEP', 'commune', 'population', 'total_subventions'];
                         const subventionFields = Object.keys(row).filter(key => 
-                            key !== 'DEP'
+                            !excludedFields.includes(key)
                         );
 
                         const values = {};
                         const invalidFields = [];
 
-                        // Validate each subvention field
                         subventionFields.forEach(field => {
                             const value = row[field];
                             if (value !== undefined && value !== '' && !isNaN(parseFloat(value))) {
@@ -203,7 +197,7 @@ function importSubventions(db, callback) {
                         departmentRows++;
                         departmentBatch.push([
                             dep,
-                            JSON.stringify(values) // Store all subvention data as JSON
+                            JSON.stringify(values)
                         ]);
                     })
                     .on('end', () => {
@@ -239,6 +233,12 @@ function importSubventions(db, callback) {
                             if (err) {
                                 console.error('Erreur création index department_subventions:', err.message);
                                 reject(err);
+                                return;
+                            }
+
+                            if (departmentBatch.length === 0) {
+                                console.log('Aucune donnée à insérer dans department_subventions');
+                                resolve();
                                 return;
                             }
 
@@ -321,7 +321,7 @@ function importSubventions(db, callback) {
                                     db.run('ROLLBACK');
                                     reject(err);
                                 } else {
-                                    communeBatch = []; // Clear batch
+                                    communeBatch = [];
                                     resolve();
                                 }
                             });
@@ -335,7 +335,7 @@ function importSubventions(db, callback) {
             return new Promise((resolve, reject) => {
                 if (!fs.existsSync('setup/commune_subventions.csv')) {
                     console.error('Erreur: setup/commune_subventions.csv n\'existe pas dans le répertoire courant');
-                    resolve(); // Continue with empty data
+                    resolve();
                     return;
                 }
 
@@ -343,23 +343,20 @@ function importSubventions(db, callback) {
 
                 stream
                     .on('data', (row) => {
-                        const missingFields = [];
-                        if (!row['COG']) missingFields.push('COG');
-
-                        if (missingFields.length > 0) {
-                            console.warn(`Ligne ignorée dans commune_subventions.csv (champs manquants: ${missingFields.join(', ')}):`, row);
+                        if (!row['COG']) {
+                            console.warn(`Ligne ignorée dans commune_subventions.csv (champ COG manquant):`, row);
                             return;
                         }
 
-                        // Extract and validate subvention fields
+                        // Extract subvention fields (exclude non-subvention fields)
+                        const excludedFields = ['COG', 'commune', 'population', 'total_subventions'];
                         const subventionFields = Object.keys(row).filter(key => 
-                            key !== 'COG' && key !== 'commune'
+                            !excludedFields.includes(key)
                         );
 
                         const values = {};
                         const invalidFields = [];
 
-                        // Validate each subvention field
                         subventionFields.forEach(field => {
                             const value = row[field];
                             if (value !== undefined && value !== '' && !isNaN(parseFloat(value))) {
@@ -378,7 +375,7 @@ function importSubventions(db, callback) {
                         communeRows++;
                         communeBatch.push([
                             row['COG'],
-                            JSON.stringify(values) // Store all subvention data as JSON
+                            JSON.stringify(values)
                         ]);
 
                         if (communeBatch.length >= batchSize) {
@@ -397,7 +394,6 @@ function importSubventions(db, callback) {
                         if (communeRows === 0) {
                             console.warn('Avertissement: commune_subventions.csv est vide ou n\'a pas de données valides');
                         }
-                        // Process any remaining rows
                         processBatch()
                             .then(resolve)
                             .catch(reject);
