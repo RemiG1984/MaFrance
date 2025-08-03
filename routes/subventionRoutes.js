@@ -58,9 +58,9 @@ router.get('/country/:country', validateCountryParam, (req, res) => {
 });
 
 // Get department subventions
-router.get('/departement/:dep', validateDepartementParam, (req, res) => {
+router.get('/departement/:dept', validateDepartementParam, (req, res) => {
     const db = req.app.locals.db;
-    const { dep } = req.params;
+    const { dept } = req.params;
 
     const query = `
         SELECT subventions_data 
@@ -68,7 +68,7 @@ router.get('/departement/:dep', validateDepartementParam, (req, res) => {
         WHERE dep = ?
     `;
 
-    db.get(query, [dep], (err, row) => {
+    db.get(query, [dept], (err, row) => {
         if (err) {
             return handleDbError(err, res);
         }
@@ -80,7 +80,7 @@ router.get('/departement/:dep', validateDepartementParam, (req, res) => {
         try {
             const subventions = JSON.parse(row.subventions_data);
             res.json({
-                departement: dep,
+                departement: dept,
                 subventions
             });
         } catch (parseErr) {
@@ -176,9 +176,9 @@ router.get('/departements', validatePagination, (req, res) => {
 });
 
 // Get communes with subventions by department
-router.get('/communes/departement/:dep', [validateDepartementParam, validatePagination], (req, res) => {
+router.get('/communes/departement/:dept', [validateDepartementParam, validatePagination], (req, res) => {
     const db = req.app.locals.db;
-    const { dep } = req.params;
+    const { dept } = req.params;
     const { page = 1, limit = 100 } = req.query;
     const offset = (page - 1) * limit;
 
@@ -192,7 +192,7 @@ router.get('/communes/departement/:dep', [validateDepartementParam, validatePagi
     `;
 
     // Department code pattern for COG codes
-    const depPattern = dep + '%';
+    const depPattern = dept + '%';
 
     db.all(query, [depPattern, parseInt(limit), parseInt(offset)], (err, rows) => {
         if (err) {
@@ -225,7 +225,7 @@ router.get('/communes/departement/:dep', [validateDepartementParam, validatePagi
         });
 
         res.json({
-            departement: dep,
+            departement: dept,
             communes,
             pagination: {
                 page: parseInt(page),
