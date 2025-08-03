@@ -7,6 +7,7 @@ const { importElus } = require('./setup/importElus');
 const { importNames } = require('./setup/importNames');
 const { importCrimeData } = require('./setup/importCrimeData');
 const { importQPV } = require('./setup/importQPV');
+const { importSubventions } = require('./setup/importSubventions');
 
 const dbFile = config.database.path;
 
@@ -68,20 +69,28 @@ function runImports() {
                 process.exit(1);
               }
               console.log('✓ Importation données QPV terminée');
-              
-              // Create search indexes for better performance
-              createSearchIndexes()
-                .then(() => {
-                  console.log('✓ Index de recherche créés');
-                  console.log('🎉 Configuration de la base de données terminée !');
-                  db.close();
-                  process.exit(0);
-                })
-                .catch((indexErr) => {
-                  console.error('Échec création des index:', indexErr.message);
-                  db.close();
+
+              importSubventions(db, (err) => {
+                if (err) {
+                  console.error('Échec importation données subventions:', err.message);
                   process.exit(1);
-                });
+                }
+                console.log('✓ Importation données subventions terminée');
+                
+                // Create search indexes for better performance
+                createSearchIndexes()
+                  .then(() => {
+                    console.log('✓ Index de recherche créés');
+                    console.log('🎉 Configuration de la base de données terminée !');
+                    db.close();
+                    process.exit(0);
+                  })
+                  .catch((indexErr) => {
+                    console.error('Échec création des index:', indexErr.message);
+                    db.close();
+                    process.exit(1);
+                  });
+              });
             });
           });
         });
