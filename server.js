@@ -31,6 +31,10 @@ const otherRoutes = require("./routes/otherRoutes");
 const qpvRoutes = require("./routes/qpvRoutes");
 const rankingRoutes = require("./routes/rankingRoutes");
 
+// Make database available to all routes
+app.locals.db = db;
+
+// Attach routes
 app.use("/api/communes", communeRoutes);
 app.use("/api/departements", departementRoutes);
 app.use("/api/country", countryRoutes);
