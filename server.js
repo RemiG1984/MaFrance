@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const path = require("path");
 const config = require("./config");
+const db = require("./config/db");
 const app = express();
 
 // Middleware
