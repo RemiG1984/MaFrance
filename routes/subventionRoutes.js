@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const { param, validationResult } = require('express-validator');
 const { handleDbError } = require('../middleware/errorHandler');
-const { validateDepartement, validateCOG, validateCountry, validateDepartementParam, validateCOGParam, validatePagination } = require('../middleware/validate');
+const { validateDepartementParam, validateCOGParam, validatePagination } = require('../middleware/validate');
 
 // Middleware to handle validation errors
 const handleValidationErrors = (req, res, next) => {
