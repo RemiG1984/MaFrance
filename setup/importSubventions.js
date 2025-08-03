@@ -23,7 +23,6 @@ function importSubventions(db, callback) {
                     .on('data', (row) => {
                         const missingFields = [];
                         if (!row['country']) missingFields.push('country');
-                        if (!row['annee']) missingFields.push('annee');
 
                         if (missingFields.length > 0) {
                             console.warn(`Ligne ignorée dans france_subventions.csv (champs manquants: ${missingFields.join(', ')}):`, row);
@@ -32,7 +31,7 @@ function importSubventions(db, callback) {
 
                         // Extract and validate subvention fields
                         const subventionFields = Object.keys(row).filter(key => 
-                            key !== 'country' && key !== 'annee'
+                            key !== 'country'
                         );
 
                         const values = {};
@@ -57,7 +56,6 @@ function importSubventions(db, callback) {
                         countryRows++;
                         countryBatch.push([
                             row['country'],
-                            row['annee'],
                             JSON.stringify(values) // Store all subvention data as JSON
                         ]);
                     })
@@ -80,10 +78,8 @@ function importSubventions(db, callback) {
                 db.serialize(() => {
                     db.run(`
                         CREATE TABLE IF NOT EXISTS country_subventions (
-                            country TEXT,
-                            annee TEXT,
-                            subventions_data TEXT,
-                            PRIMARY KEY (country, annee)
+                            country TEXT PRIMARY KEY,
+                            subventions_data TEXT
                         )
                     `, (err) => {
                         if (err) {
@@ -92,7 +88,7 @@ function importSubventions(db, callback) {
                             return;
                         }
 
-                        db.run('CREATE INDEX IF NOT EXISTS idx_country_subventions ON country_subventions(country, annee)', (err) => {
+                        db.run('CREATE INDEX IF NOT EXISTS idx_country_subventions ON country_subventions(country)', (err) => {
                             if (err) {
                                 console.error('Erreur création index country_subventions:', err.message);
                                 reject(err);
@@ -107,10 +103,10 @@ function importSubventions(db, callback) {
                                 }
 
                                 if (countryBatch.length > 0) {
-                                    const placeholders = countryBatch.map(() => '(?, ?, ?)').join(',');
+                                    const placeholders = countryBatch.map(() => '(?, ?)').join(',');
                                     const flatBatch = [].concat(...countryBatch);
                                     db.run(
-                                        `INSERT OR REPLACE INTO country_subventions (country, annee, subventions_data) VALUES ${placeholders}`,
+                                        `INSERT OR REPLACE INTO country_subventions (country, subventions_data) VALUES ${placeholders}`,
                                         flatBatch,
                                         (err) => {
                                             if (err) {
@@ -165,7 +161,6 @@ function importSubventions(db, callback) {
                     .on('data', (row) => {
                         const missingFields = [];
                         if (!row['DEP']) missingFields.push('DEP');
-                        if (!row['annee']) missingFields.push('annee');
 
                         if (missingFields.length > 0) {
                             console.warn(`Ligne ignorée dans departement_subventions.csv (champs manquants: ${missingFields.join(', ')}):`, row);
@@ -184,7 +179,7 @@ function importSubventions(db, callback) {
 
                         // Extract and validate subvention fields
                         const subventionFields = Object.keys(row).filter(key => 
-                            key !== 'DEP' && key !== 'annee'
+                            key !== 'DEP'
                         );
 
                         const values = {};
@@ -209,7 +204,6 @@ function importSubventions(db, callback) {
                         departmentRows++;
                         departmentBatch.push([
                             dep,
-                            row['annee'],
                             JSON.stringify(values) // Store all subvention data as JSON
                         ]);
                     })
@@ -232,10 +226,8 @@ function importSubventions(db, callback) {
                 db.serialize(() => {
                     db.run(`
                         CREATE TABLE IF NOT EXISTS department_subventions (
-                            dep TEXT,
-                            annee TEXT,
-                            subventions_data TEXT,
-                            PRIMARY KEY (dep, annee)
+                            dep TEXT PRIMARY KEY,
+                            subventions_data TEXT
                         )
                     `, err => {
                         if (err) {
@@ -244,7 +236,7 @@ function importSubventions(db, callback) {
                             return;
                         }
 
-                        db.run('CREATE INDEX IF NOT EXISTS idx_department_subventions ON department_subventions(dep, annee)', err => {
+                        db.run('CREATE INDEX IF NOT EXISTS idx_department_subventions ON department_subventions(dep)', err => {
                             if (err) {
                                 console.error('Erreur création index department_subventions:', err.message);
                                 reject(err);
@@ -260,10 +252,10 @@ function importSubventions(db, callback) {
 
                                 for (let i = 0; i < departmentBatch.length; i += batchSize) {
                                     const batch = departmentBatch.slice(i, i + batchSize);
-                                    const placeholders = batch.map(() => '(?, ?, ?)').join(',');
+                                    const placeholders = batch.map(() => '(?, ?)').join(',');
                                     const flatBatch = [].concat(...batch);
                                     db.run(
-                                        `INSERT OR REPLACE INTO department_subventions (dep, annee, subventions_data) VALUES ${placeholders}`,
+                                        `INSERT OR REPLACE INTO department_subventions (dep, subventions_data) VALUES ${placeholders}`,
                                         flatBatch,
                                         err => {
                                             if (err) {
@@ -312,10 +304,10 @@ function importSubventions(db, callback) {
                         return;
                     }
 
-                    const placeholders = communeBatch.map(() => '(?, ?, ?)').join(',');
+                    const placeholders = communeBatch.map(() => '(?, ?)').join(',');
                     const flatBatch = [].concat(...communeBatch);
                     db.run(
-                        `INSERT OR REPLACE INTO commune_subventions (COG, annee, subventions_data) VALUES ${placeholders}`,
+                        `INSERT OR REPLACE INTO commune_subventions (COG, subventions_data) VALUES ${placeholders}`,
                         flatBatch,
                         err => {
                             if (err) {
@@ -354,7 +346,6 @@ function importSubventions(db, callback) {
                     .on('data', (row) => {
                         const missingFields = [];
                         if (!row['COG']) missingFields.push('COG');
-                        if (!row['annee']) missingFields.push('annee');
 
                         if (missingFields.length > 0) {
                             console.warn(`Ligne ignorée dans commune_subventions.csv (champs manquants: ${missingFields.join(', ')}):`, row);
@@ -363,7 +354,7 @@ function importSubventions(db, callback) {
 
                         // Extract and validate subvention fields
                         const subventionFields = Object.keys(row).filter(key => 
-                            key !== 'COG' && key !== 'annee'
+                            key !== 'COG'
                         );
 
                         const values = {};
@@ -388,7 +379,6 @@ function importSubventions(db, callback) {
                         communeRows++;
                         communeBatch.push([
                             row['COG'],
-                            row['annee'],
                             JSON.stringify(values) // Store all subvention data as JSON
                         ]);
 
@@ -425,10 +415,8 @@ function importSubventions(db, callback) {
                 db.serialize(() => {
                     db.run(`
                         CREATE TABLE IF NOT EXISTS commune_subventions (
-                            COG TEXT,
-                            annee TEXT,
-                            subventions_data TEXT,
-                            PRIMARY KEY (COG, annee)
+                            COG TEXT PRIMARY KEY,
+                            subventions_data TEXT
                         )
                     `, err => {
                         if (err) {
@@ -437,7 +425,7 @@ function importSubventions(db, callback) {
                             return;
                         }
 
-                        db.run('CREATE INDEX IF NOT EXISTS idx_commune_subventions ON commune_subventions(COG, annee)', err => {
+                        db.run('CREATE INDEX IF NOT EXISTS idx_commune_subventions ON commune_subventions(COG)', err => {
                             if (err) {
                                 console.error('Erreur création index commune_subventions:', err.message);
                                 reject(err);
