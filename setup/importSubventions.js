@@ -1,4 +1,3 @@
-
 const fs = require('fs');
 const csv = require('csv-parser');
 
@@ -354,7 +353,7 @@ function importSubventions(db, callback) {
 
                         // Extract and validate subvention fields
                         const subventionFields = Object.keys(row).filter(key => 
-                            key !== 'COG'
+                            key !== 'COG' && key !== 'commune' && key !== 'population'
                         );
 
                         const values = {};
