@@ -24,11 +24,11 @@ function importMigrants(db, callback) {
                         return;
                     }
 
-                    const placeholders = migrantBatch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
+                    const placeholders = migrantBatch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
                     const flatBatch = [].concat(...migrantBatch);
                     db.run(
                         `INSERT OR IGNORE INTO migrant_centers (
-                            COG, commune, departement, region, type_centre, nom_centre, adresse,
+                            COG, departement, region, type_centre, nom_centre, adresse,
                             latitude, longitude, capacite, date_ouverture, date_fermeture,
                             statut, gestionnaire, population_cible, services_proposes,
                             contact_telephone, contact_email, site_web, notes, derniere_maj
@@ -72,7 +72,6 @@ function importMigrants(db, callback) {
                     .on('data', (row) => {
                         const missingFields = [];
                         if (!row['COG']) missingFields.push('COG');
-                        if (!row['commune']) missingFields.push('commune');
                         if (!row['departement']) missingFields.push('departement');
 
                         if (missingFields.length > 0) {
@@ -127,7 +126,6 @@ function importMigrants(db, callback) {
                         migrantRows++;
                         migrantBatch.push([
                             row['COG'],
-                            row['commune'].trim(),
                             departement,
                             region,
                             typeCentre,
@@ -183,7 +181,6 @@ function importMigrants(db, callback) {
                     db.run(`
                         CREATE TABLE IF NOT EXISTS migrant_centers (
                             COG TEXT,
-                            commune TEXT,
                             departement TEXT,
                             region TEXT,
                             type_centre TEXT,

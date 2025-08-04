@@ -28,6 +28,7 @@ const countryRoutes = require("./routes/countryRoutes");
 const articleRoutes = require("./routes/articleRoutes");
 const debugRoutes = require("./routes/debugRoutes");
 const subventionRoutes = require('./routes/subventionRoutes');
+const migrantRoutes = require('./routes/migrantRoutes');
 const otherRoutes = require("./routes/otherRoutes");
 const qpvRoutes = require("./routes/qpvRoutes");
 const rankingRoutes = require("./routes/rankingRoutes");
@@ -45,6 +46,7 @@ app.use('/api/qpv', qpvRoutes);
 app.use('/api/rankings', rankingRoutes);
 app.use('/api/debug', debugRoutes);
 app.use('/api/subventions', subventionRoutes);
+app.use('/api/migrants', migrantRoutes);
 app.use("/api", otherRoutes);
 app.use("/api/rankings", rankingRoutes);
 
