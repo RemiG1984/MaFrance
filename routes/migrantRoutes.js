@@ -1,4 +1,3 @@
-
 const express = require('express');
 const router = express.Router();
 const { param, validationResult } = require('express-validator');
@@ -31,7 +30,7 @@ router.get('/commune/:cog', validateCOGParam, (req, res) => {
         if (err) {
             return handleDbError(err, res);
         }
-        
+
         if (!rows || rows.length === 0) {
             return res.status(404).json({ error: 'Aucun centre de migrants trouvé pour cette commune' });
         }
@@ -139,61 +138,35 @@ router.get('/stats', (req, res) => {
     let completed = 0;
     const total = Object.keys(queries).length;
 
-    // Get total centers
-    db.get(queries.total_centers, (err, row) => {
-        if (err) {
-            console.error('Erreur stats total_centers:', err);
-            results.total_centers = 0;
+    Object.keys(queries).forEach(key => {
+        if (key === 'by_department' || key === 'by_type') {
+            db.all(queries[key], (err, rows) => {
+                if (err) {
+                    console.error(`Erreur stats ${key}:`, err);
+                    results[key] = [];
+                } else {
+                    results[key] = rows;
+                }
+                completed++;
+                if (completed === total) {
+                    res.json({ statistics: results });
+                }
+            });
         } else {
-            results.total_centers = row.count;
-        }
-        completed++;
-        checkCompletion();
-    });
-
-    // Get by department
-    db.all(queries.by_department, (err, rows) => {
-        if (err) {
-            console.error('Erreur stats by_department:', err);
-            results.by_department = [];
-        } else {
-            results.by_department = rows;
-        }
-        completed++;
-        checkCompletion();
-    });
-
-    // Get by type
-    db.all(queries.by_type, (err, rows) => {
-        if (err) {
-            console.error('Erreur stats by_type:', err);
-            results.by_type = [];
-        } else {
-            results.by_type = rows;
-        }
-        completed++;
-        checkCompletion();
-    });
-
-    // Get total capacity
-    db.get(queries.total_capacity, (err, row) => {
-        if (err) {
-            console.error('Erreur stats total_capacity:', err);
-            results.total_capacity = 0;
-        } else {
-            results.total_capacity = row.total || 0;
-        }
-        completed++;
-        checkCompletion();
-    });
-
-    function checkCompletion() {
-        if (completed === total) {
-            res.json({
-                statistics: results
+            db.get(queries[key], (err, row) => {
+                if (err) {
+                    console.error(`Erreur stats ${key}:`, err);
+                    results[key] = 0;
+                } else {
+                    results[key] = key === 'total_capacity' ? (row.total || 0) : row.count;
+                }
+                completed++;
+                if (completed === total) {
+                    res.json({ statistics: results });
+                }
             });
         }
-    }
+    });
 });
 
 module.exports = router;
