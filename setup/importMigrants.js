@@ -24,13 +24,13 @@ function importMigrants(db, callback) {
                         return;
                     }
 
-                    const placeholders = migrantBatch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
+                    const placeholders = migrantBatch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
                     const flatBatch = [].concat(...migrantBatch);
                     db.run(
                         `INSERT OR IGNORE INTO migrant_centers (
-                            COG, departement, region, type_centre, nom_centre, adresse,
+                            COG, departement, region, type_centre, gestionnaire_centre, adresse,
                             latitude, longitude, capacite, date_ouverture, date_fermeture,
-                            statut, gestionnaire, population_cible, services_proposes,
+                            statut, population_cible, services_proposes,
                             contact_telephone, contact_email, site_web, notes, derniere_maj
                         ) VALUES ${placeholders}`,
                         flatBatch,
@@ -111,11 +111,10 @@ function importMigrants(db, callback) {
 
                         // Handle optional text fields
                         const region = row['region'] ? row['region'].trim() : null;
-                        const typeCentre = row['type_centre'] ? row['type_centre'].trim() : null;
-                        const nomCentre = row['nom_centre'] ? row['nom_centre'].trim() : null;
+                        const typeCentre = row['type'] ? row['type'].trim() : null;
+                        const gestionnaireCentre = row['gestionnaire'] ? row['gestionnaire'].trim() : null;
                         const adresse = row['adresse'] ? row['adresse'].trim() : null;
                         const statut = row['statut'] ? row['statut'].trim() : null;
-                        const gestionnaire = row['gestionnaire'] ? row['gestionnaire'].trim() : null;
                         const populationCible = row['population_cible'] ? row['population_cible'].trim() : null;
                         const servicesProposes = row['services_proposes'] ? row['services_proposes'].trim() : null;
                         const contactTelephone = row['contact_telephone'] ? row['contact_telephone'].trim() : null;
@@ -129,7 +128,7 @@ function importMigrants(db, callback) {
                             departement,
                             region,
                             typeCentre,
-                            nomCentre,
+                            gestionnaireCentre,
                             adresse,
                             latitude,
                             longitude,
@@ -137,7 +136,6 @@ function importMigrants(db, callback) {
                             dateOuverture,
                             dateFermeture,
                             statut,
-                            gestionnaire,
                             populationCible,
                             servicesProposes,
                             contactTelephone,
@@ -184,7 +182,7 @@ function importMigrants(db, callback) {
                             departement TEXT,
                             region TEXT,
                             type_centre TEXT,
-                            nom_centre TEXT,
+                            gestionnaire_centre TEXT,
                             adresse TEXT,
                             latitude REAL,
                             longitude REAL,
@@ -192,7 +190,6 @@ function importMigrants(db, callback) {
                             date_ouverture TEXT,
                             date_fermeture TEXT,
                             statut TEXT,
-                            gestionnaire TEXT,
                             population_cible TEXT,
                             services_proposes TEXT,
                             contact_telephone TEXT,
@@ -200,7 +197,7 @@ function importMigrants(db, callback) {
                             site_web TEXT,
                             notes TEXT,
                             derniere_maj TEXT,
-                            PRIMARY KEY (COG, nom_centre, adresse)
+                            PRIMARY KEY (COG, gestionnaire_centre, adresse)
                         )
                     `, err => {
                         if (err) {

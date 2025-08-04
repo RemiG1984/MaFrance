@@ -30,7 +30,7 @@ router.get('/commune/:cog', validateCOGParam, (req, res) => {
         SELECT * 
         FROM migrant_centers 
         WHERE COG = ?
-        ORDER BY nom_centre
+        ORDER BY gestionnaire_centre
     `;
 
     db.all(query, [cog], (err, rows) => {
@@ -46,7 +46,7 @@ router.get('/commune/:cog', validateCOGParam, (req, res) => {
             COG: cog,
             centers: rows.map(row => ({
                 type_centre: row.type_centre,
-                nom_centre: row.nom_centre,
+                gestionnaire_centre: row.gestionnaire_centre,
                 adresse: row.adresse,
                 latitude: row.latitude,
                 longitude: row.longitude,
@@ -54,7 +54,6 @@ router.get('/commune/:cog', validateCOGParam, (req, res) => {
                 date_ouverture: row.date_ouverture,
                 date_fermeture: row.date_fermeture,
                 statut: row.statut,
-                gestionnaire: row.gestionnaire,
                 population_cible: row.population_cible,
                 services_proposes: row.services_proposes,
                 contact_telephone: row.contact_telephone,
@@ -78,7 +77,7 @@ router.get('/departement/:dept', [validateDepartementParam, validatePagination],
         SELECT * 
         FROM migrant_centers 
         WHERE departement = ?
-        ORDER BY COG, nom_centre
+        ORDER BY COG, gestionnaire_centre
         LIMIT ? OFFSET ?
     `;
 
@@ -90,7 +89,7 @@ router.get('/departement/:dept', [validateDepartementParam, validatePagination],
         const centers = rows.map(row => ({
             COG: row.COG,
             type_centre: row.type_centre,
-            nom_centre: row.nom_centre,
+            gestionnaire_centre: row.gestionnaire_centre,
             adresse: row.adresse,
             latitude: row.latitude,
             longitude: row.longitude,
@@ -98,7 +97,6 @@ router.get('/departement/:dept', [validateDepartementParam, validatePagination],
             date_ouverture: row.date_ouverture,
             date_fermeture: row.date_fermeture,
             statut: row.statut,
-            gestionnaire: row.gestionnaire,
             population_cible: row.population_cible,
             services_proposes: row.services_proposes,
             contact_telephone: row.contact_telephone,
