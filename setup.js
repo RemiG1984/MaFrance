@@ -8,6 +8,7 @@ const { importNames } = require('./setup/importNames');
 const { importCrimeData } = require('./setup/importCrimeData');
 const { importQPV } = require('./setup/importQPV');
 const { importSubventions } = require('./setup/importSubventions');
+const { importMigrants } = require('./setup/importMigrants');
 
 const dbFile = config.database.path;
 
@@ -76,20 +77,28 @@ function runImports() {
                   process.exit(1);
                 }
                 console.log('✓ Importation données subventions terminée');
-                
-                // Create search indexes for better performance
-                createSearchIndexes()
-                  .then(() => {
-                    console.log('✓ Index de recherche créés');
-                    console.log('🎉 Configuration de la base de données terminée !');
-                    db.close();
-                    process.exit(0);
-                  })
-                  .catch((indexErr) => {
-                    console.error('Échec création des index:', indexErr.message);
-                    db.close();
+
+                importMigrants(db, (err) => {
+                  if (err) {
+                    console.error('Échec importation données centres migrants:', err.message);
                     process.exit(1);
-                  });
+                  }
+                  console.log('✓ Importation données centres migrants terminée');
+                  
+                  // Create search indexes for better performance
+                  createSearchIndexes()
+                    .then(() => {
+                      console.log('✓ Index de recherche créés');
+                      console.log('🎉 Configuration de la base de données terminée !');
+                      db.close();
+                      process.exit(0);
+                    })
+                    .catch((indexErr) => {
+                      console.error('Échec création des index:', indexErr.message);
+                      db.close();
+                      process.exit(1);
+                    });
+                });
               });
             });
           });
