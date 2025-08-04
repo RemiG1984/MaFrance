@@ -27,11 +27,10 @@ router.get('/commune/:cog', validateCOGParam, (req, res) => {
     const { cog } = req.params;
 
     const query = `
-        SELECT mc.*, c.commune as commune_name 
-        FROM migrant_centers mc
-        LEFT JOIN communes c ON mc.COG = c.COG
-        WHERE mc.COG = ?
-        ORDER BY mc.nom_centre
+        SELECT * 
+        FROM migrant_centers 
+        WHERE COG = ?
+        ORDER BY nom_centre
     `;
 
     db.all(query, [cog], (err, rows) => {
@@ -45,7 +44,6 @@ router.get('/commune/:cog', validateCOGParam, (req, res) => {
 
         res.json({
             COG: cog,
-            commune: rows[0].commune_name || 'Nom inconnu',
             centers: rows.map(row => ({
                 type_centre: row.type_centre,
                 nom_centre: row.nom_centre,
@@ -77,11 +75,10 @@ router.get('/departement/:dept', [validateDepartementParam, validatePagination],
     const offset = (page - 1) * limit;
 
     const query = `
-        SELECT mc.*, c.commune as commune_name 
-        FROM migrant_centers mc
-        LEFT JOIN communes c ON mc.COG = c.COG
-        WHERE mc.departement = ?
-        ORDER BY mc.COG, mc.nom_centre
+        SELECT * 
+        FROM migrant_centers 
+        WHERE departement = ?
+        ORDER BY COG, nom_centre
         LIMIT ? OFFSET ?
     `;
 
@@ -92,7 +89,6 @@ router.get('/departement/:dept', [validateDepartementParam, validatePagination],
 
         const centers = rows.map(row => ({
             COG: row.COG,
-            commune: row.commune_name || 'Nom inconnu',
             type_centre: row.type_centre,
             nom_centre: row.nom_centre,
             adresse: row.adresse,
