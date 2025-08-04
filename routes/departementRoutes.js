@@ -52,7 +52,9 @@ router.get("/details", validateDepartement, (req, res) => {
       CASE 
         WHEN d.population > 0 THEN (COALESCE(qpv_stats.total_population_qpv, 0) * 100.0 / d.population)
         ELSE 0
-      END as pop_in_qpv_pct
+      END as pop_in_qpv_pct,
+      d.total_places_migrants,
+      d.places_migrants_p1k
     FROM departements d
     LEFT JOIN (
       SELECT 
