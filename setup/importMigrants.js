@@ -24,11 +24,11 @@ function importMigrants(db, callback) {
                         return;
                     }
 
-                    const placeholders = migrantBatch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
+                    const placeholders = migrantBatch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
                     const flatBatch = [].concat(...migrantBatch);
                     db.run(
                         `INSERT OR IGNORE INTO migrant_centers (
-                            COG, departement, region, type_centre, gestionnaire_centre, adresse,
+                            COG, departement, region, type_centre, gestionnaire_centre, adresse, places,
                             latitude, longitude, capacite, date_ouverture, date_fermeture,
                             statut, population_cible, services_proposes,
                             contact_telephone, contact_email, site_web, notes, derniere_maj
@@ -114,6 +114,7 @@ function importMigrants(db, callback) {
                         const typeCentre = row['type'] ? row['type'].trim() : null;
                         const gestionnaireCentre = row['gestionnaire'] ? row['gestionnaire'].trim() : null;
                         const adresse = row['adresse'] ? row['adresse'].trim() : null;
+                        const places = row['places'] && !isNaN(parseInt(row['places'])) ? parseInt(row['places']) : null;
                         const statut = row['statut'] ? row['statut'].trim() : null;
                         const populationCible = row['population_cible'] ? row['population_cible'].trim() : null;
                         const servicesProposes = row['services_proposes'] ? row['services_proposes'].trim() : null;
@@ -130,6 +131,7 @@ function importMigrants(db, callback) {
                             typeCentre,
                             gestionnaireCentre,
                             adresse,
+                            places,
                             latitude,
                             longitude,
                             capacite,
@@ -184,6 +186,7 @@ function importMigrants(db, callback) {
                             type_centre TEXT,
                             gestionnaire_centre TEXT,
                             adresse TEXT,
+                            places INTEGER,
                             latitude REAL,
                             longitude REAL,
                             capacite INTEGER,
