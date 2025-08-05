@@ -135,6 +135,9 @@ dist
 #Setup directory
 setup/*.csv
 
+#Public directory since it is compiled
+public/
+
 node_modules
 dist
 dist-ssr
