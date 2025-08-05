@@ -14,6 +14,7 @@
 
 <script>
 import Chart from 'chart.js/auto';
+import { watermarkPlugin } from '../utils/chartWatermark.js'
 let chart = null
 
 export default {
@@ -87,6 +88,8 @@ export default {
     }
   },
   mounted(){
+    // Register the watermark plugin
+    Chart.register(watermarkPlugin);
     this.createChart()
   },
   methods: {
