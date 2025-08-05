@@ -83,22 +83,30 @@ export default {
       
       const datasets = [];
       
+      // Define colors for each crime metric (from original crimeGraphHandler.js)
+      const metricColors = {
+        'homicides_p100k': '#dc3545',
+        'violences_physiques_p1k': '#007bff',
+        'violences_sexuelles_p1k': '#28a745',
+        'vols_p1k': '#ffc107',
+        'destructions_p1k': '#e83e8c',
+        'stupefiants_p1k': '#17a2b8',
+        'escroqueries_p1k': '#fd7e14'
+      };
+      
       // Add current location dataset (full line)
       if (this.data[currentLocationLevel]) {
         let label;
-        let color;
+        let color = metricColors[this.metricKey] || '#dc3545'; // Use metric-specific color or default
         
         if (currentLocationLevel === 'country') {
           label = this.countryLabel;
-          color = '#dc3545'; // Red for country
         } else if (currentLocationLevel === 'departement') {
           const deptName = this.dataStore.levels.departement;
           const deptCode = this.dataStore.getDepartementCode();
           label = deptName ? (deptCode ? `${deptCode} - ${deptName}` : deptName) : 'Departement';
-          color = '#007bff'; // Blue for department
         } else if (currentLocationLevel === 'commune') {
           label = this.location.name;
-          color = '#28a745'; // Green for commune
         }
         
         datasets.push({
