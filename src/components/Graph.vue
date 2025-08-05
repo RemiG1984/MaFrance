@@ -267,12 +267,6 @@ export default {
                 color: '#343a40'
               }
             }
-          },
-          elements: {
-            point: {
-              radius: 2,
-              hoverRadius: 5
-            }
           }
         }
       };
