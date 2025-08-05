@@ -106,30 +106,44 @@ export default {
   },
   computed: {
     aggregatedData() {
+      if (!this.data) return {}
+      
       const result = {}
       
-      // Pour chaque nouvelle clé dans le mapping
-      Object.keys(keyMapping).forEach(newKey => {
-        const sourceKeys = keyMapping[newKey]
-        result[newKey] = {}
+      // For each chart we want to display
+      this.chartList.forEach(chartKey => {
+        result[chartKey] = {}
+        
+        // Check if we have direct data for this key
+        if (this.data[chartKey]) {
+          // Copy the data structure directly
+          for (const level of this.levels) {
+            if (this.data[chartKey][level]) {
+              result[chartKey][level] = this.data[chartKey][level]
+            }
+          }
+        } else if (keyMapping[chartKey]) {
+          // If we need to aggregate from multiple sources using keyMapping
+          const sourceKeys = keyMapping[chartKey]
+          
+          for (const level of this.levels) {
+            const inputSeries = sourceKeys
+              .map(key => this.data[key] && this.data[key][level])
+              .filter(serie => serie && Array.isArray(serie))
 
-        for(const level of this.levels) {
-          const inputSeries = sourceKeys
-            .map(key => this.data[key] && this.data[key][level])
-            .filter(serie => serie) // Filtrer les séries undefined/null
+            if (inputSeries.length === 0) continue
 
-          if(inputSeries.length === 0) continue
+            const seriesLength = inputSeries[0].length
+            result[chartKey][level] = []
 
-          const seriesLength = inputSeries[0].length
-          result[newKey][level] = []
-
-          for (let i = 0; i < seriesLength; i++) {
-            let sum = 0
-            inputSeries.forEach(serie => {
-              const value = serie[i] === null || serie[i] === undefined ? 0 : serie[i]
-              sum += value
-            })
-            result[newKey][level].push(sum)
+            for (let i = 0; i < seriesLength; i++) {
+              let sum = 0
+              inputSeries.forEach(serie => {
+                const value = serie[i] === null || serie[i] === undefined ? 0 : serie[i]
+                sum += value
+              })
+              result[chartKey][level].push(sum)
+            }
           }
         }
       })
