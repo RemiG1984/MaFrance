@@ -1,3 +1,4 @@
+
 <template>
   <v-card>
     <v-card-title class="text-h5">
@@ -5,30 +6,46 @@
     </v-card-title>
     
     <v-card-text>
-      <div class="categories-container">
+      <div class="categories-container mb-4">
         <v-chip-group
           v-model="selectedCategory"
           active-class="primary--text"
           column
         >
-
           <v-chip 
-          color="primary"
-          variant="flat"
-          label
-          v-for="category in categories"
-          :value="category">{{ articleCategoriesRef[category] }}</v-chip>
+            color="primary"
+            variant="flat"
+            label
+            v-for="category in categories"
+            :key="category"
+            :value="category"
+            @click="selectCategory(category)"
+          >
+            {{ articleCategoriesRef[category] }} ({{ articles.counts[category] || 0 }})
+          </v-chip>
+          <v-chip 
+            color="primary"
+            variant="flat"
+            label
+            :value="null"
+            @click="selectCategory(null)"
+          >
+            Tous ({{ totalFilteredArticles }})
+          </v-chip>
         </v-chip-group>
       </div>
       <div class="articles-container">
         <div
           class="article"
-          v-for="(item, i) in articles.list"
+          v-for="(item, i) in filteredArticles"
           :key="item.url"
         >
           <b> {{ formatDate(item.date) }} </b>
           <span> [{{ item.commune }}] </span>
           <a :href='item.url'> {{ item.title }} </a>
+        </div>
+        <div v-if="filteredArticles.length === 0" class="no-articles">
+          Aucun article trouvé.
         </div>
       </div>
     </v-card-text>
@@ -71,21 +88,20 @@ export default {
     filteredArticles() {
       let filtered = [...this.articles.list]
       
-      if (this.selectedLieu) {
-        filtered = filtered.filter(article => article.lieu === this.selectedLieu)
+      // Apply category filter
+      if (this.selectedCategory) {
+        filtered = filtered.filter(article => {
+          const value = article[this.selectedCategory];
+          return value === 1 || value === "1";
+        });
       }
-      
-      // Appliquer les filtres actifs
-      // if (this.activeFilters.includes('Récents')) {
-      //   filtered.sort((a, b) => new Date(b.date) - new Date(a.date))
-      // }
       
       return filtered
     },
     
-    // totalPages() {
-    //   return Math.ceil(this.filteredArticles.length / this.itemsPerPage)
-    // }
+    totalFilteredArticles() {
+      return this.articles.list.length
+    }
   },
   methods: {
     formatDate(dateString) {
@@ -97,24 +113,22 @@ export default {
       })
     },
     
-    filterArticles() {
-      this.currentPage = 1
+    selectCategory(category) {
+      this.selectedCategory = category
     },
     
-    // toggleFilter(filter) {
-    //   const index = this.activeFilters.indexOf(filter)
-    //   if (index > -1) {
-    //     this.activeFilters.splice(index, 1)
-    //   } else {
-    //     this.activeFilters.push(filter)
-    //   }
-    // },
-    
-    // onPageChange(page) {
-    //   this.currentPage = page
-    // },
-    
+    filterArticles() {
+      // This method can be used for additional filtering logic if needed
+    }
   },
+  watch: {
+    selectedCategory: {
+      handler() {
+        // Reset to first category chip when category changes
+        // This ensures the UI reflects the current selection
+      }
+    }
+  }
 }
 </script>
 
@@ -137,4 +151,14 @@ export default {
   margin-bottom: 12px;
 }
 
-</style> 
+.no-articles {
+  text-align: center;
+  color: #6c757d;
+  font-style: italic;
+  padding: 20px;
+}
+
+.categories-container {
+  margin-bottom: 16px;
+}
+</style>
