@@ -4,7 +4,7 @@ import { DepartementNames } from '../utils/departementNames.js'
 import { keyMapping } from '../utils/statsCalc.js'
 
 
-const baseURL = 'http://127.0.0.1:3000'
+const baseURL = ''
 
 export const useDataStore = defineStore('data', {
   state: () => ({
