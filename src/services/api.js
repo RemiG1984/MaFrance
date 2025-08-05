@@ -1,38 +1,35 @@
 // Service API pour gérer les appels au backend
 class ApiService {
-  constructor() {
-    this.baseURL = 'http://127.0.0.1:3000'
-    // this.baseURL = '/api'
-  }
-
-  async request(endpoint, options = {}) {
-    const url = `${this.baseURL}${endpoint}`
-    const config = {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-      },
-      ...options
+    constructor() {
+        //this.baseURL = 'http://127.0.0.1:3000'
+        this.baseURL = "/api";
     }
 
-    return fetch(url, config)
-    .then(response => response.json())
-    .catch(function (error) {
-      // throw error
-      console.error(`API request failed: ${endpoint}`, error)
-      return null
-    })
-  }
+    async request(endpoint, options = {}) {
+        const url = `${this.baseURL}${endpoint}`;
+        const config = {
+            headers: {
+                "Content-Type": "application/json",
+                ...options.headers,
+            },
+            ...options,
+        };
+
+        return fetch(url, config)
+            .then((response) => response.json())
+            .catch(function (error) {
+                // throw error
+                console.error(`API request failed: ${endpoint}`, error);
+                return null;
+            });
+    }
 }
-
-
 
 // Export singleton instance
 const apiService = new ApiService();
 
 // Convenience methods for common endpoints
 const api = {
-    
     // Country data
     getCountryDetails: (country = "France") =>
         apiService.request(`/api/country/details?country=${country}`),
@@ -89,10 +86,10 @@ const api = {
     },
 
     // Search functionality
-    searchCommunes: (query) => 
-      apiService.request(
-        `/api/communes/search?q=${encodeURIComponent(query)}`,
-      ),
+    searchCommunes: (query) =>
+        apiService.request(
+            `/api/communes/search?q=${encodeURIComponent(query)}`,
+        ),
 
     // Location data
     getDepartements: () => apiService.request("/api/departements"),
@@ -111,4 +108,4 @@ const api = {
     },
 };
 
-export default api 
+export default api;
