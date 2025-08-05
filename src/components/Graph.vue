@@ -78,56 +78,86 @@ export default {
   methods: {
     
     generateDatasets() {
-      const colors = {
-        country: 'rgba(54, 162, 235, 0.8)',
-        departement: 'rgba(255, 99, 132, 0.8)', 
-        commune: 'rgba(75, 192, 192, 0.8)'
-      };
+      const currentLocationLevel = this.location.type === 'commune' ? 'commune' : 
+                                  this.location.type === 'departement' ? 'departement' : 'country';
       
-      const borderColors = {
-        country: 'rgba(54, 162, 235, 1)',
-        departement: 'rgba(255, 99, 132, 1)',
-        commune: 'rgba(75, 192, 192, 1)'
-      };
-
-      const levels = Object.keys(this.data)
-      const datasets = []
-      // console.log('metricKey', this.metricKey, levels)
-
-      for (const level of this.levels) {
-        if (!this.data[level]) continue; // Skip if no data for this level
+      const datasets = [];
+      
+      // Add current location dataset (full line)
+      if (this.data[currentLocationLevel]) {
         let label;
+        let color;
+        
+        if (currentLocationLevel === 'country') {
+          label = this.countryLabel;
+          color = '#dc3545'; // Red for country
+        } else if (currentLocationLevel === 'departement') {
+          const deptName = this.dataStore.levels.departement;
+          const deptCode = this.dataStore.getDepartementCode();
+          label = deptName ? (deptCode ? `${deptCode} - ${deptName}` : deptName) : 'Departement';
+          color = '#007bff'; // Blue for department
+        } else if (currentLocationLevel === 'commune') {
+          label = this.location.name;
+          color = '#28a745'; // Green for commune
+        }
+        
+        datasets.push({
+          label,
+          data: this.data[currentLocationLevel] || [],
+          borderColor: color,
+          backgroundColor: color,
+          borderWidth: 2,
+          fill: false,
+          tension: 0.4,
+          pointRadius: 2,
+          pointHoverRadius: 5
+        });
+      }
+      
+      // Add reference datasets (dashed lines for higher levels)
+      for (const level of this.levels) {
+        if (level === currentLocationLevel || !this.data[level]) continue;
+        
+        let label;
+        let color;
+        let borderDash;
+        
         if (level === 'country') {
           label = this.countryLabel;
+          color = '#808080'; // Gray for country reference
+          borderDash = [5, 5];
         } else if (level === 'departement') {
           const deptName = this.dataStore.levels.departement;
           const deptCode = this.dataStore.getDepartementCode();
           label = deptName ? (deptCode ? `${deptCode} - ${deptName}` : deptName) : 'Departement';
-        } else if (level === 'commune' && this.location.type === 'commune') {
-          label = this.location.name;
-        } else {
-          label = level.charAt(0).toUpperCase() + level.slice(1);
+          color = '#A9A9A9'; // Light gray for department reference
+          borderDash = [10, 5];
         }
+        
         datasets.push({
           label,
           data: this.data[level] || [],
-          backgroundColor: colors[level] || 'rgba(128, 128, 128, 0.8)',
-          borderColor: borderColors[level] || 'rgba(128, 128, 128, 1)',
+          borderColor: color,
+          backgroundColor: color,
+          borderDash: borderDash,
           borderWidth: 2,
-          tension: 0.4
+          fill: false,
+          tension: 0.4,
+          pointRadius: 0, // No points for reference lines
+          pointHoverRadius: 3
         });
       }
-      // console.log('datasets', datasets)
-      return datasets
+      
+      return datasets;
     },
 
     createChart() {
       const title = chartLabels[this.metricKey].label
 
       const config = {
-        type: 'line', // Changez selon vos besoins : 'bar', 'pie', etc.
+        type: 'line',
         data: {
-          labels: [...this.dataLabels], // Copie du tableau
+          labels: [...this.dataLabels],
           datasets: this.generateDatasets()
         },
         options: {
@@ -136,25 +166,97 @@ export default {
           plugins: {
             title: {
               display: true,
-              text: title
+              text: title,
+              font: {
+                family: "'Roboto', Arial, sans-serif",
+                size: 18,
+                weight: '700'
+              },
+              color: '#343a40',
+              padding: {
+                top: 10,
+                bottom: 20
+              }
             },
             legend: {
               display: true,
-              position: 'top'
+              position: 'top',
+              labels: {
+                font: {
+                  family: "'Roboto', Arial, sans-serif",
+                  size: 14
+                },
+                color: '#343a40'
+              }
+            },
+            tooltip: {
+              backgroundColor: '#fff',
+              titleColor: '#343a40',
+              bodyColor: '#343a40',
+              borderColor: '#dee2e6',
+              borderWidth: 1,
+              titleFont: {
+                family: "'Roboto', Arial, sans-serif",
+                size: 14
+              },
+              bodyFont: {
+                family: "'Roboto', Arial, sans-serif",
+                size: 12
+              },
+              callbacks: {
+                label: function (context) {
+                  let label = context.dataset.label || '';
+                  if (label) {
+                    label += ': ';
+                  }
+                  const unit = context.dataset.label.includes('Homicides') ? 
+                    ' (pour 100k hab.)' : ' (pour mille hab.)';
+                  return label + context.parsed.y.toFixed(1) + unit;
+                }
+              }
             }
           },
           scales: {
-            y: {
-              beginAtZero: true,
-              title: {
-                display: false,
-                text: 'Valeurs'
-              }
-            },
             x: {
               title: {
+                display: false
+              },
+              ticks: {
+                font: {
+                  family: "'Roboto', Arial, sans-serif",
+                  size: 12
+                },
+                color: '#343a40'
+              },
+              grid: {
+                color: '#ececec'
+              }
+            },
+            y: {
+              beginAtZero: true,
+              ticks: {
+                font: {
+                  family: "'Roboto', Arial, sans-serif",
+                  size: 12
+                },
+                color: '#343a40',
+                callback: function (value) {
+                  return value.toFixed(1);
+                }
+              },
+              grid: {
+                color: '#ececec'
+              },
+              title: {
                 display: true,
-                text: 'Années'
+                text: this.metricKey.includes('homicides') ? 
+                  'Taux (pour 100k habitants)' : 'Taux (pour mille habitants)',
+                font: {
+                  family: "'Roboto', Arial, sans-serif",
+                  size: 14,
+                  weight: '600'
+                },
+                color: '#343a40'
               }
             }
           }
@@ -199,9 +301,15 @@ export default {
   position: relative;
   width: 100%;
   height: 300px;
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .chart-canvas {
   max-height: 300px;
+  height: 100% !important;
+  width: 100% !important;
 }
 </style> 
