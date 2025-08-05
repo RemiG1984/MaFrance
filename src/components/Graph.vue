@@ -152,7 +152,10 @@ export default {
           fill: false,
           tension: 0.4,
           pointRadius: 0, // No points for reference lines
-          pointHoverRadius: 3
+          pointHoverRadius: 0, // No hover points for reference lines
+          pointHitRadius: 0, // No hit detection for reference lines
+          hoverBorderWidth: 0, // No hover border width
+          hoverBackgroundColor: 'transparent' // No hover background
         });
       }
       
