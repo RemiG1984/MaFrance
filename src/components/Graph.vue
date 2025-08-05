@@ -285,7 +285,7 @@ export default {
         this.chart.data.datasets = datasets
         
         // Redessiner le graphique
-        this.chart.update('active')
+        this.chart.update()
 
       }
     }
