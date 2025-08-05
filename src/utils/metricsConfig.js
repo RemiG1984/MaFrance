@@ -315,7 +315,6 @@ const MetricsConfig = {
         france: [
             "total_score",
             "insecurite_score",
-            "homicides_p100k",
             "homicides_total_p100k",
             "violences_physiques_p1k",
             "violences_sexuelles_p1k",
@@ -339,7 +338,6 @@ const MetricsConfig = {
         departement: [
             "total_score",
             "insecurite_score",
-            "homicides_p100k",
             "homicides_total_p100k",
             "violences_physiques_p1k",
             "violences_sexuelles_p1k",
