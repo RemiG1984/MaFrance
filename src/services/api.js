@@ -2,7 +2,7 @@
 class ApiService {
     constructor() {
         //this.baseURL = 'http://127.0.0.1:3000'
-        this.baseURL = "/api";
+        this.baseURL = "";
     }
 
     async request(endpoint, options = {}) {
