@@ -38,9 +38,9 @@ export default {
   data() {
     return {
       labelKey: 'label',
-      selectedMetric: null,
+      selectedMetric: MetricsConfig.metrics[0],
       mapLevel: 'country',
-      availableMetrics: [],
+      availableMetrics: MetricsConfig.metrics,
       deptData: {},
       communeData: {},
       geoJsonLoaded: false,
@@ -82,10 +82,6 @@ export default {
         level: mapLevel,
         departement: dept
       };
-    },
-
-    currentMapLevel() {
-      return this.mapState.level === 'country' ? 'france' : 'departement';
     }
 
   },
@@ -98,7 +94,6 @@ export default {
       if (!oldState || 
           newState.level !== oldState.level || 
           newState.departement !== oldState.departement) {
-        this.updateAvailableMetrics();
         this.updateData();
       }
     },
@@ -106,20 +101,8 @@ export default {
   mounted() {
     this.initMap()
     this.colorscale = chroma.scale(this.scaleColors).domain([0, 1]);
-    this.updateAvailableMetrics();
   },
   methods: {
-    updateAvailableMetrics() {
-      const level = this.currentMapLevel;
-      const availableMetrics = MetricsConfig.getAvailableMetricOptions(level);
-      this.availableMetrics = availableMetrics;
-      
-      // Si aucune métrique sélectionnée ou si la métrique actuelle n'est pas disponible
-      if (!this.selectedMetric || !availableMetrics.some(m => m.value === this.selectedMetric.value)) {
-        this.selectedMetric = availableMetrics[0] || null;
-      }
-    },
-
     async initMap() {
       // Vérifier que Leaflet est disponible
       if (typeof L === 'undefined') {
