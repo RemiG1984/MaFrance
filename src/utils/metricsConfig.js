@@ -543,7 +543,7 @@ const MetricsConfig = {
 
     // Get available metric options for dropdowns filtered by geographic level
     getAvailableMetricOptions(level) {
-        const availableMetrics = this.getAvailableMetrics(level);
+        const availableMetrics = this.dataAvailability[level] || [];
         return this.metrics
             .filter((metric) => availableMetrics.includes(metric.value))
             .map((metric) => ({
