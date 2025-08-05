@@ -47,6 +47,7 @@ export default {
     return {
       levels: ['country', 'departement', 'commune'],
       chartList: [
+        'homicides_p100k',
         'violences_physiques_p1k',
         'violences_sexuelles_p1k',
         'vols_p1k',
