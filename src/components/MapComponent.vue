@@ -393,7 +393,13 @@ export default {
     },
 
     getColor(value) {
-      const normalized = (value-this.scaleDomain.min)/this.scaleDomain.delta
+      let normalized = (value-this.scaleDomain.min)/this.scaleDomain.delta
+      
+      // Invert color scale for French names percentage (higher percentage should be lighter/better)
+      if (this.selectedMetric.value === 'prenom_francais_pct') {
+        normalized = 1 - normalized
+      }
+      
       return this.colorscale(this.logTransform(normalized, this.logStrength))
     },
 
