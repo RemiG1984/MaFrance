@@ -44,14 +44,6 @@ const MetricsConfig = {
             format: "score",
         },
         {
-            value: "homicides_p100k",
-            label: "Homicides /100k hab.",
-            alt1Label: "Homicides /100k hab.",
-            alt2Label: "Homicides /100k hab.",
-            category: "insécurité",
-            format: "rate_100k",
-        },
-        {
             value: "homicides_total_p100k",
             label: "Homicides et tentatives /100k hab.",
             alt1Label: "Homicides et tentatives /100k hab.",
