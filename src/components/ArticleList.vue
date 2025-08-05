@@ -16,21 +16,21 @@
             color="primary"
             variant="flat"
             label
+            :value="null"
+            @click="selectCategory(null)"
+          >
+            Tous ({{ totalFilteredArticles }})
+          </v-chip>
+          <v-chip 
+            color="primary"
+            variant="flat"
+            label
             v-for="category in categories"
             :key="category"
             :value="category"
             @click="selectCategory(category)"
           >
             {{ articleCategoriesRef[category] }} ({{ articles.counts[category] || 0 }})
-          </v-chip>
-          <v-chip 
-            color="primary"
-            variant="flat"
-            label
-            :value="null"
-            @click="selectCategory(null)"
-          >
-            Tous ({{ totalFilteredArticles }})
           </v-chip>
         </v-chip-group>
       </div>
@@ -76,7 +76,7 @@ export default {
   },
   data() {
     return {
-      selectedCategory: null,
+      selectedCategory: null, // null means "Tous" is selected
       categories: categories,
       articleCategoriesRef: articleCategoriesRef
     }
@@ -88,8 +88,9 @@ export default {
     filteredArticles() {
       let filtered = [...this.articles.list]
       
-      // Apply category filter
-      if (this.selectedCategory) {
+      // Apply category filter only if a specific category is selected
+      // When selectedCategory is null (Tous button), show all articles
+      if (this.selectedCategory !== null) {
         filtered = filtered.filter(article => {
           const value = article[this.selectedCategory];
           return value === 1 || value === "1";
