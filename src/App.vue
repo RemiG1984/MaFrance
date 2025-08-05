@@ -32,7 +32,7 @@
     <v-footer app color="grey-lighten-3" class="text-center">
       <v-container>
         <span class="text-caption text-grey-darken-1">
-          © 2024 Ma France - Analyse des indicateurs territoriaux
+          © 2025 Ma France - Etat des lieux.
         </span>
       </v-container>
     </v-footer>

@@ -67,8 +67,8 @@ export default {
       required: true
     },
     scores: {
-      type: Object,
-      default: null
+      type: Array,
+      default: () => []
     }
   },
   mounted() {

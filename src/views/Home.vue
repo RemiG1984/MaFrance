@@ -221,7 +221,7 @@ export default {
             label: this.dataStore.getDepartementCode()+' - '+this.dataStore.levels.departement,
             data: this.dataStore?.departement?.details,
           },{
-            label: "Fance",
+            label: "France",
             data: this.dataStore?.country?.details,
           }]
         break
