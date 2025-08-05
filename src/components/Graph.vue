@@ -1,178 +1,207 @@
-
 <template>
-  <div class="graph-container">
-    <canvas :id="canvasId" :ref="canvasId"></canvas>
+  <div class="chart-container">
+    <canvas ref="chartCanvas" class="chart-canvas"></canvas>
   </div>
 </template>
 
 <script>
-import { Chart, registerables } from 'chart.js'
-
-// Register Chart.js components
-Chart.register(...registerables)
+import { mapStores } from 'pinia'
+import { useDataStore } from '../services/store.js'
+import { chartLabels } from '../utils/metricsConfig.js'
+import Chart from 'chart.js/auto';
+import { markRaw } from 'vue'
 
 export default {
   name: 'Graph',
   props: {
+    dataLabels: {
+      type: Array,
+      // required: true
+    },
+    data: {
+      type: Object,
+      required: true
+    },
     metricKey: {
       type: String,
       required: true
     },
-    data: {
+    location: {
       type: Object,
       required: true
     },
-    dataLabels: {
-      type: Array,
-      required: true
-    },
-    chartConfig: {
-      type: Object,
-      default: () => ({})
+    loading: {
+      type: Boolean,
+      default: false
     }
+  },
+  computed: {
+    ...mapStores(useDataStore) // Maps useDataStore to this.dataStore
   },
   data() {
     return {
-      chart: null,
-      canvasId: `chart-${this.metricKey}-${Math.random().toString(36).substr(2, 9)}`
-    }
-  },
-  mounted() {
-    this.$nextTick(() => {
-      this.createChart()
-    })
-  },
-  beforeUnmount() {
-    if (this.chart) {
-      this.chart.destroy()
+      levels: ['country', 'departement', 'commune'],
+      countryLabel: 'France'
     }
   },
   watch: {
+    // Surveillance des changements de dataLabels
+    // dataLabels: {
+    //   handler() {
+    //     console.log('watch dataLabels')
+    //     this.updateChart();
+    //   },
+    //   deep: true
+    // },
+    
+    // Surveillance des changements de data
     data: {
       handler() {
-        if (this.chart) {
-          this.updateChart()
-        } else {
-          this.$nextTick(() => {
-            this.createChart()
-          })
-        }
+        // console.log('watch data')
+        this.updateChart();
       },
       deep: true
     }
   },
+  // created() {
+  //   // Définir des propriétés non-réactives
+  //   Object.defineProperty(this, 'chart', {
+  //     value: null,
+  //     writable: true,
+  //     enumerable: false,
+  //     configurable: true
+  //   });
+  // },
+  mounted(){
+    this.createChart()
+  },
   methods: {
-    createChart() {
-      const canvas = this.$refs[this.canvasId]
-      if (!canvas) {
-        console.error('Canvas not found for', this.canvasId)
-        return
-      }
-
-      const ctx = canvas.getContext('2d')
+    
+    generateDatasets() {
+      const colors = {
+        country: 'rgba(54, 162, 235, 0.8)',
+        departement: 'rgba(255, 99, 132, 0.8)', 
+        commune: 'rgba(75, 192, 192, 0.8)'
+      };
       
-      // Prepare datasets from the data
-      const datasets = this.prepareDatasets()
-      
-      if (datasets.length === 0) {
-        console.warn('No datasets available for', this.metricKey)
-        return
-      }
+      const borderColors = {
+        country: 'rgba(54, 162, 235, 1)',
+        departement: 'rgba(255, 99, 132, 1)',
+        commune: 'rgba(75, 192, 192, 1)'
+      };
 
-      // Calculate suggested max for y-axis
-      const allValues = []
-      datasets.forEach(dataset => {
-        allValues.push(...dataset.data)
-      })
-      const maxDataValue = Math.max(...allValues)
-      const suggestedMax = Math.ceil(maxDataValue * 1.1) || 1
-
-      // Create chart configuration
-      const config = {
-        type: this.chartConfig.type || 'line',
-        data: {
-          labels: this.dataLabels,
-          datasets: datasets
-        },
-        options: {
-          ...this.chartConfig.options,
-          scales: {
-            ...this.chartConfig.options?.scales,
-            y: {
-              ...this.chartConfig.options?.scales?.y,
-              max: suggestedMax
-            }
-          }
-        }
-      }
-
-      this.chart = new Chart(ctx, config)
-    },
-
-    prepareDatasets() {
+      const levels = Object.keys(this.data)
       const datasets = []
-      const levels = ['country', 'departement', 'commune']
-      const levelLabels = {
-        country: 'France',
-        departement: 'Département', 
-        commune: this.getLocationName()
-      }
+      // console.log('metricKey', this.metricKey, levels)
 
-      // Add datasets for each level that has data
-      for (const level of levels) {
-        if (this.data[level] && this.data[level].length > 0) {
-          const style = this.chartConfig.datasetStyles?.[level] || {}
-          
-          datasets.push({
-            label: levelLabels[level],
-            data: this.data[level],
-            ...style
-          })
+      for (const level of this.levels) {
+        if (!this.data[level]) continue; // Skip if no data for this level
+        let label;
+        if (level === 'country') {
+          label = this.countryLabel;
+        } else if (level === 'departement') {
+          const deptName = this.dataStore.levels.departement;
+          const deptCode = this.dataStore.getDepartementCode();
+          label = deptName ? (deptCode ? `${deptCode} - ${deptName}` : deptName) : 'Departement';
+        } else if (level === 'commune' && this.location.type === 'commune') {
+          label = this.location.name;
+        } else {
+          label = level.charAt(0).toUpperCase() + level.slice(1);
         }
+        datasets.push({
+          label,
+          data: this.data[level] || [],
+          backgroundColor: colors[level] || 'rgba(128, 128, 128, 0.8)',
+          borderColor: borderColors[level] || 'rgba(128, 128, 128, 1)',
+          borderWidth: 2,
+          tension: 0.4
+        });
       }
-
+      // console.log('datasets', datasets)
       return datasets
     },
 
-    getLocationName() {
-      // This should be passed from parent or computed based on current location
-      return 'Localisation'
+    createChart() {
+      const title = chartLabels[this.metricKey].label
+
+      const config = {
+        type: 'line', // Changez selon vos besoins : 'bar', 'pie', etc.
+        data: {
+          labels: [...this.dataLabels], // Copie du tableau
+          datasets: this.generateDatasets()
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            title: {
+              display: true,
+              text: title
+            },
+            legend: {
+              display: true,
+              position: 'top'
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: false,
+                text: 'Valeurs'
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Années'
+              }
+            }
+          }
+        }
+      };
+      
+      const ctx = this.$refs.chartCanvas.getContext('2d')
+      this.chart = markRaw(new Chart(ctx, config))
     },
-
+    
     updateChart() {
-      if (!this.chart) return
+      if (this.chart) {
+        // Mise à jour des labels
+        this.chart.data.labels = this.dataLabels;
+        
+        // Mise à jour des datasets
+        const datasets = this.generateDatasets()
+        this.chart.data.datasets = datasets
+        
+        // Redessiner le graphique
+        this.chart.update('active')
 
-      const datasets = this.prepareDatasets()
-      this.chart.data.datasets = datasets
-      this.chart.data.labels = this.dataLabels
-      
-      // Update suggested max
-      const allValues = []
-      datasets.forEach(dataset => {
-        allValues.push(...dataset.data)
-      })
-      const maxDataValue = Math.max(...allValues)
-      const suggestedMax = Math.ceil(maxDataValue * 1.1) || 1
-      
-      if (this.chart.options.scales?.y) {
-        this.chart.options.scales.y.max = suggestedMax
       }
+    }
+  },
 
-      this.chart.update()
+  beforeUnmount() {
+    // Détruire tous le graphique
+    if (this.chart) {
+      this.chart.destroy()
     }
   }
 }
 </script>
 
 <style scoped>
-.graph-container {
-  position: relative;
-  width: 100%;
-  height: 100%;
+.space-y-6 > * + * {
+  margin-top: 1.5rem;
 }
 
-canvas {
-  width: 100% !important;
-  height: 100% !important;
+.chart-container {
+  position: relative;
+  width: 100%;
+  height: 300px;
 }
-</style>
+
+.chart-canvas {
+  max-height: 300px;
+}
+</style> 
