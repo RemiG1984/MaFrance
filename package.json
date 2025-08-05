@@ -19,6 +19,7 @@
     "express": "^5.1.0",
     "express-basic-auth": "^1.2.1",
     "express-validator": "^7.2.1",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+    "vite": "^7.0.6"
   }
 }
