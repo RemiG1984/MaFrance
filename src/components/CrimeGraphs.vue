@@ -1,20 +1,27 @@
+
 <template>
   <v-card class="mb-4">
     <v-card-title class="text-h5">
       Graphiques de Criminalité
     </v-card-title>
     <v-card-text>
-      <v-row>
-        <v-col  cols="12" lg="6"
-        class="chart-container"
-        v-for="chartKey in chartList">
+      <div class="chart-grid" v-if="chartList.length > 0">
+        <div 
+          v-for="chartKey in chartList" 
+          :key="chartKey"
+          class="chart-container"
+        >
           <Graph
             :metricKey="chartKey"
             :data="aggregatedData[chartKey]"
             :dataLabels="labels"
+            :chartConfig="getChartConfig(chartKey)"
           />
-        </v-col>
-      </v-row>
+        </div>
+      </div>
+      <div v-else class="text-center py-8 text-grey">
+        Aucune donnée disponible pour cette localisation
+      </div>
     </v-card-text>
   </v-card>
 </template>
@@ -22,6 +29,7 @@
 <script>
 import Graph from '../components/Graph.vue'
 import { keyMapping } from '../utils/statsCalc.js'
+import { chartLabels } from '../utils/metricsConfig.js'
 
 export default {
   name: 'CrimeGraphs',
@@ -52,7 +60,45 @@ export default {
         'destructions_p1k',
         'stupefiants_p1k',
         'escroqueries_p1k'
-      ]
+      ],
+      // Chart configurations matching the original crimeGraphHandler.js
+      chartConfigs: {
+        'violences_physiques_p1k': {
+          label: 'Violences physiques',
+          color: '#007bff',
+          yAxisTitle: 'Taux (pour mille habitants)'
+        },
+        'violences_sexuelles_p1k': {
+          label: 'Violences sexuelles',
+          color: '#28a745',
+          yAxisTitle: 'Taux (pour mille habitants)'
+        },
+        'vols_p1k': {
+          label: 'Vols',
+          color: '#ffc107',
+          yAxisTitle: 'Taux (pour mille habitants)'
+        },
+        'destructions_p1k': {
+          label: 'Destructions et dégradations',
+          color: '#e83e8c',
+          yAxisTitle: 'Taux (pour mille habitants)'
+        },
+        'stupefiants_p1k': {
+          label: 'Stupéfiants',
+          color: '#17a2b8',
+          yAxisTitle: 'Taux (pour mille habitants)'
+        },
+        'escroqueries_p1k': {
+          label: 'Escroqueries',
+          color: '#fd7e14',
+          yAxisTitle: 'Taux (pour mille habitants)'
+        },
+        'homicides_p100k': {
+          label: 'Homicides',
+          color: '#dc3545',
+          yAxisTitle: 'Taux (pour 100k habitants)'
+        }
+      }
     }
   },
   mounted() {
@@ -61,7 +107,6 @@ export default {
   computed: {
     aggregatedData() {
       const result = {}
-      // const level = this.location.type
       
       // Pour chaque nouvelle clé dans le mapping
       Object.keys(keyMapping).forEach(newKey => {
@@ -69,30 +114,22 @@ export default {
         result[newKey] = {}
 
         for(const level of this.levels) {
-          const outputSerie = []
-          for(const sourceKey of sourceKeys) {
-            // if(!this.data[sourceKey] || !this.data[sourceKey][level]) break
-
-            const inputSeries = sourceKeys
+          const inputSeries = sourceKeys
             .map(key => this.data[key] && this.data[key][level])
             .filter(serie => serie) // Filtrer les séries undefined/null
 
-            if(inputSeries.length === 0) break
+          if(inputSeries.length === 0) continue
 
-            const seriesLength = inputSeries[0].length
-        
-            // Calculer la somme pour chaque entrée/level
-            result[newKey][level] = []
+          const seriesLength = inputSeries[0].length
+          result[newKey][level] = []
 
-            for (let i = 0; i < seriesLength; i++) {
-              let sum = 0
-              inputSeries.forEach(serie => {
-                // Traiter null comme 0
-                const value = serie[i] === null || serie[i] === undefined ? 0 : serie[i]
-                sum += value
-              })
-              result[newKey][level].push(sum)
-            }
+          for (let i = 0; i < seriesLength; i++) {
+            let sum = 0
+            inputSeries.forEach(serie => {
+              const value = serie[i] === null || serie[i] === undefined ? 0 : serie[i]
+              sum += value
+            })
+            result[newKey][level].push(sum)
           }
         }
       })
@@ -101,26 +138,173 @@ export default {
     }
   },
   methods: {
-
+    getChartConfig(chartKey) {
+      const config = this.chartConfigs[chartKey] || {}
+      const locationName = this.location?.name || 'Localisation'
+      
+      return {
+        type: 'line',
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: {
+                font: {
+                  family: "'Roboto', Arial, sans-serif",
+                  size: 14,
+                },
+                color: '#343a40',
+              },
+            },
+            title: {
+              display: true,
+              text: chartLabels[chartKey]?.label || config.label || chartKey,
+              font: {
+                family: "'Roboto', Arial, sans-serif",
+                size: 18,
+                weight: '700',
+              },
+              color: '#343a40',
+              padding: {
+                top: 10,
+                bottom: 20,
+              },
+            },
+            tooltip: {
+              backgroundColor: '#fff',
+              titleColor: '#343a40',
+              bodyColor: '#343a40',
+              borderColor: '#dee2e6',
+              borderWidth: 1,
+              titleFont: {
+                family: "'Roboto', Arial, sans-serif",
+                size: 14,
+              },
+              bodyFont: {
+                family: "'Roboto', Arial, sans-serif",
+                size: 12,
+              },
+              callbacks: {
+                label: function (context) {
+                  let label = context.dataset.label || '';
+                  if (label) {
+                    label += ': ';
+                  }
+                  const unit = chartKey === 'homicides_p100k' 
+                    ? ' (pour 100k hab.)' 
+                    : ' (pour mille hab.)';
+                  return label + context.parsed.y.toFixed(1) + unit;
+                },
+              },
+            },
+          },
+          scales: {
+            x: {
+              title: {
+                display: false,
+              },
+              ticks: {
+                font: {
+                  family: "'Roboto', Arial, sans-serif",
+                  size: 12,
+                },
+                color: '#343a40',
+              },
+              grid: {
+                color: '#ececec',
+              },
+            },
+            y: {
+              beginAtZero: true,
+              ticks: {
+                font: {
+                  family: "'Roboto', Arial, sans-serif",
+                  size: 12,
+                },
+                color: '#343a40',
+                callback: function (value) {
+                  return value.toFixed(1);
+                },
+              },
+              grid: {
+                color: '#ececec',
+              },
+              title: {
+                display: true,
+                text: config.yAxisTitle || 'Taux',
+                font: {
+                  family: "'Roboto', Arial, sans-serif",
+                  size: 14,
+                  weight: '600',
+                },
+                color: '#343a40',
+              },
+            },
+          },
+        },
+        // Dataset styling
+        datasetStyles: {
+          country: {
+            borderColor: '#808080',
+            backgroundColor: '#808080',
+            borderDash: [5, 5],
+            fill: false,
+            tension: 0.4,
+            pointRadius: 0,
+          },
+          departement: {
+            borderColor: '#A9A9A9',
+            backgroundColor: '#A9A9A9',
+            borderDash: [10, 5],
+            fill: false,
+            tension: 0.4,
+            pointRadius: 0,
+          },
+          commune: {
+            borderColor: config.color || '#007bff',
+            backgroundColor: config.color || '#007bff',
+            fill: false,
+            tension: 0.4,
+            pointRadius: 2,
+            pointHoverRadius: 5,
+          }
+        }
+      }
+    }
   },
-  watch: {
-    
-  },
-  
 }
 </script>
 
 <style scoped>
-.space-y-6 > * + * {
-  margin-top: 1.5rem;
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin: 20px 0;
+}
+
+@media (max-width: 768px) {
+  .chart-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
 }
 
 .chart-container {
   position: relative;
-  width: 100%;
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  height: 400px;
 }
 
-.chart-canvas {
-
+@media (max-width: 768px) {
+  .chart-container {
+    padding: 15px;
+    height: 300px;
+  }
 }
-</style> 
+</style>
