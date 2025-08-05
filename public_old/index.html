@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Ma France: état des lieux</title>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
+            rel="stylesheet"
+        />
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="stylesheet" href="base.css" />
+        <link rel="stylesheet" href="components.css" />
+        <link
+            rel="stylesheet"
+            href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+            integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+            crossorigin=""
+        />
+        <script
+            src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""
+        ></script>
+        <link
+            href="https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css"
+            rel="stylesheet"
+        />
+        <script src="https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js"></script>
+    </head>
+    <body class="min-h-screen bg-gray-50">
+        <div id="header-container"></div>
+        <div class="container mx-auto px-4 py-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <!-- First Column: Location selectors, map, lieux selector, and articles -->
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-lg shadow h-fit">
+                        <h2 class="text-lg font-semibold text-gray-800 mb-4">
+                            Sélection du niveau de visualisation
+                        </h2>
+                        <div class="flex flex-col lg:flex-row gap-4">
+                            <div class="flex flex-col">
+                                <button id="franceButton" class="france-button">
+                                    France
+                                </button>
+                            </div>
+                            <div class="flex flex-col flex-1">
+                                <select
+                                    id="departementSelect"
+                                    class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                >
+                                    <option value="">
+                                        -- Choisir un département --
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="flex flex-col flex-1">
+                                <input
+                                    type="text"
+                                    id="communeInput"
+                                    list="communeList"
+                                    placeholder="Tapez pour rechercher..."
+                                    autocomplete="off"
+                                    class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                />
+                                <datalist id="communeList"></datalist>
+                            </div>
+                        </div>
+                    </div>
+                    <div
+                        id="mapContainer"
+                        class="bg-white rounded-lg shadow overflow-hidden h-fit"
+                    >
+                        <div id="map" class="h-[500px]"></div>
+                    </div>
+                    <div
+                        id="articles"
+                        class="bg-white p-6 rounded-lg shadow h-fit"
+                    >
+                        <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                            Articles FdeSouche associés
+                        </h2>
+                        <div id="articleFilters" class="mb-4 hidden">
+                            <div class="flex flex-wrap gap-2 items-center mb-4">
+                                <select
+                                    id="lieuxSelect"
+                                    class="p-2 border border-gray-300 rounded-md bg-gray-100 text-sm"
+                                >
+                                    <option value="">
+                                        -- Tous les lieux --
+                                    </option>
+                                </select>
+                                <div
+                                    id="filterButtons"
+                                    class="flex flex-wrap gap-2"
+                                ></div>
+                            </div>
+                        </div>
+                        <div id="articleList" class="article-list"></div>
+                    </div>
+                    <div
+                        id="namesGraph"
+                        class="bg-white p-6 rounded-lg shadow h-fit"
+                    >
+                        <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                            Évolution des Prénoms
+                        </h2>
+                        <div id="namesChartContainer" class="chart-container">
+                            <canvas
+                                id="namesChart"
+                                style="max-height: 400px"
+                            ></canvas>
+                        </div>
+                    </div>
+                    <div
+                        id="qpvData"
+                        class="bg-white p-6 rounded-lg shadow h-fit"
+                    >
+                        <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                            Quartiers Prioritaires (QPV)
+                        </h2>
+                        <div id="qpvContainer">
+                            <p>
+                                Sélectionnez un département ou une commune pour
+                                voir les QPV.
+                            </p>
+                        </div>
+                    </div>
+                    <div
+                        id="executiveDetails"
+                        class="bg-white p-6 rounded-lg shadow h-fit"
+                    ></div>
+                </div>
+
+                <!-- Second Column: Score table, executive details, and links -->
+                <div class="space-y-6">
+                    <div
+                        id="results"
+                        class="bg-white p-6 rounded-lg shadow h-fit"
+                    ></div>
+                    <div
+                        id="crimeGraphs"
+                        class="bg-white p-6 rounded-lg shadow h-fit"
+                    >
+                        <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                            Graphiques de Criminalité
+                        </h2>
+                        <div id="crimeChartGrid" class="chart-grid"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script type="module" src="headerComponent.js"></script>
+        <script type="module" src="chartWatermark.js"></script>
+        <script type="module" src="departmentNames.js"></script>
+        <script type="module" src="utils.js"></script>
+        <script type="module" src="locationHandler.js"></script>
+        <script type="module" src="scoreTableHandler.js"></script>
+        <script type="module" src="executiveHandler.js"></script>
+        <script type="module" src="articleHandler.js"></script>
+        <script type="module" src="mapHandler.js"></script>
+        <script type="module" src="crimeGraphHandler.js"></script>
+        <script type="module" src="namesGraphHandler.js"></script>
+        <script type="module" src="main.js"></script>
+    </body>
+</html>
