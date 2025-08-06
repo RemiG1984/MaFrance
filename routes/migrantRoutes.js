@@ -56,6 +56,39 @@ router.get('/commune/:cog', validateCOGParam, (req, res) => {
     });
 });
 
+// Get migrant centers by country (aggregated)
+router.get('/country/:country', (req, res) => {
+    const db = req.app.locals.db;
+    const { country } = req.params;
+
+    if (country.toLowerCase() !== 'france') {
+        return res.status(404).json({ error: 'Seule la France est supportée actuellement' });
+    }
+
+    const query = `
+        SELECT 
+            COUNT(*) as total_centers,
+            SUM(COALESCE(places, 0)) as total_places,
+            AVG(COALESCE(places, 0)) as average_places
+        FROM migrant_centers
+    `;
+
+    db.get(query, [], (err, row) => {
+        if (err) {
+            return handleDbError(err, res);
+        }
+
+        res.json({
+            country: 'France',
+            statistics: {
+                total_centers: row.total_centers || 0,
+                total_places: row.total_places || 0,
+                average_places: row.average_places || 0
+            }
+        });
+    });
+});
+
 // Get migrant centers by department
 router.get('/departement/:dept', [validateDepartementParam, validatePagination], (req, res) => {
     const db = req.app.locals.db;

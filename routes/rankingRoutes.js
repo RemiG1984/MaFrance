@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const db = require("../config/db");
 const {
   validateDepartement,
   validateSort,
@@ -207,6 +206,7 @@ router.get(
       ? queryParams.slice(0, queryParams.length - 2)
       : [dept, dept];
 
+    const db = req.app.locals.db;
     db.all(sql, queryParams, (err, rows) => {
       if (err) return handleDbError(err, res, next);
       db.get(countSql, countParams, (countErr, countRow) => {
@@ -336,6 +336,7 @@ router.get(
     LIMIT ? OFFSET ?
   `;
 
+    const db = req.app.locals.db;
     db.all(sql, [limit, offset], (err, rows) => {
       if (err) return handleDbError(err, res, next);
       res.json({
