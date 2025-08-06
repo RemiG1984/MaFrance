@@ -73,18 +73,33 @@ export default {
         this.updateTable()
       },
       immediate: true
+    },
+    'dataStore.labelState': {
+      handler(newLabelState) {
+        // Update MetricsConfig when store labelState changes
+        MetricsConfig.labelState = newLabelState
+        this.updateTable()
+      }
     }
   },
   mounted() {
     // Listen for metrics label changes
     window.addEventListener('metricsLabelsToggled', this.handleLabelsToggled)
+    // Sync MetricsConfig with store on component mount
+    this.syncLabelState()
   },
   beforeUnmount() {
     window.removeEventListener('metricsLabelsToggled', this.handleLabelsToggled)
   },
   methods: {
     handleLabelsToggled() {
+      this.syncLabelState()
       this.updateTable()
+    },
+
+    syncLabelState() {
+      // Sync MetricsConfig labelState with the store's labelState
+      MetricsConfig.labelState = this.dataStore.labelState
     },
 
     updateTable() {
