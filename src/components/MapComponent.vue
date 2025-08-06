@@ -462,9 +462,13 @@ export default {
 
       const metric = this.selectedMetric.value
 
-      if(this.dataRef.hasOwnProperty(code)
-       && this.dataRef[code].hasOwnProperty(metric)) {
-        return this.dataRef[code][metric]
+      if(this.dataRef.hasOwnProperty(code)) {
+        const data = this.dataRef[code]
+        
+        // Use MetricsConfig to calculate the metric value (handles both direct and calculated metrics)
+        const value = MetricsConfig.calculateMetric(metric, data)
+        
+        return value !== undefined && value !== null ? value : null
       }
 
       return null
