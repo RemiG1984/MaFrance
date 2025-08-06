@@ -27,8 +27,7 @@
             @click="handleRowClick(row)"
           >
             <td :class="getTitleClasses(row)">
-              <a v-if="row.link" :href="row.link" @click.stop>{{ row.title }}</a>
-              <span v-else>{{ row.title }}</span>
+              <span>{{ row.title }}</span>
             </td>
             <td class="score-main">{{ row.main }}</td>
             <td v-if="compareHeader" class="score-compare">{{ row.compare || '' }}</td>
@@ -707,14 +706,7 @@ export default {
   font-size: 0.9em;
 }
 
-.row-title a {
-  color: #1976d2;
-  text-decoration: none;
-}
 
-.row-title a:hover {
-  text-decoration: underline;
-}
 
 .score-main, .score-compare {
   padding: 8px 12px;
