@@ -199,6 +199,56 @@ const MetricsConfig = {
             category: "wokisme",
             format: "percentage",
         },
+        // Subventions category
+        {
+            value: "subventions_score",
+            label: "Indice de subventions",
+            alt1Label: "Indice de solidarité publique",
+            alt2Label: "Indice d'assistanat",
+            category: "subventions",
+            format: "score",
+        },
+        {
+            value: "total_subventions",
+            label: "Montant total des subventions",
+            alt1Label: "Investissement social total",
+            alt2Label: "Coût de l'assistanat",
+            category: "subventions",
+            format: "currency",
+        },
+        {
+            value: "subventions_per_capita",
+            label: "Subventions par habitant",
+            alt1Label: "Soutien public par habitant",
+            alt2Label: "Dépendance par habitant",
+            category: "subventions",
+            format: "currency",
+        },
+        // Migration category
+        {
+            value: "migration_score",
+            label: "Indice de migration",
+            alt1Label: "Indice de mobilité géographique",
+            alt2Label: "Indice de déracinement",
+            category: "migration",
+            format: "score",
+        },
+        {
+            value: "total_migrants",
+            label: "Nombre total de migrants",
+            alt1Label: "Nouveaux arrivants",
+            alt2Label: "Flux migratoires",
+            category: "migration",
+            format: "number",
+        },
+        {
+            value: "migrants_per_capita",
+            label: "Migrants par habitant",
+            alt1Label: "Taux d'accueil",
+            alt2Label: "Pression migratoire",
+            category: "migration",
+            format: "rate_1k",
+        },
     ],
 
     // Article categories mapping
@@ -222,6 +272,14 @@ const MetricsConfig = {
         {
             name: "Wokisme",
             key: "wokisme",
+        },
+        {
+            name: "Subventions",
+            key: "subventions",
+        },
+        {
+            name: "Migration",
+            key: "migration",
         },
     ],
 
@@ -336,6 +394,12 @@ const MetricsConfig = {
             "total_qpv",
             "pop_in_qpv_pct",
             "logements_sociaux_pct",
+            "subventions_score",
+            "total_subventions",
+            "subventions_per_capita",
+            "migration_score",
+            "total_migrants",
+            "migrants_per_capita",
         ],
         departement: [
             "total_score",
@@ -359,6 +423,12 @@ const MetricsConfig = {
             "total_qpv",
             "pop_in_qpv_pct",
             "logements_sociaux_pct",
+            "subventions_score",
+            "total_subventions",
+            "subventions_per_capita",
+            "migration_score",
+            "total_migrants",
+            "migrants_per_capita",
         ],
         commune: [
             "total_score",
@@ -378,6 +448,12 @@ const MetricsConfig = {
             "total_qpv",
             "pop_in_qpv_pct",
             "logements_sociaux_pct",
+            "subventions_score",
+            "total_subventions",
+            "subventions_per_capita",
+            "migration_score",
+            "total_migrants",
+            "migrants_per_capita",
         ],
     },
 
@@ -594,6 +670,13 @@ const MetricsConfig = {
                 return value.toFixed(1);
             case "rate_1k":
                 return value.toFixed(1);
+            case "currency":
+                return value.toLocaleString("fr-FR", {
+                    style: "currency",
+                    currency: "EUR",
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                });
             case "number":
                 return value.toString();
             default:
