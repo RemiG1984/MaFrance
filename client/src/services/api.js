@@ -1,7 +1,7 @@
 // Service API pour gérer les appels au backend
 class ApiService {
     constructor() {
-        this.baseURL = import.meta.env.VITE_API_BASE_URL || "";
+        this.baseURL = "";
     }
 
     async request(endpoint, options = {}) {
