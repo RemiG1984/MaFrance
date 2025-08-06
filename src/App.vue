@@ -8,6 +8,17 @@
         </v-app-bar-title>
         
         <v-spacer></v-spacer>
+
+
+        <v-btn
+          href="https://twitter.com/intent/tweet?text=Ma%20France%3A%20%C3%A9tat%20des%20lieux%20-%20Une%20analyse%20d%C3%A9taill%C3%A9e%20des%20indicateurs%20sociaux%20en%20France&url=https://mafranceetatdeslieux.fr"
+          target="_blank"
+          variant="text"
+          class="mx-2"
+          prepend-icon="mdi-twitter"
+        >
+          Suivre @ou_va_ma_France
+        </v-btn>
         
         <v-btn
           v-for="item in menuItems"
