@@ -27,6 +27,7 @@ export const useDataStore = defineStore('data', {
       namesSeries: null,
       crimeSeries: null,
       crimeAggreg: null,
+      subventions: null,
     },
     departement: {
       details: null,
@@ -42,6 +43,8 @@ export const useDataStore = defineStore('data', {
       namesSeries: null,
       crimeSeries: null,
       crimeAggreg: null,
+      subventions: null,
+      migrants: null,
     },
     commune: {
       details: null,
@@ -53,6 +56,8 @@ export const useDataStore = defineStore('data', {
       articlesCounts: null,
       crimeSeries: null,
       crimeAggreg: null,
+      subventions: null,
+      migrants: null,
     },
   }),
 
@@ -94,6 +99,7 @@ export const useDataStore = defineStore('data', {
             sort: 'total_score',
             direction: 'DESC'
           }),
+          api.getCountrySubventions(code),
         ])
 
         const country = {}
@@ -104,6 +110,7 @@ export const useDataStore = defineStore('data', {
         country.namesHistory = results[4]
         country.executive = results[5]
         country.departementsRankings = results[6]
+        country.subventions = results[7]
         country.namesSeries = this.serializeStats(country.namesHistory)
         country.crimeSeries = this.serializeStats(country.crimeHistory)
         country.crimeAggreg = this.aggregateStats(country.crimeSeries.data)
@@ -138,6 +145,8 @@ export const useDataStore = defineStore('data', {
           api.getArticleCounts({
             dept: code,
           }),
+          api.getDepartementSubventions(code),
+          api.getDepartementMigrants(code),
         ])
 
         const departement = {}
@@ -151,6 +160,8 @@ export const useDataStore = defineStore('data', {
         departement.communesRankings = results[7]
         departement.articles = results[8]
         departement.articlesCounts = results[9]
+        departement.subventions = results[10]
+        departement.migrants = results[11]
         departement.namesSeries = this.serializeStats(departement.namesHistory)
         departement.crimeSeries = this.serializeStats(results[3])
         departement.crimeAggreg = this.aggregateStats(departement.crimeSeries.data)
@@ -181,6 +192,8 @@ export const useDataStore = defineStore('data', {
             cog: code,
             dept: deptCode,
           }),
+          api.getCommuneSubventions(code),
+          api.getCommuneMigrants(code),
         ])
 
         const commune = {}
@@ -191,6 +204,8 @@ export const useDataStore = defineStore('data', {
         commune.executive = results[4]
         commune.articles = results[5]
         commune.articlesCounts = results[6]
+        commune.subventions = results[7]
+        commune.migrants = results[8]
         commune.crimeSeries = this.serializeStats(results[2])
         commune.crimeAggreg = this.aggregateStats(commune.crimeSeries.data)
 
@@ -374,7 +389,8 @@ export const useDataStore = defineStore('data', {
         crimeHistory: null,
         namesHistory: null,
         qpv: null,
-        executive: null
+        executive: null,
+        subventions: null
       }
       this.errors.country = null
     },
@@ -387,7 +403,9 @@ export const useDataStore = defineStore('data', {
         crimeHistory: null,
         namesHistory: null,
         qpv: null,
-        executive: null
+        executive: null,
+        subventions: null,
+        migrants: null
       }
       this.errors.departement = null
     },
@@ -400,7 +418,9 @@ export const useDataStore = defineStore('data', {
         crimeHistory: null,
         namesHistory: null,
         qpv: null,
-        executive: null
+        executive: null,
+        subventions: null,
+        migrants: null
       }
       this.errors.commune = null
     },

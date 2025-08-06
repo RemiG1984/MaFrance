@@ -106,6 +106,23 @@ const api = {
         const queryString = new URLSearchParams(params).toString();
         return apiService.request(`/api/articles/counts?${queryString}`);
     },
+
+    // Subventions data
+    getCountrySubventions: (country = "France") =>
+        apiService.request(`/api/subventions/country/${country}`),
+    getDepartementSubventions: (code) =>
+        apiService.request(`/api/subventions/departement/${code}`),
+    getCommuneSubventions: (cog) =>
+        apiService.request(`/api/subventions/commune/${cog}`),
+
+    // Migrant centers data
+    getDepartementMigrants: (code, params = {}) => {
+        const queryString = new URLSearchParams(params).toString();
+        const url = `/api/migrants/departement/${code}`;
+        return apiService.request(queryString ? `${url}?${queryString}` : url);
+    },
+    getCommuneMigrants: (cog) =>
+        apiService.request(`/api/migrants/commune/${cog}`),
 };
 
 export default api;
