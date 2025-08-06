@@ -81,6 +81,11 @@ export default {
   methods: {
     
     generateDatasets() {
+      // Add null check for data
+      if (!this.data) {
+        return [];
+      }
+      
       const currentLocationLevel = this.location.type === 'commune' ? 'commune' : 
                                   this.location.type === 'departement' ? 'departement' : 'country';
       
@@ -163,6 +168,11 @@ export default {
     },
 
     createChart() {
+      // Don't create chart if data is not available
+      if (!this.data || !this.dataLabels) {
+        return;
+      }
+      
       const title = chartLabels[this.metricKey].label
 
       const config = {
@@ -279,7 +289,7 @@ export default {
     },
     
     updateChart() {
-      if (this.chart) {
+      if (this.chart && this.data && this.dataLabels) {
         // Mise à jour des labels
         this.chart.data.labels = this.dataLabels;
         
