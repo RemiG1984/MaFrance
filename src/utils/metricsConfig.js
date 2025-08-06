@@ -22,7 +22,7 @@ const MetricsConfig = {
     },
 
     // Label state: 0 = standard, 1 = alt1, 2 = alt2
-    labelState: parseInt(localStorage.getItem('metricsLabelState')) || 0,
+    labelState: parseInt(localStorage.getItem("metricsLabelState")) || 0,
 
     // All available metrics with their properties
     metrics: [
@@ -304,7 +304,7 @@ const MetricsConfig = {
 
     // Data availability by geographic level
     dataAvailability: {
-        france: [
+        country: [
             "total_score",
             "insecurite_score",
             "homicides_total_p100k",
@@ -415,7 +415,7 @@ const MetricsConfig = {
     cycleLabelState() {
         this.labelState = (this.labelState + 1) % 3;
         // Save to localStorage
-        localStorage.setItem('metricsLabelState', this.labelState.toString());
+        localStorage.setItem("metricsLabelState", this.labelState.toString());
         // Dispatch event to notify components of the change
         window.dispatchEvent(
             new CustomEvent("metricsLabelsToggled", {
@@ -450,66 +450,69 @@ const MetricsConfig = {
 
     // Initialize version dropdown (prevents multiple event listeners)
     initializeVersionDropdown() {
-        const versionDropdown = document.querySelector('.version-dropdown');
-        const versionToggle = document.querySelector('.version-toggle');
-        const versionMenu = document.querySelector('.version-menu');
-        
+        const versionDropdown = document.querySelector(".version-dropdown");
+        const versionToggle = document.querySelector(".version-toggle");
+        const versionMenu = document.querySelector(".version-menu");
+
         if (!versionDropdown || versionDropdown.dataset.initialized) return;
-        
+
         // Mark as initialized to prevent multiple event listeners
         versionDropdown.dataset.initialized = "true";
-        
+
         // Set initial version text
         const initialStateName = this.getLabelStateName();
-        const versionText = versionToggle.querySelector('.version-text');
+        const versionText = versionToggle.querySelector(".version-text");
         if (versionText) {
             versionText.textContent = this.getCurrentVersionLabel();
         }
-        
+
         // Toggle dropdown menu visibility
-        versionToggle.addEventListener('click', (e) => {
+        versionToggle.addEventListener("click", (e) => {
             e.preventDefault();
             e.stopPropagation();
-            versionMenu.classList.toggle('active');
+            versionMenu.classList.toggle("active");
         });
-        
+
         // Close dropdown when clicking outside
-        document.addEventListener('click', (e) => {
+        document.addEventListener("click", (e) => {
             if (!versionDropdown.contains(e.target)) {
-                versionMenu.classList.remove('active');
+                versionMenu.classList.remove("active");
             }
         });
-        
+
         // Add click listeners to version options
-        const versionOptions = versionMenu.querySelectorAll('.version-option');
+        const versionOptions = versionMenu.querySelectorAll(".version-option");
         versionOptions.forEach((option, index) => {
-            option.addEventListener('click', (e) => {
+            option.addEventListener("click", (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                
+
                 // Set label state based on clicked option
                 this.labelState = index;
                 // Save to localStorage
-                localStorage.setItem('metricsLabelState', this.labelState.toString());
-                
+                localStorage.setItem(
+                    "metricsLabelState",
+                    this.labelState.toString(),
+                );
+
                 // Update version text
                 const stateName = this.getLabelStateName();
                 if (versionText) {
                     versionText.textContent = this.getCurrentVersionLabel();
                 }
-                
+
                 // Close dropdown
-                versionMenu.classList.remove('active');
-                
+                versionMenu.classList.remove("active");
+
                 // Update page title
                 document.title = this.getCurrentPageTitle();
-                
+
                 // Update header h1 if exists
-                const headerH1 = document.querySelector('h1');
+                const headerH1 = document.querySelector("h1");
                 if (headerH1) {
                     headerH1.textContent = this.getCurrentPageTitle();
                 }
-                
+
                 // Dispatch event to notify components of the change
                 window.dispatchEvent(
                     new CustomEvent("metricsLabelsToggled", {
@@ -587,18 +590,18 @@ const MetricsConfig = {
                 return value.toString();
         }
     },
+};
+
+const chartLabels = {};
+
+for (let metric of MetricsConfig.metrics) {
+    chartLabels[metric.value] = metric;
 }
 
-const chartLabels = {}
+const articleCategoriesRef = {};
 
-for(let metric of MetricsConfig.metrics) {
-    chartLabels[metric.value] = metric
+for (let articleCategory of MetricsConfig.articleCategories) {
+    articleCategoriesRef[articleCategory.key] = articleCategory.name;
 }
 
-const articleCategoriesRef = {}
-
-for(let articleCategory of MetricsConfig.articleCategories) {
-    articleCategoriesRef[articleCategory.key] = articleCategory.name
-}
-
-export { chartLabels, MetricsConfig, articleCategoriesRef }
+export { chartLabels, MetricsConfig, articleCategoriesRef };
