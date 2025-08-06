@@ -76,10 +76,10 @@ export default {
     // permet de détecter les changements d'états qui nécessitent un rechargement de map
       const level = this.currentLevel;
       const dept = this.currentdepartement;
-      
+
       // Pour la map, on a soit 'country' soit 'departement'
       const mapLevel = level === 'country' ? 'country' : 'departement';
-      
+
       return {
         level: mapLevel,
         departement: dept
@@ -102,12 +102,12 @@ export default {
     currentLevel(newLevel) {
       // Update available metrics when level changes
       const newMetrics = MetricsConfig.getAvailableMetricOptions(newLevel);
-      
+
       // Check if current selected metric is still available
       const isCurrentMetricAvailable = newMetrics.some(metric => 
         metric.value === this.selectedMetric.value
       );
-      
+
       // If current metric is not available, select the first available metric
       if (!isCurrentMetricAvailable && newMetrics.length > 0) {
         this.selectedMetric = newMetrics[0];
@@ -117,19 +117,15 @@ export default {
     // Watch for commune selection changes
     'dataStore.levels.commune'(newCommune, oldCommune) {
       if (newCommune && newCommune !== oldCommune && this.currentLevel === 'commune') {
-        // Show tooltip for the selected commune
-        this.$nextTick(() => {
-          this.showCommuneTooltip();
-        });
+        // Show tooltip for the selected commune after ensuring layer is ready
+        this.showCommuneTooltipWhenReady();
       }
     },
     // Watch for level changes to commune
     currentLevel(newLevel, oldLevel) {
       if (newLevel === 'commune' && oldLevel !== 'commune') {
-        // Show tooltip when switching to commune level
-        this.$nextTick(() => {
-          this.showCommuneTooltip();
-        });
+        // Show tooltip when switching to commune level after operations complete
+        this.showCommuneTooltipWhenReady();
       }
     },
   },
@@ -281,7 +277,7 @@ export default {
         }))
 
         this.layerGroup.addLayer(this.departementsLayer)
-        
+
       } catch (error) {
         console.error('Erreur chargement GeoJSON:', error)
       }
@@ -308,7 +304,7 @@ export default {
         const geoJson = await response.json()
 
         this.updateCommunesLayer(geoJson)
-        
+
       } catch (error) {
         console.error('Erreur chargement GeoJSON:', error)
       }
@@ -338,7 +334,7 @@ export default {
       if (this.communesLayer) {
         // Vider le layer existant
         this.communesLayer.clearLayers()
-        
+
         // Ajouter les nouvelles données
         this.communesLayer.addData(newGeoJson)
       } else {
@@ -375,7 +371,7 @@ export default {
         }
 
       const color = this.getColor(value)
-      
+
       return {
         fillColor: color,
         weight: 1,
@@ -388,7 +384,7 @@ export default {
     onEachDepartementFeature(feature, layer) {
       const deptCode = feature.properties.code
       const deptName = feature.properties.nom
-      
+
       layer.on({
         click: () => {
           this.dataStore.setDepartement(deptCode)
@@ -399,7 +395,7 @@ export default {
       layer.on('mouseover', (e) => {
         this.showTooltip(e, feature);
       })
-      
+
       layer.on('mouseout', (e) => {
         this.hideTooltip(e);
       })
@@ -410,7 +406,7 @@ export default {
       const commCode = this.removeTrailingZero(feature.properties.code)
       const commName = feature.properties.nom
       const deptCode  = feature.properties.codeDepartement
-      
+
       layer.on({
         click: () => {
           this.dataStore.setCommune(commCode, commName, deptCode)
@@ -420,7 +416,7 @@ export default {
       layer.on('mouseover', (e) => {
         this.showTooltip(e, feature);
       });
-      
+
       layer.on('mouseout', (e) => {
         this.hideTooltip(e);
       });
@@ -429,12 +425,12 @@ export default {
 
     getColor(value) {
       let normalized = (value-this.scaleDomain.min)/this.scaleDomain.delta
-      
+
       // Invert color scale for French names percentage (higher percentage should be lighter/better)
       if (this.selectedMetric.value === 'prenom_francais_pct') {
         normalized = 1 - normalized
       }
-      
+
       return this.colorscale(this.logTransform(normalized, this.logStrength))
     },
 
@@ -476,7 +472,7 @@ export default {
 
     showTooltip(e, feature) {
       const { properties } = feature;
-      const layer = e.target;
+      const layer = e.target
       const center = layer.getCenter()
 
       layer.bringToFront()
@@ -560,26 +556,26 @@ export default {
     generateVerticalGradient() {
       // Calcul des positions régulières pour chaque couleur
       const step = 100 / (this.scaleColors.length - 1);
-      
+
       // Création des stops du dégradé avec leurs positions
       const colorStops = this.scaleColors.map((color, index) => {
         const position = index * step;
         return `${color} ${position}%`;
       });
-      
+
       // Génération du CSS linear-gradient
       return `background: linear-gradient(to bottom, ${colorStops.join(', ')})`;
     },
 
     generateLegendSteps(numSteps = 5, strength = 2) {
       const steps = [];
-      
+
       for (let i = 0; i < numSteps; i++) {
         const transformedPosition = i / (numSteps - 1);
         const normalizedValue = this.inverseLogTransform(transformedPosition, strength);
         const realValue = normalizedValue * this.scaleDomain.delta + this.scaleDomain.min;
         const cssPosition = (transformedPosition) * 100;
-        
+
         steps.push({
           value: realValue,
           position: cssPosition,
@@ -587,7 +583,7 @@ export default {
           transformedValue: transformedPosition
         });
       }
-      
+
       return steps;
     },
 
@@ -607,43 +603,99 @@ export default {
       return this.selectedMetric[this.labelKey]
     },
 
+    showCommuneTooltipWhenReady() {
+      // If we're switching departements, wait for map operations to complete
+      if (this.mapState.level === 'departement' || !this.communesLayer) {
+        // Wait for layer loading and map panning to complete
+        this.waitForMapOperationsComplete().then(() => {
+          this.showCommuneTooltip();
+        });
+      } else {
+        // Layer is already available, show tooltip immediately
+        this.$nextTick(() => {
+          this.showCommuneTooltip();
+        });
+      }
+    },
+
+    waitForMapOperationsComplete() {
+      return new Promise((resolve) => {
+        // Wait for map to stop moving
+        const onMoveEnd = () => {
+          this.map.off('moveend', onMoveEnd);
+
+          // Then wait for commune layer to be ready
+          this.waitForCommuneLayerReady().then(resolve);
+        };
+
+        // If map is currently moving, wait for it to stop
+        if (this.map._animatingZoom || this.map._panAnim) {
+          this.map.on('moveend', onMoveEnd);
+        } else {
+          // Map is not moving, just wait for layer
+          this.waitForCommuneLayerReady().then(resolve);
+        }
+      });
+    },
+
+    waitForCommuneLayerReady() {
+      return new Promise((resolve) => {
+        const checkLayer = () => {
+          if (this.communesLayer && this.communesLayer.getLayers().length > 0) {
+            resolve();
+          } else {
+            // Check again after a short delay
+            setTimeout(checkLayer, 100);
+          }
+        };
+        checkLayer();
+      });
+    },
+
     showCommuneTooltip() {
       if (!this.communesLayer || this.currentLevel !== 'commune') return;
-      
+
       const selectedCommune = this.dataStore.levels.commune;
       const selectedCommuneCode = this.dataStore.getCommuneCode();
-      
+
       if (!selectedCommune || !selectedCommuneCode) return;
-      
+
       // Find the layer for the selected commune
       this.communesLayer.eachLayer((layer) => {
         const feature = layer.feature;
+        if (!feature || !feature.properties) return;
+
         const layerCode = this.removeTrailingZero(feature.properties.code);
-        
+
         if (layerCode === selectedCommuneCode) {
           // Get the center of the commune
           const center = layer.getCenter();
-          
+
           // Get the value for tooltip
           const value = this.getFeatureValue(feature);
           const indiceName = this.getIndiceName();
-          
+
           // Create tooltip content
           const content = `<b>${selectedCommune}</b><br>${indiceName}: ${value !== null ? value : 'N/A'}`;
-          
+
+          // Remove existing tooltip if any
+          if (this.globalTooltip && this.map.hasLayer(this.globalTooltip)) {
+            this.map.removeLayer(this.globalTooltip);
+          }
+
           // Show the tooltip
           this.globalTooltip
             .setLatLng(center)
             .setContent(content)
             .addTo(this.map);
-          
+
           // Highlight the commune
           layer.setStyle({
             color: '#424242',
             weight: 3,
             opacity: 0.8
           });
-          
+
           return false; // Break the loop
         }
       });
@@ -727,4 +779,4 @@ export default {
   left: 0;
   transform: translateY(-50%);
 }
-</style> 
+</style>
