@@ -40,7 +40,6 @@ export default {
       labelKey: 'label',
       selectedMetric: MetricsConfig.metrics[0],
       mapLevel: 'country',
-      availableMetrics: MetricsConfig.metrics,
       deptData: {},
       communeData: {},
       geoJsonLoaded: false,
@@ -70,6 +69,9 @@ export default {
     currentdepartement() {
       return this.dataStore.levels.departement;
     },
+    availableMetrics() {
+      return this.getAvailableMetrics(this.currentLevel);
+    },
     mapState() {
     // permet de détecter les changements d'états qui nécessitent un rechargement de map
       const level = this.currentLevel;
@@ -95,6 +97,21 @@ export default {
           newState.level !== oldState.level || 
           newState.departement !== oldState.departement) {
         this.updateData();
+      }
+    },
+    currentLevel(newLevel) {
+      // Update available metrics when level changes
+      const newMetrics = this.getAvailableMetrics(newLevel);
+      
+      // Check if current selected metric is still available
+      const isCurrentMetricAvailable = newMetrics.some(metric => 
+        metric.value === this.selectedMetric.value
+      );
+      
+      // If current metric is not available, select the first available metric
+      if (!isCurrentMetricAvailable && newMetrics.length > 0) {
+        this.selectedMetric = newMetrics[0];
+        this.onMetricChange(this.selectedMetric);
       }
     },
   },
@@ -570,6 +587,45 @@ export default {
 
     getIndiceName() {
       return this.selectedMetric[this.labelKey]
+    },
+
+    getAvailableMetrics(level) {
+      // Filter metrics based on the current level
+      if (!level) {
+        return MetricsConfig.metrics;
+      }
+      
+      // Define which metrics are available for each level
+      const levelMetrics = {
+        country: [
+          'total_score',
+          'crime_score', 
+          'names_score',
+          'qpv_score',
+          'prenom_francais_pct'
+        ],
+        departement: [
+          'total_score',
+          'crime_score',
+          'names_score', 
+          'qpv_score',
+          'prenom_francais_pct'
+        ],
+        commune: [
+          'total_score',
+          'crime_score',
+          'names_score',
+          'qpv_score',
+          'prenom_francais_pct'
+        ]
+      };
+      
+      const availableMetricKeys = levelMetrics[level] || levelMetrics.country;
+      
+      // Filter the full metrics config to only include available metrics
+      return MetricsConfig.metrics.filter(metric => 
+        availableMetricKeys.includes(metric.value)
+      );
     },
 
     getMetricLabel(metric) {
