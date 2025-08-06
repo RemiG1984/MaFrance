@@ -78,7 +78,43 @@ export default {
     Chart.register(watermarkPlugin);
     this.createChart()
   },
+  watch: {
+    // Watch for label state changes to update chart titles
+    'dataStore.labelState': {
+      handler() {
+        if (this.chart) {
+          this.updateChartTitle();
+        }
+      }
+    }
+  },
   methods: {
+    getChartTitle() {
+      if (!chartLabels[this.metricKey]) {
+        return this.metricKey;
+      }
+      
+      const labelStateName = this.dataStore.getLabelStateName();
+      const metricConfig = chartLabels[this.metricKey];
+      
+      // Return the appropriate label based on current state
+      switch (labelStateName) {
+        case 'alt1':
+          return metricConfig.alt1Label || metricConfig.label;
+        case 'alt2':
+          return metricConfig.alt2Label || metricConfig.label;
+        default:
+          return metricConfig.label;
+      }
+    },
+
+    updateChartTitle() {
+      if (this.chart) {
+        const newTitle = this.getChartTitle();
+        this.chart.options.plugins.title.text = newTitle;
+        this.chart.update();
+      }
+    },
 
     generateDatasets() {
       // Add null check for data
@@ -173,7 +209,7 @@ export default {
         return;
       }
 
-      const title = chartLabels[this.metricKey].label
+      const title = this.getChartTitle()
 
       const config = {
         type: 'line',
@@ -296,6 +332,9 @@ export default {
         // Mise à jour des datasets
         const datasets = this.generateDatasets()
         this.chart.data.datasets = datasets
+
+        // Update chart title based on current label state
+        this.chart.options.plugins.title.text = this.getChartTitle();
 
         // Redessiner le graphique
         this.chart.update()
