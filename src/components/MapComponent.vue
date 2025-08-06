@@ -123,6 +123,15 @@ export default {
         });
       }
     },
+    // Watch for level changes to commune
+    currentLevel(newLevel, oldLevel) {
+      if (newLevel === 'commune' && oldLevel !== 'commune') {
+        // Show tooltip when switching to commune level
+        this.$nextTick(() => {
+          this.showCommuneTooltip();
+        });
+      }
+    },
   },
   mounted() {
     this.initMap()
@@ -634,19 +643,6 @@ export default {
             weight: 3,
             opacity: 0.8
           });
-          
-          // Auto-hide tooltip after 3 seconds
-          setTimeout(() => {
-            if (this.globalTooltip && this.map.hasLayer(this.globalTooltip)) {
-              this.map.removeLayer(this.globalTooltip);
-              // Reset style
-              layer.setStyle({
-                weight: 1,
-                opacity: 1,
-                color: 'white',
-              });
-            }
-          }, 3000);
           
           return false; // Break the loop
         }
