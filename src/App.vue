@@ -4,7 +4,7 @@
     <v-app-bar app color="primary" dark>
       <v-container class="d-flex align-center">
         <v-app-bar-title class="text-h5 font-weight-bold">
-          Ma France: état des lieux
+          {{ currentPageTitle }}
         </v-app-bar-title>
         
         <v-spacer></v-spacer>
@@ -42,11 +42,19 @@
 </template>
 <script>
 import VersionSelector from './components/VersionSelector.vue'
+import { mapStores } from 'pinia'
+import { useDataStore } from './services/store.js'
 
 export default {
   name: 'App',
   components: {
     VersionSelector
+  },
+  computed: {
+    ...mapStores(useDataStore),
+    currentPageTitle() {
+      return this.dataStore.getCurrentPageTitle()
+    }
   },
   data() {
     return {
