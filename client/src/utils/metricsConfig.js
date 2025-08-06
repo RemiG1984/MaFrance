@@ -253,7 +253,8 @@ const MetricsConfig = {
             alt1Label: "Subventions /hab/an",
             alt2Label: "Subventions /hab/an",
             category: "wokisme",
-            format: "subventions",
+            format: "currency",
+            source: "subventions",
         },
     ],
 
