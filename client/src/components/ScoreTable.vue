@@ -1,3 +1,4 @@
+
 <template>
   <v-card class="mb-4">
     <v-card-title class="text-h5">
@@ -71,42 +72,26 @@ export default {
     }
   },
   watch: {
-    // Watch for changes in location prop to update the table
     location: {
       handler() {
         this.updateTable()
       },
       immediate: true
     },
-    // Watch for changes in label state to refresh table labels
     'dataStore.labelState': {
-      handler(newLabelState) {
-        MetricsConfig.labelState = newLabelState
+      handler() {
         this.updateTable()
       }
     }
   },
   mounted() {
-    // Listen for metrics label changes
-    window.addEventListener('metricsLabelsToggled', this.handleLabelsToggled)
-    this.syncLabelState()
+    window.addEventListener('metricsLabelsToggled', this.updateTable)
   },
   beforeUnmount() {
-    window.removeEventListener('metricsLabelsToggled', this.handleLabelsToggled)
+    window.removeEventListener('metricsLabelsToggled', this.updateTable)
   },
   methods: {
-    handleLabelsToggled() {
-      this.syncLabelState()
-      this.updateTable()
-    },
-
-    syncLabelState() {
-      // Sync MetricsConfig labelState with the store's labelState
-      MetricsConfig.labelState = this.dataStore.labelState
-    },
-
     updateTable() {
-      // Exit if no location or type is provided
       if (!this.location || !this.location.type) {
         this.tableRows = []
         return
@@ -117,40 +102,18 @@ export default {
       let compareStoreSection = null
 
       // Set headers based on geographic level
-      if (level === 'country') {
-        this.mainHeader = this.location.name
-        this.compareHeader = ''
-      } else if (level === 'departement') {
-        compareStoreSection = this.dataStore.country
-        const deptCode = this.location.code
-        this.mainHeader = `${deptCode} - ${DepartementNames[deptCode] || deptCode}`
-        this.compareHeader = 'France'
-      } else if (level === 'commune') {
-        compareStoreSection = this.dataStore.departement
-        const communeData = storeSection.details
-        const departement = communeData.departement
-        const commune = communeData.commune
-        this.mainHeader = `${departement} - ${commune}`
-        this.compareHeader = DepartementNames[departement] || departement
-      }
+      this.setHeaders(level, storeSection)
 
       const rows = []
 
       // Add population row first
       const populationMetric = MetricsConfig.getMetricByValue('population')
       if (MetricsConfig.isMetricAvailable('population', level)) {
-        rows.push(this.createRow(populationMetric, storeSection, compareStoreSection, false))
+        rows.push(this.createRow(populationMetric, storeSection, compareStoreSection))
       }
 
       // Get ordered unique categories, excluding 'général'
-      const seen = new Set()
-      const categories = MetricsConfig.metrics
-        .map(m => m.category)
-        .filter(c => {
-          if (c === 'général' || seen.has(c)) return false
-          seen.add(c)
-          return true
-        })
+      const categories = this.getUniqueCategories()
 
       // Build rows for each category
       categories.forEach(category => {
@@ -172,56 +135,70 @@ export default {
       this.tableRows = this.addGroupIds(rows)
     },
 
-    // Determine the data source for a metric
-    getSource(metricKey) {
-      const metric = MetricsConfig.getMetricByValue(metricKey)
-      if (!metric) return 'details'
-
-      return metric.source || 'details'
+    setHeaders(level, storeSection) {
+      if (level === 'country') {
+        this.mainHeader = this.location.name
+        this.compareHeader = ''
+      } else if (level === 'departement') {
+        const deptCode = this.location.code
+        this.mainHeader = `${deptCode} - ${DepartementNames[deptCode] || deptCode}`
+        this.compareHeader = 'France'
+      } else if (level === 'commune') {
+        const communeData = storeSection.details
+        const departement = communeData.departement
+        const commune = communeData.commune
+        this.mainHeader = `${departement} - ${commune}`
+        this.compareHeader = DepartementNames[departement] || departement
+      }
     },
 
-    // Create a table row for a metric
-    createRow(metric, storeSection, compareStoreSection, subRow) {
+    getUniqueCategories() {
+      const seen = new Set()
+      return MetricsConfig.metrics
+        .map(m => m.category)
+        .filter(c => {
+          if (c === 'général' || seen.has(c)) return false
+          seen.add(c)
+          return true
+        })
+    },
+
+    createRow(metric, storeSection, compareStoreSection, isSubRow = false) {
       const metricKey = metric.value
       const title = MetricsConfig.getMetricLabel(metricKey)
-      const source = this.getSource(metricKey)
+      const source = metric.source || 'details'
 
       // Get main value
-      let main = 'N/A'
-      const sectionData = storeSection[source]
-      if (sectionData) {
-        let value = MetricsConfig.calculateMetric(metricKey, sectionData)
-        if (value !== null && value !== undefined && !isNaN(value)) {
-          main = MetricsConfig.formatMetricValue(value, metricKey)
-          if (source === 'names' && sectionData.annais) {
-            main += ` (${sectionData.annais})`
-          } else if (source === 'crime' && sectionData.annee) {
-            main += ` (${sectionData.annee})`
-          }
-        }
-      }
-
+      const main = this.getFormattedValue(storeSection, metricKey, source)
+      
       // Get comparison value (if applicable)
       let compare = ''
       if (compareStoreSection) {
-        const compareData = compareStoreSection[source]
-        if (compareData) {
-          let value = MetricsConfig.calculateMetric(metricKey, compareData)
-          if (value !== null && value !== undefined && !isNaN(value)) {
-            compare = MetricsConfig.formatMetricValue(value, metricKey)
-            if (source === 'names' && compareData.annais) {
-              compare += ` (${compareData.annais})`
-            } else if (source === 'crime' && compareData.annee) {
-              compare += ` (${compareData.annee})`
-            }
-          }
-        }
+        compare = this.getFormattedValue(compareStoreSection, metricKey, source)
       }
 
-      return { title, main, compare, subRow }
+      return { title, main, compare, subRow: isSubRow }
     },
 
-    // Assign group IDs for main rows and their sub-rows
+    getFormattedValue(storeSection, metricKey, source) {
+      const sectionData = storeSection[source]
+      if (!sectionData) return 'N/A'
+
+      let value = MetricsConfig.calculateMetric(metricKey, sectionData)
+      if (value == null || value === undefined || isNaN(value)) return 'N/A'
+
+      let formatted = MetricsConfig.formatMetricValue(value, metricKey)
+      
+      // Add year suffix for specific sources
+      if (source === 'names' && sectionData.annais) {
+        formatted += ` (${sectionData.annais})`
+      } else if (source === 'crime' && sectionData.annee) {
+        formatted += ` (${sectionData.annee})`
+      }
+
+      return formatted
+    },
+
     addGroupIds(rows) {
       let currentGroupId = null
       return rows.map((row, index) => {
@@ -232,7 +209,6 @@ export default {
       })
     },
 
-    // Get CSS classes for table rows
     getRowClasses(row) {
       const classes = ['score-row']
       if (row.subRow) {
@@ -241,7 +217,6 @@ export default {
       return classes.join(' ')
     },
 
-    // Get CSS classes for row titles
     getTitleClasses(row) {
       const classes = ['row-title']
       if (row.subRow) {
@@ -250,7 +225,6 @@ export default {
       return classes.join(' ')
     },
 
-    // Handle row clicks to toggle sub-rows
     handleRowClick(row) {
       if (!row.subRow) {
         const groupId = row.groupId
