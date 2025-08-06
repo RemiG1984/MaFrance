@@ -1,8 +1,7 @@
 // Service API pour gérer les appels au backend
 class ApiService {
     constructor() {
-        //this.baseURL = 'http://127.0.0.1:3000'
-        this.baseURL = "";
+        this.baseURL = import.meta.env.VITE_API_BASE_URL || "";
     }
 
     async request(endpoint, options = {}) {
