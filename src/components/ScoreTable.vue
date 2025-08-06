@@ -191,6 +191,53 @@ export default {
           subRow: true,
         },
         {
+          title: MetricsConfig.getMetricLabel("immigration_score"),
+          main: MetricsConfig.formatMetricValue(countryData.immigration_score, "immigration_score"),
+        },
+        {
+          title: MetricsConfig.getMetricLabel("extra_europeen_pct"),
+          main: MetricsConfig.formatMetricValue(metrics.extraEuropeenPct, "extra_europeen_pct") + metrics.yearLabel,
+          subRow: true,
+        },
+        {
+          title: MetricsConfig.getMetricLabel("total_places_centres_migrants"),
+          main: this.dataStore.country.migrants ? MetricsConfig.formatMetricValue(this.dataStore.country.migrants.total_places_centres_migrants || 0, "total_places_centres_migrants") : "N/A",
+          subRow: true,
+        },
+        {
+          title: MetricsConfig.getMetricLabel("places_centres_migrants_p1"),
+          main: this.dataStore.country.migrants ? MetricsConfig.formatMetricValue(this.dataStore.country.migrants.places_centres_migrants_p1 || 0, "places_centres_migrants_p1") : "N/A",
+          subRow: true,
+        },
+        {
+          title: MetricsConfig.getMetricLabel("islamisation_score"),
+          main: MetricsConfig.formatMetricValue(countryData.islamisation_score, "islamisation_score"),
+        },
+        {
+          title: MetricsConfig.getMetricLabel("musulman_pct"),
+          main: MetricsConfig.formatMetricValue(metrics.musulmanPct, "musulman_pct") + metrics.yearLabel,
+          subRow: true,
+        },
+        {
+          title: MetricsConfig.getMetricLabel("number_of_mosques"),
+          main: MetricsConfig.formatMetricValue(countryData.number_of_mosques, "number_of_mosques"),
+          subRow: true,
+        },
+        {
+          title: MetricsConfig.getMetricLabel("mosque_p100k"),
+          main: MetricsConfig.formatMetricValue(countryData.mosque_p100k, "mosque_p100k"),
+          subRow: true,
+        },
+        {
+          title: MetricsConfig.getMetricLabel("defrancisation_score"),
+          main: MetricsConfig.formatMetricValue(countryData.defrancisation_score, "defrancisation_score"),
+        },
+        {
+          title: MetricsConfig.getMetricLabel("prenom_francais_pct"),
+          main: MetricsConfig.formatMetricValue(metrics.prenomFrancaisPct, "prenom_francais_pct") + metrics.yearLabel,
+          subRow: true,
+        },
+        {
           title: MetricsConfig.getMetricLabel("wokisme_score"),
           main: MetricsConfig.formatMetricValue(countryData.wokisme_score, "wokisme_score"),
         },
@@ -209,6 +256,16 @@ export default {
         {
           title: MetricsConfig.getMetricLabel("pop_in_qpv_pct"),
           main: MetricsConfig.formatMetricValue(countryData.pop_in_qpv_pct, "pop_in_qpv_pct"),
+          subRow: true,
+        },
+        {
+          title: MetricsConfig.getMetricLabel("total_subventions"),
+          main: this.dataStore.country.subventions ? MetricsConfig.formatMetricValue(this.dataStore.country.subventions.total_subventions || 0, "total_subventions") : "N/A",
+          subRow: true,
+        },
+        {
+          title: MetricsConfig.getMetricLabel("subventions_p1"),
+          main: this.dataStore.country.subventions ? MetricsConfig.formatMetricValue(this.dataStore.country.subventions.subventions_p1 || 0, "subventions_p1") : "N/A",
           subRow: true,
         },
       ]
@@ -267,6 +324,18 @@ export default {
           subRow: true,
         },
         {
+          title: MetricsConfig.getMetricLabel("total_places_centres_migrants"),
+          main: this.dataStore.departement.migrants ? MetricsConfig.formatMetricValue(this.dataStore.departement.migrants.total_places_centres_migrants || 0, "total_places_centres_migrants") : "N/A",
+          compare: this.dataStore.country.migrants ? MetricsConfig.formatMetricValue(this.dataStore.country.migrants.total_places_centres_migrants || 0, "total_places_centres_migrants") : "N/A",
+          subRow: true,
+        },
+        {
+          title: MetricsConfig.getMetricLabel("places_centres_migrants_p1"),
+          main: this.dataStore.departement.migrants ? MetricsConfig.formatMetricValue(this.dataStore.departement.migrants.places_centres_migrants_p1 || 0, "places_centres_migrants_p1") : "N/A",
+          compare: this.dataStore.country.migrants ? MetricsConfig.formatMetricValue(this.dataStore.country.migrants.places_centres_migrants_p1 || 0, "places_centres_migrants_p1") : "N/A",
+          subRow: true,
+        },
+        {
           title: MetricsConfig.getMetricLabel("islamisation_score"),
           main: MetricsConfig.formatMetricValue(deptData.islamisation_score, "islamisation_score"),
           compare: MetricsConfig.formatMetricValue(countryData.islamisation_score, "islamisation_score"),
@@ -313,6 +382,18 @@ export default {
           compare: countryData.logements_sociaux_pct !== null && countryData.logements_sociaux_pct !== undefined
               ? MetricsConfig.formatMetricValue(countryData.logements_sociaux_pct, "logements_sociaux_pct")
               : "N/A",
+          subRow: true,
+        },
+        {
+          title: MetricsConfig.getMetricLabel("total_subventions"),
+          main: this.dataStore.departement.subventions ? MetricsConfig.formatMetricValue(this.dataStore.departement.subventions.total_subventions || 0, "total_subventions") : "N/A",
+          compare: this.dataStore.country.subventions ? MetricsConfig.formatMetricValue(this.dataStore.country.subventions.total_subventions || 0, "total_subventions") : "N/A",
+          subRow: true,
+        },
+        {
+          title: MetricsConfig.getMetricLabel("subventions_p1"),
+          main: this.dataStore.departement.subventions ? MetricsConfig.formatMetricValue(this.dataStore.departement.subventions.subventions_p1 || 0, "subventions_p1") : "N/A",
+          compare: this.dataStore.country.subventions ? MetricsConfig.formatMetricValue(this.dataStore.country.subventions.subventions_p1 || 0, "subventions_p1") : "N/A",
           subRow: true,
         },
         {
@@ -404,6 +485,26 @@ export default {
             title: MetricsConfig.getMetricLabel("extra_europeen_pct"),
             main: communeMetrics ? MetricsConfig.formatMetricValue(communeMetrics.extraEuropeenPct, "extra_europeen_pct") + communeMetrics.yearLabel : "N/A",
             compare: MetricsConfig.formatMetricValue(deptMetrics.extraEuropeenPct, "extra_europeen_pct") + deptMetrics.yearLabel,
+            subRow: true,
+          }
+        },
+        {
+          metric: "total_places_centres_migrants",
+          condition: () => true,
+          row: {
+            title: MetricsConfig.getMetricLabel("total_places_centres_migrants"),
+            main: this.dataStore.commune.migrants ? MetricsConfig.formatMetricValue(this.dataStore.commune.migrants.total_places_centres_migrants || 0, "total_places_centres_migrants") : "N/A",
+            compare: this.dataStore.departement.migrants ? MetricsConfig.formatMetricValue(this.dataStore.departement.migrants.total_places_centres_migrants || 0, "total_places_centres_migrants") : "N/A",
+            subRow: true,
+          }
+        },
+        {
+          metric: "places_centres_migrants_p1",
+          condition: () => true,
+          row: {
+            title: MetricsConfig.getMetricLabel("places_centres_migrants_p1"),
+            main: this.dataStore.commune.migrants ? MetricsConfig.formatMetricValue(this.dataStore.commune.migrants.places_centres_migrants_p1 || 0, "places_centres_migrants_p1") : "N/A",
+            compare: this.dataStore.departement.migrants ? MetricsConfig.formatMetricValue(this.dataStore.departement.migrants.places_centres_migrants_p1 || 0, "places_centres_migrants_p1") : "N/A",
             subRow: true,
           }
         },
@@ -513,6 +614,26 @@ export default {
             compare: deptData.pop_in_qpv_pct !== null && deptData.pop_in_qpv_pct !== undefined
                 ? MetricsConfig.formatMetricValue(deptData.pop_in_qpv_pct, "pop_in_qpv_pct")
                 : "0.0%",
+            subRow: true,
+          }
+        },
+        {
+          metric: "total_subventions",
+          condition: () => true,
+          row: {
+            title: MetricsConfig.getMetricLabel("total_subventions"),
+            main: this.dataStore.commune.subventions ? MetricsConfig.formatMetricValue(this.dataStore.commune.subventions.total_subventions || 0, "total_subventions") : "N/A",
+            compare: this.dataStore.departement.subventions ? MetricsConfig.formatMetricValue(this.dataStore.departement.subventions.total_subventions || 0, "total_subventions") : "N/A",
+            subRow: true,
+          }
+        },
+        {
+          metric: "subventions_p1",
+          condition: () => true,
+          row: {
+            title: MetricsConfig.getMetricLabel("subventions_p1"),
+            main: this.dataStore.commune.subventions ? MetricsConfig.formatMetricValue(this.dataStore.commune.subventions.subventions_p1 || 0, "subventions_p1") : "N/A",
+            compare: this.dataStore.departement.subventions ? MetricsConfig.formatMetricValue(this.dataStore.departement.subventions.subventions_p1 || 0, "subventions_p1") : "N/A",
             subRow: true,
           }
         }
