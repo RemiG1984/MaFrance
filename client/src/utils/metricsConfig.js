@@ -52,7 +52,7 @@ const MetricsConfig = {
             alt2Label: "Indice d'insécurité",
             category: "insécurité",
             format: "score",
-            source: "crime",
+            source: "details",
         },
         {
             value: "homicides_total_p100k",
@@ -97,6 +97,7 @@ const MetricsConfig = {
             alt2Label: "Vandalisme /1k hab.",
             category: "insécurité",
             format: "rate_1k",
+            source: "crime",
         },
         {
             value: "stupefiants_p1k",
@@ -133,7 +134,7 @@ const MetricsConfig = {
             alt2Label: "Prénoms allogènes (%)",
             category: "immigration",
             format: "percentage",
-            source: "prenoms",
+            source: "names",
         },
         {
             value: "Total_places_migrants",
@@ -170,7 +171,7 @@ const MetricsConfig = {
             alt2Label: "Prénoms islamiques (%)",
             category: "islamisme",
             format: "percentage",
-            source: "prenoms",
+            source: "names",
         },
         {
             value: "number_of_mosques",
@@ -207,7 +208,7 @@ const MetricsConfig = {
             alt2Label: "Prénoms de naissance français (%)",
             category: "défrancisation",
             format: "percentage",
-            source: "prenoms",
+            source: "names",
         },
         // Wokisme category
         {
