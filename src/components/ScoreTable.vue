@@ -18,8 +18,8 @@
           </tr>
         </thead>
         <tbody>
-          <tr 
-            v-for="(row, index) in tableRows" 
+          <tr
+            v-for="(row, index) in tableRows"
             :key="index"
             :class="getRowClasses(row)"
             :data-group-id="row.groupId"
@@ -138,8 +138,8 @@ export default {
 
       const metrics = this.calculateCommonMetrics(namesData, crimeData)
       const crimeRows = this.createCrimeRows(
-        metrics, 
-        crimeData, 
+        metrics,
+        crimeData,
         `/crime_graph.html?type=country&code=France`
       )
 
@@ -158,14 +158,8 @@ export default {
           main: MetricsConfig.formatMetricValue(countryData.immigration_score, "immigration_score"),
         },
         {
-          title: MetricsConfig.getMetricLabel("total_subventions"),
-          main: this.dataStore.country.subventions ? 
-            MetricsConfig.formatMetricValue(this.dataStore.country.subventions.total_subventions, "total_subventions") : "N/A",
-          subRow: true,
-        },
-        {
           title: MetricsConfig.getMetricLabel("subventions_p1"),
-          main: this.dataStore.country.subventions ? 
+          main: this.dataStore.country.subventions ?
             MetricsConfig.formatMetricValue(this.dataStore.country.subventions.subventions_p1, "subventions_p1") : "N/A",
           subRow: true,
         },
@@ -208,13 +202,13 @@ export default {
         },
         {
           title: MetricsConfig.getMetricLabel("total_places_centres_migrants"),
-          main: this.dataStore.country.migrants ? 
+          main: this.dataStore.country.migrants ?
             MetricsConfig.formatMetricValue(this.dataStore.country.migrants.total_places_centres_migrants, "total_places_centres_migrants") : "N/A",
           subRow: true,
         },
         {
           title: MetricsConfig.getMetricLabel("places_centres_migrants_p1"),
-          main: this.dataStore.country.migrants ? 
+          main: this.dataStore.country.migrants ?
             MetricsConfig.formatMetricValue(this.dataStore.country.migrants.places_centres_migrants_p1, "places_centres_migrants_p1") : "N/A",
           subRow: true,
         },
@@ -260,8 +254,8 @@ export default {
       const deptMetrics = this.calculateCommonMetrics(namesData, crimeData)
       const countryMetrics = this.calculateCommonMetrics(countryNamesData, countryCrimeData)
       const crimeRows = this.createCrimeRows(
-        deptMetrics, 
-        crimeData, 
+        deptMetrics,
+        crimeData,
         `/crime_graph.html?type=department&code=${deptCode}`,
         countryMetrics,
         countryCrimeData
@@ -285,18 +279,10 @@ export default {
           compare: MetricsConfig.formatMetricValue(countryData.immigration_score, "immigration_score"),
         },
         {
-          title: MetricsConfig.getMetricLabel("total_subventions"),
-          main: this.dataStore.departement.subventions ? 
-            MetricsConfig.formatMetricValue(this.dataStore.departement.subventions.total_subventions, "total_subventions") : "N/A",
-          compare: this.dataStore.country.subventions ? 
-            MetricsConfig.formatMetricValue(this.dataStore.country.subventions.total_subventions, "total_subventions") : "N/A",
-          subRow: true,
-        },
-        {
           title: MetricsConfig.getMetricLabel("subventions_p1"),
-          main: this.dataStore.departement.subventions ? 
+          main: this.dataStore.departement.subventions ?
             MetricsConfig.formatMetricValue(this.dataStore.departement.subventions.subventions_p1, "subventions_p1") : "N/A",
-          compare: this.dataStore.country.subventions ? 
+          compare: this.dataStore.country.subventions ?
             MetricsConfig.formatMetricValue(this.dataStore.country.subventions.subventions_p1, "subventions_p1") : "N/A",
           subRow: true,
         },
@@ -347,17 +333,17 @@ export default {
         },
         {
           title: MetricsConfig.getMetricLabel("total_places_centres_migrants"),
-          main: this.dataStore.departement.migrants ? 
+          main: this.dataStore.departement.migrants ?
             MetricsConfig.formatMetricValue(this.dataStore.departement.migrants.total_places_centres_migrants, "total_places_centres_migrants") : "N/A",
-          compare: this.dataStore.country.migrants ? 
+          compare: this.dataStore.country.migrants ?
             MetricsConfig.formatMetricValue(this.dataStore.country.migrants.total_places_centres_migrants, "total_places_centres_migrants") : "N/A",
           subRow: true,
         },
         {
           title: MetricsConfig.getMetricLabel("places_centres_migrants_p1"),
-          main: this.dataStore.departement.migrants ? 
+          main: this.dataStore.departement.migrants ?
             MetricsConfig.formatMetricValue(this.dataStore.departement.migrants.places_centres_migrants_p1, "places_centres_migrants_p1") : "N/A",
-          compare: this.dataStore.country.migrants ? 
+          compare: this.dataStore.country.migrants ?
             MetricsConfig.formatMetricValue(this.dataStore.country.migrants.places_centres_migrants_p1, "places_centres_migrants_p1") : "N/A",
           subRow: true,
         },
@@ -425,8 +411,8 @@ export default {
       const communeMetrics = namesData ? this.calculateCommonMetrics(namesData, crimeData) : null
       const deptMetrics = this.calculateCommonMetrics(deptNamesData, deptCrimeData)
       const crimeRows = this.createCrimeRows(
-        communeMetrics, 
-        crimeData, 
+        communeMetrics,
+        crimeData,
         `/crime_graph.html?type=commune&code=${cog}&dept=${departement}&commune=${encodeURIComponent(commune)}`,
         deptMetrics,
         deptCrimeData
@@ -450,18 +436,10 @@ export default {
           compare: MetricsConfig.formatMetricValue(deptData.immigration_score, "immigration_score"),
         },
         {
-          title: MetricsConfig.getMetricLabel("total_subventions"),
-          main: this.dataStore.commune.subventions ? 
-            MetricsConfig.formatMetricValue(this.dataStore.commune.subventions.total_subventions, "total_subventions") : "N/A",
-          compare: this.dataStore.departement.subventions ? 
-            MetricsConfig.formatMetricValue(this.dataStore.departement.subventions.total_subventions, "total_subventions") : "N/A",
-          subRow: true,
-        },
-        {
           title: MetricsConfig.getMetricLabel("subventions_p1"),
-          main: this.dataStore.commune.subventions ? 
+          main: this.dataStore.commune.subventions ?
             MetricsConfig.formatMetricValue(this.dataStore.commune.subventions.subventions_p1, "subventions_p1") : "N/A",
-          compare: this.dataStore.departement.subventions ? 
+          compare: this.dataStore.departement.subventions ?
             MetricsConfig.formatMetricValue(this.dataStore.departement.subventions.subventions_p1, "subventions_p1") : "N/A",
           subRow: true,
         },
@@ -499,20 +477,49 @@ export default {
           }
         },
         {
-          title: MetricsConfig.getMetricLabel("total_places_centres_migrants"),
-          main: this.dataStore.commune.migrants ? 
-            MetricsConfig.formatMetricValue(this.dataStore.commune.migrants.total_places_centres_migrants, "total_places_centres_migrants") : "N/A",
-          compare: this.dataStore.departement.migrants ? 
-            MetricsConfig.formatMetricValue(this.dataStore.departement.migrants.total_places_centres_migrants, "total_places_centres_migrants") : "N/A",
-          subRow: true,
+          metric: "wokisme_score",
+          condition: () => true,
+          row: {
+            title: MetricsConfig.getMetricLabel("wokisme_score"),
+            main: MetricsConfig.formatMetricValue(communeData.wokisme_score, "wokisme_score"),
+            compare: MetricsConfig.formatMetricValue(deptData.wokisme_score, "wokisme_score"),
+          }
         },
         {
-          title: MetricsConfig.getMetricLabel("places_centres_migrants_p1"),
-          main: this.dataStore.commune.migrants ? 
-            MetricsConfig.formatMetricValue(this.dataStore.commune.migrants.places_centres_migrants_p1, "places_centres_migrants_p1") : "N/A",
-          compare: this.dataStore.departement.migrants ? 
-            MetricsConfig.formatMetricValue(this.dataStore.departement.migrants.places_centres_migrants_p1, "places_centres_migrants_p1") : "N/A",
-          subRow: true,
+          metric: "subventions_p1",
+          condition: () => true,
+          row: {
+            title: MetricsConfig.getMetricLabel("subventions_p1"),
+            main: this.dataStore.commune.subventions ?
+              MetricsConfig.formatMetricValue(this.dataStore.commune.subventions.subventions_p1, "subventions_p1") : "N/A",
+            compare: this.dataStore.departement.subventions ?
+              MetricsConfig.formatMetricValue(this.dataStore.departement.subventions.subventions_p1, "subventions_p1") : "N/A",
+            subRow: true,
+          }
+        },
+        {
+          metric: "total_places_centres_migrants",
+          condition: () => true,
+          row: {
+            title: MetricsConfig.getMetricLabel("total_places_centres_migrants"),
+            main: this.dataStore.commune.migrants ?
+              MetricsConfig.formatMetricValue(this.dataStore.commune.migrants.total_places_centres_migrants, "total_places_centres_migrants") : "N/A",
+            compare: this.dataStore.departement.migrants ?
+              MetricsConfig.formatMetricValue(this.dataStore.departement.migrants.total_places_centres_migrants, "total_places_centres_migrants") : "N/A",
+            subRow: true,
+          }
+        },
+        {
+          metric: "places_centres_migrants_p1",
+          condition: () => true,
+          row: {
+            title: MetricsConfig.getMetricLabel("places_centres_migrants_p1"),
+            main: this.dataStore.commune.migrants ?
+              MetricsConfig.formatMetricValue(this.dataStore.commune.migrants.places_centres_migrants_p1, "places_centres_migrants_p1") : "N/A",
+            compare: this.dataStore.departement.migrants ?
+              MetricsConfig.formatMetricValue(this.dataStore.departement.migrants.places_centres_migrants_p1, "places_centres_migrants_p1") : "N/A",
+            subRow: true,
+          }
         },
         {
           metric: "number_of_mosques",
@@ -551,15 +558,6 @@ export default {
             main: communeMetrics ? MetricsConfig.formatMetricValue(communeMetrics.prenomFrancaisPct, "prenom_francais_pct") + communeMetrics.yearLabel : "N/A",
             compare: MetricsConfig.formatMetricValue(deptMetrics.prenomFrancaisPct, "prenom_francais_pct") + deptMetrics.yearLabel,
             subRow: true,
-          }
-        },
-        {
-          metric: "wokisme_score",
-          condition: () => true,
-          row: {
-            title: MetricsConfig.getMetricLabel("wokisme_score"),
-            main: MetricsConfig.formatMetricValue(communeData.wokisme_score, "wokisme_score"),
-            compare: MetricsConfig.formatMetricValue(deptData.wokisme_score, "wokisme_score"),
           }
         },
         {
@@ -636,20 +634,20 @@ export default {
       const rows = []
 
       // Add labelState to link if not in standard mode
-      const linkWithState = MetricsConfig.labelState > 0 ? 
-        `${linkBase}${linkBase.includes('?') ? '&' : '?'}labelState=${MetricsConfig.labelState}` : 
+      const linkWithState = MetricsConfig.labelState > 0 ?
+        `${linkBase}${linkBase.includes('?') ? '&' : '?'}labelState=${MetricsConfig.labelState}` :
         linkBase
 
       // Only add homicide row if available at current level
-      const currentLevel = linkBase.includes('country') ? 'france' : 
+      const currentLevel = linkBase.includes('country') ? 'france' :
                          linkBase.includes('department') ? 'departement' : 'commune'
 
       if (MetricsConfig.isMetricAvailable("homicides_p100k", currentLevel) && metrics) {
         rows.push({
           title: MetricsConfig.getMetricLabel("homicides_p100k"),
           main: MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("homicides_total_p100k", crimeData), "homicides_p100k") + metrics.crimeYearLabel,
-          compare: compareMetrics ? 
-            MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("homicides_total_p100k", compareCrimeData), "homicides_p100k") + compareMetrics.crimeYearLabel : 
+          compare: compareMetrics ?
+            MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("homicides_total_p100k", compareCrimeData), "homicides_p100k") + compareMetrics.crimeYearLabel :
             null,
           subRow: true,
         })
@@ -660,48 +658,48 @@ export default {
         {
           title: MetricsConfig.getMetricLabel("violences_physiques_p1k"),
           main: MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("violences_physiques_p1k", crimeData), "violences_physiques_p1k") + (metrics ? metrics.crimeYearLabel : (crimeData.annee ? ` (${crimeData.annee})` : "")),
-          compare: compareMetrics ? 
-            MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("violences_physiques_p1k", compareCrimeData), "violences_physiques_p1k") + compareMetrics.crimeYearLabel : 
+          compare: compareMetrics ?
+            MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("violences_physiques_p1k", compareCrimeData), "violences_physiques_p1k") + compareMetrics.crimeYearLabel :
             null,
           subRow: true,
         },
         {
           title: MetricsConfig.getMetricLabel("violences_sexuelles_p1k"),
           main: MetricsConfig.formatMetricValue(crimeData.violences_sexuelles_p1k, "violences_sexuelles_p1k") + (metrics ? metrics.crimeYearLabel : (crimeData.annee ? ` (${crimeData.annee})` : "")),
-          compare: compareCrimeData ? 
-            MetricsConfig.formatMetricValue(compareCrimeData.violences_sexuelles_p1k, "violences_sexuelles_p1k") + (compareMetrics ? compareMetrics.crimeYearLabel : "") : 
+          compare: compareCrimeData ?
+            MetricsConfig.formatMetricValue(compareCrimeData.violences_sexuelles_p1k, "violences_sexuelles_p1k") + (compareMetrics ? compareMetrics.crimeYearLabel : "") :
             null,
           subRow: true,
         },
         {
           title: MetricsConfig.getMetricLabel("vols_p1k"),
           main: MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("vols_p1k", crimeData), "vols_p1k") + (metrics ? metrics.crimeYearLabel : (crimeData.annee ? ` (${crimeData.annee})` : "")),
-          compare: compareMetrics ? 
-            MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("vols_p1k", compareCrimeData), "vols_p1k") + compareMetrics.crimeYearLabel : 
+          compare: compareMetrics ?
+            MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("vols_p1k", compareCrimeData), "vols_p1k") + compareMetrics.crimeYearLabel :
             null,
           subRow: true,
         },
         {
           title: MetricsConfig.getMetricLabel("destructions_p1k"),
           main: MetricsConfig.formatMetricValue(crimeData.destructions_et_degradations_volontaires_p1k, "destructions_p1k") + (metrics ? metrics.crimeYearLabel : (crimeData.annee ? ` (${crimeData.annee})` : "")),
-          compare: compareCrimeData ? 
-            MetricsConfig.formatMetricValue(compareCrimeData.destructions_et_degradations_volontaires_p1k, "destructions_p1k") + (compareMetrics ? compareMetrics.crimeYearLabel : "") : 
+          compare: compareCrimeData ?
+            MetricsConfig.formatMetricValue(compareCrimeData.destructions_et_degradations_volontaires_p1k, "destructions_p1k") + (compareMetrics ? compareMetrics.crimeYearLabel : "") :
             null,
           subRow: true,
         },
         {
           title: MetricsConfig.getMetricLabel("stupefiants_p1k"),
           main: MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("stupefiants_p1k", crimeData), "stupefiants_p1k") + (metrics ? metrics.crimeYearLabel : (crimeData.annee ? ` (${crimeData.annee})` : "")),
-          compare: compareMetrics ? 
-            MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("stupefiants_p1k", compareCrimeData), "stupefiants_p1k") + compareMetrics.crimeYearLabel : 
+          compare: compareMetrics ?
+            MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("stupefiants_p1k", compareCrimeData), "stupefiants_p1k") + compareMetrics.crimeYearLabel :
             null,
           subRow: true,
         },
         {
           title: MetricsConfig.getMetricLabel("escroqueries_p1k"),
           main: MetricsConfig.formatMetricValue(crimeData.escroqueries_p1k, "escroqueries_p1k") + (metrics ? metrics.crimeYearLabel : (crimeData.annee ? ` (${crimeData.annee})` : "")),
-          compare: compareCrimeData ? 
-            MetricsConfig.formatMetricValue(compareCrimeData.escroqueries_p1k, "escroqueries_p1k") + (compareMetrics ? compareMetrics.crimeYearLabel : "") : 
+          compare: compareCrimeData ?
+            MetricsConfig.formatMetricValue(compareCrimeData.escroqueries_p1k, "escroqueries_p1k") + (compareMetrics ? compareMetrics.crimeYearLabel : "") :
             null,
           subRow: true,
         }
