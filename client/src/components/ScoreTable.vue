@@ -1,4 +1,3 @@
-
 <template>
   <v-card class="mb-4">
     <v-card-title class="text-h5">
@@ -82,6 +81,24 @@ export default {
       handler() {
         this.updateTable()
       }
+    },
+    'dataStore.country': {
+      handler() {
+        if (this.location.type === 'country') this.updateTable()
+      },
+      deep: true
+    },
+    'dataStore.departement': {
+      handler() {
+        if (this.location.type === 'departement') this.updateTable()
+      },
+      deep: true
+    },
+    'dataStore.commune': {
+      handler() {
+        if (this.location.type === 'commune') this.updateTable()
+      },
+      deep: true
     }
   },
   mounted() {
@@ -99,7 +116,22 @@ export default {
 
       const level = this.location.type
       const storeSection = this.dataStore[level]
+
+      if (!storeSection || !storeSection.details) {  // Check if data is loaded
+        this.loading = true
+        this.tableRows = []
+        return
+      }
+
+      this.loading = false
+
       let compareStoreSection = null
+
+      if (level === 'departement') {
+        compareStoreSection = this.dataStore.country
+      } else if (level === 'commune') {
+        compareStoreSection = this.dataStore.departement
+      }
 
       // Set headers based on geographic level
       this.setHeaders(level, storeSection)
@@ -170,7 +202,7 @@ export default {
 
       // Get main value
       const main = this.getFormattedValue(storeSection, metricKey, source)
-      
+
       // Get comparison value (if applicable)
       let compare = ''
       if (compareStoreSection) {
@@ -188,7 +220,7 @@ export default {
       if (value == null || value === undefined || isNaN(value)) return 'N/A'
 
       let formatted = MetricsConfig.formatMetricValue(value, metricKey)
-      
+
       // Add year suffix for specific sources
       if (source === 'names' && sectionData.annais) {
         formatted += ` (${sectionData.annais})`
