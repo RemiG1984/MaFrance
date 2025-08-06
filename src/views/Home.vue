@@ -44,12 +44,11 @@
           </v-col>
 
           <!-- Executive Details -->
-          <!-- <v-col cols="12">
+          <v-col cols="12">
             <ExecutiveDetails 
               :location="currentLocation"
-              :data="executiveData"
             />
-          </v-col> -->
+          </v-col>
         </v-row>
       </v-col>
 
@@ -243,8 +242,6 @@ export default {
   data() {
     return {
       levels: ['country', 'departement', 'commune'],
-      executiveData: null,
-      // scores: null,
       crimeData: null
     }
   },
