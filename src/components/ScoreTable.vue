@@ -158,6 +158,16 @@ export default {
           main: MetricsConfig.formatMetricValue(countryData.immigration_score, "immigration_score"),
         },
         {
+          title: MetricsConfig.getMetricLabel("total_subventions"),
+          main: MetricsConfig.formatMetricValue(countryData.total_subventions, "total_subventions"),
+          subRow: true,
+        },
+        {
+          title: MetricsConfig.getMetricLabel("subventions_p1"),
+          main: MetricsConfig.formatMetricValue(countryData.subventions_p1, "subventions_p1"),
+          subRow: true,
+        },
+        {
           title: MetricsConfig.getMetricLabel("extra_europeen_pct"),
           main: MetricsConfig.formatMetricValue(metrics.extraEuropeenPct, "extra_europeen_pct") + metrics.yearLabel,
           subRow: true,
@@ -193,6 +203,16 @@ export default {
         {
           title: MetricsConfig.getMetricLabel("wokisme_score"),
           main: MetricsConfig.formatMetricValue(countryData.wokisme_score, "wokisme_score"),
+        },
+        {
+          title: MetricsConfig.getMetricLabel("total_places_centres_migrants"),
+          main: MetricsConfig.formatMetricValue(countryData.total_places_centres_migrants, "total_places_centres_migrants"),
+          subRow: true,
+        },
+        {
+          title: MetricsConfig.getMetricLabel("places_centres_migrants_p1"),
+          main: MetricsConfig.formatMetricValue(countryData.places_centres_migrants_p1, "places_centres_migrants_p1"),
+          subRow: true,
         },
         {
           title: MetricsConfig.getMetricLabel("logements_sociaux_pct"),
@@ -261,6 +281,18 @@ export default {
           compare: MetricsConfig.formatMetricValue(countryData.immigration_score, "immigration_score"),
         },
         {
+          title: MetricsConfig.getMetricLabel("total_subventions"),
+          main: MetricsConfig.formatMetricValue(deptData.total_subventions, "total_subventions"),
+          compare: MetricsConfig.formatMetricValue(countryData.total_subventions, "total_subventions"),
+          subRow: true,
+        },
+        {
+          title: MetricsConfig.getMetricLabel("subventions_p1"),
+          main: MetricsConfig.formatMetricValue(deptData.subventions_p1, "subventions_p1"),
+          compare: MetricsConfig.formatMetricValue(countryData.subventions_p1, "subventions_p1"),
+          subRow: true,
+        },
+        {
           title: MetricsConfig.getMetricLabel("extra_europeen_pct"),
           main: MetricsConfig.formatMetricValue(deptMetrics.extraEuropeenPct, "extra_europeen_pct") + deptMetrics.yearLabel,
           compare: MetricsConfig.formatMetricValue(countryMetrics.extraEuropeenPct, "extra_europeen_pct") + countryMetrics.yearLabel,
@@ -304,6 +336,18 @@ export default {
           title: MetricsConfig.getMetricLabel("wokisme_score"),
           main: MetricsConfig.formatMetricValue(deptData.wokisme_score, "wokisme_score"),
           compare: MetricsConfig.formatMetricValue(countryData.wokisme_score, "wokisme_score"),
+        },
+        {
+          title: MetricsConfig.getMetricLabel("total_places_centres_migrants"),
+          main: MetricsConfig.formatMetricValue(deptData.total_places_centres_migrants, "total_places_centres_migrants"),
+          compare: MetricsConfig.formatMetricValue(countryData.total_places_centres_migrants, "total_places_centres_migrants"),
+          subRow: true,
+        },
+        {
+          title: MetricsConfig.getMetricLabel("places_centres_migrants_p1"),
+          main: MetricsConfig.formatMetricValue(deptData.places_centres_migrants_p1, "places_centres_migrants_p1"),
+          compare: MetricsConfig.formatMetricValue(countryData.places_centres_migrants_p1, "places_centres_migrants_p1"),
+          subRow: true,
         },
         {
           title: MetricsConfig.getMetricLabel("logements_sociaux_pct"),
@@ -393,6 +437,18 @@ export default {
           main: MetricsConfig.formatMetricValue(communeData.immigration_score, "immigration_score"),
           compare: MetricsConfig.formatMetricValue(deptData.immigration_score, "immigration_score"),
         },
+        {
+          title: MetricsConfig.getMetricLabel("total_subventions"),
+          main: MetricsConfig.formatMetricValue(communeData.total_subventions, "total_subventions"),
+          compare: MetricsConfig.formatMetricValue(deptData.total_subventions, "total_subventions"),
+          subRow: true,
+        },
+        {
+          title: MetricsConfig.getMetricLabel("subventions_p1"),
+          main: MetricsConfig.formatMetricValue(communeData.subventions_p1, "subventions_p1"),
+          compare: MetricsConfig.formatMetricValue(deptData.subventions_p1, "subventions_p1"),
+          subRow: true,
+        },
       ]
 
       // Add conditional metrics based on availability
@@ -425,6 +481,18 @@ export default {
             compare: MetricsConfig.formatMetricValue(deptMetrics.musulmanPct, "musulman_pct") + deptMetrics.yearLabel,
             subRow: true,
           }
+        },
+        {
+          title: MetricsConfig.getMetricLabel("total_places_centres_migrants"),
+          main: MetricsConfig.formatMetricValue(communeData.total_places_centres_migrants, "total_places_centres_migrants"),
+          compare: MetricsConfig.formatMetricValue(deptData.total_places_centres_migrants, "total_places_centres_migrants"),
+          subRow: true,
+        },
+        {
+          title: MetricsConfig.getMetricLabel("places_centres_migrants_p1"),
+          main: MetricsConfig.formatMetricValue(communeData.places_centres_migrants_p1, "places_centres_migrants_p1"),
+          compare: MetricsConfig.formatMetricValue(deptData.places_centres_migrants_p1, "places_centres_migrants_p1"),
+          subRow: true,
         },
         {
           metric: "number_of_mosques",
