@@ -107,7 +107,13 @@ export default {
 
   },
   watch: {
-    
+    // Watch for label state changes to update chart data
+    'dataStore.labelState': {
+      handler() {
+        // Force reactivity update when label state changes
+        this.$forceUpdate();
+      }
+    }
   },
   
 }

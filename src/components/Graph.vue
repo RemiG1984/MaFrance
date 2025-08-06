@@ -46,22 +46,20 @@ export default {
     }
   },
   watch: {
-    // Surveillance des changements de dataLabels
-    // dataLabels: {
-    //   handler() {
-    //     console.log('watch dataLabels')
-    //     this.updateChart();
-    //   },
-    //   deep: true
-    // },
-
     // Surveillance des changements de data
     data: {
       handler() {
-        // console.log('watch data')
         this.updateChart();
       },
       deep: true
+    },
+    // Watch for label state changes to update chart titles
+    'dataStore.labelState': {
+      handler() {
+        if (this.chart) {
+          this.updateChartTitle();
+        }
+      }
     }
   },
   // created() {
@@ -77,16 +75,6 @@ export default {
     // Register the watermark plugin
     Chart.register(watermarkPlugin);
     this.createChart()
-  },
-  watch: {
-    // Watch for label state changes to update chart titles
-    'dataStore.labelState': {
-      handler() {
-        if (this.chart) {
-          this.updateChartTitle();
-        }
-      }
-    }
   },
   methods: {
     getChartTitle() {
