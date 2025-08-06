@@ -269,7 +269,7 @@ const MetricsConfig = {
         },
 
         // French names percentage calculation
-        prenom_francais_total: {
+        prenom_francais_pct: {
             formula: (data) =>
                 Math.round(data.traditionnel_pct + data.moderne_pct),
             components: ["traditionnel_pct", "moderne_pct"],
