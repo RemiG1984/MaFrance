@@ -33,6 +33,7 @@ const MetricsConfig = {
             alt2Label: "Indice de fragmentation nationale",
             category: "général",
             format: "score",
+            source: "details",
         },
         {
             value: "population",
@@ -41,6 +42,7 @@ const MetricsConfig = {
             alt2Label: "Population",
             category: "général",
             format: "number",
+            source: "details",
         },
         // Insécurité category
         {
@@ -50,6 +52,7 @@ const MetricsConfig = {
             alt2Label: "Indice d'insécurité",
             category: "insécurité",
             format: "score",
+            source: "crime",
         },
         {
             value: "homicides_total_p100k",
@@ -58,6 +61,7 @@ const MetricsConfig = {
             alt2Label: "Homicides et tentatives /100k hab.",
             category: "insécurité",
             format: "rate_100k",
+            source: "crime",
         },
         {
             value: "violences_physiques_p1k",
@@ -66,6 +70,7 @@ const MetricsConfig = {
             alt2Label: "Agressions brutales /1k hab.",
             category: "insécurité",
             format: "rate_1k",
+            source: "crime",
         },
         {
             value: "violences_sexuelles_p1k",
@@ -74,6 +79,7 @@ const MetricsConfig = {
             alt2Label: "Violences sexuelles /1k hab.",
             category: "insécurité",
             format: "rate_1k",
+            source: "crime",
         },
         {
             value: "vols_p1k",
@@ -82,6 +88,7 @@ const MetricsConfig = {
             alt2Label: "Pillages /1k hab.",
             category: "insécurité",
             format: "rate_1k",
+            source: "crime",
         },
         {
             value: "destructions_p1k",
@@ -98,6 +105,7 @@ const MetricsConfig = {
             alt2Label: "Trafic de drogues /1k hab.",
             category: "insécurité",
             format: "rate_1k",
+            source: "crime",
         },
         {
             value: "escroqueries_p1k",
@@ -106,6 +114,7 @@ const MetricsConfig = {
             alt2Label: "Escroqueries /1k hab.",
             category: "insécurité",
             format: "rate_1k",
+            source: "crime",
         },
         // Immigration category
         {
@@ -115,6 +124,7 @@ const MetricsConfig = {
             alt2Label: "Indice de grand remplacement",
             category: "immigration",
             format: "score",
+            source: "details",
         },
         {
             value: "extra_europeen_pct",
@@ -123,6 +133,7 @@ const MetricsConfig = {
             alt2Label: "Prénoms allogènes (%)",
             category: "immigration",
             format: "percentage",
+            source: "prenoms",
         },
         {
             value: "Total_places_migrants",
@@ -131,6 +142,7 @@ const MetricsConfig = {
             alt2Label: "Places en centre d'hébergement pour migrant",
             category: "immigration",
             format: "number",
+            source: "details",
         },
         {
             value: "places_migrants_p1k",
@@ -139,6 +151,7 @@ const MetricsConfig = {
             alt2Label: "Places en centre d'hébergement pour migrant /hab",
             category: "immigration",
             format: "rate_1k",
+            source: "details",
         },
         // Islamisme category
         {
@@ -148,6 +161,7 @@ const MetricsConfig = {
             alt2Label: "Indice d'islamisation",
             category: "islamisme",
             format: "score",
+            source: "details",
         },
         {
             value: "musulman_pct",
@@ -156,6 +170,7 @@ const MetricsConfig = {
             alt2Label: "Prénoms islamiques (%)",
             category: "islamisme",
             format: "percentage",
+            source: "prenoms",
         },
         {
             value: "number_of_mosques",
@@ -164,6 +179,7 @@ const MetricsConfig = {
             alt2Label: "Nombre de mosquées",
             category: "islamisme",
             format: "number",
+            source: "details",
         },
         {
             value: "mosque_p100k",
@@ -172,6 +188,7 @@ const MetricsConfig = {
             alt2Label: "Nombre de Mosquées /100k hab.",
             category: "islamisme",
             format: "rate_100k",
+            source: "details",
         },
         // Défrancisation category
         {
@@ -181,6 +198,7 @@ const MetricsConfig = {
             alt2Label: "Indice de défrancisation (petit remplacement)",
             category: "défrancisation",
             format: "score",
+            source: "details",
         },
         {
             value: "prenom_francais_pct",
@@ -189,6 +207,7 @@ const MetricsConfig = {
             alt2Label: "Prénoms de naissance français (%)",
             category: "défrancisation",
             format: "percentage",
+            source: "prenoms",
         },
         // Wokisme category
         {
@@ -198,6 +217,7 @@ const MetricsConfig = {
             alt2Label: "Indice de wokisme",
             category: "wokisme",
             format: "score",
+            souce: "details",
         },
         {
             value: "total_qpv",
@@ -206,6 +226,7 @@ const MetricsConfig = {
             alt2Label: "Quartiers à éviter (QPV)",
             category: "wokisme",
             format: "number",
+            source: "details",
         },
         {
             value: "pop_in_qpv_pct",
@@ -214,6 +235,7 @@ const MetricsConfig = {
             alt2Label: "% Pop. en quartiers perdus (QPV)",
             category: "wokisme",
             format: "percentage",
+            source: "details",
         },
         {
             value: "logements_sociaux_pct",
@@ -222,6 +244,7 @@ const MetricsConfig = {
             alt2Label: "% Logements sociaux",
             category: "wokisme",
             format: "percentage",
+            source: "details",
         },
         {
             value: "total_subventions_parHab",
@@ -229,7 +252,7 @@ const MetricsConfig = {
             alt1Label: "Subventions /hab/an",
             alt2Label: "Subventions /hab/an",
             category: "wokisme",
-            format: "currency",
+            format: "subventions",
         },
     ],
 
