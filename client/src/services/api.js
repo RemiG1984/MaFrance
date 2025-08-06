@@ -115,6 +115,11 @@ const api = {
         apiService.request(`/api/subventions/commune/${cog}`),
 
     // Migrant centers data
+    getCountryMigrants: (country = "France", params = {}) => {
+        const queryString = new URLSearchParams(params).toString();
+        const url = `/api/migrants/country/${country}`;
+        return apiService.request(queryString ? `${url}?${queryString}` : url);
+    },
     getDepartementMigrants: (code, params = {}) => {
         const queryString = new URLSearchParams(params).toString();
         const url = `/api/migrants/departement/${code}`;
