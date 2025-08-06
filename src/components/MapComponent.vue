@@ -114,6 +114,15 @@ export default {
         this.onMetricChange(this.selectedMetric);
       }
     },
+    // Watch for commune selection changes
+    'dataStore.levels.commune'(newCommune, oldCommune) {
+      if (newCommune && newCommune !== oldCommune && this.currentLevel === 'commune') {
+        // Show tooltip for the selected commune
+        this.$nextTick(() => {
+          this.showCommuneTooltip();
+        });
+      }
+    },
   },
   mounted() {
     this.initMap()
@@ -589,7 +598,60 @@ export default {
       return this.selectedMetric[this.labelKey]
     },
 
-    
+    showCommuneTooltip() {
+      if (!this.communesLayer || this.currentLevel !== 'commune') return;
+      
+      const selectedCommune = this.dataStore.levels.commune;
+      const selectedCommuneCode = this.dataStore.getCommuneCode();
+      
+      if (!selectedCommune || !selectedCommuneCode) return;
+      
+      // Find the layer for the selected commune
+      this.communesLayer.eachLayer((layer) => {
+        const feature = layer.feature;
+        const layerCode = this.removeTrailingZero(feature.properties.code);
+        
+        if (layerCode === selectedCommuneCode) {
+          // Get the center of the commune
+          const center = layer.getCenter();
+          
+          // Get the value for tooltip
+          const value = this.getFeatureValue(feature);
+          const indiceName = this.getIndiceName();
+          
+          // Create tooltip content
+          const content = `<b>${selectedCommune}</b><br>${indiceName}: ${value !== null ? value : 'N/A'}`;
+          
+          // Show the tooltip
+          this.globalTooltip
+            .setLatLng(center)
+            .setContent(content)
+            .addTo(this.map);
+          
+          // Highlight the commune
+          layer.setStyle({
+            color: '#424242',
+            weight: 3,
+            opacity: 0.8
+          });
+          
+          // Auto-hide tooltip after 3 seconds
+          setTimeout(() => {
+            if (this.globalTooltip && this.map.hasLayer(this.globalTooltip)) {
+              this.map.removeLayer(this.globalTooltip);
+              // Reset style
+              layer.setStyle({
+                weight: 1,
+                opacity: 1,
+                color: 'white',
+              });
+            }
+          }, 3000);
+          
+          return false; // Break the loop
+        }
+      });
+    },
 
     getMetricLabel(metric) {
       const metricMap = {
