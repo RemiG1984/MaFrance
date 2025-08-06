@@ -1,15 +1,14 @@
-
 <template>
   <v-card class="mb-4">
     <v-card-title class="text-h5">
       Indices et données pour {{ location.name }}
     </v-card-title>
-    
+
     <v-card-text>
       <div v-if="loading" class="d-flex justify-center align-center py-8">
         <v-progress-circular indeterminate color="primary" size="32"></v-progress-circular>
       </div>
-      
+
       <v-table v-else-if="tableRows.length > 0" class="score-table">
         <thead>
           <tr class="score-header">
@@ -147,7 +146,6 @@ export default {
           title: MetricsConfig.getMetricLabel("extra_europeen_pct"),
           main: MetricsConfig.formatMetricValue(metrics.extraEuropeenPct, "extra_europeen_pct") + metrics.yearLabel,
           subRow: true,
-          link: `/names_graph.html?type=country&code=France`,
         },
         {
           title: MetricsConfig.getMetricLabel("islamisation_score"),
@@ -157,7 +155,6 @@ export default {
           title: MetricsConfig.getMetricLabel("musulman_pct"),
           main: MetricsConfig.formatMetricValue(metrics.musulmanPct, "musulman_pct") + metrics.yearLabel,
           subRow: true,
-          link: `/names_graph.html?type=country&code=France`,
         },
         {
           title: MetricsConfig.getMetricLabel("number_of_mosques"),
@@ -177,7 +174,6 @@ export default {
           title: MetricsConfig.getMetricLabel("prenom_francais_pct"),
           main: MetricsConfig.formatMetricValue(metrics.prenomFrancaisPct, "prenom_francais_pct") + metrics.yearLabel,
           subRow: true,
-          link: `/names_graph.html?type=country&code=France`,
         },
         {
           title: MetricsConfig.getMetricLabel("wokisme_score"),
@@ -254,7 +250,6 @@ export default {
           main: MetricsConfig.formatMetricValue(deptMetrics.extraEuropeenPct, "extra_europeen_pct") + deptMetrics.yearLabel,
           compare: MetricsConfig.formatMetricValue(countryMetrics.extraEuropeenPct, "extra_europeen_pct") + countryMetrics.yearLabel,
           subRow: true,
-          link: `/names_graph.html?type=department&code=${deptCode}`,
         },
         {
           title: MetricsConfig.getMetricLabel("islamisation_score"),
@@ -266,7 +261,6 @@ export default {
           main: MetricsConfig.formatMetricValue(deptMetrics.musulmanPct, "musulman_pct") + deptMetrics.yearLabel,
           compare: MetricsConfig.formatMetricValue(countryMetrics.musulmanPct, "musulman_pct") + countryMetrics.yearLabel,
           subRow: true,
-          link: `/names_graph.html?type=department&code=${deptCode}`,
         },
         {
           title: MetricsConfig.getMetricLabel("number_of_mosques"),
@@ -290,7 +284,6 @@ export default {
           main: MetricsConfig.formatMetricValue(deptMetrics.prenomFrancaisPct, "prenom_francais_pct") + deptMetrics.yearLabel,
           compare: MetricsConfig.formatMetricValue(countryMetrics.prenomFrancaisPct, "prenom_francais_pct") + countryMetrics.yearLabel,
           subRow: true,
-          link: `/names_graph.html?type=department&code=${deptCode}`,
         },
         {
           title: MetricsConfig.getMetricLabel("wokisme_score"),
@@ -314,7 +307,6 @@ export default {
               : "0",
           compare: "",
           subRow: true,
-          link: `/qpv.html?type=department&code=${deptCode}`,
         },
         {
           title: MetricsConfig.getMetricLabel("pop_in_qpv_pct"),
@@ -398,7 +390,6 @@ export default {
             main: communeMetrics ? MetricsConfig.formatMetricValue(communeMetrics.extraEuropeenPct, "extra_europeen_pct") + communeMetrics.yearLabel : "N/A",
             compare: MetricsConfig.formatMetricValue(deptMetrics.extraEuropeenPct, "extra_europeen_pct") + deptMetrics.yearLabel,
             subRow: true,
-            link: `/names_graph.html?type=commune&code=${cog}&dept=${departement}`,
           }
         },
         {
@@ -418,7 +409,6 @@ export default {
             main: communeMetrics ? MetricsConfig.formatMetricValue(communeMetrics.musulmanPct, "musulman_pct") + communeMetrics.yearLabel : "N/A",
             compare: MetricsConfig.formatMetricValue(deptMetrics.musulmanPct, "musulman_pct") + deptMetrics.yearLabel,
             subRow: true,
-            link: `/names_graph.html?type=commune&code=${cog}&dept=${departement}`,
           }
         },
         {
@@ -458,7 +448,6 @@ export default {
             main: communeMetrics ? MetricsConfig.formatMetricValue(communeMetrics.prenomFrancaisPct, "prenom_francais_pct") + communeMetrics.yearLabel : "N/A",
             compare: MetricsConfig.formatMetricValue(deptMetrics.prenomFrancaisPct, "prenom_francais_pct") + deptMetrics.yearLabel,
             subRow: true,
-            link: `/names_graph.html?type=commune&code=${cog}&dept=${departement}`,
           }
         },
         {
@@ -496,7 +485,6 @@ export default {
                 ? MetricsConfig.formatMetricValue(deptData.total_qpv, "total_qpv")
                 : "0",
             subRow: true,
-            link: `/qpv.html?type=commune&code=${cog}&dept=${departement}&commune=${encodeURIComponent(commune)}`,
           }
         },
         {
@@ -561,7 +549,6 @@ export default {
             MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("homicides_total_p100k", compareCrimeData), "homicides_p100k") + compareMetrics.crimeYearLabel : 
             null,
           subRow: true,
-          link: linkWithState,
         })
       }
 
@@ -574,7 +561,6 @@ export default {
             MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("violences_physiques_p1k", compareCrimeData), "violences_physiques_p1k") + compareMetrics.crimeYearLabel : 
             null,
           subRow: true,
-          link: linkWithState,
         },
         {
           title: MetricsConfig.getMetricLabel("violences_sexuelles_p1k"),
@@ -583,7 +569,6 @@ export default {
             MetricsConfig.formatMetricValue(compareCrimeData.violences_sexuelles_p1k, "violences_sexuelles_p1k") + (compareMetrics ? compareMetrics.crimeYearLabel : "") : 
             null,
           subRow: true,
-          link: linkWithState,
         },
         {
           title: MetricsConfig.getMetricLabel("vols_p1k"),
@@ -592,7 +577,6 @@ export default {
             MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("vols_p1k", compareCrimeData), "vols_p1k") + compareMetrics.crimeYearLabel : 
             null,
           subRow: true,
-          link: linkWithState,
         },
         {
           title: MetricsConfig.getMetricLabel("destructions_p1k"),
@@ -601,7 +585,6 @@ export default {
             MetricsConfig.formatMetricValue(compareCrimeData.destructions_et_degradations_volontaires_p1k, "destructions_p1k") + (compareMetrics ? compareMetrics.crimeYearLabel : "") : 
             null,
           subRow: true,
-          link: linkWithState,
         },
         {
           title: MetricsConfig.getMetricLabel("stupefiants_p1k"),
@@ -610,7 +593,6 @@ export default {
             MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("stupefiants_p1k", compareCrimeData), "stupefiants_p1k") + compareMetrics.crimeYearLabel : 
             null,
           subRow: true,
-          link: linkWithState,
         },
         {
           title: MetricsConfig.getMetricLabel("escroqueries_p1k"),
@@ -619,7 +601,6 @@ export default {
             MetricsConfig.formatMetricValue(compareCrimeData.escroqueries_p1k, "escroqueries_p1k") + (compareMetrics ? compareMetrics.crimeYearLabel : "") : 
             null,
           subRow: true,
-          link: linkWithState,
         }
       )
 
