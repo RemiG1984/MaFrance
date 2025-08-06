@@ -218,7 +218,7 @@ const MetricsConfig = {
             alt2Label: "Indice de wokisme",
             category: "wokisme",
             format: "score",
-            souce: "details",
+            source: "details",
         },
         {
             value: "total_qpv",
