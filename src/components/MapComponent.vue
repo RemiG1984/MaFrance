@@ -103,6 +103,18 @@ export default {
         this.updateData();
       }
     },
+    availableMetrics(newAvailableMetrics) {
+      // Check if current selected metric is still available
+      const isCurrentMetricAvailable = newAvailableMetrics.some(metric => 
+        metric.value === this.selectedMetric.value
+      );
+      
+      // If current metric is not available, select the first available one
+      if (!isCurrentMetricAvailable && newAvailableMetrics.length > 0) {
+        this.selectedMetric = newAvailableMetrics[0];
+        this.onMetricChange(this.selectedMetric);
+      }
+    },
   },
   mounted() {
     this.initMap()
