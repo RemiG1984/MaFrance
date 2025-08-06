@@ -18,6 +18,8 @@
         >
           {{ item.title }}
         </v-btn>
+        
+        <VersionSelector />
       </v-container>
     </v-app-bar>
 
@@ -39,8 +41,13 @@
   </v-app>
 </template>
 <script>
+import VersionSelector from './components/VersionSelector.vue'
+
 export default {
   name: 'App',
+  components: {
+    VersionSelector
+  },
   data() {
     return {
       menuItems: [

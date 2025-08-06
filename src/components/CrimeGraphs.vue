@@ -61,6 +61,7 @@ export default {
     // console.log('data', this.data)
   },
   computed: {
+    ...mapStores(useDataStore),
     aggregatedData() {
       const result = {}
       

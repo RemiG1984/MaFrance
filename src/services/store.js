@@ -9,6 +9,7 @@ const baseURL = ''
 export const useDataStore = defineStore('data', {
   state: () => ({
     currentLevel: null,
+    labelState: parseInt(localStorage.getItem('metricsLabelState') || '0'),
     levels: {
       country: 'France',
       departement: null,
@@ -408,6 +409,23 @@ export const useDataStore = defineStore('data', {
       this.clearCountryData()
       this.clearDepartementData()
       this.clearCommuneData()
+    },
+
+    // Label state management
+    setLabelState(state) {
+      this.labelState = state
+      localStorage.setItem('metricsLabelState', state.toString())
+      // Dispatch event for components that might need to react
+      window.dispatchEvent(
+        new CustomEvent('metricsLabelsToggled', {
+          detail: { labelState: this.labelState }
+        })
+      )
+    },
+
+    cycleLabelState() {
+      const newState = (this.labelState + 1) % 3
+      this.setLabelState(newState)
     }
   },
 
@@ -454,5 +472,31 @@ export const useDataStore = defineStore('data', {
     getCommuneDepartementCode: (state) => () => {
       return state.commune?.details?.departement
     },
+
+    // Label state getters
+    getLabelStateName: (state) => () => {
+      switch (state.labelState) {
+        case 1:
+          return 'alt1'
+        case 2:
+          return 'alt2'
+        default:
+          return 'standard'
+      }
+    },
+
+    getCurrentVersionLabel: (state) => () => {
+      const stateName = state.getLabelStateName()
+      return MetricsConfig.versionLabels?.[stateName] || 'Version Standard'
+    },
+
+    getCurrentPageTitle: (state) => () => {
+      const stateName = state.getLabelStateName()
+      return MetricsConfig.pageTitles?.[stateName] || 'Ma France: état des lieux'
+    },
+
+    getMetricLabel: (state) => (metricKey) => {
+      return MetricsConfig.getMetricLabel ? MetricsConfig.getMetricLabel(metricKey) : metricKey
+    }
   }
 })

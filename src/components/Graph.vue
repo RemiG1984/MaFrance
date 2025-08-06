@@ -54,7 +54,7 @@ export default {
     //   },
     //   deep: true
     // },
-    
+
     // Surveillance des changements de data
     data: {
       handler() {
@@ -79,18 +79,18 @@ export default {
     this.createChart()
   },
   methods: {
-    
+
     generateDatasets() {
       // Add null check for data
       if (!this.data) {
         return [];
       }
-      
-      const currentLocationLevel = this.location.type === 'commune' ? 'commune' : 
+
+      const currentLocationLevel = this.location.type === 'commune' ? 'commune' :
                                   this.location.type === 'departement' ? 'departement' : 'country';
-      
+
       const datasets = [];
-      
+
       // Define colors for each crime metric (from original crimeGraphHandler.js)
       const metricColors = {
         'homicides_p100k': '#dc3545',
@@ -101,12 +101,12 @@ export default {
         'stupefiants_p1k': '#17a2b8',
         'escroqueries_p1k': '#fd7e14'
       };
-      
+
       // Add current location dataset (full line)
       if (this.data[currentLocationLevel]) {
         let label;
         let color = metricColors[this.metricKey] || '#dc3545'; // Use metric-specific color or default
-        
+
         if (currentLocationLevel === 'country') {
           label = this.countryLabel;
         } else if (currentLocationLevel === 'departement') {
@@ -116,7 +116,7 @@ export default {
         } else if (currentLocationLevel === 'commune') {
           label = this.location.name;
         }
-        
+
         datasets.push({
           label,
           data: this.data[currentLocationLevel] || [],
@@ -129,15 +129,15 @@ export default {
           pointHoverRadius: 5
         });
       }
-      
+
       // Add reference datasets (dashed lines for higher levels)
       for (const level of this.levels) {
         if (level === currentLocationLevel || !this.data[level]) continue;
-        
+
         let label;
         let color;
         let borderDash;
-        
+
         if (level === 'country') {
           label = this.countryLabel;
           color = '#808080'; // Gray for country reference
@@ -149,7 +149,7 @@ export default {
           color = '#A9A9A9'; // Light gray for department reference
           borderDash = [10, 5];
         }
-        
+
         datasets.push({
           label,
           data: this.data[level] || [],
@@ -163,7 +163,7 @@ export default {
           pointHoverRadius: 0, // No hover points for reference lines
         });
       }
-      
+
       return datasets;
     },
 
@@ -172,7 +172,7 @@ export default {
       if (!this.data || !this.dataLabels) {
         return;
       }
-      
+
       const title = chartLabels[this.metricKey].label
 
       const config = {
@@ -230,7 +230,7 @@ export default {
                   if (label) {
                     label += ': ';
                   }
-                  const unit = context.dataset.label.includes('Homicides') ? 
+                  const unit = context.dataset.label.includes('Homicides') ?
                     ' (pour 100k hab.)' : ' (pour mille hab.)';
                   return label + context.parsed.y.toFixed(1) + unit;
                 }
@@ -270,7 +270,7 @@ export default {
               },
               title: {
                 display: true,
-                text: this.metricKey.includes('homicides') ? 
+                text: this.metricKey.includes('homicides') ?
                   'Taux (pour 100k habitants)' : 'Taux (pour mille habitants)',
                 font: {
                   family: "'Roboto', Arial, sans-serif",
@@ -283,20 +283,20 @@ export default {
           }
         }
       };
-      
+
       const ctx = this.$refs.chartCanvas.getContext('2d')
       this.chart = markRaw(new Chart(ctx, config))
     },
-    
+
     updateChart() {
       if (this.chart && this.data && this.dataLabels) {
         // Mise à jour des labels
         this.chart.data.labels = this.dataLabels;
-        
+
         // Mise à jour des datasets
         const datasets = this.generateDatasets()
         this.chart.data.datasets = datasets
-        
+
         // Redessiner le graphique
         this.chart.update()
 
@@ -333,4 +333,4 @@ export default {
   height: 100% !important;
   width: 100% !important;
 }
-</style> 
+</style>
