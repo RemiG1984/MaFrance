@@ -30,7 +30,7 @@ router.get('/country/:country', validateCountryParam, (req, res) => {
     const { country } = req.params;
 
     const query = `
-        SELECT subventions_data 
+        SELECT * 
         FROM country_subventions 
         WHERE country = ?
     `;
@@ -44,16 +44,21 @@ router.get('/country/:country', validateCountryParam, (req, res) => {
             return res.status(404).json({ error: 'Données de subventions non trouvées pour ce pays' });
         }
 
-        try {
-            const subventions = JSON.parse(row.subventions_data);
-            res.json({
-                country,
-                subventions
-            });
-        } catch (parseErr) {
-            console.error('Erreur parsing JSON subventions pays:', parseErr);
-            res.status(500).json({ error: 'Erreur de format des données de subventions' });
-        }
+        // Extract all fields except the country identifier
+        const { country: countryField, ...subventions } = row;
+        
+        // Calculate total if needed
+        const total_subventions_parHab = Object.values(subventions)
+            .filter(val => typeof val === 'number' && !isNaN(val))
+            .reduce((sum, val) => sum + val, 0);
+
+        res.json({
+            country,
+            subventions: {
+                ...subventions,
+                total_subventions_parHab
+            }
+        });
     });
 });
 
@@ -63,7 +68,7 @@ router.get('/departement/:dept', validateDepartementParam, (req, res) => {
     const { dept } = req.params;
 
     const query = `
-        SELECT subventions_data 
+        SELECT * 
         FROM department_subventions 
         WHERE dep = ?
     `;
@@ -77,16 +82,21 @@ router.get('/departement/:dept', validateDepartementParam, (req, res) => {
             return res.status(404).json({ error: 'Données de subventions non trouvées pour ce département' });
         }
 
-        try {
-            const subventions = JSON.parse(row.subventions_data);
-            res.json({
-                departement: dept,
-                subventions
-            });
-        } catch (parseErr) {
-            console.error('Erreur parsing JSON subventions département:', parseErr);
-            res.status(500).json({ error: 'Erreur de format des données de subventions' });
-        }
+        // Extract all fields except the department identifier
+        const { dep: deptField, ...subventions } = row;
+        
+        // Calculate total if needed
+        const total_subventions_parHab = Object.values(subventions)
+            .filter(val => typeof val === 'number' && !isNaN(val))
+            .reduce((sum, val) => sum + val, 0);
+
+        res.json({
+            departement: dept,
+            subventions: {
+                ...subventions,
+                total_subventions_parHab
+            }
+        });
     });
 });
 
@@ -96,7 +106,7 @@ router.get('/commune/:cog', validateCOGParam, (req, res) => {
     const { cog } = req.params;
 
     const query = `
-        SELECT subventions_data 
+        SELECT * 
         FROM commune_subventions 
         WHERE COG = ?
     `;
@@ -110,16 +120,21 @@ router.get('/commune/:cog', validateCOGParam, (req, res) => {
             return res.status(404).json({ error: 'Données de subventions non trouvées pour cette commune' });
         }
 
-        try {
-            const subventions = JSON.parse(row.subventions_data);
-            res.json({
-                commune: cog,
-                subventions
-            });
-        } catch (parseErr) {
-            console.error('Erreur parsing JSON subventions commune:', parseErr);
-            res.status(500).json({ error: 'Erreur de format des données de subventions' });
-        }
+        // Extract all fields except the commune identifier
+        const { COG: cogField, ...subventions } = row;
+        
+        // Calculate total if needed
+        const total_subventions_parHab = Object.values(subventions)
+            .filter(val => typeof val === 'number' && !isNaN(val))
+            .reduce((sum, val) => sum + val, 0);
+
+        res.json({
+            commune: cog,
+            subventions: {
+                ...subventions,
+                total_subventions_parHab
+            }
+        });
     });
 });
 
