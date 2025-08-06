@@ -15,7 +15,7 @@
           target="_blank"
           variant="text"
           class="mx-2"
-          prepend-icon="mdi-twitter"
+          prepend-icon="mdi-close"
         >
           Suivre @ou_va_ma_France
         </v-btn>
