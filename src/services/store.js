@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import api from './api.js'
 import { DepartementNames } from '../utils/departementNames.js'
-import { keyMapping } from '../utils/statsCalc.js'
+import { MetricsConfig } from '../utils/metricsConfig.js'
 
 
 const baseURL = ''
@@ -270,31 +270,35 @@ export const useDataStore = defineStore('data', {
     },
 
     aggregateStats(data) {
-      // crée des stats "composites" (additions de différentes autres stats comme spécifié dans keyMapping)
+      // crée des stats "composites" en utilisant les formules de calculatedMetrics
       const result = {}
       
-      // Pour chaque nouvelle clé dans le mapping
-      Object.keys(keyMapping).forEach(newKey => {
-        const sourceKeys = keyMapping[newKey]
-
-        const inputSeries = sourceKeys
-        .map(key => data[key])
-        .filter(serie => serie) // Filtrer les séries undefined/null
+      // Pour chaque métrique calculée définie dans MetricsConfig
+      Object.keys(MetricsConfig.calculatedMetrics).forEach(metricKey => {
+        const calculation = MetricsConfig.calculatedMetrics[metricKey]
+        
+        // Vérifier que tous les composants nécessaires sont disponibles
+        const inputSeries = calculation.components
+          .map(key => data[key])
+          .filter(serie => serie) // Filtrer les séries undefined/null
 
         if(inputSeries.length === 0) return
 
         const seriesLength = inputSeries[0].length
     
-        // Calculer la somme pour chaque entrée/level
-        result[newKey] = []
+        // Calculer la métrique pour chaque entrée/level en utilisant la formule
+        result[metricKey] = []
 
         for (let i = 0; i < seriesLength; i++) {
-          let sum = 0
-          inputSeries.forEach(serie => {
-            // Traiter null/undefined comme 0
-            sum += serie[i] || 0
+          // Créer un objet de données pour cette année/période
+          const dataPoint = {}
+          calculation.components.forEach(key => {
+            dataPoint[key] = data[key] ? (data[key][i] || 0) : 0
           })
-          result[newKey].push(sum)
+          
+          // Appliquer la formule
+          const calculatedValue = calculation.formula(dataPoint)
+          result[metricKey].push(calculatedValue)
         }
       })
       
