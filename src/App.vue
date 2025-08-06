@@ -11,7 +11,7 @@
 
 
         <v-btn
-          href="https://twitter.com/intent/tweet?text=Ma%20France%3A%20%C3%A9tat%20des%20lieux%20-%20Une%20analyse%20d%C3%A9taill%C3%A9e%20des%20indicateurs%20sociaux%20en%20France&url=https://mafranceetatdeslieux.fr"
+          href="https://twitter.com/intent/follow?screen_name=ou_va_ma_France"
           target="_blank"
           variant="text"
           class="mx-2"
@@ -19,7 +19,7 @@
         >
           Suivre @ou_va_ma_France
         </v-btn>
-        
+  
         <v-btn
           v-for="item in menuItems"
           :key="item.path"
