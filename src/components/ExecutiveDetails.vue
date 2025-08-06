@@ -1,3 +1,4 @@
+
 <template>
   <v-card class="mb-4">
     <v-card-title class="text-h5">
@@ -9,49 +10,30 @@
         <v-progress-circular indeterminate color="primary" size="32"></v-progress-circular>
       </div>
       
-      <div v-else-if="data && data.executives && data.executives.length > 0">
-        <div class="space-y-4">
-          <v-card
-            v-for="executive in data.executives"
-            :key="executive.id"
-            variant="outlined"
-            class="mb-3 executive-card"
-          >
-            <v-card-text>
-              <div class="d-flex justify-space-between align-start mb-2">
-                <h3 class="font-weight-semibold">{{ executive.nom }}</h3>
-                <span class="text-caption text-grey">{{ executive.fonction }}</span>
-              </div>
-              
-              <v-row>
-                <v-col cols="12" md="6">
-                  <div class="d-flex align-center">
-                    <span class="text-body-2 text-grey-darken-1">Parti:</span>
-                    <span class="font-weight-medium ml-1">{{ executive.parti || 'N/A' }}</span>
-                  </div>
-                </v-col>
-                <v-col cols="12" md="6">
-                  <div class="d-flex align-center">
-                    <span class="text-body-2 text-grey-darken-1">Mandat:</span>
-                    <span class="font-weight-medium ml-1">{{ executive.mandat || 'N/A' }}</span>
-                  </div>
-                </v-col>
-              </v-row>
-              
-              <div v-if="executive.description" class="mt-2 text-body-2 text-grey-darken-1">
-                {{ executive.description }}
-              </div>
-            </v-card-text>
-          </v-card>
-        </div>
+      <div v-else-if="executiveData" class="executive-box">
+        <p>
+          {{ executiveData.position }} de {{ executiveData.location }}: 
+          <span class="executive-name font-weight-bold">{{ executiveData.prenom }} {{ executiveData.nom }}</span>
+          <span v-if="executiveData.dateLabel">{{ executiveData.dateLabel }}</span>
+          <br v-if="executiveData.familleNuance">
+          <span v-if="executiveData.familleNuance">
+            Famille politique: <span class="executive-famille">{{ executiveData.familleNuance }}</span>
+          </span>
+        </p>
       </div>
 
       <div v-else class="text-center py-8 text-grey">
-        <p v-if="location.type === 'france'">
-          Sélectionnez un département ou une commune pour voir les détails des élus.
+        <p v-if="location.type === 'country'">
+          Affichage du ministre de l'intérieur pour la France.
+        </p>
+        <p v-else-if="location.type === 'departement'">
+          Aucune information disponible sur le préfet.
+        </p>
+        <p v-else-if="location.type === 'commune'">
+          Aucune information disponible sur le maire.
         </p>
         <p v-else>
-          Aucune information disponible sur les élus.
+          Sélectionnez un niveau administratif pour voir les détails des élus.
         </p>
       </div>
     </v-card-text>
@@ -59,16 +41,16 @@
 </template>
 
 <script>
+import { mapStores } from 'pinia'
+import { useDataStore } from '../services/store.js'
+import { DepartementNames } from '../utils/departementNames.js'
+
 export default {
   name: 'ExecutiveDetails',
   props: {
     location: {
       type: Object,
       required: true
-    },
-    data: {
-      type: Object,
-      default: null
     }
   },
   data() {
@@ -76,27 +58,89 @@ export default {
       loading: false
     }
   },
-  methods: {
-    async loadData() {
-      if (!this.location || this.location.type === 'france') return
+  computed: {
+    ...mapStores(useDataStore),
+    
+    executiveData() {
+      if (!this.location) return null;
       
-      this.loading = true
+      let executive = null;
+      let position = '';
+      let locationName = '';
+      
+      switch (this.location.type) {
+        case 'country':
+          executive = this.dataStore.country.executive;
+          position = 'Ministre de l\'intérieur';
+          locationName = 'France';
+          break;
+          
+        case 'departement':
+          executive = this.dataStore.departement.executive;
+          position = 'Préfet';
+          const deptCode = this.location.code;
+          locationName = `${DepartementNames[deptCode]} (${deptCode})`;
+          break;
+          
+        case 'commune':
+          executive = this.dataStore.commune.executive;
+          position = 'Maire';
+          const communeDetails = this.dataStore.commune.details;
+          if (communeDetails) {
+            locationName = `${this.location.name} (${communeDetails.departement})`;
+          } else {
+            locationName = this.location.name || 'Commune';
+          }
+          break;
+          
+        default:
+          return null;
+      }
+      
+      if (!executive) return null;
+      
+      // Format the date label
+      let dateLabel = '';
+      if (executive.date_mandat) {
+        dateLabel = ` depuis le ${this.formatDate(executive.date_mandat)}`;
+      } else if (executive.date_poste) {
+        dateLabel = ` depuis le ${this.formatDate(executive.date_poste)}`;
+      }
+      
+      return {
+        position,
+        location: locationName,
+        prenom: executive.prenom,
+        nom: executive.nom,
+        dateLabel,
+        familleNuance: executive.famille_nuance
+      };
+    }
+  },
+  
+  methods: {
+    formatDate(dateString) {
+      if (!dateString) return '';
+      
       try {
-        const response = await fetch(`/api/executives?type=${this.location.type}&code=${this.location.code}`)
-        const data = await response.json()
-        this.$emit('data-loaded', data)
+        const date = new Date(dateString);
+        return date.toLocaleDateString('fr-FR', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
       } catch (error) {
-        console.error('Erreur chargement données élus:', error)
-      } finally {
-        this.loading = false
+        console.error('Error formatting date:', error);
+        return dateString;
       }
     }
   },
   
   watch: {
     location: {
-      handler() {
-        this.loadData()
+      handler(newLocation) {
+        // The store will handle loading the executive data
+        // when the location changes through the main app logic
       },
       immediate: true
     }
@@ -105,15 +149,19 @@ export default {
 </script>
 
 <style scoped>
-.space-y-4 > * + * {
-  margin-top: 1rem;
+.executive-box {
+  padding: 16px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  border-left: 4px solid #1976d2;
 }
 
-.executive-card {
-  transition: box-shadow 0.2s ease-in-out;
+.executive-name {
+  color: #1976d2;
 }
 
-.executive-card:hover {
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.executive-famille {
+  color: #666;
+  font-style: italic;
 }
-</style> 
+</style>
