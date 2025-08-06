@@ -28,6 +28,7 @@ export const useDataStore = defineStore('data', {
       crimeSeries: null,
       crimeAggreg: null,
       subventions: null,
+      migrants: null,
     },
     departement: {
       details: null,
@@ -111,6 +112,7 @@ export const useDataStore = defineStore('data', {
         country.executive = results[5]
         country.departementsRankings = results[6]
         country.subventions = results[7]
+        country.migrants = results[8]
         country.namesSeries = this.serializeStats(country.namesHistory)
         country.crimeSeries = this.serializeStats(country.crimeHistory)
         country.crimeAggreg = this.aggregateStats(country.crimeSeries.data)
@@ -390,7 +392,8 @@ export const useDataStore = defineStore('data', {
         namesHistory: null,
         qpv: null,
         executive: null,
-        subventions: null
+        subventions: null,
+        migrants: null
       }
       this.errors.country = null
     },

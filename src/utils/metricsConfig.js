@@ -216,13 +216,13 @@ const MetricsConfig = {
             category: "subventions",
             format: "currency",
         },
-        // Centre_migrant category
+        // Migrant category
         {
             value: "total_places_centres_migrants",
             label: "Places en centre d'hébergement pour migrant",
             alt1Label: "Places en centre d'hébergement pour migrant",
             alt2Label: "Places en centre d'hébergement pour migrant",
-            category: "centre_migrant",
+            category: "migrants",
             format: "number",
         },
         {
@@ -230,7 +230,7 @@ const MetricsConfig = {
             label: "Places en centre d'hébergement pour migrant /hab",
             alt1Label: "Places en centre d'hébergement pour migrant /hab",
             alt2Label: "Places en centre d'hébergement pour migrant /hab",
-            category: "centre_migrant",
+            category: "migrants",
             format: "rate_1k",
         },
     ],
