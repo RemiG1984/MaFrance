@@ -37,7 +37,6 @@ export default {
   },
   data() {
     return {
-      labelKey: 'label',
       selectedMetric: MetricsConfig.metrics[0],
       mapLevel: 'country',
       deptData: {},
@@ -69,8 +68,46 @@ export default {
     currentdepartement() {
       return this.dataStore.levels.departement;
     },
+    labelKey() {
+      // Return the appropriate label key based on current label state
+      const labelStateName = this.dataStore.getLabelStateName();
+      switch (labelStateName) {
+        case 'alt1':
+          return 'alt1Label';
+        case 'alt2':
+          return 'alt2Label';
+        default:
+          return 'label';
+      }
+    },
     availableMetrics() {
-      return MetricsConfig.getAvailableMetricOptions(this.currentLevel);
+      // Get metrics with dynamic labels based on current state
+      const metrics = MetricsConfig.getAvailableMetricOptions(this.currentLevel);
+      return metrics.map(metric => {
+        const metricConfig = MetricsConfig.getMetricByValue(metric.value);
+        if (!metricConfig) return metric;
+        
+        // Use the appropriate label based on current state
+        const labelStateName = this.dataStore.getLabelStateName();
+        let label;
+        switch (labelStateName) {
+          case 'alt1':
+            label = metricConfig.alt1Label || metricConfig.label;
+            break;
+          case 'alt2':
+            label = metricConfig.alt2Label || metricConfig.label;
+            break;
+          default:
+            label = metricConfig.label;
+        }
+        
+        return {
+          ...metric,
+          label: label,
+          alt1Label: metricConfig.alt1Label,
+          alt2Label: metricConfig.alt2Label
+        };
+      });
     },
     mapState() {
     // permet de détecter les changements d'états qui nécessitent un rechargement de map
@@ -126,6 +163,13 @@ export default {
       if (newLevel === 'commune' && oldLevel !== 'commune') {
         // Show tooltip when switching to commune level after operations complete
         this.showCommuneTooltipWhenReady();
+      }
+    },
+    // Watch for label state changes to update tooltips and legend
+    'dataStore.labelState': {
+      handler() {
+        // Update legend when label state changes
+        this.updateLegend();
       }
     },
   },
@@ -601,7 +645,18 @@ export default {
     },
 
     getIndiceName() {
-      return this.selectedMetric[this.labelKey]
+      const metricConfig = MetricsConfig.getMetricByValue(this.selectedMetric.value);
+      if (!metricConfig) return this.selectedMetric.value;
+      
+      const labelStateName = this.dataStore.getLabelStateName();
+      switch (labelStateName) {
+        case 'alt1':
+          return metricConfig.alt1Label || metricConfig.label;
+        case 'alt2':
+          return metricConfig.alt2Label || metricConfig.label;
+        default:
+          return metricConfig.label;
+      }
     },
 
     showCommuneTooltipWhenReady() {
