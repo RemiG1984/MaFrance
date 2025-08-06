@@ -24,7 +24,7 @@ const MetricsConfig = {
     // Label state: 0 = standard, 1 = alt1, 2 = alt2
     labelState: parseInt(localStorage.getItem("metricsLabelState")) || 0,
 
-    // All available metrics with their properties
+    // All available metrics with their properties, in order of appearance within each category in ScoreTable
     metrics: [
         {
             value: "total_score",
@@ -33,6 +33,14 @@ const MetricsConfig = {
             alt2Label: "Indice de fragmentation nationale",
             category: "général",
             format: "score",
+        },
+        {
+            value: "population",
+            label: "Population",
+            alt1Label: "Population",
+            alt2Label: "Population",
+            category: "général",
+            format: "number",
         },
         // Insécurité category
         {
@@ -115,6 +123,22 @@ const MetricsConfig = {
             alt2Label: "Prénoms allogènes (%)",
             category: "immigration",
             format: "percentage",
+        },
+        {
+            value: "total_places_centres_migrants",
+            label: "Places en centre d'hébergement pour migrant",
+            alt1Label: "Places en centre d'hébergement pour migrant",
+            alt2Label: "Places en centre d'hébergement pour migrant",
+            category: "immigration",
+            format: "number",
+        },
+        {
+            value: "places_centres_migrants_p1",
+            label: "Places en centre d'hébergement pour migrant /hab",
+            alt1Label: "Places en centre d'hébergement pour migrant /hab",
+            alt2Label: "Places en centre d'hébergement pour migrant /hab",
+            category: "immigration",
+            format: "rate_1k",
         },
         // Islamisme category
         {
@@ -199,32 +223,14 @@ const MetricsConfig = {
             category: "wokisme",
             format: "percentage",
         },
-        // Subventions category
         {
             value: "subventions_p1",
-            label: "Subventions par habitant",
-            alt1Label: "Subventions par habitant",
-            alt2Label: "Subventions par habitant",
-            category: "subventions",
+            label: "Subventions /hab/an",
+            alt1Label: "Subventions /hab/an",
+            alt2Label: "Subventions /hab/an",
+            category: "wokisme",
             format: "currency",
-        },
-        // Migrant category
-        {
-            value: "total_places_centres_migrants",
-            label: "Places en centre d'hébergement pour migrant",
-            alt1Label: "Places en centre d'hébergement pour migrant",
-            alt2Label: "Places en centre d'hébergement pour migrant",
-            category: "migrants",
-            format: "number",
-        },
-        {
-            value: "places_centres_migrants_p1",
-            label: "Places en centre d'hébergement pour migrant /hab",
-            alt1Label: "Places en centre d'hébergement pour migrant /hab",
-            alt2Label: "Places en centre d'hébergement pour migrant /hab",
-            category: "migrants",
-            format: "rate_1k",
-        },
+        },      
     ],
 
     // Article categories mapping
@@ -248,14 +254,6 @@ const MetricsConfig = {
         {
             name: "Wokisme",
             key: "wokisme",
-        },
-        {
-            name: "Subventions",
-            key: "subventions",
-        },
-        {
-            name: "Migration",
-            key: "migration",
         },
     ],
 
