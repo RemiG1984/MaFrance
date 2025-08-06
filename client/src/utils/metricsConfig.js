@@ -33,7 +33,7 @@ const MetricsConfig = {
             alt2Label: "Indice de fragmentation nationale",
             category: "général",
             format: "score",
-            source: "details",
+            source: "calculatedMetrics",
         },
         {
             value: "population",
