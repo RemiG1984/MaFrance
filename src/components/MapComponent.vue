@@ -99,7 +99,7 @@ export default {
         this.updateData();
       }
     },
-    currentLevel(newLevel, oldLevel) {
+    currentLevel(newLevel) {
       // Update available metrics when level changes
       const newMetrics = MetricsConfig.getAvailableMetricOptions(newLevel);
       
@@ -112,27 +112,6 @@ export default {
       if (!isCurrentMetricAvailable && newMetrics.length > 0) {
         this.selectedMetric = newMetrics[0];
         this.onMetricChange(this.selectedMetric);
-      }
-
-      // Show tooltip when switching to commune level
-      if (newLevel === 'commune' && oldLevel !== 'commune') {
-        this.$nextTick(() => {
-          this.showCommuneTooltip();
-        });
-      }
-      // Show tooltip when switching to department level  
-      else if (newLevel === 'departement' && oldLevel !== 'departement') {
-        this.$nextTick(() => {
-          this.showDepartmentTooltip();
-        });
-      }
-    },
-    // Watch for commune changes within the same level
-    'dataStore.levels.commune'(newCommune, oldCommune) {
-      if (newCommune && newCommune !== oldCommune && this.currentLevel === 'commune') {
-        this.$nextTick(() => {
-          this.showCommuneTooltip();
-        });
       }
     },
   },
@@ -610,103 +589,7 @@ export default {
       return this.selectedMetric[this.labelKey]
     },
 
-    /**
-     * Shows a tooltip for the currently selected commune
-     */
-    showCommuneTooltip() {
-      if (!this.communesLayer || this.currentLevel !== 'commune') return;
-      
-      const communeCode = this.dataStore.getCommuneCode();
-      const communeName = this.dataStore.levels.commune;
-      
-      if (!communeCode) return;
-
-      this.communesLayer.eachLayer((layer) => {
-        const feature = layer.feature;
-        const possibleCodes = [
-          feature.properties.code,
-          feature.properties.insee,
-          feature.properties.COG,
-          feature.properties.cog,
-          feature.properties.COM,
-          feature.properties.Code_INSEE,
-          feature.properties.INSEE_COM,
-          feature.properties.codgeo,
-        ];
-
-        // Check if this is the target commune
-        const isTargetCommune = possibleCodes.some(code => {
-          if (code === communeCode) return true;
-          // Also check normalized versions for single-digit departments
-          const normalizedCode = this.removeTrailingZero(code);
-          return normalizedCode === communeCode;
-        });
-
-        if (isTargetCommune) {
-          const center = layer.getCenter();
-          const value = this.getFeatureValue(feature);
-          const indiceName = this.getIndiceName();
-          const deptCode = this.dataStore.getDepartementCode();
-          
-          // Highlight the commune
-          layer.setStyle({
-            weight: 3,
-            color: '#666',
-            dashArray: "",
-            fillOpacity: 0.9,
-          });
-
-          // Show tooltip
-          const content = `<b>${communeName} (${deptCode})</b><br>${indiceName}: ${value}`;
-          
-          this.globalTooltip
-            .setLatLng(center)
-            .setContent(content)
-            .addTo(this.map);
-
-          return false; // Break the loop
-        }
-      });
-    },
-
-    /**
-     * Shows a tooltip for the currently selected department
-     */
-    showDepartmentTooltip() {
-      if (!this.departementsLayer || this.currentLevel !== 'departement') return;
-      
-      const deptCode = this.dataStore.getDepartementCode();
-      const deptName = this.dataStore.levels.departement;
-      
-      if (!deptCode) return;
-
-      this.departementsLayer.eachLayer((layer) => {
-        const feature = layer.feature;
-        if (feature.properties.code === deptCode) {
-          const center = layer.getCenter();
-          const value = this.getFeatureValue(feature);
-          const indiceName = this.getIndiceName();
-          
-          // Highlight the department
-          layer.setStyle({
-            weight: 3,
-            color: '#666',
-            dashArray: "",
-            fillOpacity: 0.9,
-          });
-
-          // Show tooltip
-          const content = `<b>${deptName} (${deptCode})</b><br>${indiceName}: ${value}`;
-          
-          this.globalTooltip
-            .setLatLng(center)
-            .setContent(content)
-            .addTo(this.map);
-
-          return false; // Break the loop
-        }
-      });
-    },
+    
 
     getMetricLabel(metric) {
       const metricMap = {
