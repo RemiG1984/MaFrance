@@ -177,12 +177,7 @@ export default {
       const metric = MetricsConfig.getMetricByValue(metricKey)
       if (!metric) return 'details'
 
-      if (metricKey === 'subventions_p1') return 'subventions'
-      if (metricKey.includes('centres_migrants')) return 'migrants'
-      if (metric.category === 'insécurité' && metricKey !== 'insecurite_score') return 'crime'
-      if (metricKey.endsWith('_pct') && ['immigration', 'islamisme', 'défrancisation'].includes(metric.category)) return 'names'
-
-      return 'details'
+      return metric.source || 'details'
     },
 
     // Create a table row for a metric
