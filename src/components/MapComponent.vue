@@ -84,10 +84,7 @@ export default {
     },
     availableMetrics() {
       const level = this.mapState.level === 'country' ? 'france' : this.mapState.level;
-      const availableMetricKeys = MetricsConfig.getAvailableMetrics(level);
-      return MetricsConfig.metrics.filter(metric => 
-        availableMetricKeys.includes(metric.value)
-      );
+      return MetricsConfig.getAvailableMetrics(level);
     }
 
   },
