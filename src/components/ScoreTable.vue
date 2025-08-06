@@ -1,7 +1,7 @@
 <template>
   <v-card class="mb-4">
     <v-card-title class="text-h5">
-      Scores pour {{ location.name }}
+      Indices et données pour {{ location.name }}
     </v-card-title>
     
     <v-card-text>

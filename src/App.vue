@@ -9,16 +9,13 @@
         
         <v-spacer></v-spacer>
 
-
         <v-btn
           href="https://twitter.com/intent/follow?screen_name=ou_va_ma_France"
           target="_blank"
           variant="text"
           class="mx-2"
+          prepend-icon="mdi-close"
         >
-          <template v-slot:prepend>
-            <img src="/src/assets/X-logo-black.png" alt="X" style="width: 20px; height: 20px;" />
-          </template>
           Suivre @ou_va_ma_France
         </v-btn>
   
