@@ -40,6 +40,7 @@ export default {
       labelKey: 'label',
       selectedMetric: MetricsConfig.metrics[0],
       mapLevel: 'country',
+      availableMetrics: MetricsConfig.metrics,
       deptData: {},
       communeData: {},
       geoJsonLoaded: false,
@@ -81,10 +82,6 @@ export default {
         level: mapLevel,
         departement: dept
       };
-    },
-    availableMetrics() {
-      const level = this.mapState.level === 'country' ? 'france' : this.mapState.level;
-      return MetricsConfig.getAvailableMetrics(level);
     }
 
   },
@@ -98,18 +95,6 @@ export default {
           newState.level !== oldState.level || 
           newState.departement !== oldState.departement) {
         this.updateData();
-      }
-    },
-    availableMetrics(newAvailableMetrics) {
-      // Check if current selected metric is still available
-      const isCurrentMetricAvailable = newAvailableMetrics.some(metric => 
-        metric.value === this.selectedMetric.value
-      );
-      
-      // If current metric is not available, select the first available one
-      if (!isCurrentMetricAvailable && newAvailableMetrics.length > 0) {
-        this.selectedMetric = newAvailableMetrics[0];
-        this.onMetricChange(this.selectedMetric);
       }
     },
   },
