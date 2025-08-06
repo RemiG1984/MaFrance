@@ -211,7 +211,7 @@ router.get(
       dn.traditionnel_pct, 
       dn.moderne_pct, 
       dn.annais,
-      (COALESCE(dc.homicides_p100k, 0) + COALESCE(dc.tentatives_homicides_p100k, 0)) AS homicides_p100k,
+      (COALESCE(dc.homicides_p100k, 0) + COALESCE(dc.tentatives_homicides_p100k, 0)) AS homicides_total_p100k,
       (COALESCE(dc.coups_et_blessures_volontaires_p1k, 0) + 
        COALESCE(dc.coups_et_blessures_volontaires_intrafamiliaux_p1k, 0) + 
        COALESCE(dc.autres_coups_et_blessures_volontaires_p1k, 0) + 
