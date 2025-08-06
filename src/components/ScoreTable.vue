@@ -57,7 +57,6 @@
 
 <script>
 import { chartLabels } from '../utils/metricsConfig.js'
-import { keyMapping } from '../utils/statsCalc.js'
 
 export default {
   name: 'ScoreTable',
