@@ -125,7 +125,7 @@ const MetricsConfig = {
             format: "percentage",
         },
         {
-            value: "total_places_centres_migrants",
+            value: "Total_places_migrants",
             label: "Places en centre d'hébergement pour migrant",
             alt1Label: "Places en centre d'hébergement pour migrant",
             alt2Label: "Places en centre d'hébergement pour migrant",
@@ -133,7 +133,7 @@ const MetricsConfig = {
             format: "number",
         },
         {
-            value: "places_centres_migrants_p1",
+            value: "places_migrants_p1k",
             label: "Places en centre d'hébergement pour migrant /hab",
             alt1Label: "Places en centre d'hébergement pour migrant /hab",
             alt2Label: "Places en centre d'hébergement pour migrant /hab",
@@ -224,13 +224,13 @@ const MetricsConfig = {
             format: "percentage",
         },
         {
-            value: "subventions_p1",
+            value: "total_subventions_parHab",
             label: "Subventions /hab/an",
             alt1Label: "Subventions /hab/an",
             alt2Label: "Subventions /hab/an",
             category: "wokisme",
             format: "currency",
-        },      
+        },
     ],
 
     // Article categories mapping
@@ -339,9 +339,10 @@ const MetricsConfig = {
             components: ["violences_sexuelles_p1k"],
         },
         destructions_p1k: {
-            formula: (data) => data.destructions_et_degradations_volontaires_p1k,
+            formula: (data) =>
+                data.destructions_et_degradations_volontaires_p1k,
             components: ["destructions_et_degradations_volontaires_p1k"],
-        }
+        },
     },
 
     // Data availability by geographic level
@@ -368,9 +369,9 @@ const MetricsConfig = {
             "total_qpv",
             "pop_in_qpv_pct",
             "logements_sociaux_pct",
-            "subventions_p1",
-            "total_places_centres_migrants",
-            "places_centres_migrants_p1",
+            "total_subventions_parHab",
+            "Total_places_migrants",
+            "places_migrants_p1k",
         ],
         departement: [
             "total_score",
@@ -394,9 +395,9 @@ const MetricsConfig = {
             "total_qpv",
             "pop_in_qpv_pct",
             "logements_sociaux_pct",
-            "subventions_p1",
-            "total_places_centres_migrants",
-            "places_centres_migrants_p1",
+            "total_subventions_parHab",
+            "Total_places_migrants",
+            "places_migrants_p1k",
         ],
         commune: [
             "total_score",
@@ -416,9 +417,9 @@ const MetricsConfig = {
             "total_qpv",
             "pop_in_qpv_pct",
             "logements_sociaux_pct",
-            "subventions_p1",
-            "total_places_centres_migrants",
-            "places_centres_migrants_p1",
+            "total_subventions_parHab",
+            "Total_places_migrants",
+            "places_migrants_p1k",
         ],
     },
 

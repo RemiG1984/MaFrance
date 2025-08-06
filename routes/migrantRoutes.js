@@ -49,19 +49,8 @@ router.get('/commune/:cog', validateCOGParam, (req, res) => {
                 gestionnaire_centre: row.gestionnaire_centre,
                 adresse: row.adresse,
                 places: row.places,
-                latitude: row.latitude,
-                longitude: row.longitude,
-                capacite: row.capacite,
-                date_ouverture: row.date_ouverture,
-                date_fermeture: row.date_fermeture,
-                statut: row.statut,
-                population_cible: row.population_cible,
-                services_proposes: row.services_proposes,
-                contact_telephone: row.contact_telephone,
-                contact_email: row.contact_email,
-                site_web: row.site_web,
-                notes: row.notes,
-                derniere_maj: row.derniere_maj
+                //latitude: row.latitude,
+                //longitude: row.longitude,
             }))
         });
     });
@@ -93,19 +82,8 @@ router.get('/departement/:dept', [validateDepartementParam, validatePagination],
             gestionnaire_centre: row.gestionnaire_centre,
             adresse: row.adresse,
             places: row.places,
-            latitude: row.latitude,
-            longitude: row.longitude,
-            capacite: row.capacite,
-            date_ouverture: row.date_ouverture,
-            date_fermeture: row.date_fermeture,
-            statut: row.statut,
-            population_cible: row.population_cible,
-            services_proposes: row.services_proposes,
-            contact_telephone: row.contact_telephone,
-            contact_email: row.contact_email,
-            site_web: row.site_web,
-            notes: row.notes,
-            derniere_maj: row.derniere_maj
+            //latitude: row.latitude,
+            //longitude: row.longitude,
         }));
 
         res.json({
