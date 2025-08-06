@@ -70,7 +70,7 @@ export default {
       return this.dataStore.levels.departement;
     },
     availableMetrics() {
-      return this.getAvailableMetrics(this.currentLevel);
+      return MetricsConfig.getAvailableMetricOptions(this.currentLevel);
     },
     mapState() {
     // permet de détecter les changements d'états qui nécessitent un rechargement de map
@@ -101,7 +101,7 @@ export default {
     },
     currentLevel(newLevel) {
       // Update available metrics when level changes
-      const newMetrics = this.getAvailableMetrics(newLevel);
+      const newMetrics = MetricsConfig.getAvailableMetricOptions(newLevel);
       
       // Check if current selected metric is still available
       const isCurrentMetricAvailable = newMetrics.some(metric => 
@@ -589,44 +589,7 @@ export default {
       return this.selectedMetric[this.labelKey]
     },
 
-    getAvailableMetrics(level) {
-      // Filter metrics based on the current level
-      if (!level) {
-        return MetricsConfig.metrics;
-      }
-      
-      // Define which metrics are available for each level
-      const levelMetrics = {
-        country: [
-          'total_score',
-          'crime_score', 
-          'names_score',
-          'qpv_score',
-          'prenom_francais_pct'
-        ],
-        departement: [
-          'total_score',
-          'crime_score',
-          'names_score', 
-          'qpv_score',
-          'prenom_francais_pct'
-        ],
-        commune: [
-          'total_score',
-          'crime_score',
-          'names_score',
-          'qpv_score',
-          'prenom_francais_pct'
-        ]
-      };
-      
-      const availableMetricKeys = levelMetrics[level] || levelMetrics.country;
-      
-      // Filter the full metrics config to only include available metrics
-      return MetricsConfig.metrics.filter(metric => 
-        availableMetricKeys.includes(metric.value)
-      );
-    },
+    
 
     getMetricLabel(metric) {
       const metricMap = {
