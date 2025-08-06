@@ -107,7 +107,7 @@ const api = {
     },
 
     // Subventions data
-    getCountrySubventions: (country = "France") =>
+    getCountrySubventions: (country = "france") =>
         apiService.request(`/api/subventions/country/${country}`),
     getDepartementSubventions: (code) =>
         apiService.request(`/api/subventions/departement/${code}`),
