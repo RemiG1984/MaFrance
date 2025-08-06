@@ -300,6 +300,16 @@ const MetricsConfig = {
                 "trafic_de_stupefiants_p1k",
             ],
         },
+
+        // Non-calculated metrics
+        violences_sexuelles_p1k: {
+            formula: (data) => data.violences_sexuelles_p1k,
+            components: ["violences_sexuelles_p1k"],
+        },
+        destructions_p1k: {
+            formula: (data) => data.destructions_et_degradations_volontaires_p1k,
+            components: ["destructions_et_degradations_volontaires_p1k"],
+        }
     },
 
     // Data availability by geographic level
