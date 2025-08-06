@@ -40,7 +40,6 @@ export default {
       labelKey: 'label',
       selectedMetric: MetricsConfig.metrics[0],
       mapLevel: 'country',
-      availableMetrics: MetricsConfig.metrics,
       deptData: {},
       communeData: {},
       geoJsonLoaded: false,
@@ -82,6 +81,13 @@ export default {
         level: mapLevel,
         departement: dept
       };
+    },
+    availableMetrics() {
+      const level = this.mapState.level === 'country' ? 'france' : this.mapState.level;
+      const availableMetricKeys = MetricsConfig.getAvailableMetrics(level);
+      return MetricsConfig.metrics.filter(metric => 
+        availableMetricKeys.includes(metric.value)
+      );
     }
 
   },
