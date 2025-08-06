@@ -181,15 +181,7 @@ export default {
     },
 
     getFormattedValue(storeSection, metricKey, source) {
-      let sectionData
-      
-      // Handle special case for subventions source
-      if (source === 'subventions') {
-        sectionData = storeSection.subventions
-      } else {
-        sectionData = storeSection[source]
-      }
-      
+      const sectionData = storeSection[source]
       if (!sectionData) return 'N/A'
 
       let value = MetricsConfig.calculateMetric(metricKey, sectionData)
