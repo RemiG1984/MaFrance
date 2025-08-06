@@ -21,6 +21,9 @@ app.use(
   }),
 );
 
+// Servir les fichiers Vue buildés
+app.use(express.static(path.join(__dirname, "dist")));
+
 // Routes
 const communeRoutes = require("./routes/communeRoutes");
 const departementRoutes = require("./routes/departementRoutes");

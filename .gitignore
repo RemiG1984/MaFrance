@@ -134,3 +134,22 @@ dist
 
 #Setup directory
 setup/*.csv
+
+#Public directory since it is compiled
+public/
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
