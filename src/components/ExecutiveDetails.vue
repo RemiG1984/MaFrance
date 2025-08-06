@@ -2,7 +2,7 @@
 <template>
   <v-card class="mb-4">
     <v-card-title class="text-h5">
-      Détails des élus
+      Responsable exécutif
     </v-card-title>
     
     <v-card-text>
