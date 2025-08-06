@@ -483,10 +483,11 @@ export default {
       });
 
       let value = this.getFeatureValue(feature)
+      const formattedValue = value !== null ? MetricsConfig.formatMetricValue(value, this.selectedMetric.value) : 'N/A'
 
       const indiceName = this.getIndiceName()
       // const indiceName = this.selectedMetric[this.labelKey]
-      const content = `<b>${properties.nom}</b><br>${indiceName}: ${value}`
+      const content = `<b>${properties.nom}</b><br>${indiceName}: ${formattedValue}`
 
       this.globalTooltip
       .setLatLng(center)
@@ -675,10 +676,11 @@ export default {
 
           // Get the value for tooltip
           const value = this.getFeatureValue(feature);
+          const formattedValue = value !== null ? MetricsConfig.formatMetricValue(value, this.selectedMetric.value) : 'N/A';
           const indiceName = this.getIndiceName();
 
           // Create tooltip content
-          const content = `<b>${selectedCommune}</b><br>${indiceName}: ${value !== null ? value : 'N/A'}`;
+          const content = `<b>${selectedCommune}</b><br>${indiceName}: ${formattedValue}`;
 
           // Remove existing tooltip if any
           if (this.globalTooltip && this.map.hasLayer(this.globalTooltip)) {
