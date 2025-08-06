@@ -91,10 +91,10 @@ export default {
   watch: {
     mapState(newState, oldState) {
       // Ecoute du changement d'état
-      // Se déclenche uniquement si le niveau de la map change 
+      // Se déclenche uniquement si le niveau de la map change
       // ou si le département change
-      if (!oldState || 
-          newState.level !== oldState.level || 
+      if (!oldState ||
+          newState.level !== oldState.level ||
           newState.departement !== oldState.departement) {
         this.updateData();
       }
@@ -104,7 +104,7 @@ export default {
       const newMetrics = MetricsConfig.getAvailableMetricOptions(newLevel);
 
       // Check if current selected metric is still available
-      const isCurrentMetricAvailable = newMetrics.some(metric => 
+      const isCurrentMetricAvailable = newMetrics.some(metric =>
         metric.value === this.selectedMetric.value
       );
 
@@ -533,7 +533,7 @@ export default {
       const delta = legendSteps[legendSteps.length-1].value
 
       for(const step of legendSteps){
-        const valueDisplay = delta > 20 ? Math.round(step.value) : step.value.toFixed(1) 
+        const valueDisplay = delta > 20 ? Math.round(step.value) : step.value.toFixed(1)
 
         unitsMarkerDiv += `<div class="map-legend-marker" style="top: ${step.position}%;"></div>`
         unitsDiv += `<div class="map-legend-step" style="top: ${step.position}%;">
@@ -660,6 +660,7 @@ export default {
 
       if (!selectedCommune || !selectedCommuneCode) return;
 
+      let layerFound = false;
       // Find the layer for the selected commune
       this.communesLayer.eachLayer((layer) => {
         const feature = layer.feature;
@@ -668,6 +669,7 @@ export default {
         const layerCode = this.removeTrailingZero(feature.properties.code);
 
         if (layerCode === selectedCommuneCode) {
+          layerFound = true;
           // Get the center of the commune
           const center = layer.getCenter();
 
@@ -699,6 +701,20 @@ export default {
           return false; // Break the loop
         }
       });
+
+      // If layer not found, retry after another short delay (commune layer might still be loading)
+      if (!layerFound && this.communesLayer && this.communesLayer.getLayers().length > 0) {
+        // Layer has features but we couldn't find our commune, retry once more
+        setTimeout(() => {
+          this.showCommuneTooltip();
+        }, 500);
+      } else if (!layerFound) {
+        // Layer doesn't have features yet, wait for it to be ready and retry
+        console.log('Commune layer not ready, waiting...');
+        this.waitForCommuneLayerReady().then(() => {
+          this.showCommuneTooltip();
+        });
+      }
     },
 
     getMetricLabel(metric) {
