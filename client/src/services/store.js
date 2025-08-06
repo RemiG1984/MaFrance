@@ -87,19 +87,21 @@ export const useDataStore = defineStore("data", {
         country.details = results[0];
         country.names = results[1];
         country.crime = results[2];
-        country.crimeHistory = results[3];
-        country.namesHistory = results[4];
+        country.crimeHistory = results[3] || [];
+        country.namesHistory = results[4] || [];
         country.executive = results[5];
-        country.departementsRankings = results[6];
+        country.departementsRankings = results[6] || { data: [] };
         country.subventions = results[7];
         country.migrants = results[8];
-        country.namesSeries = this.serializeStats(country.namesHistory);
-        country.crimeSeries = this.serializeStats(country.crimeHistory);
-        country.crimeAggreg = this.aggregateStats(country.crimeSeries.data);
+        
+        // Add safety checks for serialization
+        country.namesSeries = country.namesHistory ? this.serializeStats(country.namesHistory) : { labels: [], data: {} };
+        country.crimeSeries = country.crimeHistory ? this.serializeStats(country.crimeHistory) : { labels: [], data: {} };
+        country.crimeAggreg = country.crimeSeries?.data ? this.aggregateStats(country.crimeSeries.data) : {};
 
         return country;
       } catch (error) {
-        console.error(error);
+        console.error("Error fetching country data:", error);
         return null;
       }
     },
@@ -203,8 +205,10 @@ export const useDataStore = defineStore("data", {
     },
 
     setCountry() {
-      this.fetchCountryData().then((country) => {
-        this.country = country;
+      this.fetchCountryData("France").then((country) => {
+        if (country) {
+          this.country = country;
+        }
         this.setLevel("country");
       });
     },
@@ -307,7 +311,7 @@ export const useDataStore = defineStore("data", {
       const allYears = new Set();
       const allKeys = new Set();
 
-      if (data.length === 0)
+      if (!data || !Array.isArray(data) || data.length === 0)
         return {
           labels: [],
           data: {},
