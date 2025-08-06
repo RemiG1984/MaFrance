@@ -1,4 +1,3 @@
-
 const express = require('express');
 const router = express.Router();
 const { param, validationResult } = require('express-validator');
@@ -39,25 +38,17 @@ router.get('/country/:country', validateCountryParam, (req, res) => {
         if (err) {
             return handleDbError(err, res);
         }
-        
+
         if (!row) {
             return res.status(404).json({ error: 'Données de subventions non trouvées pour ce pays' });
         }
 
         // Extract all fields except the country identifier
         const { country: countryField, ...subventions } = row;
-        
-        // Calculate total if needed
-        const total_subventions_parHab = Object.values(subventions)
-            .filter(val => typeof val === 'number' && !isNaN(val))
-            .reduce((sum, val) => sum + val, 0);
 
         res.json({
             country,
-            subventions: {
-                ...subventions,
-                total_subventions_parHab
-            }
+            subventions
         });
     });
 });
@@ -77,25 +68,17 @@ router.get('/departement/:dept', validateDepartementParam, (req, res) => {
         if (err) {
             return handleDbError(err, res);
         }
-        
+
         if (!row) {
             return res.status(404).json({ error: 'Données de subventions non trouvées pour ce département' });
         }
 
         // Extract all fields except the department identifier
         const { dep: deptField, ...subventions } = row;
-        
-        // Calculate total if needed
-        const total_subventions_parHab = Object.values(subventions)
-            .filter(val => typeof val === 'number' && !isNaN(val))
-            .reduce((sum, val) => sum + val, 0);
 
         res.json({
             departement: dept,
-            subventions: {
-                ...subventions,
-                total_subventions_parHab
-            }
+            subventions
         });
     });
 });
@@ -115,25 +98,17 @@ router.get('/commune/:cog', validateCOGParam, (req, res) => {
         if (err) {
             return handleDbError(err, res);
         }
-        
+
         if (!row) {
             return res.status(404).json({ error: 'Données de subventions non trouvées pour cette commune' });
         }
 
         // Extract all fields except the commune identifier
         const { COG: cogField, ...subventions } = row;
-        
-        // Calculate total if needed
-        const total_subventions_parHab = Object.values(subventions)
-            .filter(val => typeof val === 'number' && !isNaN(val))
-            .reduce((sum, val) => sum + val, 0);
 
         res.json({
             commune: cog,
-            subventions: {
-                ...subventions,
-                total_subventions_parHab
-            }
+            subventions
         });
     });
 });
