@@ -22,7 +22,7 @@
 
 <script>
 import Graph from '../components/Graph.vue'
-import { keyMapping } from '../utils/statsCalc.js'
+import { MetricsConfig } from '../utils/metricsConfig.js'
 
 export default {
   name: 'CrimeGraphs',
@@ -63,38 +63,36 @@ export default {
   computed: {
     aggregatedData() {
       const result = {}
-      // const level = this.location.type
       
-      // Pour chaque nouvelle clé dans le mapping
-      Object.keys(keyMapping).forEach(newKey => {
-        const sourceKeys = keyMapping[newKey]
-        result[newKey] = {}
+      // Pour chaque métrique calculée définie dans MetricsConfig
+      Object.keys(MetricsConfig.calculatedMetrics).forEach(metricKey => {
+        const calculation = MetricsConfig.calculatedMetrics[metricKey]
+        result[metricKey] = {}
 
         for(const level of this.levels) {
-          const outputSerie = []
-          for(const sourceKey of sourceKeys) {
-            // if(!this.data[sourceKey] || !this.data[sourceKey][level]) break
-
-            const inputSeries = sourceKeys
+          // Vérifier que tous les composants nécessaires sont disponibles
+          const inputSeries = calculation.components
             .map(key => this.data[key] && this.data[key][level])
             .filter(serie => serie) // Filtrer les séries undefined/null
 
-            if(inputSeries.length === 0) break
+          if(inputSeries.length === 0) continue
 
-            const seriesLength = inputSeries[0].length
-        
-            // Calculer la somme pour chaque entrée/level
-            result[newKey][level] = []
+          const seriesLength = inputSeries[0].length
+      
+          // Calculer la métrique pour chaque entrée/level en utilisant la formule
+          result[metricKey][level] = []
 
-            for (let i = 0; i < seriesLength; i++) {
-              let sum = 0
-              inputSeries.forEach(serie => {
-                // Traiter null comme 0
-                const value = serie[i] === null || serie[i] === undefined ? 0 : serie[i]
-                sum += value
-              })
-              result[newKey][level].push(sum)
-            }
+          for (let i = 0; i < seriesLength; i++) {
+            // Créer un objet de données pour cette année/période
+            const dataPoint = {}
+            calculation.components.forEach(key => {
+              const serie = this.data[key] && this.data[key][level]
+              dataPoint[key] = serie ? (serie[i] || 0) : 0
+            })
+            
+            // Appliquer la formule
+            const calculatedValue = calculation.formula(dataPoint)
+            result[metricKey][level].push(calculatedValue)
           }
         }
       })
