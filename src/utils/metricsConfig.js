@@ -201,14 +201,6 @@ const MetricsConfig = {
         },
         // Subventions category
         {
-            value: "total_subventions",
-            label: "Total des subventions",
-            alt1Label: "Total des subventions",
-            alt2Label: "Total des subventions",
-            category: "subventions",
-            format: "currency",
-        },
-        {
             value: "subventions_p1",
             label: "Subventions par habitant",
             alt1Label: "Subventions par habitant",
