@@ -1,7 +1,7 @@
 // Service API pour gérer les appels au backend
 class ApiService {
     constructor() {
-        this.baseURL = "";
+        this.baseURL = import.meta.env.VITE_API_BASE_URL || "";
     }
 
     async request(endpoint, options = {}) {
@@ -115,11 +115,6 @@ const api = {
         apiService.request(`/api/subventions/commune/${cog}`),
 
     // Migrant centers data
-    getCountryMigrants: (country = "France", params = {}) => {
-        const queryString = new URLSearchParams(params).toString();
-        const url = `/api/migrants/country/${country}`;
-        return apiService.request(queryString ? `${url}?${queryString}` : url);
-    },
     getDepartementMigrants: (code, params = {}) => {
         const queryString = new URLSearchParams(params).toString();
         const url = `/api/migrants/departement/${code}`;

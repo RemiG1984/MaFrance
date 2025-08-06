@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const db = require("../config/db");
 const {
   validateDepartement,
   validateSort,
@@ -93,49 +94,6 @@ router.get(
       FROM commune_names cn
       WHERE cn.annais = (SELECT MAX(annais) FROM commune_names WHERE COG = cn.COG)
       GROUP BY COG
-    ),
-    CommuneMigrantStats AS (
-      SELECT 
-        COG,
-        SUM(COALESCE(places, 0)) AS Total_places_migrants,
-        CASE 
-          WHEN l.population > 0 THEN (SUM(COALESCE(places, 0)) * 1000.0) / l.population
-          ELSE 0 
-        END AS places_migrants_p1k
-      FROM migrant_centers mc
-      LEFT JOIN locations l ON mc.COG = l.COG
-      GROUP BY mc.COG
-    ),
-    CommuneSubventionStats AS (
-      SELECT 
-        COG,
-        COALESCE(SUM(
-          COALESCE(cs.aide_exceptionnelle_etat_covid, 0) +
-          COALESCE(cs.aide_exceptionnelle_etat_investissement, 0) +
-          COALESCE(cs.fonds_national_amenagement_territoire, 0) +
-          COALESCE(cs.dotation_equipement_territoires_ruraux, 0) +
-          COALESCE(cs.dotation_soutien_investissement_local, 0) +
-          COALESCE(cs.fonds_interministeriel_prevention_delinquance, 0) +
-          COALESCE(cs.plan_france_relance, 0) +
-          COALESCE(cs.autres_subventions, 0)
-        ), 0) AS total_subventions,
-        CASE 
-          WHEN l.population > 0 THEN 
-            COALESCE(SUM(
-              COALESCE(cs.aide_exceptionnelle_etat_covid, 0) +
-              COALESCE(cs.aide_exceptionnelle_etat_investissement, 0) +
-              COALESCE(cs.fonds_national_amenagement_territoire, 0) +
-              COALESCE(cs.dotation_equipement_territoires_ruraux, 0) +
-              COALESCE(cs.dotation_soutien_investissement_local, 0) +
-              COALESCE(cs.fonds_interministeriel_prevention_delinquance, 0) +
-              COALESCE(cs.plan_france_relance, 0) +
-              COALESCE(cs.autres_subventions, 0)
-            ), 0) / l.population
-          ELSE 0 
-        END AS total_subventions_parHab
-      FROM commune_subventions cs
-      LEFT JOIN locations l ON cs.COG = l.COG
-      GROUP BY cs.COG
     )
     SELECT 
       l.COG, 
@@ -178,16 +136,11 @@ router.get(
        COALESCE(cc.trafic_de_stupefiants_p1k, 0)) AS stupefiants_p1k,
       COALESCE(cc.escroqueries_p1k, 0) AS escroqueries_p1k,
       (COALESCE(cn.musulman_pct, 0) + COALESCE(cn.africain_pct, 0) + COALESCE(cn.asiatique_pct, 0)) AS extra_europeen_pct,
-      (COALESCE(cn.traditionnel_pct, 0) + COALESCE(cn.moderne_pct, 0)) AS prenom_francais_pct,
-      COALESCE(css.total_subventions_parHab, 0) AS total_subventions_parHab,
-      COALESCE(cms.Total_places_migrants, 0) AS Total_places_migrants,
-      COALESCE(cms.places_migrants_p1k, 0) AS places_migrants_p1k
+      (COALESCE(cn.traditionnel_pct, 0) + COALESCE(cn.moderne_pct, 0)) AS prenom_francais_pct
     FROM locations l
     LEFT JOIN LatestCommuneNames cn ON l.COG = cn.COG
     LEFT JOIN commune_crime cc ON l.COG = cc.COG 
       AND cc.annee = (SELECT MAX(annee) FROM commune_crime WHERE COG = l.COG)
-    LEFT JOIN CommuneMigrantStats cms ON l.COG = cms.COG
-    LEFT JOIN CommuneSubventionStats css ON l.COG = css.COG
     WHERE (l.departement = ? OR ? = '')
     ${populationFilter}
     ORDER BY ${sort} ${direction}, ${secondarySort}
@@ -206,7 +159,6 @@ router.get(
       ? queryParams.slice(0, queryParams.length - 2)
       : [dept, dept];
 
-    const db = req.app.locals.db;
     db.all(sql, queryParams, (err, rows) => {
       if (err) return handleDbError(err, res, next);
       db.get(countSql, countParams, (countErr, countRow) => {
@@ -238,49 +190,6 @@ router.get(
       FROM department_names dn
       WHERE dn.annais = (SELECT MAX(annais) FROM department_names WHERE dpt = dn.dpt)
       GROUP BY dpt
-    ),
-    DepartmentMigrantStats AS (
-      SELECT 
-        departement,
-        SUM(COALESCE(places, 0)) AS Total_places_migrants,
-        CASE 
-          WHEN d.population > 0 THEN (SUM(COALESCE(places, 0)) * 1000.0) / d.population
-          ELSE 0 
-        END AS places_migrants_p1k
-      FROM migrant_centers mc
-      LEFT JOIN departements d ON mc.departement = d.departement
-      GROUP BY mc.departement
-    ),
-    DepartmentSubventionStats AS (
-      SELECT 
-        dep,
-        COALESCE(SUM(
-          COALESCE(ds.aide_exceptionnelle_etat_covid, 0) +
-          COALESCE(ds.aide_exceptionnelle_etat_investissement, 0) +
-          COALESCE(ds.fonds_national_amenagement_territoire, 0) +
-          COALESCE(ds.dotation_equipement_territoires_ruraux, 0) +
-          COALESCE(ds.dotation_soutien_investissement_local, 0) +
-          COALESCE(ds.fonds_interministeriel_prevention_delinquance, 0) +
-          COALESCE(ds.plan_france_relance, 0) +
-          COALESCE(ds.autres_subventions, 0)
-        ), 0) AS total_subventions,
-        CASE 
-          WHEN d.population > 0 THEN 
-            COALESCE(SUM(
-              COALESCE(ds.aide_exceptionnelle_etat_covid, 0) +
-              COALESCE(ds.aide_exceptionnelle_etat_investissement, 0) +
-              COALESCE(ds.fonds_national_amenagement_territoire, 0) +
-              COALESCE(ds.dotation_equipement_territoires_ruraux, 0) +
-              COALESCE(ds.dotation_soutien_investissement_local, 0) +
-              COALESCE(ds.fonds_interministeriel_prevention_delinquance, 0) +
-              COALESCE(ds.plan_france_relance, 0) +
-              COALESCE(ds.autres_subventions, 0)
-            ), 0) / d.population
-          ELSE 0 
-        END AS total_subventions_parHab
-      FROM department_subventions ds
-      LEFT JOIN departements d ON ds.dep = d.departement
-      GROUP BY ds.dep
     )
     SELECT 
       d.departement, 
@@ -322,21 +231,15 @@ router.get(
        COALESCE(dc.trafic_de_stupefiants_p1k, 0)) AS stupefiants_p1k,
       COALESCE(dc.escroqueries_p1k, 0) AS escroqueries_p1k,
       ROUND(COALESCE(dn.musulman_pct, 0) + COALESCE(dn.africain_pct, 0) + COALESCE(dn.asiatique_pct, 0)) AS extra_europeen_pct,
-      ROUND(COALESCE(dn.traditionnel_pct, 0) + COALESCE(dn.moderne_pct, 0)) AS prenom_francais_pct,
-      COALESCE(dss.total_subventions_parHab, 0) AS total_subventions_parHab,
-      COALESCE(dms.Total_places_migrants, 0) AS Total_places_migrants,
-      COALESCE(dms.places_migrants_p1k, 0) AS places_migrants_p1k
+      ROUND(COALESCE(dn.traditionnel_pct, 0) + COALESCE(dn.moderne_pct, 0)) AS prenom_francais_pct
     FROM departements d
     LEFT JOIN LatestDepartmentNames dn ON d.departement = dn.dpt
     LEFT JOIN department_crime dc ON d.departement = dc.dep 
       AND dc.annee = (SELECT MAX(annee) FROM department_crime WHERE dep = d.departement)
-    LEFT JOIN DepartmentMigrantStats dms ON d.departement = dms.departement
-    LEFT JOIN DepartmentSubventionStats dss ON d.departement = dss.dep
     ORDER BY ${sort} ${direction}
     LIMIT ? OFFSET ?
   `;
 
-    const db = req.app.locals.db;
     db.all(sql, [limit, offset], (err, rows) => {
       if (err) return handleDbError(err, res, next);
       res.json({

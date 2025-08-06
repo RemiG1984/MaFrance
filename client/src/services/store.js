@@ -80,7 +80,6 @@ export const useDataStore = defineStore("data", {
             direction: "DESC",
           }),
           api.getCountrySubventions(code),
-          api.getCountryMigrants(code),
         ]);
 
         const country = {};
@@ -92,7 +91,6 @@ export const useDataStore = defineStore("data", {
         country.executive = results[5];
         country.departementsRankings = results[6];
         country.subventions = results[7];
-        country.migrants = results[8];
         country.namesSeries = this.serializeStats(country.namesHistory);
         country.crimeSeries = this.serializeStats(country.crimeHistory);
         country.crimeAggreg = this.aggregateStats(country.crimeSeries.data);
