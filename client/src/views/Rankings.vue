@@ -5,6 +5,10 @@
     <div class="controls-section">
       <!-- All controls moved to RankingFilters -->
       <RankingFilters 
+        :selectedScope="selectedScope"
+        :selectedDepartement="selectedDepartement"
+        :selectedMetric="selectedMetric"
+        :filters="filters"
         @filters-changed="onFiltersChanged"
         @selection-changed="onSelectionChanged"
         ref="rankingFilters"

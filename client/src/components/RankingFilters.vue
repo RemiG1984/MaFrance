@@ -94,19 +94,23 @@ export default {
   props: {
     selectedScope: {
       type: String,
-      required: true
+      default: 'departements'
     },
     selectedDepartement: {
       type: String,
-      required: true
+      default: ''
     },
     selectedMetric: {
       type: String,
-      required: true
+      default: ''
     },
     filters: {
       type: Object,
-      required: true
+      default: () => ({
+        popLower: null,
+        popUpper: null,
+        topLimit: 10
+      })
     }
   },
   emits: ['filters-changed', 'selection-changed'],
