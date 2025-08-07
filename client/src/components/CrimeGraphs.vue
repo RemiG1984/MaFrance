@@ -7,7 +7,8 @@
       <v-row>
         <v-col  cols="12" lg="6"
         class="chart-container"
-        v-for="chartKey in chartList">
+        v-for="chartKey in availableCharts"
+        :key="chartKey">
           <Graph
             :metricKey="chartKey"
             :data="aggregatedData[chartKey]"
@@ -64,6 +65,16 @@ export default {
   },
   computed: {
     ...mapStores(useDataStore),
+    availableCharts() {
+      // Only return charts that have data available
+      return this.chartList.filter(chartKey => {
+        return this.aggregatedData[chartKey] && 
+               Object.keys(this.aggregatedData[chartKey]).length > 0 &&
+               Object.values(this.aggregatedData[chartKey]).some(levelData => 
+                 levelData && levelData.length > 0
+               );
+      });
+    },
     aggregatedData() {
       const result = {}
       
