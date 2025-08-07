@@ -1,10 +1,11 @@
+
 <template>
   <div class="ranking-filters">
     <!-- Main Controls -->
     <div class="main-controls">
       <div class="form-group">
         <label for="scopeSelect">Portée :</label>
-        <select id="scopeSelect" v-model="selectedScope" @change="onScopeChange">
+        <select id="scopeSelect" :value="selectedScope" @change="onScopeChange">
           <option value="departements">Départements</option>
           <option value="communes_france">Communes (France)</option>
           <option value="communes_dept">Communes (par département)</option>
@@ -13,7 +14,7 @@
 
       <div v-show="selectedScope === 'communes_dept'" class="form-group">
         <label for="departementSelect">Département :</label>
-        <select id="departementSelect" v-model="selectedDepartement" @change="emitSelectionChanged">
+        <select id="departementSelect" :value="selectedDepartement" @change="onDepartementChange">
           <option value="">-- Tous les départements --</option>
           <option 
             v-for="dept in departments" 
@@ -27,7 +28,7 @@
 
       <div class="form-group">
         <label for="metricSelect">Métrique :</label>
-        <select id="metricSelect" v-model="selectedMetric" @change="emitSelectionChanged">
+        <select id="metricSelect" :value="selectedMetric" @change="onMetricChange">
           <option value="">-- Choisir une métrique --</option>
           <option 
             v-for="option in availableMetricOptions" 
@@ -49,7 +50,7 @@
       <div class="population-controls">
         <div class="form-group">
           <label for="popLower">Pop min:</label>
-          <select id="popLower" v-model="filters.popLower" @change="emitFiltersChanged">
+          <select id="popLower" :value="filters.popLower" @change="onFilterChange('popLower', $event)">
             <option :value="null">Aucune limite</option>
             <option :value="1000">1k</option>
             <option :value="10000">10k</option>
@@ -59,7 +60,7 @@
 
         <div class="form-group">
           <label for="popUpper">Pop max:</label>
-          <select id="popUpper" v-model="filters.popUpper" @change="emitFiltersChanged">
+          <select id="popUpper" :value="filters.popUpper" @change="onFilterChange('popUpper', $event)">
             <option :value="null">Aucune limite</option>
             <option :value="1000">1k</option>
             <option :value="10000">10k</option>
@@ -73,8 +74,8 @@
         <input 
           type="number" 
           id="topLimit" 
-          v-model.number="filters.topLimit"
-          @input="emitFiltersChanged"
+          :value="filters.topLimit"
+          @input="onFilterChange('topLimit', $event)"
           min="1" 
           max="100"
         >
@@ -84,29 +85,38 @@
 </template>
 
 <script>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { MetricsConfig } from '../utils/metricsConfig.js'
 import { DepartementNames } from '../utils/departementNames.js'
 
 export default {
   name: 'RankingFilters',
+  props: {
+    selectedScope: {
+      type: String,
+      required: true
+    },
+    selectedDepartement: {
+      type: String,
+      required: true
+    },
+    selectedMetric: {
+      type: String,
+      required: true
+    },
+    filters: {
+      type: Object,
+      required: true
+    }
+  },
   emits: ['filters-changed', 'selection-changed'],
   setup(props, { emit }) {
-    // Reactive state
+    // UI state only
     const showFilters = ref(false)
-    const selectedScope = ref('departements')
-    const selectedDepartement = ref('')
-    const selectedMetric = ref('')
 
-    const filters = reactive({
-      popLower: null,
-      popUpper: null,
-      topLimit: 10
-    })
-
-    // Computed properties
+    // Computed properties based on props
     const currentLevel = computed(() => {
-      return selectedScope.value.includes('communes') ? 'commune' : 'departement'
+      return props.selectedScope.includes('communes') ? 'commune' : 'departement'
     })
 
     const availableMetricOptions = computed(() => {
@@ -124,47 +134,64 @@ export default {
           return parseCode(a) - parseCode(b)
         })
         .map(([code, name]) => ({
+          code,
           name: `${code} - ${name}`
         }))
     })
 
-    // Methods
-    const emitFiltersChanged = () => {
-      // Simple validation
-      if (filters.popLower !== null && filters.popUpper !== null && filters.popLower > filters.popUpper) {
-        console.warn('Population min cannot be greater than max')
-        return
-      }
-      emit('filters-changed', { ...filters })
+    // Event handlers - emit to parent
+    const onScopeChange = (event) => {
+      emit('selection-changed', {
+        scope: event.target.value,
+        departement: '',
+        metric: '',
+        level: event.target.value.includes('communes') ? 'commune' : 'departement'
+      })
     }
 
-    const emitSelectionChanged = () => {
+    const onDepartementChange = (event) => {
       emit('selection-changed', {
-        scope: selectedScope.value,
-        departement: selectedDepartement.value,
-        metric: selectedMetric.value,
+        scope: props.selectedScope,
+        departement: event.target.value,
+        metric: props.selectedMetric,
         level: currentLevel.value
       })
     }
 
-    const onScopeChange = () => {
-      selectedDepartement.value = ''
-      selectedMetric.value = ''
-      emitSelectionChanged()
+    const onMetricChange = (event) => {
+      emit('selection-changed', {
+        scope: props.selectedScope,
+        departement: props.selectedDepartement,
+        metric: event.target.value,
+        level: currentLevel.value
+      })
+    }
+
+    const onFilterChange = (filterKey, event) => {
+      const value = event.target.type === 'number' ? 
+        parseInt(event.target.value, 10) : 
+        event.target.value === 'null' ? null : event.target.value
+
+      const newFilters = { ...props.filters, [filterKey]: value }
+
+      // Simple validation
+      if (newFilters.popLower !== null && newFilters.popUpper !== null && newFilters.popLower > newFilters.popUpper) {
+        console.warn('Population min cannot be greater than max')
+        return
+      }
+
+      emit('filters-changed', newFilters)
     }
 
     return {
       showFilters,
-      selectedScope,
-      selectedDepartement,
-      selectedMetric,
-      filters,
       currentLevel,
       availableMetricOptions,
       departments,
-      emitFiltersChanged,
-      emitSelectionChanged,
-      onScopeChange
+      onScopeChange,
+      onDepartementChange,
+      onMetricChange,
+      onFilterChange
     }
   }
 }
