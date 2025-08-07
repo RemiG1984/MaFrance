@@ -154,6 +154,20 @@
                 par intelligence artificielle.
               </p>
             </div>
+            <div class="data-card">
+              <h3 class="data-title">Centres d'hébergement de migrants</h3>
+              <p class="data-text">
+                Les données ont été récupérées en aout 2025 du site officiel de la CIMADE.
+              </p>
+            </div>
+            <div class="data-card">
+              <h3 class="data-title">Subventions publiques aux associations</h3>
+              <p class="data-text">
+                Les données ont été récupérées en aout 2025 des sources officielles (data.ofgl.fr et budget.gouv.fr).
+                Les subventions des agglomérations et communautés de commune ont été ventilées par commune suivant la population.
+                Les subventions des régions ont été ventilées par département suivant la population.
+              </p>
+            </div>
           </div>
         </section>
                 
@@ -213,6 +227,18 @@
                       <a href="https://fdesouche.com" target="_blank" class="link">fdesouche.com</a>
                   </td>
               </tr>
+              <tr>
+                  <td>Centres d'hébergement pour migrants</td>
+                  <td>
+                      <a href="https://www.lacimade.org/schemas-regionaux-daccueil-des-demandeurs-dasile-quel-etat-des-lieux-2024/" target="_blank" class="link">lacimade.org</a>
+                  </td>
+              </tr>
+              <tr>
+                  <td>Subventions publiques aux associations</td>
+                  <td>
+                      <a href="https://data.ofgl.fr/pages/acces-donnees-comptables-detaillees/" target="_blank" class="link">data.ofgl.fr</a> et le jaune budgétaire <a href="https://www.budget.gouv.fr/documentation/documents-budgetaires/exercice-2025/projet-loi-finances-les/jaunes-budgetaires-2025-plf-2025" target="_blank" class="link">www.budget.gouv.fr</a>
+                  </td>
+              </tr>
             </tbody>
           </table>
         </section>
@@ -222,7 +248,7 @@
           <div class="warning-box">
             <ul class="warning-list">
               <li>Les données sont mises à jour selon la disponibilité des sources officielles</li>
-              <li>Certains territoires peuvent avoir des données incomplètes en fonction des sources</li>
+              <li>Certains territoires peuvent avoir des données incomplètes en fonction des sources. Certaines valeurs à "zéro" doivent être prises avec du recul</li>
               <li>Les indices sont relatifs et doivent être interprétés dans leur contexte</li>
               <li>Cette analyse ne prétend pas être exhaustive ou définitive</li>
               <li>RGPD: Aucune donnée personnelle n'est stockée sur ce site. L'ensemble des données utilisées sont publiques et anonymisées.</li>
