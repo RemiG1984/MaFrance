@@ -317,6 +317,10 @@ export default {
     font-weight: 500;
     color: #333;
     font-weight: bold;
+    max-width: 50%;
+    word-wrap: break-word;
+    white-space: normal;
+    overflow-wrap: break-word;
   }
   .row-title.sub-row {
     padding-left: 32px;
@@ -324,6 +328,10 @@ export default {
     font-size: 14px;
     font-style: italic;
     color: #555;
+    max-width: 50%;
+    word-wrap: break-word;
+    white-space: normal;
+    overflow-wrap: break-word;
   }
   .score-main {
     padding: 8px 12px;
