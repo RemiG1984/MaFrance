@@ -46,7 +46,7 @@
           <a :href='item.url'> {{ item.title }} </a>
         </div>
         <div v-if="filteredArticles.length === 0" class="no-articles">
-          Aucun article trouvé.
+          {{ noArticlesMessage }}
         </div>
       </div>
     </v-card-text>
@@ -118,6 +118,13 @@ export default {
     
     totalFilteredArticles() {
       return this.articles.list.length
+    },
+    
+    noArticlesMessage() {
+      if (this.location && this.location.type === 'country') {
+        return 'Sélectionnez un département ou une commune pour voir les articles'
+      }
+      return 'Aucun article trouvé.'
     }
   },
   methods: {
