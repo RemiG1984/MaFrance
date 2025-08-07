@@ -70,8 +70,8 @@ app.use(
 );
 
 // Serve Vue.js built files
-const distPath = path.resolve(__dirname, "dist");
-app.use(express.static(distPath));
+const publicPath = path.resolve(__dirname, "public");
+app.use(express.static(publicPath));
 
 // Routes
 const articleRoutes = require("./routes/articleRoutes");
@@ -115,7 +115,7 @@ app.get("/", (req, res, next) => {
   if (req.headers["user-agent"]?.includes("GoogleHC")) {
     return res.status(200).send("OK");
   }
-  const filePath = path.resolve(__dirname, "dist", "index.html");
+  const filePath = path.resolve(__dirname, "public", "index.html");
   console.log(`Attempting to serve ${filePath} for root request`);
   res.sendFile(filePath, (err) => {
     if (err) {
