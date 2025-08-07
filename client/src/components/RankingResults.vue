@@ -106,7 +106,11 @@ export default {
     })
 
     const formatLocationName = (item) => {
-      return `${item.name} (${item.deptCode})`
+      if (props.type === 'departement') {
+        return item.nom || item.name || `Département ${item.departement}`
+      } else {
+        return `${item.commune || item.name || item.nom} (${item.departement || item.deptCode})`
+      }
     }
 
     const formatPopulation = (population) => {
