@@ -106,8 +106,12 @@ export default {
         return [] // No bottom rankings if we have fewer items than the limit
       }
       
-      // Get the last X items (worst performers)
-      return props.rankings.slice(-props.limit)
+      // Calculate how many items to show in bottom list
+      const remainingItems = totalCount - props.limit
+      const bottomCount = Math.min(props.limit, remainingItems)
+      
+      // Get the actual worst performers (last items after top rankings)
+      return props.rankings.slice(totalCount - bottomCount)
     })
 
     const formatLocationName = (item) => {
