@@ -68,7 +68,13 @@ class ApiService {
             '/api/country/details',
             '/api/articles/lieux',
             '/api/departements',
-            '/api/communes'
+            '/api/communes',
+            '/api/rankings/departements',
+            '/api/rankings/communes',
+            '/api/communes/search',
+            '/api/migrants/departement/',
+            '/api/migrants/commune/',
+            '/api/subventions/'
         ];
         
         return persistentEndpoints.some(pattern => endpoint.includes(pattern));
