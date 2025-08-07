@@ -394,6 +394,7 @@ const MetricsConfig = {
     dataAvailability: {
         country: [
             "total_score",
+            "population",
             "insecurite_score",
             "homicides_total_p100k",
             "violences_physiques_p1k",
@@ -420,6 +421,7 @@ const MetricsConfig = {
         ],
         departement: [
             "total_score",
+            "population",
             "insecurite_score",
             "homicides_total_p100k",
             "violences_physiques_p1k",
@@ -446,6 +448,7 @@ const MetricsConfig = {
         ],
         commune: [
             "total_score",
+            "population",
             "insecurite_score",
             "violences_physiques_p1k",
             "violences_sexuelles_p1k",
