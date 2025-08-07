@@ -110,8 +110,11 @@ export default {
       const remainingItems = totalCount - props.limit
       const bottomCount = Math.min(props.limit, remainingItems)
       
-      // Get the actual worst performers (last items after top rankings)
-      return props.rankings.slice(totalCount - bottomCount)
+      // Get the last X items and assign correct ranks
+      return props.rankings.slice(-bottomCount).map((item, index) => ({
+        ...item,
+        rank: totalCount - bottomCount + index + 1
+      }))
     })
 
     const formatLocationName = (item) => {
