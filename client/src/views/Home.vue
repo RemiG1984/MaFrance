@@ -63,6 +63,14 @@
             />
           </v-col>
 
+          <!-- Centres Migrants -->
+          <v-col cols="12">
+            <CentresMigrants 
+              :location="currentLocation"
+              :data="migrantsData"
+            />
+          </v-col>
+
           <v-col cols="12">
             <CrimeGraphs 
               v-if="currentLocation"
@@ -88,6 +96,7 @@ import MapComponent from '../components/MapComponent.vue'
 import ArticleList from '../components/ArticleList.vue'
 import NamesGraph from '../components/NamesGraph.vue'
 import QpvData from '../components/QpvData.vue'
+import CentresMigrants from '../components/CentresMigrants.vue'
 import ExecutiveDetails from '../components/ExecutiveDetails.vue'
 import ScoreTable from '../components/ScoreTable.vue'
 import CrimeGraphs from '../components/CrimeGraphs.vue'
@@ -101,6 +110,7 @@ export default {
     ArticleList,
     NamesGraph,
     QpvData,
+    CentresMigrants,
     ExecutiveDetails,
     ScoreTable,
     CrimeGraphs,
@@ -236,6 +246,17 @@ export default {
       }
 
       return []
+    },
+
+    migrantsData(){
+      switch(this.dataStore.currentLevel){
+        case 'departement':
+          return this.dataStore.departement?.migrants || []
+        case 'commune':
+          return this.dataStore.commune?.migrants || []
+        default:
+          return []
+      }
     },
 
   },
