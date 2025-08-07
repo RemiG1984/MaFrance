@@ -265,48 +265,89 @@ export default {
 </script>
 
 <style scoped>
-.score-table {
-  width: 100%;
-}
+/* Score table specific styles */
+  .score-table {
+    width: 100%;
+    border-collapse: collapse;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-top: 2px solid #ccc;
+    border-bottom: 2px solid #ccc;
+  }
+  .score-header th {
+    font-weight: bold;
+    padding: 12px;
+    border-bottom: 2px solid #ddd;
+  }
+  .score-header .row-title {
+    background-color: #e9ecef;
+    color: #333;
+  }
+  .score-header .score-main {
+    background-color: #e9ecef;
+    color: #111;
+    font-weight: bold;
+  }
+  .score-header .score-compare {
+    text-align: right;
+    background-color: #e9ecef;
+    color: #555;
+    font-weight: bold;
+  }
+  .score-row {
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.2s;
+  }
+  .score-row:not(.sub-row):hover {
+    background-color: #f1f3f5;
+  }
+  .sub-row {
+    background-color: #f8f9fa;
+    transition: all 0.2s ease;
+  }
+  .sub-row-hidden {
+    display: none;
+  }
+  .row-title {
+    padding: 8px 12px;
+    font-weight: 500;
+    color: #333;
+    font-weight: bold;
+  }
+  .row-title.sub-row {
+    padding-left: 32px;
+    font-weight: 400;
+    font-size: 14px;
+    font-style: italic;
+    color: #555;
+  }
+  .score-main {
+    padding: 8px 12px;
+    text-align: left;
+    color: #222;
+  }
+  .score-compare {
+    padding: 8px 12px;
+    text-align: right;
+    font-size: 14px;
+    color: #555;
+  }
+  .score-row:nth-child(even) .row-title,
+  .score-row:nth-child(even) .score-main,
+  .score-row:nth-child(even) .score-compare {
+    background-color: #ffffff;
+  }
+  .score-row:nth-child(odd) .row-title,
+  .score-row:nth-child(odd) .score-main,
+  .score-row:nth-child(odd) .score-compare {
+    background-color: #f9f9f9;
+  }
 
-.score-header th {
-  background-color: #f5f5f5;
-  font-weight: bold;
-  padding: 12px;
-  border-bottom: 2px solid #ddd;
-}
-
-.score-row {
-  border-bottom: 1px solid #eee;
-  cursor: pointer;
-}
-
-.score-row:not(.sub-row):hover {
-  background-color: #f8f9fa;
-}
-
-.sub-row {
-  background-color: #f9f9f9;
-  cursor: default;
-}
-
-.sub-row-hidden {
-  display: none;
-}
-
-.row-title {
-  padding: 8px 12px;
-  font-weight: 500;
-}
-
-.row-title.sub-row {
-  padding-left: 32px;
-  font-weight: normal;
-  font-size: 0.9em;
-}
-
-.score-main, .score-compare {
-  padding: 8px 12px;
-  text-align: right;
+/* Responsive table */
+@media (max-width: 768px) {
+  .score-table {
+    display: block;
+    overflow-x: auto;
+    min-width: 600px;
+  }
 }
 </style>

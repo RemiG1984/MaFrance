@@ -692,7 +692,10 @@ const MetricsConfig = {
                     maximumFractionDigits: 0,
                 });
             case "number":
-                return value.toString();
+            return value.toLocaleString("fr-FR", {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+            });
             default:
                 return value.toString();
         }
