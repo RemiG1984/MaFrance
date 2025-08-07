@@ -140,6 +140,10 @@ export default {
       const level = currentLevel.value
       // Force reactivity to store label state changes
       const labelState = store.labelState
+      
+      // Sync MetricsConfig label state with store before getting options
+      MetricsConfig.labelState = labelState
+      
       return MetricsConfig.getAvailableMetricOptions(level)
     })
 
