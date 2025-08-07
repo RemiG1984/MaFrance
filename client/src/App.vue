@@ -6,19 +6,18 @@
         <v-app-bar-title class="text-h5 font-weight-bold">
           {{ currentPageTitle }}
         </v-app-bar-title>
-        
+       
         <v-spacer></v-spacer>
-
         <v-btn
           href="https://twitter.com/intent/follow?screen_name=ou_va_ma_France"
           target="_blank"
           variant="text"
-          class="mx-2"
+          class="mx-2 twitter-btn"
           prepend-icon="mdi-close"
         >
-          Suivre @ou_va_ma_France
+          @ou_va_ma_France
         </v-btn>
-  
+ 
         <v-btn
           v-for="item in menuItems"
           :key="item.path"
@@ -28,18 +27,16 @@
         >
           {{ item.title }}
         </v-btn>
-        
+       
         <VersionSelector />
       </v-container>
     </v-app-bar>
-
     <!-- Main Content -->
     <v-main>
       <v-container fluid class="pa-6">
         <router-view />
       </v-container>
     </v-main>
-
     <!-- Footer -->
     <v-footer app color="grey-lighten-3" class="text-center">
       <v-container>
@@ -50,6 +47,7 @@
     </v-footer>
   </v-app>
 </template>
+
 <script>
 import VersionSelector from './components/VersionSelector.vue'
 import { mapStores } from 'pinia'
@@ -87,5 +85,11 @@ export default {
 /* Styles pour les liens actifs */
 .v-btn--active {
   background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Style pour le bouton Twitter */
+.twitter-btn {
+  background-color: #000000 !important; /* Black background */
+  color: #ffffff !important; /* White text for contrast */
 }
 </style>

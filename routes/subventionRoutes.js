@@ -1,8 +1,12 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { param, validationResult } = require('express-validator');
-const { handleDbError } = require('../middleware/errorHandler');
-const { validateDepartementParam, validateCOGParam, validatePagination } = require('../middleware/validate');
+const { param, validationResult } = require("express-validator");
+const { handleDbError } = require("../middleware/errorHandler");
+const {
+    validateDepartementParam,
+    validateCOGParam,
+    validatePagination,
+} = require("../middleware/validate");
 
 // Middleware to handle validation errors
 const handleValidationErrors = (req, res, next) => {
@@ -15,16 +19,16 @@ const handleValidationErrors = (req, res, next) => {
 
 // Validate country parameter
 const validateCountryParam = [
-    param('country')
+    param("country")
         .notEmpty()
-        .withMessage('Pays requis')
-        .isIn(['france', 'France', 'FRANCE'])
-        .withMessage('Pays doit être France'),
+        .withMessage("Pays requis")
+        .isIn(["france", "France", "FRANCE"])
+        .withMessage("Pays doit être France"),
     handleValidationErrors,
 ];
 
 // Get country subventions
-router.get('/country/:country', validateCountryParam, (req, res) => {
+router.get("/country/:country", validateCountryParam, (req, res) => {
     const db = req.app.locals.db;
     const { country } = req.params;
 
@@ -40,21 +44,22 @@ router.get('/country/:country', validateCountryParam, (req, res) => {
         }
 
         if (!row) {
-            return res.status(404).json({ error: 'Données de subventions non trouvées pour ce pays' });
+            return res
+                .status(404)
+                .json({
+                    error: "Données de subventions non trouvées pour ce pays",
+                });
         }
 
         // Extract all fields except the country identifier
         const { country: countryField, ...subventions } = row;
 
-        res.json({
-            country,
-            subventions
-        });
+        res.json(subventions);
     });
 });
 
 // Get department subventions
-router.get('/departement/:dept', validateDepartementParam, (req, res) => {
+router.get("/departement/:dept", validateDepartementParam, (req, res) => {
     const db = req.app.locals.db;
     const { dept } = req.params;
 
@@ -70,21 +75,22 @@ router.get('/departement/:dept', validateDepartementParam, (req, res) => {
         }
 
         if (!row) {
-            return res.status(404).json({ error: 'Données de subventions non trouvées pour ce département' });
+            return res
+                .status(404)
+                .json({
+                    error: "Données de subventions non trouvées pour ce département",
+                });
         }
 
         // Extract all fields except the department identifier
         const { dep: deptField, ...subventions } = row;
 
-        res.json({
-            departement: dept,
-            subventions
-        });
+        res.json(subventions);
     });
 });
 
 // Get commune subventions
-router.get('/commune/:cog', validateCOGParam, (req, res) => {
+router.get("/commune/:cog", validateCOGParam, (req, res) => {
     const db = req.app.locals.db;
     const { cog } = req.params;
 
@@ -100,7 +106,11 @@ router.get('/commune/:cog', validateCOGParam, (req, res) => {
         }
 
         if (!row) {
-            return res.status(404).json({ error: 'Données de subventions non trouvées pour cette commune' });
+            return res
+                .status(404)
+                .json({
+                    error: "Données de subventions non trouvées pour cette commune",
+                });
         }
 
         // Extract all fields except the commune identifier
@@ -108,7 +118,7 @@ router.get('/commune/:cog', validateCOGParam, (req, res) => {
 
         res.json({
             commune: cog,
-            subventions
+            subventions,
         });
     });
 });
