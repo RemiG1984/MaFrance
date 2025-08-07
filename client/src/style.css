@@ -9,6 +9,39 @@ body {
   padding: 0;
 }
 
+/* Desktop layout constraints */
+@media (min-width: 1200px) {
+  .v-application {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  
+  .v-main {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  
+  .container {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+}
+
+@media (min-width: 1600px) {
+  .v-application {
+    max-width: 1600px;
+  }
+  
+  .v-main {
+    max-width: 1600px;
+  }
+  
+  .container {
+    max-width: 1520px;
+  }
+}
+
 /* Styles pour les composants */
 .chart-container {
   position: relative;
