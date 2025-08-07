@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const path = require("path");
+const fs = require("fs");
 const config = require("./config");
 const db = require("./config/db");
 const app = express();
@@ -22,7 +23,8 @@ app.use(
 );
 
 // Serve Vue.js built files
-app.use(express.static(path.join(__dirname, "dist")));
+const distPath = path.resolve(__dirname, "dist");
+app.use(express.static(distPath));
 
 // Routes
 const communeRoutes = require("./routes/communeRoutes");
@@ -49,22 +51,31 @@ app.use('/api/subventions', subventionRoutes);
 app.use('/api/migrants', migrantRoutes);
 app.use("/api", otherRoutes);
 
-// Catch-all route for Vue.js SPA: serve index.html for all non-API routes
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "dist", "index.html"));
+// Catch-all route: redirect non-API routes to root with original path
+app.get('/{*path}', (req, res) => {
+  const originalUrl = req.originalUrl === '/' ? '/' : req.originalUrl;
+  console.log(`Redirecting ${originalUrl} to /?redirect=${encodeURIComponent(originalUrl)}`);
+  res.redirect(`/?redirect=${encodeURIComponent(originalUrl)}`);
+});
+
+// Health check and root route
+app.get("/", (req, res, next) => {
+  if (req.headers["user-agent"]?.includes("GoogleHC")) {
+    return res.status(200).send("OK");
+  }
+  const filePath = path.resolve(__dirname, "dist", "index.html");
+  console.log(`Attempting to serve ${filePath} for root request`);
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      console.error(`Error serving ${filePath}:`, err);
+      res.status(500).json({ error: err.message, details: null });
+    }
+  });
 });
 
 // Error handling
 const errorHandler = require("./middleware/errorHandler");
 app.use(errorHandler);
-
-// Health check
-app.get("/", (req, res) => {
-  if (req.headers["user-agent"]?.includes("GoogleHC")) {
-    return res.status(200).send("OK");
-  }
-  res.sendFile(path.join(__dirname, "dist", "index.html"));
-});
 
 // Start server
 const server = app.listen(config.server.port, config.server.host, () => {
