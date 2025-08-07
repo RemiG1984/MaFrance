@@ -22,7 +22,7 @@
               :key="dept.code" 
               :value="dept.code"
             >
-              {{ dept.code }} - {{ dept.name }}
+              {{ dept.name }}
             </option>
           </select>
         </div>
