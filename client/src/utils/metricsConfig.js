@@ -284,6 +284,26 @@ const MetricsConfig = {
 
     // Calculated metrics definitions (for complex calculations)
     calculatedMetrics: {
+        // Total score calculation
+        total_score: {
+            formula: (data) =>
+                Math.round(
+                    (data.insecurite_score +
+                        data.immigration_score +
+                        data.islamisation_score +
+                        data.defrancisation_score +
+                        data.wokisme_score) /
+                        5,
+                ),
+            components: [
+                "insecurite_score",
+                "immigration_score",
+                "islamisation_score",
+                "defrancisation_score",
+                "wokisme_score",
+            ]
+        },
+        
         // Extra-European percentage calculation
         extra_europeen_pct: {
             formula: (data) =>
