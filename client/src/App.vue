@@ -73,6 +73,10 @@ export default {
         { title: 'Méthodologie', path: '/methodologie' }
       ]
     }
+  },
+  mounted() {
+    // Initialize store to sync with MetricsConfig
+    this.dataStore.initializeStore()
   }
 }
 </script>

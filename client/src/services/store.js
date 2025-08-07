@@ -407,9 +407,17 @@ export const useDataStore = defineStore("data", {
       this.clearCommuneData();
     },
 
+    // Initialize store and sync with MetricsConfig
+    initializeStore() {
+      // Sync labelState with MetricsConfig
+      MetricsConfig.labelState = this.labelState;
+    },
+
     // Label state management
     setLabelState(state) {
       this.labelState = state;
+      // Keep MetricsConfig in sync
+      MetricsConfig.labelState = state;
       localStorage.setItem("metricsLabelState", state.toString());
       // Dispatch event for components that might need to react
       window.dispatchEvent(
