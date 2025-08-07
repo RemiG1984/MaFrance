@@ -306,4 +306,63 @@ export default {
 .home {
   min-height: 100vh;
 }
+
+/* Mobile responsive adjustments for component titles */
+@media (max-width: 768px) {
+  .home :deep(.v-card-title) {
+    font-size: 1.1rem !important;
+    line-height: 1.3;
+    word-break: break-word;
+  }
+  
+  .home :deep(.component-title) {
+    font-size: 1.1rem !important;
+    line-height: 1.3;
+    word-break: break-word;
+  }
+  
+  .home :deep(.section-title) {
+    font-size: 1.1rem !important;
+    line-height: 1.3;
+  }
+  
+  .home :deep(.card-title) {
+    font-size: 1rem !important;
+    line-height: 1.3;
+    word-break: break-word;
+  }
+}
+
+@media (max-width: 480px) {
+  .home :deep(.v-card-title) {
+    font-size: 1rem !important;
+    line-height: 1.2;
+    word-break: break-word;
+  }
+  
+  .home :deep(.component-title) {
+    font-size: 1rem !important;
+    line-height: 1.2;
+    word-break: break-word;
+  }
+  
+  .home :deep(.section-title) {
+    font-size: 1rem !important;
+    line-height: 1.2;
+  }
+  
+  .home :deep(.card-title) {
+    font-size: 0.9rem !important;
+    line-height: 1.2;
+    word-break: break-word;
+  }
+  
+  .home :deep(.text-h6) {
+    font-size: 1rem !important;
+  }
+  
+  .home :deep(.text-h5) {
+    font-size: 1.1rem !important;
+  }
+}
 </style> 
