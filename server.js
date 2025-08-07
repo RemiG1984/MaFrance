@@ -24,6 +24,9 @@ app.use(
 // Servir les fichiers Vue buildés
 app.use(express.static(path.join(__dirname, "dist")));
 
+// Serve static files
+app.use(express.static(path.join(__dirname, 'public')));
+
 // Routes
 const communeRoutes = require("./routes/communeRoutes");
 const departementRoutes = require("./routes/departementRoutes");
@@ -35,6 +38,11 @@ const migrantRoutes = require('./routes/migrantRoutes');
 const otherRoutes = require("./routes/otherRoutes");
 const qpvRoutes = require("./routes/qpvRoutes");
 const rankingRoutes = require("./routes/rankingRoutes");
+
+// SPA fallback - serve index.html for all non-API routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // Make database available to all routes
 app.locals.db = db;
