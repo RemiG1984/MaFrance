@@ -1,9 +1,12 @@
 /**
  * Centralized metrics configuration
- * Contains all metric definitions, labels, categories, and formatting logic
+ * Contains all metric definitions, labels, categories, formatting logic, and color scales
  * Label = description neutre
  * Alt1 = description positive (vision de gauche)
  * Alt2 = description négative (vision de droite)
+ * Color scale: For metrics in metricRanges for a given level (departement or commune),
+ * values below min are pure white (#ffffff), values above max are darkest red (#b10026).
+ * For undefined metrics at a level, dynamic scaling is used.
  */
 
 const MetricsConfig = {
@@ -23,6 +26,74 @@ const MetricsConfig = {
 
     // Label state: 0 = standard, 1 = alt1, 2 = alt2
     labelState: parseInt(localStorage.getItem("metricsLabelState")) || 0,
+
+    // Color scale configuration for all metrics
+    colorScale: {
+        defaultColors: [
+            "#ffeda0",
+            "#feb24c",
+            "#fd8d3c",
+            "#fc4e2a",
+            "#e31a1c",
+            "#b10026",
+        ],
+        // Define level-specific min/max values for metrics
+        // Values below min are pure white (#ffffff), values above max are darkest red (#b10026)
+        metricRanges: {
+            departement: {
+                total_score: { min: 50, max: 150 },
+                insecurite_score: { min: 50, max: 150 },
+                homicides_total_p100k: { min: 1, max: 15 },
+                violences_physiques_p1k: { min: 6, max: 15 },
+                violences_sexuelles_p1k: { min: 1, max: 2.5 },
+                vols_p1k: { min: 5, max: 65 },
+                destructions_p1k: { min: 4, max: 11 },
+                stupefiants_p1k: { min: 2, max: 20 },
+                escroqueries_p1k: { min: 2, max: 8 },
+                immigration_score: { min: 50, max: 150 },
+                extra_europeen_pct: { min: 5, max: 50 },
+                Total_places_migrants: { min: 100, max: 3000 },
+                places_migrants_p1k: { min: 0.2, max: 3 },
+                islamisation_score: { min: 30, max: 170 },
+                musulman_pct: { min: 2, max: 40 },
+                number_of_mosques: { min: 1, max: 70 },
+                mosque_p100k: { min: 0.5, max: 7 },
+                defrancisation_score: { min: 50, max: 150 },
+                prenom_francais_pct: { min: 20, max: 70, invert: true },
+                wokisme_score: { min: 50, max: 150 },
+                total_qpv: { min: 1, max: 70 },
+                pop_in_qpv_pct: { min: 1.5, max: 40 },
+                logements_sociaux_pct: { min: 5, max: 30 },
+                total_subventions_parHab: { min: 20, max: 150 },
+            },
+            commune: {
+                total_score: { min: 50, max: 150 },
+                insecurite_score: { min: 50, max: 150 },
+                homicides_total_p100k: { min: 1, max: 15 },
+                violences_physiques_p1k: { min: 6, max: 15 },
+                violences_sexuelles_p1k: { min: 1, max: 2.5 },
+                vols_p1k: { min: 5, max: 65 },
+                destructions_p1k: { min: 4, max: 11 },
+                stupefiants_p1k: { min: 2, max: 20 },
+                escroqueries_p1k: { min: 2, max: 8 },
+                immigration_score: { min: 50, max: 150 },
+                extra_europeen_pct: { min: 5, max: 50 },
+                Total_places_migrants: { min: 0, max: 1000 },
+                places_migrants_p1k: { min: 0.2, max: 3 },
+                islamisation_score: { min: 50, max: 150 },
+                musulman_pct: { min: 2, max: 40 },
+                number_of_mosques: { min: 1, max: 70 },
+                mosque_p100k: { min: 0.5, max: 7 },
+                defrancisation_score: { min: 50, max: 150 },
+                prenom_francais_pct: { min: 20, max: 70, invert: true },
+                wokisme_score: { min: 50, max: 150 },
+                total_qpv: { min: 1, max: 70 },
+                pop_in_qpv_pct: { min: 1.5, max: 40 },
+                logements_sociaux_pct: { min: 5, max: 30 },
+                total_subventions_parHab: { min: 25, max: 150 },
+            },
+        },
+    },
 
     // All available metrics with their properties, in order of appearance within each category in ScoreTable
     metrics: [
@@ -301,9 +372,9 @@ const MetricsConfig = {
                 "islamisation_score",
                 "defrancisation_score",
                 "wokisme_score",
-            ]
+            ],
         },
-        
+
         // Extra-European percentage calculation
         extra_europeen_pct: {
             formula: (data) =>
@@ -494,7 +565,6 @@ const MetricsConfig = {
         return this.metrics.filter((metric) => metric.category === category);
     },
 
-    // Calculate a metric if it's a calculated one
     calculateMetric(metricKey, data) {
         const calculation = this.calculatedMetrics[metricKey];
         if (calculation && calculation.formula) {
@@ -503,7 +573,6 @@ const MetricsConfig = {
         return data[metricKey];
     },
 
-    // Get all metrics as options for dropdowns
     getMetricOptions() {
         return this.metrics.map((metric) => ({
             value: metric.value,
@@ -511,12 +580,9 @@ const MetricsConfig = {
         }));
     },
 
-    // Cycle between label states (0 -> 1 -> 2 -> 0)
     cycleLabelState() {
         this.labelState = (this.labelState + 1) % 3;
-        // Save to localStorage
         localStorage.setItem("metricsLabelState", this.labelState.toString());
-        // Dispatch event to notify components of the change
         window.dispatchEvent(
             new CustomEvent("metricsLabelsToggled", {
                 detail: { labelState: this.labelState },
@@ -524,7 +590,6 @@ const MetricsConfig = {
         );
     },
 
-    // Get current label state name
     getLabelStateName() {
         switch (this.labelState) {
             case 1:
@@ -536,19 +601,16 @@ const MetricsConfig = {
         }
     },
 
-    // Get current page title
     getCurrentPageTitle() {
         const stateName = this.getLabelStateName();
         return this.pageTitles[stateName];
     },
 
-    // Get current version label
     getCurrentVersionLabel() {
         const stateName = this.getLabelStateName();
         return this.versionLabels[stateName];
     },
 
-    // Initialize version dropdown (prevents multiple event listeners)
     initializeVersionDropdown() {
         const versionDropdown = document.querySelector(".version-dropdown");
         const versionToggle = document.querySelector(".version-toggle");
@@ -556,64 +618,49 @@ const MetricsConfig = {
 
         if (!versionDropdown || versionDropdown.dataset.initialized) return;
 
-        // Mark as initialized to prevent multiple event listeners
         versionDropdown.dataset.initialized = "true";
 
-        // Set initial version text
-        const initialStateName = this.getLabelStateName();
         const versionText = versionToggle.querySelector(".version-text");
         if (versionText) {
             versionText.textContent = this.getCurrentVersionLabel();
         }
 
-        // Toggle dropdown menu visibility
         versionToggle.addEventListener("click", (e) => {
             e.preventDefault();
             e.stopPropagation();
             versionMenu.classList.toggle("active");
         });
 
-        // Close dropdown when clicking outside
         document.addEventListener("click", (e) => {
             if (!versionDropdown.contains(e.target)) {
                 versionMenu.classList.remove("active");
             }
         });
 
-        // Add click listeners to version options
         const versionOptions = versionMenu.querySelectorAll(".version-option");
         versionOptions.forEach((option, index) => {
             option.addEventListener("click", (e) => {
                 e.preventDefault();
                 e.stopPropagation();
 
-                // Set label state based on clicked option
                 this.labelState = index;
-                // Save to localStorage
                 localStorage.setItem(
                     "metricsLabelState",
                     this.labelState.toString(),
                 );
 
-                // Update version text
-                const stateName = this.getLabelStateName();
                 if (versionText) {
                     versionText.textContent = this.getCurrentVersionLabel();
                 }
 
-                // Close dropdown
                 versionMenu.classList.remove("active");
-
-                // Update page title
                 document.title = this.getCurrentPageTitle();
 
-                // Update header h1 if exists
                 const headerH1 = document.querySelector("h1");
                 if (headerH1) {
                     headerH1.textContent = this.getCurrentPageTitle();
                 }
 
-                // Dispatch event to notify components of the change
                 window.dispatchEvent(
                     new CustomEvent("metricsLabelsToggled", {
                         detail: { labelState: this.labelState },
@@ -623,7 +670,6 @@ const MetricsConfig = {
         });
     },
 
-    // Check if a metric is available at a specific geographic level
     isMetricAvailable(metricKey, level) {
         return (
             this.dataAvailability[level] &&
@@ -631,12 +677,10 @@ const MetricsConfig = {
         );
     },
 
-    // Get available metrics for a specific geographic level
     getAvailableMetrics(level) {
         return this.dataAvailability[level] || [];
     },
 
-    // Get available metric options for dropdowns filtered by geographic level
     getAvailableMetricOptions(level) {
         const availableMetrics = this.getAvailableMetrics(level);
         return this.metrics
@@ -647,12 +691,10 @@ const MetricsConfig = {
             }));
     },
 
-    // Extract and map data fields for a specific geographic level
     extractDataForLevel(sourceData, level, additionalFields = []) {
         const availableMetrics = this.getAvailableMetrics(level);
         const result = {};
 
-        // Always include basic fields
         const basicFields = ["population", "commune", "departement", "COG"];
         [...basicFields, ...availableMetrics, ...additionalFields].forEach(
             (field) => {
@@ -665,7 +707,6 @@ const MetricsConfig = {
         return result;
     },
 
-    // Format metric values based on their format property
     formatMetricValue(value, metricKey) {
         if (value == null || isNaN(value)) return "N/A";
 
@@ -692,24 +733,47 @@ const MetricsConfig = {
                     maximumFractionDigits: 0,
                 });
             case "number":
-            return value.toLocaleString("fr-FR", {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0,
-            });
+                return value.toLocaleString("fr-FR", {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                });
             default:
                 return value.toString();
         }
     },
+
+    // Get color scale configuration for a metric at a specific level
+    getMetricColorScale(metricKey, level) {
+        if (
+            this.colorScale.metricRanges[level] &&
+            this.colorScale.metricRanges[level].hasOwnProperty(metricKey)
+        ) {
+            const range = this.colorScale.metricRanges[level][metricKey];
+            return {
+                colors: this.colorScale.defaultColors,
+                min: range.min,
+                max: range.max,
+                invert: range.invert || false,
+                useFixedRange: true,
+            };
+        }
+        // Return default config for dynamic scaling
+        return {
+            colors: this.colorScale.defaultColors,
+            min: 0,
+            max: 100,
+            invert: false,
+            useFixedRange: false,
+        };
+    },
 };
 
 const chartLabels = {};
-
 for (let metric of MetricsConfig.metrics) {
     chartLabels[metric.value] = metric;
 }
 
 const articleCategoriesRef = {};
-
 for (let articleCategory of MetricsConfig.articleCategories) {
     articleCategoriesRef[articleCategory.key] = articleCategory.name;
 }
