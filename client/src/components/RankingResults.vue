@@ -101,8 +101,13 @@ export default {
     })
 
     const bottomRankings = computed(() => {
-      const remaining = props.rankings.slice(props.limit)
-      return remaining.sort((a, b) => a.rank - b.rank)
+      const totalCount = props.rankings.length
+      if (totalCount <= props.limit) {
+        return [] // No bottom rankings if we have fewer items than the limit
+      }
+      
+      // Get the last X items (worst performers)
+      return props.rankings.slice(-props.limit)
     })
 
     const formatLocationName = (item) => {
