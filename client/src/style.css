@@ -9,36 +9,37 @@ body {
   padding: 0;
 }
 
-/* Desktop layout constraints */
+/* Desktop layout constraints with CSS variables */
+:root {
+  --max-width-desktop: 1400px;
+  --max-width-content: 1320px;
+  --max-width-wide: 1600px;
+  --max-width-content-wide: 1520px;
+  --container-padding: 24px;
+}
+
 @media (min-width: 1200px) {
-  .v-application {
-    max-width: 1400px;
-    margin: 0 auto;
-  }
-  
+  .v-application,
   .v-main {
-    max-width: 1400px;
+    max-width: var(--max-width-desktop);
     margin: 0 auto;
   }
   
   .container {
-    max-width: 1320px;
+    max-width: var(--max-width-content);
     margin: 0 auto;
-    padding: 0 24px;
+    padding: 0 var(--container-padding);
   }
 }
 
 @media (min-width: 1600px) {
-  .v-application {
-    max-width: 1600px;
-  }
-  
+  .v-application,
   .v-main {
-    max-width: 1600px;
+    max-width: var(--max-width-wide);
   }
   
   .container {
-    max-width: 1520px;
+    max-width: var(--max-width-content-wide);
   }
 }
 

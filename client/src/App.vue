@@ -6,7 +6,7 @@
         <v-app-bar-title class="text-h5 font-weight-bold">
           {{ currentPageTitle }}
         </v-app-bar-title>
-       
+
         <v-spacer></v-spacer>
         <v-btn
           href="https://twitter.com/intent/follow?screen_name=ou_va_ma_France"
@@ -17,7 +17,7 @@
         >
           @ou_va_ma_France
         </v-btn>
- 
+
         <v-btn
           v-for="item in menuItems"
           :key="item.path"
@@ -27,7 +27,7 @@
         >
           {{ item.title }}
         </v-btn>
-       
+
         <VersionSelector />
       </v-container>
     </v-app-bar>
@@ -91,5 +91,20 @@ export default {
 .twitter-btn {
   background-color: #000000 !important; /* Black background */
   color: #ffffff !important; /* White text for contrast */
+}
+
+/* Header content alignment */
+@media (min-width: 1200px) {
+  .header-container {
+    max-width: var(--max-width-content);
+    margin: 0 auto;
+    padding: 0 var(--container-padding);
+  }
+}
+
+@media (min-width: 1600px) {
+  .header-container {
+    max-width: var(--max-width-content-wide);
+  }
 }
 </style>
