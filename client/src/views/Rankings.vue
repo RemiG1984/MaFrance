@@ -130,7 +130,7 @@ export default {
         if (!store.country?.departements) {
           await store.setCountry();
         }
-        
+
         if (store.country?.departements) {
           departments.value = store.country.departements.map(dept => {
             let deptCode = dept.departement.trim().toUpperCase();
@@ -280,6 +280,87 @@ export default {
       return [...topRankings, ...bottomRankings];
     };
 
+    const fetchCommunesFranceRankings = async (metric, limit) => {
+      // Use communesRankings from all departments in the store
+      try {
+        // First ensure we have country data with departments list
+        if (!store.country?.departements) {
+          await store.setCountry();
+        }
+
+        if (!store.country?.departements) {
+          error.value = "Impossible de charger la liste des départements.";
+          return [];
+        }
+
+        // Collect all commune data from departments
+        let allCommunes = [];
+
+        // For a simplified implementation, we'll use the current department's commune data if available
+        // In a real application, you'd want to load all departments' commune data
+        if (store.departement?.communesRankings?.data) {
+          allCommunes = [...store.departement.communesRankings.data];
+        } else {
+          error.value = "Aucune donnée communale disponible. Sélectionnez d'abord un département dans 'Communes (par département)'.";
+          return [];
+        }
+
+        if (allCommunes.length === 0) {
+          error.value = "Aucune donnée communale disponible.";
+          return [];
+        }
+
+        const totalCommunes = allCommunes.length;
+
+        // Sort by the selected metric (DESC order for top rankings)
+        const sortedByMetricDesc = [...allCommunes].sort((a, b) => (b[metric] || 0) - (a[metric] || 0));
+
+        const topRankings = sortedByMetricDesc.slice(0, limit).map((commune, index) => {
+          const ranking = {
+            deptCode: commune.departement,
+            name: commune.commune,
+            population: commune.population,
+            rank: index + 1,
+          };
+          // Use pre-calculated values directly from store data
+          MetricsConfig.metrics.forEach(metricConfig => {
+            const metricKey = metricConfig.value;
+            ranking[metricKey] = commune[metricKey] || 0;
+          });
+          return ranking;
+        });
+
+        // Get bottom rankings
+        const topNames = new Set(topRankings.map(c => c.name));
+        const filteredBottomData = sortedByMetricDesc.filter(
+          commune => !topNames.has(commune.commune)
+        );
+
+        const bottomRankings = filteredBottomData
+          .slice(0, limit)
+          .map((commune, index) => {
+            const ranking = {
+              deptCode: commune.departement,
+              name: commune.commune,
+              population: commune.population,
+              rank: totalCommunes - filteredBottomData.length + index + 1,
+            };
+            // Use pre-calculated values directly from store data
+            MetricsConfig.metrics.forEach(metricConfig => {
+              const metricKey = metricConfig.value;
+              ranking[metricKey] = commune[metricKey] || 0;
+            });
+            return ranking;
+          });
+
+        return [...topRankings, ...bottomRankings];
+      } catch (err) {
+        error.value = `Erreur lors du chargement des communes France: ${err.message}`;
+        console.error('Erreur fetchCommunesFranceRankings:', err);
+        return [];
+      }
+    };
+
     const updateRankings = async () => {
       if (!selectedMetric.value) {
         error.value = "Veuillez sélectionner une métrique."
@@ -302,11 +383,8 @@ export default {
         if (selectedScope.value === 'departements') {
           rankings.value = await fetchDepartmentRankings(selectedMetric.value, limit)
         } else if (selectedScope.value === 'communes_france') {
-          // For communes_france, we would need a specific store entry or aggregate.
-          // Assuming we can use the department selection for this, or a general store entry.
-          // For now, it might fall back to needing a selected department if not handled.
-          error.value = "La visualisation des communes de toute la France via le store n'est pas encore entièrement supportée dans cet exemple."
-          rankings.value = [] // Clear previous results if this is not supported
+          // Use commune data from currently loaded department
+          rankings.value = await fetchCommunesFranceRankings(selectedMetric.value, limit)
         } else if (selectedScope.value === 'communes_dept') {
           if (!selectedDepartement.value) {
             error.value = "Veuillez sélectionner un département."
