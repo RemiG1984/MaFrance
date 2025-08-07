@@ -67,6 +67,8 @@ class ApiService {
             '/api/communes/details',
             '/api/country/details',
             '/api/articles/lieux',
+            '/api/articles',
+            '/api/articles/counts',
             '/api/departements',
             '/api/communes',
             '/api/rankings/departements',
