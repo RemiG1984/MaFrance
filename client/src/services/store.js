@@ -431,6 +431,58 @@ export const useDataStore = defineStore("data", {
       const newState = (this.labelState + 1) % 3;
       this.setLabelState(newState);
     },
+
+    async loadDepartementSubventions(deptCode) {
+      if (!deptCode) return
+
+      try {
+        const data = await api.getDepartementSubventions(deptCode)
+        if (data) {
+          this.departement.subventions = data.subventions || []
+        }
+      } catch (error) {
+        console.error('Failed to load departement subventions:', error)
+      }
+    },
+
+    async loadDepartementMigrants(deptCode) {
+      if (!deptCode) return
+
+      try {
+        const data = await api.getDepartementMigrants(deptCode)
+        if (data) {
+          this.departement.migrants = data.migrants || []
+        }
+      } catch (error) {
+        console.error('Failed to load departement migrants:', error)
+      }
+    },
+
+    async loadCommuneSubventions(cog) {
+      if (!cog) return
+
+      try {
+        const data = await api.getCommuneSubventions(cog)
+        if (data) {
+          this.commune.subventions = data.subventions || []
+        }
+      } catch (error) {
+        console.error('Failed to load commune subventions:', error)
+      }
+    },
+
+    async loadCommuneMigrants(cog) {
+      if (!cog) return
+
+      try {
+        const data = await api.getCommuneMigrants(cog)
+        if (data) {
+          this.commune.migrants = data.migrants || []
+        }
+      } catch (error) {
+        console.error('Failed to load commune migrants:', error)
+      }
+    },
   },
 
   getters: {
