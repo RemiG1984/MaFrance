@@ -1,7 +1,7 @@
 <template>
   <v-card class="mb-4">
     <v-card-title class="text-h5">
-      Quartiers Prioritaires (QPV)
+      Quartiers Prioritaires (QPV) à: {{ locationName }}
     </v-card-title>
     <v-card-text>
       <div

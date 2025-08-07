@@ -35,6 +35,14 @@
             />
           </v-col>
 
+          <!-- Centres Migrants -->
+          <v-col cols="12">
+            <CentresMigrants 
+              :location="currentLocation"
+              :data="migrantsData"
+            />
+          </v-col>
+
           <!-- QPV Data -->
           <v-col cols="12">
             <QpvData 
@@ -43,12 +51,6 @@
             />
           </v-col>
 
-          <!-- Executive Details -->
-          <v-col cols="12">
-            <ExecutiveDetails 
-              :location="currentLocation"
-            />
-          </v-col>
         </v-row>
       </v-col>
 
@@ -63,11 +65,10 @@
             />
           </v-col>
 
-          <!-- Centres Migrants -->
+          <!-- Executive Details -->
           <v-col cols="12">
-            <CentresMigrants 
+            <ExecutiveDetails 
               :location="currentLocation"
-              :data="migrantsData"
             />
           </v-col>
 

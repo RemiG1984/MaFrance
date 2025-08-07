@@ -2,7 +2,7 @@
 <template>
   <v-card>
     <v-card-title class="text-h5">
-      Articles FdeSouche associés
+      Articles FdeSouche associés à: {{ locationName }}
     </v-card-title>
     
     <v-card-text>

@@ -52,7 +52,7 @@ router.get('/commune/:cog', validateCOGParam, (req, res) => {
             //longitude: row.longitude,
         }));
 
-        res.json({ migrants });
+        res.json(migrants);
     });
 });
 
@@ -86,14 +86,7 @@ router.get('/departement/:dept', [validateDepartementParam, validatePagination],
             //longitude: row.longitude,
         }));
 
-        res.json({
-            migrants,
-            pagination: {
-                page: parseInt(page),
-                limit: parseInt(limit),
-                total: migrants.length
-            }
-        });
+        res.json(migrants);
     });
 });
 

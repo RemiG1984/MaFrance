@@ -12,9 +12,9 @@
           <thead>
             <tr>
               <th>Type de centre</th>
+              <th>Places</th>
               <th>Gestionnaire</th>
               <th>Adresse</th>
-              <th>Places</th>
             </tr>
           </thead>
           <tbody>
@@ -23,9 +23,9 @@
               :key="centre.COG + '-' + centre.gestionnaire_centre"
             >
               <td class="row-title">{{ centre.type_centre || 'N/A' }}</td>
+              <td class="score-main">{{ formatNumber(centre.places) }}</td>
               <td class="score-main">{{ centre.gestionnaire_centre || 'N/A' }}</td>
               <td class="score-main">{{ centre.adresse || 'N/A' }}</td>
-              <td class="score-main">{{ formatNumber(centre.places) }}</td>
             </tr>
           </tbody>
         </table>
@@ -139,7 +139,6 @@ export default {
 }
 
 .score-main {
-  font-family: 'Courier New', monospace;
   color: #555;
 }
 </style>

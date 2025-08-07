@@ -1,7 +1,7 @@
 <template>
   <v-card class="mb-4">
     <v-card-title class="text-h5">
-      Graphiques de Criminalité
+      Graphiques de Criminalité pour: {{ locationName }}
     </v-card-title>
     <v-card-text>
       <v-row>
