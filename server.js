@@ -88,9 +88,6 @@ const cacheRoutes = require("./routes/cacheRoutes");
 // Make database available to all routes
 app.locals.db = db;
 
-// Initialize cache service
-cacheService.init();
-
 // Attach routes with search rate limiting where applicable
 app.use("/api/communes", searchLimiter, communeRoutes);
 app.use("/api/departements", departementRoutes);
