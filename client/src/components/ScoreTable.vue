@@ -350,71 +350,9 @@ export default {
 /* Responsive table */
 @media (max-width: 768px) {
   .score-table {
-    width: 100%;
-    font-size: 14px;
-  }
-  
-  .score-table,
-  .score-table thead,
-  .score-table tbody,
-  .score-table th,
-  .score-table td,
-  .score-table tr {
     display: block;
-  }
-  
-  .score-header {
-    display: none;
-  }
-  
-  .score-row {
-    border: 1px solid #ddd;
-    margin-bottom: 10px;
-    padding: 10px;
-    border-radius: 4px;
-    background-color: #fff;
-  }
-  
-  .score-row.sub-row {
-    margin-left: 15px;
-    margin-bottom: 5px;
-    background-color: #f8f9fa;
-  }
-  
-  .score-row td {
-    border: none;
-    padding: 4px 0;
-    text-align: left !important;
-  }
-  
-  .row-title {
-    font-weight: bold;
-    font-size: 16px;
-    margin-bottom: 5px;
-    padding: 0 !important;
-  }
-  
-  .row-title.sub-row {
-    font-size: 14px;
-    padding-left: 0 !important;
-  }
-  
-  .score-main::before {
-    content: "Valeur: ";
-    font-weight: bold;
-    color: #666;
-  }
-  
-  .score-compare::before {
-    content: "Comparaison: ";
-    font-weight: bold;
-    color: #666;
-  }
-  
-  .score-main,
-  .score-compare {
-    padding: 2px 0 !important;
-    font-size: 14px;
+    overflow-x: auto;
+    min-width: 600px;
   }
 }
 </style>
