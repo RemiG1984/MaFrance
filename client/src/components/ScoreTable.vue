@@ -138,12 +138,6 @@ export default {
 
       const rows = []
 
-      // Add population row first
-      const populationMetric = MetricsConfig.getMetricByValue('population')
-      if (MetricsConfig.isMetricAvailable('population', level)) {
-        rows.push(this.createRow(populationMetric, storeSection, compareStoreSection))
-      }
-
       // Get ordered unique categories, excluding 'général'
       const categories = this.getUniqueCategories()
 
