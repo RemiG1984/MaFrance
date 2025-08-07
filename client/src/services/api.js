@@ -1,11 +1,111 @@
-// Service API pour gérer les appels au backend
+
+// Service API pour gérer les appels au backend avec cache
 class ApiService {
     constructor() {
         this.baseURL = import.meta.env.VITE_API_BASE_URL || "";
+        this.cache = new Map();
+        this.cacheExpiry = 24 * 60 * 60 * 1000; // 24 hours
+        this.activeRequests = new Map();
+        this.persistentStorage = this.initPersistentStorage();
     }
 
-    async request(endpoint, options = {}) {
+    /**
+     * Initialize persistent storage for cross-session caching
+     */
+    initPersistentStorage() {
+        try {
+            return {
+                get: (key) => {
+                    const item = localStorage.getItem(`api_cache_${key}`);
+                    return item ? JSON.parse(item) : null;
+                },
+                set: (key, value) => {
+                    try {
+                        localStorage.setItem(`api_cache_${key}`, JSON.stringify(value));
+                    } catch (e) {
+                        console.warn('Cache storage full, clearing old entries');
+                        this.clearOldCacheEntries();
+                    }
+                },
+                remove: (key) => localStorage.removeItem(`api_cache_${key}`)
+            };
+        } catch (e) {
+            return { get: () => null, set: () => {}, remove: () => {} };
+        }
+    }
+
+    /**
+     * Clear old cache entries when storage is full
+     */
+    clearOldCacheEntries() {
+        const keys = Object.keys(localStorage).filter(key => key.startsWith('api_cache_'));
+        const keysToRemove = keys.slice(0, Math.floor(keys.length * 0.25));
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+    }
+
+    /**
+     * Generate consistent cache key
+     */
+    generateCacheKey(endpoint, options) {
+        const optionsStr = JSON.stringify(options || {});
+        return btoa(encodeURIComponent(`${endpoint}_${optionsStr}`)).replace(/[^a-zA-Z0-9]/g, '_');
+    }
+
+    /**
+     * Determine if endpoint should be persistently cached
+     */
+    shouldPersistCache(endpoint) {
+        const persistentEndpoints = [
+            '/api/departements/crime_history',
+            '/api/departements/names_history', 
+            '/api/communes/crime_history',
+            '/api/communes/names_history',
+            '/api/country/crime_history',
+            '/api/country/names_history',
+            '/api/qpv/',
+            '/api/departements/details',
+            '/api/communes/details',
+            '/api/country/details',
+            '/api/articles/lieux',
+            '/api/departements',
+            '/api/communes'
+        ];
+        
+        return persistentEndpoints.some(pattern => endpoint.includes(pattern));
+    }
+
+    async request(endpoint, options = {}, useCache = true) {
+        const cacheKey = this.generateCacheKey(endpoint, options);
         const url = `${this.baseURL}${endpoint}`;
+
+        if (useCache) {
+            // Check memory cache first
+            if (this.cache.has(cacheKey)) {
+                const cached = this.cache.get(cacheKey);
+                if (Date.now() - cached.timestamp < this.cacheExpiry) {
+                    console.log("Using memory cached data for:", endpoint);
+                    return cached.data;
+                }
+                this.cache.delete(cacheKey);
+            }
+
+            // Check persistent storage
+            const persistentCached = this.persistentStorage.get(cacheKey);
+            if (persistentCached && Date.now() - persistentCached.timestamp < this.cacheExpiry) {
+                console.log("Using persistent cached data for:", endpoint);
+                this.cache.set(cacheKey, persistentCached);
+                return persistentCached.data;
+            } else if (persistentCached) {
+                this.persistentStorage.remove(cacheKey);
+            }
+        }
+
+        // Check if request is already in progress
+        if (this.activeRequests.has(endpoint)) {
+            console.log("Request already in progress, waiting...", endpoint);
+            return this.activeRequests.get(endpoint);
+        }
+
         const config = {
             headers: {
                 "Content-Type": "application/json",
@@ -14,13 +114,68 @@ class ApiService {
             ...options,
         };
 
-        return fetch(url, config)
-            .then((response) => response.json())
-            .catch(function (error) {
-                // throw error
+        const requestPromise = fetch(url, config)
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then((data) => {
+                // Cache successful responses
+                if (useCache && data) {
+                    const cacheEntry = {
+                        data,
+                        timestamp: Date.now(),
+                    };
+                    
+                    // Store in memory cache
+                    this.cache.set(cacheKey, cacheEntry);
+                    
+                    // Store in persistent cache for specific data types
+                    if (this.shouldPersistCache(endpoint)) {
+                        this.persistentStorage.set(cacheKey, cacheEntry);
+                    }
+                }
+                return data;
+            })
+            .catch((error) => {
                 console.error(`API request failed: ${endpoint}`, error);
                 return null;
+            })
+            .finally(() => {
+                this.activeRequests.delete(endpoint);
             });
+
+        this.activeRequests.set(endpoint, requestPromise);
+        return requestPromise;
+    }
+
+    /**
+     * Clear all caches
+     */
+    clearCache() {
+        this.cache.clear();
+        
+        const keys = Object.keys(localStorage).filter(key => key.startsWith('api_cache_'));
+        keys.forEach(key => localStorage.removeItem(key));
+        
+        console.log("All caches cleared");
+    }
+
+    /**
+     * Get cache statistics
+     */
+    getCacheStats() {
+        const memorySize = this.cache.size;
+        const persistentKeys = Object.keys(localStorage).filter(key => key.startsWith('api_cache_'));
+        const persistentSize = persistentKeys.length;
+        
+        return {
+            memory: memorySize,
+            persistent: persistentSize,
+            total: memorySize + persistentSize
+        };
     }
 }
 
@@ -122,6 +277,10 @@ const api = {
     },
     getCommuneMigrants: (cog) =>
         apiService.request(`/api/migrants/commune/${cog}`),
+
+    // Cache management
+    clearCache: () => apiService.clearCache(),
+    getCacheStats: () => apiService.getCacheStats(),
 };
 
 export default api;
