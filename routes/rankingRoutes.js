@@ -110,6 +110,8 @@ router.get(
       l.mosque_p100k,
       l.total_qpv,
       l.pop_in_qpv_pct,
+      l.Total_places_migrants,
+      l.places_migrants_p1k,
       (COALESCE(l.insecurite_score, 0) + COALESCE(l.immigration_score, 0) + COALESCE(l.islamisation_score, 0) + COALESCE(l.defrancisation_score, 0) + COALESCE(l.wokisme_score, 0)) / 5 AS total_score,
       cn.musulman_pct, 
       cn.africain_pct, 
@@ -136,11 +138,13 @@ router.get(
        COALESCE(cc.trafic_de_stupefiants_p1k, 0)) AS stupefiants_p1k,
       COALESCE(cc.escroqueries_p1k, 0) AS escroqueries_p1k,
       (COALESCE(cn.musulman_pct, 0) + COALESCE(cn.africain_pct, 0) + COALESCE(cn.asiatique_pct, 0)) AS extra_europeen_pct,
-      (COALESCE(cn.traditionnel_pct, 0) + COALESCE(cn.moderne_pct, 0)) AS prenom_francais_pct
+      (COALESCE(cn.traditionnel_pct, 0) + COALESCE(cn.moderne_pct, 0)) AS prenom_francais_pct,
+      COALESCE(cs.total_subventions_parHab, 0) AS total_subventions_parHab
     FROM locations l
     LEFT JOIN LatestCommuneNames cn ON l.COG = cn.COG
     LEFT JOIN commune_crime cc ON l.COG = cc.COG 
       AND cc.annee = (SELECT MAX(annee) FROM commune_crime WHERE COG = l.COG)
+    LEFT JOIN commune_subventions cs ON l.COG = cs.COG
     WHERE (l.departement = ? OR ? = '')
     ${populationFilter}
     ORDER BY ${sort} ${direction}, ${secondarySort}
@@ -204,6 +208,8 @@ router.get(
       d.mosque_p100k,
       d.total_qpv,
       d.pop_in_qpv_pct,
+      d.Total_places_migrants,
+      d.places_migrants_p1k,
       (COALESCE(d.insecurite_score, 0) + COALESCE(d.immigration_score, 0) + COALESCE(d.islamisation_score, 0) + COALESCE(d.defrancisation_score, 0) + COALESCE(d.wokisme_score, 0)) /5 AS total_score,
       dn.musulman_pct, 
       dn.africain_pct, 
@@ -231,11 +237,13 @@ router.get(
        COALESCE(dc.trafic_de_stupefiants_p1k, 0)) AS stupefiants_p1k,
       COALESCE(dc.escroqueries_p1k, 0) AS escroqueries_p1k,
       ROUND(COALESCE(dn.musulman_pct, 0) + COALESCE(dn.africain_pct, 0) + COALESCE(dn.asiatique_pct, 0)) AS extra_europeen_pct,
-      ROUND(COALESCE(dn.traditionnel_pct, 0) + COALESCE(dn.moderne_pct, 0)) AS prenom_francais_pct
+      ROUND(COALESCE(dn.traditionnel_pct, 0) + COALESCE(dn.moderne_pct, 0)) AS prenom_francais_pct,
+      COALESCE(ds.total_subventions_parHab, 0) AS total_subventions_parHab
     FROM departements d
     LEFT JOIN LatestDepartmentNames dn ON d.departement = dn.dpt
     LEFT JOIN department_crime dc ON d.departement = dc.dep 
       AND dc.annee = (SELECT MAX(annee) FROM department_crime WHERE dep = d.departement)
+    LEFT JOIN department_subventions ds ON d.departement = ds.dep
     ORDER BY ${sort} ${direction}
     LIMIT ? OFFSET ?
   `;
