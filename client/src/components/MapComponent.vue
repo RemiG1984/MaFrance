@@ -167,10 +167,8 @@ export default {
     },
   },
   mounted() {
-    this.$nextTick(() => {
-      this.initMap()
-      this.colorscale = chroma.scale(this.scaleColors).domain([0, 1]);
-    })
+    this.initMap()
+    this.colorscale = chroma.scale(this.scaleColors).domain([0, 1]);
   },
   methods: {
     async initMap() {
@@ -178,20 +176,6 @@ export default {
         console.error('Leaflet not loaded')
         return
       }
-      
-      // Ensure DOM element exists
-      const mapElement = document.getElementById('map')
-      if (!mapElement) {
-        console.error('Map container not found')
-        return
-      }
-      
-      // Clean up existing map if any
-      if (this.map) {
-        this.map.remove()
-        this.map = null
-      }
-      
       const p = 1
       const maxBounds = [
         [41.362164776515-p, -5.138001239929-p],
@@ -705,19 +689,7 @@ export default {
   beforeUnmount() {
     if (this.map) {
       this.map.remove()
-      this.map = null
     }
-  },
-  beforeRouteEnter(to, from, next) {
-    next(vm => {
-      // Reinitialize map when entering route
-      vm.$nextTick(() => {
-        if (!vm.map) {
-          vm.initMap()
-          vm.colorscale = chroma.scale(vm.scaleColors).domain([0, 1]);
-        }
-      })
-    })
   }
 }
 </script>
