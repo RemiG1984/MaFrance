@@ -14,11 +14,12 @@ const {
 } = require("../middleware/validate");
 
 // Centralized error handler for database queries
-const handleDbError = (err, next) => {
-  const error = new Error("Erreur lors de la requête à la base de données");
-  error.status = 500;
-  error.details = err.message;
-  return next(error);
+const handleDbError = (err, res) => {
+  console.error("Database error:", err.message);
+  res.status(500).json({
+    error: "Erreur lors de la requête à la base de données",
+    details: err.message,
+  });
 };
 
 // GET /api/communes
@@ -73,7 +74,7 @@ router.get("/all", (req, res) => {
     "SELECT COG, departement, commune, population, logements_sociaux_pct, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct, total_places_migrants, places_migrants_p1k FROM locations",
     [],
     (err, rows) => {
-      if (err) return handleDbError(res, err);
+      if (err) return handleDbError(err, res);
       res.json(rows);
     },
   );

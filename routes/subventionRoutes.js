@@ -1,7 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const { param, validationResult } = require("express-validator");
-const { handleDbError } = require("../middleware/errorHandler");
+// Centralized error handler for database queries
+const handleDbError = (err, res) => {
+  console.error("Database error:", err.message);
+  res.status(500).json({
+    error: "Erreur lors de la requête à la base de données",
+    details: err.message,
+  });
+};
 const {
     validateDepartementParam,
     validateCOGParam,

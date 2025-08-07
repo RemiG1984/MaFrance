@@ -8,11 +8,12 @@ const {
 } = require("../middleware/validate");
 
 // Centralized error handler for database queries
-const handleDbError = (err, next) => {
-  const error = new Error("Erreur lors de la requête à la base de données");
-  error.status = 500;
-  error.details = err.message;
-  return next(error);
+const handleDbError = (err, res) => {
+  console.error("Database error:", err.message);
+  res.status(500).json({
+    error: "Erreur lors de la requête à la base de données",
+    details: err.message,
+  });
 };
 
 // Base condition for articles with at least one category flag
@@ -43,7 +44,7 @@ router.get(
     sql += " ORDER BY date DESC";
 
     db.all(sql, params, (err, rows) => {
-      if (err) return handleDbError(res, err);
+      if (err) return handleDbError(err, res);
       res.json(rows);
     });
   },
@@ -77,7 +78,7 @@ router.get(
     }
 
     db.get(sql, params, (err, row) => {
-      if (err) return handleDbError(res, err);
+      if (err) return handleDbError(err, res);
       const result = {
         insecurite: row?.insecurite_count || 0,
         immigration: row?.immigration_count || 0,
@@ -111,7 +112,7 @@ router.get(
     }
 
     db.all(sql, params, (err, rows) => {
-      if (err) return handleDbError(res, err);
+      if (err) return handleDbError(err, res);
       const lieuxSet = new Set();
       rows.forEach((row) => {
         if (row.lieu) {
