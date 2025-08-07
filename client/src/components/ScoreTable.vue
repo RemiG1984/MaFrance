@@ -189,7 +189,7 @@ export default {
       return MetricsConfig.metrics
         .map(m => m.category)
         .filter(c => {
-          if (c === 'général' || seen.has(c)) return false
+          if (seen.has(c)) return false
           seen.add(c)
           return true
         })
