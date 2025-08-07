@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../config/db");
+const cacheService = require("../services/cacheService");
 const {
   validateDepartement,
   validateSort,
@@ -32,6 +33,14 @@ router.get("/", (req, res) => {
 // GET /api/departements/details
 router.get("/details", validateDepartement, (req, res) => {
   const { dept } = req.query;
+  
+  // Try cache first
+  const cachedData = cacheService.get(`dept_details_${dept}`);
+  if (cachedData) {
+    return res.json(cachedData);
+  }
+  
+  // Fallback to database if not in cache
   const normalizedDept =
     /^\d+$/.test(dept) && dept.length < 2 ? dept.padStart(2, "0") : dept;
 
@@ -70,6 +79,9 @@ router.get("/details", validateDepartement, (req, res) => {
   db.get(sql, [normalizedDept, dept], (err, row) => {
     if (err) return handleDbError(res, err);
     if (!row) return res.status(404).json({ error: "Département non trouvé" });
+    
+    // Cache the result
+    cacheService.set(`dept_details_${dept}`, row);
     res.json(row);
   });
 });
@@ -77,6 +89,13 @@ router.get("/details", validateDepartement, (req, res) => {
 // GET /api/departements/names
 router.get("/names", validateDepartement, (req, res) => {
   const { dept } = req.query;
+  
+  // Try cache first
+  const cachedData = cacheService.get(`dept_names_${dept}`);
+  if (cachedData) {
+    return res.json(cachedData);
+  }
+  
   db.get(
     `SELECT musulman_pct, africain_pct, asiatique_pct, traditionnel_pct, moderne_pct, annais
      FROM department_names 
@@ -88,6 +107,9 @@ router.get("/names", validateDepartement, (req, res) => {
         return res.status(404).json({
           error: "Données de prénoms non trouvées pour la dernière année",
         });
+      
+      // Cache the result
+      cacheService.set(`dept_names_${dept}`, row);
       res.json(row);
     },
   );
@@ -96,6 +118,13 @@ router.get("/names", validateDepartement, (req, res) => {
 // GET /api/departements/names_history
 router.get("/names_history", validateDepartement, (req, res) => {
   const { dept } = req.query;
+  
+  // Try cache first
+  const cachedData = cacheService.get(`dept_names_history_${dept}`);
+  if (cachedData) {
+    return res.json(cachedData);
+  }
+  
   db.all(
     `SELECT musulman_pct, africain_pct, asiatique_pct, traditionnel_pct, moderne_pct, invente_pct, europeen_pct, annais
      FROM department_names 
@@ -104,6 +133,9 @@ router.get("/names_history", validateDepartement, (req, res) => {
     [dept],
     (err, rows) => {
       if (err) return handleDbError(res, err);
+      
+      // Cache the result
+      cacheService.set(`dept_names_history_${dept}`, rows);
       res.json(rows);
     },
   );
@@ -112,6 +144,13 @@ router.get("/names_history", validateDepartement, (req, res) => {
 // GET /api/departements/crime
 router.get("/crime", validateDepartement, (req, res) => {
   const { dept } = req.query;
+  
+  // Try cache first
+  const cachedData = cacheService.get(`dept_crime_${dept}`);
+  if (cachedData) {
+    return res.json(cachedData);
+  }
+  
   db.get(
     `SELECT * 
      FROM department_crime 
@@ -123,6 +162,9 @@ router.get("/crime", validateDepartement, (req, res) => {
         return res.status(404).json({
           error: "Données criminelles non trouvées pour la dernière année",
         });
+      
+      // Cache the result
+      cacheService.set(`dept_crime_${dept}`, row);
       res.json(row);
     },
   );
@@ -131,6 +173,13 @@ router.get("/crime", validateDepartement, (req, res) => {
 // GET /api/departements/crime_history
 router.get("/crime_history", validateDepartement, (req, res) => {
   const { dept } = req.query;
+  
+  // Try cache first
+  const cachedData = cacheService.get(`dept_crime_history_${dept}`);
+  if (cachedData) {
+    return res.json(cachedData);
+  }
+  
   db.all(
     `SELECT *
      FROM department_crime 
@@ -139,6 +188,9 @@ router.get("/crime_history", validateDepartement, (req, res) => {
     [dept],
     (err, rows) => {
       if (err) return handleDbError(res, err);
+      
+      // Cache the result
+      cacheService.set(`dept_crime_history_${dept}`, rows);
       res.json(rows);
     },
   );
@@ -147,12 +199,22 @@ router.get("/crime_history", validateDepartement, (req, res) => {
 // GET /api/departements/prefet
 router.get("/prefet", validateDepartement, (req, res) => {
   const { dept } = req.query;
+  
+  // Try cache first
+  const cachedData = cacheService.get(`prefet_${dept}`);
+  if (cachedData) {
+    return res.json(cachedData);
+  }
+  
   db.get(
     "SELECT code, prenom, nom, date_poste FROM prefets WHERE code = ?",
     [dept],
     (err, row) => {
       if (err) return handleDbError(res, err);
       if (!row) return res.status(404).json({ error: "Préfet non trouvé" });
+      
+      // Cache the result
+      cacheService.set(`prefet_${dept}`, row);
       res.json(row);
     },
   );

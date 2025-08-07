@@ -8,6 +8,8 @@ const cors = require('cors');
 const config = require("./config");
 const db = require("./config/db");
 const app = express();
+const compression = require("compression");
+const cacheService = require("./services/cacheService");
 
 // Security middleware
 app.use(helmet({
@@ -24,7 +26,7 @@ app.use(helmet({
 }));
 
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' ? 
+  origin: process.env.NODE_ENV === 'production' ?
     ['https://your-domain.com'] : // Replace with your actual domain
     true,
   credentials: true
@@ -72,18 +74,22 @@ const distPath = path.resolve(__dirname, "dist");
 app.use(express.static(distPath));
 
 // Routes
-const communeRoutes = require("./routes/communeRoutes");
-const departementRoutes = require("./routes/departementRoutes");
-const countryRoutes = require("./routes/countryRoutes");
 const articleRoutes = require("./routes/articleRoutes");
-const subventionRoutes = require('./routes/subventionRoutes');
-const migrantRoutes = require('./routes/migrantRoutes');
+const communeRoutes = require("./routes/communeRoutes");
+const countryRoutes = require("./routes/countryRoutes");
+const departementRoutes = require("./routes/departementRoutes");
+const migrantRoutes = require("./routes/migrantRoutes");
 const otherRoutes = require("./routes/otherRoutes");
 const qpvRoutes = require("./routes/qpvRoutes");
 const rankingRoutes = require("./routes/rankingRoutes");
+const subventionRoutes = require("./routes/subventionRoutes");
+const cacheRoutes = require("./routes/cacheRoutes");
 
 // Make database available to all routes
 app.locals.db = db;
+
+// Initialize cache service
+cacheService.init();
 
 // Attach routes with search rate limiting where applicable
 app.use("/api/communes", searchLimiter, communeRoutes);
@@ -95,6 +101,7 @@ app.use('/api/rankings', rankingRoutes);
 app.use('/api/subventions', subventionRoutes);
 app.use('/api/migrants', migrantRoutes);
 app.use("/api", otherRoutes);
+app.use("/api/cache", cacheRoutes);
 
 // Catch-all route: redirect non-API routes to root with original path
 app.get('/{*path}', (req, res) => {
