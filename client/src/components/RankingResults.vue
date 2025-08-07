@@ -63,7 +63,6 @@
 
 <script>
 import { computed } from 'vue'
-import { useDataStore } from '../services/store.js'
 import { MetricsConfig } from '../utils/metricsConfig.js'
 
 export default {
@@ -87,11 +86,7 @@ export default {
     }
   },
   setup(props) {
-    const store = useDataStore()
-    
     const metricName = computed(() => {
-      // Make this reactive to store.labelState changes
-      store.labelState
       return MetricsConfig.getMetricLabel(props.metric)
     })
 
