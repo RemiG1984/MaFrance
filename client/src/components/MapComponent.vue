@@ -3,7 +3,7 @@
     <v-card-text class="pa-0 position-relative">
       <div id="map" class="map-container"></div>
       <v-select
-        style="max-width: 300px; z-index: 9999; position: absolute; top: 10px; right: 10px;"
+        style="max-width: 300px; z-index: 19999; position: absolute; top: 10px; right: 10px;"
         v-model="selectedMetric"
         @update:model-value="onMetricChange"
         :items="availableMetrics"
