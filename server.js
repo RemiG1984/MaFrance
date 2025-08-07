@@ -21,6 +21,9 @@ app.use(
   }),
 );
 
+// Serve Vue.js built files
+app.use(express.static(path.join(__dirname, "dist")));
+
 // Routes
 const communeRoutes = require("./routes/communeRoutes");
 const departementRoutes = require("./routes/departementRoutes");
@@ -36,7 +39,7 @@ const rankingRoutes = require("./routes/rankingRoutes");
 // Make database available to all routes
 app.locals.db = db;
 
-// API Routes
+// Attach routes
 app.use("/api/communes", communeRoutes);
 app.use("/api/departements", departementRoutes);
 app.use("/api/country", countryRoutes);
@@ -48,9 +51,9 @@ app.use('/api/subventions', subventionRoutes);
 app.use('/api/migrants', migrantRoutes);
 app.use("/api", otherRoutes);
 
-// SPA fallback - serve index.html for all non-API routes
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+// Catch-all route for Vue.js SPA: serve index.html for all non-API routes
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "dist", "index.html"));
 });
 
 // Error handling
@@ -62,7 +65,7 @@ app.get("/", (req, res) => {
   if (req.headers["user-agent"]?.includes("GoogleHC")) {
     return res.status(200).send("OK");
   }
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+  res.sendFile(path.join(__dirname, "dist", "index.html"));
 });
 
 // Start server
