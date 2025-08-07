@@ -163,7 +163,7 @@ router.get("/ministre", validateCountry, (req, res) => {
   }
 
   db.get(
-    `SELECT country, prenom, nom, sexe, date_nais, date_mandat, famille_nuance, nuance_politique 
+    `SELECT prenom, nom, date_mandat, famille_nuance, nuance_politique 
      FROM ministre_interieur 
      WHERE UPPER(country) = ? 
      ORDER BY date_mandat DESC LIMIT 1`,

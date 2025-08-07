@@ -207,7 +207,7 @@ router.get("/prefet", validateDepartement, (req, res) => {
   }
   
   db.get(
-    "SELECT code, prenom, nom, date_poste FROM prefets WHERE code = ?",
+    "SELECT prenom, nom, date_poste FROM prefets WHERE code = ?",
     [dept],
     (err, row) => {
       if (err) return handleDbError(res, err);

@@ -195,7 +195,7 @@ const nuanceMap = {
 router.get("/maire", validateCOG, (req, res) => {
   const { cog } = req.query;
   db.get(
-    "SELECT cog, commune, prenom, nom, sexe, date_nais, date_mandat, famille_nuance, nuance_politique FROM maires WHERE cog = ?",
+    "SELECT cog, prenom, nom, date_mandat, famille_nuance, nuance_politique FROM maires WHERE cog = ?",
     [cog],
     (err, row) => {
       if (err) return handleDbError(res, err);
