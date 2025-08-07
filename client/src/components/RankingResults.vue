@@ -62,7 +62,8 @@
 </template>
 
 <script>
-import { computed } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { useDataStore } from '../services/store.js'
 import { MetricsConfig } from '../utils/metricsConfig.js'
 
 export default {
@@ -86,7 +87,12 @@ export default {
     }
   },
   setup(props) {
+    const store = useDataStore()
+    const labelStateKey = ref(store.labelState)
+
     const metricName = computed(() => {
+      // Force reactivity by accessing labelStateKey
+      labelStateKey.value
       return MetricsConfig.getMetricLabel(props.metric)
     })
 
@@ -110,6 +116,19 @@ export default {
     const formatMetricValue = (value) => {
       return MetricsConfig.formatMetricValue(value, props.metric)
     }
+
+    // Listen for label state changes
+    const handleLabelChange = (event) => {
+      labelStateKey.value = event.detail.labelState
+    }
+
+    onMounted(() => {
+      window.addEventListener('metricsLabelsToggled', handleLabelChange)
+    })
+
+    onUnmounted(() => {
+      window.removeEventListener('metricsLabelsToggled', handleLabelChange)
+    })
 
     return {
       metricName,
