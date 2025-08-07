@@ -167,14 +167,29 @@ export default {
     },
   },
   mounted() {
-    this.initMap()
-    this.colorscale = chroma.scale(this.scaleColors).domain([0, 1]);
+    this.$nextTick(() => {
+      this.initMap()
+      this.colorscale = chroma.scale(this.scaleColors).domain([0, 1]);
+    })
   },
   methods: {
     async initMap() {
       if (typeof L === 'undefined') {
         console.error('Leaflet not loaded')
         return
+      }
+      
+      // Ensure DOM element exists and is not already initialized
+      const mapElement = document.getElementById('map')
+      if (!mapElement) {
+        console.error('Map container not found')
+        return
+      }
+      
+      // Clean up existing map if any
+      if (this.map) {
+        this.map.remove()
+        this.map = null
       }
       const p = 1
       const maxBounds = [
@@ -689,6 +704,23 @@ export default {
   beforeUnmount() {
     if (this.map) {
       this.map.remove()
+      this.map = null
+    }
+  },
+  activated() {
+    // Called when component is activated (if using keep-alive)
+    if (!this.map) {
+      this.$nextTick(() => {
+        this.initMap()
+        this.colorscale = chroma.scale(this.scaleColors).domain([0, 1]);
+      })
+    }
+  },
+  deactivated() {
+    // Called when component is deactivated (if using keep-alive)
+    if (this.map) {
+      this.map.remove()
+      this.map = null
     }
   }
 }
