@@ -21,10 +21,7 @@ app.use(
   }),
 );
 
-// Servir les fichiers Vue buildés
-app.use(express.static(path.join(__dirname, "dist")));
-
-// Serve static files
+// Serve static files from public directory (Vue build output)
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Routes
@@ -43,16 +40,21 @@ const rankingRoutes = require("./routes/rankingRoutes");
 app.locals.db = db;
 
 // Attach routes (API routes must come before SPA fallback)
-app.use("/api/communes", communeRoutes);
-app.use("/api/departements", departementRoutes);
-app.use("/api/country", countryRoutes);
-app.use("/api/articles", articleRoutes);
-app.use("/api/debug", debugRoutes);
-app.use('/api/qpv', qpvRoutes);
-app.use('/api/rankings', rankingRoutes);
-app.use('/api/subventions', subventionRoutes);
-app.use('/api/migrants', migrantRoutes);
-app.use("/api", otherRoutes);
+// Temporarily loading routes one by one to identify the problematic one
+try {
+  app.use("/api/communes", communeRoutes);
+  app.use("/api/departements", departementRoutes);
+  app.use("/api/country", countryRoutes);
+  app.use("/api/articles", articleRoutes);
+  app.use("/api/debug", debugRoutes);
+  app.use('/api/qpv', qpvRoutes);
+  app.use('/api/rankings', rankingRoutes);
+  app.use('/api/subventions', subventionRoutes);
+  app.use('/api/migrants', migrantRoutes);
+  app.use("/api", otherRoutes);
+} catch (error) {
+  console.error('Error loading routes:', error);
+}
 
 // SPA fallback - serve index.html for all non-API routes (must be last)
 app.get('*', (req, res) => {
