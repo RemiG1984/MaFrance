@@ -1,4 +1,3 @@
-
 <template>
   <div class="ranking-filters">
     <!-- Main Controls -->
@@ -42,25 +41,25 @@
     </div>
 
     <!-- Advanced Filters Toggle -->
-    <button class="tweaking-toggle" @click="toggleFilters">
+    <button class="tweaking-toggle" @click="showFilters = !showFilters">
       Paramètres avancés
     </button>
-    
+
     <div class="tweaking-box" :class="{ active: showFilters }">
       <div class="population-controls">
         <div class="form-group">
           <label for="popLower">Pop min:</label>
-          <select id="popLower" v-model="localFilters.popLower" @change="emitFiltersChanged">
+          <select id="popLower" v-model="filters.popLower" @change="emitFiltersChanged">
             <option :value="null">Aucune limite</option>
             <option :value="1000">1k</option>
             <option :value="10000">10k</option>
             <option :value="100000">100k</option>
           </select>
         </div>
-        
+
         <div class="form-group">
           <label for="popUpper">Pop max:</label>
-          <select id="popUpper" v-model="localFilters.popUpper" @change="emitFiltersChanged">
+          <select id="popUpper" v-model="filters.popUpper" @change="emitFiltersChanged">
             <option :value="null">Aucune limite</option>
             <option :value="1000">1k</option>
             <option :value="10000">10k</option>
@@ -68,30 +67,24 @@
           </select>
         </div>
       </div>
-      
+
       <div class="form-group">
         <label for="topLimit">Nombre de résultats (Top/Bottom) :</label>
         <input 
           type="number" 
           id="topLimit" 
-          v-model.number="localFilters.topLimit"
+          v-model.number="filters.topLimit"
           @input="emitFiltersChanged"
           min="1" 
           max="100"
         >
-      </div>
-      
-      <div class="button-container">
-        <button @click="applyFilters" class="apply-button">
-          Appliquer
-        </button>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { ref, reactive, watch, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { MetricsConfig } from '../utils/metricsConfig.js'
 import { DepartementNames } from '../utils/departementNames.js'
 
@@ -99,13 +92,13 @@ export default {
   name: 'RankingFilters',
   emits: ['filters-changed', 'selection-changed'],
   setup(props, { emit }) {
+    // Reactive state
     const showFilters = ref(false)
     const selectedScope = ref('departements')
     const selectedDepartement = ref('')
     const selectedMetric = ref('')
-    const departments = ref([])
-    
-    const localFilters = reactive({
+
+    const filters = reactive({
       popLower: null,
       popUpper: null,
       topLimit: 10
@@ -113,64 +106,37 @@ export default {
 
     // Computed properties
     const currentLevel = computed(() => {
-      return (selectedScope.value === 'communes_france' || selectedScope.value === 'communes_dept') 
-        ? 'commune' 
-        : 'departement'
+      return selectedScope.value.includes('communes') ? 'commune' : 'departement'
     })
 
     const availableMetricOptions = computed(() => {
       return MetricsConfig.getAvailableMetricOptions(currentLevel.value)
     })
 
+    const departments = computed(() => {
+      return Object.entries(DepartementNames)
+        .sort(([a], [b]) => {
+          const parseCode = (code) => {
+            if (code === '2A') return 20.1
+            if (code === '2B') return 20.2
+            return parseInt(code, 10)
+          }
+          return parseCode(a) - parseCode(b)
+        })
+        .map(([code, name]) => ({
+          code,
+          name: `${code} - ${name}`
+        }))
+    })
+
     // Methods
-    const loadDepartements = async () => {
-      try {
-        // Use DepartementNames directly like LocationSelector.vue
-        departments.value = Object.entries(DepartementNames)
-          .sort(([a], [b]) => {
-            const parseCode = (code) => {
-              if (code === '2A') return 20.1
-              if (code === '2B') return 20.2
-              return parseInt(code, 10)
-            }
-            return parseCode(a) - parseCode(b)
-          })
-          .map(([code, name]) => ({
-            code,
-            name: `${code} - ${name}`
-          }));
-      } catch (err) {
-        console.warn('Erreur chargement départements:', err);
-      }
-    }
-
-    const toggleFilters = () => {
-      showFilters.value = !showFilters.value
-    }
-
-    const validateFilters = () => {
-      const validPopValues = [1000, 10000, 100000]
-      
-      if (localFilters.popLower !== null && !validPopValues.includes(localFilters.popLower)) {
-        return "Valeur de population minimale invalide."
-      }
-      
-      if (localFilters.popUpper !== null && !validPopValues.includes(localFilters.popUpper)) {
-        return "Valeur de population maximale invalide."
-      }
-      
-      if (localFilters.popLower !== null && localFilters.popUpper !== null && localFilters.popLower > localFilters.popUpper) {
-        return "La population minimale ne peut pas être supérieure à la population maximale."
-      }
-      
-      return null
-    }
-
     const emitFiltersChanged = () => {
-      const error = validateFilters()
-      if (!error) {
-        emit('filters-changed', { ...localFilters })
+      // Simple validation
+      if (filters.popLower !== null && filters.popUpper !== null && filters.popLower > filters.popUpper) {
+        console.warn('Population min cannot be greater than max')
+        return
       }
+      emit('filters-changed', { ...filters })
     }
 
     const emitSelectionChanged = () => {
@@ -188,37 +154,18 @@ export default {
       emitSelectionChanged()
     }
 
-    const applyFilters = () => {
-      emitFiltersChanged()
-    }
-
-    // Watch for changes and validate
-    watch(localFilters, () => {
-      const error = validateFilters()
-      if (error) {
-        console.warn('Filter validation error:', error)
-      }
-    })
-
-    // Lifecycle
-    onMounted(() => {
-      loadDepartements()
-    })
-
     return {
       showFilters,
       selectedScope,
       selectedDepartement,
       selectedMetric,
-      departments,
-      localFilters,
+      filters,
       currentLevel,
       availableMetricOptions,
-      toggleFilters,
+      departments,
       emitFiltersChanged,
       emitSelectionChanged,
-      onScopeChange,
-      applyFilters
+      onScopeChange
     }
   }
 }
@@ -292,34 +239,15 @@ export default {
   font-size: 14px;
 }
 
-.button-container {
-  margin-top: 15px;
-}
-
-.apply-button {
-  background: #28a745;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.2s;
-}
-
-.apply-button:hover {
-  background: #218838;
-}
-
 @media (max-width: 768px) {
   .main-controls {
     flex-direction: column;
   }
-  
+
   .population-controls {
     flex-direction: column;
   }
-  
+
   .form-group {
     min-width: auto;
   }
