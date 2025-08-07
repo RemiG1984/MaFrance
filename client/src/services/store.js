@@ -140,7 +140,7 @@ export const useDataStore = defineStore("data", {
         departement.articles = results[8];
         departement.articlesCounts = results[9];
         departement.subventions = results[10];
-        departement.migrants = results[11];
+        departement.migrants = results[11] || [];
         departement.namesSeries = this.serializeStats(departement.namesHistory);
         departement.crimeSeries = this.serializeStats(results[3]);
         departement.crimeAggreg = this.aggregateStats(
@@ -185,7 +185,7 @@ export const useDataStore = defineStore("data", {
         commune.articles = results[5];
         commune.articlesCounts = results[6];
         commune.subventions = results[7];
-        commune.migrants = results[8];
+        commune.migrants = results[8] || [];
         commune.crimeSeries = this.serializeStats(results[2]);
         commune.crimeAggreg = this.aggregateStats(commune.crimeSeries.data);
 
@@ -451,7 +451,7 @@ export const useDataStore = defineStore("data", {
       try {
         const data = await api.getDepartementMigrants(deptCode)
         if (data) {
-          this.departement.migrants = data.migrants || []
+          this.departement.migrants = data || []
         }
       } catch (error) {
         console.error('Failed to load departement migrants:', error)
@@ -477,7 +477,7 @@ export const useDataStore = defineStore("data", {
       try {
         const data = await api.getCommuneMigrants(cog)
         if (data) {
-          this.commune.migrants = data.migrants || []
+          this.commune.migrants = data || []
         }
       } catch (error) {
         console.error('Failed to load commune migrants:', error)
