@@ -83,6 +83,9 @@ class CacheService {
             // Cache ministre data
             await this.cacheMinistereData('France');
             
+            // Cache department rankings
+            await this.cacheDepartmentRankings();
+            
             console.log('Cached data for France');
         } catch (error) {
             console.error('Error caching country data:', error);
@@ -341,6 +344,76 @@ class CacheService {
                     resolve(row);
                 }
             );
+        });
+    }
+
+    async cacheDepartmentRankings() {
+        return new Promise((resolve, reject) => {
+            const sql = `
+            WITH LatestDepartmentNames AS (
+              SELECT dpt, musulman_pct, africain_pct, asiatique_pct, traditionnel_pct, moderne_pct, annais
+              FROM department_names dn
+              WHERE dn.annais = (SELECT MAX(annais) FROM department_names WHERE dpt = dn.dpt)
+              GROUP BY dpt
+            )
+            SELECT 
+              d.departement, 
+              d.population, 
+              d.logements_sociaux_pct,
+              d.insecurite_score, 
+              d.immigration_score, 
+              d.islamisation_score, 
+              d.defrancisation_score, 
+              d.wokisme_score, 
+              d.number_of_mosques, 
+              d.mosque_p100k,
+              d.total_qpv,
+              d.pop_in_qpv_pct,
+              d.Total_places_migrants,
+              d.places_migrants_p1k,
+              (COALESCE(d.insecurite_score, 0) + COALESCE(d.immigration_score, 0) + COALESCE(d.islamisation_score, 0) + COALESCE(d.defrancisation_score, 0) + COALESCE(d.wokisme_score, 0)) /5 AS total_score,
+              dn.musulman_pct, 
+              dn.africain_pct, 
+              dn.asiatique_pct, 
+              dn.traditionnel_pct, 
+              dn.moderne_pct, 
+              dn.annais,
+              (COALESCE(dc.homicides_p100k, 0) + COALESCE(dc.tentatives_homicides_p100k, 0)) AS homicides_total_p100k,
+              (COALESCE(dc.coups_et_blessures_volontaires_p1k, 0) + 
+               COALESCE(dc.coups_et_blessures_volontaires_intrafamiliaux_p1k, 0) + 
+               COALESCE(dc.autres_coups_et_blessures_volontaires_p1k, 0) + 
+               COALESCE(dc.vols_avec_armes_p1k, 0) + 
+               COALESCE(dc.vols_violents_sans_arme_p1k, 0)) AS violences_physiques_p1k,
+              COALESCE(dc.violences_sexuelles_p1k, 0) AS violences_sexuelles_p1k,
+              (COALESCE(dc.vols_avec_armes_p1k, 0) + 
+               COALESCE(dc.vols_violents_sans_arme_p1k, 0) + 
+               COALESCE(dc.vols_sans_violence_contre_des_personnes_p1k, 0) + 
+               COALESCE(dc.cambriolages_de_logement_p1k, 0) + 
+               COALESCE(dc.vols_de_vehicules_p1k, 0) + 
+               COALESCE(dc.vols_dans_les_vehicules_p1k, 0) + 
+               COALESCE(dc.vols_d_accessoires_sur_vehicules_p1k, 0)) AS vols_p1k,
+              COALESCE(dc.destructions_et_degradations_volontaires_p1k, 0) AS destructions_p1k,
+              (COALESCE(dc.usage_de_stupefiants_p1k, 0) + 
+               COALESCE(dc.usage_de_stupefiants_afd_p1k, 0) + 
+               COALESCE(dc.trafic_de_stupefiants_p1k, 0)) AS stupefiants_p1k,
+              COALESCE(dc.escroqueries_p1k, 0) AS escroqueries_p1k,
+              ROUND(COALESCE(dn.musulman_pct, 0) + COALESCE(dn.africain_pct, 0) + COALESCE(dn.asiatique_pct, 0)) AS extra_europeen_pct,
+              ROUND(COALESCE(dn.traditionnel_pct, 0) + COALESCE(dn.moderne_pct, 0)) AS prenom_francais_pct,
+              COALESCE(ds.total_subventions_parHab, 0) AS total_subventions_parHab
+            FROM departements d
+            LEFT JOIN LatestDepartmentNames dn ON d.departement = dn.dpt
+            LEFT JOIN department_crime dc ON d.departement = dc.dep 
+              AND dc.annee = (SELECT MAX(annee) FROM department_crime WHERE dep = d.departement)
+            LEFT JOIN department_subventions ds ON d.departement = ds.dep
+            ORDER BY d.departement
+            `;
+            
+            db.all(sql, [], (err, rows) => {
+                if (err) return reject(err);
+                this.set('department_rankings', rows);
+                console.log(`Cached department rankings data for ${rows.length} departments`);
+                resolve(rows);
+            });
         });
     }
 }

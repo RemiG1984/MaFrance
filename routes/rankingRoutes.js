@@ -188,6 +188,38 @@ router.get(
       direction = "DESC",
     } = req.query;
 
+    // Try to get cached data first
+    const cacheService = require('../services/cacheService');
+    const cachedData = cacheService.get('department_rankings');
+    
+    if (cachedData) {
+      // Sort the cached data
+      const sortedData = [...cachedData].sort((a, b) => {
+        const aValue = a[sort] || 0;
+        const bValue = b[sort] || 0;
+        
+        if (direction === 'DESC') {
+          if (bValue !== aValue) return bValue - aValue;
+          // Secondary sort by departement code
+          return b.departement.localeCompare(a.departement);
+        } else {
+          if (aValue !== bValue) return aValue - bValue;
+          // Secondary sort by departement code
+          return a.departement.localeCompare(b.departement);
+        }
+      });
+      
+      // Apply pagination
+      const paginatedData = sortedData.slice(offset, offset + parseInt(limit));
+      
+      res.json({
+        data: paginatedData,
+        total_count: sortedData.length,
+      });
+      return;
+    }
+
+    // Fallback to database query if cache is empty
     const sql = `
     WITH LatestDepartmentNames AS (
       SELECT dpt, musulman_pct, africain_pct, asiatique_pct, traditionnel_pct, moderne_pct, annais
