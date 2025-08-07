@@ -3,48 +3,10 @@
 
     <!-- Controls Section -->
     <div class="controls-section">
-      <div class="main-controls">
-        <div class="form-group">
-          <label for="scopeSelect">Portée :</label>
-          <select id="scopeSelect" v-model="selectedScope" @change="onScopeChange">
-            <option value="departements">Départements</option>
-            <option value="communes_france">Communes (France)</option>
-            <option value="communes_dept">Communes (par département)</option>
-          </select>
-        </div>
-
-        <div v-show="selectedScope === 'communes_dept'" class="form-group">
-          <label for="departementSelect">Département :</label>
-          <select id="departementSelect" v-model="selectedDepartement" @change="updateRankings">
-            <option value="">-- Tous les départements --</option>
-            <option 
-              v-for="dept in departments" 
-              :key="dept.code" 
-              :value="dept.code"
-            >
-              {{ dept.name }}
-            </option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="metricSelect">Métrique :</label>
-          <select id="metricSelect" v-model="selectedMetric" @change="updateRankings">
-            <option value="">-- Choisir une métrique --</option>
-            <option 
-              v-for="option in availableMetricOptions" 
-              :key="option.value" 
-              :value="option.value"
-            >
-              {{ option.label }}
-            </option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Tweaking controls -->
+      <!-- All controls moved to RankingFilters -->
       <RankingFilters 
         @filters-changed="onFiltersChanged"
+        @selection-changed="onSelectionChanged"
         ref="rankingFilters"
       />
     </div>
@@ -98,10 +60,10 @@ export default {
     const selectedScope = ref('departements')
     const selectedDepartement = ref('')
     const selectedMetric = ref('')
+    const currentLevel = ref('departement')
     const rankings = ref([])
     const loading = ref(false)
     const error = ref('')
-    const departments = ref([])
     const filters = ref({
       popLower: null,
       popUpper: null,
@@ -109,41 +71,9 @@ export default {
     })
 
     // Computed properties
-    const currentLevel = computed(() => {
-      return (selectedScope.value === 'communes_france' || selectedScope.value === 'communes_dept') 
-        ? 'commune' 
-        : 'departement'
-    })
-
     const currentType = computed(() => {
       return currentLevel.value === 'commune' ? 'Commune' : 'Département'
     })
-
-    const availableMetricOptions = computed(() => {
-      return MetricsConfig.getAvailableMetricOptions(currentLevel.value)
-    })
-
-    // Methods
-    const loadDepartements = async () => {
-      try {
-        // Use DepartementNames directly like LocationSelector.vue
-        departments.value = Object.entries(DepartementNames)
-          .sort(([a], [b]) => {
-            const parseCode = (code) => {
-              if (code === '2A') return 20.1
-              if (code === '2B') return 20.2
-              return parseInt(code, 10)
-            }
-            return parseCode(a) - parseCode(b)
-          })
-          .map(([code, name]) => ({
-            code,
-            name: `${code} - ${name}`
-          }));
-      } catch (err) {
-        console.warn('Erreur chargement départements:', err);
-      }
-    }
 
     const fetchDepartmentRankings = async (metric, limit) => {
       // Use store data for departementsRankings
@@ -411,11 +341,20 @@ export default {
       return ""
     }
 
-    const onScopeChange = () => {
-      selectedDepartement.value = ''
-      selectedMetric.value = ''
+    const onSelectionChanged = (selection) => {
+      selectedScope.value = selection.scope
+      selectedDepartement.value = selection.departement
+      selectedMetric.value = selection.metric
+      currentLevel.value = selection.level
+      
+      // Clear previous results and errors
       rankings.value = []
       error.value = ''
+      
+      // Update rankings if metric is selected
+      if (selectedMetric.value) {
+        updateRankings()
+      }
     }
 
     const onFiltersChanged = (newFilters) => {
@@ -451,8 +390,6 @@ export default {
 
     // Lifecycle
     onMounted(() => {
-      loadDepartements()
-
       // Set initial state from URL parameter (if applicable)
       const urlParams = new URLSearchParams(window.location.search)
       const labelState = urlParams.get('labelState')
@@ -478,16 +415,14 @@ export default {
       selectedScope,
       selectedDepartement,
       selectedMetric,
+      currentLevel,
       rankings,
       loading,
       error,
-      departments,
       filters,
-      currentLevel,
       currentType,
-      availableMetricOptions,
       updateRankings,
-      onScopeChange,
+      onSelectionChanged,
       onFiltersChanged
     }
   }
@@ -521,32 +456,6 @@ export default {
   margin-bottom: 30px;
 }
 
-.main-controls {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-  margin-bottom: 20px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  min-width: 200px;
-}
-
-.form-group label {
-  font-weight: bold;
-  margin-bottom: 5px;
-  color: #555;
-}
-
-.form-group select {
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
-}
-
 .results-section {
   min-height: 400px;
 }
@@ -578,14 +487,6 @@ export default {
   .header-section {
     flex-direction: column;
     gap: 15px;
-  }
-
-  .main-controls {
-    flex-direction: column;
-  }
-
-  .form-group {
-    min-width: auto;
   }
 }
 </style>

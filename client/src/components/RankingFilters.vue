@@ -1,8 +1,49 @@
 
 <template>
   <div class="ranking-filters">
+    <!-- Main Controls -->
+    <div class="main-controls">
+      <div class="form-group">
+        <label for="scopeSelect">Portée :</label>
+        <select id="scopeSelect" v-model="selectedScope" @change="onScopeChange">
+          <option value="departements">Départements</option>
+          <option value="communes_france">Communes (France)</option>
+          <option value="communes_dept">Communes (par département)</option>
+        </select>
+      </div>
+
+      <div v-show="selectedScope === 'communes_dept'" class="form-group">
+        <label for="departementSelect">Département :</label>
+        <select id="departementSelect" v-model="selectedDepartement" @change="emitSelectionChanged">
+          <option value="">-- Tous les départements --</option>
+          <option 
+            v-for="dept in departments" 
+            :key="dept.code" 
+            :value="dept.code"
+          >
+            {{ dept.name }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="metricSelect">Métrique :</label>
+        <select id="metricSelect" v-model="selectedMetric" @change="emitSelectionChanged">
+          <option value="">-- Choisir une métrique --</option>
+          <option 
+            v-for="option in availableMetricOptions" 
+            :key="option.value" 
+            :value="option.value"
+          >
+            {{ option.label }}
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Advanced Filters Toggle -->
     <button class="tweaking-toggle" @click="toggleFilters">
-      Paramètres
+      Paramètres avancés
     </button>
     
     <div class="tweaking-box" :class="{ active: showFilters }">
@@ -50,18 +91,58 @@
 </template>
 
 <script>
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, watch, computed, onMounted } from 'vue'
+import { MetricsConfig } from '../utils/metricsConfig.js'
+import { DepartementNames } from '../utils/departementNames.js'
 
 export default {
   name: 'RankingFilters',
-  emits: ['filters-changed'],
+  emits: ['filters-changed', 'selection-changed'],
   setup(props, { emit }) {
     const showFilters = ref(false)
+    const selectedScope = ref('departements')
+    const selectedDepartement = ref('')
+    const selectedMetric = ref('')
+    const departments = ref([])
+    
     const localFilters = reactive({
       popLower: null,
       popUpper: null,
       topLimit: 10
     })
+
+    // Computed properties
+    const currentLevel = computed(() => {
+      return (selectedScope.value === 'communes_france' || selectedScope.value === 'communes_dept') 
+        ? 'commune' 
+        : 'departement'
+    })
+
+    const availableMetricOptions = computed(() => {
+      return MetricsConfig.getAvailableMetricOptions(currentLevel.value)
+    })
+
+    // Methods
+    const loadDepartements = async () => {
+      try {
+        // Use DepartementNames directly like LocationSelector.vue
+        departments.value = Object.entries(DepartementNames)
+          .sort(([a], [b]) => {
+            const parseCode = (code) => {
+              if (code === '2A') return 20.1
+              if (code === '2B') return 20.2
+              return parseInt(code, 10)
+            }
+            return parseCode(a) - parseCode(b)
+          })
+          .map(([code, name]) => ({
+            code,
+            name: `${code} - ${name}`
+          }));
+      } catch (err) {
+        console.warn('Erreur chargement départements:', err);
+      }
+    }
 
     const toggleFilters = () => {
       showFilters.value = !showFilters.value
@@ -92,6 +173,21 @@ export default {
       }
     }
 
+    const emitSelectionChanged = () => {
+      emit('selection-changed', {
+        scope: selectedScope.value,
+        departement: selectedDepartement.value,
+        metric: selectedMetric.value,
+        level: currentLevel.value
+      })
+    }
+
+    const onScopeChange = () => {
+      selectedDepartement.value = ''
+      selectedMetric.value = ''
+      emitSelectionChanged()
+    }
+
     const applyFilters = () => {
       emitFiltersChanged()
     }
@@ -104,11 +200,24 @@ export default {
       }
     })
 
+    // Lifecycle
+    onMounted(() => {
+      loadDepartements()
+    })
+
     return {
       showFilters,
+      selectedScope,
+      selectedDepartement,
+      selectedMetric,
+      departments,
       localFilters,
+      currentLevel,
+      availableMetricOptions,
       toggleFilters,
       emitFiltersChanged,
+      emitSelectionChanged,
+      onScopeChange,
       applyFilters
     }
   }
@@ -118,6 +227,13 @@ export default {
 <style scoped>
 .ranking-filters {
   position: relative;
+}
+
+.main-controls {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
 }
 
 .tweaking-toggle {
@@ -158,7 +274,7 @@ export default {
 .form-group {
   display: flex;
   flex-direction: column;
-  min-width: 120px;
+  min-width: 200px;
 }
 
 .form-group label {
@@ -170,7 +286,7 @@ export default {
 
 .form-group select,
 .form-group input {
-  padding: 6px 10px;
+  padding: 8px 12px;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 14px;
@@ -196,6 +312,10 @@ export default {
 }
 
 @media (max-width: 768px) {
+  .main-controls {
+    flex-direction: column;
+  }
+  
   .population-controls {
     flex-direction: column;
   }
