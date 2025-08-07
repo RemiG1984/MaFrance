@@ -4,7 +4,7 @@
     <!-- Controls Section -->
     <div class="controls-section">
       <!-- All controls moved to RankingFilters -->
-      <RankingFilters
+      <RankingFilters 
         :selectedScope="selectedScope"
         :selectedDepartement="selectedDepartement"
         :selectedMetric="selectedMetric"
@@ -25,7 +25,7 @@
         {{ error }}
       </div>
 
-      <RankingResults
+      <RankingResults 
         v-else-if="rankings.length > 0"
         :rankings="rankings"
         :metric="selectedMetric"
@@ -286,103 +286,24 @@ export default {
       error.value = ''
 
       try {
-        if (currentLevel.value === 'departement') {
-          rankings.value = await fetchDepartmentRankings(selectedMetric.value, filters.value.topLimit)
-        } else if (currentLevel.value === 'commune') {
-          let communesData = []
+        let populationRange = constructPopulationRange()
+        let limit = Math.min(filters.value.topLimit || 10, 100)
 
-          if (selectedScope.value === 'communes_france') {
-            // For France communes, we need to make an API call since it's not in store
-            const result = await api.getCommuneRankings({
-              limit: filters.value.topLimit * 2,
-              sort: selectedMetric.value,
-              direction: 'DESC'
-            })
-            communesData = result.data || []
-          } else if (selectedScope.value === 'communes_dept' && selectedDepartement.value) {
-            // Use commune rankings from store
-            const storeData = store.getDepartementData('communesRankings')
-            communesData = storeData?.data || []
-          } else {
-            error.value = 'Veuillez sélectionner un département'
+        if (selectedScope.value === 'departements') {
+          rankings.value = await fetchDepartmentRankings(selectedMetric.value, limit)
+        } else if (selectedScope.value === 'communes_france') {
+          // Use commune data from currently loaded department
+          rankings.value = await fetchCommunesFranceRankings(selectedMetric.value, limit)
+        } else if (selectedScope.value === 'communes_dept') {
+          if (!selectedDepartement.value) {
+            error.value = "Veuillez sélectionner un département."
             return
           }
-
-          if (communesData.length > 0) {
-            // Apply population filtering
-            let filteredCommunes = [...communesData]
-
-            if (filters.value.popLower !== null) {
-              filteredCommunes = filteredCommunes.filter(commune => {
-                const population = commune.population || 0
-                return population >= filters.value.popLower
-              })
-            }
-
-            if (filters.value.popUpper !== null) {
-              filteredCommunes = filteredCommunes.filter(commune => {
-                const population = commune.population || 0
-                return population <= filters.value.popUpper
-              })
-            }
-
-            // Sort by selected metric
-            const isAscending = selectedMetric.value.includes('_score') ||
-                               selectedMetric.value === 'population'
-
-            filteredCommunes.sort((a, b) => {
-              const aValue = a[selectedMetric.value] || 0
-              const bValue = b[selectedMetric.value] || 0
-              return isAscending ? bValue - aValue : aValue - bValue
-            })
-
-            const totalCommunes = filteredCommunes.length
-            const limit = Math.min(filters.value.topLimit, Math.floor(totalCommunes / 2))
-
-            const topRankings = filteredCommunes.slice(0, limit).map((commune, index) => {
-              const ranking = {
-                deptCode: commune.departement,
-                name: commune.commune,
-                population: commune.population,
-                rank: index + 1,
-                ...commune
-              }
-              // Use pre-calculated values directly from store data
-              MetricsConfig.metrics.forEach(metricConfig => {
-                const metricKey = metricConfig.value;
-                ranking[metricKey] = commune[metricKey] || 0;
-              });
-              return ranking;
-            })
-
-            const bottomRankings = filteredCommunes.slice(-limit).map((commune, index) => {
-              const ranking = {
-                deptCode: commune.departement,
-                name: commune.commune,
-                population: commune.population,
-                rank: totalCommunes - limit + index + 1,
-                ...commune
-              }
-              // Use pre-calculated values directly from store data
-              MetricsConfig.metrics.forEach(metricConfig => {
-                const metricKey = metricConfig.value;
-                ranking[metricKey] = commune[metricKey] || 0;
-              });
-              return ranking;
-            })
-
-            rankings.value = {
-              top: topRankings,
-              bottom: bottomRankings,
-              total: totalCommunes,
-              metric: selectedMetric.value,
-              level: 'commune'
-            }
-          }
+          rankings.value = await fetchCommuneRankings(selectedDepartement.value, selectedMetric.value, limit, populationRange)
         }
       } catch (err) {
-        console.error('Error fetching rankings:', err)
-        error.value = 'Erreur lors du chargement des classements'
+        error.value = `Erreur lors de la mise à jour des classements : ${err.message}`
+        console.error('Erreur updateRankings:', err)
       } finally {
         loading.value = false
       }
@@ -415,11 +336,11 @@ export default {
       selectedDepartement.value = selection.departement
       selectedMetric.value = selection.metric
       currentLevel.value = selection.level
-
+      
       // Clear previous results and errors
       rankings.value = []
       error.value = ''
-
+      
       // Update rankings if metric is selected
       if (selectedMetric.value) {
         updateRankings()

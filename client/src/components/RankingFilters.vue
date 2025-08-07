@@ -6,7 +6,9 @@
         <label for="scopeSelect">Portée :</label>
         <select id="scopeSelect" :value="selectedScope" @change="onScopeChange">
           <option value="departements">Départements</option>
+          <!--
           <option value="communes_france">Communes (France)</option>
+          -->
           <option value="communes_dept">Communes (par département)</option>
         </select>
       </div>
@@ -45,6 +47,7 @@
       Paramètres avancés
     </button>
 
+    <!--
     <div class="tweaking-box" :class="{ active: showFilters }">
       <div class="population-controls">
         <div class="form-group">
@@ -67,6 +70,7 @@
           </select>
         </div>
       </div>
+    -->
 
       <div class="form-group">
         <label for="topLimit">Nombre de résultats (Top/Bottom) :</label>
