@@ -322,9 +322,9 @@ const MetricsConfig = {
         },
         {
             value: "total_subventions_parHab",
-            label: "Subventions /hab/an",
-            alt1Label: "Subventions /hab/an",
-            alt2Label: "Subventions /hab/an",
+            label: "Subventions aux associations /hab/an",
+            alt1Label: "Subventions aux associations /hab/an",
+            alt2Label: "Subventions aux associations /hab/an",
             category: "wokisme",
             format: "currency",
             source: "subventions",
