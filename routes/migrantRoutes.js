@@ -42,17 +42,16 @@ router.get('/commune/:cog', validateCOGParam, (req, res) => {
             return res.status(404).json({ error: 'Aucun centre de migrants trouvé pour cette commune' });
         }
 
-        res.json({
-            COG: cog,
-            centers: rows.map(row => ({
-                type_centre: row.type_centre,
-                gestionnaire_centre: row.gestionnaire_centre,
-                adresse: row.adresse,
-                places: row.places,
-                //latitude: row.latitude,
-                //longitude: row.longitude,
-            }))
-        });
+        const centres = rows.map(row => ({
+            type_centre: row.type_centre,
+            gestionnaire_centre: row.gestionnaire_centre,
+            adresse: row.adresse,
+            places: row.places,
+            //latitude: row.latitude,
+            //longitude: row.longitude,
+        }));
+
+        res.json({centres});
     });
 });
 
@@ -76,8 +75,7 @@ router.get('/departement/:dept', [validateDepartementParam, validatePagination],
             return handleDbError(err, res);
         }
 
-        const centers = rows.map(row => ({
-            COG: row.COG,
+        const centres = rows.map(row => ({
             type_centre: row.type_centre,
             gestionnaire_centre: row.gestionnaire_centre,
             adresse: row.adresse,
@@ -87,12 +85,11 @@ router.get('/departement/:dept', [validateDepartementParam, validatePagination],
         }));
 
         res.json({
-            departement: dept,
-            centers,
+            centres,
             pagination: {
                 page: parseInt(page),
                 limit: parseInt(limit),
-                total: centers.length
+                total: centres.length
             }
         });
     });
