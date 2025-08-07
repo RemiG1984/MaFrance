@@ -92,7 +92,7 @@ const MetricsConfig = {
                 total_qpv: { min: 0.5, max: 3 },
                 pop_in_qpv_pct: { min: 1.5, max: 20 },
                 logements_sociaux_pct: { min: 5, max: 30 },
-                total_subventions_parHab: { min: 10, max: 100 },
+                total_subventions_parHab: { min: 5, max: 100 },
             },
         },
     },
