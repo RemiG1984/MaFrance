@@ -302,7 +302,7 @@ export default {
           } else if (selectedScope.value === 'communes_dept' && selectedDepartement.value) {
             // Use commune rankings from store
             const storeData = store.getDepartementData('communesRankings')
-            communesData = storeData || []
+            communesData = storeData?.data || []
           } else {
             error.value = 'Veuillez sélectionner un département'
             return
@@ -310,18 +310,20 @@ export default {
 
           if (communesData.length > 0) {
             // Apply population filtering
-            let filteredCommunes = communesData
+            let filteredCommunes = [...communesData]
 
             if (filters.value.popLower !== null) {
-              filteredCommunes = filteredCommunes.filter(commune =>
-                commune.population >= filters.value.popLower
-              )
+              filteredCommunes = filteredCommunes.filter(commune => {
+                const population = commune.population || 0
+                return population >= filters.value.popLower
+              })
             }
 
             if (filters.value.popUpper !== null) {
-              filteredCommunes = filteredCommunes.filter(commune =>
-                commune.population <= filters.value.popUpper
-              )
+              filteredCommunes = filteredCommunes.filter(commune => {
+                const population = commune.population || 0
+                return population <= filters.value.popUpper
+              })
             }
 
             // Sort by selected metric
