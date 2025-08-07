@@ -48,7 +48,7 @@
     <div class="tweaking-box" :class="{ active: showFilters }">
       <div class="population-controls">
         <div class="form-group">
-          <label for="popLower">Pop min:</label>
+          <label for="popLower">Commune pop. min:</label>
           <select id="popLower" :value="filters.popLower" @change="onFilterChange('popLower', $event)">
             <option :value="null">Aucune limite</option>
             <option :value="1000">1k</option>
@@ -58,12 +58,12 @@
         </div>
 
         <div class="form-group">
-          <label for="popUpper">Pop max:</label>
+          <label for="popUpper">Commune pop. max:</label>
           <select id="popUpper" :value="filters.popUpper" @change="onFilterChange('popUpper', $event)">
-            <option :value="null">Aucune limite</option>
             <option :value="1000">1k</option>
             <option :value="10000">10k</option>
             <option :value="100000">100k</option>
+            <option :value="null">Aucune limite</option>
           </select>
         </div>
       </div>
