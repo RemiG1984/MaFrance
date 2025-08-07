@@ -62,6 +62,15 @@ class ApiService {
             '/api/communes/names_history',
             '/api/country/crime_history',
             '/api/country/names_history',
+            '/api/departements/crime',
+            '/api/departements/names',
+            '/api/departements/prefet',
+            '/api/communes/crime',
+            '/api/communes/names',
+            '/api/communes/maire',
+            '/api/country/crime',
+            '/api/country/names',
+            '/api/country/ministre',
             '/api/qpv/',
             '/api/departements/details',
             '/api/communes/details',
@@ -76,7 +85,9 @@ class ApiService {
             '/api/communes/search',
             '/api/migrants/departement/',
             '/api/migrants/commune/',
-            '/api/subventions/'
+            '/api/subventions/country/',
+            '/api/subventions/departement/',
+            '/api/subventions/commune/'
         ];
         
         return persistentEndpoints.some(pattern => endpoint.includes(pattern));
