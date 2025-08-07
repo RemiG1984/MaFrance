@@ -86,6 +86,21 @@ export default {
     // console.log('articleCategoriesRef', articleCategoriesRef)
   },
   computed: {
+    locationName() {
+      if (!this.location) return '';
+      
+      switch (this.location.type) {
+        case 'country':
+          return 'France';
+        case 'departement':
+          return this.location.name || `Département ${this.location.code}`;
+        case 'commune':
+          return this.location.name || 'Commune';
+        default:
+          return '';
+      }
+    },
+    
     filteredArticles() {
       let filtered = [...this.articles.list]
       

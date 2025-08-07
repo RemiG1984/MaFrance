@@ -62,6 +62,21 @@ export default {
       return useDataStore()
     },
     
+    locationName() {
+      if (!this.location) return '';
+      
+      switch (this.location.type) {
+        case 'country':
+          return 'France';
+        case 'departement':
+          return this.location.name || `Département ${this.location.code}`;
+        case 'commune':
+          return this.location.name || 'Commune';
+        default:
+          return '';
+      }
+    },
+    
     executiveData() {
       if (!this.location) return null;
       

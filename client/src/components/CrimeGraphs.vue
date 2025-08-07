@@ -65,6 +65,22 @@ export default {
   },
   computed: {
     ...mapStores(useDataStore),
+    
+    locationName() {
+      if (!this.location) return '';
+      
+      switch (this.location.type) {
+        case 'country':
+          return 'France';
+        case 'departement':
+          return this.location.name || `Département ${this.location.code}`;
+        case 'commune':
+          return this.location.name || 'Commune';
+        default:
+          return '';
+      }
+    },
+    
     availableCharts() {
       // Only return charts that have data available
       return this.chartList.filter(chartKey => {

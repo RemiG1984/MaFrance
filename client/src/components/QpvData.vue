@@ -77,6 +77,22 @@ export default {
       loading: false
     }
   },
+  computed: {
+    locationName() {
+      if (!this.location) return '';
+
+      switch (this.location.type) {
+        case 'country':
+          return 'France';
+        case 'departement':
+          return this.location.name || `Département ${this.location.code}`;
+        case 'commune':
+          return this.location.name || 'Commune';
+        default:
+          return '';
+      }
+    }
+  },
   methods: {
     formatNumber(number) {
       if (number == null || isNaN(number)) return "N/A";
@@ -88,7 +104,7 @@ export default {
       return value.toFixed(1) + "%";
     }
   },
-  
+
   watch: {
 
   }
@@ -161,4 +177,4 @@ export default {
 .qpv-table a:hover {
   text-decoration: underline;
 }
-</style> 
+</style>
