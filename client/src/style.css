@@ -9,18 +9,10 @@ body {
   padding: 0;
 }
 
-/* Layout containers */
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 15px;
-}
-
 /* Styles pour les composants */
 .chart-container {
   position: relative;
   width: 100%;
-  max-width: 100%;
 }
 
 /* Styles pour les animations de chargement */
@@ -45,77 +37,6 @@ body {
   transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
-}
-
-
-
-/* Layout and width constraints */
-.layout-container {
-  display: flex;
-  flex-direction: column;
-  max-width: 1200px;
-  margin: 20px auto;
-  gap: 20px;
-}
-
-.filter-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 15px;
-  max-width: 800px;
-  margin-left: auto;
-  margin-right: auto;
-  gap: 15px;
-}
-
-/* Table containers */
-.table-container {
-  width: 100%;
-  overflow-x: auto;
-  margin: 15px 0;
-  border: 1px solid #dee2e6;
-  border-radius: 8px;
-  background-color: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Responsive breakpoints */
-@media (min-width: 768px) {
-  .layout-container {
-    flex-direction: row;
-    justify-content: space-between;
-  }
-}
-
-@media (max-width: 768px) {
-  .filter-container {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .container {
-    padding: 10px;
-  }
-
-  .table-container {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-}
-
-@media (max-width: 1024px) {
-  .layout-container {
-    max-width: 100vw;
-    overflow-x: hidden;
-  }
-
-  /* Ensure all content respects mobile width */
-  .layout-container > div {
-    max-width: 100vw;
-    overflow-x: hidden;
-    box-sizing: border-box;
-  }
 }
 
 .transition-shadow {
