@@ -17,9 +17,9 @@
           <label for="departementSelect">Département :</label>
           <select id="departementSelect" v-model="selectedDepartement" @change="updateRankings">
             <option value="">-- Tous les départements --</option>
-            <option 
-              v-for="dept in departments" 
-              :key="dept.code" 
+            <option
+              v-for="dept in departments"
+              :key="dept.code"
               :value="dept.code"
             >
               {{ dept.code }} - {{ dept.name }}
@@ -31,9 +31,9 @@
           <label for="metricSelect">Métrique :</label>
           <select id="metricSelect" v-model="selectedMetric" @change="updateRankings">
             <option value="">-- Choisir une métrique --</option>
-            <option 
-              v-for="option in availableMetricOptions" 
-              :key="option.value" 
+            <option
+              v-for="option in availableMetrics"
+              :key="option.value"
               :value="option.value"
             >
               {{ option.label }}
@@ -43,7 +43,7 @@
       </div>
 
       <!-- Tweaking controls -->
-      <RankingFilters 
+      <RankingFilters
         @filters-changed="onFiltersChanged"
         ref="rankingFilters"
       />
@@ -59,7 +59,7 @@
         {{ error }}
       </div>
 
-      <RankingResults 
+      <RankingResults
         v-else-if="rankings.length > 0"
         :rankings="rankings"
         :metric="selectedMetric"
@@ -83,6 +83,7 @@ import { DepartementNames } from '../utils/departementNames.js'
 import VersionSelector from '../components/VersionSelector.vue'
 import RankingFilters from '../components/RankingFilters.vue'
 import RankingResults from '../components/RankingResults.vue'
+import { mapStores } from 'pinia'
 
 export default {
   name: 'Rankings',
@@ -110,8 +111,8 @@ export default {
 
     // Computed properties
     const currentLevel = computed(() => {
-      return (selectedScope.value === 'communes_france' || selectedScope.value === 'communes_dept') 
-        ? 'commune' 
+      return (selectedScope.value === 'communes_france' || selectedScope.value === 'communes_dept')
+        ? 'commune'
         : 'departement'
     })
 
@@ -130,7 +131,7 @@ export default {
         if (!store.country?.departements) {
           await store.setCountry();
         }
-        
+
         if (store.country?.departements) {
           departments.value = store.country.departements.map(dept => {
             let deptCode = dept.departement.trim().toUpperCase();
@@ -230,7 +231,7 @@ export default {
         }
         communeData = store.departement?.communesRankings?.data;
       } else {
-        // For France-wide, we need to aggregate or have a specific endpoint
+        // For communes_france, we need to aggregate or have a specific endpoint
         // Assuming store.country.communesRankings would exist for France-wide
         // For now, let's rely on department-specific data if available.
         // If no specific deptCode is given, and we need France-wide, this logic might need adjustment
@@ -449,6 +450,155 @@ export default {
       updateRankings,
       onScopeChange,
       onFiltersChanged
+    }
+  },
+  computed: {
+    ...mapStores(useDataStore),
+    currentLevel() {
+      return this.dataStore.currentLevel;
+    },
+    labelKey() {
+      // Return the appropriate label key based on current label state
+      const labelStateName = this.dataStore.getLabelStateName();
+      switch (labelStateName) {
+        case 'alt1':
+          return 'alt1Label';
+        case 'alt2':
+          return 'alt2Label';
+        default:
+          return 'label';
+      }
+    },
+    availableData() {
+      const level = this.currentLevel;
+      if (level === 'country') {
+        return this.dataStore.country?.departementsRankings;
+      } else if (level === 'departement') {
+        return this.dataStore.departement?.communesRankings;
+      }
+      return null;
+    },
+    processedRankings() {
+      if (!this.availableData?.data) return [];
+
+      return this.availableData.data.map(item => {
+        const processedItem = { ...item };
+
+        // Calculate metrics using MetricsConfig - same logic as MapComponent
+        Object.keys(MetricsConfig.calculatedMetrics).forEach(metricKey => {
+          if (MetricsConfig.isMetricAvailable(metricKey, this.currentLevel)) {
+            processedItem[metricKey] = MetricsConfig.calculateMetric(metricKey, item);
+          }
+        });
+
+        return processedItem;
+      });
+    },
+    availableMetrics() {
+      // Get metrics with dynamic labels based on current state - same as MapComponent
+      const metrics = MetricsConfig.getAvailableMetricOptions(this.currentLevel);
+      return metrics.map(metric => {
+        const metricConfig = MetricsConfig.getMetricByValue(metric.value);
+        if (!metricConfig) return metric;
+
+        // Use the appropriate label based on current state
+        const labelStateName = this.dataStore.getLabelStateName();
+        let label;
+        switch (labelStateName) {
+          case 'alt1':
+            label = metricConfig.alt1Label || metricConfig.label;
+            break;
+          case 'alt2':
+            label = metricConfig.alt2Label || metricConfig.label;
+            break;
+          default:
+            label = metricConfig.label;
+        }
+
+        return {
+          ...metric,
+          label: label,
+          alt1Label: metricConfig.alt1Label,
+          alt2Label: metricConfig.alt2Label
+        };
+      });
+    }
+  },
+  watch: {
+    // Watch for label state changes to update display
+    'dataStore.labelState': {
+      handler() {
+        // Force reactivity update when labels change
+        this.$forceUpdate();
+      }
+    },
+    // Watch for data changes - same pattern as MapComponent
+    currentLevel(newLevel, oldLevel) {
+      if (newLevel !== oldLevel) {
+        // Data will be automatically updated through computed properties
+        // Reset filters if needed
+        this.resetFilters();
+      }
+    },
+    // Watch for available data changes
+    availableData(newData, oldData) {
+      if (newData !== oldData) {
+        // Data has changed, update rankings
+        this.updateRankings();
+      }
+    }
+  },
+  methods: {
+    onFiltersChanged(filters) {
+      this.filters = { ...filters };
+      this.applyFilters();
+    },
+
+    applyFilters() {
+      this.loading = true;
+
+      // Apply filters logic here
+      setTimeout(() => {
+        this.loading = false;
+      }, 500);
+    },
+
+    resetFilters() {
+      // Reset filters when data changes
+      this.filters = {
+        popLower: null,
+        popUpper: null,
+        topLimit: 20
+      };
+    },
+
+    updateRankings() {
+      // Method to handle ranking updates when data changes
+      // Similar to MapComponent's updateData method
+      if (this.availableData?.data) {
+        this.loading = false;
+      }
+    },
+
+    // Get metric label with current label state - same as MapComponent
+    getMetricLabel(metricKey) {
+      const metricConfig = MetricsConfig.getMetricByValue(metricKey);
+      if (!metricConfig) return metricKey;
+
+      const labelStateName = this.dataStore.getLabelStateName();
+      switch (labelStateName) {
+        case 'alt1':
+          return metricConfig.alt1Label || metricConfig.label;
+        case 'alt2':
+          return metricConfig.alt2Label || metricConfig.label;
+        default:
+          return metricConfig.label;
+      }
+    },
+
+    // Format metric values - same as MapComponent
+    formatMetricValue(value, metricKey) {
+      return MetricsConfig.formatMetricValue(value, metricKey);
     }
   }
 }
