@@ -68,7 +68,7 @@
       />
 
       <div v-else class="no-data">
-        Veuillez sélectionner une métrique pour afficher les classements.
+        Sélectionnez une métrique pour voir le classement.
       </div>
     </div>
   </div>
@@ -147,11 +147,12 @@ export default {
             };
           }).filter(Boolean);
         } else {
-          throw new Error("Données de départements non disponibles dans le store.");
+          // Don't set error during initial load, just log it
+          console.warn("Données de départements non disponibles dans le store lors du chargement initial.");
         }
       } catch (err) {
-        error.value = `Erreur : ${err.message}`;
-        console.error('Erreur chargement départements:', err);
+        // Don't set error during initial load, just log it
+        console.warn('Erreur chargement départements:', err);
       }
     }
 
