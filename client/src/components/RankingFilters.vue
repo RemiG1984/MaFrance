@@ -124,7 +124,6 @@ export default {
           return parseCode(a) - parseCode(b)
         })
         .map(([code, name]) => ({
-          code,
           name: `${code} - ${name}`
         }))
     })
