@@ -385,6 +385,22 @@ export default {
       }
     })
 
+    // Listen for label state changes from MetricsConfig
+    onMounted(() => {
+      const handleLabelChange = (event) => {
+        if (selectedMetric.value) {
+          updateRankings()
+        }
+      }
+      
+      window.addEventListener('metricsLabelsToggled', handleLabelChange)
+      
+      // Cleanup listener when component unmounts
+      return () => {
+        window.removeEventListener('metricsLabelsToggled', handleLabelChange)
+      }
+    })
+
     // Lifecycle
     onMounted(() => {
       loadDepartements()
@@ -394,6 +410,20 @@ export default {
       const labelState = urlParams.get('labelState')
       if (labelState) {
         store.setLabelState(parseInt(labelState))
+      }
+
+      // Listen for label state changes from MetricsConfig
+      const handleLabelChange = (event) => {
+        if (selectedMetric.value) {
+          updateRankings()
+        }
+      }
+      
+      window.addEventListener('metricsLabelsToggled', handleLabelChange)
+      
+      // Cleanup listener when component unmounts
+      return () => {
+        window.removeEventListener('metricsLabelsToggled', handleLabelChange)
       }
     })
 
