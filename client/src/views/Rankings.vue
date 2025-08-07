@@ -107,20 +107,15 @@ export default {
         return ranking;
       });
 
-      // Get bottom rankings
-      const topDeptCodes = new Set(topRankings.map(d => d.deptCode));
-      const filteredBottomData = sortedByMetricDesc.filter(
-        dept => !topDeptCodes.has(dept.departement)
-      );
-
-      const bottomRankings = filteredBottomData
-        .slice(0, limit)
+      // Get bottom rankings - take the last items from the sorted array
+      const bottomRankings = sortedByMetricDesc
+        .slice(-limit)
         .map((dept, index) => {
           const ranking = {
             deptCode: dept.departement,
             name: DepartementNames[dept.departement] || dept.departement,
             population: dept.population,
-            rank: totalDepartments - filteredBottomData.length + index + 1,
+            rank: totalDepartments - limit + index + 1,
           };
           // Use pre-calculated values directly from store data (like MapComponent)
           MetricsConfig.metrics.forEach(metricConfig => {
@@ -178,19 +173,15 @@ export default {
         return ranking;
       });
 
-      const topNames = new Set(topRankings.map(c => c.name));
-      const filteredBottomData = sortedByMetricDesc.filter(
-        commune => !topNames.has(commune.commune)
-      );
-
-      const bottomRankings = filteredBottomData
-        .slice(0, limit)
+      // Get bottom rankings - take the last items from the sorted array
+      const bottomRankings = sortedByMetricDesc
+        .slice(-limit)
         .map((commune, index) => {
           const ranking = {
             deptCode: commune.departement,
             name: commune.commune,
             population: commune.population,
-            rank: totalCommunes - filteredBottomData.length + index + 1,
+            rank: totalCommunes - limit + index + 1,
           };
           // Use pre-calculated values directly from store data (like MapComponent)
           MetricsConfig.metrics.forEach(metricConfig => {
@@ -253,20 +244,15 @@ export default {
           return ranking;
         });
 
-        // Get bottom rankings
-        const topNames = new Set(topRankings.map(c => c.name));
-        const filteredBottomData = sortedByMetricDesc.filter(
-          commune => !topNames.has(commune.commune)
-        );
-
-        const bottomRankings = filteredBottomData
-          .slice(0, limit)
+        // Get bottom rankings - take the last items from the sorted array
+        const bottomRankings = sortedByMetricDesc
+          .slice(-limit)
           .map((commune, index) => {
             const ranking = {
               deptCode: commune.departement,
               name: commune.commune,
               population: commune.population,
-              rank: totalCommunes - filteredBottomData.length + index + 1,
+              rank: totalCommunes - limit + index + 1,
             };
             // Use pre-calculated values directly from store data
             MetricsConfig.metrics.forEach(metricConfig => {
