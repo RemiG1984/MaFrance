@@ -1,7 +1,7 @@
 <template>
   <v-card class="mb-4">
     <v-card-title class="text-h5">
-      Indices et données pour {{ location.name }}
+      Indices et données pour: {{ location.name }}
     </v-card-title>
 
     <v-card-text>
@@ -275,7 +275,7 @@ export default {
   }
   .score-header th {
     font-weight: bold;
-    padding: 12px;
+    padding: 10px;
     border-bottom: 2px solid #ddd;
   }
   .score-header .row-title {
@@ -297,8 +297,12 @@ export default {
     border-bottom: 1px solid #eee;
     transition: background-color 0.2s;
   }
+  .score-row:not(.sub-row):hover .row-title,
+  .score-row:not(.sub-row):hover .score-main,
+  .score-row:not(.sub-row):hover .score-compare {
+    background-color: rgba(25, 118, 210, 0.1);
+  }
   .score-row:not(.sub-row):hover {
-    background-color: rgba(25, 118, 210, 0.08) !important;
     cursor: pointer;
   }
   .sub-row {
