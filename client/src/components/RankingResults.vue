@@ -32,8 +32,8 @@
       </div>
       
       <!-- Bottom rankings -->
-      <h3 v-if="bottomRankings.length > 0">Bottom {{ bottomRankings.length }}</h3>
-      <div v-if="bottomRankings.length > 0" class="table-container">
+      <h3>Bottom {{ bottomRankings.length }}</h3>
+      <div class="table-container">
         <table class="score-table">
           <thead>
             <tr class="score-header">
@@ -62,7 +62,8 @@
 </template>
 
 <script>
-import { computed } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { useDataStore } from '../services/store.js'
 import { MetricsConfig } from '../utils/metricsConfig.js'
 
 export default {
@@ -86,7 +87,12 @@ export default {
     }
   },
   setup(props) {
+    const store = useDataStore()
+    const labelStateKey = ref(store.labelState)
+
     const metricName = computed(() => {
+      // Force reactivity by accessing labelStateKey
+      labelStateKey.value
       return MetricsConfig.getMetricLabel(props.metric)
     })
 
@@ -109,10 +115,10 @@ export default {
     })
 
     const formatLocationName = (item) => {
-      if (props.type === 'Département') {
-        return item.name || `Département ${item.deptCode}`
+      if (props.type === 'departement') {
+        return item.nom || item.name || `Département ${item.departement}`
       } else {
-        return `${item.name} (${item.deptCode})`
+        return `${item.commune || item.name || item.nom} (${item.departement || item.deptCode})`
       }
     }
 
@@ -123,6 +129,19 @@ export default {
     const formatMetricValue = (value) => {
       return MetricsConfig.formatMetricValue(value, props.metric)
     }
+
+    // Listen for label state changes
+    const handleLabelChange = (event) => {
+      labelStateKey.value = event.detail.labelState
+    }
+
+    onMounted(() => {
+      window.addEventListener('metricsLabelsToggled', handleLabelChange)
+    })
+
+    onUnmounted(() => {
+      window.removeEventListener('metricsLabelsToggled', handleLabelChange)
+    })
 
     return {
       metricName,
