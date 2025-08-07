@@ -1,4 +1,3 @@
-
 <template>
   <div class="ranking-filters">
     <!-- Main Controls -->
@@ -85,7 +84,8 @@
 </template>
 
 <script>
-import { ref, computed } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
+import { useDataStore } from '../services/store.js'
 import { MetricsConfig } from '../utils/metricsConfig.js'
 import { DepartementNames } from '../utils/departementNames.js'
 
@@ -115,16 +115,32 @@ export default {
   },
   emits: ['filters-changed', 'selection-changed'],
   setup(props, { emit }) {
+    const store = useDataStore()
+
+    // Local state to manage dropdown selections within the component
+    const localScope = ref(props.selectedScope)
+    const localDepartement = ref(props.selectedDepartement)
+    const localMetric = ref(props.selectedMetric)
+    const localFilters = ref({ ...props.filters })
+
     // UI state only
     const showFilters = ref(false)
 
-    // Computed properties based on props
+    // Helper function to update the current level based on scope
+    const updateCurrentLevel = () => {
+      // This function is implicitly used in computed properties and watchers
+    }
+
+    // Computed properties based on props and local state
     const currentLevel = computed(() => {
-      return props.selectedScope.includes('communes') ? 'commune' : 'departement'
+      return localScope.value.includes('communes') ? 'commune' : 'departement'
     })
 
     const availableMetricOptions = computed(() => {
-      return MetricsConfig.getAvailableMetricOptions(currentLevel.value)
+      const level = currentLevel.value
+      // Force reactivity to store label state changes
+      const labelState = store.labelState
+      return MetricsConfig.getAvailableMetricOptions(level)
     })
 
     const departments = computed(() => {
@@ -144,29 +160,40 @@ export default {
     })
 
     // Event handlers - emit to parent
+    const emitSelectionChange = (payload) => {
+      emit('selection-changed', payload)
+    }
+
+    const emitFiltersChange = (payload) => {
+      emit('filters-changed', payload)
+    }
+
     const onScopeChange = (event) => {
-      emit('selection-changed', {
-        scope: event.target.value,
+      localScope.value = event.target.value
+      emitSelectionChange({
+        scope: localScope.value,
         departement: '',
         metric: '',
-        level: event.target.value.includes('communes') ? 'commune' : 'departement'
+        level: localScope.value.includes('communes') ? 'commune' : 'departement'
       })
     }
 
     const onDepartementChange = (event) => {
-      emit('selection-changed', {
-        scope: props.selectedScope,
-        departement: event.target.value,
-        metric: props.selectedMetric,
+      localDepartement.value = event.target.value
+      emitSelectionChange({
+        scope: localScope.value,
+        departement: localDepartement.value,
+        metric: localMetric.value,
         level: currentLevel.value
       })
     }
 
     const onMetricChange = (event) => {
-      emit('selection-changed', {
-        scope: props.selectedScope,
-        departement: props.selectedDepartement,
-        metric: event.target.value,
+      localMetric.value = event.target.value
+      emitSelectionChange({
+        scope: localScope.value,
+        departement: localDepartement.value,
+        metric: localMetric.value,
         level: currentLevel.value
       })
     }
@@ -176,18 +203,60 @@ export default {
         parseInt(event.target.value, 10) : 
         event.target.value === 'null' ? null : event.target.value
 
-      const newFilters = { ...props.filters, [filterKey]: value }
+      localFilters.value = { ...localFilters.value, [filterKey]: value }
 
       // Simple validation
-      if (newFilters.popLower !== null && newFilters.popUpper !== null && newFilters.popLower > newFilters.popUpper) {
+      if (localFilters.value.popLower !== null && localFilters.value.popUpper !== null && localFilters.value.popLower > localFilters.value.popUpper) {
         console.warn('Population min cannot be greater than max')
         return
       }
 
-      emit('filters-changed', newFilters)
+      emitFiltersChange(localFilters.value)
     }
 
+    // Watchers
+    watch(() => props.selectedScope, (newScope) => {
+      localScope.value = newScope
+      // updateCurrentLevel() // No longer needed here, currentLevel is computed
+    })
+
+    watch(() => props.selectedDepartement, (newDept) => {
+      localDepartement.value = newDept
+    })
+
+    watch(() => props.selectedMetric, (newMetric) => {
+      localMetric.value = newMetric
+    })
+
+    // Watch for label state changes from store
+    watch(() => store.labelState, () => {
+      // Force re-computation of metric options when label state changes
+      // This ensures dropdown labels update immediately
+    })
+
+    onMounted(() => {
+      // updateCurrentLevel() // No longer needed here, currentLevel is computed
+
+      // Listen for global label state changes from MetricsConfig
+      const handleLabelChange = () => {
+        // Force reactivity by triggering a re-render
+        // The computed metricOptions will automatically update
+      }
+
+      window.addEventListener('metricsLabelsToggled', handleLabelChange)
+
+      // Cleanup listener when component unmounts
+      return () => {
+        window.removeEventListener('metricsLabelsToggled', handleLabelChange)
+      }
+    })
+
     return {
+      store,
+      localScope,
+      localDepartement,
+      localMetric,
+      localFilters,
       showFilters,
       currentLevel,
       availableMetricOptions,
@@ -195,7 +264,9 @@ export default {
       onScopeChange,
       onDepartementChange,
       onMetricChange,
-      onFilterChange
+      onFilterChange,
+      emitSelectionChange,
+      emitFiltersChange
     }
   }
 }
