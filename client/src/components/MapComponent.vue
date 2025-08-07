@@ -73,7 +73,20 @@ export default {
       }
     },
     availableMetrics() {
-      const metrics = MetricsConfig.getAvailableMetricOptions(this.currentLevel);
+      // Use level-1 since map displays data for the level below current navigation level
+      // If current level is 'country', show departement metrics (departement data on map)
+      // If current level is 'departement', show commune metrics (commune data on map)
+      let dataLevel;
+      if (this.currentLevel === 'country') {
+        dataLevel = 'departement';
+      } else if (this.currentLevel === 'departement') {
+        dataLevel = 'commune';
+      } else {
+        // Fallback to current level for other cases
+        dataLevel = this.currentLevel;
+      }
+      
+      const metrics = MetricsConfig.getAvailableMetricOptions(dataLevel);
       return metrics.map(metric => {
         const metricConfig = MetricsConfig.getMetricByValue(metric.value);
         if (!metricConfig) return metric;
@@ -118,7 +131,17 @@ export default {
       }
     },
     currentLevel(newLevel) {
-      const newMetrics = MetricsConfig.getAvailableMetricOptions(newLevel);
+      // Use level-1 logic for determining data level
+      let dataLevel;
+      if (newLevel === 'country') {
+        dataLevel = 'departement';
+      } else if (newLevel === 'departement') {
+        dataLevel = 'commune';
+      } else {
+        dataLevel = newLevel;
+      }
+      
+      const newMetrics = MetricsConfig.getAvailableMetricOptions(dataLevel);
       const isCurrentMetricAvailable = newMetrics.some(metric =>
         metric.value === this.selectedMetric.value
       );
