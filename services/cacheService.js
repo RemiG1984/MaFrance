@@ -4,8 +4,6 @@ const db = require('../config/db');
 class CacheService {
     constructor() {
         this.cache = new Map();
-        this.cacheExpiry = new Map();
-        this.defaultTTL = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
         
         // Preload critical data on startup
         this.initializeCache();
@@ -91,39 +89,24 @@ class CacheService {
         }
     }
 
-    set(key, value, ttl = this.defaultTTL) {
+    set(key, value) {
         this.cache.set(key, value);
-        this.cacheExpiry.set(key, Date.now() + ttl);
     }
 
     get(key) {
-        const expiry = this.cacheExpiry.get(key);
-        if (expiry && Date.now() > expiry) {
-            this.cache.delete(key);
-            this.cacheExpiry.delete(key);
-            return null;
-        }
         return this.cache.get(key) || null;
     }
 
     has(key) {
-        const expiry = this.cacheExpiry.get(key);
-        if (expiry && Date.now() > expiry) {
-            this.cache.delete(key);
-            this.cacheExpiry.delete(key);
-            return false;
-        }
         return this.cache.has(key);
     }
 
     delete(key) {
         this.cache.delete(key);
-        this.cacheExpiry.delete(key);
     }
 
     clear() {
         this.cache.clear();
-        this.cacheExpiry.clear();
     }
 
     getStats() {
