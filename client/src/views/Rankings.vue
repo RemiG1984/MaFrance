@@ -1,11 +1,6 @@
 
 <template>
   <div class="rankings-container">
-    <!-- Header with version selector -->
-    <div class="header-section">
-      <h1>{{ store.getCurrentPageTitle() }}</h1>
-      <VersionSelector />
-    </div>
 
     <!-- Controls Section -->
     <div class="controls-section">
