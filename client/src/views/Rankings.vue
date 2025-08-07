@@ -160,13 +160,10 @@ export default {
       let departmentData = store.country?.departementsRankings?.data;
 
       if (!departmentData) {
-        // Optionally fetch if not in store, but the goal is to use store.
-        // For now, we'll assume it should be there or error out.
         error.value = "Données de classement départemental non disponibles dans le store.";
         return [];
       }
 
-      // Simulate API call logic using store data
       const totalDepartments = departmentData.length;
 
       // Sort by the selected metric (DESC order for top rankings)
@@ -178,14 +175,10 @@ export default {
           population: dept.population,
           rank: index + 1,
         };
-        // Add all metrics from MetricsConfig
+        // Use pre-calculated values directly from store data (like MapComponent)
         MetricsConfig.metrics.forEach(metricConfig => {
           const metricKey = metricConfig.value;
-          if (MetricsConfig.calculatedMetrics[metricKey]) {
-            ranking[metricKey] = MetricsConfig.calculateMetric(metricKey, dept);
-          } else {
-            ranking[metricKey] = dept[metricKey] || 0;
-          }
+          ranking[metricKey] = dept[metricKey] || 0;
         });
         return ranking;
       });
@@ -197,22 +190,18 @@ export default {
       );
 
       const bottomRankings = filteredBottomData
-        .slice(0, limit) // Take the next 'limit' items after filtering
+        .slice(0, limit)
         .map((dept, index) => {
           const ranking = {
             deptCode: dept.departement,
             name: DepartementNames[dept.departement] || dept.departement,
             population: dept.population,
-            rank: totalDepartments - filteredBottomData.length + index + 1, // Recalculate rank
+            rank: totalDepartments - filteredBottomData.length + index + 1,
           };
-          // Add all metrics from MetricsConfig
+          // Use pre-calculated values directly from store data (like MapComponent)
           MetricsConfig.metrics.forEach(metricConfig => {
             const metricKey = metricConfig.value;
-            if (MetricsConfig.calculatedMetrics[metricKey]) {
-              ranking[metricKey] = MetricsConfig.calculateMetric(metricKey, dept);
-            } else {
-              ranking[metricKey] = dept[metricKey] || 0;
-            }
+            ranking[metricKey] = dept[metricKey] || 0;
           });
           return ranking;
         });
@@ -230,12 +219,6 @@ export default {
         }
         communeData = store.departement?.communesRankings?.data;
       } else {
-        // For France-wide, we need to aggregate or have a specific endpoint
-        // Assuming store.country.communesRankings would exist for France-wide
-        // For now, let's rely on department-specific data if available.
-        // If no specific deptCode is given, and we need France-wide, this logic might need adjustment
-        // based on how store.country.communesRankings is populated.
-        // For this example, we'll focus on the deptCode case.
         error.value = "Classement des communes pour toute la France non implémenté via le store dans cet exemple.";
         return [];
       }
@@ -245,16 +228,13 @@ export default {
         return [];
       }
 
-      // Simulate API call logic using store data
       const totalCommunes = communeData.length;
 
       // Filter by population range if specified
       let filteredByPopulation = communeData;
       if (populationRange) {
-        // This requires parsing populationRange string and applying logic, which was in constructPopulationRange
-        // For simplicity, let's assume populationRange is handled before this function or is not strictly needed from API params
-        // and focus on the core data retrieval and processing.
-        // If populationRange needs to be applied here, it would require the logic from constructPopulationRange.
+        // Population filtering logic would go here if needed
+        // For now, keeping it simple
       }
 
       // Sort by the selected metric (DESC order for top rankings)
@@ -266,14 +246,10 @@ export default {
           population: commune.population,
           rank: index + 1,
         };
-        // Add all metrics from MetricsConfig
+        // Use pre-calculated values directly from store data (like MapComponent)
         MetricsConfig.metrics.forEach(metricConfig => {
           const metricKey = metricConfig.value;
-          if (MetricsConfig.calculatedMetrics[metricKey]) {
-            ranking[metricKey] = MetricsConfig.calculateMetric(metricKey, commune);
-          } else {
-            ranking[metricKey] = commune[metricKey] || 0;
-          }
+          ranking[metricKey] = commune[metricKey] || 0;
         });
         return ranking;
       });
@@ -284,22 +260,18 @@ export default {
       );
 
       const bottomRankings = filteredBottomData
-        .slice(0, limit) // Take the next 'limit' items after filtering
+        .slice(0, limit)
         .map((commune, index) => {
           const ranking = {
             deptCode: commune.departement,
             name: commune.commune,
             population: commune.population,
-            rank: totalCommunes - filteredBottomData.length + index + 1, // Recalculate rank
+            rank: totalCommunes - filteredBottomData.length + index + 1,
           };
-          // Add all metrics from MetricsConfig
+          // Use pre-calculated values directly from store data (like MapComponent)
           MetricsConfig.metrics.forEach(metricConfig => {
             const metricKey = metricConfig.value;
-            if (MetricsConfig.calculatedMetrics[metricKey]) {
-              ranking[metricKey] = MetricsConfig.calculateMetric(metricKey, commune);
-            } else {
-              ranking[metricKey] = commune[metricKey] || 0;
-            }
+            ranking[metricKey] = commune[metricKey] || 0;
           });
           return ranking;
         });
