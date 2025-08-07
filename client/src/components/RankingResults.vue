@@ -1,8 +1,9 @@
+
 <template>
   <div class="ranking-results">
     <div class="data-box">
       <h2>Classement des {{ type }}s pour {{ metricName }}</h2>
-
+      
       <!-- Top rankings -->
       <h3>Top {{ topRankings.length }}</h3>
       <div class="table-container">
@@ -29,7 +30,7 @@
           </tbody>
         </table>
       </div>
-
+      
       <!-- Bottom rankings -->
       <h3>Bottom {{ bottomRankings.length }}</h3>
       <div class="table-container">
@@ -88,7 +89,6 @@ export default {
   setup(props) {
     const store = useDataStore()
     const labelStateKey = ref(store.labelState)
-    const currentLevel = ref('country'); // Assuming a default level, adjust as needed
 
     const metricName = computed(() => {
       // Force reactivity by accessing labelStateKey
@@ -140,85 +140,7 @@ export default {
       bottomRankings,
       formatLocationName,
       formatPopulation,
-      formatMetricValue,
-      currentLevel // Make currentLevel available in template
-    }
-  },
-  computed: {
-    filteredRankings() {
-      if (!this.rankings || this.rankings.length === 0) {
-        return [];
-      }
-
-      let filtered = [...this.rankings];
-
-      // Apply population filters
-      if (this.filters && this.filters.popLower !== null) {
-        filtered = filtered.filter(item => 
-          item.population >= this.filters.popLower
-        );
-      }
-
-      if (this.filters && this.filters.popUpper !== null) {
-        filtered = filtered.filter(item => 
-          item.population <= this.filters.popUpper
-        );
-      }
-
-      // Apply limit
-      if (this.filters && this.filters.topLimit && this.filters.topLimit > 0) {
-        filtered = filtered.slice(0, this.filters.topLimit);
-      }
-
-      return filtered;
-    },
-
-    // Available metrics for current level - same as MapComponent
-    availableMetrics() {
-      return MetricsConfig.getAvailableMetrics(this.currentLevel || 'country');
-    }
-  },
-  methods: {
-    formatValue(value, format, metricKey = null) {
-      if (value == null || isNaN(value)) return 'N/A';
-
-      // Use MetricsConfig formatting if metricKey is provided - same as MapComponent
-      if (metricKey) {
-        return MetricsConfig.formatMetricValue(value, metricKey);
-      }
-
-      // Fallback to legacy formatting
-      switch (format) {
-        case 'percentage':
-          return `${value.toFixed(1)}%`;
-        case 'score':
-          return value.toFixed(0);
-        case 'rate':
-          return value.toFixed(1);
-        case 'currency':
-          return new Intl.NumberFormat('fr-FR', {
-            style: 'currency',
-            currency: 'EUR'
-          }).format(value);
-        default:
-          return value.toLocaleString('fr-FR');
-      }
-    },
-
-    // Get metric value with calculation if needed - same logic as MapComponent
-    getMetricValue(item, metricKey) {
-      // Check if it's a calculated metric
-      if (MetricsConfig.calculatedMetrics[metricKey]) {
-        return MetricsConfig.calculateMetric(metricKey, item);
-      }
-
-      // Return raw value
-      return item[metricKey];
-    },
-
-    // Check if metric is available for current level - same as MapComponent
-    isMetricAvailable(metricKey) {
-      return MetricsConfig.isMetricAvailable(metricKey, this.currentLevel || 'country');
+      formatMetricValue
     }
   }
 }
@@ -300,17 +222,17 @@ export default {
   .data-box {
     padding: 15px;
   }
-
+  
   .score-header th,
   .score-row td {
     padding: 8px 6px;
     font-size: 12px;
   }
-
+  
   .data-box h2 {
     font-size: 1.3rem;
   }
-
+  
   .data-box h3 {
     font-size: 1.1rem;
   }
@@ -320,7 +242,7 @@ export default {
   .table-container {
     font-size: 11px;
   }
-
+  
   .score-header th,
   .score-row td {
     padding: 6px 4px;
