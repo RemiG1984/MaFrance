@@ -126,32 +126,21 @@ export default {
     // Methods
     const loadDepartements = async () => {
       try {
-        // Directly use store data if available, otherwise fetch
-        if (!store.country?.departements) {
-          await store.setCountry();
-        }
-
-        if (store.country?.departements) {
-          departments.value = store.country.departements.map(dept => {
-            let deptCode = dept.departement.trim().toUpperCase();
-            if (/^\d+$/.test(deptCode)) {
-              deptCode = deptCode.padStart(2, '0');
+        // Use DepartementNames directly like LocationSelector.vue
+        departments.value = Object.entries(DepartementNames)
+          .sort(([a], [b]) => {
+            const parseCode = (code) => {
+              if (code === '2A') return 20.1
+              if (code === '2B') return 20.2
+              return parseInt(code, 10)
             }
-            // Basic validation for department codes
-            if (!/^(0[1-9]|[1-8][0-9]|9[0-5]|2[AB]|97[1-6])$/.test(deptCode)) {
-              return null;
-            }
-            return {
-              code: deptCode,
-              name: DepartementNames[deptCode] || deptCode
-            };
-          }).filter(Boolean);
-        } else {
-          // Don't set error during initial load, just log it
-          console.warn("Données de départements non disponibles dans le store lors du chargement initial.");
-        }
+            return parseCode(a) - parseCode(b)
+          })
+          .map(([code, name]) => ({
+            code,
+            name: `${code} - ${name}`
+          }));
       } catch (err) {
-        // Don't set error during initial load, just log it
         console.warn('Erreur chargement départements:', err);
       }
     }
