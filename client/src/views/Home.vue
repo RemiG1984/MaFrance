@@ -14,7 +14,6 @@
           <!-- Map -->
           <v-col cols="12">
             <MapComponent 
-              :key="`map-${$route.name}-${currentLocation.type}-${currentLocation.code || 'none'}`"
               :location="currentLocation"
             />
           </v-col>
