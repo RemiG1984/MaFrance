@@ -298,7 +298,7 @@ export default {
     transition: background-color 0.2s;
   }
   .score-row:not(.sub-row):hover {
-    background-color: rgba(var(--v-theme-primary), 0.08);
+    background-color: rgb(var(--v-theme-primary) / 8%);
     cursor: pointer;
   }
   .sub-row {
