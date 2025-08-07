@@ -7,7 +7,8 @@
           {{ currentPageTitle }}
         </v-app-bar-title>
        
-        <div class="header-menu">
+        <!-- Desktop Menu -->
+        <div class="header-menu d-none d-md-flex">
           <v-btn
             href="https://twitter.com/intent/follow?screen_name=ou_va_ma_France"
             target="_blank"
@@ -30,8 +31,52 @@
          
           <VersionSelector />
         </div>
+
+        <!-- Mobile Hamburger Menu -->
+        <div class="d-flex d-md-none">
+          <v-btn
+            icon
+            @click="mobileMenuOpen = !mobileMenuOpen"
+            class="hamburger-btn"
+          >
+            <v-icon>{{ mobileMenuOpen ? 'mdi-close' : 'mdi-menu' }}</v-icon>
+          </v-btn>
+        </div>
       </div>
     </v-app-bar>
+
+    <!-- Mobile Menu Overlay -->
+    <v-navigation-drawer
+      v-model="mobileMenuOpen"
+      temporary
+      location="right"
+      class="d-flex d-md-none mobile-menu"
+    >
+      <v-list>
+        <v-list-item
+          v-for="item in menuItems"
+          :key="item.path"
+          :to="item.path"
+          @click="mobileMenuOpen = false"
+        >
+          <v-list-item-title>{{ item.title }}</v-list-item-title>
+        </v-list-item>
+        
+        <v-divider class="my-2"></v-divider>
+        
+        <v-list-item>
+          <VersionSelector />
+        </v-list-item>
+        
+        <v-list-item
+          href="https://twitter.com/intent/follow?screen_name=ou_va_ma_France"
+          target="_blank"
+          class="twitter-mobile"
+        >
+          <v-list-item-title>@ou_va_ma_France</v-list-item-title>
+        </v-list-item>
+      </v-list>
+    </v-navigation-drawer>
     <!-- Main Content -->
     <v-main>
       <v-container fluid class="pa-6">
@@ -59,6 +104,7 @@ export default {
   },
   data() {
     return {
+      mobileMenuOpen: false,
       menuItems: [
         { title: 'Accueil', path: '/' },
         { title: 'Classements', path: '/classements' },
@@ -110,5 +156,30 @@ export default {
   .header-content-wrapper {
     max-width: 1520px;
   }
+}
+
+/* Mobile menu styles */
+.hamburger-btn {
+  color: white !important;
+}
+
+.mobile-menu {
+  margin-top: 64px; /* Account for app bar height */
+}
+
+.mobile-menu .v-list-item {
+  padding: 16px 24px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.mobile-menu .v-list-item:last-child {
+  border-bottom: none;
+}
+
+.twitter-mobile {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  margin: 8px 16px;
+  border-radius: 4px;
 }
 </style>
