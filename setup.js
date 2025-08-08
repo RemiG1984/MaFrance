@@ -14,6 +14,14 @@ const dbFile = config.database.path;
 
 // Initialize SQLite database
 function initializeDatabase() {
+  // Create .data directory if it doesn't exist
+  const path = require("path");
+  const dbDir = path.dirname(dbFile);
+  if (!fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir, { recursive: true });
+    console.log(`Created directory: ${dbDir}`);
+  }
+
   if (fs.existsSync(dbFile)) {
     try {
       fs.unlinkSync(dbFile);
