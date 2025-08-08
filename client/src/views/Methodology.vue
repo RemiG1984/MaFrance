@@ -27,7 +27,7 @@
             <div class="indice-card blue">
               <h3 class="indice-title">Indice de changement général</h3>
               <p class="indice-text">
-                Représente la moyenne des 5 indices précédents. Cet indice est également étalonné à 100 au niveau national.
+                Représente la moyenne des 5 indices ci-dessous. Cet indice est également étalonné à 100 au niveau national.
                 Moins de 100 signifie que la zone sélectionnée est en dessous de la moyenne nationale.
                 Plus de 100 signifie que la zone est au-dessus de la moyenne nationale.
                 Dénominations alternatives: indice d'évolution
@@ -252,7 +252,7 @@
               <li>Les indices sont relatifs et doivent être interprétés dans leur contexte</li>
               <li>Cette analyse ne prétend pas être exhaustive ou définitive</li>
               <li>RGPD: Aucune donnée personnelle n'est stockée sur ce site. L'ensemble des données utilisées sont publiques et anonymisées.</li>
-              <li>Auteur: GRATION, Rémi</li>
+              <li>Auteur: Rémi G.</li>
             </ul>
           </div>
         </section>

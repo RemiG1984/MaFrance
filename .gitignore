@@ -132,8 +132,6 @@ dist
 # Replit debugger
 .breakpoints
 
-#Setup directory
-setup/*.csv
 
 #Public directory since it is compiled
 public/
