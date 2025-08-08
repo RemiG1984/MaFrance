@@ -54,7 +54,7 @@ router.get("/suggestions", [validateDepartement, validateSearchQuery], async (re
 router.get("/search", [validateSearchQuery], async (req, res) => {
   const { q = "" } = req.query;
 
-  if (!q || q.length < 2) {
+  if (!q || q.length < 3) {
     return res.json([]);
   }
 
