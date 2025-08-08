@@ -103,13 +103,6 @@ app.use('/api/migrants', migrantRoutes);
 app.use("/api", otherRoutes);
 app.use("/api/cache", cacheRoutes);
 
-// Catch-all route: redirect non-API routes to root with original path
-app.get('/{*path}', (req, res) => {
-  const originalUrl = req.originalUrl === '/' ? '/' : req.originalUrl;
-  console.log(`Redirecting ${originalUrl} to /?redirect=${encodeURIComponent(originalUrl)}`);
-  res.redirect(`/?redirect=${encodeURIComponent(originalUrl)}`);
-});
-
 // Health check and root route
 app.get("/", (req, res, next) => {
   if (req.headers["user-agent"]?.includes("GoogleHC")) {
@@ -123,6 +116,13 @@ app.get("/", (req, res, next) => {
       res.status(500).json({ error: err.message, details: null });
     }
   });
+});
+
+// Catch-all route: redirect non-API routes to root with original path
+app.get('/{*path}', (req, res) => {
+  const originalUrl = req.originalUrl === '/' ? '/' : req.originalUrl;
+  console.log(`Redirecting ${originalUrl} to /?redirect=${encodeURIComponent(originalUrl)}`);
+  res.redirect(`/?redirect=${encodeURIComponent(originalUrl)}`);
 });
 
 // Error handling
