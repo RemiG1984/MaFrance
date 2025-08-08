@@ -14,8 +14,8 @@
             target="_blank"
             variant="text"
             class="mx-2 twitter-btn"
-            prepend-icon="mdi-close"
           >
+            <b>𝕏</b> 
             @ou_va_ma_France
           </v-btn>
    
@@ -39,7 +39,10 @@
             @click="mobileMenuOpen = !mobileMenuOpen"
             class="hamburger-btn"
           >
-            <v-icon>{{ mobileMenuOpen ? 'mdi-close' : 'mdi-menu' }}</v-icon>
+            <hamburger-icon
+            color="white"
+            :opened="mobileMenuOpen"
+            />
           </v-btn>
         </div>
       </div>
@@ -88,13 +91,15 @@
 
 <script>
 import VersionSelector from './components/VersionSelector.vue'
+import HamburgerIcon from './components/HamburgerIcon.vue'
 import { mapStores } from 'pinia'
 import { useDataStore } from './services/store.js'
 
 export default {
   name: 'App',
   components: {
-    VersionSelector
+    VersionSelector,
+    HamburgerIcon,
   },
   computed: {
     ...mapStores(useDataStore),
@@ -161,10 +166,6 @@ export default {
 /* Mobile menu styles */
 .hamburger-btn {
   color: white !important;
-}
-
-.mobile-menu {
-  margin-top: 64px; /* Account for app bar height */
 }
 
 .mobile-menu .v-list-item {
