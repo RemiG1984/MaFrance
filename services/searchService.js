@@ -50,7 +50,7 @@ class SearchService {
      */
     static searchCommunes(departement, query, limit = 10) {
         return new Promise((resolve, reject) => {
-            if (!query || query.length < 2) {
+            if (!query || query.length < 3) {
                 // For short queries, just return recent or popular communes
                 db.all(
                     `SELECT DISTINCT commune, COG 
@@ -132,7 +132,7 @@ class SearchService {
      */
     static async searchCommunesGlobally(query, limit = 15) {
         return new Promise((resolve, reject) => {
-            if (!query || query.length < 2) {
+            if (!query || query.length < 3) {
                 resolve([]);
                 return;
             }
