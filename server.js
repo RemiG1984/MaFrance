@@ -11,6 +11,9 @@ const app = express();
 const compression = require("compression");
 const cacheService = require("./services/cacheService");
 
+// Enable compression
+app.use(compression());
+
 // Security middleware
 app.use(helmet({
   contentSecurityPolicy: {
