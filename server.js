@@ -43,7 +43,7 @@ const limiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
-app.use('/api/', limiter);
+//app.use('/api/', limiter);
 
 // Stricter rate limit for search endpoints
 const searchLimiter = rateLimit({
@@ -92,7 +92,8 @@ const cacheRoutes = require("./routes/cacheRoutes");
 app.locals.db = db;
 
 // Attach routes with search rate limiting where applicable
-app.use("/api/communes", searchLimiter, communeRoutes);
+//app.use("/api/communes", searchLimiter, communeRoutes);
+app.use("/api/communes", communeRoutes);
 app.use("/api/departements", departementRoutes);
 app.use("/api/country", countryRoutes);
 app.use("/api/articles", articleRoutes);
