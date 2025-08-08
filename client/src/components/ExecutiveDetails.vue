@@ -2,7 +2,7 @@
 <template>
   <v-card class="mb-4">
     <v-card-title class="text-h5">
-      Responsable exécutif
+      Responsable exécutif de: {{ locationName }}
     </v-card-title>
     
     <v-card-text>
@@ -60,6 +60,21 @@ export default {
   computed: {
     dataStore() {
       return useDataStore()
+    },
+    
+    locationName() {
+      if (!this.location) return '';
+      
+      switch (this.location.type) {
+        case 'country':
+          return 'France';
+        case 'departement':
+          return this.location.name || `Département ${this.location.code}`;
+        case 'commune':
+          return this.location.name || 'Commune';
+        default:
+          return '';
+      }
     },
     
     executiveData() {

@@ -35,6 +35,14 @@
             />
           </v-col>
 
+          <!-- Centres Migrants -->
+          <v-col cols="12">
+            <CentresMigrants 
+              :location="currentLocation"
+              :data="migrantsData"
+            />
+          </v-col>
+
           <!-- QPV Data -->
           <v-col cols="12">
             <QpvData 
@@ -43,12 +51,6 @@
             />
           </v-col>
 
-          <!-- Executive Details -->
-          <v-col cols="12">
-            <ExecutiveDetails 
-              :location="currentLocation"
-            />
-          </v-col>
         </v-row>
       </v-col>
 
@@ -60,6 +62,13 @@
             <ScoreTable 
               :location="currentLocation"
               :scores="scores"
+            />
+          </v-col>
+
+          <!-- Executive Details -->
+          <v-col cols="12">
+            <ExecutiveDetails 
+              :location="currentLocation"
             />
           </v-col>
 
@@ -88,6 +97,7 @@ import MapComponent from '../components/MapComponent.vue'
 import ArticleList from '../components/ArticleList.vue'
 import NamesGraph from '../components/NamesGraph.vue'
 import QpvData from '../components/QpvData.vue'
+import CentresMigrants from '../components/CentresMigrants.vue'
 import ExecutiveDetails from '../components/ExecutiveDetails.vue'
 import ScoreTable from '../components/ScoreTable.vue'
 import CrimeGraphs from '../components/CrimeGraphs.vue'
@@ -101,6 +111,7 @@ export default {
     ArticleList,
     NamesGraph,
     QpvData,
+    CentresMigrants,
     ExecutiveDetails,
     ScoreTable,
     CrimeGraphs,
@@ -238,6 +249,17 @@ export default {
       return []
     },
 
+    migrantsData(){
+      switch(this.dataStore.currentLevel){
+        case 'departement':
+          return this.dataStore.departement?.migrants || []
+        case 'commune':
+          return this.dataStore.commune?.migrants || []
+        default:
+          return []
+      }
+    },
+
   },
   data() {
     return {
@@ -283,5 +305,64 @@ export default {
 <style scoped>
 .home {
   min-height: 100vh;
+}
+
+/* Mobile responsive adjustments for component titles */
+@media (max-width: 768px) {
+  .home :deep(.v-card-title) {
+    font-size: 1.1rem !important;
+    line-height: 1.3;
+    word-break: break-word;
+  }
+  
+  .home :deep(.component-title) {
+    font-size: 1.1rem !important;
+    line-height: 1.3;
+    word-break: break-word;
+  }
+  
+  .home :deep(.section-title) {
+    font-size: 1.1rem !important;
+    line-height: 1.3;
+  }
+  
+  .home :deep(.card-title) {
+    font-size: 1rem !important;
+    line-height: 1.3;
+    word-break: break-word;
+  }
+}
+
+@media (max-width: 480px) {
+  .home :deep(.v-card-title) {
+    font-size: 1rem !important;
+    line-height: 1.2;
+    word-break: break-word;
+  }
+  
+  .home :deep(.component-title) {
+    font-size: 1rem !important;
+    line-height: 1.2;
+    word-break: break-word;
+  }
+  
+  .home :deep(.section-title) {
+    font-size: 1rem !important;
+    line-height: 1.2;
+  }
+  
+  .home :deep(.card-title) {
+    font-size: 0.9rem !important;
+    line-height: 1.2;
+    word-break: break-word;
+  }
+  
+  .home :deep(.text-h6) {
+    font-size: 1rem !important;
+  }
+  
+  .home :deep(.text-h5) {
+    font-size: 1.1rem !important;
+  }
 }
 </style> 

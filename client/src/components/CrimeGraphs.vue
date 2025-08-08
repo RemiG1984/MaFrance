@@ -1,13 +1,14 @@
 <template>
   <v-card class="mb-4">
     <v-card-title class="text-h5">
-      Graphiques de Criminalité
+      Graphiques de Criminalité pour: {{ locationName }}
     </v-card-title>
     <v-card-text>
       <v-row>
         <v-col  cols="12" lg="6"
         class="chart-container"
-        v-for="chartKey in chartList">
+        v-for="chartKey in availableCharts"
+        :key="chartKey">
           <Graph
             :metricKey="chartKey"
             :data="aggregatedData[chartKey]"
@@ -64,6 +65,32 @@ export default {
   },
   computed: {
     ...mapStores(useDataStore),
+    
+    locationName() {
+      if (!this.location) return '';
+      
+      switch (this.location.type) {
+        case 'country':
+          return 'France';
+        case 'departement':
+          return this.location.name || `Département ${this.location.code}`;
+        case 'commune':
+          return this.location.name || 'Commune';
+        default:
+          return '';
+      }
+    },
+    
+    availableCharts() {
+      // Only return charts that have data available
+      return this.chartList.filter(chartKey => {
+        return this.aggregatedData[chartKey] && 
+               Object.keys(this.aggregatedData[chartKey]).length > 0 &&
+               Object.values(this.aggregatedData[chartKey]).some(levelData => 
+                 levelData && levelData.length > 0
+               );
+      });
+    },
     aggregatedData() {
       const result = {}
       

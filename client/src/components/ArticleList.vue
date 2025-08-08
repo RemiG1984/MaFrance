@@ -2,7 +2,7 @@
 <template>
   <v-card>
     <v-card-title class="text-h5">
-      Articles FdeSouche associés
+      Articles FdS associés à: {{ locationName }}
     </v-card-title>
     
     <v-card-text>
@@ -46,7 +46,7 @@
           <a :href='item.url'> {{ item.title }} </a>
         </div>
         <div v-if="filteredArticles.length === 0" class="no-articles">
-          Aucun article trouvé.
+          {{ noArticlesMessage }}
         </div>
       </div>
     </v-card-text>
@@ -86,6 +86,21 @@ export default {
     // console.log('articleCategoriesRef', articleCategoriesRef)
   },
   computed: {
+    locationName() {
+      if (!this.location) return '';
+      
+      switch (this.location.type) {
+        case 'country':
+          return 'France';
+        case 'departement':
+          return this.location.name || `Département ${this.location.code}`;
+        case 'commune':
+          return this.location.name || 'Commune';
+        default:
+          return '';
+      }
+    },
+    
     filteredArticles() {
       let filtered = [...this.articles.list]
       
@@ -103,6 +118,13 @@ export default {
     
     totalFilteredArticles() {
       return this.articles.list.length
+    },
+    
+    noArticlesMessage() {
+      if (this.location && this.location.type === 'country') {
+        return 'Sélectionnez un département ou une commune pour voir les articles'
+      }
+      return 'Aucun article trouvé.'
     }
   },
   methods: {

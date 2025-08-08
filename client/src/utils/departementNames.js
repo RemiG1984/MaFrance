@@ -101,11 +101,11 @@ const DepartementNames = {
   '93': 'Seine-Saint-Denis',
   '94': 'Val-de-Marne',
   '95': "Val-d'Oise",
-  // '971': 'Guadeloupe',
-  // '972': 'Martinique',
-  // '973': 'Guyane',
-  // '974': 'La Réunion',
-  // '976': 'Mayotte'
+  '971': 'Guadeloupe',
+  '972': 'Martinique',
+  '973': 'Guyane',
+  '974': 'La Réunion',
+  '976': 'Mayotte'
 };
 
 // Export for ES6 modules

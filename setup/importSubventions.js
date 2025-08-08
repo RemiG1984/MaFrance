@@ -5,8 +5,58 @@ const csv = require('csv-parser');
 function importSubventions(db, callback) {
     const batchSize = 1000;
 
+    // Get all unique subvention field names from CSV files
+    function getAllSubventionFields() {
+        return new Promise((resolve, reject) => {
+            const allFields = new Set();
+            const files = [
+                { path: 'setup/france_subventions.csv', excludedFields: ['commune', 'population', 'total_subventions'] },
+                { path: 'setup/departement_subventions.csv', excludedFields: ['dept_code', 'commune', 'population', 'total_subventions'] },
+                { path: 'setup/commune_subventions.csv', excludedFields: ['COG', 'commune', 'population', 'total_subventions'] }
+            ];
+
+            let processedFiles = 0;
+
+            files.forEach(file => {
+                if (!fs.existsSync(file.path)) {
+                    processedFiles++;
+                    if (processedFiles === files.length) resolve(Array.from(allFields));
+                    return;
+                }
+
+                fs.createReadStream(file.path)
+                    .pipe(csv())
+                    .on('data', (row) => {
+                        Object.keys(row).forEach(key => {
+                            if (!file.excludedFields.includes(key)) {
+                                allFields.add(key);
+                            }
+                        });
+                    })
+                    .on('end', () => {
+                        processedFiles++;
+                        if (processedFiles === files.length) {
+                            resolve(Array.from(allFields));
+                        }
+                    })
+                    .on('error', reject);
+            });
+        });
+    }
+
+    // Create dynamic table schema
+    function createTableSchema(fields, tableName, keyField) {
+        const columns = fields.map(field => `${field} REAL`).join(', ');
+        return `
+            CREATE TABLE IF NOT EXISTS ${tableName} (
+                ${keyField} TEXT PRIMARY KEY,
+                ${columns}
+            )
+        `;
+    }
+
     // Import country subventions from france_subventions.csv
-    function importCountrySubventions() {
+    function importCountrySubventions(subventionFields) {
         let countryRows = 0;
         let countryBatch = [];
 
@@ -21,110 +71,80 @@ function importSubventions(db, callback) {
                 fs.createReadStream('setup/france_subventions.csv')
                     .pipe(csv())
                     .on('data', (row) => {
-                        // Extract subvention fields (exclude non-subvention fields)
                         const excludedFields = ['commune', 'population', 'total_subventions'];
-                        const subventionFields = Object.keys(row).filter(key => 
-                            !excludedFields.includes(key)
-                        );
-
-                        const values = {};
-                        const invalidFields = [];
-
+                        const values = ['france'];
+                        
                         subventionFields.forEach(field => {
                             const value = row[field];
                             if (value !== undefined && value !== '' && !isNaN(parseFloat(value))) {
-                                values[field] = parseFloat(value);
-                            } else if (value === '' || value === undefined) {
-                                values[field] = null;
+                                values.push(parseFloat(value));
                             } else {
-                                invalidFields.push(field);
+                                values.push(null);
                             }
                         });
 
-                        if (invalidFields.length > 0) {
-                            console.warn(`Champs de subvention invalides dans france_subventions.csv: ${invalidFields.join(', ')}`, row);
-                        }
-
                         countryRows++;
-                        countryBatch.push([
-                            'france',
-                            JSON.stringify(values)
-                        ]);
+                        countryBatch.push(values);
                     })
                     .on('end', () => {
                         console.log(`Lecture de france_subventions.csv terminée: ${countryRows} lignes`);
-                        if (countryRows === 0) {
-                            console.warn('Avertissement: france_subventions.csv est vide ou n\'a pas de données valides');
-                        }
                         resolve();
                     })
-                    .on('error', (err) => {
-                        console.error('Erreur lecture france_subventions.csv:', err.message);
-                        reject(err);
-                    });
+                    .on('error', reject);
             });
         }
 
         function insertCountrySubventions() {
             return new Promise((resolve, reject) => {
                 db.serialize(() => {
-                    db.run(`
-                        CREATE TABLE IF NOT EXISTS country_subventions (
-                            country TEXT PRIMARY KEY,
-                            subventions_data TEXT
-                        )
-                    `, (err) => {
+                    const schema = createTableSchema(subventionFields, 'country_subventions', 'country');
+                    
+                    db.run(schema, (err) => {
                         if (err) {
                             console.error('Erreur création table country_subventions:', err.message);
                             reject(err);
                             return;
                         }
 
-                        db.run('CREATE INDEX IF NOT EXISTS idx_country_subventions ON country_subventions(country)', (err) => {
+                        if (countryBatch.length === 0) {
+                            console.log('Aucune donnée à insérer dans country_subventions');
+                            resolve();
+                            return;
+                        }
+
+                        db.run('BEGIN TRANSACTION', (err) => {
                             if (err) {
-                                console.error('Erreur création index country_subventions:', err.message);
+                                console.error('Erreur début transaction country_subventions:', err.message);
                                 reject(err);
                                 return;
                             }
 
-                            if (countryBatch.length === 0) {
-                                console.log('Aucune donnée à insérer dans country_subventions');
-                                resolve();
-                                return;
-                            }
-
-                            db.run('BEGIN TRANSACTION', (err) => {
-                                if (err) {
-                                    console.error('Erreur début transaction country_subventions:', err.message);
-                                    reject(err);
-                                    return;
-                                }
-
-                                const placeholders = countryBatch.map(() => '(?, ?)').join(',');
-                                const flatBatch = [].concat(...countryBatch);
-                                db.run(
-                                    `INSERT OR REPLACE INTO country_subventions (country, subventions_data) VALUES ${placeholders}`,
-                                    flatBatch,
-                                    (err) => {
+                            const placeholders = `(${Array(subventionFields.length + 1).fill('?').join(', ')})`;
+                            const fieldsList = ['country'].concat(subventionFields).join(', ');
+                            const flatBatch = [].concat(...countryBatch);
+                            
+                            db.run(
+                                `INSERT OR REPLACE INTO country_subventions (${fieldsList}) VALUES ${placeholders}`,
+                                flatBatch,
+                                (err) => {
+                                    if (err) {
+                                        console.error('Erreur insertion country_subventions:', err.message);
+                                        db.run('ROLLBACK');
+                                        reject(err);
+                                        return;
+                                    }
+                                    db.run('COMMIT', (err) => {
                                         if (err) {
-                                            console.error('Erreur insertion batch country_subventions:', err.message);
+                                            console.error('Erreur commit country_subventions:', err.message);
                                             db.run('ROLLBACK');
                                             reject(err);
-                                            return;
+                                        } else {
+                                            console.log(`Importation de ${countryRows} lignes dans country_subventions terminée`);
+                                            resolve();
                                         }
-                                        db.run('COMMIT', (err) => {
-                                            if (err) {
-                                                console.error('Erreur commit country_subventions:', err.message);
-                                                db.run('ROLLBACK');
-                                                reject(err);
-                                            } else {
-                                                console.log(`Importation de ${countryRows} lignes dans country_subventions terminée`);
-                                                resolve();
-                                            }
-                                        });
-                                    }
-                                );
-                            });
+                                    });
+                                }
+                            );
                         });
                     });
                 });
@@ -135,7 +155,7 @@ function importSubventions(db, callback) {
     }
 
     // Import department subventions from departement_subventions.csv
-    function importDepartmentSubventions() {
+    function importDepartmentSubventions(subventionFields) {
         let departmentRows = 0;
         let departmentBatch = [];
 
@@ -155,120 +175,89 @@ function importSubventions(db, callback) {
                             return;
                         }
 
-                        // Normalize department code
                         let dep = row['dept_code'].trim().toUpperCase();
                         if (/^\d+$/.test(dep)) {
                             dep = dep.padStart(2, '0');
                         }
                         if (!/^(0[1-9]|[1-8][0-9]|9[0-5]|2[AB]|97[1-6])$/.test(dep)) {
-                            console.warn(`Code département invalide ignoré dans departement_subventions.csv: ${dep}`, row);
+                            console.warn(`Code département invalide ignoré: ${dep}`, row);
                             return;
                         }
 
-                        // Extract subvention fields (exclude non-subvention fields)
-                        const excludedFields = ['dept_code', 'commune', 'population', 'total_subventions'];
-                        const subventionFields = Object.keys(row).filter(key => 
-                            !excludedFields.includes(key)
-                        );
-
-                        const values = {};
-                        const invalidFields = [];
-
+                        const values = [dep];
                         subventionFields.forEach(field => {
                             const value = row[field];
                             if (value !== undefined && value !== '' && !isNaN(parseFloat(value))) {
-                                values[field] = parseFloat(value);
-                            } else if (value === '' || value === undefined) {
-                                values[field] = null;
+                                values.push(parseFloat(value));
                             } else {
-                                invalidFields.push(field);
+                                values.push(null);
                             }
                         });
 
-                        if (invalidFields.length > 0) {
-                            console.warn(`Champs de subvention invalides dans departement_subventions.csv: ${invalidFields.join(', ')}`, row);
-                        }
-
                         departmentRows++;
-                        departmentBatch.push([
-                            dep,
-                            JSON.stringify(values)
-                        ]);
+                        departmentBatch.push(values);
                     })
                     .on('end', () => {
                         console.log(`Lecture de departement_subventions.csv terminée: ${departmentRows} lignes`);
-                        if (departmentRows === 0) {
-                            console.warn('Avertissement: departement_subventions.csv est vide ou n\'a pas de données valides');
-                        }
                         resolve();
                     })
-                    .on('error', (err) => {
-                        console.error('Erreur lecture departement_subventions.csv:', err.message);
-                        reject(err);
-                    });
+                    .on('error', reject);
             });
         }
 
         function insertDepartmentSubventions() {
             return new Promise((resolve, reject) => {
                 db.serialize(() => {
-                    db.run(`
-                        CREATE TABLE IF NOT EXISTS department_subventions (
-                            dep TEXT PRIMARY KEY,
-                            subventions_data TEXT
-                        )
-                    `, err => {
+                    const schema = createTableSchema(subventionFields, 'department_subventions', 'dep');
+                    
+                    db.run(schema, err => {
                         if (err) {
                             console.error('Erreur création table department_subventions:', err.message);
                             reject(err);
                             return;
                         }
 
-                        db.run('CREATE INDEX IF NOT EXISTS idx_department_subventions ON department_subventions(dep)', err => {
+                        if (departmentBatch.length === 0) {
+                            console.log('Aucune donnée à insérer dans department_subventions');
+                            resolve();
+                            return;
+                        }
+
+                        db.run('BEGIN TRANSACTION', err => {
                             if (err) {
-                                console.error('Erreur création index department_subventions:', err.message);
+                                console.error('Erreur début transaction department_subventions:', err.message);
                                 reject(err);
                                 return;
                             }
 
-                            if (departmentBatch.length === 0) {
-                                console.log('Aucune donnée à insérer dans department_subventions');
-                                resolve();
-                                return;
+                            const fieldsList = ['dep'].concat(subventionFields).join(', ');
+                            const placeholders = `(${Array(subventionFields.length + 1).fill('?').join(', ')})`;
+
+                            for (let i = 0; i < departmentBatch.length; i += batchSize) {
+                                const batch = departmentBatch.slice(i, i + batchSize);
+                                const batchPlaceholders = batch.map(() => placeholders).join(',');
+                                const flatBatch = [].concat(...batch);
+                                
+                                db.run(
+                                    `INSERT OR REPLACE INTO department_subventions (${fieldsList}) VALUES ${batchPlaceholders}`,
+                                    flatBatch,
+                                    err => {
+                                        if (err) {
+                                            console.error('Erreur insertion batch department_subventions:', err.message);
+                                        }
+                                    }
+                                );
                             }
 
-                            db.run('BEGIN TRANSACTION', err => {
+                            db.run('COMMIT', err => {
                                 if (err) {
-                                    console.error('Erreur début transaction department_subventions:', err.message);
+                                    console.error('Erreur commit department_subventions:', err.message);
+                                    db.run('ROLLBACK');
                                     reject(err);
-                                    return;
+                                } else {
+                                    console.log(`Importation de ${departmentRows} lignes dans department_subventions terminée`);
+                                    resolve();
                                 }
-
-                                for (let i = 0; i < departmentBatch.length; i += batchSize) {
-                                    const batch = departmentBatch.slice(i, i + batchSize);
-                                    const placeholders = batch.map(() => '(?, ?)').join(',');
-                                    const flatBatch = [].concat(...batch);
-                                    db.run(
-                                        `INSERT OR REPLACE INTO department_subventions (dep, subventions_data) VALUES ${placeholders}`,
-                                        flatBatch,
-                                        err => {
-                                            if (err) {
-                                                console.error('Erreur insertion batch department_subventions:', err.message);
-                                            }
-                                        }
-                                    );
-                                }
-
-                                db.run('COMMIT', err => {
-                                    if (err) {
-                                        console.error('Erreur commit department_subventions:', err.message);
-                                        db.run('ROLLBACK');
-                                        reject(err);
-                                    } else {
-                                        console.log(`Importation de ${departmentRows} lignes dans department_subventions terminée`);
-                                        resolve();
-                                    }
-                                });
                             });
                         });
                     });
@@ -280,7 +269,7 @@ function importSubventions(db, callback) {
     }
 
     // Import commune subventions from commune_subventions.csv
-    function importCommuneSubventions() {
+    function importCommuneSubventions(subventionFields) {
         let communeRows = 0;
         let communeBatch = [];
 
@@ -298,10 +287,13 @@ function importSubventions(db, callback) {
                         return;
                     }
 
-                    const placeholders = communeBatch.map(() => '(?, ?)').join(',');
+                    const fieldsList = ['COG'].concat(subventionFields).join(', ');
+                    const placeholders = `(${Array(subventionFields.length + 1).fill('?').join(', ')})`;
+                    const batchPlaceholders = communeBatch.map(() => placeholders).join(',');
                     const flatBatch = [].concat(...communeBatch);
+                    
                     db.run(
-                        `INSERT OR REPLACE INTO commune_subventions (COG, subventions_data) VALUES ${placeholders}`,
+                        `INSERT OR REPLACE INTO commune_subventions (${fieldsList}) VALUES ${batchPlaceholders}`,
                         flatBatch,
                         err => {
                             if (err) {
@@ -343,35 +335,18 @@ function importSubventions(db, callback) {
                             return;
                         }
 
-                        // Extract subvention fields (exclude non-subvention fields)
-                        const excludedFields = ['COG', 'commune', 'population', 'total_subventions'];
-                        const subventionFields = Object.keys(row).filter(key => 
-                            !excludedFields.includes(key)
-                        );
-
-                        const values = {};
-                        const invalidFields = [];
-
+                        const values = [row['COG']];
                         subventionFields.forEach(field => {
                             const value = row[field];
                             if (value !== undefined && value !== '' && !isNaN(parseFloat(value))) {
-                                values[field] = parseFloat(value);
-                            } else if (value === '' || value === undefined) {
-                                values[field] = null;
+                                values.push(parseFloat(value));
                             } else {
-                                invalidFields.push(field);
+                                values.push(null);
                             }
                         });
 
-                        if (invalidFields.length > 0) {
-                            console.warn(`Champs de subvention invalides dans commune_subventions.csv: ${invalidFields.join(', ')}`, row);
-                        }
-
                         communeRows++;
-                        communeBatch.push([
-                            row['COG'],
-                            JSON.stringify(values)
-                        ]);
+                        communeBatch.push(values);
 
                         if (communeBatch.length >= batchSize) {
                             stream.pause();
@@ -386,43 +361,26 @@ function importSubventions(db, callback) {
                     })
                     .on('end', () => {
                         console.log(`Lecture de commune_subventions.csv terminée: ${communeRows} lignes`);
-                        if (communeRows === 0) {
-                            console.warn('Avertissement: commune_subventions.csv est vide ou n\'a pas de données valides');
-                        }
                         processBatch()
                             .then(resolve)
                             .catch(reject);
                     })
-                    .on('error', (err) => {
-                        console.error('Erreur lecture commune_subventions.csv:', err.message);
-                        reject(err);
-                    });
+                    .on('error', reject);
             });
         }
 
         function insertCommuneSubventions() {
             return new Promise((resolve, reject) => {
                 db.serialize(() => {
-                    db.run(`
-                        CREATE TABLE IF NOT EXISTS commune_subventions (
-                            COG TEXT PRIMARY KEY,
-                            subventions_data TEXT
-                        )
-                    `, err => {
+                    const schema = createTableSchema(subventionFields, 'commune_subventions', 'COG');
+                    
+                    db.run(schema, err => {
                         if (err) {
                             console.error('Erreur création table commune_subventions:', err.message);
                             reject(err);
                             return;
                         }
-
-                        db.run('CREATE INDEX IF NOT EXISTS idx_commune_subventions ON commune_subventions(COG)', err => {
-                            if (err) {
-                                console.error('Erreur création index commune_subventions:', err.message);
-                                reject(err);
-                                return;
-                            }
-                            resolve();
-                        });
+                        resolve();
                     });
                 });
             });
@@ -432,9 +390,13 @@ function importSubventions(db, callback) {
     }
 
     // Execute imports sequentially
-    importCountrySubventions()
-        .then(importDepartmentSubventions)
-        .then(importCommuneSubventions)
+    getAllSubventionFields()
+        .then(subventionFields => {
+            console.log(`Champs de subvention détectés: ${subventionFields.join(', ')}`);
+            return importCountrySubventions(subventionFields)
+                .then(() => importDepartmentSubventions(subventionFields))
+                .then(() => importCommuneSubventions(subventionFields));
+        })
         .then(() => callback(null))
         .catch(err => {
             console.error('Échec de l\'importation des données de subventions:', err.message);

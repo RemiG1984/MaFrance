@@ -17,5 +17,6 @@ console.log('VITE_API_BASE_URL:', import.meta.env.VITE_API_BASE_URL);
 
 app.use(router)
 app.use(pinia)
+//window.__pinia = pinia; // temporarily expose Pinia globally for debugging
 app.use(vuetify)
 app.mount('#app')

@@ -42,28 +42,17 @@ router.get('/commune/:cog', validateCOGParam, (req, res) => {
             return res.status(404).json({ error: 'Aucun centre de migrants trouvé pour cette commune' });
         }
 
-        res.json({
-            COG: cog,
-            centers: rows.map(row => ({
-                type_centre: row.type_centre,
-                gestionnaire_centre: row.gestionnaire_centre,
-                adresse: row.adresse,
-                places: row.places,
-                latitude: row.latitude,
-                longitude: row.longitude,
-                capacite: row.capacite,
-                date_ouverture: row.date_ouverture,
-                date_fermeture: row.date_fermeture,
-                statut: row.statut,
-                population_cible: row.population_cible,
-                services_proposes: row.services_proposes,
-                contact_telephone: row.contact_telephone,
-                contact_email: row.contact_email,
-                site_web: row.site_web,
-                notes: row.notes,
-                derniere_maj: row.derniere_maj
-            }))
-        });
+        const migrants = rows.map(row => ({
+            type_centre: row.type_centre || row.typeCentre,
+            gestionnaire_centre: row.gestionnaire_centre || row.gestionnaireCentre,
+            adresse: row.adresse,
+            places: row.places,
+            COG: row.COG,
+            //latitude: row.latitude,
+            //longitude: row.longitude,
+        }));
+
+        res.json(migrants);
     });
 });
 
@@ -87,36 +76,17 @@ router.get('/departement/:dept', [validateDepartementParam, validatePagination],
             return handleDbError(err, res);
         }
 
-        const centers = rows.map(row => ({
-            COG: row.COG,
-            type_centre: row.type_centre,
-            gestionnaire_centre: row.gestionnaire_centre,
+        const migrants = rows.map(row => ({
+            type_centre: row.type_centre || row.typeCentre,
+            gestionnaire_centre: row.gestionnaire_centre || row.gestionnaireCentre,
             adresse: row.adresse,
             places: row.places,
-            latitude: row.latitude,
-            longitude: row.longitude,
-            capacite: row.capacite,
-            date_ouverture: row.date_ouverture,
-            date_fermeture: row.date_fermeture,
-            statut: row.statut,
-            population_cible: row.population_cible,
-            services_proposes: row.services_proposes,
-            contact_telephone: row.contact_telephone,
-            contact_email: row.contact_email,
-            site_web: row.site_web,
-            notes: row.notes,
-            derniere_maj: row.derniere_maj
+            COG: row.COG,
+            //latitude: row.latitude,
+            //longitude: row.longitude,
         }));
 
-        res.json({
-            departement: dept,
-            centers,
-            pagination: {
-                page: parseInt(page),
-                limit: parseInt(limit),
-                total: centers.length
-            }
-        });
+        res.json(migrants);
     });
 });
 

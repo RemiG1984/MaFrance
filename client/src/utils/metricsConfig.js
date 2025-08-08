@@ -1,9 +1,12 @@
 /**
  * Centralized metrics configuration
- * Contains all metric definitions, labels, categories, and formatting logic
+ * Contains all metric definitions, labels, categories, formatting logic, and color scales
  * Label = description neutre
  * Alt1 = description positive (vision de gauche)
  * Alt2 = description négative (vision de droite)
+ * Color scale: For metrics in metricRanges for a given level (departement or commune),
+ * values below min are pure white (#ffffff), values above max are darkest red (#b10026).
+ * For undefined metrics at a level, dynamic scaling is used.
  */
 
 const MetricsConfig = {
@@ -24,7 +27,77 @@ const MetricsConfig = {
     // Label state: 0 = standard, 1 = alt1, 2 = alt2
     labelState: parseInt(localStorage.getItem("metricsLabelState")) || 0,
 
-    // All available metrics with their properties
+    // Color scale configuration for all metrics
+    colorScale: {
+        defaultColors: [
+            "#fff7c7",
+            "#ffe083",
+            "#ffb74d",
+            "#ff8a65",
+            "#e53935",
+            "#b10026",
+        ],
+        // Define level-specific min/max values for metrics
+        // Values below min are pure white (#ffffff), values above max are darkest red (#b10026)
+        metricRanges: {
+            departement: {
+                total_score: { min: 40, max: 150 },
+                population: { min: 100000, max: 2000000 },
+                insecurite_score: { min: 40, max: 150 },
+                homicides_total_p100k: { min: 1, max: 15 },
+                violences_physiques_p1k: { min: 6, max: 15 },
+                violences_sexuelles_p1k: { min: 1.2, max: 2.5 },
+                vols_p1k: { min: 6, max: 40 },
+                destructions_p1k: { min: 4, max: 11 },
+                stupefiants_p1k: { min: 2, max: 20 },
+                escroqueries_p1k: { min: 3, max: 8 },
+                immigration_score: { min: 40, max: 150 },
+                extra_europeen_pct: { min: 5, max: 50 },
+                Total_places_migrants: { min: 100, max: 3000 },
+                places_migrants_p1k: { min: 0.6, max: 3 },
+                islamisation_score: { min: 40, max: 150 },
+                musulman_pct: { min: 2, max: 40 },
+                number_of_mosques: { min: 1, max: 70 },
+                mosque_p100k: { min: 0.5, max: 7 },
+                defrancisation_score: {min: 40, max: 150 },
+                prenom_francais_pct: { min: 20, max: 70, invert: true },
+                wokisme_score: { min: 40, max: 150 },
+                total_qpv: { min: 1, max: 70 },
+                pop_in_qpv_pct: { min: 1.5, max: 20 },
+                logements_sociaux_pct: { min: 5, max: 30 },
+                total_subventions_parHab: { min: 20, max: 100 },
+            },
+            commune: {
+                total_score: { min: 40, max: 150 },
+                population: { min: 500, max: 100000 },
+                insecurite_score: { min: 40, max: 150 },
+                homicides_total_p100k: { min: 1, max: 15 },
+                violences_physiques_p1k: { min: 3, max: 15 },
+                violences_sexuelles_p1k: { min: 1.2, max: 2.5 },
+                vols_p1k: { min: 6, max: 40 },
+                destructions_p1k: { min: 4, max: 11 },
+                stupefiants_p1k: { min: 2, max: 20 },
+                escroqueries_p1k: { min: 2, max: 10 },
+                immigration_score: {min: 40, max: 150 },
+                extra_europeen_pct: { min: 5, max: 50 },
+                Total_places_migrants: { min: 10, max: 500 },
+                places_migrants_p1k: { min: 0.6, max: 3 },
+                islamisation_score: { min: 40, max: 150 },
+                musulman_pct: { min: 2, max: 40 },
+                number_of_mosques: { min: 1, max: 5 },
+                mosque_p100k: { min: 1, max: 7 },
+                defrancisation_score: { min: 40, max: 150 },
+                prenom_francais_pct: { min: 20, max: 70, invert: true },
+                wokisme_score: { min: 40, max: 150 },
+                total_qpv: { min: 0.5, max: 3 },
+                pop_in_qpv_pct: { min: 1.5, max: 20 },
+                logements_sociaux_pct: { min: 5, max: 30 },
+                total_subventions_parHab: { min: 5, max: 100 },
+            },
+        },
+    },
+
+    // All available metrics with their properties, in order of appearance within each category in ScoreTable
     metrics: [
         {
             value: "total_score",
@@ -33,6 +106,16 @@ const MetricsConfig = {
             alt2Label: "Indice de fragmentation nationale",
             category: "général",
             format: "score",
+            source: "details",
+        },
+        {
+            value: "population",
+            label: "Population",
+            alt1Label: "Population",
+            alt2Label: "Population",
+            category: "général",
+            format: "number",
+            source: "details",
         },
         // Insécurité category
         {
@@ -42,6 +125,7 @@ const MetricsConfig = {
             alt2Label: "Indice d'insécurité",
             category: "insécurité",
             format: "score",
+            source: "details",
         },
         {
             value: "homicides_total_p100k",
@@ -50,6 +134,7 @@ const MetricsConfig = {
             alt2Label: "Homicides et tentatives /100k hab.",
             category: "insécurité",
             format: "rate_100k",
+            source: "crime",
         },
         {
             value: "violences_physiques_p1k",
@@ -58,6 +143,7 @@ const MetricsConfig = {
             alt2Label: "Agressions brutales /1k hab.",
             category: "insécurité",
             format: "rate_1k",
+            source: "crime",
         },
         {
             value: "violences_sexuelles_p1k",
@@ -66,6 +152,7 @@ const MetricsConfig = {
             alt2Label: "Violences sexuelles /1k hab.",
             category: "insécurité",
             format: "rate_1k",
+            source: "crime",
         },
         {
             value: "vols_p1k",
@@ -74,6 +161,7 @@ const MetricsConfig = {
             alt2Label: "Pillages /1k hab.",
             category: "insécurité",
             format: "rate_1k",
+            source: "crime",
         },
         {
             value: "destructions_p1k",
@@ -82,6 +170,7 @@ const MetricsConfig = {
             alt2Label: "Vandalisme /1k hab.",
             category: "insécurité",
             format: "rate_1k",
+            source: "crime",
         },
         {
             value: "stupefiants_p1k",
@@ -90,6 +179,7 @@ const MetricsConfig = {
             alt2Label: "Trafic de drogues /1k hab.",
             category: "insécurité",
             format: "rate_1k",
+            source: "crime",
         },
         {
             value: "escroqueries_p1k",
@@ -98,6 +188,7 @@ const MetricsConfig = {
             alt2Label: "Escroqueries /1k hab.",
             category: "insécurité",
             format: "rate_1k",
+            source: "crime",
         },
         // Immigration category
         {
@@ -107,6 +198,7 @@ const MetricsConfig = {
             alt2Label: "Indice de grand remplacement",
             category: "immigration",
             format: "score",
+            source: "details",
         },
         {
             value: "extra_europeen_pct",
@@ -115,6 +207,25 @@ const MetricsConfig = {
             alt2Label: "Prénoms allogènes (%)",
             category: "immigration",
             format: "percentage",
+            source: "names",
+        },
+        {
+            value: "Total_places_migrants",
+            label: "Places en centre d'hébergement pour migrant",
+            alt1Label: "Places en centre d'hébergement pour migrant",
+            alt2Label: "Places en centre d'hébergement pour migrant",
+            category: "immigration",
+            format: "number",
+            source: "details",
+        },
+        {
+            value: "places_migrants_p1k",
+            label: "Places en centre d'hébergement pour migrant /hab",
+            alt1Label: "Places en centre d'hébergement pour migrant /hab",
+            alt2Label: "Places en centre d'hébergement pour migrant /hab",
+            category: "immigration",
+            format: "rate_1k",
+            source: "details",
         },
         // Islamisme category
         {
@@ -124,6 +235,7 @@ const MetricsConfig = {
             alt2Label: "Indice d'islamisation",
             category: "islamisme",
             format: "score",
+            source: "details",
         },
         {
             value: "musulman_pct",
@@ -132,6 +244,7 @@ const MetricsConfig = {
             alt2Label: "Prénoms islamiques (%)",
             category: "islamisme",
             format: "percentage",
+            source: "names",
         },
         {
             value: "number_of_mosques",
@@ -140,6 +253,7 @@ const MetricsConfig = {
             alt2Label: "Nombre de mosquées",
             category: "islamisme",
             format: "number",
+            source: "details",
         },
         {
             value: "mosque_p100k",
@@ -148,6 +262,7 @@ const MetricsConfig = {
             alt2Label: "Nombre de Mosquées /100k hab.",
             category: "islamisme",
             format: "rate_100k",
+            source: "details",
         },
         // Défrancisation category
         {
@@ -157,6 +272,7 @@ const MetricsConfig = {
             alt2Label: "Indice de défrancisation (petit remplacement)",
             category: "défrancisation",
             format: "score",
+            source: "details",
         },
         {
             value: "prenom_francais_pct",
@@ -165,6 +281,7 @@ const MetricsConfig = {
             alt2Label: "Prénoms de naissance français (%)",
             category: "défrancisation",
             format: "percentage",
+            source: "names",
         },
         // Wokisme category
         {
@@ -174,6 +291,7 @@ const MetricsConfig = {
             alt2Label: "Indice de wokisme",
             category: "wokisme",
             format: "score",
+            source: "details",
         },
         {
             value: "total_qpv",
@@ -182,6 +300,7 @@ const MetricsConfig = {
             alt2Label: "Quartiers à éviter (QPV)",
             category: "wokisme",
             format: "number",
+            source: "details",
         },
         {
             value: "pop_in_qpv_pct",
@@ -190,6 +309,7 @@ const MetricsConfig = {
             alt2Label: "% Pop. en quartiers perdus (QPV)",
             category: "wokisme",
             format: "percentage",
+            source: "details",
         },
         {
             value: "logements_sociaux_pct",
@@ -198,32 +318,16 @@ const MetricsConfig = {
             alt2Label: "% Logements sociaux",
             category: "wokisme",
             format: "percentage",
+            source: "details",
         },
-        // Subventions category
         {
-            value: "subventions_p1",
-            label: "Subventions par habitant",
-            alt1Label: "Subventions par habitant",
-            alt2Label: "Subventions par habitant",
-            category: "subventions",
+            value: "total_subventions_parHab",
+            label: "Subventions aux associations /hab/an",
+            alt1Label: "Subventions aux associations /hab/an",
+            alt2Label: "Subventions aux associations /hab/an",
+            category: "wokisme",
             format: "currency",
-        },
-        // Migrant category
-        {
-            value: "total_places_centres_migrants",
-            label: "Places en centre d'hébergement pour migrant",
-            alt1Label: "Places en centre d'hébergement pour migrant",
-            alt2Label: "Places en centre d'hébergement pour migrant",
-            category: "migrants",
-            format: "number",
-        },
-        {
-            value: "places_centres_migrants_p1",
-            label: "Places en centre d'hébergement pour migrant /hab",
-            alt1Label: "Places en centre d'hébergement pour migrant /hab",
-            alt2Label: "Places en centre d'hébergement pour migrant /hab",
-            category: "migrants",
-            format: "rate_1k",
+            source: "subventions",
         },
     ],
 
@@ -249,18 +353,30 @@ const MetricsConfig = {
             name: "Wokisme",
             key: "wokisme",
         },
-        {
-            name: "Subventions",
-            key: "subventions",
-        },
-        {
-            name: "Migration",
-            key: "migration",
-        },
     ],
 
     // Calculated metrics definitions (for complex calculations)
     calculatedMetrics: {
+        // Total score calculation
+        total_score: {
+            formula: (data) =>
+                Math.round(
+                    (data.insecurite_score +
+                        data.immigration_score +
+                        data.islamisation_score +
+                        data.defrancisation_score +
+                        data.wokisme_score) /
+                        5,
+                ),
+            components: [
+                "insecurite_score",
+                "immigration_score",
+                "islamisation_score",
+                "defrancisation_score",
+                "wokisme_score",
+            ],
+        },
+
         // Extra-European percentage calculation
         extra_europeen_pct: {
             formula: (data) =>
@@ -271,7 +387,7 @@ const MetricsConfig = {
         },
 
         // French names percentage calculation
-        prenom_francais_total: {
+        prenom_francais_pct: {
             formula: (data) =>
                 Math.round(data.traditionnel_pct + data.moderne_pct),
             components: ["traditionnel_pct", "moderne_pct"],
@@ -341,15 +457,17 @@ const MetricsConfig = {
             components: ["violences_sexuelles_p1k"],
         },
         destructions_p1k: {
-            formula: (data) => data.destructions_et_degradations_volontaires_p1k,
+            formula: (data) =>
+                data.destructions_et_degradations_volontaires_p1k,
             components: ["destructions_et_degradations_volontaires_p1k"],
-        }
+        },
     },
 
     // Data availability by geographic level
     dataAvailability: {
         country: [
             "total_score",
+            "population",
             "insecurite_score",
             "homicides_total_p100k",
             "violences_physiques_p1k",
@@ -370,12 +488,13 @@ const MetricsConfig = {
             "total_qpv",
             "pop_in_qpv_pct",
             "logements_sociaux_pct",
-            "subventions_p1",
-            "total_places_centres_migrants",
-            "places_centres_migrants_p1",
+            "total_subventions_parHab",
+            "Total_places_migrants",
+            "places_migrants_p1k",
         ],
         departement: [
             "total_score",
+            "population",
             "insecurite_score",
             "homicides_total_p100k",
             "violences_physiques_p1k",
@@ -396,12 +515,13 @@ const MetricsConfig = {
             "total_qpv",
             "pop_in_qpv_pct",
             "logements_sociaux_pct",
-            "subventions_p1",
-            "total_places_centres_migrants",
-            "places_centres_migrants_p1",
+            "total_subventions_parHab",
+            "Total_places_migrants",
+            "places_migrants_p1k",
         ],
         commune: [
             "total_score",
+            "population",
             "insecurite_score",
             "violences_physiques_p1k",
             "violences_sexuelles_p1k",
@@ -418,9 +538,9 @@ const MetricsConfig = {
             "total_qpv",
             "pop_in_qpv_pct",
             "logements_sociaux_pct",
-            "subventions_p1",
-            "total_places_centres_migrants",
-            "places_centres_migrants_p1",
+            "total_subventions_parHab",
+            "Total_places_migrants",
+            "places_migrants_p1k",
         ],
     },
 
@@ -447,7 +567,6 @@ const MetricsConfig = {
         return this.metrics.filter((metric) => metric.category === category);
     },
 
-    // Calculate a metric if it's a calculated one
     calculateMetric(metricKey, data) {
         const calculation = this.calculatedMetrics[metricKey];
         if (calculation && calculation.formula) {
@@ -456,7 +575,6 @@ const MetricsConfig = {
         return data[metricKey];
     },
 
-    // Get all metrics as options for dropdowns
     getMetricOptions() {
         return this.metrics.map((metric) => ({
             value: metric.value,
@@ -464,12 +582,9 @@ const MetricsConfig = {
         }));
     },
 
-    // Cycle between label states (0 -> 1 -> 2 -> 0)
     cycleLabelState() {
         this.labelState = (this.labelState + 1) % 3;
-        // Save to localStorage
         localStorage.setItem("metricsLabelState", this.labelState.toString());
-        // Dispatch event to notify components of the change
         window.dispatchEvent(
             new CustomEvent("metricsLabelsToggled", {
                 detail: { labelState: this.labelState },
@@ -477,7 +592,6 @@ const MetricsConfig = {
         );
     },
 
-    // Get current label state name
     getLabelStateName() {
         switch (this.labelState) {
             case 1:
@@ -489,19 +603,16 @@ const MetricsConfig = {
         }
     },
 
-    // Get current page title
     getCurrentPageTitle() {
         const stateName = this.getLabelStateName();
         return this.pageTitles[stateName];
     },
 
-    // Get current version label
     getCurrentVersionLabel() {
         const stateName = this.getLabelStateName();
         return this.versionLabels[stateName];
     },
 
-    // Initialize version dropdown (prevents multiple event listeners)
     initializeVersionDropdown() {
         const versionDropdown = document.querySelector(".version-dropdown");
         const versionToggle = document.querySelector(".version-toggle");
@@ -509,64 +620,49 @@ const MetricsConfig = {
 
         if (!versionDropdown || versionDropdown.dataset.initialized) return;
 
-        // Mark as initialized to prevent multiple event listeners
         versionDropdown.dataset.initialized = "true";
 
-        // Set initial version text
-        const initialStateName = this.getLabelStateName();
         const versionText = versionToggle.querySelector(".version-text");
         if (versionText) {
             versionText.textContent = this.getCurrentVersionLabel();
         }
 
-        // Toggle dropdown menu visibility
         versionToggle.addEventListener("click", (e) => {
             e.preventDefault();
             e.stopPropagation();
             versionMenu.classList.toggle("active");
         });
 
-        // Close dropdown when clicking outside
         document.addEventListener("click", (e) => {
             if (!versionDropdown.contains(e.target)) {
                 versionMenu.classList.remove("active");
             }
         });
 
-        // Add click listeners to version options
         const versionOptions = versionMenu.querySelectorAll(".version-option");
         versionOptions.forEach((option, index) => {
             option.addEventListener("click", (e) => {
                 e.preventDefault();
                 e.stopPropagation();
 
-                // Set label state based on clicked option
                 this.labelState = index;
-                // Save to localStorage
                 localStorage.setItem(
                     "metricsLabelState",
                     this.labelState.toString(),
                 );
 
-                // Update version text
-                const stateName = this.getLabelStateName();
                 if (versionText) {
                     versionText.textContent = this.getCurrentVersionLabel();
                 }
 
-                // Close dropdown
                 versionMenu.classList.remove("active");
-
-                // Update page title
                 document.title = this.getCurrentPageTitle();
 
-                // Update header h1 if exists
                 const headerH1 = document.querySelector("h1");
                 if (headerH1) {
                     headerH1.textContent = this.getCurrentPageTitle();
                 }
 
-                // Dispatch event to notify components of the change
                 window.dispatchEvent(
                     new CustomEvent("metricsLabelsToggled", {
                         detail: { labelState: this.labelState },
@@ -576,7 +672,6 @@ const MetricsConfig = {
         });
     },
 
-    // Check if a metric is available at a specific geographic level
     isMetricAvailable(metricKey, level) {
         return (
             this.dataAvailability[level] &&
@@ -584,12 +679,10 @@ const MetricsConfig = {
         );
     },
 
-    // Get available metrics for a specific geographic level
     getAvailableMetrics(level) {
         return this.dataAvailability[level] || [];
     },
 
-    // Get available metric options for dropdowns filtered by geographic level
     getAvailableMetricOptions(level) {
         const availableMetrics = this.getAvailableMetrics(level);
         return this.metrics
@@ -600,12 +693,10 @@ const MetricsConfig = {
             }));
     },
 
-    // Extract and map data fields for a specific geographic level
     extractDataForLevel(sourceData, level, additionalFields = []) {
         const availableMetrics = this.getAvailableMetrics(level);
         const result = {};
 
-        // Always include basic fields
         const basicFields = ["population", "commune", "departement", "COG"];
         [...basicFields, ...availableMetrics, ...additionalFields].forEach(
             (field) => {
@@ -618,7 +709,6 @@ const MetricsConfig = {
         return result;
     },
 
-    // Format metric values based on their format property
     formatMetricValue(value, metricKey) {
         if (value == null || isNaN(value)) return "N/A";
 
@@ -645,21 +735,47 @@ const MetricsConfig = {
                     maximumFractionDigits: 0,
                 });
             case "number":
-                return value.toString();
+                return value.toLocaleString("fr-FR", {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                });
             default:
                 return value.toString();
         }
     },
+
+    // Get color scale configuration for a metric at a specific level
+    getMetricColorScale(metricKey, level) {
+        if (
+            this.colorScale.metricRanges[level] &&
+            this.colorScale.metricRanges[level].hasOwnProperty(metricKey)
+        ) {
+            const range = this.colorScale.metricRanges[level][metricKey];
+            return {
+                colors: this.colorScale.defaultColors,
+                min: range.min,
+                max: range.max,
+                invert: range.invert || false,
+                useFixedRange: true,
+            };
+        }
+        // Return default config for dynamic scaling
+        return {
+            colors: this.colorScale.defaultColors,
+            min: 0,
+            max: 100,
+            invert: false,
+            useFixedRange: false,
+        };
+    },
 };
 
 const chartLabels = {};
-
 for (let metric of MetricsConfig.metrics) {
     chartLabels[metric.value] = metric;
 }
 
 const articleCategoriesRef = {};
-
 for (let articleCategory of MetricsConfig.articleCategories) {
     articleCategoriesRef[articleCategory.key] = articleCategory.name;
 }

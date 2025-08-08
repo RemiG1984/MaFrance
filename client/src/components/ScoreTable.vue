@@ -1,20 +1,22 @@
 <template>
   <v-card class="mb-4">
     <v-card-title class="text-h5">
-      Indices et données pour {{ location.name }}
+      Indices et données pour: {{ location.name }}
     </v-card-title>
 
     <v-card-text>
+      <!-- Show loading indicator while data is being fetched -->
       <div v-if="loading" class="d-flex justify-center align-center py-8">
         <v-progress-circular indeterminate color="primary" size="32"></v-progress-circular>
       </div>
 
+      <!-- Display table if there are rows -->
       <v-table v-else-if="tableRows.length > 0" class="score-table">
         <thead>
           <tr class="score-header">
-            <th class="row-title"></th>
-            <th class="score-main">{{ mainHeader }}</th>
-            <th v-if="compareHeader" class="score-compare">{{ compareHeader }}</th>
+            <th class="row-title" :style="compareHeader ? 'width: 50%' : 'width: 70%'"></th>
+            <th class="score-main" :style="compareHeader ? 'width: 25%' : 'width: 30%'">{{ mainHeader }}</th>
+            <th v-if="compareHeader" class="score-compare" style="width: 25%">{{ compareHeader }}</th>
           </tr>
         </thead>
         <tbody>
@@ -34,6 +36,7 @@
         </tbody>
       </v-table>
 
+      <!-- Show message if no data is available -->
       <div v-else class="text-center py-8 text-grey">
         Aucune donnée disponible pour cette localisation
       </div>
@@ -75,637 +78,151 @@ export default {
       immediate: true
     },
     'dataStore.labelState': {
-      handler(newLabelState) {
-        // Update MetricsConfig when store labelState changes
-        MetricsConfig.labelState = newLabelState
+      handler() {
         this.updateTable()
       }
+    },
+    'dataStore.country': {
+      handler() {
+        if (this.location.type === 'country') this.updateTable()
+      },
+      deep: true
+    },
+    'dataStore.departement': {
+      handler() {
+        if (this.location.type === 'departement') this.updateTable()
+      },
+      deep: true
+    },
+    'dataStore.commune': {
+      handler() {
+        if (this.location.type === 'commune') this.updateTable()
+      },
+      deep: true
     }
   },
   mounted() {
-    // Listen for metrics label changes
-    window.addEventListener('metricsLabelsToggled', this.handleLabelsToggled)
-    // Sync MetricsConfig with store on component mount
-    this.syncLabelState()
+    window.addEventListener('metricsLabelsToggled', this.updateTable)
   },
   beforeUnmount() {
-    window.removeEventListener('metricsLabelsToggled', this.handleLabelsToggled)
+    window.removeEventListener('metricsLabelsToggled', this.updateTable)
   },
   methods: {
-    handleLabelsToggled() {
-      this.syncLabelState()
-      this.updateTable()
-    },
-
-    syncLabelState() {
-      // Sync MetricsConfig labelState with the store's labelState
-      MetricsConfig.labelState = this.dataStore.labelState
-    },
-
     updateTable() {
       if (!this.location || !this.location.type) {
         this.tableRows = []
         return
       }
 
-      switch (this.location.type) {
-        case 'country':
-          this.buildCountryTable()
-          break
-        case 'departement':
-          this.buildDepartementTable()
-          break
-        case 'commune':
-          this.buildCommuneTable()
-          break
-        default:
-          this.tableRows = []
-      }
-    },
+      const level = this.location.type
+      const storeSection = this.dataStore[level]
 
-    buildCountryTable() {
-      const countryData = this.dataStore.country.details
-      const namesData = this.dataStore.country.names
-      const crimeData = this.dataStore.country.crime
-
-      if (!countryData || !namesData || !crimeData) {
+      if (!storeSection || !storeSection.details) {  // Check if data is loaded
+        this.loading = true
         this.tableRows = []
         return
       }
 
-      this.mainHeader = this.location.name
-      this.compareHeader = ''
+      this.loading = false
 
-      const metrics = this.calculateCommonMetrics(namesData, crimeData)
-      const crimeRows = this.createCrimeRows(
-        metrics,
-        crimeData,
-        `/crime_graph.html?type=country&code=France`
-      )
+      let compareStoreSection = null
 
-      const rows = [
-        {
-          title: "Population",
-          main: countryData.population ? countryData.population.toLocaleString("fr-FR") : "N/A",
-        },
-        {
-          title: MetricsConfig.getMetricLabel("insecurite_score"),
-          main: MetricsConfig.formatMetricValue(countryData.insecurite_score, "insecurite_score"),
-        },
-        ...crimeRows,
-        {
-          title: MetricsConfig.getMetricLabel("immigration_score"),
-          main: MetricsConfig.formatMetricValue(countryData.immigration_score, "immigration_score"),
-        },
-        {
-          title: MetricsConfig.getMetricLabel("subventions_p1"),
-          main: this.dataStore.country.subventions ?
-            MetricsConfig.formatMetricValue(this.dataStore.country.subventions.subventions_p1, "subventions_p1") : "N/A",
-          subRow: true,
-        },
-        {
-          title: MetricsConfig.getMetricLabel("extra_europeen_pct"),
-          main: MetricsConfig.formatMetricValue(metrics.extraEuropeenPct, "extra_europeen_pct") + metrics.yearLabel,
-          subRow: true,
-        },
-        {
-          title: MetricsConfig.getMetricLabel("islamisation_score"),
-          main: MetricsConfig.formatMetricValue(countryData.islamisation_score, "islamisation_score"),
-        },
-        {
-          title: MetricsConfig.getMetricLabel("musulman_pct"),
-          main: MetricsConfig.formatMetricValue(metrics.musulmanPct, "musulman_pct") + metrics.yearLabel,
-          subRow: true,
-        },
-        {
-          title: MetricsConfig.getMetricLabel("number_of_mosques"),
-          main: MetricsConfig.formatMetricValue(countryData.number_of_mosques, "number_of_mosques"),
-          subRow: true,
-        },
-        {
-          title: MetricsConfig.getMetricLabel("mosque_p100k"),
-          main: MetricsConfig.formatMetricValue(countryData.mosque_p100k, "mosque_p100k"),
-          subRow: true,
-        },
-        {
-          title: MetricsConfig.getMetricLabel("defrancisation_score"),
-          main: MetricsConfig.formatMetricValue(countryData.defrancisation_score, "defrancisation_score"),
-        },
-        {
-          title: MetricsConfig.getMetricLabel("prenom_francais_pct"),
-          main: MetricsConfig.formatMetricValue(metrics.prenomFrancaisPct, "prenom_francais_pct") + metrics.yearLabel,
-          subRow: true,
-        },
-        {
-          title: MetricsConfig.getMetricLabel("wokisme_score"),
-          main: MetricsConfig.formatMetricValue(countryData.wokisme_score, "wokisme_score"),
-        },
-        {
-          title: MetricsConfig.getMetricLabel("total_places_centres_migrants"),
-          main: this.dataStore.country.migrants ?
-            MetricsConfig.formatMetricValue(this.dataStore.country.migrants.total_places_centres_migrants, "total_places_centres_migrants") : "N/A",
-          subRow: true,
-        },
-        {
-          title: MetricsConfig.getMetricLabel("places_centres_migrants_p1"),
-          main: this.dataStore.country.migrants ?
-            MetricsConfig.formatMetricValue(this.dataStore.country.migrants.places_centres_migrants_p1, "places_centres_migrants_p1") : "N/A",
-          subRow: true,
-        },
-        {
-          title: MetricsConfig.getMetricLabel("logements_sociaux_pct"),
-          main: countryData.logements_sociaux_pct !== null && countryData.logements_sociaux_pct !== undefined
-              ? MetricsConfig.formatMetricValue(countryData.logements_sociaux_pct, "logements_sociaux_pct")
-              : "N/A",
-          subRow: true,
-        },
-        {
-          title: MetricsConfig.getMetricLabel("total_qpv"),
-          main: MetricsConfig.formatMetricValue(countryData.total_qpv, "total_qpv"),
-          subRow: true,
-        },
-        {
-          title: MetricsConfig.getMetricLabel("pop_in_qpv_pct"),
-          main: MetricsConfig.formatMetricValue(countryData.pop_in_qpv_pct, "pop_in_qpv_pct"),
-          subRow: true,
-        },
-      ]
-
-      this.tableRows = this.addGroupIds(rows)
-    },
-
-    buildDepartementTable() {
-      const deptData = this.dataStore.departement.details
-      const countryData = this.dataStore.country.details
-      const namesData = this.dataStore.departement.names
-      const crimeData = this.dataStore.departement.crime
-      const countryNamesData = this.dataStore.country.names
-      const countryCrimeData = this.dataStore.country.crime
-
-      if (!deptData || !countryData || !namesData || !crimeData || !countryNamesData || !countryCrimeData) {
-        this.tableRows = []
-        return
+      if (level === 'departement') {
+        compareStoreSection = this.dataStore.country
+      } else if (level === 'commune') {
+        compareStoreSection = this.dataStore.departement
       }
 
-      const deptCode = this.location.code
-      this.mainHeader = `${deptCode} - ${DepartementNames[deptCode] || deptCode}`
-      this.compareHeader = 'France'
+      // Set headers based on geographic level
+      this.setHeaders(level, storeSection)
 
-      const deptMetrics = this.calculateCommonMetrics(namesData, crimeData)
-      const countryMetrics = this.calculateCommonMetrics(countryNamesData, countryCrimeData)
-      const crimeRows = this.createCrimeRows(
-        deptMetrics,
-        crimeData,
-        `/crime_graph.html?type=department&code=${deptCode}`,
-        countryMetrics,
-        countryCrimeData
-      )
+      const rows = []
 
-      const rows = [
-        {
-          title: "Population",
-          main: deptData.population ? deptData.population.toLocaleString("fr-FR") : "N/A",
-          compare: countryData.population ? countryData.population.toLocaleString("fr-FR") : "N/A",
-        },
-        {
-          title: MetricsConfig.getMetricLabel("insecurite_score"),
-          main: MetricsConfig.formatMetricValue(deptData.insecurite_score, "insecurite_score"),
-          compare: MetricsConfig.formatMetricValue(countryData.insecurite_score, "insecurite_score"),
-        },
-        ...crimeRows,
-        {
-          title: MetricsConfig.getMetricLabel("immigration_score"),
-          main: MetricsConfig.formatMetricValue(deptData.immigration_score, "immigration_score"),
-          compare: MetricsConfig.formatMetricValue(countryData.immigration_score, "immigration_score"),
-        },
-        {
-          title: MetricsConfig.getMetricLabel("subventions_p1"),
-          main: this.dataStore.departement.subventions ?
-            MetricsConfig.formatMetricValue(this.dataStore.departement.subventions.subventions_p1, "subventions_p1") : "N/A",
-          compare: this.dataStore.country.subventions ?
-            MetricsConfig.formatMetricValue(this.dataStore.country.subventions.subventions_p1, "subventions_p1") : "N/A",
-          subRow: true,
-        },
-        {
-          title: MetricsConfig.getMetricLabel("extra_europeen_pct"),
-          main: MetricsConfig.formatMetricValue(deptMetrics.extraEuropeenPct, "extra_europeen_pct") + deptMetrics.yearLabel,
-          compare: MetricsConfig.formatMetricValue(countryMetrics.extraEuropeenPct, "extra_europeen_pct") + countryMetrics.yearLabel,
-          subRow: true,
-        },
-        {
-          title: MetricsConfig.getMetricLabel("islamisation_score"),
-          main: MetricsConfig.formatMetricValue(deptData.islamisation_score, "islamisation_score"),
-          compare: MetricsConfig.formatMetricValue(countryData.islamisation_score, "islamisation_score"),
-        },
-        {
-          title: MetricsConfig.getMetricLabel("musulman_pct"),
-          main: MetricsConfig.formatMetricValue(deptMetrics.musulmanPct, "musulman_pct") + deptMetrics.yearLabel,
-          compare: MetricsConfig.formatMetricValue(countryMetrics.musulmanPct, "musulman_pct") + countryMetrics.yearLabel,
-          subRow: true,
-        },
-        {
-          title: MetricsConfig.getMetricLabel("number_of_mosques"),
-          main: MetricsConfig.formatMetricValue(deptData.number_of_mosques, "number_of_mosques"),
-          compare: MetricsConfig.formatMetricValue(countryData.number_of_mosques, "number_of_mosques"),
-          subRow: true,
-        },
-        {
-          title: MetricsConfig.getMetricLabel("mosque_p100k"),
-          main: MetricsConfig.formatMetricValue(deptData.mosque_p100k, "mosque_p100k"),
-          compare: MetricsConfig.formatMetricValue(countryData.mosque_p100k, "mosque_p100k"),
-          subRow: true,
-        },
-        {
-          title: MetricsConfig.getMetricLabel("defrancisation_score"),
-          main: MetricsConfig.formatMetricValue(deptData.defrancisation_score, "defrancisation_score"),
-          compare: MetricsConfig.formatMetricValue(countryData.defrancisation_score, "defrancisation_score"),
-        },
-        {
-          title: MetricsConfig.getMetricLabel("prenom_francais_pct"),
-          main: MetricsConfig.formatMetricValue(deptMetrics.prenomFrancaisPct, "prenom_francais_pct") + deptMetrics.yearLabel,
-          compare: MetricsConfig.formatMetricValue(countryMetrics.prenomFrancaisPct, "prenom_francais_pct") + countryMetrics.yearLabel,
-          subRow: true,
-        },
-        {
-          title: MetricsConfig.getMetricLabel("wokisme_score"),
-          main: MetricsConfig.formatMetricValue(deptData.wokisme_score, "wokisme_score"),
-          compare: MetricsConfig.formatMetricValue(countryData.wokisme_score, "wokisme_score"),
-        },
-        {
-          title: MetricsConfig.getMetricLabel("total_places_centres_migrants"),
-          main: this.dataStore.departement.migrants ?
-            MetricsConfig.formatMetricValue(this.dataStore.departement.migrants.total_places_centres_migrants, "total_places_centres_migrants") : "N/A",
-          compare: this.dataStore.country.migrants ?
-            MetricsConfig.formatMetricValue(this.dataStore.country.migrants.total_places_centres_migrants, "total_places_centres_migrants") : "N/A",
-          subRow: true,
-        },
-        {
-          title: MetricsConfig.getMetricLabel("places_centres_migrants_p1"),
-          main: this.dataStore.departement.migrants ?
-            MetricsConfig.formatMetricValue(this.dataStore.departement.migrants.places_centres_migrants_p1, "places_centres_migrants_p1") : "N/A",
-          compare: this.dataStore.country.migrants ?
-            MetricsConfig.formatMetricValue(this.dataStore.country.migrants.places_centres_migrants_p1, "places_centres_migrants_p1") : "N/A",
-          subRow: true,
-        },
-        {
-          title: MetricsConfig.getMetricLabel("logements_sociaux_pct"),
-          main: deptData.logements_sociaux_pct !== null && deptData.logements_sociaux_pct !== undefined
-              ? MetricsConfig.formatMetricValue(deptData.logements_sociaux_pct, "logements_sociaux_pct")
-              : "N/A",
-          compare: countryData.logements_sociaux_pct !== null && countryData.logements_sociaux_pct !== undefined
-              ? MetricsConfig.formatMetricValue(countryData.logements_sociaux_pct, "logements_sociaux_pct")
-              : "N/A",
-          subRow: true,
-        },
-        {
-          title: MetricsConfig.getMetricLabel("total_qpv"),
-          main: deptData.total_qpv !== null && deptData.total_qpv !== undefined
-              ? MetricsConfig.formatMetricValue(deptData.total_qpv, "total_qpv")
-              : "0",
-          compare: "",
-          subRow: true,
-        },
-        {
-          title: MetricsConfig.getMetricLabel("pop_in_qpv_pct"),
-          main: deptData.pop_in_qpv_pct !== null && deptData.pop_in_qpv_pct !== undefined
-              ? MetricsConfig.formatMetricValue(deptData.pop_in_qpv_pct, "pop_in_qpv_pct")
-              : "0.0%",
-          compare: countryData.pop_in_qpv_pct !== null && countryData.pop_in_qpv_pct !== undefined
-              ? MetricsConfig.formatMetricValue(countryData.pop_in_qpv_pct, "pop_in_qpv_pct")
-              : "0.0%",
-          subRow: true,
-        },
-      ]
+      // Get ordered unique categories, excluding 'général'
+      const categories = this.getUniqueCategories()
 
-      this.tableRows = this.addGroupIds(rows)
-    },
+      // Build rows for each category
+      categories.forEach(category => {
+        const categoryMetrics = MetricsConfig.getMetricsByCategory(category)
+          .filter(m => MetricsConfig.isMetricAvailable(m.value, level))
 
-    buildCommuneTable() {
-      const communeData = this.dataStore.commune.details
-      const deptData = this.dataStore.departement.details
-      const crimeData = this.dataStore.commune.crime
-      const deptNamesData = this.dataStore.departement.names
-      const deptCrimeData = this.dataStore.departement.crime
+        if (categoryMetrics.length === 0) return
 
-      if (!communeData || !deptData || !crimeData || !deptNamesData || !deptCrimeData) {
-        this.tableRows = []
-        return
-      }
+        // Main row (first metric, usually the score)
+        const mainMetric = categoryMetrics[0]
+        rows.push(this.createRow(mainMetric, storeSection, compareStoreSection, false))
 
-      const cog = this.location.code
-      const departement = communeData.departement
-      const commune = communeData.commune
-
-      this.mainHeader = `${departement} - ${commune}`
-      this.compareHeader = DepartementNames[departement] || departement
-
-      // Commune names data might not be available
-      let namesData = null
-      try {
-        // This would need to be fetched separately if not already in store
-        // For now, we'll handle the case where it's not available
-      } catch (error) {
-        console.log('Commune names data not available')
-      }
-
-      const communeMetrics = namesData ? this.calculateCommonMetrics(namesData, crimeData) : null
-      const deptMetrics = this.calculateCommonMetrics(deptNamesData, deptCrimeData)
-      const crimeRows = this.createCrimeRows(
-        communeMetrics,
-        crimeData,
-        `/crime_graph.html?type=commune&code=${cog}&dept=${departement}&commune=${encodeURIComponent(commune)}`,
-        deptMetrics,
-        deptCrimeData
-      )
-
-      const rows = [
-        {
-          title: "Population",
-          main: communeData.population ? communeData.population.toLocaleString("fr-FR") : "N/A",
-          compare: deptData.population ? deptData.population.toLocaleString("fr-FR") : "N/A",
-        },
-        {
-          title: MetricsConfig.getMetricLabel("insecurite_score"),
-          main: MetricsConfig.formatMetricValue(communeData.insecurite_score, "insecurite_score"),
-          compare: MetricsConfig.formatMetricValue(deptData.insecurite_score, "insecurite_score"),
-        },
-        ...crimeRows,
-        {
-          title: MetricsConfig.getMetricLabel("immigration_score"),
-          main: MetricsConfig.formatMetricValue(communeData.immigration_score, "immigration_score"),
-          compare: MetricsConfig.formatMetricValue(deptData.immigration_score, "immigration_score"),
-        },
-        {
-          title: MetricsConfig.getMetricLabel("subventions_p1"),
-          main: this.dataStore.commune.subventions ?
-            MetricsConfig.formatMetricValue(this.dataStore.commune.subventions.subventions_p1, "subventions_p1") : "N/A",
-          compare: this.dataStore.departement.subventions ?
-            MetricsConfig.formatMetricValue(this.dataStore.departement.subventions.subventions_p1, "subventions_p1") : "N/A",
-          subRow: true,
-        },
-      ]
-
-      // Add conditional metrics based on availability
-      const conditionalRows = [
-        {
-          metric: "extra_europeen_pct",
-          condition: () => communeMetrics && !isNaN(communeMetrics.extraEuropeenPct),
-          row: {
-            title: MetricsConfig.getMetricLabel("extra_europeen_pct"),
-            main: communeMetrics ? MetricsConfig.formatMetricValue(communeMetrics.extraEuropeenPct, "extra_europeen_pct") + communeMetrics.yearLabel : "N/A",
-            compare: MetricsConfig.formatMetricValue(deptMetrics.extraEuropeenPct, "extra_europeen_pct") + deptMetrics.yearLabel,
-            subRow: true,
-          }
-        },
-        {
-          metric: "islamisation_score",
-          condition: () => true,
-          row: {
-            title: MetricsConfig.getMetricLabel("islamisation_score"),
-            main: MetricsConfig.formatMetricValue(communeData.islamisation_score, "islamisation_score"),
-            compare: MetricsConfig.formatMetricValue(deptData.islamisation_score, "islamisation_score"),
-          }
-        },
-        {
-          metric: "musulman_pct",
-          condition: () => communeMetrics && !isNaN(communeMetrics.musulmanPct),
-          row: {
-            title: MetricsConfig.getMetricLabel("musulman_pct"),
-            main: communeMetrics ? MetricsConfig.formatMetricValue(communeMetrics.musulmanPct, "musulman_pct") + communeMetrics.yearLabel : "N/A",
-            compare: MetricsConfig.formatMetricValue(deptMetrics.musulmanPct, "musulman_pct") + deptMetrics.yearLabel,
-            subRow: true,
-          }
-        },
-        {
-          metric: "wokisme_score",
-          condition: () => true,
-          row: {
-            title: MetricsConfig.getMetricLabel("wokisme_score"),
-            main: MetricsConfig.formatMetricValue(communeData.wokisme_score, "wokisme_score"),
-            compare: MetricsConfig.formatMetricValue(deptData.wokisme_score, "wokisme_score"),
-          }
-        },
-        {
-          metric: "subventions_p1",
-          condition: () => true,
-          row: {
-            title: MetricsConfig.getMetricLabel("subventions_p1"),
-            main: this.dataStore.commune.subventions ?
-              MetricsConfig.formatMetricValue(this.dataStore.commune.subventions.subventions_p1, "subventions_p1") : "N/A",
-            compare: this.dataStore.departement.subventions ?
-              MetricsConfig.formatMetricValue(this.dataStore.departement.subventions.subventions_p1, "subventions_p1") : "N/A",
-            subRow: true,
-          }
-        },
-        {
-          metric: "total_places_centres_migrants",
-          condition: () => true,
-          row: {
-            title: MetricsConfig.getMetricLabel("total_places_centres_migrants"),
-            main: this.dataStore.commune.migrants ?
-              MetricsConfig.formatMetricValue(this.dataStore.commune.migrants.total_places_centres_migrants, "total_places_centres_migrants") : "N/A",
-            compare: this.dataStore.departement.migrants ?
-              MetricsConfig.formatMetricValue(this.dataStore.departement.migrants.total_places_centres_migrants, "total_places_centres_migrants") : "N/A",
-            subRow: true,
-          }
-        },
-        {
-          metric: "places_centres_migrants_p1",
-          condition: () => true,
-          row: {
-            title: MetricsConfig.getMetricLabel("places_centres_migrants_p1"),
-            main: this.dataStore.commune.migrants ?
-              MetricsConfig.formatMetricValue(this.dataStore.commune.migrants.places_centres_migrants_p1, "places_centres_migrants_p1") : "N/A",
-            compare: this.dataStore.departement.migrants ?
-              MetricsConfig.formatMetricValue(this.dataStore.departement.migrants.places_centres_migrants_p1, "places_centres_migrants_p1") : "N/A",
-            subRow: true,
-          }
-        },
-        {
-          metric: "number_of_mosques",
-          condition: () => true,
-          row: {
-            title: MetricsConfig.getMetricLabel("number_of_mosques"),
-            main: MetricsConfig.formatMetricValue(communeData.number_of_mosques, "number_of_mosques"),
-            compare: MetricsConfig.formatMetricValue(deptData.number_of_mosques, "number_of_mosques"),
-            subRow: true,
-          }
-        },
-        {
-          metric: "mosque_p100k",
-          condition: () => true,
-          row: {
-            title: MetricsConfig.getMetricLabel("mosque_p100k"),
-            main: MetricsConfig.formatMetricValue(communeData.mosque_p100k, "mosque_p100k"),
-            compare: MetricsConfig.formatMetricValue(deptData.mosque_p100k, "mosque_p100k"),
-            subRow: true,
-          }
-        },
-        {
-          metric: "defrancisation_score",
-          condition: () => true,
-          row: {
-            title: MetricsConfig.getMetricLabel("defrancisation_score"),
-            main: MetricsConfig.formatMetricValue(communeData.defrancisation_score, "defrancisation_score"),
-            compare: MetricsConfig.formatMetricValue(deptData.defrancisation_score, "defrancisation_score"),
-          }
-        },
-        {
-          metric: "prenom_francais_pct",
-          condition: () => communeMetrics && !isNaN(communeMetrics.prenomFrancaisPct),
-          row: {
-            title: MetricsConfig.getMetricLabel("prenom_francais_pct"),
-            main: communeMetrics ? MetricsConfig.formatMetricValue(communeMetrics.prenomFrancaisPct, "prenom_francais_pct") + communeMetrics.yearLabel : "N/A",
-            compare: MetricsConfig.formatMetricValue(deptMetrics.prenomFrancaisPct, "prenom_francais_pct") + deptMetrics.yearLabel,
-            subRow: true,
-          }
-        },
-        {
-          metric: "logements_sociaux_pct",
-          condition: () => true,
-          row: {
-            title: MetricsConfig.getMetricLabel("logements_sociaux_pct"),
-            main: communeData.logements_sociaux_pct !== null && communeData.logements_sociaux_pct !== undefined
-                ? MetricsConfig.formatMetricValue(communeData.logements_sociaux_pct, "logements_sociaux_pct")
-                : "N/A",
-            compare: deptData.logements_sociaux_pct !== null && deptData.logements_sociaux_pct !== undefined
-                ? MetricsConfig.formatMetricValue(deptData.logements_sociaux_pct, "logements_sociaux_pct")
-                : "N/A",
-            subRow: true,
-          }
-        },
-        {
-          metric: "total_qpv",
-          condition: () => true,
-          row: {
-            title: MetricsConfig.getMetricLabel("total_qpv"),
-            main: communeData.total_qpv !== null && communeData.total_qpv !== undefined
-                ? MetricsConfig.formatMetricValue(communeData.total_qpv, "total_qpv")
-                : "0",
-            compare: deptData.total_qpv !== null && deptData.total_qpv !== undefined
-                ? MetricsConfig.formatMetricValue(deptData.total_qpv, "total_qpv")
-                : "0",
-            subRow: true,
-          }
-        },
-        {
-          metric: "pop_in_qpv_pct",
-          condition: () => true,
-          row: {
-            title: MetricsConfig.getMetricLabel("pop_in_qpv_pct"),
-            main: communeData.pop_in_qpv_pct !== null && communeData.pop_in_qpv_pct !== undefined
-                ? MetricsConfig.formatMetricValue(communeData.pop_in_qpv_pct, "pop_in_qpv_pct")
-                : "0.0%",
-            compare: deptData.pop_in_qpv_pct !== null && deptData.pop_in_qpv_pct !== undefined
-                ? MetricsConfig.formatMetricValue(deptData.pop_in_qpv_pct, "pop_in_qpv_pct")
-                : "0.0%",
-            subRow: true,
-          }
-        }
-      ]
-
-      // Add rows only if metric is available at commune level and condition is met
-      conditionalRows.forEach(({ metric, condition, row }) => {
-        if (MetricsConfig.isMetricAvailable(metric, "commune") && condition()) {
-          rows.push(row)
-        }
+        // Sub-rows (remaining metrics)
+        categoryMetrics.slice(1).forEach(subMetric => {
+          rows.push(this.createRow(subMetric, storeSection, compareStoreSection, true))
+        })
       })
 
       this.tableRows = this.addGroupIds(rows)
     },
 
-    calculateCommonMetrics(namesData, crimeData) {
-      const extraEuropeenPct = MetricsConfig.calculateMetric("extra_europeen_pct", namesData)
-      const musulmanPct = Math.round(namesData.musulman_pct)
-      const prenomFrancaisPct = MetricsConfig.calculateMetric("prenom_francais_total", namesData)
-      const yearLabel = namesData.annais ? ` (${namesData.annais})` : ""
-      const crimeYearLabel = crimeData.annee ? ` (${crimeData.annee})` : ""
-
-      return {
-        extraEuropeenPct,
-        musulmanPct,
-        prenomFrancaisPct,
-        yearLabel,
-        crimeYearLabel
+    setHeaders(level, storeSection) {
+      if (level === 'country') {
+        this.mainHeader = this.location.name
+        this.compareHeader = ''
+      } else if (level === 'departement') {
+        const deptCode = this.location.code
+        this.mainHeader = `${deptCode} - ${DepartementNames[deptCode] || deptCode}`
+        this.compareHeader = 'France'
+      } else if (level === 'commune') {
+        const communeData = storeSection.details
+        const departement = communeData.departement
+        const commune = communeData.commune
+        this.mainHeader = `${departement} - ${commune}`
+        this.compareHeader = DepartementNames[departement] || departement
       }
     },
 
-    createCrimeRows(metrics, crimeData, linkBase, compareMetrics = null, compareCrimeData = null) {
-      const rows = []
-
-      // Add labelState to link if not in standard mode
-      const linkWithState = MetricsConfig.labelState > 0 ?
-        `${linkBase}${linkBase.includes('?') ? '&' : '?'}labelState=${MetricsConfig.labelState}` :
-        linkBase
-
-      // Only add homicide row if available at current level
-      const currentLevel = linkBase.includes('country') ? 'france' :
-                         linkBase.includes('department') ? 'departement' : 'commune'
-
-      if (MetricsConfig.isMetricAvailable("homicides_p100k", currentLevel) && metrics) {
-        rows.push({
-          title: MetricsConfig.getMetricLabel("homicides_p100k"),
-          main: MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("homicides_total_p100k", crimeData), "homicides_p100k") + metrics.crimeYearLabel,
-          compare: compareMetrics ?
-            MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("homicides_total_p100k", compareCrimeData), "homicides_p100k") + compareMetrics.crimeYearLabel :
-            null,
-          subRow: true,
+    getUniqueCategories() {
+      const seen = new Set()
+      return MetricsConfig.metrics
+        .map(m => m.category)
+        .filter(c => {
+          if (seen.has(c)) return false
+          seen.add(c)
+          return true
         })
+    },
+
+    createRow(metric, storeSection, compareStoreSection, isSubRow = false) {
+      const metricKey = metric.value
+      const title = MetricsConfig.getMetricLabel(metricKey)
+      const source = metric.source || 'details'
+
+      // Get main value
+      const main = this.getFormattedValue(storeSection, metricKey, source)
+
+      // Get comparison value (if applicable)
+      let compare = ''
+      if (compareStoreSection) {
+        compare = this.getFormattedValue(compareStoreSection, metricKey, source)
       }
 
-      // Add other crime rows
-      rows.push(
-        {
-          title: MetricsConfig.getMetricLabel("violences_physiques_p1k"),
-          main: MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("violences_physiques_p1k", crimeData), "violences_physiques_p1k") + (metrics ? metrics.crimeYearLabel : (crimeData.annee ? ` (${crimeData.annee})` : "")),
-          compare: compareMetrics ?
-            MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("violences_physiques_p1k", compareCrimeData), "violences_physiques_p1k") + compareMetrics.crimeYearLabel :
-            null,
-          subRow: true,
-        },
-        {
-          title: MetricsConfig.getMetricLabel("violences_sexuelles_p1k"),
-          main: MetricsConfig.formatMetricValue(crimeData.violences_sexuelles_p1k, "violences_sexuelles_p1k") + (metrics ? metrics.crimeYearLabel : (crimeData.annee ? ` (${crimeData.annee})` : "")),
-          compare: compareCrimeData ?
-            MetricsConfig.formatMetricValue(compareCrimeData.violences_sexuelles_p1k, "violences_sexuelles_p1k") + (compareMetrics ? compareMetrics.crimeYearLabel : "") :
-            null,
-          subRow: true,
-        },
-        {
-          title: MetricsConfig.getMetricLabel("vols_p1k"),
-          main: MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("vols_p1k", crimeData), "vols_p1k") + (metrics ? metrics.crimeYearLabel : (crimeData.annee ? ` (${crimeData.annee})` : "")),
-          compare: compareMetrics ?
-            MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("vols_p1k", compareCrimeData), "vols_p1k") + compareMetrics.crimeYearLabel :
-            null,
-          subRow: true,
-        },
-        {
-          title: MetricsConfig.getMetricLabel("destructions_p1k"),
-          main: MetricsConfig.formatMetricValue(crimeData.destructions_et_degradations_volontaires_p1k, "destructions_p1k") + (metrics ? metrics.crimeYearLabel : (crimeData.annee ? ` (${crimeData.annee})` : "")),
-          compare: compareCrimeData ?
-            MetricsConfig.formatMetricValue(compareCrimeData.destructions_et_degradations_volontaires_p1k, "destructions_p1k") + (compareMetrics ? compareMetrics.crimeYearLabel : "") :
-            null,
-          subRow: true,
-        },
-        {
-          title: MetricsConfig.getMetricLabel("stupefiants_p1k"),
-          main: MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("stupefiants_p1k", crimeData), "stupefiants_p1k") + (metrics ? metrics.crimeYearLabel : (crimeData.annee ? ` (${crimeData.annee})` : "")),
-          compare: compareMetrics ?
-            MetricsConfig.formatMetricValue(MetricsConfig.calculateMetric("stupefiants_p1k", compareCrimeData), "stupefiants_p1k") + compareMetrics.crimeYearLabel :
-            null,
-          subRow: true,
-        },
-        {
-          title: MetricsConfig.getMetricLabel("escroqueries_p1k"),
-          main: MetricsConfig.formatMetricValue(crimeData.escroqueries_p1k, "escroqueries_p1k") + (metrics ? metrics.crimeYearLabel : (crimeData.annee ? ` (${crimeData.annee})` : "")),
-          compare: compareCrimeData ?
-            MetricsConfig.formatMetricValue(compareCrimeData.escroqueries_p1k, "escroqueries_p1k") + (compareMetrics ? compareMetrics.crimeYearLabel : "") :
-            null,
-          subRow: true,
-        }
-      )
+      return { title, main, compare, subRow: isSubRow }
+    },
 
-      return rows.filter(row => row.compare !== null || compareMetrics === null)
+    getFormattedValue(storeSection, metricKey, source) {
+      const sectionData = storeSection[source]
+      if (!sectionData) return 'N/A'
+
+      let value = MetricsConfig.calculateMetric(metricKey, sectionData)
+      if (value == null || value === undefined || isNaN(value)) return 'N/A'
+
+      let formatted = MetricsConfig.formatMetricValue(value, metricKey)
+
+      // Add year suffix for specific sources
+      if (source === 'names' && sectionData.annais) {
+        formatted += ` (${sectionData.annais})`
+      } else if (source === 'crime' && sectionData.annee) {
+        formatted += ` (${sectionData.annee})`
+      }
+
+      return formatted
     },
 
     addGroupIds(rows) {
@@ -748,50 +265,152 @@ export default {
 </script>
 
 <style scoped>
-.score-table {
-  width: 100%;
+/* Score table specific styles */
+  .score-table {
+    width: 100%;
+    border-collapse: collapse;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-top: 2px solid #ccc;
+    border-bottom: 2px solid #ccc;
+    table-layout: fixed;
+  }
+  .score-header th {
+    font-weight: bold;
+    padding: 10px;
+    border-bottom: 2px solid #ddd;
+  }
+  .score-header .row-title {
+    background-color: #e9ecef;
+    color: #333;
+  }
+  .score-header .score-main {
+    background-color: #e9ecef;
+    color: #111;
+    font-weight: bold;
+  }
+  .score-header .score-compare {
+    text-align: right;
+    background-color: #e9ecef;
+    color: #555;
+    font-weight: bold;
+  }
+  .score-row {
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.2s;
+  }
+  .score-row:not(.sub-row):hover .row-title,
+  .score-row:not(.sub-row):hover .score-main,
+  .score-row:not(.sub-row):hover .score-compare {
+    background-color: rgba(25, 118, 210, 0.1);
+  }
+  .score-row:not(.sub-row):hover {
+    cursor: pointer;
+  }
+  .sub-row {
+    background-color: #f8f9fa;
+    transition: all 0.2s ease;
+  }
+  .sub-row-hidden {
+    display: none;
+  }
+  .row-title {
+    padding: 8px 12px;
+    font-weight: 500;
+    color: #333;
+    font-weight: bold;
+    max-width: 50%;
+    word-wrap: break-word;
+    white-space: normal;
+    overflow-wrap: break-word;
+  }
+  .row-title.sub-row {
+    padding-left: 32px;
+    font-weight: 400;
+    font-size: 14px;
+    font-style: italic;
+    color: #555;
+    max-width: 50%;
+    word-wrap: break-word;
+    white-space: normal;
+    overflow-wrap: break-word;
+  }
+  .score-main {
+    padding: 8px 12px;
+    text-align: left;
+    color: #222;
+  }
+  .score-compare {
+    padding: 8px 12px;
+    text-align: right;
+    font-size: 14px;
+    color: #555;
+  }
+  .score-row:nth-child(even) .row-title,
+  .score-row:nth-child(even) .score-main,
+  .score-row:nth-child(even) .score-compare {
+    background-color: #ffffff;
+  }
+  .score-row:nth-child(odd) .row-title,
+  .score-row:nth-child(odd) .score-main,
+  .score-row:nth-child(odd) .score-compare {
+    background-color: #f9f9f9;
+  }
+
+/* Responsive table */
+@media (max-width: 768px) {
+  .score-table {
+    width: 100%;
+    table-layout: fixed;
+    font-size: 0.875rem;
+  }
+  
+  .score-header th {
+    padding: 8px 6px;
+  }
+  
+  .row-title {
+    width: 50%;
+    padding: 6px 8px;
+    font-size: 0.875rem;
+  }
+  
+  .row-title.sub-row {
+    padding-left: 24px;
+    font-size: 0.8125rem;
+  }
+  
+  .score-main,
+  .score-compare {
+    width: 25%;
+    padding: 6px 4px;
+    font-size: 0.875rem;
+  }
 }
 
-.score-header th {
-  background-color: #f5f5f5;
-  font-weight: bold;
-  padding: 12px;
-  border-bottom: 2px solid #ddd;
-}
-
-.score-row {
-  border-bottom: 1px solid #eee;
-  cursor: pointer;
-}
-
-.score-row:not(.sub-row):hover {
-  background-color: #f8f9fa;
-}
-
-.sub-row {
-  background-color: #f9f9f9;
-  cursor: default;
-}
-
-.sub-row-hidden {
-  display: none;
-}
-
-.row-title {
-  padding: 8px 12px;
-  font-weight: 500;
-}
-
-.row-title.sub-row {
-  padding-left: 32px;
-  font-weight: normal;
-  font-size: 0.9em;
-}
-
-
-
-.score-main, .score-compare {
-  padding: 8px 12px;
-  text-align: right;
+@media (max-width: 480px) {
+  .score-table {
+    font-size: 0.8125rem;
+  }
+  
+  .score-header th {
+    padding: 6px 4px;
+    font-size: 0.8125rem;
+  }
+  
+  .row-title {
+    padding: 4px 6px;
+    font-size: 0.8125rem;
+  }
+  
+  .row-title.sub-row {
+    padding-left: 20px;
+    font-size: 0.75rem;
+  }
+  
+  .score-main,
+  .score-compare {
+    padding: 4px 3px;
+    font-size: 0.8125rem;
+  }
 }
 </style>

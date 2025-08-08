@@ -1,9 +1,19 @@
-
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { param, validationResult } = require('express-validator');
-const { handleDbError } = require('../middleware/errorHandler');
-const { validateDepartementParam, validateCOGParam, validatePagination } = require('../middleware/validate');
+const { param, validationResult } = require("express-validator");
+// Centralized error handler for database queries
+const handleDbError = (err, res) => {
+  console.error("Database error:", err.message);
+  res.status(500).json({
+    error: "Erreur lors de la requête à la base de données",
+    details: err.message,
+  });
+};
+const {
+    validateDepartementParam,
+    validateCOGParam,
+    validatePagination,
+} = require("../middleware/validate");
 
 // Middleware to handle validation errors
 const handleValidationErrors = (req, res, next) => {
@@ -16,21 +26,21 @@ const handleValidationErrors = (req, res, next) => {
 
 // Validate country parameter
 const validateCountryParam = [
-    param('country')
+    param("country")
         .notEmpty()
-        .withMessage('Pays requis')
-        .isIn(['france', 'France', 'FRANCE'])
-        .withMessage('Pays doit être France'),
+        .withMessage("Pays requis")
+        .isIn(["france", "France", "FRANCE"])
+        .withMessage("Pays doit être France"),
     handleValidationErrors,
 ];
 
 // Get country subventions
-router.get('/country/:country', validateCountryParam, (req, res) => {
+router.get("/country/:country", validateCountryParam, (req, res) => {
     const db = req.app.locals.db;
     const { country } = req.params;
 
     const query = `
-        SELECT subventions_data 
+        SELECT * 
         FROM country_subventions 
         WHERE country = ?
     `;
@@ -39,31 +49,29 @@ router.get('/country/:country', validateCountryParam, (req, res) => {
         if (err) {
             return handleDbError(err, res);
         }
-        
+
         if (!row) {
-            return res.status(404).json({ error: 'Données de subventions non trouvées pour ce pays' });
+            return res
+                .status(404)
+                .json({
+                    error: "Données de subventions non trouvées pour ce pays",
+                });
         }
 
-        try {
-            const subventions = JSON.parse(row.subventions_data);
-            res.json({
-                country,
-                subventions
-            });
-        } catch (parseErr) {
-            console.error('Erreur parsing JSON subventions pays:', parseErr);
-            res.status(500).json({ error: 'Erreur de format des données de subventions' });
-        }
+        // Extract all fields except the country identifier
+        const { country: countryField, ...subventions } = row;
+
+        res.json(subventions);
     });
 });
 
 // Get department subventions
-router.get('/departement/:dept', validateDepartementParam, (req, res) => {
+router.get("/departement/:dept", validateDepartementParam, (req, res) => {
     const db = req.app.locals.db;
     const { dept } = req.params;
 
     const query = `
-        SELECT subventions_data 
+        SELECT * 
         FROM department_subventions 
         WHERE dep = ?
     `;
@@ -72,31 +80,29 @@ router.get('/departement/:dept', validateDepartementParam, (req, res) => {
         if (err) {
             return handleDbError(err, res);
         }
-        
+
         if (!row) {
-            return res.status(404).json({ error: 'Données de subventions non trouvées pour ce département' });
+            return res
+                .status(404)
+                .json({
+                    error: "Données de subventions non trouvées pour ce département",
+                });
         }
 
-        try {
-            const subventions = JSON.parse(row.subventions_data);
-            res.json({
-                departement: dept,
-                subventions
-            });
-        } catch (parseErr) {
-            console.error('Erreur parsing JSON subventions département:', parseErr);
-            res.status(500).json({ error: 'Erreur de format des données de subventions' });
-        }
+        // Extract all fields except the department identifier
+        const { dep: deptField, ...subventions } = row;
+
+        res.json(subventions);
     });
 });
 
 // Get commune subventions
-router.get('/commune/:cog', validateCOGParam, (req, res) => {
+router.get("/commune/:cog", validateCOGParam, (req, res) => {
     const db = req.app.locals.db;
     const { cog } = req.params;
 
     const query = `
-        SELECT subventions_data 
+        SELECT * 
         FROM commune_subventions 
         WHERE COG = ?
     `;
@@ -105,21 +111,22 @@ router.get('/commune/:cog', validateCOGParam, (req, res) => {
         if (err) {
             return handleDbError(err, res);
         }
-        
+
         if (!row) {
-            return res.status(404).json({ error: 'Données de subventions non trouvées pour cette commune' });
+            return res
+                .status(404)
+                .json({
+                    error: "Données de subventions non trouvées pour cette commune",
+                });
         }
 
-        try {
-            const subventions = JSON.parse(row.subventions_data);
-            res.json({
-                commune: cog,
-                subventions
-            });
-        } catch (parseErr) {
-            console.error('Erreur parsing JSON subventions commune:', parseErr);
-            res.status(500).json({ error: 'Erreur de format des données de subventions' });
-        }
+        // Extract all fields except the commune identifier
+        const { COG: cogField, ...subventions } = row;
+
+        res.json({
+            commune: cog,
+            subventions,
+        });
     });
 });
 

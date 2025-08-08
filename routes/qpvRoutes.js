@@ -60,7 +60,7 @@ router.get(
         params.push(parseInt(limit));
 
         db.all(sql, params, (err, rows) => {
-            if (err) return handleDbError(res, err);
+            if (err) return handleDbError(err, res);
             res.json(rows);
         });
     },
@@ -73,7 +73,7 @@ router.get("/commune/:cog", validateCOGParam, (req, res) => {
     const sql = `${baseQpvSelect} WHERE COG = ? ORDER BY codeQPV ASC`;
 
     db.all(sql, [cog], (err, rows) => {
-        if (err) return handleDbError(res, err);
+        if (err) return handleDbError(err, res);
         res.json(rows);
     });
 });
@@ -85,7 +85,7 @@ router.get("/departement/:dept", validateDepartementParam, (req, res) => {
     const sql = `${baseQpvSelect} WHERE insee_dep = ? ORDER BY lib_com ASC, codeQPV ASC`;
 
     db.all(sql, [dept], (err, rows) => {
-        if (err) return handleDbError(res, err);
+        if (err) return handleDbError(err, res);
         res.json(rows);
     });
 });
@@ -109,7 +109,7 @@ router.get("/stats/departement/:dept", validateDepartementParam, (req, res) => {
   `;
 
     db.get(sql, [dept], (err, row) => {
-        if (err) return handleDbError(res, err);
+        if (err) return handleDbError(err, res);
         res.json(row);
     });
 });
@@ -138,7 +138,7 @@ router.get(
         params.push(parseInt(limit));
 
         db.all(sql, params, (err, rows) => {
-            if (err) return handleDbError(res, err);
+            if (err) return handleDbError(err, res);
             res.json(rows);
         });
     },
