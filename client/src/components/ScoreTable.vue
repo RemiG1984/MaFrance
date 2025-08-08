@@ -14,9 +14,9 @@
       <v-table v-else-if="tableRows.length > 0" class="score-table">
         <thead>
           <tr class="score-header">
-            <th class="row-title"></th>
-            <th class="score-main">{{ mainHeader }}</th>
-            <th v-if="compareHeader" class="score-compare">{{ compareHeader }}</th>
+            <th class="row-title" :style="compareHeader ? 'width: 50%' : 'width: 70%'"></th>
+            <th class="score-main" :style="compareHeader ? 'width: 25%' : 'width: 30%'">{{ mainHeader }}</th>
+            <th v-if="compareHeader" class="score-compare" style="width: 25%">{{ compareHeader }}</th>
           </tr>
         </thead>
         <tbody>
@@ -272,6 +272,7 @@ export default {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     border-top: 2px solid #ccc;
     border-bottom: 2px solid #ccc;
+    table-layout: fixed;
   }
   .score-header th {
     font-weight: bold;
