@@ -135,7 +135,7 @@ export default {
     },
     
     async onCommuneInput() {
-      if (this.communeQuery.length < 2) {
+      if (this.communeQuery.length < 3) {
         this.communeSuggestions = []
         return
       }

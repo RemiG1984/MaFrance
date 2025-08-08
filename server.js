@@ -38,7 +38,7 @@ app.use(cors({
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  max: 200, // limit each IP to 100 requests per windowMs
   message: 'Trop de requêtes, veuillez réessayer plus tard.',
   standardHeaders: true,
   legacyHeaders: false,
@@ -48,7 +48,7 @@ app.use('/api/', limiter);
 // Stricter rate limit for search endpoints
 const searchLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
-  max: 20, // 20 searches per minute
+  max: 50, // 50 searches per minute
   message: 'Limite de recherche atteinte, veuillez attendre.',
 });
 
