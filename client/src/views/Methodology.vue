@@ -16,7 +16,7 @@
             Le site est en béta ouverte. Il est possible que des bugs ou erreurs soient présents. Des fonctions et données supplémentaires sont ajoutées régulièrement.
           </p>
           <p class="text">
-            Si vous souhaitez m'aider, vous pouver m'apporter une petite contribution via le lien Ko-fi pour m'aider à couvrir les frais de fonctionnement du site.
+            Si vous souhaitez m'aider, vous pouver m'apporter une petite contribution via le lien Ko-fi pour m'aider à couvrir les frais de fonctionnement du site. ko-fi.com/remi63047 <a href="https://ko-fi.com/remi63047" target="_blank" class="link">ko-fi.com/remi63047</a>
           </p>
         </section>
 
