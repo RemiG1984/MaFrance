@@ -15,6 +15,7 @@
           <p class="text">
             Le site est en béta ouverte. Il est possible que des bugs ou erreurs soient présents. Des fonctions et données supplémentaires sont ajoutées régulièrement.
           </p>
+          <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script><script type='text/javascript'>kofiwidget2.init('M'aider avec un don', '#72a4f2', 'O5O11JF046');kofiwidget2.draw();</script> 
         </section>
 
         <section class="section">
