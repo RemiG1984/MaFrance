@@ -109,7 +109,6 @@ import VersionSelector from './components/VersionSelector.vue'
 import HamburgerIcon from './components/HamburgerIcon.vue'
 import { mapStores } from 'pinia'
 import { useDataStore } from './services/store.js'
-import kofiSymbolImage from '@/assets/kofi_symbol.webp'; // Import the image
 
 export default {
   name: 'App',
@@ -131,7 +130,7 @@ export default {
         { title: 'Classements', path: '/classements' },
         { title: 'Méthodologie', path: '/methodologie' }
       ],
-      kofiSymbol: kofiSymbolImage // Assign the imported image to a data property
+      kofiSymbol: 'data:image/webp;base64,' // Will be filled with base64 data after running the shell command
     }
   },
   mounted() {
