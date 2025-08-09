@@ -25,7 +25,7 @@
             variant="text"
             class="mx-2 kofi-btn"
           >
-            <img src="@/assets/kofi_symbol.webp" alt="Support Me on Ko-fi" class="kofi-image" />
+            <img :src="kofiSymbol" alt="Support Me on Ko-fi" class="kofi-image" />
           </v-btn>
 
           <v-btn
@@ -91,7 +91,7 @@
           target="_blank"
           class="kofi-mobile"
         >
-          <img src="@/assets/kofi_symbol.webp" alt="Support Me on Ko-fi" class="kofi-image" />
+          <img :src="kofiSymbol" alt="Support Me on Ko-fi" class="kofi-image" />
         </v-list-item>
       </v-list>
     </v-navigation-drawer>
@@ -109,6 +109,7 @@ import VersionSelector from './components/VersionSelector.vue'
 import HamburgerIcon from './components/HamburgerIcon.vue'
 import { mapStores } from 'pinia'
 import { useDataStore } from './services/store.js'
+import kofiSymbolImage from '@/assets/kofi_symbol.webp'; // Import the image
 
 export default {
   name: 'App',
@@ -129,7 +130,8 @@ export default {
         { title: 'Accueil', path: '/' },
         { title: 'Classements', path: '/classements' },
         { title: 'Méthodologie', path: '/methodologie' }
-      ]
+      ],
+      kofiSymbol: kofiSymbolImage // Assign the imported image to a data property
     }
   },
   mounted() {
