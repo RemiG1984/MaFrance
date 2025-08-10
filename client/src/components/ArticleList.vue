@@ -77,7 +77,7 @@ export default {
     articles: {
       type: Object,
       default: () => { 
-        const counts = {};
+        const counts = { total: 0 };
         categories.forEach(str => counts[str] = 0);
         return {
           list: [],
@@ -190,9 +190,12 @@ export default {
     
     initializeArticles() {
       // Initialize with existing articles if available
-      if (this.articles.list && this.articles.list.length > 0) {
+      if (this.articles && this.articles.list && this.articles.list.length > 0) {
         this.displayedArticles = [...this.articles.list]
         this.currentTotal = this.articles.list.length
+      } else {
+        this.displayedArticles = []
+        this.currentTotal = 0
       }
     },
     
@@ -214,10 +217,10 @@ export default {
     },
     
     articles: {
-      handler() {
-        if (this.selectedCategory === 'tous' && this.articles.list) {
-          this.displayedArticles = [...this.articles.list]
-          this.currentTotal = this.articles.list.length
+      handler(newArticles) {
+        if (newArticles && newArticles.list && this.selectedCategory === 'tous') {
+          this.displayedArticles = [...newArticles.list]
+          this.currentTotal = newArticles.list.length
         }
       },
       deep: true
