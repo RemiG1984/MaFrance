@@ -30,7 +30,6 @@
               alt="Ko-fi" 
               class="kofi-icon"
             />
-            Ko-fi
           </v-btn>
    
           <v-btn
@@ -104,7 +103,6 @@
               alt="Ko-fi" 
               class="kofi-icon-mobile"
             />
-            Ko-fi
           </v-list-item-title>
         </v-list-item>
       </v-list>
