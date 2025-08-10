@@ -168,12 +168,6 @@ export default {
   color: #ffffff !important; /* White text for contrast */
 }
 
-/* Style pour le bouton Ko-fi */
-.kofi-btn {
-  background-color: #000000 !important; /* Black background */
-  color: #ffffff !important; /* White text for contrast */
-}
-
 .kofi-icon {
   width: 20px;
   height: 20px;
@@ -231,8 +225,6 @@ export default {
 }
 
 .kofi-mobile {
-  background-color: #000000 !important;
-  color: #ffffff !important;
   margin: 8px 16px;
   border-radius: 4px;
 }

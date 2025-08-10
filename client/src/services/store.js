@@ -120,8 +120,6 @@ export const useDataStore = defineStore("data", {
           }),
           api.getArticles({
             dept: code,
-            limit: 50,
-            offset: 0
           }),
           api.getArticleCounts({
             dept: code,
@@ -139,12 +137,8 @@ export const useDataStore = defineStore("data", {
         departement.qpv = results[5];
         departement.executive = results[6];
         departement.communesRankings = results[7];
-        // Structure articles data properly for ArticleList component
-        const articlesResponse = results[8];
-        departement.articles = {
-          list: articlesResponse?.articles || [],
-          counts: results[9] || {}
-        };
+        departement.articles = results[8];
+        departement.articlesCounts = results[9];
         departement.subventions = results[10];
         departement.migrants = results[11] || [];
         departement.namesSeries = this.serializeStats(departement.namesHistory);
@@ -173,8 +167,6 @@ export const useDataStore = defineStore("data", {
           api.getArticles({
             cog: code,
             dept: deptCode,
-            limit: 50,
-            offset: 0
           }),
           api.getArticleCounts({
             cog: code,
@@ -190,12 +182,8 @@ export const useDataStore = defineStore("data", {
         commune.crimeHistory = results[2];
         commune.qpv = results[3];
         commune.executive = results[4];
-        // Structure articles data properly for ArticleList component
-        const articlesResponse = results[5];
-        commune.articles = {
-          list: articlesResponse?.articles || [],
-          counts: results[6] || {}
-        };
+        commune.articles = results[5];
+        commune.articlesCounts = results[6];
         commune.subventions = results[7];
         commune.migrants = results[8] || [];
         commune.crimeSeries = this.serializeStats(results[2]);

@@ -8,12 +8,11 @@ const {
 } = require("../middleware/validate");
 
 // Centralized error handler for database queries
-const handleDbError = (err, res) => {
-  console.error("Database error:", err.message);
-  res.status(500).json({
-    error: "Erreur lors de la requête à la base de données",
-    details: err.message,
-  });
+const handleDbError = (err, next) => {
+  const error = new Error("Erreur lors de la requête à la base de données");
+  error.status = 500;
+  error.details = err.message;
+  return next(error);
 };
 
 // Base condition for articles with at least one category flag
@@ -25,7 +24,7 @@ router.get(
   "/",
   [validateDepartement, validateOptionalCOG, validateLieu],
   (req, res) => {
-    const { dept, cog, lieu, category, limit = 50, offset = 0 } = req.query;
+    const { dept, cog, lieu } = req.query;
 
     let sql = `
     SELECT date, title, url, lieu, commune, insecurite, immigration, islamisme, defrancisation, wokisme 
@@ -41,60 +40,11 @@ router.get(
       sql += " AND lieu LIKE ?";
       params.push(`%${lieu}%`);
     }
-    
-    // Add category filtering
-    if (category && category !== 'tous') {
-      const validCategories = ['insecurite', 'immigration', 'islamisme', 'defrancisation', 'wokisme'];
-      if (validCategories.includes(category)) {
-        sql += ` AND ${category} = 1`;
-      }
-    }
-    
     sql += " ORDER BY date DESC";
-    
-    // Add pagination
-    sql += " LIMIT ? OFFSET ?";
-    params.push(parseInt(limit), parseInt(offset));
 
-    // Get total count for pagination info
-    let countSql = `
-    SELECT COUNT(*) as total
-    FROM articles 
-    WHERE ${baseCondition}`;
-    const countParams = [dept];
-
-    if (cog) {
-      countSql += " AND cog = ?";
-      countParams.push(cog);
-    }
-    if (lieu) {
-      countSql += " AND lieu LIKE ?";
-      countParams.push(`%${lieu}%`);
-    }
-    if (category && category !== 'tous') {
-      const validCategories = ['insecurite', 'immigration', 'islamisme', 'defrancisation', 'wokisme'];
-      if (validCategories.includes(category)) {
-        countSql += ` AND ${category} = 1`;
-      }
-    }
-
-    // Execute both queries
-    db.get(countSql, countParams, (err, countRow) => {
-      if (err) return handleDbError(err, res);
-      
-      db.all(sql, params, (err, rows) => {
-        if (err) return handleDbError(err, res);
-        
-        res.json({
-          articles: rows,
-          pagination: {
-            total: countRow.total,
-            limit: parseInt(limit),
-            offset: parseInt(offset),
-            hasMore: countRow.total > parseInt(offset) + parseInt(limit)
-          }
-        });
-      });
+    db.all(sql, params, (err, rows) => {
+      if (err) return handleDbError(res, err);
+      res.json(rows);
     });
   },
 );
@@ -127,7 +77,7 @@ router.get(
     }
 
     db.get(sql, params, (err, row) => {
-      if (err) return handleDbError(err, res);
+      if (err) return handleDbError(res, err);
       const result = {
         insecurite: row?.insecurite_count || 0,
         immigration: row?.immigration_count || 0,
@@ -161,7 +111,7 @@ router.get(
     }
 
     db.all(sql, params, (err, rows) => {
-      if (err) return handleDbError(err, res);
+      if (err) return handleDbError(res, err);
       const lieuxSet = new Set();
       rows.forEach((row) => {
         if (row.lieu) {

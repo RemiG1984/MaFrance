@@ -1,3 +1,4 @@
+
 // Service API pour gérer les appels au backend avec cache
 class ApiService {
     constructor() {
@@ -56,7 +57,7 @@ class ApiService {
     shouldPersistCache(endpoint) {
         const persistentEndpoints = [
             '/api/departements/crime_history',
-            '/api/departements/names_history',
+            '/api/departements/names_history', 
             '/api/communes/crime_history',
             '/api/communes/names_history',
             '/api/country/crime_history',
@@ -88,7 +89,7 @@ class ApiService {
             '/api/subventions/departement/',
             '/api/subventions/commune/'
         ];
-
+        
         return persistentEndpoints.some(pattern => endpoint.includes(pattern));
     }
 
@@ -146,10 +147,10 @@ class ApiService {
                         data,
                         timestamp: Date.now(),
                     };
-
+                    
                     // Store in memory cache
                     this.cache.set(cacheKey, cacheEntry);
-
+                    
                     // Store in persistent cache for specific data types
                     if (this.shouldPersistCache(endpoint)) {
                         this.persistentStorage.set(cacheKey, cacheEntry);
@@ -174,10 +175,10 @@ class ApiService {
      */
     clearCache() {
         this.cache.clear();
-
+        
         const keys = Object.keys(localStorage).filter(key => key.startsWith('api_cache_'));
         keys.forEach(key => localStorage.removeItem(key));
-
+        
         console.log("All caches cleared");
     }
 
@@ -188,7 +189,7 @@ class ApiService {
         const memorySize = this.cache.size;
         const persistentKeys = Object.keys(localStorage).filter(key => key.startsWith('api_cache_'));
         const persistentSize = persistentKeys.length;
-
+        
         return {
             memory: memorySize,
             persistent: persistentSize,
@@ -270,7 +271,7 @@ const api = {
         apiService.request(`/api/articles/lieux?dept=${dept}&cog=${cog}`),
 
     // Articles
-    getArticles: (params = {}) => {
+    getArticles: (params) => {
         const queryString = new URLSearchParams(params).toString();
         return apiService.request(`/api/articles?${queryString}`);
     },
