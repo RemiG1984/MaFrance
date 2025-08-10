@@ -26,7 +26,7 @@
             class="mx-2 kofi-btn"
           >
             <img 
-              src="/assets/kofi_symbol.webp" 
+              src="/images/kofi_symbol.webp" 
               alt="Ko-fi" 
               class="kofi-icon"
             />
