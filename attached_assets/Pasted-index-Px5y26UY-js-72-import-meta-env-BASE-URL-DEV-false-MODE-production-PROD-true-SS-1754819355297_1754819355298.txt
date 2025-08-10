@@ -1,0 +1,48 @@
+index-Px5y26UY.js:72 import.meta.env: {BASE_URL: '/', DEV: false, MODE: 'production', PROD: true, SSR: false}
+index-Px5y26UY.js:72 VITE_API_BASE_URL: undefined
+index-Px5y26UY.js:21 Using persistent cached data for: /api/country/details?country=France
+index-Px5y26UY.js:21 Using persistent cached data for: /api/country/names?country=France
+index-Px5y26UY.js:21 Using persistent cached data for: /api/country/crime?country=France
+index-Px5y26UY.js:21 Using persistent cached data for: /api/country/crime_history?country=France
+index-Px5y26UY.js:21 Using persistent cached data for: /api/country/names_history?country=France
+index-Px5y26UY.js:21 Using persistent cached data for: /api/country/ministre?country=France
+index-Px5y26UY.js:21 Using persistent cached data for: /api/rankings/departements?limit=101&sort=total_score&direction=DESC
+index-Px5y26UY.js:21 Using persistent cached data for: /api/subventions/country/france
+index-Px5y26UY.js:13 TypeError: e.filter is not a function
+    at Iu (index-Px5y26UY.js:25:23466)
+    at Proxy.articles (index-Px5y26UY.js:64:59726)
+    at jp (index-Px5y26UY.js:9:3323)
+    at get value (index-Px5y26UY.js:9:14706)
+    at Object.get [as articles] (index-Px5y26UY.js:13:14028)
+    at index-Px5y26UY.js:64:61592
+    at Object.a [as default] (index-Px5y26UY.js:13:2159)
+    at Proxy.<anonymous> (index-Px5y26UY.js:72:263679)
+    at Jm (index-Px5y26UY.js:13:34934)
+    at Fp.he [as fn] (index-Px5y26UY.js:13:26351)
+aw @ index-Px5y26UY.js:13
+wc @ index-Px5y26UY.js:13
+Jm @ index-Px5y26UY.js:13
+he @ index-Px5y26UY.js:13
+run @ index-Px5y26UY.js:9
+runIfDirty @ index-Px5y26UY.js:9
+Nl @ index-Px5y26UY.js:13
+sy @ index-Px5y26UY.js:13
+Promise.then
+ay @ index-Px5y26UY.js:13
+Xf @ index-Px5y26UY.js:13
+l.scheduler @ index-Px5y26UY.js:13
+u.scheduler @ index-Px5y26UY.js:9
+trigger @ index-Px5y26UY.js:9
+Wf @ index-Px5y26UY.js:9
+za @ index-Px5y26UY.js:9
+set @ index-Px5y26UY.js:9
+set value @ index-Px5y26UY.js:9
+set @ index-Px5y26UY.js:9
+setDepartement @ index-Px5y26UY.js:21
+await in setDepartement
+I @ index-Px5y26UY.js:21
+click @ index-Px5y26UY.js:37
+fire @ Events.js:195
+_fireDOMEvent @ Map.js:1452
+_handleDOMEvent @ Map.js:1401
+o @ DomEvent.js:108
