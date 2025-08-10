@@ -25,7 +25,7 @@ router.get(
   "/",
   [validateDepartement, validateOptionalCOG, validateLieu],
   (req, res) => {
-    const { dept, cog, lieu } = req.query;
+    const { dept, cog, lieu, category, limit = 50, offset = 0 } = req.query;
 
     let sql = `
     SELECT date, title, url, lieu, commune, insecurite, immigration, islamisme, defrancisation, wokisme 
@@ -41,11 +41,60 @@ router.get(
       sql += " AND lieu LIKE ?";
       params.push(`%${lieu}%`);
     }
+    
+    // Add category filtering
+    if (category && category !== 'tous') {
+      const validCategories = ['insecurite', 'immigration', 'islamisme', 'defrancisation', 'wokisme'];
+      if (validCategories.includes(category)) {
+        sql += ` AND ${category} = 1`;
+      }
+    }
+    
     sql += " ORDER BY date DESC";
+    
+    // Add pagination
+    sql += " LIMIT ? OFFSET ?";
+    params.push(parseInt(limit), parseInt(offset));
 
-    db.all(sql, params, (err, rows) => {
+    // Get total count for pagination info
+    let countSql = `
+    SELECT COUNT(*) as total
+    FROM articles 
+    WHERE ${baseCondition}`;
+    const countParams = [dept];
+
+    if (cog) {
+      countSql += " AND cog = ?";
+      countParams.push(cog);
+    }
+    if (lieu) {
+      countSql += " AND lieu LIKE ?";
+      countParams.push(`%${lieu}%`);
+    }
+    if (category && category !== 'tous') {
+      const validCategories = ['insecurite', 'immigration', 'islamisme', 'defrancisation', 'wokisme'];
+      if (validCategories.includes(category)) {
+        countSql += ` AND ${category} = 1`;
+      }
+    }
+
+    // Execute both queries
+    db.get(countSql, countParams, (err, countRow) => {
       if (err) return handleDbError(err, res);
-      res.json(rows);
+      
+      db.all(sql, params, (err, rows) => {
+        if (err) return handleDbError(err, res);
+        
+        res.json({
+          articles: rows,
+          pagination: {
+            total: countRow.total,
+            limit: parseInt(limit),
+            offset: parseInt(offset),
+            hasMore: countRow.total > parseInt(offset) + parseInt(limit)
+          }
+        });
+      });
     });
   },
 );

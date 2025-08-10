@@ -19,8 +19,9 @@
             label
             :value="'tous'"
             @click="selectCategory('tous')"
+            :loading="loading && selectedCategory === 'tous'"
           >
-            Tous ({{ totalFilteredArticles }})
+            Tous ({{ selectedCategory === 'tous' ? currentTotal : articles.counts.total || 0 }})
           </v-chip>
           <v-chip 
             color="primary"
@@ -30,23 +31,31 @@
             :key="category"
             :value="category"
             @click="selectCategory(category)"
+            :loading="loading && selectedCategory === category"
           >
-            {{ articleCategoriesRef[category] }} ({{ articles.counts[category] || 0 }})
+            {{ articleCategoriesRef[category] }} ({{ selectedCategory === category ? currentTotal : (articles.counts[category] || 0) }})
           </v-chip>
         </v-chip-group>
       </div>
-      <div class="articles-container">
+      <div class="articles-container" @scroll="handleScroll" ref="articlesContainer">
         <div
           class="article"
-          v-for="(item, i) in filteredArticles"
+          v-for="(item, i) in displayedArticles"
           :key="item.url"
         >
           <b> {{ formatDate(item.date) }} </b>
           <span> [{{ item.commune }}] </span>
           <a :href='item.url'> {{ item.title }} </a>
         </div>
-        <div v-if="filteredArticles.length === 0" class="no-articles">
+        <div v-if="loading" class="loading-indicator">
+          <v-progress-circular indeterminate color="primary" size="24"></v-progress-circular>
+          Chargement...
+        </div>
+        <div v-if="displayedArticles.length === 0 && !loading" class="no-articles">
           {{ noArticlesMessage }}
+        </div>
+        <div v-if="!hasMore && displayedArticles.length > 0" class="end-indicator">
+          Tous les articles ont été chargés
         </div>
       </div>
     </v-card-text>
@@ -55,6 +64,8 @@
 
 <script>
 import { articleCategoriesRef } from '../utils/metricsConfig.js'
+import api from '../services/api.js'
+
 const categories = Object.keys(articleCategoriesRef)
 
 export default {
@@ -77,13 +88,19 @@ export default {
   },
   data() {
     return {
-      selectedCategory: 'tous', // Default to 'tous' for showing all articles
+      selectedCategory: 'tous',
       categories: categories,
-      articleCategoriesRef: articleCategoriesRef
+      articleCategoriesRef: articleCategoriesRef,
+      displayedArticles: [],
+      loading: false,
+      hasMore: true,
+      currentOffset: 0,
+      currentTotal: 0,
+      pageSize: 50
     }
   },
   mounted() {
-    // console.log('articleCategoriesRef', articleCategoriesRef)
+    this.initializeArticles()
   },
   computed: {
     locationName() {
@@ -99,25 +116,6 @@ export default {
         default:
           return '';
       }
-    },
-    
-    filteredArticles() {
-      let filtered = [...this.articles.list]
-      
-      // Apply category filter only if a specific category is selected
-      // When selectedCategory is 'tous', show all articles
-      if (this.selectedCategory && this.selectedCategory !== 'tous') {
-        filtered = filtered.filter(article => {
-          const value = article[this.selectedCategory];
-          return value === 1 || value === "1";
-        });
-      }
-      
-      return filtered
-    },
-    
-    totalFilteredArticles() {
-      return this.articles.list.length
     },
     
     noArticlesMessage() {
@@ -137,20 +135,92 @@ export default {
       })
     },
     
-    selectCategory(category) {
+    async selectCategory(category) {
+      if (this.selectedCategory === category) return
+      
       this.selectedCategory = category
+      this.displayedArticles = []
+      this.currentOffset = 0
+      this.hasMore = true
+      
+      await this.loadArticles(true)
     },
     
-    filterArticles() {
-      // This method can be used for additional filtering logic if needed
+    async loadArticles(reset = false) {
+      if (this.loading || (!this.hasMore && !reset)) return
+      
+      this.loading = true
+      
+      try {
+        const params = {
+          limit: this.pageSize,
+          offset: reset ? 0 : this.currentOffset,
+          category: this.selectedCategory
+        }
+        
+        // Add location-specific parameters
+        if (this.location) {
+          if (this.location.type === 'departement') {
+            params.dept = this.location.code
+          } else if (this.location.type === 'commune') {
+            params.cog = this.location.code
+            params.dept = this.location.departement
+          }
+        }
+        
+        const response = await api.getArticles(params)
+        
+        if (reset) {
+          this.displayedArticles = response.articles
+          this.currentOffset = response.pagination.limit
+        } else {
+          this.displayedArticles.push(...response.articles)
+          this.currentOffset += response.pagination.limit
+        }
+        
+        this.currentTotal = response.pagination.total
+        this.hasMore = response.pagination.hasMore
+        
+      } catch (error) {
+        console.error('Failed to load articles:', error)
+      } finally {
+        this.loading = false
+      }
+    },
+    
+    initializeArticles() {
+      // Initialize with existing articles if available
+      if (this.articles.list && this.articles.list.length > 0) {
+        this.displayedArticles = [...this.articles.list]
+        this.currentTotal = this.articles.list.length
+      }
+    },
+    
+    handleScroll(event) {
+      const { scrollTop, scrollHeight, clientHeight } = event.target
+      
+      // Load more when user scrolls near the bottom
+      if (scrollTop + clientHeight >= scrollHeight - 100) {
+        this.loadArticles()
+      }
     }
   },
   watch: {
-    selectedCategory: {
+    location: {
       handler() {
-        // Reset to first category chip when category changes
-        // This ensures the UI reflects the current selection
-      }
+        this.initializeArticles()
+      },
+      immediate: true
+    },
+    
+    articles: {
+      handler() {
+        if (this.selectedCategory === 'tous' && this.articles.list) {
+          this.displayedArticles = [...this.articles.list]
+          this.currentTotal = this.articles.list.length
+        }
+      },
+      deep: true
     }
   }
 }
@@ -180,6 +250,24 @@ export default {
   color: #6c757d;
   font-style: italic;
   padding: 20px;
+}
+
+.loading-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  color: #6c757d;
+  font-size: 14px;
+}
+
+.end-indicator {
+  text-align: center;
+  color: #6c757d;
+  font-style: italic;
+  padding: 16px;
+  font-size: 14px;
 }
 
 .categories-container {

@@ -120,6 +120,8 @@ export const useDataStore = defineStore("data", {
           }),
           api.getArticles({
             dept: code,
+            limit: 50,
+            offset: 0
           }),
           api.getArticleCounts({
             dept: code,
@@ -167,6 +169,8 @@ export const useDataStore = defineStore("data", {
           api.getArticles({
             cog: code,
             dept: deptCode,
+            limit: 50,
+            offset: 0
           }),
           api.getArticleCounts({
             cog: code,
