@@ -26,7 +26,7 @@
             class="mx-2 kofi-btn"
           >
             <img 
-              src="images/kofi_symbol.webp" 
+              src="/images/kofi_symbol.webp" 
               alt="Ko-fi" 
               class="kofi-icon"
             />
@@ -99,7 +99,7 @@
         >
           <v-list-item-title>
             <img 
-              src="images/kofi_symbol.webp" 
+              src="/images/kofi_symbol.webp" 
               alt="Ko-fi" 
               class="kofi-icon-mobile"
             />
