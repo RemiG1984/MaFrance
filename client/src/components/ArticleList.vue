@@ -134,7 +134,27 @@ export default {
     },
 
     filteredArticles() {
-      return this.articles.list || []
+      const allArticles = this.articles.list || []
+      
+      // If "tous" is selected or no category filtering needed, return all articles
+      if (this.selectedCategory === 'tous') {
+        return allArticles
+      }
+
+      // Check if all articles are loaded (no pagination needed)
+      const totalCount = this.articles.counts.total || 0
+      const currentArticlesCount = allArticles.length
+      const isAllLoaded = totalCount <= 20 || currentArticlesCount >= totalCount
+
+      // If all articles are loaded, filter them client-side by category
+      if (isAllLoaded) {
+        return allArticles.filter(article => 
+          article.categories && article.categories.includes(this.selectedCategory)
+        )
+      }
+
+      // Otherwise, return all articles (they should already be filtered by the API)
+      return allArticles
     },
 
     totalArticles() {
@@ -214,6 +234,18 @@ export default {
         this.$refs.articlesContainer.scrollTop = 0
       }
 
+      // Check if all articles are already loaded (no pagination needed)
+      const totalCount = this.articles.counts.total || 0
+      const currentArticlesCount = this.articles.list?.length || 0
+      const isAllLoaded = totalCount <= 20 || currentArticlesCount >= totalCount
+
+      // If all articles are loaded, no need to fetch from API - filtering will happen automatically
+      // through the computed property filteredArticles
+      if (isAllLoaded) {
+        return
+      }
+
+      // Otherwise, fetch filtered articles from API
       const { useDataStore } = await import('../services/store.js')
       const dataStore = useDataStore()
 
