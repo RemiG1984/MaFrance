@@ -129,15 +129,30 @@ export default {
       })
     },
 
-    selectCategory(category) {
+    async selectCategory(category) {
       this.selectedCategory = category
-      // Fetch articles based on the selected category
-      // This assumes your API endpoint can handle a category query parameter
-      // Example: fetch(`/api/articles?location=${this.location.code}&category=${category}`)
-      // You would then update this.articles with the new list and counts from the API response.
-      // For now, we are just updating the selected category.
-      // The actual fetching and updating of `this.articles` should be handled by a parent component
-      // or a Vuex store that manages the data and makes API calls.
+      
+      // Import the store
+      const { useDataStore } = await import('../services/store.js')
+      const dataStore = useDataStore()
+      
+      // Prepare API parameters based on location
+      const params = {}
+      
+      if (this.location.type === 'departement') {
+        params.dept = this.location.code
+      } else if (this.location.type === 'commune') {
+        params.cog = this.location.code
+        params.dept = dataStore.getCommuneDepartementCode()
+      }
+      
+      // Add category filter if not 'tous'
+      if (category !== 'tous') {
+        params.category = category
+      }
+      
+      // Fetch filtered articles
+      await dataStore.fetchFilteredArticles(params)
     },
 
   },
