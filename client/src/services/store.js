@@ -121,9 +121,6 @@ export const useDataStore = defineStore("data", {
           api.getArticles({
             dept: code,
           }),
-          api.getArticleCounts({
-            dept: code,
-          }),
           api.getDepartementSubventions(code),
           api.getDepartementMigrants(code),
         ]);
@@ -137,10 +134,11 @@ export const useDataStore = defineStore("data", {
         departement.qpv = results[5];
         departement.executive = results[6];
         departement.communesRankings = results[7];
-        departement.articles = results[8];
-        departement.articlesCounts = results[9];
-        departement.subventions = results[10];
-        departement.migrants = results[11] || [];
+        const articlesResponse = results[8];
+        departement.articles = articlesResponse;
+        departement.articlesCounts = articlesResponse?.counts || {};
+        departement.subventions = results[9];
+        departement.migrants = results[10] || [];
         departement.namesSeries = this.serializeStats(departement.namesHistory);
         departement.crimeSeries = this.serializeStats(results[3]);
         departement.crimeAggreg = this.aggregateStats(
@@ -168,10 +166,6 @@ export const useDataStore = defineStore("data", {
             cog: code,
             dept: deptCode,
           }),
-          api.getArticleCounts({
-            cog: code,
-            dept: deptCode,
-          }),
           api.getCommuneSubventions(code),
           api.getCommuneMigrants(code),
         ]);
@@ -182,10 +176,11 @@ export const useDataStore = defineStore("data", {
         commune.crimeHistory = results[2];
         commune.qpv = results[3];
         commune.executive = results[4];
-        commune.articles = results[5];
-        commune.articlesCounts = results[6];
-        commune.subventions = results[7];
-        commune.migrants = results[8] || [];
+        const articlesResponse = results[5];
+        commune.articles = articlesResponse;
+        commune.articlesCounts = articlesResponse?.counts || {};
+        commune.subventions = results[6];
+        commune.migrants = results[7] || [];
         commune.crimeSeries = this.serializeStats(results[2]);
         commune.crimeAggreg = this.aggregateStats(commune.crimeSeries.data);
 
