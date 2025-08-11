@@ -65,14 +65,16 @@ export default {
     },
     articles: {
       type: Object,
-      default: () => { 
-        const counts = {};
-        categories.forEach(str => counts[str] = 0);
-        return {
-          list: [],
-          counts: counts,
+      default: () => ({ 
+        list: [],
+        counts: {
+          insecurite: 0,
+          immigration: 0,
+          islamisme: 0,
+          defrancisation: 0,
+          wokisme: 0
         }
-      }
+      })
     }
   },
   data() {

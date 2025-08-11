@@ -42,9 +42,31 @@ router.get(
     }
     sql += " ORDER BY date DESC";
 
+    // Get articles
     db.all(sql, params, (err, rows) => {
-      if (err) return handleDbError(res, err);
-      res.json(rows);
+      if (err) return handleDbError(err, res);
+      
+      // Calculate counts from the fetched articles
+      const counts = {
+        insecurite: 0,
+        immigration: 0,
+        islamisme: 0,
+        defrancisation: 0,
+        wokisme: 0
+      };
+
+      rows.forEach(article => {
+        if (article.insecurite === 1) counts.insecurite++;
+        if (article.immigration === 1) counts.immigration++;
+        if (article.islamisme === 1) counts.islamisme++;
+        if (article.defrancisation === 1) counts.defrancisation++;
+        if (article.wokisme === 1) counts.wokisme++;
+      });
+
+      res.json({
+        list: rows,
+        counts: counts
+      });
     });
   },
 );
