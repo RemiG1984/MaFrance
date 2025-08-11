@@ -199,13 +199,11 @@ export default {
 
     articles(){
       const level = this.dataStore.currentLevel
-      const articles = this.dataStore[level]?.articles || []
-      const articlesCounts = this.dataStore[level]?.articlesCounts || {}
+      const articlesData = this.dataStore[level]?.articles || { list: [], counts: {} }
 
       return {
-        list: dedupeArrByKey(articles, 'url'),
-        // list: articles,
-        counts: articlesCounts,
+        list: dedupeArrByKey(articlesData.list || [], 'url'),
+        counts: articlesData.counts || {},
       }
     },
 
