@@ -3,6 +3,7 @@ const router = express.Router();
 const db = require("../config/db");
 const {
   validateDepartement,
+  validateOptionalDepartement,
   validateOptionalCOG,
   validateLieu,
 } = require("../middleware/validate");
@@ -16,18 +17,23 @@ const handleDbError = (err, next) => {
 };
 
 // Base condition for articles with at least one category flag
-const baseCondition =
-  "departement = ? AND (insecurite = 1 OR immigration = 1 OR islamisme = 1 OR defrancisation = 1 OR wokisme = 1)";
+const getBaseCondition = (hasDept) => {
+  if (hasDept) {
+    return "departement = ? AND (insecurite = 1 OR immigration = 1 OR islamisme = 1 OR defrancisation = 1 OR wokisme = 1)";
+  }
+  return "(insecurite = 1 OR immigration = 1 OR islamisme = 1 OR defrancisation = 1 OR wokisme = 1)";
+};
 
 // GET /api/articles
 router.get(
   "/",
-  [validateDepartement, validateOptionalCOG, validateLieu],
+  [validateOptionalDepartement, validateOptionalCOG, validateLieu],
   (req, res) => {
     const { dept, cog, lieu, category, cursor, limit = '20' } = req.query;
     const pageLimit = Math.min(parseInt(limit), 100); // Cap at 100 items per page
 
     // First, get total counts for all categories (always needed for UI)
+    const baseCondition = getBaseCondition(!!dept);
     let countSql = `
     SELECT 
       SUM(insecurite) as insecurite_count,
@@ -38,7 +44,7 @@ router.get(
       COUNT(*) as total_count
     FROM articles 
     WHERE ${baseCondition}`;
-    const countParams = [dept];
+    const countParams = dept ? [dept] : [];
 
     if (cog) {
       countSql += " AND cog = ?";
@@ -68,7 +74,7 @@ router.get(
              rowid
       FROM articles 
       WHERE ${baseCondition}`;
-      const params = [dept];
+      const params = dept ? [dept] : [];
 
       if (cog) {
         sql += " AND cog = ?";

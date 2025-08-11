@@ -170,9 +170,6 @@ export default {
     },
 
     noArticlesMessage() {
-      if (this.location && this.location.type === 'country') {
-        return 'Sélectionnez un département ou une commune pour voir les articles'
-      }
       return 'Aucun article trouvé.'
     }
   },
@@ -231,6 +228,7 @@ export default {
         params.cog = this.location.code
         params.dept = dataStore.getCommuneDepartementCode()
       }
+      // For country level (France), no additional location params needed
 
       if (category !== 'tous') {
         params.category = category
@@ -259,6 +257,7 @@ export default {
           params.cog = this.location.code
           params.dept = dataStore.getCommuneDepartementCode()
         }
+        // For country level (France), no additional location params needed
 
         if (this.selectedCategory !== 'tous') {
           params.category = this.selectedCategory

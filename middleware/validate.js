@@ -178,6 +178,15 @@ const validateLieu = [
   handleValidationErrors,
 ];
 
+// New middleware for optional department validation
+const validateOptionalDepartement = (req, res, next) => {
+  const { dept } = req.query
+  if (dept && !/^\d{1,3}$/.test(dept)) {
+    return res.status(400).json({ error: 'Le paramètre dept doit être un nombre' })
+  }
+  next()
+}
+
 function validateSearchQuery(req, res, next) {
   const { q } = req.query;
   if (
@@ -206,6 +215,7 @@ module.exports = {
   validateCOG,
   validateCOGParam,
   validateOptionalCOG,
+  validateOptionalDepartement,
   validateSearchQuery,
   validateSort,
   validateDirection,
