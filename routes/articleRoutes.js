@@ -24,58 +24,98 @@ router.get(
   "/",
   [validateDepartement, validateOptionalCOG, validateLieu],
   (req, res) => {
-    const { dept, cog, lieu, category } = req.query;
+    const { dept, cog, lieu, category, cursor, limit = '20' } = req.query;
+    const pageLimit = Math.min(parseInt(limit), 100); // Cap at 100 items per page
 
-    let sql = `
-    SELECT date, title, url, lieu, commune, insecurite, immigration, islamisme, defrancisation, wokisme 
+    // First, get total counts for all categories (always needed for UI)
+    let countSql = `
+    SELECT 
+      SUM(insecurite) as insecurite_count,
+      SUM(immigration) as immigration_count,
+      SUM(islamisme) as islamisme_count,
+      SUM(defrancisation) as defrancisation_count,
+      SUM(wokisme) as wokisme_count,
+      COUNT(*) as total_count
     FROM articles 
     WHERE ${baseCondition}`;
-    const params = [dept];
+    const countParams = [dept];
 
     if (cog) {
-      sql += " AND cog = ?";
-      params.push(cog);
+      countSql += " AND cog = ?";
+      countParams.push(cog);
     }
     if (lieu) {
-      sql += " AND lieu LIKE ?";
-      params.push(`%${lieu}%`);
+      countSql += " AND lieu LIKE ?";
+      countParams.push(`%${lieu}%`);
     }
-    
-    // Add category filtering if specified and not 'tous'
-    if (category && category !== 'tous') {
-      const validCategories = ['insecurite', 'immigration', 'islamisme', 'defrancisation', 'wokisme'];
-      if (validCategories.includes(category)) {
-        sql += ` AND ${category} = 1`;
-      }
-    }
-    
-    sql += " ORDER BY date DESC";
 
-    // Get articles
-    db.all(sql, params, (err, rows) => {
+    // Get counts first
+    db.get(countSql, countParams, (err, countRow) => {
       if (err) return handleDbError(err, res);
-      
-      // Calculate counts from the fetched articles
+
       const counts = {
-        insecurite: 0,
-        immigration: 0,
-        islamisme: 0,
-        defrancisation: 0,
-        wokisme: 0,
-        total: rows.length
+        insecurite: countRow?.insecurite_count || 0,
+        immigration: countRow?.immigration_count || 0,
+        islamisme: countRow?.islamisme_count || 0,
+        defrancisation: countRow?.defrancisation_count || 0,
+        wokisme: countRow?.wokisme_count || 0,
+        total: countRow?.total_count || 0
       };
 
-      rows.forEach(article => {
-        if (article.insecurite === 1) counts.insecurite++;
-        if (article.immigration === 1) counts.immigration++;
-        if (article.islamisme === 1) counts.islamisme++;
-        if (article.defrancisation === 1) counts.defrancisation++;
-        if (article.wokisme === 1) counts.wokisme++;
-      });
+      // Now get paginated articles
+      let sql = `
+      SELECT date, title, url, lieu, commune, insecurite, immigration, islamisme, defrancisation, wokisme,
+             rowid
+      FROM articles 
+      WHERE ${baseCondition}`;
+      const params = [dept];
 
-      res.json({
-        list: rows,
-        counts: counts
+      if (cog) {
+        sql += " AND cog = ?";
+        params.push(cog);
+      }
+      if (lieu) {
+        sql += " AND lieu LIKE ?";
+        params.push(`%${lieu}%`);
+      }
+      
+      // Add category filtering if specified and not 'tous'
+      if (category && category !== 'tous') {
+        const validCategories = ['insecurite', 'immigration', 'islamisme', 'defrancisation', 'wokisme'];
+        if (validCategories.includes(category)) {
+          sql += ` AND ${category} = 1`;
+        }
+      }
+
+      // Add cursor-based pagination
+      if (cursor) {
+        sql += " AND rowid > ?";
+        params.push(cursor);
+      }
+      
+      sql += " ORDER BY date DESC, rowid ASC LIMIT ?";
+      params.push(pageLimit + 1); // Get one extra to check if there are more
+
+      // Get articles
+      db.all(sql, params, (err, rows) => {
+        if (err) return handleDbError(err, res);
+        
+        const hasMore = rows.length > pageLimit;
+        const articles = hasMore ? rows.slice(0, pageLimit) : rows;
+        const nextCursor = hasMore && articles.length > 0 ? articles[articles.length - 1].rowid : null;
+
+        // Remove rowid from response
+        const cleanArticles = articles.map(({ rowid, ...article }) => article);
+
+        res.json({
+          list: cleanArticles,
+          counts: counts,
+          pagination: {
+            hasMore: hasMore,
+            nextCursor: nextCursor,
+            limit: pageLimit
+          }
+        });
       });
     });
   },

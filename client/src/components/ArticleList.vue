@@ -1,3 +1,4 @@
+
 <template>
   <v-card>
     <v-card-title class="text-h5">
@@ -19,7 +20,7 @@
             :value="'tous'"
             @click="selectCategory('tous')"
           >
-            Tous ({{ totalFilteredArticles }})
+            Tous ({{ totalArticles }})
           </v-chip>
           <v-chip 
             color="primary"
@@ -34,17 +35,31 @@
           </v-chip>
         </v-chip-group>
       </div>
-      <div class="articles-container">
-        <div
-          class="article"
-          v-for="(item, i) in filteredArticles"
-          :key="item.url"
-        >
-          <b> {{ formatDate(item.date) }} </b>
-          <span> [{{ item.commune }}] </span>
-          <a :href='item.url'> {{ item.title }} </a>
+      
+      <div class="articles-container" ref="articlesContainer" @scroll="handleScroll">
+        <div class="virtual-scroll-wrapper" :style="{ height: virtualHeight + 'px' }">
+          <div class="virtual-scroll-content" :style="{ transform: `translateY(${offsetY}px)` }">
+            <div
+              class="article"
+              v-for="(item, i) in visibleArticles"
+              :key="item.url + i"
+              :style="{ height: itemHeight + 'px' }"
+            >
+              <div class="article-content">
+                <b> {{ formatDate(item.date) }} </b>
+                <span> [{{ item.commune }}] </span>
+                <a :href='item.url'> {{ item.title }} </a>
+              </div>
+            </div>
+          </div>
         </div>
-        <div v-if="filteredArticles.length === 0" class="no-articles">
+        
+        <div v-if="isLoading" class="loading">
+          <v-progress-circular indeterminate size="24" color="primary"></v-progress-circular>
+          Chargement...
+        </div>
+        
+        <div v-if="filteredArticles.length === 0 && !isLoading" class="no-articles">
           {{ noArticlesMessage }}
         </div>
       </div>
@@ -73,19 +88,34 @@ export default {
           defrancisation: 0,
           wokisme: 0,
           total: 0
+        },
+        pagination: {
+          hasMore: false,
+          nextCursor: null,
+          limit: 20
         }
       })
     }
   },
   data() {
     return {
-      selectedCategory: 'tous', // Default to 'tous' for showing all articles
+      selectedCategory: 'tous',
       categories: categories,
-      articleCategoriesRef: articleCategoriesRef
+      articleCategoriesRef: articleCategoriesRef,
+      isLoading: false,
+      // Virtual scrolling
+      containerHeight: 400,
+      itemHeight: 60,
+      scrollTop: 0,
+      bufferSize: 5 // Extra items to render for smooth scrolling
     }
   },
   mounted() {
-    // console.log('articleCategoriesRef', articleCategoriesRef)
+    this.updateContainerHeight()
+    window.addEventListener('resize', this.updateContainerHeight)
+  },
+  beforeUnmount() {
+    window.removeEventListener('resize', this.updateContainerHeight)
   },
   computed: {
     locationName() {
@@ -104,12 +134,40 @@ export default {
     },
 
     filteredArticles() {
-      // Now articles.list already contains the filtered results from the API
-      return this.articles.list
+      return this.articles.list || []
     },
 
-    totalFilteredArticles() {
-      return this.articles.list.length
+    totalArticles() {
+      // For "tous" category, show the count for the current filter
+      if (this.selectedCategory === 'tous') {
+        return this.articles.counts.total || 0
+      }
+      return this.articles.counts[this.selectedCategory] || 0
+    },
+
+    // Virtual scrolling computed properties
+    visibleStartIndex() {
+      return Math.max(0, Math.floor(this.scrollTop / this.itemHeight) - this.bufferSize)
+    },
+
+    visibleEndIndex() {
+      const visibleCount = Math.ceil(this.containerHeight / this.itemHeight)
+      return Math.min(
+        this.filteredArticles.length - 1,
+        this.visibleStartIndex + visibleCount + this.bufferSize * 2
+      )
+    },
+
+    visibleArticles() {
+      return this.filteredArticles.slice(this.visibleStartIndex, this.visibleEndIndex + 1)
+    },
+
+    virtualHeight() {
+      return this.filteredArticles.length * this.itemHeight
+    },
+
+    offsetY() {
+      return this.visibleStartIndex * this.itemHeight
     },
 
     noArticlesMessage() {
@@ -129,15 +187,42 @@ export default {
       })
     },
 
+    updateContainerHeight() {
+      if (this.$refs.articlesContainer) {
+        this.containerHeight = this.$refs.articlesContainer.clientHeight
+      }
+    },
+
+    handleScroll(event) {
+      this.scrollTop = event.target.scrollTop
+      
+      // Check if we need to load more articles
+      const scrollBottom = this.scrollTop + this.containerHeight
+      const contentHeight = this.virtualHeight
+      
+      if (
+        scrollBottom >= contentHeight - 200 && // Load when 200px from bottom
+        !this.isLoading &&
+        this.articles.pagination?.hasMore
+      ) {
+        this.loadMoreArticles()
+      }
+    },
+
     async selectCategory(category) {
       this.selectedCategory = category
+      this.scrollTop = 0 // Reset scroll position
+      
+      if (this.$refs.articlesContainer) {
+        this.$refs.articlesContainer.scrollTop = 0
+      }
 
-      // Import the store
       const { useDataStore } = await import('../services/store.js')
       const dataStore = useDataStore()
 
-      // Prepare API parameters based on location
-      const params = {}
+      const params = {
+        limit: 20 // Initial page size
+      }
 
       if (this.location.type === 'departement') {
         params.dept = this.location.code
@@ -146,22 +231,54 @@ export default {
         params.dept = dataStore.getCommuneDepartementCode()
       }
 
-      // Add category filter only if not 'tous'
       if (category !== 'tous') {
         params.category = category
       }
 
-      // Fetch articles (filtered or all)
-      await dataStore.fetchFilteredArticles(params)
+      await dataStore.fetchFilteredArticles(params, false) // Don't append, replace
     },
 
+    async loadMoreArticles() {
+      if (this.isLoading || !this.articles.pagination?.hasMore) return
+
+      this.isLoading = true
+
+      try {
+        const { useDataStore } = await import('../services/store.js')
+        const dataStore = useDataStore()
+
+        const params = {
+          cursor: this.articles.pagination.nextCursor,
+          limit: 20
+        }
+
+        if (this.location.type === 'departement') {
+          params.dept = this.location.code
+        } else if (this.location.type === 'commune') {
+          params.cog = this.location.code
+          params.dept = dataStore.getCommuneDepartementCode()
+        }
+
+        if (this.selectedCategory !== 'tous') {
+          params.category = this.selectedCategory
+        }
+
+        await dataStore.loadMoreArticles(params)
+      } catch (error) {
+        console.error('Failed to load more articles:', error)
+      } finally {
+        this.isLoading = false
+      }
+    }
   },
   watch: {
-    selectedCategory: {
+    articles: {
       handler() {
-        // Reset to first category chip when category changes
-        // This ensures the UI reflects the current selection
-      }
+        this.$nextTick(() => {
+          this.updateContainerHeight()
+        })
+      },
+      deep: true
     }
   }
 }
@@ -169,21 +286,45 @@ export default {
 
 <style scoped>
 .articles-container {
-  max-height: 300px;
+  height: 400px;
   overflow-y: auto;
   border: 1px solid #dee2e6;
   border-radius: 8px;
-  padding: 12px;
   background-color: #fff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.virtual-scroll-wrapper {
+  position: relative;
+}
+
+.virtual-scroll-content {
+  position: relative;
+}
+
+.article {
+  border-bottom: 1px solid #eee;
+  display: flex;
+  align-items: center;
+}
+
+.article-content {
+  padding: 12px;
+  width: 100%;
 }
 
 .article a {
   color: #007bff;
 }
 
-.article {
-  margin-bottom: 12px;
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px;
+  color: #6c757d;
 }
 
 .no-articles {

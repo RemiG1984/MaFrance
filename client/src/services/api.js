@@ -273,7 +273,7 @@ const api = {
     // Articles
     getArticles: (params) => {
         const queryString = new URLSearchParams(params).toString();
-        return apiService.request(`/api/articles?${queryString}`);
+        return apiService.request(`/api/articles?${queryString}`, {}, !params.cursor); // Don't cache paginated requests
     },
     getArticleCounts: (params) => {
         const queryString = new URLSearchParams(params).toString();

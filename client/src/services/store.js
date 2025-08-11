@@ -475,23 +475,35 @@ export const useDataStore = defineStore("data", {
       }
     },
 
-    async fetchFilteredArticles(params) {
+    async fetchFilteredArticles(params, append = false) {
       try {
         const articlesResponse = await api.getArticles(params)
 
         if (params.cog) {
-          // For commune: update list but preserve original counts for category buttons
-          const originalCounts = this.commune.articles.counts
-          this.commune.articles = {
-            ...articlesResponse,
-            counts: originalCounts // Keep original counts for category buttons
+          // For commune
+          if (append && this.commune.articles) {
+            // Append new articles to existing list
+            this.commune.articles = {
+              ...articlesResponse,
+              list: [...this.commune.articles.list, ...articlesResponse.list],
+              counts: articlesResponse.counts // Use fresh counts
+            }
+          } else {
+            // Replace articles list
+            this.commune.articles = articlesResponse
           }
         } else if (params.dept) {
-          // For departement: update list but preserve original counts for category buttons  
-          const originalCounts = this.departement.articles.counts
-          this.departement.articles = {
-            ...articlesResponse,
-            counts: originalCounts // Keep original counts for category buttons
+          // For departement
+          if (append && this.departement.articles) {
+            // Append new articles to existing list
+            this.departement.articles = {
+              ...articlesResponse,
+              list: [...this.departement.articles.list, ...articlesResponse.list],
+              counts: articlesResponse.counts // Use fresh counts
+            }
+          } else {
+            // Replace articles list
+            this.departement.articles = articlesResponse
           }
         }
 
@@ -500,6 +512,10 @@ export const useDataStore = defineStore("data", {
         console.error('Failed to fetch filtered articles:', error)
         return null
       }
+    },
+
+    async loadMoreArticles(params) {
+      return this.fetchFilteredArticles(params, true)
     },
   },
 
