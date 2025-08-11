@@ -71,7 +71,8 @@ export default {
           immigration: 0,
           islamisme: 0,
           defrancisation: 0,
-          wokisme: 0
+          wokisme: 0,
+          total: 0
         }
       })
     }
