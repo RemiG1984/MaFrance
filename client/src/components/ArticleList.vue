@@ -131,27 +131,27 @@ export default {
 
     async selectCategory(category) {
       this.selectedCategory = category
-      
+
       // Import the store
       const { useDataStore } = await import('../services/store.js')
       const dataStore = useDataStore()
-      
+
       // Prepare API parameters based on location
       const params = {}
-      
+
       if (this.location.type === 'departement') {
         params.dept = this.location.code
       } else if (this.location.type === 'commune') {
         params.cog = this.location.code
         params.dept = dataStore.getCommuneDepartementCode()
       }
-      
-      // Add category filter if not 'tous'
+
+      // Add category filter only if not 'tous'
       if (category !== 'tous') {
         params.category = category
       }
-      
-      // Fetch filtered articles
+
+      // Fetch articles (filtered or all)
       await dataStore.fetchFilteredArticles(params)
     },
 

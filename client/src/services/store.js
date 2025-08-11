@@ -478,21 +478,23 @@ export const useDataStore = defineStore("data", {
     async fetchFilteredArticles(params) {
       try {
         const articlesResponse = await api.getArticles(params)
-        
+
         if (params.cog) {
-          // Update commune articles with filtered results, but keep original counts
+          // For commune: update list but preserve original counts for category buttons
+          const originalCounts = this.commune.articles.counts
           this.commune.articles = {
-            ...this.commune.articles,
-            list: articlesResponse.list
+            ...articlesResponse,
+            counts: originalCounts // Keep original counts for category buttons
           }
         } else if (params.dept) {
-          // Update departement articles with filtered results, but keep original counts
+          // For departement: update list but preserve original counts for category buttons  
+          const originalCounts = this.departement.articles.counts
           this.departement.articles = {
-            ...this.departement.articles,
-            list: articlesResponse.list
+            ...articlesResponse,
+            counts: originalCounts // Keep original counts for category buttons
           }
         }
-        
+
         return articlesResponse
       } catch (error) {
         console.error('Failed to fetch filtered articles:', error)
