@@ -227,8 +227,9 @@ export default {
       } else if (this.location.type === 'commune') {
         params.cog = this.location.code
         params.dept = dataStore.getCommuneDepartementCode()
+      } else if (this.location.type === 'country') {
+        params.country = 'France'
       }
-      // For country level (France), no additional location params needed
 
       if (category !== 'tous') {
         params.category = category
@@ -256,8 +257,9 @@ export default {
         } else if (this.location.type === 'commune') {
           params.cog = this.location.code
           params.dept = dataStore.getCommuneDepartementCode()
+        } else if (this.location.type === 'country') {
+          params.country = 'France'
         }
-        // For country level (France), no additional location params needed
 
         if (this.selectedCategory !== 'tous') {
           params.category = this.selectedCategory
