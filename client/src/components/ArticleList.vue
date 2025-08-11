@@ -1,10 +1,9 @@
-
 <template>
   <v-card>
     <v-card-title class="text-h5">
       Articles FdS associés à: {{ locationName }}
     </v-card-title>
-    
+
     <v-card-text>
       <div class="categories-container mb-4">
         <v-chip-group
@@ -13,16 +12,16 @@
           column
           mandatory
         >
-          <v-chip 
+          <v-chip
             color="primary"
             variant="flat"
             label
             :value="'tous'"
             @click="selectCategory('tous')"
           >
-            Tous ({{ totalFilteredArticles }})
+            Tous ({{ articles.counts.total || 0 }})
           </v-chip>
-          <v-chip 
+          <v-chip
             color="primary"
             variant="flat"
             label
@@ -65,14 +64,15 @@ export default {
     },
     articles: {
       type: Object,
-      default: () => ({ 
+      default: () => ({
         list: [],
         counts: {
           insecurite: 0,
           immigration: 0,
           islamisme: 0,
           defrancisation: 0,
-          wokisme: 0
+          wokisme: 0,
+          total: 0
         }
       })
     }
@@ -90,7 +90,7 @@ export default {
   computed: {
     locationName() {
       if (!this.location) return '';
-      
+
       switch (this.location.type) {
         case 'country':
           return 'France';
@@ -102,10 +102,10 @@ export default {
           return '';
       }
     },
-    
+
     filteredArticles() {
       let filtered = [...this.articles.list]
-      
+
       // Apply category filter only if a specific category is selected
       // When selectedCategory is 'tous', show all articles
       if (this.selectedCategory && this.selectedCategory !== 'tous') {
@@ -114,14 +114,14 @@ export default {
           return value === 1 || value === "1";
         });
       }
-      
+
       return filtered
     },
-    
+
     totalFilteredArticles() {
-      return this.articles.list.length
+      return this.articles.counts.total || 0
     },
-    
+
     noArticlesMessage() {
       if (this.location && this.location.type === 'country') {
         return 'Sélectionnez un département ou une commune pour voir les articles'
@@ -138,11 +138,11 @@ export default {
         year: 'numeric'
       })
     },
-    
+
     selectCategory(category) {
       this.selectedCategory = category
     },
-    
+
     filterArticles() {
       // This method can be used for additional filtering logic if needed
     }
