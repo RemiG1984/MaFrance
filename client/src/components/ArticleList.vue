@@ -138,11 +138,8 @@ export default {
     },
 
     totalArticles() {
-      // For "tous" category, show the count for the current filter
-      if (this.selectedCategory === 'tous') {
-        return this.articles.counts.total || 0
-      }
-      return this.articles.counts[this.selectedCategory] || 0
+      // Always show the total count, regardless of selected category
+      return this.articles.counts.total || 0
     },
 
     // Virtual scrolling computed properties
