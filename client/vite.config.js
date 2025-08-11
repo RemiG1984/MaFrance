@@ -10,6 +10,7 @@ export default defineConfig({
       '@': resolve(__dirname, 'src')
     }
   },
+  publicDir: '../public',
   build: {
     outDir: "../dist",
     emptyOutDir: true,
