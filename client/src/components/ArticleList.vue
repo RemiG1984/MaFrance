@@ -107,7 +107,9 @@ export default {
       containerHeight: 400,
       itemHeight: 60,
       scrollTop: 0,
-      bufferSize: 5 // Extra items to render for smooth scrolling
+      bufferSize: 5, // Extra items to render for smooth scrolling
+      // Cache for "tous" articles when all are loaded
+      allArticlesCache: null
     }
   },
   mounted() {
@@ -134,28 +136,7 @@ export default {
     },
 
     filteredArticles() {
-      const allArticles = this.articles.list || []
-      
-      // If "tous" is selected, return all articles
-      if (this.selectedCategory === 'tous') {
-        return allArticles
-      }
-
-      // Check if all articles are loaded (no pagination needed)
-      const totalCount = this.articles.counts.total || 0
-      const currentArticlesCount = allArticles.length
-      const hasMorePages = this.articles.pagination?.hasMore === true
-      const isAllLoaded = !hasMorePages && currentArticlesCount > 0
-
-      // If all articles are loaded, filter them client-side by category
-      if (isAllLoaded) {
-        return allArticles.filter(article => 
-          article.categories && article.categories.includes(this.selectedCategory)
-        )
-      }
-
-      // Otherwise, return all articles (they should already be filtered by the API)
-      return allArticles
+      return this.articles.list || []
     },
 
     totalArticles() {
@@ -235,18 +216,8 @@ export default {
         this.$refs.articlesContainer.scrollTop = 0
       }
 
-      // Check if all articles are already loaded (no pagination needed)
-      const hasMorePages = this.articles.pagination?.hasMore === true
-      const currentArticlesCount = this.articles.list?.length || 0
-      const isAllLoaded = !hasMorePages && currentArticlesCount > 0
-
-      // If all articles are loaded, no need to fetch from API - filtering will happen automatically
-      // through the computed property filteredArticles
-      if (isAllLoaded) {
-        return
-      }
-
-      // Otherwise, fetch filtered articles from API
+      // Always fetch from API for consistency - this avoids the complexity
+      // of managing client-side vs server-side filtering states
       const { useDataStore } = await import('../services/store.js')
       const dataStore = useDataStore()
 
