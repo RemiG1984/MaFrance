@@ -24,7 +24,7 @@ router.get(
   "/",
   [validateDepartement, validateOptionalCOG, validateLieu],
   (req, res) => {
-    const { dept, cog, lieu } = req.query;
+    const { dept, cog, lieu, category } = req.query;
 
     let sql = `
     SELECT date, title, url, lieu, commune, insecurite, immigration, islamisme, defrancisation, wokisme 
@@ -40,6 +40,15 @@ router.get(
       sql += " AND lieu LIKE ?";
       params.push(`%${lieu}%`);
     }
+    
+    // Add category filtering if specified and not 'tous'
+    if (category && category !== 'tous') {
+      const validCategories = ['insecurite', 'immigration', 'islamisme', 'defrancisation', 'wokisme'];
+      if (validCategories.includes(category)) {
+        sql += ` AND ${category} = 1`;
+      }
+    }
+    
     sql += " ORDER BY date DESC";
 
     // Get articles

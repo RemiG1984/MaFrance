@@ -1,10 +1,9 @@
-
 <template>
   <v-card>
     <v-card-title class="text-h5">
       Articles FdS associés à: {{ locationName }}
     </v-card-title>
-    
+
     <v-card-text>
       <div class="categories-container mb-4">
         <v-chip-group
@@ -90,7 +89,7 @@ export default {
   computed: {
     locationName() {
       if (!this.location) return '';
-      
+
       switch (this.location.type) {
         case 'country':
           return 'France';
@@ -102,26 +101,16 @@ export default {
           return '';
       }
     },
-    
+
     filteredArticles() {
-      let filtered = [...this.articles.list]
-      
-      // Apply category filter only if a specific category is selected
-      // When selectedCategory is 'tous', show all articles
-      if (this.selectedCategory && this.selectedCategory !== 'tous') {
-        filtered = filtered.filter(article => {
-          const value = article[this.selectedCategory];
-          return value === 1 || value === "1";
-        });
-      }
-      
-      return filtered
+      // Now articles.list already contains the filtered results from the API
+      return this.articles.list
     },
-    
+
     totalFilteredArticles() {
       return this.articles.list.length
     },
-    
+
     noArticlesMessage() {
       if (this.location && this.location.type === 'country') {
         return 'Sélectionnez un département ou une commune pour voir les articles'
@@ -138,11 +127,18 @@ export default {
         year: 'numeric'
       })
     },
-    
+
     selectCategory(category) {
       this.selectedCategory = category
+      // Fetch articles based on the selected category
+      // This assumes your API endpoint can handle a category query parameter
+      // Example: fetch(`/api/articles?location=${this.location.code}&category=${category}`)
+      // You would then update this.articles with the new list and counts from the API response.
+      // For now, we are just updating the selected category.
+      // The actual fetching and updating of `this.articles` should be handled by a parent component
+      // or a Vuex store that manages the data and makes API calls.
     },
-    
+
   },
   watch: {
     selectedCategory: {

@@ -474,6 +474,31 @@ export const useDataStore = defineStore("data", {
         console.error('Failed to load commune migrants:', error)
       }
     },
+
+    async fetchFilteredArticles(params) {
+      try {
+        const articlesResponse = await api.getArticles(params)
+        
+        if (params.cog) {
+          // Update commune articles with filtered results, but keep original counts
+          this.commune.articles = {
+            ...this.commune.articles,
+            list: articlesResponse.list
+          }
+        } else if (params.dept) {
+          // Update departement articles with filtered results, but keep original counts
+          this.departement.articles = {
+            ...this.departement.articles,
+            list: articlesResponse.list
+          }
+        }
+        
+        return articlesResponse
+      } catch (error) {
+        console.error('Failed to fetch filtered articles:', error)
+        return null
+      }
+    },
   },
 
   getters: {
