@@ -216,6 +216,8 @@ const api = {
         apiService.request(`/api/country/names_history?country=${country}`),
     getCountryExecutive: (country = "France") =>
         apiService.request(`/api/country/ministre?country=${country}`),
+    getCountryArticles: (country = "France") =>
+        apiService.request(`/api/articles?country=${country}`),
 
     // Departement data
     getDepartementDetails: (code) =>
