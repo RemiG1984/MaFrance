@@ -26,6 +26,7 @@ export const useDataStore = defineStore("data", {
       crimeAggreg: null,
       subventions: null,
       migrants: null,
+      articles: null,
     },
     departement: {
       details: null,
@@ -78,6 +79,7 @@ export const useDataStore = defineStore("data", {
             direction: "DESC",
           }),
           api.getCountrySubventions(code),
+          api.getCountryArticles(code), // Added for country-level articles
         ]);
 
         const country = {};
@@ -89,6 +91,7 @@ export const useDataStore = defineStore("data", {
         country.executive = results[5];
         country.departementsRankings = results[6];
         country.subventions = results[7];
+        country.articles = results[8]; // Assign country articles
         country.namesSeries = this.serializeStats(country.namesHistory);
         country.crimeSeries = this.serializeStats(country.crimeHistory);
         country.crimeAggreg = this.aggregateStats(country.crimeSeries.data);
@@ -358,6 +361,7 @@ export const useDataStore = defineStore("data", {
         executive: null,
         subventions: null,
         migrants: null,
+        articles: null, // Cleared articles
       };
       this.errors.country = null;
     },
@@ -504,6 +508,19 @@ export const useDataStore = defineStore("data", {
           } else {
             // Replace articles list
             this.departement.articles = articlesResponse
+          }
+        } else if (params.country) { // Added condition for country
+          // For country
+          if (append && this.country.articles) {
+            // Append new articles to existing list
+            this.country.articles = {
+              ...articlesResponse,
+              list: [...this.country.articles.list, ...articlesResponse.list],
+              counts: articlesResponse.counts // Use fresh counts
+            }
+          } else {
+            // Replace articles list
+            this.country.articles = articlesResponse
           }
         }
 
