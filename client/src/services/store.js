@@ -37,7 +37,6 @@ export const useDataStore = defineStore("data", {
       executive: null,
       communesRankings: null,
       articles: null,
-      articlesCounts: null,
       namesSeries: null,
       crimeSeries: null,
       crimeAggreg: null,
@@ -51,7 +50,6 @@ export const useDataStore = defineStore("data", {
       qpv: null,
       executive: null,
       articles: null,
-      articlesCounts: null,
       crimeSeries: null,
       crimeAggreg: null,
       subventions: null,
@@ -136,7 +134,6 @@ export const useDataStore = defineStore("data", {
         departement.communesRankings = results[7];
         const articlesResponse = results[8];
         departement.articles = articlesResponse;
-        departement.articlesCounts = articlesResponse?.counts || {};
         departement.subventions = results[9];
         departement.migrants = results[10] || [];
         departement.namesSeries = this.serializeStats(departement.namesHistory);
@@ -178,7 +175,6 @@ export const useDataStore = defineStore("data", {
         commune.executive = results[4];
         const articlesResponse = results[5];
         commune.articles = articlesResponse;
-        commune.articlesCounts = articlesResponse?.counts || {};
         commune.subventions = results[6];
         commune.migrants = results[7] || [];
         commune.crimeSeries = this.serializeStats(results[2]);
