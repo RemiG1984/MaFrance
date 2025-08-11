@@ -104,13 +104,7 @@ export default {
     },
     
     filteredArticles() {
-      // Ensure we have a valid articles list
-      const articlesList = this.articles?.list || [];
-      if (!Array.isArray(articlesList)) {
-        return [];
-      }
-      
-      let filtered = [...articlesList];
+      let filtered = [...this.articles.list]
       
       // Apply category filter only if a specific category is selected
       // When selectedCategory is 'tous', show all articles
@@ -121,12 +115,11 @@ export default {
         });
       }
       
-      return filtered;
+      return filtered
     },
     
     totalFilteredArticles() {
-      const articlesList = this.articles?.list || [];
-      return Array.isArray(articlesList) ? articlesList.length : 0;
+      return this.articles.list.length
     },
     
     noArticlesMessage() {
