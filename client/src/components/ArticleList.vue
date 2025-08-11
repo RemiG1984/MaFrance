@@ -136,7 +136,7 @@ export default {
     filteredArticles() {
       const allArticles = this.articles.list || []
       
-      // If "tous" is selected or no category filtering needed, return all articles
+      // If "tous" is selected, return all articles
       if (this.selectedCategory === 'tous') {
         return allArticles
       }
@@ -144,7 +144,8 @@ export default {
       // Check if all articles are loaded (no pagination needed)
       const totalCount = this.articles.counts.total || 0
       const currentArticlesCount = allArticles.length
-      const isAllLoaded = totalCount <= 20 || currentArticlesCount >= totalCount
+      const hasMorePages = this.articles.pagination?.hasMore === true
+      const isAllLoaded = !hasMorePages && currentArticlesCount > 0
 
       // If all articles are loaded, filter them client-side by category
       if (isAllLoaded) {
@@ -235,9 +236,9 @@ export default {
       }
 
       // Check if all articles are already loaded (no pagination needed)
-      const totalCount = this.articles.counts.total || 0
+      const hasMorePages = this.articles.pagination?.hasMore === true
       const currentArticlesCount = this.articles.list?.length || 0
-      const isAllLoaded = totalCount <= 20 || currentArticlesCount >= totalCount
+      const isAllLoaded = !hasMorePages && currentArticlesCount > 0
 
       // If all articles are loaded, no need to fetch from API - filtering will happen automatically
       // through the computed property filteredArticles
@@ -308,6 +309,13 @@ export default {
         })
       },
       deep: true
+    },
+    filteredArticles: {
+      handler() {
+        this.$nextTick(() => {
+          this.updateContainerHeight()
+        })
+      }
     }
   }
 }
