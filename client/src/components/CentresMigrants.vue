@@ -18,6 +18,7 @@
               <th>Type de centre</th>
               <th>Places</th>
               <th>Gestionnaire</th>
+              <th v-if="location.type === 'country'">Département</th>
               <th>Adresse</th>
             </tr>
           </thead>
@@ -36,6 +37,7 @@
                   <td class="row-title">{{ centre.type_centre || 'N/A' }}</td>
                   <td class="score-main">{{ formatNumber(centre.places) }}</td>
                   <td class="score-main">{{ centre.gestionnaire_centre || 'N/A' }}</td>
+                  <td v-if="location.type === 'country'" class="score-main">{{ centre.departement || 'N/A' }}</td>
                   <td class="score-main">{{ centre.adresse || 'N/A' }}</td>
                 </tr>
               </tbody>
@@ -50,12 +52,7 @@
       </div>
 
       <div v-else class="text-center">
-        <p v-if="location.type === 'country'">
-          Sélectionnez un département ou une commune pour voir les centres de migrants.
-        </p>
-        <p v-else>
-          Aucun centre d'hébergement de migrants dans cette zone.
-        </p>
+        <p>Aucun centre d'hébergement de migrants dans cette zone.</p>
       </div>
     </v-card-text>
   </v-card>
@@ -183,6 +180,8 @@ export default {
           await dataStore.loadMoreDepartementMigrants(this.location.code, params)
         } else if (this.location.type === 'commune') {
           await dataStore.loadMoreCommuneMigrants(this.location.code, params)
+        } else if (this.location.type === 'country') {
+          await dataStore.loadMoreCountryMigrants('france', params)
         }
       } catch (error) {
         console.error('Failed to load more migrants:', error)

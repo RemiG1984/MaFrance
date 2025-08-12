@@ -56,6 +56,31 @@ export const useDataStore = defineStore("data", {
       subventions: null,
       migrants: null,
     },
+    // Migrant centers data
+    migrantsCountry: {
+        list: [],
+        pagination: {
+            hasMore: false,
+            nextCursor: null,
+            limit: 20
+        }
+    },
+    migrantsDepartement: {
+        list: [],
+        pagination: {
+            hasMore: false,
+            nextCursor: null,
+            limit: 20
+        }
+    },
+    migrantsCommune: {
+        list: [],
+        pagination: {
+            hasMore: false,
+            nextCursor: null,
+            limit: 20
+        }
+    },
   }),
 
   actions: {
@@ -578,6 +603,30 @@ export const useDataStore = defineStore("data", {
         console.error('Error loading more commune migrants:', error)
       }
     },
+
+    // Subventions actions
+    async fetchCountrySubventions(country = 'france') {
+        this.subventionsCountry = await api.getCountrySubventions(country) || {
+            list: [],
+            pagination: { hasMore: false, nextCursor: null, limit: 20 }
+        }
+    },
+
+    // Migrant centers actions
+    async fetchCountryMigrants(country = 'france') {
+        this.migrantsCountry = await api.getCountryMigrants(country) || {
+            list: [],
+            pagination: { hasMore: false, nextCursor: null, limit: 20 }
+        }
+    },
+
+    async loadMoreCountryMigrants(country = 'france', params = {}) {
+        const newData = await api.getCountryMigrants(country, params)
+        if (newData) {
+            this.migrantsCountry.list.push(...newData.list)
+            this.migrantsCountry.pagination = newData.pagination
+        }
+    },
   },
 
   getters: {
@@ -653,5 +702,27 @@ export const useDataStore = defineStore("data", {
         ? MetricsConfig.getMetricLabel(metricKey)
         : metricKey;
     },
+
+    getCurrentSubventions() {
+            const location = this.getCurrentLocation()
+            if (location.type === 'departement') {
+                return this.subventionsDepartement
+            } else if (location.type === 'commune') {
+                return this.subventionsCommune
+            } else {
+                return this.subventionsCountry
+            }
+        },
+
+        getCurrentMigrants() {
+            const location = this.getCurrentLocation()
+            if (location.type === 'departement') {
+                return this.migrantsDepartement
+            } else if (location.type === 'commune') {
+                return this.migrantsCommune
+            } else {
+                return this.migrantsCountry
+            }
+        },
   },
 });

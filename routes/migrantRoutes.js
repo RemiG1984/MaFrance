@@ -73,6 +73,62 @@ router.get('/commune/:cog', validateCOGParam, (req, res) => {
     });
 });
 
+// Get migrant centers for the entire country
+router.get('/country/:country', validatePagination, (req, res) => {
+    const db = req.app.locals.db;
+    const { country } = req.params;
+    const { cursor, limit = '20' } = req.query;
+    const pageLimit = Math.min(parseInt(limit), 100);
+
+    if (country.toLowerCase() !== 'france') {
+        return res.status(400).json({ error: 'Only France is supported' });
+    }
+
+    let query = `
+        SELECT *, rowid
+        FROM migrant_centers
+    `;
+    const params = [];
+
+    if (cursor) {
+        query += " WHERE rowid > ?";
+        params.push(cursor);
+    }
+
+    query += " ORDER BY departement, COG, gestionnaire_centre, rowid ASC LIMIT ?";
+    params.push(pageLimit + 1);
+
+    db.all(query, params, (err, rows) => {
+        if (err) {
+            return handleDbError(err, res);
+        }
+
+        const hasMore = rows.length > pageLimit;
+        const centers = hasMore ? rows.slice(0, pageLimit) : rows;
+        const nextCursor = hasMore && centers.length > 0 ? centers[centers.length - 1].rowid : null;
+
+        const migrants = centers.map(({ rowid, ...row }) => ({
+            type_centre: row.type_centre || row.typeCentre,
+            gestionnaire_centre: row.gestionnaire_centre || row.gestionnaireCentre,
+            adresse: row.adresse,
+            places: row.places,
+            COG: row.COG,
+            departement: row.departement,
+            //latitude: row.latitude,
+            //longitude: row.longitude,
+        }));
+
+        res.json({
+            list: migrants,
+            pagination: {
+                hasMore: hasMore,
+                nextCursor: nextCursor,
+                limit: pageLimit
+            }
+        });
+    });
+});
+
 // Get migrant centers by department
 router.get('/departement/:dept', [validateDepartementParam, validatePagination], (req, res) => {
     const db = req.app.locals.db;

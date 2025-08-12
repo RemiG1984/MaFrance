@@ -102,6 +102,7 @@ import ExecutiveDetails from '../components/ExecutiveDetails.vue'
 import ScoreTable from '../components/ScoreTable.vue'
 import CrimeGraphs from '../components/CrimeGraphs.vue'
 import Graph from '../components/Graph.vue'
+import SubventionsDisplay from '../components/SubventionsDisplay.vue'
 
 export default {
   name: 'Home',
@@ -116,6 +117,7 @@ export default {
     ScoreTable,
     CrimeGraphs,
     Graph,
+    SubventionsDisplay
   },
   computed: {
     ...mapStores(useDataStore),
@@ -162,7 +164,7 @@ export default {
 
     crimeSeries(){ // retourne les données des stats groupées par clef/niveaux pour les graphs
       const result = {}
-      
+
       let allYears = null
 
       for (const level of this.levels) {
@@ -187,7 +189,7 @@ export default {
           if(!result.hasOwnProperty(k)) result[k] = {}
           result[k][level] = data[k]
         }
-        
+
         if (level === this.dataStore.currentLevel) break
       }
 
@@ -278,6 +280,13 @@ export default {
           return { list: [], pagination: { hasMore: false, nextCursor: null, limit: 20 } }
       }
     },
+    currentSubventions() {
+      return this.dataStore.getCurrentSubventions()
+    },
+
+    currentMigrants() {
+      return this.dataStore.getCurrentMigrants()
+    },
 
   },
   data() {
@@ -287,7 +296,7 @@ export default {
     }
   },
   mounted() {
-    
+
     this.dataStore.setCountry()
 
   },
@@ -317,6 +326,42 @@ export default {
       }
     },
 
+    async loadLocationData(location) {
+      if (!location || !location.code && location.type !== 'country') {
+        console.warn('loadLocationData called with invalid location:', location)
+        return
+      }
+
+      const level = location.type
+
+      // Fetch data based on the selected level
+      if (level === 'country') {
+        await this.dataStore.fetchCountryData('france')
+      } else if (level === 'departement') {
+        await this.dataStore.fetchDepartementData(location.code)
+      } else if (level === 'commune') {
+        await this.dataStore.fetchCommuneData(location.code)
+      }
+
+      // Fetch subventions data
+        if (location.type === 'country') {
+          await this.dataStore.fetchCountrySubventions('france')
+        } else if (location.type === 'departement') {
+          await this.dataStore.fetchDepartementSubventions(location.code)
+        } else if (location.type === 'commune') {
+          await this.dataStore.fetchCommuneSubventions(location.code)
+        }
+
+        // Fetch migrants data
+        if (location.type === 'country') {
+          await this.dataStore.fetchCountryMigrants('france')
+        } else if (location.type === 'departement') {
+          await this.dataStore.fetchDepartementMigrants(location.code)
+        } else if (location.type === 'commune') {
+          await this.dataStore.fetchCommuneMigrants(location.code)
+        }
+    }
+
   },
 }
 </script>
@@ -333,18 +378,18 @@ export default {
     line-height: 1.3;
     word-break: break-word;
   }
-  
+
   .home :deep(.component-title) {
     font-size: 1.1rem !important;
     line-height: 1.3;
     word-break: break-word;
   }
-  
+
   .home :deep(.section-title) {
     font-size: 1.1rem !important;
     line-height: 1.3;
   }
-  
+
   .home :deep(.card-title) {
     font-size: 1rem !important;
     line-height: 1.3;
@@ -358,30 +403,30 @@ export default {
     line-height: 1.2;
     word-break: break-word;
   }
-  
+
   .home :deep(.component-title) {
     font-size: 1rem !important;
     line-height: 1.2;
     word-break: break-word;
   }
-  
+
   .home :deep(.section-title) {
     font-size: 1rem !important;
     line-height: 1.2;
   }
-  
+
   .home :deep(.card-title) {
     font-size: 0.9rem !important;
     line-height: 1.2;
     word-break: break-word;
   }
-  
+
   .home :deep(.text-h6) {
     font-size: 1rem !important;
   }
-  
+
   .home :deep(.text-h5) {
     font-size: 1.1rem !important;
   }
 }
-</style> 
+</style>
