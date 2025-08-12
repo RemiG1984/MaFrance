@@ -89,9 +89,6 @@
 <script>
 import { mapStores } from 'pinia'
 import { useDataStore } from '../services/store.js'
-// FIXME: we shoulnd have to dedupe data client side
-import { dedupeArrByKey, arrGetLast } from '../utils/gen.js'
-
 import LocationSelector from '../components/LocationSelector.vue'
 import MapComponent from '../components/MapComponent.vue'
 import ArticleList from '../components/ArticleList.vue'
@@ -210,7 +207,7 @@ export default {
       }
 
       return {
-        list: dedupeArrByKey(articlesData.list || [], 'url'),
+        list: articlesData.list || [],
         counts: articlesData.counts || {},
         pagination: articlesData.pagination || {
           hasMore: false,
@@ -225,9 +222,9 @@ export default {
         case 'country':
           return this.dataStore.country.qpv || { list: [], pagination: { hasMore: false, nextCursor: null, limit: 20 } }
         case 'departement':
-          return dedupeArrByKey(this.dataStore.departement.qpv, 'codeQPV')
+          return this.dataStore.departement.qpv
         case 'commune':
-          return dedupeArrByKey(this.dataStore.commune.qpv, 'codeQPV')
+          return this.dataStore.commune.qpv
       }
 
       return []
