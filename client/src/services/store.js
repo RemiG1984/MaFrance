@@ -79,7 +79,7 @@ export const useDataStore = defineStore("data", {
             direction: "DESC",
           }),
           api.getCountrySubventions(code),
-          api.getCountryArticles(code),
+          api.getArticles({ country: 'France', limit: 20 }),
           api.getDepartementMigrants('all', { limit: 20 }),
         ]);
 
@@ -123,6 +123,7 @@ export const useDataStore = defineStore("data", {
           }),
           api.getArticles({
             dept: code,
+            limit: 20,
           }),
           api.getDepartementSubventions(code),
           api.getDepartementMigrants(code, { limit: 20 }),
@@ -167,6 +168,7 @@ export const useDataStore = defineStore("data", {
           api.getArticles({
             cog: code,
             dept: deptCode,
+            limit: 20,
           }),
           api.getCommuneSubventions(code),
           api.getCommuneMigrants(code, { limit: 20 }),
