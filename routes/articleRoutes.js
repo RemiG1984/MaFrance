@@ -95,11 +95,11 @@ router.get(
 
       // Add cursor-based pagination
       if (cursor) {
-        sql += " AND rowid > ?";
+        sql += " AND rowid < ?";
         params.push(cursor);
       }
       
-      sql += " ORDER BY date DESC, rowid ASC LIMIT ?";
+      sql += " ORDER BY rowid DESC LIMIT ?";
       params.push(pageLimit + 1); // Get one extra to check if there are more
 
       // Get articles
