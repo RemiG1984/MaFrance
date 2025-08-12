@@ -8,52 +8,85 @@ function importMigrants(db, callback) {
     // Import migrant centers from centres_migrants.csv
     function importMigrantCenters() {
         let migrantRows = 0;
-        let migrantBatch = [];
+        let allMigrantData = [];
 
-        function processBatch() {
+        function processSortedData() {
             return new Promise((resolve, reject) => {
-                if (migrantBatch.length === 0) {
+                if (allMigrantData.length === 0) {
                     resolve();
                     return;
                 }
 
-                db.run('BEGIN TRANSACTION', err => {
-                    if (err) {
-                        console.error('Erreur début transaction migrant_centers:', err.message);
-                        reject(err);
+                // Sort by places descending, then by departement, COG, gestionnaire_centre
+                allMigrantData.sort((a, b) => {
+                    const placesA = a[6] || 0; // places is at index 6
+                    const placesB = b[6] || 0;
+                    if (placesB !== placesA) {
+                        return placesB - placesA; // descending order
+                    }
+                    // Secondary sort by departement (ascending)
+                    if (a[1] !== b[1]) {
+                        return a[1].localeCompare(b[1]);
+                    }
+                    // Tertiary sort by COG (ascending)
+                    if (a[0] !== b[0]) {
+                        return a[0].localeCompare(b[0]);
+                    }
+                    // Quaternary sort by gestionnaire_centre (ascending)
+                    return (a[4] || '').localeCompare(b[4] || '');
+                });
+
+                console.log(`Données triées: ${allMigrantData.length} centres par places (décroissant)`);
+
+                // Process in batches
+                let batchIndex = 0;
+                function processBatch() {
+                    const batch = allMigrantData.slice(batchIndex, batchIndex + batchSize);
+                    if (batch.length === 0) {
+                        resolve();
                         return;
                     }
 
-                    const placeholders = migrantBatch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
-                    const flatBatch = [].concat(...migrantBatch);
-                    db.run(
-                        `INSERT OR IGNORE INTO migrant_centers (
-                            COG, departement, region, type_centre, gestionnaire_centre, adresse, places,
-                            latitude, longitude, capacite, date_ouverture, date_fermeture,
-                            statut, population_cible, services_proposes,
-                            contact_telephone, contact_email, site_web, notes, derniere_maj
-                        ) VALUES ${placeholders}`,
-                        flatBatch,
-                        err => {
-                            if (err) {
-                                console.error('Erreur insertion batch migrant_centers:', err.message);
-                                db.run('ROLLBACK');
-                                reject(err);
-                                return;
-                            }
-                            db.run('COMMIT', err => {
+                    db.run('BEGIN TRANSACTION', err => {
+                        if (err) {
+                            console.error('Erreur début transaction migrant_centers:', err.message);
+                            reject(err);
+                            return;
+                        }
+
+                        const placeholders = batch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
+                        const flatBatch = [].concat(...batch);
+                        db.run(
+                            `INSERT OR IGNORE INTO migrant_centers (
+                                COG, departement, region, type_centre, gestionnaire_centre, adresse, places,
+                                latitude, longitude, capacite, date_ouverture, date_fermeture,
+                                statut, population_cible, services_proposes,
+                                contact_telephone, contact_email, site_web, notes, derniere_maj
+                            ) VALUES ${placeholders}`,
+                            flatBatch,
+                            err => {
                                 if (err) {
-                                    console.error('Erreur commit migrant_centers:', err.message);
+                                    console.error('Erreur insertion batch migrant_centers:', err.message);
                                     db.run('ROLLBACK');
                                     reject(err);
-                                } else {
-                                    migrantBatch = []; // Clear batch
-                                    resolve();
+                                    return;
                                 }
-                            });
-                        }
-                    );
-                });
+                                db.run('COMMIT', err => {
+                                    if (err) {
+                                        console.error('Erreur commit migrant_centers:', err.message);
+                                        db.run('ROLLBACK');
+                                        reject(err);
+                                    } else {
+                                        batchIndex += batchSize;
+                                        processBatch();
+                                    }
+                                });
+                            }
+                        );
+                    });
+                }
+
+                processBatch();
             });
         }
 
@@ -124,7 +157,7 @@ function importMigrants(db, callback) {
                         const notes = row['notes'] ? row['notes'].trim() : null;
 
                         migrantRows++;
-                        migrantBatch.push([
+                        allMigrantData.push([
                             row['COG'],
                             departement,
                             region,
@@ -146,25 +179,14 @@ function importMigrants(db, callback) {
                             notes,
                             derniereMaj
                         ]);
-
-                        if (migrantBatch.length >= batchSize) {
-                            stream.pause();
-                            processBatch()
-                                .then(() => {
-                                    stream.resume();
-                                })
-                                .catch(err => {
-                                    stream.destroy(err);
-                                });
-                        }
                     })
                     .on('end', () => {
                         console.log(`Lecture de centres_migrants.csv terminée: ${migrantRows} lignes`);
                         if (migrantRows === 0) {
                             console.warn('Avertissement: centres_migrants.csv est vide ou n\'a pas de données valides');
                         }
-                        // Process any remaining rows
-                        processBatch()
+                        // Sort and process all data
+                        processSortedData()
                             .then(resolve)
                             .catch(reject);
                     })
