@@ -563,6 +563,8 @@ export const useDataStore = defineStore("data", {
         }
     },
 
+  },
+
   getters: {
     // Getters pour vérifier si les données sont chargées
     isCountryDataLoaded: (state) => {
