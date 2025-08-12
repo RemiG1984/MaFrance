@@ -229,6 +229,7 @@ export default {
   width: 100%;
   border-collapse: collapse;
   min-width: 600px;
+  table-layout: fixed;
 }
 
 .centres-table-header {
@@ -248,6 +249,8 @@ export default {
   text-align: left;
   border-bottom: 1px solid #ececec;
   white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .centres-table th {
@@ -257,9 +260,35 @@ export default {
   height: 40px;
 }
 
-.centres-table th:first-child,
-.centres-table td:first-child {
+/* Consistent column widths for both header and body tables */
+.centres-table th:nth-child(1),
+.centres-table td:nth-child(1) {
+  width: 15%;
+}
+
+.centres-table th:nth-child(2),
+.centres-table td:nth-child(2) {
+  width: 10%;
+}
+
+.centres-table th:nth-child(3),
+.centres-table td:nth-child(3) {
   width: 20%;
+}
+
+.centres-table th:nth-child(4),
+.centres-table td:nth-child(4) {
+  width: 15%;
+}
+
+.centres-table th:nth-child(5),
+.centres-table td:nth-child(5) {
+  width: 15%;
+}
+
+.centres-table th:nth-child(6),
+.centres-table td:nth-child(6) {
+  width: 25%;
 }
 
 .centres-table-header th:first-child {
