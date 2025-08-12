@@ -16,10 +16,10 @@
         <table class="centres-table centres-table-header">
           <thead>
             <tr>
-              <th>Type de centre</th>
+              <th>Type</th>
               <th>Places</th>
               <th>Gestionnaire</th>
-              <th v-if="location.type === 'country'">Département</th>
+              <th>Département</th>
               <th>Commune</th>
               <th>Adresse</th>
             </tr>
@@ -39,7 +39,7 @@
                   <td class="row-title">{{ centre.type_centre || 'N/A' }}</td>
                   <td class="score-main">{{ formatNumber(centre.places) }}</td>
                   <td class="score-main">{{ centre.gestionnaire_centre || 'N/A' }}</td>
-                  <td v-if="location.type === 'country'" class="score-main">{{ centre.departement || 'N/A' }}</td>
+                  <td class="score-main">{{ centre.departement || 'N/A' }}</td>
                   <td class="score-main">{{ centre.commune || 'N/A' }}</td>
                   <td class="score-main">{{ centre.adresse || 'N/A' }}</td>
                 </tr>
