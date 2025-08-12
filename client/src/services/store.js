@@ -27,7 +27,6 @@ export const useDataStore = defineStore("data", {
       subventions: null,
       migrants: null,
       articles: null,
-      qpv: null,
     },
     departement: {
       details: null,
@@ -117,7 +116,7 @@ export const useDataStore = defineStore("data", {
           api.getDepartementCrime(code),
           api.getDepartementCrimeHistory(code),
           api.getDepartementNamesHistory(code),
-          api.getDepartementQpv(code),
+          api.getQpv({ limit: 20 }),
           api.getDepartementExecutive(code),
           api.getCommuneRankings({
             dept: code,
@@ -167,7 +166,7 @@ export const useDataStore = defineStore("data", {
           api.getCommuneCrime(code),
           api.getCommuneCrimeHistory(code),
           // api.getCommuneNamesHistory(code),
-          api.getCommuneQpv(code),
+          api.getQpv({ limit: 20 }),
           api.getCommuneExecutive(code),
           api.getArticles({
             cog: code,
@@ -369,8 +368,7 @@ export const useDataStore = defineStore("data", {
         executive: null,
         subventions: null,
         migrants: null,
-        articles: null, // Cleared articles
-        qpv: null,
+        articles: null,
       };
       this.errors.country = null;
     },
@@ -633,11 +631,6 @@ export const useDataStore = defineStore("data", {
 
     getCommuneCode: (state) => () => {
       return state.commune?.details?.COG;
-    },
-
-    getCommuneName: (state) => () => {
-      // FIXME: le nom de la commune devrait être à un endroit clean dans les données
-      return state.commune?.qpv[0]?.lib_com;
     },
 
     getCommuneDepartementCode: (state) => () => {

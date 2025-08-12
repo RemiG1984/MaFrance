@@ -250,8 +250,6 @@ const api = {
         apiService.request(`/api/departements/crime_history?dept=${code}`),
     getDepartementNamesHistory: (code) =>
         apiService.request(`/api/departements/names_history?dept=${code}`),
-    getDepartementQpv: (code) =>
-        apiService.request(`/api/qpv/departement/${code}`),
     getDepartementExecutive: (deptCode) =>
         apiService.request(`/api/departements/prefet?dept=${deptCode}`),
     getDepartementRankings: (params) => {
@@ -270,7 +268,6 @@ const api = {
         apiService.request(`/api/communes/crime_history?cog=${cog}`),
     getCommuneNamesHistory: (cog) =>
         apiService.request(`/api/communes/names_history?cog=${cog}`),
-    getCommuneQpv: (code) => apiService.request(`/api/qpv/commune/${code}`),
     getCommuneExecutive: (cog) =>
         apiService.request(
             `/api/communes/maire?cog=${encodeURIComponent(cog)}`,
