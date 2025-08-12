@@ -1,7 +1,10 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { param, validationResult } = require('express-validator');
-const { validateDepartementParam, validateCOGParam, validatePagination } = require('../middleware/validate');
+const {
+    validateOptionalDepartement,
+    validateOptionalCOG,
+    validatePagination,
+} = require("../middleware/validate");
 
 // Centralized error handler for database queries
 const handleDbError = (err, res) => {
@@ -12,132 +15,78 @@ const handleDbError = (err, res) => {
     });
 };
 
-// Middleware to handle validation errors
-const handleValidationErrors = (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
-    next();
-};
+// Single endpoint for all migrant centers
+router.get(
+    "/migrants",
+    [validateOptionalDepartement, validateOptionalCOG, validatePagination],
+    (req, res) => {
+        const db = req.app.locals.db;
+        const { dept, cog, cursor, limit = "20" } = req.query;
+        const pageLimit = Math.min(parseInt(limit), 100);
 
-// Get migrant centers by commune COG
-router.get('/commune/:cog', validateCOGParam, (req, res) => {
-    const db = req.app.locals.db;
-    const { cog } = req.params;
-    const { cursor, limit = '20' } = req.query;
-    const pageLimit = Math.min(parseInt(limit), 100);
-
-    let query = `
-        SELECT *, rowid
-        FROM migrant_centers 
-        WHERE COG = ?
-    `;
-    const params = [cog];
-
-    if (cursor) {
-        query += " AND rowid > ?";
-        params.push(cursor);
-    }
-
-    query += " ORDER BY gestionnaire_centre, rowid ASC LIMIT ?";
-    params.push(pageLimit + 1);
-
-    db.all(query, params, (err, rows) => {
-        if (err) {
-            return handleDbError(err, res);
+        // Prevent simultaneous dept and cog
+        if (dept && cog) {
+            return res
+                .status(400)
+                .json({ error: "Cannot specify both dept and cog" });
         }
 
-        const hasMore = rows.length > pageLimit;
-        const centers = hasMore ? rows.slice(0, pageLimit) : rows;
-        const nextCursor = hasMore && centers.length > 0 ? centers[centers.length - 1].rowid : null;
-
-        const migrants = centers.map(({ rowid, ...row }) => ({
-            type_centre: row.type_centre || row.typeCentre,
-            gestionnaire_centre: row.gestionnaire_centre || row.gestionnaireCentre,
-            adresse: row.adresse,
-            places: row.places,
-            COG: row.COG,
-            //latitude: row.latitude,
-            //longitude: row.longitude,
-        }));
-
-        res.json({
-            list: migrants,
-            pagination: {
-                hasMore: hasMore,
-                nextCursor: nextCursor,
-                limit: pageLimit
-            }
-        });
-    });
-});
-
-// Get migrant centers by department (or all with "all")
-router.get('/departement/:dept', [validatePagination], (req, res) => {
-    const db = req.app.locals.db;
-    const { dept } = req.params;
-    const { cursor, limit = '20' } = req.query;
-    const pageLimit = Math.min(parseInt(limit), 100);
-
-    let query = `
+        let query = `
         SELECT *, rowid
         FROM migrant_centers
     `;
-    const params = [];
+        const params = [];
 
-    // Handle "all" as special case for entire country
-    if (dept.toLowerCase() !== 'all') {
-        query += " WHERE departement = ?";
-        params.push(dept);
-        
+        if (cog) {
+            query += " WHERE COG = ?";
+            params.push(cog);
+        } else if (dept) {
+            query += " WHERE departement = ?";
+            params.push(dept);
+        }
+
         if (cursor) {
-            query += " AND rowid > ?";
+            query += params.length ? " AND" : " WHERE";
+            query += " rowid > ?";
             params.push(cursor);
         }
-        
-        query += " ORDER BY COG, gestionnaire_centre, rowid ASC LIMIT ?";
-    } else {
-        // For "all", return all centers
-        if (cursor) {
-            query += " WHERE rowid > ?";
-            params.push(cursor);
-        }
-        
-        query += " ORDER BY departement, COG, gestionnaire_centre, rowid ASC LIMIT ?";
-    }
-    
-    params.push(pageLimit + 1);
 
-    db.all(query, params, (err, rows) => {
-        if (err) {
-            return handleDbError(err, res);
-        }
+        query +=
+            " ORDER BY departement, COG, gestionnaire_centre, rowid ASC LIMIT ?";
+        params.push(pageLimit + 1);
 
-        const hasMore = rows.length > pageLimit;
-        const centers = hasMore ? rows.slice(0, pageLimit) : rows;
-        const nextCursor = hasMore && centers.length > 0 ? centers[centers.length - 1].rowid : null;
-
-        const migrants = centers.map(({ rowid, ...row }) => ({
-            type_centre: row.type_centre || row.typeCentre,
-            gestionnaire_centre: row.gestionnaire_centre || row.gestionnaireCentre,
-            adresse: row.adresse,
-            places: row.places,
-            COG: row.COG,
-            departement: row.departement,
-            //latitude: row.latitude,
-            //longitude: row.longitude,
-        }));
-
-        res.json({
-            list: migrants,
-            pagination: {
-                hasMore: hasMore,
-                nextCursor: nextCursor,
-                limit: pageLimit
+        db.all(query, params, (err, rows) => {
+            if (err) {
+                return handleDbError(err, res);
             }
+
+            const hasMore = rows.length > pageLimit;
+            const centers = hasMore ? rows.slice(0, pageLimit) : rows;
+            const nextCursor =
+                hasMore && centers.length > 0
+                    ? centers[centers.length - 1].rowid
+                    : null;
+
+            const migrants = centers.map(({ rowid, ...row }) => ({
+                type_centre: row.type_centre || row.typeCentre,
+                gestionnaire_centre:
+                    row.gestionnaire_centre || row.gestionnaireCentre,
+                adresse: row.adresse,
+                places: row.places,
+                COG: row.COG,
+                departement: row.departement,
+            }));
+
+            res.json({
+                list: migrants,
+                pagination: {
+                    hasMore: hasMore,
+                    nextCursor: nextCursor,
+                    limit: pageLimit,
+                },
+            });
         });
-    });
-});
+    },
+);
 
 module.exports = router;

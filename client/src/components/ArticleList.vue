@@ -1,4 +1,3 @@
-
 <template>
   <v-card>
     <v-card-title class="text-h5">
@@ -35,8 +34,8 @@
           </v-chip>
         </v-chip-group>
       </div>
-      
-      <div class="articles-container" ref="articlesContainer" @scroll="handleScroll">
+
+      <div class="articles-container" ref="articlesContainer" @scroll="handleScroll" :style="{ height: computedContainerHeight + 'px' }">
         <div class="virtual-scroll-wrapper" :style="{ height: virtualHeight + 'px' }">
           <div class="virtual-scroll-content" :style="{ transform: `translateY(${offsetY}px)` }">
             <div
@@ -53,12 +52,12 @@
             </div>
           </div>
         </div>
-        
+
         <div v-if="isLoading" class="loading">
           <v-progress-circular indeterminate size="24" color="primary"></v-progress-circular>
           Chargement...
         </div>
-        
+
         <div v-if="filteredArticles.length === 0 && !isLoading" class="no-articles">
           {{ noArticlesMessage }}
         </div>
@@ -68,8 +67,8 @@
 </template>
 
 <script>
-import { articleCategoriesRef } from '../utils/metricsConfig.js'
-const categories = Object.keys(articleCategoriesRef)
+import { articleCategoriesRef } from '../utils/metricsConfig.js';
+const categories = Object.keys(articleCategoriesRef);
 
 export default {
   name: 'ArticleList',
@@ -104,25 +103,24 @@ export default {
       articleCategoriesRef: articleCategoriesRef,
       isLoading: false,
       // Virtual scrolling
-      containerHeight: 400,
+      containerHeight: 400, // Default height, will be updated dynamically
       itemHeight: 60,
       scrollTop: 0,
-      bufferSize: 5, // Extra items to render for smooth scrolling
+      bufferSize: 5,
       // Cache for "tous" articles when all are loaded
       allArticlesCache: null
-    }
+    };
   },
   mounted() {
-    this.updateContainerHeight()
-    window.addEventListener('resize', this.updateContainerHeight)
+    this.updateContainerHeight();
+    window.addEventListener('resize', this.updateContainerHeight);
   },
   beforeUnmount() {
-    window.removeEventListener('resize', this.updateContainerHeight)
+    window.removeEventListener('resize', this.updateContainerHeight);
   },
   computed: {
     locationName() {
       if (!this.location) return '';
-
       switch (this.location.type) {
         case 'country':
           return 'France';
@@ -134,142 +132,111 @@ export default {
           return '';
       }
     },
-
     filteredArticles() {
-      return this.articles.list || []
+      return this.articles.list || [];
     },
-
     totalArticles() {
-      // Always show the total count, regardless of selected category
-      return this.articles.counts.total || 0
+      return this.articles.counts.total || 0;
     },
-
-    // Virtual scrolling computed properties
     visibleStartIndex() {
-      return Math.max(0, Math.floor(this.scrollTop / this.itemHeight) - this.bufferSize)
+      return Math.max(0, Math.floor(this.scrollTop / this.itemHeight) - this.bufferSize);
     },
-
     visibleEndIndex() {
-      const visibleCount = Math.ceil(this.containerHeight / this.itemHeight)
+      const visibleCount = Math.ceil(this.containerHeight / this.itemHeight);
       return Math.min(
         this.filteredArticles.length - 1,
         this.visibleStartIndex + visibleCount + this.bufferSize * 2
-      )
+      );
     },
-
     visibleArticles() {
-      return this.filteredArticles.slice(this.visibleStartIndex, this.visibleEndIndex + 1)
+      return this.filteredArticles.slice(this.visibleStartIndex, this.visibleEndIndex + 1);
     },
-
     virtualHeight() {
-      return this.filteredArticles.length * this.itemHeight
+      return this.filteredArticles.length * this.itemHeight;
     },
-
     offsetY() {
-      return this.visibleStartIndex * this.itemHeight
+      return this.visibleStartIndex * this.itemHeight;
     },
-
     noArticlesMessage() {
-      return 'Aucun article trouvé.'
+      return 'Aucun article trouvé.';
+    },
+    computedContainerHeight() {
+      // Reduce height to 50px when no articles are found and not loading
+      return this.filteredArticles.length === 0 && !this.isLoading ? 50 : 400;
     }
   },
   methods: {
     formatDate(dateString) {
-      const date = new Date(dateString)
+      const date = new Date(dateString);
       return date.toLocaleDateString('fr-FR', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric'
-      })
+      });
     },
-
     updateContainerHeight() {
       if (this.$refs.articlesContainer) {
-        this.containerHeight = this.$refs.articlesContainer.clientHeight
+        this.containerHeight = this.computedContainerHeight;
       }
     },
-
     handleScroll(event) {
-      this.scrollTop = event.target.scrollTop
-      
-      // Check if we need to load more articles
-      const scrollBottom = this.scrollTop + this.containerHeight
-      const contentHeight = this.virtualHeight
-      
+      this.scrollTop = event.target.scrollTop;
+      const scrollBottom = this.scrollTop + this.containerHeight;
+      const contentHeight = this.virtualHeight;
       if (
-        scrollBottom >= contentHeight - 200 && // Load when 200px from bottom
+        scrollBottom >= contentHeight - 200 &&
         !this.isLoading &&
         this.articles.pagination?.hasMore
       ) {
-        this.loadMoreArticles()
+        this.loadMoreArticles();
       }
     },
-
     async selectCategory(category) {
-      this.selectedCategory = category
-      this.scrollTop = 0 // Reset scroll position
-      
+      this.selectedCategory = category;
+      this.scrollTop = 0;
       if (this.$refs.articlesContainer) {
-        this.$refs.articlesContainer.scrollTop = 0
+        this.$refs.articlesContainer.scrollTop = 0;
       }
-
-      // Always fetch from API for consistency - this avoids the complexity
-      // of managing client-side vs server-side filtering states
-      const { useDataStore } = await import('../services/store.js')
-      const dataStore = useDataStore()
-
+      const { useDataStore } = await import('../services/store.js');
+      const dataStore = useDataStore();
       const params = {
-        limit: 20 // Initial page size
-      }
-
+        limit: 20
+      };
       if (this.location.type === 'departement') {
-        params.dept = this.location.code
+        params.dept = this.location.code;
       } else if (this.location.type === 'commune') {
-        params.cog = this.location.code
-        params.dept = dataStore.getCommuneDepartementCode()
-      } else if (this.location.type === 'country') {
-        params.country = 'France'
+        params.cog = this.location.code;
+        params.dept = dataStore.getCommuneDepartementCode();
       }
-
       if (category !== 'tous') {
-        params.category = category
+        params.category = category;
       }
-
-      await dataStore.fetchFilteredArticles(params, false) // Don't append, replace
+      await dataStore.fetchFilteredArticles(params, false);
     },
-
     async loadMoreArticles() {
-      if (this.isLoading || !this.articles.pagination?.hasMore) return
-
-      this.isLoading = true
-
+      if (this.isLoading || !this.articles.pagination?.hasMore) return;
+      this.isLoading = true;
       try {
-        const { useDataStore } = await import('../services/store.js')
-        const dataStore = useDataStore()
-
+        const { useDataStore } = await import('../services/store.js');
+        const dataStore = useDataStore();
         const params = {
           cursor: this.articles.pagination.nextCursor,
           limit: 20
-        }
-
+        };
         if (this.location.type === 'departement') {
-          params.dept = this.location.code
+          params.dept = this.location.code;
         } else if (this.location.type === 'commune') {
-          params.cog = this.location.code
-          params.dept = dataStore.getCommuneDepartementCode()
-        } else if (this.location.type === 'country') {
-          params.country = 'France'
+          params.cog = this.location.code;
+          params.dept = dataStore.getCommuneDepartementCode();
         }
-
         if (this.selectedCategory !== 'tous') {
-          params.category = this.selectedCategory
+          params.category = this.selectedCategory;
         }
-
-        await dataStore.loadMoreArticles(params)
+        await dataStore.loadMoreArticles(params);
       } catch (error) {
-        console.error('Failed to load more articles:', error)
+        console.error('Failed to load more articles:', error);
       } finally {
-        this.isLoading = false
+        this.isLoading = false;
       }
     }
   },
@@ -277,25 +244,25 @@ export default {
     articles: {
       handler() {
         this.$nextTick(() => {
-          this.updateContainerHeight()
-        })
+          this.updateContainerHeight();
+        });
       },
       deep: true
     },
     filteredArticles: {
       handler() {
         this.$nextTick(() => {
-          this.updateContainerHeight()
-        })
+          this.updateContainerHeight();
+        });
       }
     }
   }
-}
+};
 </script>
 
 <style scoped>
 .articles-container {
-  height: 400px;
+  height: var(--container-height, 400px); /* Default height, overridden by inline style */
   overflow-y: auto;
   border: 1px solid #dee2e6;
   border-radius: 8px;

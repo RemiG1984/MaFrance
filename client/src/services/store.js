@@ -79,8 +79,8 @@ export const useDataStore = defineStore("data", {
             direction: "DESC",
           }),
           api.getCountrySubventions(code),
-          api.getArticles({ country: 'France', limit: 20 }),
-          api.getDepartementMigrants('all', { limit: 20 }),
+          api.getArticles({ limit: 20 }),
+          api.getMigrants({ limit: 20 }),
         ]);
 
         const country = {};
@@ -127,7 +127,7 @@ export const useDataStore = defineStore("data", {
             limit: 20,
           }),
           api.getDepartementSubventions(code),
-          api.getDepartementMigrants(code, { limit: 20 }),
+          api.getMigrants(code, { limit: 100 }),
         ]);
 
         const departement = {};
@@ -172,7 +172,7 @@ export const useDataStore = defineStore("data", {
             limit: 20,
           }),
           api.getCommuneSubventions(code),
-          api.getCommuneMigrants(code, { limit: 20 }),
+          api.getMigrants(code, { limit: 100 }),
         ]);
 
         const commune = {};
@@ -489,7 +489,7 @@ export const useDataStore = defineStore("data", {
             this.departement.articles = articlesResponse
           }
         } else if (params.country) { // Added condition for country
-          // For country
+          // For country (no dept or cog)
           if (append && this.country.articles) {
             // Append new articles to existing list
             this.country.articles = {
@@ -514,47 +514,39 @@ export const useDataStore = defineStore("data", {
       return this.fetchFilteredArticles(params, true)
     },
 
-    async fetchDepartementMigrants(deptCode) {
+    async fetchMigrants(level, code) {
       try {
-        const migrants = await api.getDepartementMigrants(deptCode)
-        this.departement.migrants = migrants || { list: [], pagination: { hasMore: false, nextCursor: null, limit: 20 } }
+        let params = { limit: level === 'country' ? 20 : 100 };
+        if (level === 'departement') {
+          params.dept = code;
+        } else if (level === 'commune') {
+          params.cog = code;
+        } // No params for country
+
+        const migrants = await api.getMigrants(params);
+        this[level].migrants = migrants || { list: [], pagination: { hasMore: false, nextCursor: null, limit: params.limit } };
       } catch (error) {
-        console.error('Error fetching departement migrants:', error)
-        this.departement.migrants = { list: [], pagination: { hasMore: false, nextCursor: null, limit: 20 } }
+        console.error(`Error fetching ${level} migrants:`, error);
+        this[level].migrants = { list: [], pagination: { hasMore: false, nextCursor: null, limit: 20 } };
       }
     },
 
-    async fetchCommuneMigrants(cogCode) {
+    async loadMoreMigrants(level, code, params) {
       try {
-        const migrants = await api.getCommuneMigrants(cogCode)
-        this.commune.migrants = migrants || { list: [], pagination: { hasMore: false, nextCursor: null, limit: 20 } }
-      } catch (error) {
-        console.error('Error fetching commune migrants:', error)
-        this.commune.migrants = { list: [], pagination: { hasMore: false, nextCursor: null, limit: 20 } }
-      }
-    },
+        let migrantParams = { ...params };
+        if (level === 'departement') {
+          migrantParams.dept = code;
+        } else if (level === 'commune') {
+          migrantParams.cog = code;
+        } // No dept/cog for country
 
-    async loadMoreDepartementMigrants(deptCode, params) {
-      try {
-        const moreMigrants = await api.getDepartementMigrants(deptCode, params)
+        const moreMigrants = await api.getMigrants(migrantParams);
         if (moreMigrants && moreMigrants.list) {
-          this.departement.migrants.list.push(...moreMigrants.list)
-          this.departement.migrants.pagination = moreMigrants.pagination
+          this[level].migrants.list.push(...moreMigrants.list);
+          this[level].migrants.pagination = moreMigrants.pagination;
         }
       } catch (error) {
-        console.error('Error loading more departement migrants:', error)
-      }
-    },
-
-    async loadMoreCommuneMigrants(cogCode, params) {
-      try {
-        const moreMigrants = await api.getCommuneMigrants(cogCode, params)
-        if (moreMigrants && moreMigrants.list) {
-          this.commune.migrants.list.push(...moreMigrants.list)
-          this.commune.migrants.pagination = moreMigrants.pagination
-        }
-      } catch (error) {
-        console.error('Error loading more commune migrants:', error)
+        console.error(`Error loading more ${level} migrants:`, error);
       }
     },
 
