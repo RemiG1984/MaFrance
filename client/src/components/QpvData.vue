@@ -31,7 +31,7 @@
         
         <!-- Virtual scrolled content -->
         <div class="virtual-scroll-wrapper" :style="{ height: virtualHeight + 'px' }">
-          <div class="virtual-scroll-content" :style="{ transform: `translateY(${offsetY}px)`, paddingTop: '40px' }">
+          <div class="virtual-scroll-content" :style="{ transform: `translateY(${offsetY}px)`, paddingTop: '36px' }">
             <table class="qpv-table qpv-table-body">
               <tbody>
                 <tr
@@ -258,7 +258,7 @@ export default {
 .qpv-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 800px;
+  min-width: 1200px;
   table-layout: fixed;
 }
 
@@ -270,24 +270,25 @@ export default {
 }
 
 .qpv-table-body {
-  margin-top: -40px; /* Offset for header height */
+  margin-top: -36px; /* Offset for header height */
 }
 
 .qpv-table th,
 .qpv-table td {
-  padding: 10px 12px;
+  padding: 8px 10px;
   text-align: left;
   border-bottom: 1px solid #ececec;
-  white-space: normal;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .qpv-table th {
-  position: sticky;
   background-color: #e9ecef;
   font-weight: 700;
-  font-size: 13px;
-  top: 0;
-  z-index: 2;
+  font-size: 12px;
+  height: 36px;
+  line-height: 1.2;
 }
 
 .qpv-table th:first-child,
@@ -296,7 +297,9 @@ export default {
   left: 0;
   background-color: #fff;
   z-index: 3;
-  width: 30%;
+  min-width: 200px;
+  max-width: 250px;
+  white-space: normal;
 }
 
 .qpv-table th:first-child {
@@ -308,6 +311,10 @@ export default {
   background-color: #f8f9fa;
 }
 
+.qpv-table tr:nth-child(even) td:first-child {
+  background-color: #f8f9fa;
+}
+
 .qpv-table tr:last-child td {
   border-bottom: none;
 }
@@ -315,51 +322,64 @@ export default {
 .qpv-table a {
   color: #007bff;
   text-decoration: none;
+  display: block;
+  white-space: normal;
+  word-wrap: break-word;
 }
 
 .qpv-table a:hover {
   text-decoration: underline;
 }
 
-/* Consistent column widths for both header and body tables */
+/* Optimized column widths for horizontal scrolling */
 .qpv-table th:nth-child(1),
 .qpv-table td:nth-child(1) {
-  width: 25%;
+  width: 200px;
 }
 
 .qpv-table th:nth-child(2),
 .qpv-table td:nth-child(2) {
-  width: 10%;
+  width: 100px;
 }
 
 .qpv-table th:nth-child(3),
 .qpv-table td:nth-child(3) {
-  width: 12%;
+  width: 120px;
 }
 
 .qpv-table th:nth-child(4),
 .qpv-table td:nth-child(4) {
-  width: 10%;
+  width: 120px;
 }
 
 .qpv-table th:nth-child(5),
 .qpv-table td:nth-child(5) {
-  width: 12%;
+  width: 140px;
 }
 
 .qpv-table th:nth-child(6),
 .qpv-table td:nth-child(6) {
-  width: 10%;
+  width: 110px;
 }
 
 .qpv-table th:nth-child(7),
 .qpv-table td:nth-child(7) {
-  width: 11%;
+  width: 120px;
 }
 
 .qpv-table th:nth-child(8),
 .qpv-table td:nth-child(8) {
-  width: 10%;
+  width: 100px;
+}
+
+.qpv-table th:nth-child(9),
+.qpv-table td:nth-child(9) {
+  width: 120px;
+}
+
+.qpv-table th:nth-child(10),
+.qpv-table td:nth-child(10) {
+  width: 120px;
 }
 
 .loading {
