@@ -56,31 +56,6 @@ export const useDataStore = defineStore("data", {
       subventions: null,
       migrants: null,
     },
-    // Migrant centers data
-    migrantsCountry: {
-        list: [],
-        pagination: {
-            hasMore: false,
-            nextCursor: null,
-            limit: 20
-        }
-    },
-    migrantsDepartement: {
-        list: [],
-        pagination: {
-            hasMore: false,
-            nextCursor: null,
-            limit: 20
-        }
-    },
-    migrantsCommune: {
-        list: [],
-        pagination: {
-            hasMore: false,
-            nextCursor: null,
-            limit: 20
-        }
-    },
   }),
 
   actions: {
@@ -105,7 +80,7 @@ export const useDataStore = defineStore("data", {
           }),
           api.getCountrySubventions(code),
           api.getCountryArticles(code),
-          api.getCountryMigrants(code), // Added for country-level migrants
+          api.getDepartementMigrants('all'),
         ]);
 
         const country = {};
@@ -118,7 +93,7 @@ export const useDataStore = defineStore("data", {
         country.departementsRankings = results[6];
         country.subventions = results[7];
         country.articles = results[8];
-        country.migrants = results[9] || []; // Assign country migrants
+        country.migrants = results[9];
         country.namesSeries = this.serializeStats(country.namesHistory);
         country.crimeSeries = this.serializeStats(country.crimeHistory);
         country.crimeAggreg = this.aggregateStats(country.crimeSeries.data);
@@ -467,19 +442,6 @@ export const useDataStore = defineStore("data", {
       }
     },
 
-    async loadDepartementMigrants(deptCode) {
-      if (!deptCode) return
-
-      try {
-        const data = await api.getDepartementMigrants(deptCode)
-        if (data) {
-          this.departement.migrants = data || []
-        }
-      } catch (error) {
-        console.error('Failed to load departement migrants:', error)
-      }
-    },
-
     async loadCommuneSubventions(cog) {
       if (!cog) return
 
@@ -490,19 +452,6 @@ export const useDataStore = defineStore("data", {
         }
       } catch (error) {
         console.error('Failed to load commune subventions:', error)
-      }
-    },
-
-    async loadCommuneMigrants(cog) {
-      if (!cog) return
-
-      try {
-        const data = await api.getCommuneMigrants(cog)
-        if (data) {
-          this.commune.migrants = data || []
-        }
-      } catch (error) {
-        console.error('Failed to load commune migrants:', error)
       }
     },
 
@@ -613,23 +562,6 @@ export const useDataStore = defineStore("data", {
             pagination: { hasMore: false, nextCursor: null, limit: 20 }
         }
     },
-
-    // Migrant centers actions
-    async fetchCountryMigrants(country = 'france') {
-        this.migrantsCountry = await api.getDepartementMigrants('all') || {
-            list: [],
-            pagination: { hasMore: false, nextCursor: null, limit: 20 }
-        }
-    },
-
-    async loadMoreCountryMigrants(country = 'france', params = {}) {
-        const newData = await api.getDepartementMigrants('all', params)
-        if (newData) {
-            this.migrantsCountry.list.push(...newData.list)
-            this.migrantsCountry.pagination = newData.pagination
-        }
-    },
-  },
 
   getters: {
     // Getters pour vérifier si les données sont chargées

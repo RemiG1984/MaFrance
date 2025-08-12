@@ -335,7 +335,7 @@ export default {
 
         // Fetch migrants data
         if (location.type === 'country') {
-          await this.dataStore.fetchCountryMigrants('france')
+          await this.dataStore.fetchDepartementMigrants('all')
         } else if (location.type === 'departement') {
           await this.dataStore.fetchDepartementMigrants(location.code)
         } else if (location.type === 'commune') {
