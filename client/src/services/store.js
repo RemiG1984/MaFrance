@@ -104,7 +104,8 @@ export const useDataStore = defineStore("data", {
             direction: "DESC",
           }),
           api.getCountrySubventions(code),
-          api.getCountryArticles(code), // Added for country-level articles
+          api.getCountryArticles(code),
+          api.getCountryMigrants(code), // Added for country-level migrants
         ]);
 
         const country = {};
@@ -116,7 +117,8 @@ export const useDataStore = defineStore("data", {
         country.executive = results[5];
         country.departementsRankings = results[6];
         country.subventions = results[7];
-        country.articles = results[8]; // Assign country articles
+        country.articles = results[8];
+        country.migrants = results[9] || []; // Assign country migrants
         country.namesSeries = this.serializeStats(country.namesHistory);
         country.crimeSeries = this.serializeStats(country.crimeHistory);
         country.crimeAggreg = this.aggregateStats(country.crimeSeries.data);
