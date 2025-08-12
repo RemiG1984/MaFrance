@@ -116,7 +116,7 @@ export const useDataStore = defineStore("data", {
           api.getDepartementCrime(code),
           api.getDepartementCrimeHistory(code),
           api.getDepartementNamesHistory(code),
-          api.getQpv({ limit: 20 }),
+          api.getQpv({ dept: code }),
           api.getDepartementExecutive(code),
           api.getCommuneRankings({
             dept: code,
@@ -129,7 +129,7 @@ export const useDataStore = defineStore("data", {
             limit: 20,
           }),
           api.getDepartementSubventions(code),
-          api.getMigrants(code, { limit: 100 }),
+          api.getMigrants({ dept: code, limit: 100 }),
         ]);
 
         const departement = {};
@@ -166,7 +166,7 @@ export const useDataStore = defineStore("data", {
           api.getCommuneCrime(code),
           api.getCommuneCrimeHistory(code),
           // api.getCommuneNamesHistory(code),
-          api.getQpv({ limit: 20 }),
+          api.getQpv({ cog: code }),
           api.getCommuneExecutive(code),
           api.getArticles({
             cog: code,
@@ -174,7 +174,7 @@ export const useDataStore = defineStore("data", {
             limit: 20,
           }),
           api.getCommuneSubventions(code),
-          api.getMigrants(code, { limit: 100 }),
+          api.getMigrants({ cog: code, limit: 100 }),
         ]);
 
         const commune = {};
