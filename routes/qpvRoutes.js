@@ -18,10 +18,8 @@ const handleDbError = (err, next) => {
 
 // Base SQL select for QPV data
 const baseQpvSelect = `
-  SELECT rowid, COG, lib_com, codeQPV, lib_qp, insee_reg, lib_reg, insee_dep, lib_dep,
-         siren_epci, lib_epci, popMuniQPV, indiceJeunesse, partPopEt, partPopImmi,
-         partMenImmi, partMenEt, partMen1p, partMen2p, partMen3p, partMen45p,
-         partMen6pp, nombre_menages, nombre_logements_sociaux, taux_logements_sociaux,
+  SELECT rowid, COG, lib_com, codeQPV, lib_qp, popMuniQPV, indiceJeunesse, partPopEt, ppImmi,
+         nombre_logements_sociaux, taux_logements_sociaux,
          taux_d_emploi, taux_pauvrete_60, personnes_couvertes_CAF, allocataires_CAF, RSA_socle
   FROM qpv_data
 `;

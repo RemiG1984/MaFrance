@@ -17,9 +17,12 @@
             <tr>
               <th>Quartier QPV</th>
               <th>Population</th>
+              <th>Commune</th>
               <th>Indice Jeunesse</th>
               <th>Logements sociaux</th>
               <th>Taux logements sociaux</th>
+              <th>Part Pop Immigrée</th>
+              <th>Part Pop Étrangère</th>
               <th>Taux d'emploi</th>
               <th>Taux de pauvreté</th>
               <th>RSA socle</th>
@@ -45,9 +48,12 @@
                       </a>
                   </td>
                   <td class="score-main">{{formatNumber(qpv.popMuniQPV)}}</td>
+                  <td class="score-main">{{qpv.lib_com}}</td>
                   <td class="score-main">{{formatNumber(qpv.indiceJeunesse)}}</td>
                   <td class="score-main">{{formatNumber(qpv.nombre_logements_sociaux)}}</td>
                   <td class="score-main">{{formatPercentage(qpv.taux_logements_sociaux)}}</td>
+                  <td class="score-main">{{formatPercentage(qpv.ppImmi)}}</td>
+                  <td class="score-main">{{formatPercentage(qpv.partPopEt)}}</td>
                   <td class="score-main">{{formatPercentage(qpv.taux_d_emploi)}}</td>
                   <td class="score-main">{{formatPercentage(qpv.taux_pauvrete_60)}}</td>
                   <td class="score-main">{{formatNumber(qpv.RSA_socle)}}</td>
