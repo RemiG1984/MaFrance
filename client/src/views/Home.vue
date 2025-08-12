@@ -261,10 +261,10 @@ export default {
     },
 
     migrantsData(){
-      return this.dataStore.getCurrentMigrants()
+      return this.dataStore.getCurrentMigrants
     },
     currentSubventions() {
-      return this.dataStore.getCurrentSubventions()
+      return this.dataStore.getCurrentSubventions
     },
 
     
