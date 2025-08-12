@@ -32,7 +32,7 @@ router.get(
         }
 
         let query = `
-        SELECT mc.*, l.commune AS commune_name, rowid
+        SELECT mc.*, l.commune AS commune_name, mc.rowid
         FROM migrant_centers mc
         LEFT JOIN locations l ON mc.COG = l.COG
     `;
