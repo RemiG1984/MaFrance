@@ -28,7 +28,7 @@ const baseQpvSelect = `
 router.get(
     "/",
     [validateDepartement, validateOptionalCOG, validateSearchQuery, validatePagination],
-    (req, res) => {
+    (req, res, next) => {
         const { dept = "", cog = "", commune = "", cursor, limit = "20" } = req.query;
         const pageLimit = Math.min(parseInt(limit), 100);
 
@@ -70,7 +70,7 @@ router.get(
         params.push(pageLimit + 1);
 
         db.all(sql, params, (err, rows) => {
-            if (err) return handleDbError(err, res);
+            if (err) return handleDbError(err, next);
 
             const hasMore = rows.length > pageLimit;
             const qpvs = hasMore ? rows.slice(0, pageLimit) : rows;
