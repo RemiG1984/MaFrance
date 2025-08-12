@@ -222,12 +222,12 @@ export default {
 
     qpvData(){
       switch(this.dataStore.currentLevel){
+        case 'country':
+          return this.dataStore.country.qpv || { list: [], pagination: { hasMore: false, nextCursor: null, limit: 20 } }
         case 'departement':
           return dedupeArrByKey(this.dataStore.departement.qpv, 'codeQPV')
-        break
         case 'commune':
           return dedupeArrByKey(this.dataStore.commune.qpv, 'codeQPV')
-        break  
       }
 
       return []
@@ -340,6 +340,15 @@ export default {
           await this.dataStore.fetchDepartementMigrants(location.code)
         } else if (location.type === 'commune') {
           await this.dataStore.fetchCommuneMigrants(location.code)
+        }
+
+        // Fetch QPV data
+        if (location.type === 'country') {
+          await this.dataStore.fetchCountryQpv()
+        } else if (location.type === 'departement') {
+          await this.dataStore.fetchDepartementQpv(location.code)
+        } else if (location.type === 'commune') {
+          await this.dataStore.fetchCommuneQpv(location.code)
         }
     }
 
