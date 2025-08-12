@@ -180,7 +180,7 @@ export default {
           cursor: this.data.pagination.nextCursor,
           limit: 20
         };
-        await dataStore.dataStore.loadMoreMigrants('country', null, params);
+        await dataStore.loadMoreMigrants('country', null, params);
       } catch (error) {
         console.error('Failed to load more migrants:', error);
       } finally {
