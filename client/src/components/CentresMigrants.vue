@@ -2,7 +2,7 @@
 <template>
   <v-card class="mb-4">
     <v-card-title class="text-h5">
-      Centres d'hébergement de migrants pour: {{ locationName }}
+      Centres de migrants pour: {{ locationName }}
     </v-card-title>
     <v-card-text>
       <div

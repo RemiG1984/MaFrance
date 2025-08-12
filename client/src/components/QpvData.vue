@@ -120,7 +120,7 @@ export default {
 
       switch (this.location.type) {
         case 'country':
-          return 'France';
+          return 'France (1609 QPV)';
         case 'departement':
           return this.location.name || `Département ${this.location.code}`;
         case 'commune':
