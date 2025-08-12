@@ -18,7 +18,7 @@ const handleDbError = (err, next) => {
 
 // Base SQL select for QPV data
 const baseQpvSelect = `
-  SELECT COG, lib_com, codeQPV, lib_qp, insee_reg, lib_reg, insee_dep, lib_dep,
+  SELECT rowid, COG, lib_com, codeQPV, lib_qp, insee_reg, lib_reg, insee_dep, lib_dep,
          siren_epci, lib_epci, popMuniQPV, indiceJeunesse, partPopEt, partPopImmi,
          partMenImmi, partMenEt, partMen1p, partMen2p, partMen3p, partMen45p,
          partMen6pp, nombre_menages, nombre_logements_sociaux, taux_logements_sociaux,
@@ -33,7 +33,6 @@ router.get(
     (req, res) => {
         const { dept = "", cog = "", commune = "", cursor, limit = "20" } = req.query;
         const pageLimit = Math.min(parseInt(limit), 100);
-        const offset = cursor ? parseInt(cursor) : 0;
 
         // Prevent simultaneous dept and cog
         if (dept && cog) {
@@ -59,13 +58,18 @@ router.get(
             params.push(`%${commune}%`);
         }
 
+        // Add cursor condition for pagination (only for country-level requests without filters)
+        if (cursor && !dept && !cog && !commune) {
+            conditions.push("rowid > ?");
+            params.push(parseInt(cursor));
+        }
+
         if (conditions.length > 0) {
             sql += " WHERE " + conditions.join(" AND ");
         }
 
-        sql += ` ORDER BY lib_com ASC, codeQPV ASC LIMIT ? OFFSET ?`;
+        sql += ` ORDER BY rowid ASC LIMIT ?`;
         params.push(pageLimit + 1);
-        params.push(offset);
 
         db.all(sql, params, (err, rows) => {
             if (err) return handleDbError(err, res);
