@@ -3,9 +3,7 @@ const router = express.Router();
 const db = require("../config/db");
 const {
     validateDepartement,
-    validateDepartementParam,
-    validateCOG,
-    validateCOGParam,
+    validateOptionalCOG,
     validateSearchQuery,
     validatePagination,
 } = require("../middleware/validate");
