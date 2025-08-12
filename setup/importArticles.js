@@ -68,6 +68,8 @@ function importArticles(db, callback) {
                                         return;
                                     }
 
+                                    const allArticles = [];
+                                    
                                     fs.createReadStream(
                                         "setup/fdesouche_analyzed.csv",
                                     )
@@ -153,7 +155,7 @@ function importArticles(db, callback) {
                                                     ? row.lieu
                                                     : null;
 
-                                            articleBatch.push([
+                                            allArticles.push([
                                                 row.date,
                                                 normalizedDepartement,
                                                 cog,
@@ -169,59 +171,42 @@ function importArticles(db, callback) {
                                             ]);
 
                                             articleRows++;
-
-                                            if (
-                                                articleBatch.length >= batchSize
-                                            ) {
-                                                const placeholders =
-                                                    articleBatch
-                                                        .map(
-                                                            () =>
-                                                                "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                                                        )
-                                                        .join(",");
-                                                const flatBatch = [].concat(
-                                                    ...articleBatch,
-                                                ); // Manual flattening
-                                                db.run(
-                                                    `INSERT INTO articles (date, departement, cog, commune, lieu, title, url, insecurite, immigration, islamisme, defrancisation, wokisme) VALUES ${placeholders}`,
-                                                    flatBatch,
-                                                    (err) => {
-                                                        if (err) {
-                                                            console.error(
-                                                                "Erreur insertion batch articles:",
-                                                                err.message,
-                                                            );
-                                                        }
-                                                    },
-                                                );
-                                                articleBatch = [];
-                                            }
                                         })
                                         .on("end", () => {
-                                            if (articleBatch.length > 0) {
-                                                const placeholders =
-                                                    articleBatch
-                                                        .map(
-                                                            () =>
-                                                                "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                                                        )
+                                            // Sort all articles by date in descending order
+                                            allArticles.sort((a, b) => {
+                                                const dateA = new Date(a[0]); // date is at index 0
+                                                const dateB = new Date(b[0]);
+                                                return dateB - dateA; // Descending order
+                                            });
+
+                                            console.log(`Sorted ${allArticles.length} articles by date (descending)`);
+
+                                            // Insert sorted articles in batches
+                                            let currentBatch = [];
+                                            for (let i = 0; i < allArticles.length; i++) {
+                                                currentBatch.push(allArticles[i]);
+
+                                                if (currentBatch.length >= batchSize || i === allArticles.length - 1) {
+                                                    const placeholders = currentBatch
+                                                        .map(() => "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
                                                         .join(",");
-                                                const flatBatch = [].concat(
-                                                    ...articleBatch,
-                                                ); // Manual flattening
-                                                db.run(
-                                                    `INSERT INTO articles (date, departement, cog, commune, lieu, title, url, insecurite, immigration, islamisme, defrancisation, wokisme) VALUES ${placeholders}`,
-                                                    flatBatch,
-                                                    (err) => {
-                                                        if (err) {
-                                                            console.error(
-                                                                "Erreur insertion batch final articles:",
-                                                                err.message,
-                                                            );
-                                                        }
-                                                    },
-                                                );
+                                                    const flatBatch = [].concat(...currentBatch);
+
+                                                    db.run(
+                                                        `INSERT INTO articles (date, departement, cog, commune, lieu, title, url, insecurite, immigration, islamisme, defrancisation, wokisme) VALUES ${placeholders}`,
+                                                        flatBatch,
+                                                        (err) => {
+                                                            if (err) {
+                                                                console.error(
+                                                                    "Erreur insertion batch articles:",
+                                                                    err.message,
+                                                                );
+                                                            }
+                                                        },
+                                                    );
+                                                    currentBatch = [];
+                                                }
                                             }
 
                                             db.run("COMMIT", (err) => {
