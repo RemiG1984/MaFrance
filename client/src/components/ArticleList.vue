@@ -1,3 +1,4 @@
+
 <template>
   <v-card>
     <v-card-title class="text-h5">
@@ -16,6 +17,7 @@
             color="primary"
             variant="flat"
             label
+            size="small"
             :value="'tous'"
             @click="selectCategory('tous')"
           >
@@ -25,6 +27,7 @@
             color="primary"
             variant="flat"
             label
+            size="small"
             v-for="category in categories"
             :key="category"
             :value="category"
@@ -35,31 +38,40 @@
         </v-chip-group>
       </div>
 
-      <div class="articles-container" ref="articlesContainer" @scroll="handleScroll" :style="{ height: computedContainerHeight + 'px' }">
-        <div class="virtual-scroll-wrapper" :style="{ height: virtualHeight + 'px' }">
-          <div class="virtual-scroll-content" :style="{ transform: `translateY(${offsetY}px)` }">
-            <div
-              class="article"
-              v-for="(item, i) in visibleArticles"
-              :key="item.url + i"
-              :style="{ height: itemHeight + 'px' }"
-            >
-              <div class="article-content">
-                <b> {{ formatDate(item.date) }} </b>
-                <span> [{{ item.commune }}] </span>
-                <a :href='item.url'> {{ item.title }} </a>
-              </div>
-            </div>
+      <div class="articles-container" ref="articlesContainer" @scroll="handleScroll">
+        <div
+          class="article-item"
+          v-for="(item, i) in filteredArticles"
+          :key="item.url + i"
+        >
+          <div class="article-date">{{ formatDate(item.date) }}</div>
+          <div class="article-location">[{{ item.commune }}]</div>
+          <div class="article-title">
+            <a :href='item.url' target="_blank" rel="noopener noreferrer">
+              {{ item.title }}
+            </a>
           </div>
         </div>
 
         <div v-if="isLoading" class="loading">
           <v-progress-circular indeterminate size="24" color="primary"></v-progress-circular>
-          Chargement...
+          <span class="loading-text">Chargement...</span>
         </div>
 
         <div v-if="filteredArticles.length === 0 && !isLoading" class="no-articles">
           {{ noArticlesMessage }}
+        </div>
+
+        <div v-if="articles.pagination?.hasMore && !isLoading" class="load-more">
+          <v-btn
+            @click="loadMoreArticles"
+            variant="outlined"
+            color="primary"
+            size="small"
+            block
+          >
+            Charger plus d'articles
+          </v-btn>
         </div>
       </div>
     </v-card-text>
@@ -101,22 +113,8 @@ export default {
       selectedCategory: 'tous',
       categories: categories,
       articleCategoriesRef: articleCategoriesRef,
-      isLoading: false,
-      // Virtual scrolling
-      containerHeight: 400, // Default height, will be updated dynamically
-      itemHeight: 60,
-      scrollTop: 0,
-      bufferSize: 5,
-      // Cache for "tous" articles when all are loaded
-      allArticlesCache: null
+      isLoading: false
     };
-  },
-  mounted() {
-    this.updateContainerHeight();
-    window.addEventListener('resize', this.updateContainerHeight);
-  },
-  beforeUnmount() {
-    window.removeEventListener('resize', this.updateContainerHeight);
   },
   computed: {
     locationName() {
@@ -138,31 +136,8 @@ export default {
     totalArticles() {
       return this.articles.counts.total || 0;
     },
-    visibleStartIndex() {
-      return Math.max(0, Math.floor(this.scrollTop / this.itemHeight) - this.bufferSize);
-    },
-    visibleEndIndex() {
-      const visibleCount = Math.ceil(this.containerHeight / this.itemHeight);
-      return Math.min(
-        this.filteredArticles.length - 1,
-        this.visibleStartIndex + visibleCount + this.bufferSize * 2
-      );
-    },
-    visibleArticles() {
-      return this.filteredArticles.slice(this.visibleStartIndex, this.visibleEndIndex + 1);
-    },
-    virtualHeight() {
-      return this.filteredArticles.length * this.itemHeight;
-    },
-    offsetY() {
-      return this.visibleStartIndex * this.itemHeight;
-    },
     noArticlesMessage() {
       return 'Aucun article trouvé.';
-    },
-    computedContainerHeight() {
-      // Reduce height to 50px when no articles are found and not loading
-      return this.filteredArticles.length === 0 && !this.isLoading ? 50 : 400;
     }
   },
   methods: {
@@ -174,17 +149,10 @@ export default {
         year: 'numeric'
       });
     },
-    updateContainerHeight() {
-      if (this.$refs.articlesContainer) {
-        this.containerHeight = this.computedContainerHeight;
-      }
-    },
     handleScroll(event) {
-      this.scrollTop = event.target.scrollTop;
-      const scrollBottom = this.scrollTop + this.containerHeight;
-      const contentHeight = this.virtualHeight;
+      const { scrollTop, scrollHeight, clientHeight } = event.target;
       if (
-        scrollBottom >= contentHeight - 200 &&
+        scrollTop + clientHeight >= scrollHeight - 100 &&
         !this.isLoading &&
         this.articles.pagination?.hasMore
       ) {
@@ -193,28 +161,34 @@ export default {
     },
     async selectCategory(category) {
       this.selectedCategory = category;
-      this.scrollTop = 0;
       if (this.$refs.articlesContainer) {
         this.$refs.articlesContainer.scrollTop = 0;
       }
+      
       const { useDataStore } = await import('../services/store.js');
       const dataStore = useDataStore();
       const params = {
         limit: 20
       };
+      
       if (this.location.type === 'departement') {
         params.dept = this.location.code;
       } else if (this.location.type === 'commune') {
         params.cog = this.location.code;
         params.dept = dataStore.getCommuneDepartementCode();
+      } else if (this.location.type === 'country') {
+        params.country = 'France';
       }
+      
       if (category !== 'tous') {
         params.category = category;
       }
+      
       await dataStore.fetchFilteredArticles(params, false);
     },
     async loadMoreArticles() {
       if (this.isLoading || !this.articles.pagination?.hasMore) return;
+      
       this.isLoading = true;
       try {
         const { useDataStore } = await import('../services/store.js');
@@ -223,37 +197,25 @@ export default {
           cursor: this.articles.pagination.nextCursor,
           limit: 20
         };
+        
         if (this.location.type === 'departement') {
           params.dept = this.location.code;
         } else if (this.location.type === 'commune') {
           params.cog = this.location.code;
           params.dept = dataStore.getCommuneDepartementCode();
+        } else if (this.location.type === 'country') {
+          params.country = 'France';
         }
+        
         if (this.selectedCategory !== 'tous') {
           params.category = this.selectedCategory;
         }
+        
         await dataStore.loadMoreArticles(params);
       } catch (error) {
         console.error('Failed to load more articles:', error);
       } finally {
         this.isLoading = false;
-      }
-    }
-  },
-  watch: {
-    articles: {
-      handler() {
-        this.$nextTick(() => {
-          this.updateContainerHeight();
-        });
-      },
-      deep: true
-    },
-    filteredArticles: {
-      handler() {
-        this.$nextTick(() => {
-          this.updateContainerHeight();
-        });
       }
     }
   }
@@ -262,36 +224,55 @@ export default {
 
 <style scoped>
 .articles-container {
-  height: var(--container-height, 400px); /* Default height, overridden by inline style */
+  max-height: 400px;
   overflow-y: auto;
-  border: 1px solid #dee2e6;
+  border: 1px solid #e0e0e0;
   border-radius: 8px;
   background-color: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  position: relative;
 }
 
-.virtual-scroll-wrapper {
-  position: relative;
-}
-
-.virtual-scroll-content {
-  position: relative;
-}
-
-.article {
-  border-bottom: 1px solid #eee;
-  display: flex;
-  align-items: center;
-}
-
-.article-content {
+.article-item {
   padding: 12px;
-  width: 100%;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.article a {
-  color: #007bff;
+.article-item:last-child {
+  border-bottom: none;
+}
+
+.article-date {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #666;
+  line-height: 1.2;
+}
+
+.article-location {
+  font-size: 0.8rem;
+  color: #888;
+  line-height: 1.2;
+}
+
+.article-title {
+  line-height: 1.3;
+  margin-top: 2px;
+}
+
+.article-title a {
+  color: #1976d2;
+  text-decoration: none;
+  font-size: 0.9rem;
+  display: block;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+.article-title a:hover {
+  text-decoration: underline;
 }
 
 .loading {
@@ -299,18 +280,75 @@ export default {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 20px;
-  color: #6c757d;
+  padding: 16px;
+  color: #666;
+}
+
+.loading-text {
+  font-size: 0.9rem;
 }
 
 .no-articles {
   text-align: center;
-  color: #6c757d;
+  color: #666;
   font-style: italic;
   padding: 20px;
+  font-size: 0.9rem;
+}
+
+.load-more {
+  padding: 12px;
+  border-top: 1px solid #f0f0f0;
 }
 
 .categories-container {
   margin-bottom: 16px;
+}
+
+/* Mobile specific improvements */
+@media (max-width: 600px) {
+  .article-item {
+    padding: 10px;
+  }
+  
+  .article-date {
+    font-size: 0.8rem;
+  }
+  
+  .article-location {
+    font-size: 0.75rem;
+  }
+  
+  .article-title a {
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+  
+  .categories-container :deep(.v-chip-group) {
+    gap: 4px;
+  }
+  
+  .categories-container :deep(.v-chip) {
+    font-size: 0.75rem;
+    height: auto;
+    min-height: 28px;
+    padding: 4px 8px;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 400px) {
+  .article-item {
+    padding: 8px;
+  }
+  
+  .article-title a {
+    font-size: 0.8rem;
+  }
+  
+  .categories-container :deep(.v-chip) {
+    font-size: 0.7rem;
+    padding: 3px 6px;
+  }
 }
 </style>

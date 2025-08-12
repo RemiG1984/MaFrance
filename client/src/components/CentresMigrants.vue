@@ -2,7 +2,7 @@
 <template>
   <v-card class="mb-4">
     <v-card-title class="text-h5">
-      Centres d'hébergement de migrants pour: {{ locationName }}
+      Centres de migrants pour: {{ locationName }}
     </v-card-title>
     <v-card-text>
       <div
@@ -105,7 +105,7 @@ export default {
       } else if (this.location.type === 'commune') {
         return this.location.name
       }
-      return 'France'
+      return 'France (1062 centres)'
     },
 
     migrantsList() {

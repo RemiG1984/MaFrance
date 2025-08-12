@@ -80,7 +80,8 @@ export const useDataStore = defineStore("data", {
           }),
           api.getCountrySubventions(code),
           api.getArticles({ limit: 20 }),
-          api.getMigrants({ limit: 20 }),
+          api.getMigrants({ limit: 10 }),
+          api.getQpv({ limit: 10 }),
         ]);
 
         const country = {};
@@ -95,6 +96,7 @@ export const useDataStore = defineStore("data", {
         const articlesResponse = results[8];
         country.articles = articlesResponse;
         country.migrants = results[9];
+        country.qpv = results[10];
         country.namesSeries = this.serializeStats(country.namesHistory);
         country.crimeSeries = this.serializeStats(country.crimeHistory);
         country.crimeAggreg = this.aggregateStats(country.crimeSeries.data);
@@ -114,7 +116,7 @@ export const useDataStore = defineStore("data", {
           api.getDepartementCrime(code),
           api.getDepartementCrimeHistory(code),
           api.getDepartementNamesHistory(code),
-          api.getDepartementQpv(code),
+          api.getQpv({ dept: code, limit: 100 }),
           api.getDepartementExecutive(code),
           api.getCommuneRankings({
             dept: code,
@@ -127,7 +129,7 @@ export const useDataStore = defineStore("data", {
             limit: 20,
           }),
           api.getDepartementSubventions(code),
-          api.getMigrants(code, { limit: 100 }),
+          api.getMigrants({ dept: code, limit: 100 }),
         ]);
 
         const departement = {};
@@ -164,7 +166,7 @@ export const useDataStore = defineStore("data", {
           api.getCommuneCrime(code),
           api.getCommuneCrimeHistory(code),
           // api.getCommuneNamesHistory(code),
-          api.getCommuneQpv(code),
+          api.getQpv({ cog: code, limit: 100 }),
           api.getCommuneExecutive(code),
           api.getArticles({
             cog: code,
@@ -172,7 +174,7 @@ export const useDataStore = defineStore("data", {
             limit: 20,
           }),
           api.getCommuneSubventions(code),
-          api.getMigrants(code, { limit: 100 }),
+          api.getMigrants({ cog: code, limit: 100 }),
         ]);
 
         const commune = {};
@@ -366,7 +368,7 @@ export const useDataStore = defineStore("data", {
         executive: null,
         subventions: null,
         migrants: null,
-        articles: null, // Cleared articles
+        articles: null,
       };
       this.errors.country = null;
     },
@@ -550,6 +552,42 @@ export const useDataStore = defineStore("data", {
       }
     },
 
+    async fetchQpv(level, code) {
+      try {
+        let params = { limit: level === 'country' ? 20 : 100 };
+        if (level === 'departement') {
+          params.dept = code;
+        } else if (level === 'commune') {
+          params.cog = code;
+        } // No params for country
+
+        const qpv = await api.getQpv(params);
+        this[level].qpv = qpv || { list: [], pagination: { hasMore: false, nextCursor: null, limit: params.limit } };
+      } catch (error) {
+        console.error(`Error fetching ${level} QPV:`, error);
+        this[level].qpv = { list: [], pagination: { hasMore: false, nextCursor: null, limit: 20 } };
+      }
+    },
+
+    async loadMoreQpv(level, code, params) {
+      try {
+        let qpvParams = { ...params };
+        if (level === 'departement') {
+          qpvParams.dept = code;
+        } else if (level === 'commune') {
+          qpvParams.cog = code;
+        } // No dept/cog for country
+
+        const moreQpv = await api.getQpv(qpvParams);
+        if (moreQpv && moreQpv.list) {
+          this[level].qpv.list.push(...moreQpv.list);
+          this[level].qpv.pagination = moreQpv.pagination;
+        }
+      } catch (error) {
+        console.error(`Error loading more ${level} QPV:`, error);
+      }
+    },
+
     // Subventions actions
     async fetchCountrySubventions(country = 'france') {
         this.subventionsCountry = await api.getCountrySubventions(country) || {
@@ -593,11 +631,6 @@ export const useDataStore = defineStore("data", {
 
     getCommuneCode: (state) => () => {
       return state.commune?.details?.COG;
-    },
-
-    getCommuneName: (state) => () => {
-      // FIXME: le nom de la commune devrait être à un endroit clean dans les données
-      return state.commune?.qpv[0]?.lib_com;
     },
 
     getCommuneDepartementCode: (state) => () => {

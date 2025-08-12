@@ -23,6 +23,7 @@ router.get(
         const db = req.app.locals.db;
         const { dept, cog, cursor, limit = "20" } = req.query;
         const pageLimit = Math.min(parseInt(limit), 100);
+        const offset = cursor ? parseInt(cursor) : 0;
 
         // Prevent simultaneous dept and cog
         if (dept && cog) {
@@ -46,15 +47,10 @@ router.get(
             params.push(dept);
         }
 
-        if (cursor) {
-            query += params.length ? " AND" : " WHERE";
-            query += " mc.rowid > ?";
-            params.push(cursor);
-        }
-
         query +=
-            " ORDER BY mc.places DESC, mc.departement, mc.COG, mc.gestionnaire_centre, mc.rowid ASC LIMIT ?";
+            " ORDER BY mc.places DESC, mc.departement, mc.COG, mc.gestionnaire_centre, mc.rowid ASC LIMIT ? OFFSET ?";
         params.push(pageLimit + 1);
+        params.push(offset);
 
         db.all(query, params, (err, rows) => {
             if (err) {

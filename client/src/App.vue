@@ -19,7 +19,7 @@
             @ou_va_ma_France
           </v-btn>
 
-          <!--
+
           <v-btn
             href="https://ko-fi.com/remi63047"
             target="_blank"
@@ -32,7 +32,7 @@
               class="kofi-icon"
             />
           </v-btn>
-          -->
+
    
           <v-btn
             v-for="item in menuItems"
@@ -95,7 +95,6 @@
           <v-list-item-title>@ou_va_ma_France</v-list-item-title>
         </v-list-item>
 
-        <!--
         <v-list-item
           href="https://ko-fi.com/remi63047"
           target="_blank"
@@ -109,7 +108,6 @@
             />
           </v-list-item-title>
         </v-list-item>
-        -->
 
 
         

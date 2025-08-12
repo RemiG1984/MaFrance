@@ -1,7 +1,7 @@
 
 # Ma France - Application Vue.js
 
-Cette application Vue.js est une refonte de l'application "Ma France: état des lieux" qui analyse différents indicateurs pour évaluer l'état des lieux en France, au niveau des départements et des communes.
+Cette application Vue.js est une refonte de l'application "Ma France: état des lieux" qui analyse différents indicateurs pour évaluer l'état des lieux en France, au niveau national, départemental et communal.
 
 ## Architecture de l'application
 
@@ -50,7 +50,8 @@ L'application est composée de deux parties principales :
 │   ├── qpvRoutes.js      # Quartiers prioritaires
 │   ├── rankingRoutes.js  # Classements
 │   ├── subventionRoutes.js # Subventions
-│   └── cacheRoutes.js    # Gestion cache
+│   ├── cacheRoutes.js    # Gestion cache
+│   └── otherRoutes.js    # Routes diverses
 ├── services/
 │   ├── cacheService.js   # Service de cache persistant
 │   └── searchService.js  # Service de recherche
@@ -75,7 +76,10 @@ client/
 │   │   ├── ArticleList.vue       # Liste articles
 │   │   ├── ExecutiveDetails.vue  # Détails élus
 │   │   ├── CentresMigrants.vue   # Centres migrants
-│   │   └── CacheManager.vue      # Gestionnaire cache
+│   │   ├── CacheManager.vue      # Gestionnaire cache
+│   │   ├── VersionSelector.vue   # Sélecteur de version
+│   │   ├── RankingFilters.vue    # Filtres classements
+│   │   └── RankingResults.vue    # Résultats classements
 │   ├── views/            # Pages principales
 │   │   ├── Home.vue      # Page d'accueil
 │   │   ├── Rankings.vue  # Page classements
@@ -103,22 +107,35 @@ client/
 - `GET /api/country/crime_history?country=France` - Historique criminalité
 - `GET /api/country/names_history?country=France` - Historique prénoms
 - `GET /api/country/ministre?country=France` - Données ministres
+- `GET /api/subventions/country/france` - Subventions nationales
 
 ### Départements
-- `GET /api/departements/rankings` - Classements départements
-- `GET /api/departements/:code/scores` - Scores département
+- `GET /api/departements/:code/details` - Détails département
+- `GET /api/departements/:code/names` - Prénoms département
+- `GET /api/departements/:code/crime` - Criminalité département
+- `GET /api/departements/:code/crime_history` - Historique criminalité
+- `GET /api/departements/:code/names_history` - Historique prénoms
+- `GET /api/departements/:code/ministre` - Élus département
+- `GET /api/subventions/departement/:code` - Subventions département
 
 ### Communes
 - `GET /api/communes/search?q=query` - Recherche communes
-- `GET /api/communes/rankings` - Classements communes
-- `GET /api/communes/:code/scores` - Scores commune
+- `GET /api/communes/:code/details` - Détails commune
+- `GET /api/communes/:code/crime` - Criminalité commune
+- `GET /api/communes/:code/crime_history` - Historique criminalité
+- `GET /api/communes/:code/ministre` - Élus commune
+- `GET /api/subventions/commune/:code` - Subventions commune
 
 ### Données spécialisées
-- `GET /api/rankings/departements` - Classements avec filtres
-- `GET /api/subventions/country/france` - Subventions nationales
+- `GET /api/rankings/departements` - Classements départements
+- `GET /api/rankings/communes` - Classements communes
 - `GET /api/migrants/centres` - Centres migrants
 - `GET /api/qpv` - Quartiers prioritaires
-- `GET /api/articles` - Articles FdeSouche
+- `GET /api/articles` - Articles FdeSouche avec filtres et pagination
+
+### Cache et utilitaires
+- `GET /api/cache/status` - Statut du cache
+- `POST /api/cache/clear` - Vider le cache
 
 ## Métriques et scores
 
@@ -207,115 +224,180 @@ VITE_API_BASE_URL=http://localhost:3000/api
 
 ## Fonctionnalités principales
 
+### Navigation multi-niveaux
+- **National** : Données France entière
+- **Départemental** : Données par département
+- **Communal** : Données par commune
+- Transition fluide entre les niveaux
+
 ### Carte interactive
 - Visualisation géographique avec Leaflet
 - Sélection départements/communes
-- Données contextuelles
+- Données contextuelles par zone
 
-### Système de cache
+### Système de versioning
+- 3 versions de labels configurables
+- Commutation dynamique via `VersionSelector`
+- Persistance des préférences utilisateur
+
+### Articles et actualités
+- Intégration articles FdeSouche
+- Filtrage par catégorie (insécurité, immigration, islamisme, etc.)
+- Pagination avec curseur
+- Compteurs par catégorie
+
+### Centres migrants et QPV
+- Cartographie des centres d'accueil
+- Données quartiers prioritaires de la ville
+- Pagination et filtrage avancés
+
+### Système de cache avancé
 - Cache persistant côté serveur
 - Cache navigateur optimisé
-- Invalidation automatique
+- Interface d'administration du cache
+- Invalidation sélective
 
 ### Graphiques dynamiques
 - Chart.js pour visualisations
 - Graphiques criminalité évolutifs
 - Histogrammes prénoms temporels
+- Watermarking automatique
 
 ### Recherche et filtrage
 - Recherche de communes en temps réel
 - Filtres de classements avancés
 - Tri multi-critères
+- Résultats paginés
 
-### Gestion d'état
-- Store Pinia centralisé
+### Gestion d'état centralisée
+- Store Pinia avec actions asynchrones
+- Chargement de données optimisé
+- Gestion des erreurs intégrée
 - Réactivité Vue 3
-- Persistance localisation
 
 ## Sécurité
 
 ### Mesures implémentées
 - **Helmet** : Headers sécurisés
-- **Rate limiting** : Protection DoS
-- **Validation** : express-validator
+- **Rate limiting** : Protection DoS (100/15min, 20/min pour recherche)
+- **Validation** : express-validator sur tous les endpoints
 - **Sanitisation** : Nettoyage entrées utilisateur
 - **CORS** : Contrôle origine des requêtes
 - **CSP** : Content Security Policy
 
-### Authentification
-- Middleware basic auth disponible
-- Protection routes sensibles
-- Validation tokens
+### Validation des données
+- Codes département/commune
+- Paramètres de pagination
+- Filtres de recherche
+- Prévention injection SQL
 
 ## Performance
 
 ### Optimisations backend
 - Compression gzip
-- Cache persistant Redis-like
-- Requêtes SQL optimisées
-- Pagination résultats
+- Cache persistant avec TTL
+- Requêtes SQL indexées et optimisées
+- Pagination cursor-based
+- Batch processing pour imports
 
 ### Optimisations frontend
-- Bundle splitting Vite
+- Bundle splitting Vite (909KB minifié)
 - Lazy loading composants
-- Optimisation images
-- Cache navigateur
+- Cache persistant localStorage
+- Debouncing recherches
+- Virtual scrolling pour grandes listes
+
+### Monitoring
+- Logs structurés avec niveaux
+- Métriques de performance
+- Monitoring cache hit ratio
+- Alertes erreurs
 
 ## Déploiement sur Replit
 
 ### Configuration production
 L'application est configurée pour Replit avec :
-- Binding sur `0.0.0.0`
-- Port 3000 par défaut
-- Build automatisé
-- Serveur de fichiers statiques
+- Binding sur `0.0.0.0:3000`
+- Build automatisé via workflows
+- Service de fichiers statiques intégré
+- Variables d'environnement configurées
 
-### Commandes Replit
-- **Run** : Exécute `npm run build && node server.js`
-- **Build** : `npm run build` (frontend)
-- **Dev** : `npm run dev` (développement)
+### Workflows disponibles
+- **Build and Start Vue** : Build frontend + démarrage serveur
+- **Start Server** : Démarrage serveur uniquement
+- **Build and Start** : Build CSS + démarrage serveur
 
 ### Structure déployée
 ```
-public/           # Fichiers statiques générés
+public/           # Fichiers statiques générés par Vite
 ├── index.html    # Point d'entrée SPA
 ├── assets/       # CSS/JS/fonts optimisés
-└── ...
+│   ├── index-gCHxcsa-.css (817KB)
+│   └── index-DCb9g14C.js (909KB)
+└── images/       # Assets statiques
 ```
 
-## Base de données
+## Base de données SQLite
 
-### Structure SQLite
-- Tables scores (départements/communes)
-- Données criminalité historiques
-- Prénoms par année/localisation
-- QPV et subventions
-- Articles et élus
+### Tables principales
+- `country_*` - Données nationales (scores, criminalité, prénoms)
+- `departement_*` - Données départementales
+- `commune_*` - Données communales
+- `articles` - Articles FdeSouche avec catégorisation
+- `qpv` - Quartiers prioritaires
+- `migrants_centres` - Centres d'accueil migrants
+- `*_subventions` - Données subventions par niveau
 
 ### Import de données
 Scripts dans `setup/` pour importer :
-- Scores calculés
+- Scores calculés (CSV)
 - Données criminalité INSEE
-- Analyse prénoms
-- Quartiers prioritaires
-- Listes élus
-- Articles FdeSouche
+- Analyse prénoms par géolocalisation
+- Quartiers prioritaires (QPV)
+- Listes élus (maires, préfets, ministres)
+- Articles FdeSouche catégorisés
+- Centres migrants géolocalisés
+
+### Commandes d'import
+```bash
+node setup.js  # Import complet de toutes les données
+```
 
 ## Maintenance
 
-### Logs
-- Niveau configurable (info/debug/error)
-- Logs SQL optionnels
-- Monitoring erreurs
+### Logs et monitoring
+- Niveaux configurables (info/debug/error)
+- Logs SQL optionnels pour debug
+- Monitoring erreurs API
+- Métriques de performance cache
 
-### Mise à jour données
-```bash
-node setup.js  # Réimport complet données
-```
-
-### Cache management
-- Endpoint `/api/cache/clear` pour vider le cache
-- Interface admin intégrée
+### Gestion du cache
+- Endpoint `/api/cache/clear` pour reset
+- Interface admin dans `CacheManager.vue`
 - Monitoring utilisation mémoire
+- TTL configurables par type de données
 
-Cette application fournit une interface complète d'analyse territoriale française avec des données actualisées et une architecture moderne scalable.
+### Mise à jour des données
+Les données peuvent être mises à jour en remplaçant les fichiers CSV dans `setup/` et en relançant l'import.
+
+## Caractéristiques techniques
+
+### Pagination avancée
+- Cursor-based pagination pour les articles
+- Limit configurable (défaut: 20, max: 100)
+- Chargement incrémental ("Load More")
+- Compteurs de catégories en temps réel
+
+### Filtrage multi-critères
+- Par département, commune, lieu
+- Par catégorie d'articles
+- Par type de centres migrants
+- Combinaisons de filtres
+
+### Responsive design
+- Interface Vuetify adaptative
+- Cartes optimisées mobile
+- Tableaux avec défilement horizontal
+- Navigation hamburger sur mobile
+
+Cette application fournit une interface complète d'analyse territoriale française avec des données actualisées, une architecture moderne scalable et des fonctionnalités avancées de visualisation et d'analyse.

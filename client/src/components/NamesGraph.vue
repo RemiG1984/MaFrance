@@ -113,7 +113,16 @@ export default {
             },
             legend: {
               display: true,
-              position: 'top'
+              position: 'top',
+              align: 'start',
+              labels: {
+                boxWidth: 12,
+                padding: 8,
+                usePointStyle: true,
+                font: {
+                  size: window.innerWidth < 768 ? 10 : 12
+                }
+              }
             }
           },
           scales: {
@@ -126,8 +135,7 @@ export default {
             },
             x: {
               title: {
-                display: true,
-                text: 'Années'
+                display: false
               }
             }
           }
@@ -201,5 +209,16 @@ export default {
 
 .chart-canvas {
   max-height: 400px;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .chart-container {
+    height: 350px;
+  }
+  
+  .chart-canvas {
+    max-height: 350px;
+  }
 }
 </style> 
