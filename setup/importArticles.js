@@ -179,12 +179,27 @@ function importArticles(db, callback) {
                                                 let dateA = a[0]; // date is at index 0
                                                 let dateB = b[0];
                                                 
-                                                // Convert to Date objects for reliable comparison
-                                                const parsedDateA = new Date(dateA);
-                                                const parsedDateB = new Date(dateB);
+                                                // Parse French date format (DD/MM/YYYY)
+                                                function parseFrenchDate(dateStr) {
+                                                    if (!dateStr) return null;
+                                                    
+                                                    // Check if it's in DD/MM/YYYY format
+                                                    const frenchDateMatch = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+                                                    if (frenchDateMatch) {
+                                                        const [, day, month, year] = frenchDateMatch;
+                                                        // Convert to ISO format (YYYY-MM-DD) for reliable parsing
+                                                        return new Date(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`);
+                                                    }
+                                                    
+                                                    // Try standard parsing as fallback
+                                                    return new Date(dateStr);
+                                                }
+                                                
+                                                const parsedDateA = parseFrenchDate(dateA);
+                                                const parsedDateB = parseFrenchDate(dateB);
                                                 
                                                 // Check if dates are valid
-                                                if (isNaN(parsedDateA.getTime()) || isNaN(parsedDateB.getTime())) {
+                                                if (!parsedDateA || !parsedDateB || isNaN(parsedDateA.getTime()) || isNaN(parsedDateB.getTime())) {
                                                     console.warn('Invalid date found:', dateA, dateB);
                                                     // Fallback to string comparison
                                                     return dateB.localeCompare(dateA);
