@@ -263,12 +263,12 @@ export default {
 /* Consistent column widths for both header and body tables */
 .centres-table th:nth-child(1),
 .centres-table td:nth-child(1) {
-  width: 15%;
+  width: 10%;
 }
 
 .centres-table th:nth-child(2),
 .centres-table td:nth-child(2) {
-  width: 10%;
+  width: 15%;
 }
 
 .centres-table th:nth-child(3),
@@ -278,7 +278,7 @@ export default {
 
 .centres-table th:nth-child(4),
 .centres-table td:nth-child(4) {
-  width: 15%;
+  width: 20%;
 }
 
 .centres-table th:nth-child(5),
@@ -288,7 +288,7 @@ export default {
 
 .centres-table th:nth-child(6),
 .centres-table td:nth-child(6) {
-  width: 25%;
+  width: 20%;
 }
 
 .centres-table-header th:first-child {
