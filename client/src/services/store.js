@@ -80,7 +80,7 @@ export const useDataStore = defineStore("data", {
           }),
           api.getCountrySubventions(code),
           api.getCountryArticles(code),
-          api.getDepartementMigrants('all'),
+          api.getDepartementMigrants('all', { limit: 20 }),
         ]);
 
         const country = {};
@@ -125,7 +125,7 @@ export const useDataStore = defineStore("data", {
             dept: code,
           }),
           api.getDepartementSubventions(code),
-          api.getDepartementMigrants(code),
+          api.getDepartementMigrants(code, { limit: 20 }),
         ]);
 
         const departement = {};
@@ -169,7 +169,7 @@ export const useDataStore = defineStore("data", {
             dept: deptCode,
           }),
           api.getCommuneSubventions(code),
-          api.getCommuneMigrants(code),
+          api.getCommuneMigrants(code, { limit: 20 }),
         ]);
 
         const commune = {};
