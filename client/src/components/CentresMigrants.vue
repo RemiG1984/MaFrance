@@ -1,3 +1,4 @@
+
 <template>
   <v-card class="mb-4">
     <v-card-title class="text-h5">
@@ -24,7 +25,7 @@
             </tr>
           </thead>
         </table>
-
+        
         <!-- Virtual scrolled content -->
         <div class="virtual-scroll-wrapper" :style="{ height: virtualHeight + 'px' }">
           <div class="virtual-scroll-content" :style="{ transform: `translateY(${offsetY}px)`, paddingTop: '40px' }">
@@ -46,7 +47,7 @@
             </table>
           </div>
         </div>
-
+        
         <div v-if="isLoading" class="loading">
           <v-progress-circular indeterminate size="24" color="primary"></v-progress-circular>
           Chargement...
@@ -139,11 +140,6 @@ export default {
     computedContainerHeight() {
       // Reduce to 50px if no migrants and not loading
       return this.migrantsList.length === 0 && !this.isLoading ? 50 : 400;
-    },
-
-    totalCenters() {
-      // Use the total count from the API response
-      return this.data.total || 0;
     }
   },
   methods: {
