@@ -30,8 +30,15 @@ const validateDepartementParam = [
   param("dept")
     .notEmpty()
     .withMessage("Département requis")
-    .matches(/^(0[1-9]|[1-8][0-9]|9[0-5]|2[AB]|97[1-6])$/)
-    .withMessage("Code département invalide"),
+    .custom((value) => {
+      if (value.toLowerCase() === 'all') {
+        return true; // Allow 'all' as a special case
+      }
+      if (!/^(0[1-9]|[1-8][0-9]|9[0-5]|2[AB]|97[1-6])$/.test(value)) {
+        throw new Error("Code département invalide");
+      }
+      return true;
+    }),
   handleValidationErrors,
 ];
 
@@ -128,10 +135,10 @@ const validatePagination = [
     .isInt({ min: 1, max: 1001 })
     .withMessage("Limit doit être un entier entre 1 et 1000")
     .toInt(),
-  query("offset")
+  query("cursor")
     .optional()
-    .isInt({ min: 0 })
-    .withMessage("Offset doit être un entier positif")
+    .isInt({ min: 1 })
+    .withMessage("Cursor doit être un entier positif")
     .toInt(),
   handleValidationErrors,
 ];
@@ -178,6 +185,15 @@ const validateLieu = [
   handleValidationErrors,
 ];
 
+// New middleware for optional department validation
+const validateOptionalDepartement = (req, res, next) => {
+  const { dept } = req.query
+  if (dept && !/^\d{1,3}$/.test(dept)) {
+    return res.status(400).json({ error: 'Le paramètre dept doit être un nombre' })
+  }
+  next()
+}
+
 function validateSearchQuery(req, res, next) {
   const { q } = req.query;
   if (
@@ -206,6 +222,7 @@ module.exports = {
   validateCOG,
   validateCOGParam,
   validateOptionalCOG,
+  validateOptionalDepartement,
   validateSearchQuery,
   validateSort,
   validateDirection,

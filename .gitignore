@@ -133,8 +133,8 @@ dist
 .breakpoints
 
 
-#Public directory since it is compiled
-public/
+#Dist directory since it is compiled by vite
+dist/
 
 node_modules
 dist

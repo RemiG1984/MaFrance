@@ -18,6 +18,21 @@
             <b>𝕏</b> 
             @ou_va_ma_France
           </v-btn>
+
+          <!--
+          <v-btn
+            href="https://ko-fi.com/remi63047"
+            target="_blank"
+            variant="text"
+            class="mx-2 kofi-btn"
+          >
+            <img 
+              src="/images/kofi_symbol.webp" 
+              alt="Ko-fi" 
+              class="kofi-icon"
+            />
+          </v-btn>
+          -->
    
           <v-btn
             v-for="item in menuItems"
@@ -28,6 +43,7 @@
           >
             {{ item.title }}
           </v-btn>
+          
          
           <VersionSelector />
         </div>
@@ -78,6 +94,25 @@
         >
           <v-list-item-title>@ou_va_ma_France</v-list-item-title>
         </v-list-item>
+
+        <!--
+        <v-list-item
+          href="https://ko-fi.com/remi63047"
+          target="_blank"
+          class="kofi-mobile"
+        >
+          <v-list-item-title>
+            <img 
+              src="/images/kofi_symbol.webp" 
+              alt="Ko-fi" 
+              class="kofi-icon-mobile"
+            />
+          </v-list-item-title>
+        </v-list-item>
+        -->
+
+
+        
       </v-list>
     </v-navigation-drawer>
     <!-- Main Content -->
@@ -141,6 +176,19 @@ export default {
   color: #ffffff !important; /* White text for contrast */
 }
 
+.kofi-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+}
+
+.kofi-icon-mobile {
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
 /* Header layout */
 .header-content-wrapper {
   display: flex;
@@ -180,6 +228,11 @@ export default {
 .twitter-mobile {
   background-color: #000000 !important;
   color: #ffffff !important;
+  margin: 8px 16px;
+  border-radius: 4px;
+}
+
+.kofi-mobile {
   margin: 8px 16px;
   border-radius: 4px;
 }

@@ -26,6 +26,7 @@ export const useDataStore = defineStore("data", {
       crimeAggreg: null,
       subventions: null,
       migrants: null,
+      articles: null,
     },
     departement: {
       details: null,
@@ -37,7 +38,6 @@ export const useDataStore = defineStore("data", {
       executive: null,
       communesRankings: null,
       articles: null,
-      articlesCounts: null,
       namesSeries: null,
       crimeSeries: null,
       crimeAggreg: null,
@@ -51,7 +51,6 @@ export const useDataStore = defineStore("data", {
       qpv: null,
       executive: null,
       articles: null,
-      articlesCounts: null,
       crimeSeries: null,
       crimeAggreg: null,
       subventions: null,
@@ -80,6 +79,8 @@ export const useDataStore = defineStore("data", {
             direction: "DESC",
           }),
           api.getCountrySubventions(code),
+          api.getArticles({ limit: 20 }),
+          api.getMigrants({ limit: 20 }),
         ]);
 
         const country = {};
@@ -91,6 +92,9 @@ export const useDataStore = defineStore("data", {
         country.executive = results[5];
         country.departementsRankings = results[6];
         country.subventions = results[7];
+        const articlesResponse = results[8];
+        country.articles = articlesResponse;
+        country.migrants = results[9];
         country.namesSeries = this.serializeStats(country.namesHistory);
         country.crimeSeries = this.serializeStats(country.crimeHistory);
         country.crimeAggreg = this.aggregateStats(country.crimeSeries.data);
@@ -120,12 +124,10 @@ export const useDataStore = defineStore("data", {
           }),
           api.getArticles({
             dept: code,
-          }),
-          api.getArticleCounts({
-            dept: code,
+            limit: 20,
           }),
           api.getDepartementSubventions(code),
-          api.getDepartementMigrants(code),
+          api.getMigrants(code, { limit: 100 }),
         ]);
 
         const departement = {};
@@ -137,10 +139,10 @@ export const useDataStore = defineStore("data", {
         departement.qpv = results[5];
         departement.executive = results[6];
         departement.communesRankings = results[7];
-        departement.articles = results[8];
-        departement.articlesCounts = results[9];
-        departement.subventions = results[10];
-        departement.migrants = results[11] || [];
+        const articlesResponse = results[8];
+        departement.articles = articlesResponse;
+        departement.subventions = results[9];
+        departement.migrants = results[10] || [];
         departement.namesSeries = this.serializeStats(departement.namesHistory);
         departement.crimeSeries = this.serializeStats(results[3]);
         departement.crimeAggreg = this.aggregateStats(
@@ -167,13 +169,10 @@ export const useDataStore = defineStore("data", {
           api.getArticles({
             cog: code,
             dept: deptCode,
-          }),
-          api.getArticleCounts({
-            cog: code,
-            dept: deptCode,
+            limit: 20,
           }),
           api.getCommuneSubventions(code),
-          api.getCommuneMigrants(code),
+          api.getMigrants(code, { limit: 100 }),
         ]);
 
         const commune = {};
@@ -182,10 +181,10 @@ export const useDataStore = defineStore("data", {
         commune.crimeHistory = results[2];
         commune.qpv = results[3];
         commune.executive = results[4];
-        commune.articles = results[5];
-        commune.articlesCounts = results[6];
-        commune.subventions = results[7];
-        commune.migrants = results[8] || [];
+        const articlesResponse = results[5];
+        commune.articles = articlesResponse;
+        commune.subventions = results[6];
+        commune.migrants = results[7] || [];
         commune.crimeSeries = this.serializeStats(results[2]);
         commune.crimeAggreg = this.aggregateStats(commune.crimeSeries.data);
 
@@ -367,6 +366,7 @@ export const useDataStore = defineStore("data", {
         executive: null,
         subventions: null,
         migrants: null,
+        articles: null, // Cleared articles
       };
       this.errors.country = null;
     },
@@ -445,19 +445,6 @@ export const useDataStore = defineStore("data", {
       }
     },
 
-    async loadDepartementMigrants(deptCode) {
-      if (!deptCode) return
-
-      try {
-        const data = await api.getDepartementMigrants(deptCode)
-        if (data) {
-          this.departement.migrants = data || []
-        }
-      } catch (error) {
-        console.error('Failed to load departement migrants:', error)
-      }
-    },
-
     async loadCommuneSubventions(cog) {
       if (!cog) return
 
@@ -471,18 +458,106 @@ export const useDataStore = defineStore("data", {
       }
     },
 
-    async loadCommuneMigrants(cog) {
-      if (!cog) return
-
+    async fetchFilteredArticles(params, append = false) {
       try {
-        const data = await api.getCommuneMigrants(cog)
-        if (data) {
-          this.commune.migrants = data || []
+        const articlesResponse = await api.getArticles(params)
+
+        if (params.cog) {
+          // For commune
+          if (append && this.commune.articles) {
+            // Append new articles to existing list
+            this.commune.articles = {
+              ...articlesResponse,
+              list: [...this.commune.articles.list, ...articlesResponse.list],
+              counts: articlesResponse.counts // Use fresh counts
+            }
+          } else {
+            // Replace articles list
+            this.commune.articles = articlesResponse
+          }
+        } else if (params.dept) {
+          // For departement
+          if (append && this.departement.articles) {
+            // Append new articles to existing list
+            this.departement.articles = {
+              ...articlesResponse,
+              list: [...this.departement.articles.list, ...articlesResponse.list],
+              counts: articlesResponse.counts // Use fresh counts
+            }
+          } else {
+            // Replace articles list
+            this.departement.articles = articlesResponse
+          }
+        } else if (params.country) { // Added condition for country
+          // For country (no dept or cog)
+          if (append && this.country.articles) {
+            // Append new articles to existing list
+            this.country.articles = {
+              ...articlesResponse,
+              list: [...this.country.articles.list, ...articlesResponse.list],
+              counts: articlesResponse.counts // Use fresh counts
+            }
+          } else {
+            // Replace articles list
+            this.country.articles = articlesResponse
+          }
         }
+
+        return articlesResponse
       } catch (error) {
-        console.error('Failed to load commune migrants:', error)
+        console.error('Failed to fetch filtered articles:', error)
+        return null
       }
     },
+
+    async loadMoreArticles(params) {
+      return this.fetchFilteredArticles(params, true)
+    },
+
+    async fetchMigrants(level, code) {
+      try {
+        let params = { limit: level === 'country' ? 20 : 100 };
+        if (level === 'departement') {
+          params.dept = code;
+        } else if (level === 'commune') {
+          params.cog = code;
+        } // No params for country
+
+        const migrants = await api.getMigrants(params);
+        this[level].migrants = migrants || { list: [], pagination: { hasMore: false, nextCursor: null, limit: params.limit } };
+      } catch (error) {
+        console.error(`Error fetching ${level} migrants:`, error);
+        this[level].migrants = { list: [], pagination: { hasMore: false, nextCursor: null, limit: 20 } };
+      }
+    },
+
+    async loadMoreMigrants(level, code, params) {
+      try {
+        let migrantParams = { ...params };
+        if (level === 'departement') {
+          migrantParams.dept = code;
+        } else if (level === 'commune') {
+          migrantParams.cog = code;
+        } // No dept/cog for country
+
+        const moreMigrants = await api.getMigrants(migrantParams);
+        if (moreMigrants && moreMigrants.list) {
+          this[level].migrants.list.push(...moreMigrants.list);
+          this[level].migrants.pagination = moreMigrants.pagination;
+        }
+      } catch (error) {
+        console.error(`Error loading more ${level} migrants:`, error);
+      }
+    },
+
+    // Subventions actions
+    async fetchCountrySubventions(country = 'france') {
+        this.subventionsCountry = await api.getCountrySubventions(country) || {
+            list: [],
+            pagination: { hasMore: false, nextCursor: null, limit: 20 }
+        }
+    },
+
   },
 
   getters: {
@@ -558,5 +633,21 @@ export const useDataStore = defineStore("data", {
         ? MetricsConfig.getMetricLabel(metricKey)
         : metricKey;
     },
+
+    getCurrentSubventions() {
+            const location = this.getCurrentLocation()
+            if (location.type === 'departement') {
+                return this.subventionsDepartement
+            } else if (location.type === 'commune') {
+                return this.subventionsCommune
+            } else {
+                return this.subventionsCountry
+            }
+        },
+
+        getCurrentMigrants() {
+            const level = this.currentLevel
+            return this[level]?.migrants || { list: [], pagination: { hasMore: false, nextCursor: null, limit: 20 } }
+        },
   },
 });

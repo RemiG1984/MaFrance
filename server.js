@@ -60,7 +60,7 @@ app.use(express.json({ limit: '10mb' }));
 const { sanitizeInput } = require('./middleware/security');
 app.use(sanitizeInput);
 app.use(
-  express.static(path.join(__dirname, "public"), {
+  express.static(path.join(__dirname, "dist"), {
     setHeaders: (res, filePath) => {
       if (filePath.endsWith(".html"))
         res.setHeader("Content-Type", "text/html; charset=utf-8");
@@ -73,7 +73,7 @@ app.use(
 );
 
 // Serve Vue.js built files
-const publicPath = path.resolve(__dirname, "public");
+const publicPath = path.resolve(__dirname, "dist");
 app.use(express.static(publicPath));
 
 // Routes
@@ -109,7 +109,7 @@ app.get("/", (req, res, next) => {
   if (req.headers["user-agent"]?.includes("GoogleHC")) {
     return res.status(200).send("OK");
   }
-  const filePath = path.resolve(__dirname, "public", "index.html");
+  const filePath = path.resolve(__dirname, "dist", "index.html");
   console.log(`Attempting to serve ${filePath} for root request`);
   res.sendFile(filePath, (err) => {
     if (err) {

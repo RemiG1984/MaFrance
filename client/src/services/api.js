@@ -1,4 +1,3 @@
-
 // Service API pour gérer les appels au backend avec cache
 class ApiService {
     constructor() {
@@ -21,13 +20,18 @@ class ApiService {
                 },
                 set: (key, value) => {
                     try {
-                        localStorage.setItem(`api_cache_${key}`, JSON.stringify(value));
+                        localStorage.setItem(
+                            `api_cache_${key}`,
+                            JSON.stringify(value),
+                        );
                     } catch (e) {
-                        console.warn('Cache storage full, clearing old entries');
+                        console.warn(
+                            "Cache storage full, clearing old entries",
+                        );
                         this.clearOldCacheEntries();
                     }
                 },
-                remove: (key) => localStorage.removeItem(`api_cache_${key}`)
+                remove: (key) => localStorage.removeItem(`api_cache_${key}`),
             };
         } catch (e) {
             return { get: () => null, set: () => {}, remove: () => {} };
@@ -38,9 +42,11 @@ class ApiService {
      * Clear old cache entries when storage is full
      */
     clearOldCacheEntries() {
-        const keys = Object.keys(localStorage).filter(key => key.startsWith('api_cache_'));
+        const keys = Object.keys(localStorage).filter((key) =>
+            key.startsWith("api_cache_"),
+        );
         const keysToRemove = keys.slice(0, Math.floor(keys.length * 0.25));
-        keysToRemove.forEach(key => localStorage.removeItem(key));
+        keysToRemove.forEach((key) => localStorage.removeItem(key));
     }
 
     /**
@@ -48,7 +54,10 @@ class ApiService {
      */
     generateCacheKey(endpoint, options) {
         const optionsStr = JSON.stringify(options || {});
-        return btoa(encodeURIComponent(`${endpoint}_${optionsStr}`)).replace(/[^a-zA-Z0-9]/g, '_');
+        return btoa(encodeURIComponent(`${endpoint}_${optionsStr}`)).replace(
+            /[^a-zA-Z0-9]/g,
+            "_",
+        );
     }
 
     /**
@@ -56,41 +65,43 @@ class ApiService {
      */
     shouldPersistCache(endpoint) {
         const persistentEndpoints = [
-            '/api/departements/crime_history',
-            '/api/departements/names_history', 
-            '/api/communes/crime_history',
-            '/api/communes/names_history',
-            '/api/country/crime_history',
-            '/api/country/names_history',
-            '/api/departements/crime',
-            '/api/departements/names',
-            '/api/departements/prefet',
-            '/api/communes/crime',
-            '/api/communes/names',
-            '/api/communes/maire',
-            '/api/country/crime',
-            '/api/country/names',
-            '/api/country/ministre',
-            '/api/qpv/',
-            '/api/departements/details',
-            '/api/communes/details',
-            '/api/country/details',
-            '/api/articles/lieux',
-            '/api/articles',
-            '/api/articles/counts',
-            '/api/departements',
-            '/api/communes',
-            '/api/rankings/departements',
-            '/api/rankings/communes',
-            '/api/communes/search',
-            '/api/migrants/departement/',
-            '/api/migrants/commune/',
-            '/api/subventions/country/',
-            '/api/subventions/departement/',
-            '/api/subventions/commune/'
+            "/api/departements/crime_history",
+            "/api/departements/names_history",
+            "/api/communes/crime_history",
+            "/api/communes/names_history",
+            "/api/country/crime_history",
+            "/api/country/names_history",
+            "/api/departements/crime",
+            "/api/departements/names",
+            "/api/departements/prefet",
+            "/api/communes/crime",
+            "/api/communes/names",
+            "/api/communes/maire",
+            "/api/country/crime",
+            "/api/country/names",
+            "/api/country/ministre",
+            "/api/qpv/",
+            "/api/departements/details",
+            "/api/communes/details",
+            "/api/country/details",
+            "/api/articles/lieux",
+            "/api/articles",
+            "/api/articles/counts",
+            "/api/departements",
+            "/api/communes",
+            "/api/rankings/departements",
+            "/api/rankings/communes",
+            "/api/communes/search",
+            "/api/migrants/departement/",
+            "/api/migrants/commune/",
+            "/api/subventions/country/",
+            "/api/subventions/departement/",
+            "/api/subventions/commune/",
         ];
-        
-        return persistentEndpoints.some(pattern => endpoint.includes(pattern));
+
+        return persistentEndpoints.some((pattern) =>
+            endpoint.includes(pattern),
+        );
     }
 
     async request(endpoint, options = {}, useCache = true) {
@@ -110,7 +121,10 @@ class ApiService {
 
             // Check persistent storage
             const persistentCached = this.persistentStorage.get(cacheKey);
-            if (persistentCached && Date.now() - persistentCached.timestamp < this.cacheExpiry) {
+            if (
+                persistentCached &&
+                Date.now() - persistentCached.timestamp < this.cacheExpiry
+            ) {
                 console.log("Using persistent cached data for:", endpoint);
                 this.cache.set(cacheKey, persistentCached);
                 return persistentCached.data;
@@ -136,7 +150,9 @@ class ApiService {
         const requestPromise = fetch(url, config)
             .then((response) => {
                 if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    throw new Error(
+                        `HTTP ${response.status}: ${response.statusText}`,
+                    );
                 }
                 return response.json();
             })
@@ -147,10 +163,10 @@ class ApiService {
                         data,
                         timestamp: Date.now(),
                     };
-                    
+
                     // Store in memory cache
                     this.cache.set(cacheKey, cacheEntry);
-                    
+
                     // Store in persistent cache for specific data types
                     if (this.shouldPersistCache(endpoint)) {
                         this.persistentStorage.set(cacheKey, cacheEntry);
@@ -175,10 +191,12 @@ class ApiService {
      */
     clearCache() {
         this.cache.clear();
-        
-        const keys = Object.keys(localStorage).filter(key => key.startsWith('api_cache_'));
-        keys.forEach(key => localStorage.removeItem(key));
-        
+
+        const keys = Object.keys(localStorage).filter((key) =>
+            key.startsWith("api_cache_"),
+        );
+        keys.forEach((key) => localStorage.removeItem(key));
+
         console.log("All caches cleared");
     }
 
@@ -187,13 +205,15 @@ class ApiService {
      */
     getCacheStats() {
         const memorySize = this.cache.size;
-        const persistentKeys = Object.keys(localStorage).filter(key => key.startsWith('api_cache_'));
+        const persistentKeys = Object.keys(localStorage).filter((key) =>
+            key.startsWith("api_cache_"),
+        );
         const persistentSize = persistentKeys.length;
-        
+
         return {
             memory: memorySize,
             persistent: persistentSize,
-            total: memorySize + persistentSize
+            total: memorySize + persistentSize,
         };
     }
 }
@@ -216,6 +236,8 @@ const api = {
         apiService.request(`/api/country/names_history?country=${country}`),
     getCountryExecutive: (country = "France") =>
         apiService.request(`/api/country/ministre?country=${country}`),
+    getCountryArticles: (country = "France") =>
+        apiService.request(`/api/articles?country=${country}`),
 
     // Departement data
     getDepartementDetails: (code) =>
@@ -273,7 +295,11 @@ const api = {
     // Articles
     getArticles: (params) => {
         const queryString = new URLSearchParams(params).toString();
-        return apiService.request(`/api/articles?${queryString}`);
+        return apiService.request(
+            `/api/articles?${queryString}`,
+            {},
+            !params.cursor,
+        ); // Don't cache paginated requests
     },
     getArticleCounts: (params) => {
         const queryString = new URLSearchParams(params).toString();
@@ -289,13 +315,15 @@ const api = {
         apiService.request(`/api/subventions/commune/${cog}`),
 
     // Migrant centers data
-    getDepartementMigrants: (code, params = {}) => {
+    getMigrants: (params = {}) => {
         const queryString = new URLSearchParams(params).toString();
-        const url = `/api/migrants/departement/${code}`;
-        return apiService.request(queryString ? `${url}?${queryString}` : url);
+        const url = `/api/migrants`;
+        return apiService.request(
+            queryString ? `${url}?${queryString}` : url,
+            {},
+            !params.cursor,
+        );
     },
-    getCommuneMigrants: (cog) =>
-        apiService.request(`/api/migrants/commune/${cog}`),
 
     // Cache management
     clearCache: () => apiService.clearCache(),
