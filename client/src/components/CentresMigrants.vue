@@ -11,17 +11,22 @@
         @scroll="handleScroll"
         v-if="visibleMigrants && visibleMigrants.length > 0"
       >
+        <!-- Fixed header outside of virtual scroll -->
+        <table class="centres-table centres-table-header">
+          <thead>
+            <tr>
+              <th>Type de centre</th>
+              <th>Places</th>
+              <th>Gestionnaire</th>
+              <th>Adresse</th>
+            </tr>
+          </thead>
+        </table>
+        
+        <!-- Virtual scrolled content -->
         <div class="virtual-scroll-wrapper" :style="{ height: virtualHeight + 'px' }">
-          <div class="virtual-scroll-content" :style="{ transform: `translateY(${offsetY}px)` }">
-            <table class="centres-table">
-              <thead>
-                <tr>
-                  <th>Type de centre</th>
-                  <th>Places</th>
-                  <th>Gestionnaire</th>
-                  <th>Adresse</th>
-                </tr>
-              </thead>
+          <div class="virtual-scroll-content" :style="{ transform: `translateY(${offsetY}px)`, paddingTop: '40px' }">
+            <table class="centres-table centres-table-body">
               <tbody>
                 <tr
                   v-for="(centre, i) in visibleMigrants"
@@ -227,6 +232,17 @@ export default {
   min-width: 600px;
 }
 
+.centres-table-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: #fff;
+}
+
+.centres-table-body {
+  margin-top: -40px; /* Offset for header height */
+}
+
 .centres-table th,
 .centres-table td {
   padding: 10px 12px;
@@ -236,26 +252,19 @@ export default {
 }
 
 .centres-table th {
-  position: sticky;
   background-color: #e9ecef;
   font-weight: 700;
   font-size: 13px;
-  top: 0;
-  z-index: 2;
+  height: 40px;
 }
 
 .centres-table th:first-child,
 .centres-table td:first-child {
-  position: sticky;
-  left: 0;
-  background-color: #fff;
-  z-index: 3;
   width: 20%;
 }
 
-.centres-table th:first-child {
+.centres-table-header th:first-child {
   background-color: #e9ecef;
-  z-index: 4;
 }
 
 .centres-table tr:nth-child(even) {
