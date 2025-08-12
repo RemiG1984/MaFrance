@@ -116,7 +116,7 @@ export const useDataStore = defineStore("data", {
           api.getDepartementCrime(code),
           api.getDepartementCrimeHistory(code),
           api.getDepartementNamesHistory(code),
-          api.getQpv({ dept: code }),
+          api.getQpv({ dept: code, limit: 100 }),
           api.getDepartementExecutive(code),
           api.getCommuneRankings({
             dept: code,
@@ -166,7 +166,7 @@ export const useDataStore = defineStore("data", {
           api.getCommuneCrime(code),
           api.getCommuneCrimeHistory(code),
           // api.getCommuneNamesHistory(code),
-          api.getQpv({ cog: code }),
+          api.getQpv({ cog: code, limit: 100 }),
           api.getCommuneExecutive(code),
           api.getArticles({
             cog: code,
