@@ -32,27 +32,28 @@ router.get(
         }
 
         let query = `
-        SELECT *, rowid
-        FROM migrant_centers
+        SELECT mc.*, l.commune AS commune_name, rowid
+        FROM migrant_centers mc
+        LEFT JOIN locations l ON mc.COG = l.COG
     `;
         const params = [];
 
         if (cog) {
-            query += " WHERE COG = ?";
+            query += " WHERE mc.COG = ?";
             params.push(cog);
         } else if (dept) {
-            query += " WHERE departement = ?";
+            query += " WHERE mc.departement = ?";
             params.push(dept);
         }
 
         if (cursor) {
             query += params.length ? " AND" : " WHERE";
-            query += " rowid > ?";
+            query += " mc.rowid > ?";
             params.push(cursor);
         }
 
         query +=
-            " ORDER BY departement, COG, gestionnaire_centre, rowid ASC LIMIT ?";
+            " ORDER BY mc.places DESC, mc.departement, mc.COG, mc.gestionnaire_centre, mc.rowid ASC LIMIT ?";
         params.push(pageLimit + 1);
 
         db.all(query, params, (err, rows) => {
@@ -67,7 +68,7 @@ router.get(
                     ? centers[centers.length - 1].rowid
                     : null;
 
-            const migrants = centers.map(({ rowid, ...row }) => ({
+            const migrants = centers.map(({ rowid, commune_name, ...row }) => ({
                 type_centre: row.type_centre || row.typeCentre,
                 gestionnaire_centre:
                     row.gestionnaire_centre || row.gestionnaireCentre,
@@ -75,6 +76,7 @@ router.get(
                 places: row.places,
                 COG: row.COG,
                 departement: row.departement,
+                commune: commune_name,
             }));
 
             res.json({
