@@ -31,7 +31,7 @@ const baseQpvSelect = `
 // GET /api/qpv - Get all QPV data with optional filtering and pagination
 router.get(
     "/",
-    [validateDepartement, validateCOG, validatePagination],
+    [validateDepartement, validateOptionalCOG, validateSearchQuery, validatePagination],
     (req, res) => {
         const { dept = "", cog = "", commune = "", cursor, limit = "20" } = req.query;
         const pageLimit = Math.min(parseInt(limit), 100);
