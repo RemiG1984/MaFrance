@@ -47,18 +47,9 @@ router.get(
         }
 
         if (cursor) {
-            // Parse cursor which contains the last seen values for proper pagination
-            const cursorData = JSON.parse(Buffer.from(cursor, 'base64').toString('utf-8'));
             query += params.length ? " AND" : " WHERE";
-            // Use cursor with all sort fields to maintain proper ordering
-            query += ` (mc.places < ? OR (mc.places = ? AND mc.departement > ?) OR (mc.places = ? AND mc.departement = ? AND mc.COG > ?) OR (mc.places = ? AND mc.departement = ? AND mc.COG = ? AND mc.gestionnaire_centre > ?) OR (mc.places = ? AND mc.departement = ? AND mc.COG = ? AND mc.gestionnaire_centre = ? AND mc.rowid > ?))`;
-            params.push(
-                cursorData.places, // mc.places < ?
-                cursorData.places, cursorData.departement, // mc.places = ? AND mc.departement > ?
-                cursorData.places, cursorData.departement, cursorData.COG, // mc.places = ? AND mc.departement = ? AND mc.COG > ?
-                cursorData.places, cursorData.departement, cursorData.COG, cursorData.gestionnaire_centre, // mc.places = ? AND mc.departement = ? AND mc.COG = ? AND mc.gestionnaire_centre > ?
-                cursorData.places, cursorData.departement, cursorData.COG, cursorData.gestionnaire_centre, cursorData.rowid // mc.places = ? AND mc.departement = ? AND mc.COG = ? AND mc.gestionnaire_centre = ? AND mc.rowid > ?
-            );
+            query += ` mc.rowid > ?`;
+            params.push(parseInt(cursor));
         }
 
         query +=
@@ -74,10 +65,6 @@ router.get(
             const centers = hasMore ? rows.slice(0, pageLimit) : rows;
             const nextCursor = hasMore && centers.length > 0 
                 ? Buffer.from(JSON.stringify({
-                    places: centers[centers.length - 1].places,
-                    departement: centers[centers.length - 1].departement,
-                    COG: centers[centers.length - 1].COG,
-                    gestionnaire_centre: centers[centers.length - 1].gestionnaire_centre,
                     rowid: centers[centers.length - 1].rowid
                 })).toString('base64')
                 : null;
