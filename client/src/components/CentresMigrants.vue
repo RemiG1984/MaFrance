@@ -181,7 +181,7 @@ export default {
         } else if (this.location.type === 'commune') {
           await dataStore.loadMoreCommuneMigrants(this.location.code, params)
         } else if (this.location.type === 'country') {
-          await dataStore.loadMoreCountryMigrants('france', params)
+          await dataStore.loadMoreDepartementMigrants('all', params)
         }
       } catch (error) {
         console.error('Failed to load more migrants:', error)

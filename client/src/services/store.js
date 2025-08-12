@@ -614,14 +614,14 @@ export const useDataStore = defineStore("data", {
 
     // Migrant centers actions
     async fetchCountryMigrants(country = 'france') {
-        this.migrantsCountry = await api.getCountryMigrants(country) || {
+        this.migrantsCountry = await api.getDepartementMigrants('all') || {
             list: [],
             pagination: { hasMore: false, nextCursor: null, limit: 20 }
         }
     },
 
     async loadMoreCountryMigrants(country = 'france', params = {}) {
-        const newData = await api.getCountryMigrants(country, params)
+        const newData = await api.getDepartementMigrants('all', params)
         if (newData) {
             this.migrantsCountry.list.push(...newData.list)
             this.migrantsCountry.pagination = newData.pagination

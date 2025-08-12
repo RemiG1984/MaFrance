@@ -293,7 +293,7 @@ const api = {
     // Migrant centers data
     getCountryMigrants: (country = "france", params = {}) => {
         const queryString = new URLSearchParams(params).toString();
-        const url = `/api/migrants/country/${country}`;
+        const url = `/api/migrants/departement/all`;
         return apiService.request(queryString ? `${url}?${queryString}` : url, {}, !params.cursor);
     },
     getDepartementMigrants: (code, params = {}) => {
