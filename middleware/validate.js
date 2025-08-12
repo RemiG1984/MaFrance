@@ -30,8 +30,15 @@ const validateDepartementParam = [
   param("dept")
     .notEmpty()
     .withMessage("Département requis")
-    .matches(/^(0[1-9]|[1-8][0-9]|9[0-5]|2[AB]|97[1-6])$/)
-    .withMessage("Code département invalide"),
+    .custom((value) => {
+      if (value.toLowerCase() === 'all') {
+        return true; // Allow 'all' as a special case
+      }
+      if (!/^(0[1-9]|[1-8][0-9]|9[0-5]|2[AB]|97[1-6])$/.test(value)) {
+        throw new Error("Code département invalide");
+      }
+      return true;
+    }),
   handleValidationErrors,
 ];
 
