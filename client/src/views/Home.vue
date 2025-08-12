@@ -102,7 +102,6 @@ import ExecutiveDetails from '../components/ExecutiveDetails.vue'
 import ScoreTable from '../components/ScoreTable.vue'
 import CrimeGraphs from '../components/CrimeGraphs.vue'
 import Graph from '../components/Graph.vue'
-import SubventionsDisplay from '../components/SubventionsDisplay.vue'
 
 export default {
   name: 'Home',
@@ -117,7 +116,6 @@ export default {
     ScoreTable,
     CrimeGraphs,
     Graph,
-    SubventionsDisplay
   },
   computed: {
     ...mapStores(useDataStore),
