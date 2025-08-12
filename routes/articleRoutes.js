@@ -95,7 +95,7 @@ router.get(
 
       // Add cursor-based pagination
       if (cursor) {
-        sql += " AND rowid < ?";
+        sql += " AND rowid > ?";
         params.push(cursor);
       }
       
