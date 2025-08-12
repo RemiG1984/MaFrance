@@ -19,7 +19,7 @@
               <th>Type</th>
               <th>Places</th>
               <th>Gestionnaire</th>
-              <th>Département</th>
+              <th>Dept.</th>
               <th>Commune</th>
               <th>Adresse</th>
             </tr>
@@ -269,7 +269,7 @@ export default {
 /* Consistent column widths for both header and body tables */
 .centres-table th:nth-child(1),
 .centres-table td:nth-child(1) {
-  width: 10%;
+  width: 15%;
 }
 
 .centres-table th:nth-child(2),
@@ -284,12 +284,12 @@ export default {
 
 .centres-table th:nth-child(4),
 .centres-table td:nth-child(4) {
-  width: 20%;
+  width: 10%;
 }
 
 .centres-table th:nth-child(5),
 .centres-table td:nth-child(5) {
-  width: 15%;
+  width: 20%;
 }
 
 .centres-table th:nth-child(6),
