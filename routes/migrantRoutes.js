@@ -17,7 +17,7 @@ const handleDbError = (err, res) => {
 
 // Single endpoint for all migrant centers
 router.get(
-    "/migrants",
+    "/",
     [validateOptionalDepartement, validateOptionalCOG, validatePagination],
     (req, res) => {
         const db = req.app.locals.db;
