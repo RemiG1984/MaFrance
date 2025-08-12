@@ -212,8 +212,8 @@ const MetricsConfig = {
         {
             value: "Total_places_migrants",
             label: "Places en centre d'hébergement pour migrant",
-            alt1Label: "Places en centre d'hébergement pour migrant",
-            alt2Label: "Places en centre d'hébergement pour migrant",
+            alt1Label: "Places en centre d'hébergement pour clandestin",
+            alt2Label: "Places en centre d'hébergement pour colon",
             category: "immigration",
             format: "number",
             source: "details",
@@ -221,8 +221,8 @@ const MetricsConfig = {
         {
             value: "places_migrants_p1k",
             label: "Places en centre d'hébergement pour migrant /1k hab",
-            alt1Label: "Places en centre d'hébergement pour migrant /1k hab",
-            alt2Label: "Places en centre d'hébergement pour migrant /1k hab",
+            alt1Label: "Places en centre d'hébergement pour clandestin /1k hab",
+            alt2Label: "Places en centre d'hébergement pour colon /1k hab",
             category: "immigration",
             format: "rate_1k",
             source: "details",
