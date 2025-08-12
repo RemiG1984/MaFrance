@@ -261,30 +261,13 @@ export default {
     },
 
     migrantsData(){
-      switch(this.dataStore.currentLevel){
-        case 'departement':
-          const deptMigrants = this.dataStore.departement?.migrants || { list: [], pagination: { hasMore: false, nextCursor: null, limit: 20 } }
-          return {
-            list: deptMigrants.list || deptMigrants, // Handle both old and new format
-            pagination: deptMigrants.pagination || { hasMore: false, nextCursor: null, limit: 20 }
-          }
-        case 'commune':
-          const communeMigrants = this.dataStore.commune?.migrants || { list: [], pagination: { hasMore: false, nextCursor: null, limit: 20 } }
-          return {
-            list: communeMigrants.list || communeMigrants, // Handle both old and new format
-            pagination: communeMigrants.pagination || { hasMore: false, nextCursor: null, limit: 20 }
-          }
-        default:
-          return { list: [], pagination: { hasMore: false, nextCursor: null, limit: 20 } }
-      }
+      return this.dataStore.getCurrentMigrants()
     },
     currentSubventions() {
       return this.dataStore.getCurrentSubventions()
     },
 
-    currentMigrants() {
-      return this.dataStore.getCurrentMigrants()
-    },
+    
 
   },
   data() {

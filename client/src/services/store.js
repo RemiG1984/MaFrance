@@ -717,14 +717,8 @@ export const useDataStore = defineStore("data", {
         },
 
         getCurrentMigrants() {
-            const location = this.getCurrentLocation()
-            if (location.type === 'departement') {
-                return this.migrantsDepartement
-            } else if (location.type === 'commune') {
-                return this.migrantsCommune
-            } else {
-                return this.migrantsCountry
-            }
+            const level = this.currentLevel
+            return this[level]?.migrants || { list: [], pagination: { hasMore: false, nextCursor: null, limit: 20 } }
         },
   },
 });
