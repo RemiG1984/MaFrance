@@ -80,8 +80,8 @@ export const useDataStore = defineStore("data", {
           }),
           api.getCountrySubventions(code),
           api.getArticles({ limit: 20 }),
-          api.getMigrants({ limit: 20 }),
-          api.getQpv({ limit: 20 }),
+          api.getMigrants({ limit: 10 }),
+          api.getQpv({ limit: 10 }),
         ]);
 
         const country = {};
@@ -116,7 +116,7 @@ export const useDataStore = defineStore("data", {
           api.getDepartementCrime(code),
           api.getDepartementCrimeHistory(code),
           api.getDepartementNamesHistory(code),
-          api.getQpv({ dept: code, limit: 100 }),
+          api.getQpv({ dept: code, limit: 20 }),
           api.getDepartementExecutive(code),
           api.getCommuneRankings({
             dept: code,
@@ -129,7 +129,7 @@ export const useDataStore = defineStore("data", {
             limit: 20,
           }),
           api.getDepartementSubventions(code),
-          api.getMigrants({ dept: code, limit: 100 }),
+          api.getMigrants({ dept: code, limit: 20 }),
         ]);
 
         const departement = {};
@@ -166,7 +166,7 @@ export const useDataStore = defineStore("data", {
           api.getCommuneCrime(code),
           api.getCommuneCrimeHistory(code),
           // api.getCommuneNamesHistory(code),
-          api.getQpv({ cog: code, limit: 100 }),
+          api.getQpv({ cog: code, limit: 20 }),
           api.getCommuneExecutive(code),
           api.getArticles({
             cog: code,
@@ -174,7 +174,7 @@ export const useDataStore = defineStore("data", {
             limit: 20,
           }),
           api.getCommuneSubventions(code),
-          api.getMigrants({ cog: code, limit: 100 }),
+          api.getMigrants({ cog: code, limit: 20 }),
         ]);
 
         const commune = {};
