@@ -294,10 +294,13 @@ const api = {
     getDepartementMigrants: (code, params = {}) => {
         const queryString = new URLSearchParams(params).toString();
         const url = `/api/migrants/departement/${code}`;
-        return apiService.request(queryString ? `${url}?${queryString}` : url);
+        return apiService.request(queryString ? `${url}?${queryString}` : url, {}, !params.cursor);
     },
-    getCommuneMigrants: (cog) =>
-        apiService.request(`/api/migrants/commune/${cog}`),
+    getCommuneMigrants: (cog, params = {}) => {
+        const queryString = new URLSearchParams(params).toString();
+        const url = `/api/migrants/commune/${cog}`;
+        return apiService.request(queryString ? `${url}?${queryString}` : url, {}, !params.cursor);
+    },
 
     // Cache management
     clearCache: () => apiService.clearCache(),

@@ -534,6 +534,50 @@ export const useDataStore = defineStore("data", {
     async loadMoreArticles(params) {
       return this.fetchFilteredArticles(params, true)
     },
+
+    async fetchDepartementMigrants(deptCode) {
+      try {
+        const migrants = await api.getDepartementMigrants(deptCode)
+        this.departement.migrants = migrants || { list: [], pagination: { hasMore: false, nextCursor: null, limit: 20 } }
+      } catch (error) {
+        console.error('Error fetching departement migrants:', error)
+        this.departement.migrants = { list: [], pagination: { hasMore: false, nextCursor: null, limit: 20 } }
+      }
+    },
+
+    async fetchCommuneMigrants(cogCode) {
+      try {
+        const migrants = await api.getCommuneMigrants(cogCode)
+        this.commune.migrants = migrants || { list: [], pagination: { hasMore: false, nextCursor: null, limit: 20 } }
+      } catch (error) {
+        console.error('Error fetching commune migrants:', error)
+        this.commune.migrants = { list: [], pagination: { hasMore: false, nextCursor: null, limit: 20 } }
+      }
+    },
+
+    async loadMoreDepartementMigrants(deptCode, params) {
+      try {
+        const moreMigrants = await api.getDepartementMigrants(deptCode, params)
+        if (moreMigrants && moreMigrants.list) {
+          this.departement.migrants.list.push(...moreMigrants.list)
+          this.departement.migrants.pagination = moreMigrants.pagination
+        }
+      } catch (error) {
+        console.error('Error loading more departement migrants:', error)
+      }
+    },
+
+    async loadMoreCommuneMigrants(cogCode, params) {
+      try {
+        const moreMigrants = await api.getCommuneMigrants(cogCode, params)
+        if (moreMigrants && moreMigrants.list) {
+          this.commune.migrants.list.push(...moreMigrants.list)
+          this.commune.migrants.pagination = moreMigrants.pagination
+        }
+      } catch (error) {
+        console.error('Error loading more commune migrants:', error)
+      }
+    },
   },
 
   getters: {

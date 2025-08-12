@@ -25,24 +25,34 @@ const handleValidationErrors = (req, res, next) => {
 router.get('/commune/:cog', validateCOGParam, (req, res) => {
     const db = req.app.locals.db;
     const { cog } = req.params;
+    const { cursor, limit = '20' } = req.query;
+    const pageLimit = Math.min(parseInt(limit), 100);
 
-    const query = `
-        SELECT * 
+    let query = `
+        SELECT *, rowid
         FROM migrant_centers 
         WHERE COG = ?
-        ORDER BY gestionnaire_centre
     `;
+    const params = [cog];
 
-    db.all(query, [cog], (err, rows) => {
+    if (cursor) {
+        query += " AND rowid > ?";
+        params.push(cursor);
+    }
+
+    query += " ORDER BY gestionnaire_centre, rowid ASC LIMIT ?";
+    params.push(pageLimit + 1);
+
+    db.all(query, params, (err, rows) => {
         if (err) {
             return handleDbError(err, res);
         }
 
-        if (!rows || rows.length === 0) {
-            return res.status(404).json({ error: 'Aucun centre de migrants trouvé pour cette commune' });
-        }
+        const hasMore = rows.length > pageLimit;
+        const centers = hasMore ? rows.slice(0, pageLimit) : rows;
+        const nextCursor = hasMore && centers.length > 0 ? centers[centers.length - 1].rowid : null;
 
-        const migrants = rows.map(row => ({
+        const migrants = centers.map(({ rowid, ...row }) => ({
             type_centre: row.type_centre || row.typeCentre,
             gestionnaire_centre: row.gestionnaire_centre || row.gestionnaireCentre,
             adresse: row.adresse,
@@ -52,7 +62,14 @@ router.get('/commune/:cog', validateCOGParam, (req, res) => {
             //longitude: row.longitude,
         }));
 
-        res.json(migrants);
+        res.json({
+            list: migrants,
+            pagination: {
+                hasMore: hasMore,
+                nextCursor: nextCursor,
+                limit: pageLimit
+            }
+        });
     });
 });
 
@@ -60,23 +77,34 @@ router.get('/commune/:cog', validateCOGParam, (req, res) => {
 router.get('/departement/:dept', [validateDepartementParam, validatePagination], (req, res) => {
     const db = req.app.locals.db;
     const { dept } = req.params;
-    const { page = 1, limit = 100 } = req.query;
-    const offset = (page - 1) * limit;
+    const { cursor, limit = '20' } = req.query;
+    const pageLimit = Math.min(parseInt(limit), 100);
 
-    const query = `
-        SELECT * 
+    let query = `
+        SELECT *, rowid
         FROM migrant_centers 
         WHERE departement = ?
-        ORDER BY COG, gestionnaire_centre
-        LIMIT ? OFFSET ?
     `;
+    const params = [dept];
 
-    db.all(query, [dept, parseInt(limit), parseInt(offset)], (err, rows) => {
+    if (cursor) {
+        query += " AND rowid > ?";
+        params.push(cursor);
+    }
+
+    query += " ORDER BY COG, gestionnaire_centre, rowid ASC LIMIT ?";
+    params.push(pageLimit + 1);
+
+    db.all(query, params, (err, rows) => {
         if (err) {
             return handleDbError(err, res);
         }
 
-        const migrants = rows.map(row => ({
+        const hasMore = rows.length > pageLimit;
+        const centers = hasMore ? rows.slice(0, pageLimit) : rows;
+        const nextCursor = hasMore && centers.length > 0 ? centers[centers.length - 1].rowid : null;
+
+        const migrants = centers.map(({ rowid, ...row }) => ({
             type_centre: row.type_centre || row.typeCentre,
             gestionnaire_centre: row.gestionnaire_centre || row.gestionnaireCentre,
             adresse: row.adresse,
@@ -86,7 +114,14 @@ router.get('/departement/:dept', [validateDepartementParam, validatePagination],
             //longitude: row.longitude,
         }));
 
-        res.json(migrants);
+        res.json({
+            list: migrants,
+            pagination: {
+                hasMore: hasMore,
+                nextCursor: nextCursor,
+                limit: pageLimit
+            }
+        });
     });
 });
 

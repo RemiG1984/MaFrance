@@ -1,3 +1,4 @@
+
 <template>
   <v-card class="mb-4">
     <v-card-title class="text-h5">
@@ -6,29 +7,41 @@
     <v-card-text>
       <div
         class="table-container"
-        v-if="data && data.length > 0"
+        ref="tableContainer"
+        @scroll="handleScroll"
+        v-if="visibleMigrants && visibleMigrants.length > 0"
       >
-        <table class="centres-table">
-          <thead>
-            <tr>
-              <th>Type de centre</th>
-              <th>Places</th>
-              <th>Gestionnaire</th>
-              <th>Adresse</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="centre in data"
-              :key="centre.COG + '-' + centre.gestionnaire_centre"
-            >
-              <td class="row-title">{{ centre.type_centre || 'N/A' }}</td>
-              <td class="score-main">{{ formatNumber(centre.places) }}</td>
-              <td class="score-main">{{ centre.gestionnaire_centre || 'N/A' }}</td>
-              <td class="score-main">{{ centre.adresse || 'N/A' }}</td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="virtual-scroll-wrapper" :style="{ height: virtualHeight + 'px' }">
+          <div class="virtual-scroll-content" :style="{ transform: `translateY(${offsetY}px)` }">
+            <table class="centres-table">
+              <thead>
+                <tr>
+                  <th>Type de centre</th>
+                  <th>Places</th>
+                  <th>Gestionnaire</th>
+                  <th>Adresse</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="(centre, i) in visibleMigrants"
+                  :key="centre.COG + '-' + centre.gestionnaire_centre + '-' + i"
+                  :style="{ height: itemHeight + 'px' }"
+                >
+                  <td class="row-title">{{ centre.type_centre || 'N/A' }}</td>
+                  <td class="score-main">{{ formatNumber(centre.places) }}</td>
+                  <td class="score-main">{{ centre.gestionnaire_centre || 'N/A' }}</td>
+                  <td class="score-main">{{ centre.adresse || 'N/A' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <div v-if="isLoading" class="loading">
+          <v-progress-circular indeterminate size="24" color="primary"></v-progress-circular>
+          Chargement...
+        </div>
       </div>
 
       <div v-else class="text-center">
@@ -52,9 +65,33 @@ export default {
       required: true
     },
     data: {
-      type: Array,
-      default: () => []
+      type: Object,
+      default: () => ({
+        list: [],
+        pagination: {
+          hasMore: false,
+          nextCursor: null,
+          limit: 20
+        }
+      })
     }
+  },
+  data() {
+    return {
+      isLoading: false,
+      // Virtual scrolling
+      containerHeight: 400,
+      itemHeight: 60,
+      scrollTop: 0,
+      bufferSize: 5
+    }
+  },
+  mounted() {
+    this.updateContainerHeight()
+    window.addEventListener('resize', this.updateContainerHeight)
+  },
+  beforeUnmount() {
+    window.removeEventListener('resize', this.updateContainerHeight)
   },
   computed: {
     locationName() {
@@ -64,12 +101,99 @@ export default {
         return this.location.name
       }
       return 'France'
+    },
+
+    migrantsList() {
+      return this.data.list || []
+    },
+
+    // Virtual scrolling computed properties
+    visibleStartIndex() {
+      return Math.max(0, Math.floor(this.scrollTop / this.itemHeight) - this.bufferSize)
+    },
+
+    visibleEndIndex() {
+      const visibleCount = Math.ceil(this.containerHeight / this.itemHeight)
+      return Math.min(
+        this.migrantsList.length - 1,
+        this.visibleStartIndex + visibleCount + this.bufferSize * 2
+      )
+    },
+
+    visibleMigrants() {
+      return this.migrantsList.slice(this.visibleStartIndex, this.visibleEndIndex + 1)
+    },
+
+    virtualHeight() {
+      return this.migrantsList.length * this.itemHeight
+    },
+
+    offsetY() {
+      return this.visibleStartIndex * this.itemHeight
     }
   },
   methods: {
     formatNumber(number) {
       if (number == null || isNaN(number)) return "N/A";
       return number.toLocaleString("fr-FR");
+    },
+
+    updateContainerHeight() {
+      if (this.$refs.tableContainer) {
+        this.containerHeight = this.$refs.tableContainer.clientHeight
+      }
+    },
+
+    handleScroll(event) {
+      this.scrollTop = event.target.scrollTop
+      
+      // Check if we need to load more migrants
+      const scrollBottom = this.scrollTop + this.containerHeight
+      const contentHeight = this.virtualHeight
+      
+      if (
+        scrollBottom >= contentHeight - 200 && // Load when 200px from bottom
+        !this.isLoading &&
+        this.data.pagination?.hasMore
+      ) {
+        this.loadMoreMigrants()
+      }
+    },
+
+    async loadMoreMigrants() {
+      if (this.isLoading || !this.data.pagination?.hasMore) return
+
+      this.isLoading = true
+
+      try {
+        const { useDataStore } = await import('../services/store.js')
+        const dataStore = useDataStore()
+
+        const params = {
+          cursor: this.data.pagination.nextCursor,
+          limit: 20
+        }
+
+        if (this.location.type === 'departement') {
+          await dataStore.loadMoreDepartementMigrants(this.location.code, params)
+        } else if (this.location.type === 'commune') {
+          await dataStore.loadMoreCommuneMigrants(this.location.code, params)
+        }
+      } catch (error) {
+        console.error('Failed to load more migrants:', error)
+      } finally {
+        this.isLoading = false
+      }
+    }
+  },
+  watch: {
+    data: {
+      handler() {
+        this.$nextTick(() => {
+          this.updateContainerHeight()
+        })
+      },
+      deep: true
     }
   }
 }
@@ -86,6 +210,15 @@ export default {
   border-radius: 8px;
   background-color: #fff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.virtual-scroll-wrapper {
+  position: relative;
+}
+
+.virtual-scroll-content {
+  position: relative;
 }
 
 .centres-table {
@@ -140,5 +273,14 @@ export default {
 
 .score-main {
   color: #555;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px;
+  color: #6c757d;
 }
 </style>
