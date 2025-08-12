@@ -105,7 +105,7 @@ export default {
       } else if (this.location.type === 'commune') {
         return this.location.name
       }
-      return 'France'
+      return 'France (1062 centres)'
     },
 
     migrantsList() {
