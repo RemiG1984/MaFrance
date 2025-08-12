@@ -21,8 +21,8 @@
               <th>Indice Jeunesse</th>
               <th>Logements sociaux</th>
               <th>Taux logements sociaux</th>
-              <th>Part Pop Immigrée</th>
-              <th>Part Pop Étrangère</th>
+              <th>Pop. Immigrée</th>
+              <th>Pop. Étrangère</th>
               <th>Taux d'emploi</th>
               <th>Taux de pauvreté</th>
               <th>RSA socle</th>
@@ -52,7 +52,7 @@
                   <td class="score-main">{{formatNumber(qpv.indiceJeunesse)}}</td>
                   <td class="score-main">{{formatNumber(qpv.nombre_logements_sociaux)}}</td>
                   <td class="score-main">{{formatPercentage(qpv.taux_logements_sociaux)}}</td>
-                  <td class="score-main">{{formatPercentage(qpv.ppImmi)}}</td>
+                  <td class="score-main">{{formatPercentage(qpv.partPopImmi)}}</td>
                   <td class="score-main">{{formatPercentage(qpv.partPopEt)}}</td>
                   <td class="score-main">{{formatPercentage(qpv.taux_d_emploi)}}</td>
                   <td class="score-main">{{formatPercentage(qpv.taux_pauvrete_60)}}</td>
