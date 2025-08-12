@@ -253,6 +253,12 @@ export default {
   text-overflow: ellipsis;
 }
 
+.centres-table td:nth-child(6) {
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: unset;
+}
+
 .centres-table th {
   background-color: #e9ecef;
   font-weight: 700;
