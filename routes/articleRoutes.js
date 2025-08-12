@@ -99,7 +99,7 @@ router.get(
         params.push(cursor);
       }
       
-      sql += " ORDER BY rowid DESC LIMIT ?";
+      sql += " ORDER BY rowid ASC LIMIT ?";
       params.push(pageLimit + 1); // Get one extra to check if there are more
 
       // Get articles
