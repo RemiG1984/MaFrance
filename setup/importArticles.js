@@ -175,9 +175,22 @@ function importArticles(db, callback) {
                                         .on("end", () => {
                                             // Sort all articles by date in descending order
                                             allArticles.sort((a, b) => {
-                                                const dateA = new Date(a[0]); // date is at index 0
-                                                const dateB = new Date(b[0]);
-                                                return dateB - dateA; // Descending order
+                                                // Normalize dates to ensure proper sorting
+                                                let dateA = a[0]; // date is at index 0
+                                                let dateB = b[0];
+                                                
+                                                // Convert to Date objects for reliable comparison
+                                                const parsedDateA = new Date(dateA);
+                                                const parsedDateB = new Date(dateB);
+                                                
+                                                // Check if dates are valid
+                                                if (isNaN(parsedDateA.getTime()) || isNaN(parsedDateB.getTime())) {
+                                                    console.warn('Invalid date found:', dateA, dateB);
+                                                    // Fallback to string comparison
+                                                    return dateB.localeCompare(dateA);
+                                                }
+                                                
+                                                return parsedDateB - parsedDateA; // Descending order (newest first)
                                             });
 
                                             console.log(`Sorted ${allArticles.length} articles by date (descending)`);
