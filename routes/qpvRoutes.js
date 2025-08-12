@@ -42,7 +42,7 @@ router.get(
                 .json({ error: "Cannot specify both dept and cog" });
         }
 
-        let sql = `${baseQpvSelect} LEFT JOIN (SELECT ROW_NUMBER() OVER (ORDER BY lib_com ASC, codeQPV ASC) as rowid, codeQPV as rn_code FROM qpv_data`;
+        let sql = baseQpvSelect;
         const conditions = [];
         const params = [];
 
@@ -58,12 +58,6 @@ router.get(
             conditions.push("LOWER(lib_com) LIKE LOWER(?)");
             params.push(`%${commune}%`);
         }
-
-        if (conditions.length > 0) {
-            sql += " WHERE " + conditions.join(" AND ");
-        }
-
-        sql += `) rn ON qpv_data.codeQPV = rn.rn_code`;
 
         if (conditions.length > 0) {
             sql += " WHERE " + conditions.join(" AND ");
