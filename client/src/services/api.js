@@ -325,6 +325,17 @@ const api = {
         );
     },
 
+    // QPV data
+    getQpv: (params = {}) => {
+        const queryString = new URLSearchParams(params).toString();
+        const url = `/api/qpv`;
+        return apiService.request(
+            queryString ? `${url}?${queryString}` : url,
+            {},
+            !params.cursor,
+        );
+    },
+
     // Cache management
     clearCache: () => apiService.clearCache(),
     getCacheStats: () => apiService.getCacheStats(),

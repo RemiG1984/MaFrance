@@ -28,14 +28,23 @@ const baseQpvSelect = `
   FROM qpv_data
 `;
 
-// GET /api/qpv - Get all QPV data with optional filtering
+// GET /api/qpv - Get all QPV data with optional filtering and pagination
 router.get(
     "/",
     [validateDepartement, validateCOG, validatePagination],
     (req, res) => {
-        const { dept = "", cog = "", commune = "", limit = 100 } = req.query;
+        const { dept = "", cog = "", commune = "", cursor, limit = "20" } = req.query;
+        const pageLimit = Math.min(parseInt(limit), 100);
+        const offset = cursor ? parseInt(cursor) : 0;
 
-        let sql = baseQpvSelect;
+        // Prevent simultaneous dept and cog
+        if (dept && cog) {
+            return res
+                .status(400)
+                .json({ error: "Cannot specify both dept and cog" });
+        }
+
+        let sql = `${baseQpvSelect} LEFT JOIN (SELECT ROW_NUMBER() OVER (ORDER BY lib_com ASC, codeQPV ASC) as rowid, codeQPV as rn_code FROM qpv_data`;
         const conditions = [];
         const params = [];
 
@@ -56,12 +65,40 @@ router.get(
             sql += " WHERE " + conditions.join(" AND ");
         }
 
-        sql += ` ORDER BY lib_com ASC LIMIT ?`;
-        params.push(parseInt(limit));
+        sql += `) rn ON qpv_data.codeQPV = rn.rn_code`;
+
+        if (conditions.length > 0) {
+            sql += " WHERE " + conditions.join(" AND ");
+        }
+
+        sql += ` ORDER BY lib_com ASC, codeQPV ASC LIMIT ? OFFSET ?`;
+        params.push(pageLimit + 1);
+        params.push(offset);
 
         db.all(sql, params, (err, rows) => {
             if (err) return handleDbError(err, res);
-            res.json(rows);
+
+            const hasMore = rows.length > pageLimit;
+            const qpvs = hasMore ? rows.slice(0, pageLimit) : rows;
+            const nextCursor =
+                hasMore && qpvs.length > 0
+                    ? qpvs[qpvs.length - 1].rowid
+                    : null;
+
+            // If we have filters (dept, cog, commune), return simple array for backward compatibility
+            if (dept || cog || commune) {
+                res.json(qpvs.map(({ rowid, ...row }) => row));
+            } else {
+                // For country-level requests, return paginated format
+                res.json({
+                    list: qpvs.map(({ rowid, ...row }) => row),
+                    pagination: {
+                        hasMore: hasMore,
+                        nextCursor: nextCursor,
+                        limit: pageLimit,
+                    },
+                });
+            }
         });
     },
 );

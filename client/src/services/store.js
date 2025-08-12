@@ -27,6 +27,7 @@ export const useDataStore = defineStore("data", {
       subventions: null,
       migrants: null,
       articles: null,
+      qpv: null,
     },
     departement: {
       details: null,
@@ -81,6 +82,7 @@ export const useDataStore = defineStore("data", {
           api.getCountrySubventions(code),
           api.getArticles({ limit: 20 }),
           api.getMigrants({ limit: 20 }),
+          api.getQpv({ limit: 20 }),
         ]);
 
         const country = {};
@@ -95,6 +97,7 @@ export const useDataStore = defineStore("data", {
         const articlesResponse = results[8];
         country.articles = articlesResponse;
         country.migrants = results[9];
+        country.qpv = results[10];
         country.namesSeries = this.serializeStats(country.namesHistory);
         country.crimeSeries = this.serializeStats(country.crimeHistory);
         country.crimeAggreg = this.aggregateStats(country.crimeSeries.data);
@@ -367,6 +370,7 @@ export const useDataStore = defineStore("data", {
         subventions: null,
         migrants: null,
         articles: null, // Cleared articles
+        qpv: null,
       };
       this.errors.country = null;
     },
@@ -547,6 +551,42 @@ export const useDataStore = defineStore("data", {
         }
       } catch (error) {
         console.error(`Error loading more ${level} migrants:`, error);
+      }
+    },
+
+    async fetchQpv(level, code) {
+      try {
+        let params = { limit: level === 'country' ? 20 : 100 };
+        if (level === 'departement') {
+          params.dept = code;
+        } else if (level === 'commune') {
+          params.cog = code;
+        } // No params for country
+
+        const qpv = await api.getQpv(params);
+        this[level].qpv = qpv || { list: [], pagination: { hasMore: false, nextCursor: null, limit: params.limit } };
+      } catch (error) {
+        console.error(`Error fetching ${level} QPV:`, error);
+        this[level].qpv = { list: [], pagination: { hasMore: false, nextCursor: null, limit: 20 } };
+      }
+    },
+
+    async loadMoreQpv(level, code, params) {
+      try {
+        let qpvParams = { ...params };
+        if (level === 'departement') {
+          qpvParams.dept = code;
+        } else if (level === 'commune') {
+          qpvParams.cog = code;
+        } // No dept/cog for country
+
+        const moreQpv = await api.getQpv(qpvParams);
+        if (moreQpv && moreQpv.list) {
+          this[level].qpv.list.push(...moreQpv.list);
+          this[level].qpv.pagination = moreQpv.pagination;
+        }
+      } catch (error) {
+        console.error(`Error loading more ${level} QPV:`, error);
       }
     },
 
