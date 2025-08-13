@@ -44,14 +44,6 @@
             {{ item.title }}
           </v-btn>
           
-          <v-btn
-            @click="toggleTheme"
-            variant="text"
-            icon
-            class="mx-2"
-          >
-            <v-icon>{{ isDark ? 'mdi-weather-sunny' : 'mdi-weather-night' }}</v-icon>
-          </v-btn>
          
           <VersionSelector />
         </div>
@@ -93,13 +85,6 @@
         
         <v-list-item>
           <VersionSelector />
-        </v-list-item>
-        
-        <v-list-item @click="toggleTheme">
-          <v-list-item-title>
-            <v-icon class="mr-2">{{ isDark ? 'mdi-weather-sunny' : 'mdi-weather-night' }}</v-icon>
-            {{ isDark ? 'Mode clair' : 'Mode sombre' }}
-          </v-list-item-title>
         </v-list-item>
         
         <v-list-item
@@ -159,7 +144,6 @@ export default {
   data() {
     return {
       mobileMenuOpen: false,
-      isDark: false,
       menuItems: [
         { title: 'Accueil', path: '/' },
         { title: 'Classements', path: '/classements' },
@@ -167,23 +151,9 @@ export default {
       ]
     }
   },
-  methods: {
-    toggleTheme() {
-      this.isDark = !this.isDark
-      this.$vuetify.theme.global.name = this.isDark ? 'dark' : 'light'
-      localStorage.setItem('darkMode', this.isDark.toString())
-    }
-  },
   mounted() {
     // Initialize store to sync with MetricsConfig
     this.dataStore.initializeStore()
-    
-    // Initialize dark mode from localStorage
-    const savedDarkMode = localStorage.getItem('darkMode')
-    if (savedDarkMode !== null) {
-      this.isDark = savedDarkMode === 'true'
-      this.$vuetify.theme.global.name = this.isDark ? 'dark' : 'light'
-    }
   }
 }
 </script>
