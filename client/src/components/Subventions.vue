@@ -17,7 +17,7 @@
             <tbody>
               <tr v-for="(row, index) in subventionRows" :key="index">
                 <td class="row-title">{{ row.entity }}</td>
-                <td class="score-main">{{ formatNumber(row.value) }} €</td>
+                <td class="score-main value-column">{{ formatNumber(row.value) }} €</td>
                 <td class="score-main">{{ formatNumber(row.perCapita) }} €</td>
               </tr>
             </tbody>
@@ -157,7 +157,7 @@ export default {
   methods: {
     formatNumber(number) {
       if (number == null || isNaN(number)) return "N/A";
-      return Math.round(number).toLocaleString("fr-FR");
+      return Math.round(number).toLocaleString("fr-FR").replace(/\s/g, ' ');
     }
   }
 }
@@ -210,6 +210,11 @@ export default {
 .score-main {
   font-weight: 500;
   text-align: right;
+}
+
+.value-column {
+  font-family: 'Courier New', 'Monaco', monospace;
+  letter-spacing: 0.5px;
 }
 
 @media (max-width: 768px) {
