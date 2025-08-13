@@ -14,19 +14,11 @@ const cacheService = require("./services/cacheService");
 // Enable compression
 app.use(compression());
 
-// Security middleware
+// Security middleware - simplified for Replit preview compatibility
 app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https:"],
-      fontSrc: ["'self'", "https:", "data:"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https:"],
-      imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "https:"],
-    },
-  },
-  frameguard: false, // Allow iframe embedding for Replit preview
+  contentSecurityPolicy: false, // Disable CSP completely
+  frameguard: false, // Allow iframe embedding
+  hsts: false, // Disable HSTS for development
 }));
 
 app.use(cors({
