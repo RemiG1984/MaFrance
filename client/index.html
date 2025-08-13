@@ -83,17 +83,35 @@
             const registration = await navigator.serviceWorker.register('/sw.js');
             console.log('SW registered: ', registration);
             
+            // Check for updates immediately
+            registration.update();
+            
             // Listen for updates
             registration.addEventListener('updatefound', () => {
               const newWorker = registration.installing;
+              console.log('New service worker found, installing...');
+              
               newWorker.addEventListener('statechange', () => {
-                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  // New content is available, prompt user to refresh
-                  if (confirm('Une nouvelle version est disponible. Actualiser maintenant?')) {
+                console.log('SW state changed:', newWorker.state);
+                if (newWorker.state === 'installed') {
+                  if (navigator.serviceWorker.controller) {
+                    // New content is available
+                    console.log('New content available, will update on next page load');
+                    // Auto-refresh to get new content
+                    newWorker.postMessage({ type: 'SKIP_WAITING' });
                     window.location.reload();
+                  } else {
+                    // Content is cached for first time
+                    console.log('Content is cached for offline use.');
                   }
                 }
               });
+            });
+            
+            // Listen for controlling service worker changes
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+              console.log('New service worker activated, refreshing...');
+              window.location.reload();
             });
             
             // Handle offline/online status
@@ -108,6 +126,11 @@
             window.addEventListener('offline', () => {
               console.log('App is offline - using cached data');
             });
+            
+            // Check for updates periodically
+            setInterval(() => {
+              registration.update();
+            }, 60000); // Check every minute
             
           } catch (error) {
             console.log('SW registration failed: ', error);

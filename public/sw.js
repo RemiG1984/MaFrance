@@ -1,14 +1,12 @@
 
-const CACHE_NAME = 'ma-france-v1';
-const STATIC_CACHE_NAME = 'ma-france-static-v1';
-const API_CACHE_NAME = 'ma-france-api-v1';
+const CACHE_NAME = 'ma-france-v2'; // Increment version to force cache refresh
+const STATIC_CACHE_NAME = 'ma-france-static-v2';
+const API_CACHE_NAME = 'ma-france-api-v2';
 
 // Static assets to cache immediately
 const STATIC_ASSETS = [
   '/',
   '/index.html',
-  '/assets/index-gCHxcsa-.css',
-  '/assets/index-DCb9g14C.js',
   '/android-chrome-192x192.png',
   '/android-chrome-512x512.png',
   '/favicon-32x32.png',
@@ -18,133 +16,162 @@ const STATIC_ASSETS = [
 
 // API routes that should be cached
 const API_ROUTES = [
-  '/api/country/',
-  '/api/departement/',
-  '/api/commune/',
-  '/api/rankings/',
-  '/api/articles/',
-  '/api/migrants/',
-  '/api/qpv/',
-  '/api/subventions/'
+  '/api/country/details',
+  '/api/country/names', 
+  '/api/country/crime',
+  '/api/departements',
+  '/api/communes'
 ];
 
+// Install event - cache static assets
 self.addEventListener('install', (event) => {
+  console.log('Service Worker installing...');
   event.waitUntil(
-    Promise.all([
-      caches.open(STATIC_CACHE_NAME).then((cache) => {
-        return cache.addAll(STATIC_ASSETS.filter(asset => asset !== '/'));
-      }),
-      caches.open(API_CACHE_NAME)
-    ]).then(() => {
-      self.skipWaiting();
-    })
+    caches.open(STATIC_CACHE_NAME)
+      .then((cache) => {
+        return cache.addAll(STATIC_ASSETS);
+      })
+      .then(() => {
+        console.log('Static assets cached');
+        return self.skipWaiting(); // Activate immediately
+      })
   );
 });
 
+// Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
+  console.log('Service Worker activating...');
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME && 
-              cacheName !== STATIC_CACHE_NAME && 
-              cacheName !== API_CACHE_NAME) {
+          // Delete old cache versions
+          if (cacheName !== STATIC_CACHE_NAME && 
+              cacheName !== API_CACHE_NAME &&
+              (cacheName.startsWith('ma-france-') || cacheName.startsWith('workbox-'))) {
+            console.log('Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
     }).then(() => {
-      self.clients.claim();
+      console.log('Old caches cleaned up');
+      return self.clients.claim(); // Take control of all clients
     })
   );
 });
 
+// Fetch event - handle requests with proper cache strategy
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Handle API requests
+  // Skip non-GET requests
+  if (request.method !== 'GET') {
+    return;
+  }
+
+  // Handle different types of requests
   if (url.pathname.startsWith('/api/')) {
+    // API requests - network first with cache fallback
     event.respondWith(handleApiRequest(request));
-    return;
-  }
-
-  // Handle static assets
-  if (request.destination === 'document' || 
-      request.destination === 'script' || 
-      request.destination === 'style' ||
-      request.destination === 'image') {
+  } else if (url.pathname.match(/\.(js|css)$/)) {
+    // JS/CSS assets - cache first but check for updates
+    event.respondWith(handleAssetRequest(request));
+  } else if (STATIC_ASSETS.some(asset => url.pathname === asset || url.pathname.endsWith(asset))) {
+    // Static assets - cache first
     event.respondWith(handleStaticRequest(request));
-    return;
+  } else {
+    // HTML pages - network first with cache fallback
+    event.respondWith(handlePageRequest(request));
   }
-
-  // Default: try network first, then cache
-  event.respondWith(
-    fetch(request).catch(() => {
-      return caches.match(request);
-    })
-  );
 });
 
+// Handle API requests - network first
 async function handleApiRequest(request) {
-  const url = new URL(request.url);
-  
   try {
-    // Try network first for API requests
-    const networkResponse = await fetch(request);
-    
-    if (networkResponse.ok) {
-      // Cache successful API responses
+    const response = await fetch(request);
+    if (response.ok) {
       const cache = await caches.open(API_CACHE_NAME);
-      cache.put(request, networkResponse.clone());
-      return networkResponse;
+      cache.put(request, response.clone());
     }
-    
-    throw new Error('Network response not ok');
+    return response;
   } catch (error) {
-    // Fallback to cache
+    console.log('Network failed for API request, trying cache:', request.url);
     const cachedResponse = await caches.match(request);
     if (cachedResponse) {
       return cachedResponse;
     }
-    
-    // Return offline response for critical API endpoints
-    if (isEssentialApiRoute(url.pathname)) {
-      return new Response(JSON.stringify({
-        error: 'Données non disponibles hors ligne',
-        offline: true
-      }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-    
     throw error;
   }
 }
 
+// Handle asset requests (JS/CSS) - network first to get latest versions
+async function handleAssetRequest(request) {
+  try {
+    // Always try network first for assets to get latest versions
+    const response = await fetch(request);
+    if (response.ok) {
+      const cache = await caches.open(STATIC_CACHE_NAME);
+      cache.put(request, response.clone());
+      return response;
+    }
+  } catch (error) {
+    console.log('Network failed for asset, trying cache:', request.url);
+  }
+  
+  // Fallback to cache
+  const cachedResponse = await caches.match(request);
+  if (cachedResponse) {
+    return cachedResponse;
+  }
+  
+  // If no cache, return network error
+  return fetch(request);
+}
+
+// Handle static requests - cache first
 async function handleStaticRequest(request) {
-  // Try cache first for static assets
   const cachedResponse = await caches.match(request);
   if (cachedResponse) {
     return cachedResponse;
   }
   
   try {
-    const networkResponse = await fetch(request);
-    if (networkResponse.ok) {
+    const response = await fetch(request);
+    if (response.ok) {
       const cache = await caches.open(STATIC_CACHE_NAME);
-      cache.put(request, networkResponse.clone());
+      cache.put(request, response.clone());
     }
-    return networkResponse;
+    return response;
   } catch (error) {
-    // For HTML requests, return cached index.html as fallback
-    if (request.destination === 'document') {
-      const indexCache = await caches.match('/index.html');
-      if (indexCache) {
-        return indexCache;
-      }
+    console.error('Failed to fetch static asset:', request.url);
+    throw error;
+  }
+}
+
+// Handle page requests - network first
+async function handlePageRequest(request) {
+  try {
+    const response = await fetch(request);
+    if (response.ok) {
+      const cache = await caches.open(STATIC_CACHE_NAME);
+      cache.put(request, response.clone());
     }
+    return response;
+  } catch (error) {
+    console.log('Network failed for page, trying cache:', request.url);
+    const cachedResponse = await caches.match(request);
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+    
+    // Fallback to index.html for SPA routing
+    const indexResponse = await caches.match('/index.html');
+    if (indexResponse) {
+      return indexResponse;
+    }
+    
     throw error;
   }
 }
@@ -185,3 +212,18 @@ async function doBackgroundSync() {
     console.log('Background sync failed:', error);
   }
 }
+
+// Handle messages from the main thread
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  } else if (event.data && event.data.type === 'CLEAR_CACHE') {
+    event.waitUntil(
+      caches.keys().then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => caches.delete(cacheName))
+        );
+      })
+    );
+  }
+});
