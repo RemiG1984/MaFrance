@@ -79,7 +79,7 @@ export const useDataStore = defineStore("data", {
             direction: "DESC",
           }),
           api.getCountrySubventions(code),
-          api.getArticles({ limit: 20 }),
+          api.getArticles({ limit: 10 }),
           api.getMigrants({ limit: 10 }),
           api.getQpv({ limit: 10 }),
         ]);

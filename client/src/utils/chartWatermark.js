@@ -9,13 +9,13 @@ export const watermarkPlugin = {
     // Watermark properties styled to match the original styles
     ctx.font = "14px 'Roboto', Arial, sans-serif";
     ctx.fillStyle = "rgba(52, 58, 64, 0.5)"; // Matches #343a40 with 50% opacity
-    ctx.textAlign = "right";
+    ctx.textAlign = "left";
     ctx.textBaseline = "bottom";
 
     // Watermark text
     const watermarkText = "https://ouvamafrance.replit.app";
     const padding = 10;
-    const x = chart.chartArea.right - padding;
+    const x = chart.chartArea.left - padding;
     const y = chart.chartArea.bottom - padding;
 
     // Draw the watermark
