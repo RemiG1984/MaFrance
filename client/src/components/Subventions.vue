@@ -1,7 +1,7 @@
 <template>
   <v-card class="mb-4">
     <v-card-title class="text-h6">
-      Subventions publiques à: {{ locationName }}
+      Subventions publiques aux associations pour: {{ locationName }}
     </v-card-title>
     <v-card-text>
       <div v-if="subventionRows && subventionRows.length > 0">
@@ -17,8 +17,8 @@
             <tbody>
               <tr v-for="(row, index) in subventionRows" :key="index">
                 <td class="row-title">{{ row.entity }}</td>
-                <td class="score-main">{{ formatNumber(row.value) }}€</td>
-                <td class="score-main">{{ formatNumber(row.perCapita) }}€</td>
+                <td class="score-main">{{ formatNumber(row.value) }} €</td>
+                <td class="score-main">{{ formatNumber(row.perCapita) }} €</td>
               </tr>
             </tbody>
           </table>
