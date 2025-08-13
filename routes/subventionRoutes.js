@@ -35,7 +35,6 @@ const validateCountryParam = [
 ];
 
 // Get country subventions
-// Returns: { etat_central, autres_organismes_publics }
 router.get("/country/:country", validateCountryParam, (req, res) => {
     const db = req.app.locals.db;
     const { country } = req.params;
@@ -67,7 +66,6 @@ router.get("/country/:country", validateCountryParam, (req, res) => {
 });
 
 // Get department subventions
-// Returns: { subvention_region_distributed, subvention_departement }
 router.get("/departement/:dept", validateDepartementParam, (req, res) => {
     const db = req.app.locals.db;
     const { dept } = req.params;
@@ -99,7 +97,6 @@ router.get("/departement/:dept", validateDepartementParam, (req, res) => {
 });
 
 // Get commune subventions
-// Returns: { commune, subvention_EPCI_distributed, subvention_commune }
 router.get("/commune/:cog", validateCOGParam, (req, res) => {
     const db = req.app.locals.db;
     const { cog } = req.params;
@@ -124,7 +121,6 @@ router.get("/commune/:cog", validateCOGParam, (req, res) => {
         }
 
         res.json({
-            commune: cog,
             subvention_EPCI_distributed: row.subvention_EPCI_distributed,
             subvention_commune: row.subvention_commune
         });
