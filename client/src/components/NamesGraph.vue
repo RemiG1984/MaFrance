@@ -1,7 +1,7 @@
 
 <template>
   <v-card>
-    <v-card-title class="text-h6" d-flex justify-space-between align-center>
+    <v-card-title class="text-h6 d-flex justify-space-between align-center">
       <span>Évolution des Prénoms</span>
       <v-btn
         @click="toggleView"

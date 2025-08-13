@@ -9,8 +9,7 @@
           <table class="subventions-table">
             <thead>
               <tr>
-                <th>Entité</th>
-                <th>Valeur</th>
+                <th></th>
                 <th>Valeur /hab./an</th>
                 <th>Moyenne nationale /hab./an</th>
               </tr>
@@ -18,13 +17,11 @@
             <tbody>
               <tr v-for="(row, index) in subventionRows" :key="index">
                 <td class="row-title">{{ row.entity }}</td>
-                <td class="score-main">{{ formatNumber(row.value) }} €</td>
                 <td class="score-main">{{ formatNumber(row.perCapita) }} €</td>
                 <td class="score-main">{{ formatNumber(row.nationalAverage) }} €</td>
               </tr>
               <tr class="total-row">
                 <td class="row-title total-title">Total par hab. et par an</td>
-                <td class="score-main">-</td>
                 <td class="score-main">{{ formatNumber(totalPerCapita) }} €</td>
                 <td class="score-main">{{ formatNumber(totalNationalAverage) }} €</td>
               </tr>
@@ -99,7 +96,6 @@ export default {
         const value = this.countryData.subventions.etat_central;
         rows.push({
           entity: 'Ministères',
-          value: value,
           perCapita: countryPopulation > 0 ? value / countryPopulation : 0,
           nationalAverage: countryPopulation > 0 ? value / countryPopulation : 0
         });
@@ -110,7 +106,6 @@ export default {
         const value = this.countryData.subventions.autres_organismes_publics;
         rows.push({
           entity: 'Autres organismes publics',
-          value: value,
           perCapita: countryPopulation > 0 ? value / countryPopulation : 0,
           nationalAverage: countryPopulation > 0 ? value / countryPopulation : 0
         });
@@ -123,8 +118,7 @@ export default {
         const nationalRegionAverage = this.countryData.subventions?.total_subv_region && countryPopulation > 0 
           ? this.countryData.subventions.total_subv_region / countryPopulation : 0;
         rows.push({
-          entity: 'Région (rapportée au dept.)',
-          value: value,
+          entity: 'Région',
           perCapita: departementPopulation > 0 ? value / departementPopulation : 0,
           nationalAverage: nationalRegionAverage
         });
@@ -138,7 +132,6 @@ export default {
           ? this.countryData.subventions.total_subv_dept / countryPopulation : 0;
         rows.push({
           entity: 'Département',
-          value: value,
           perCapita: departementPopulation > 0 ? value / departementPopulation : 0,
           nationalAverage: nationalDeptAverage
         });
@@ -151,8 +144,7 @@ export default {
         const nationalEPCIAverage = this.countryData.subventions?.total_subv_EPCI && countryPopulation > 0 
           ? this.countryData.subventions.total_subv_EPCI / countryPopulation : 0;
         rows.push({
-          entity: 'Agglomération (rapportée à la commune)',
-          value: value,
+          entity: 'Agglomération',
           perCapita: communePopulation > 0 ? value / communePopulation : 0,
           nationalAverage: nationalEPCIAverage
         });
@@ -166,7 +158,6 @@ export default {
           ? this.countryData.subventions.total_subv_commune / countryPopulation : 0;
         rows.push({
           entity: 'Commune',
-          value: value,
           perCapita: communePopulation > 0 ? value / communePopulation : 0,
           nationalAverage: nationalCommuneAverage
         });
