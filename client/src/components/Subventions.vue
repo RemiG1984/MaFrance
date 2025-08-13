@@ -17,7 +17,7 @@
             <tbody>
               <tr v-for="(row, index) in subventionRows" :key="index">
                 <td class="row-title">{{ row.entity }}</td>
-                <td class="score-main value-column">{{ formatNumber(row.value) }} €</td>
+                <td class="score-main">{{ formatNumber(row.value) }} €</td>
                 <td class="score-main">{{ formatNumber(row.perCapita) }} €</td>
               </tr>
             </tbody>
@@ -112,7 +112,7 @@ export default {
         const value = this.departementData.subventions.subvention_region_distributed;
         const departementPopulation = this.departementData.details?.population || 0;
         rows.push({
-          entity: 'Région',
+          entity: 'Région (rapportée au dept.)',
           value: value,
           perCapita: departementPopulation > 0 ? value / departementPopulation : 0
         });
@@ -134,7 +134,7 @@ export default {
         const value = this.communeData.subventions.subvention_EPCI_distributed;
         const communePopulation = this.communeData.details?.population || 0;
         rows.push({
-          entity: 'Agglomération',
+          entity: 'Agglomération (rapportée à la commune)',
           value: value,
           perCapita: communePopulation > 0 ? value / communePopulation : 0
         });
@@ -210,11 +210,6 @@ export default {
 .score-main {
   font-weight: 500;
   text-align: right;
-}
-
-.value-column {
-  font-family: 'Courier New', 'Monaco', monospace;
-  letter-spacing: 0.5px;
 }
 
 @media (max-width: 768px) {
