@@ -17,8 +17,13 @@
             <tbody>
               <tr v-for="(row, index) in subventionRows" :key="index">
                 <td class="row-title">{{ row.entity }}</td>
-                <td class="score-main">{{ formatNumber(row.value) }} €</td>
+                <td class="score-main value-column">{{ formatNumber(row.value) }} €</td>
                 <td class="score-main">{{ formatNumber(row.perCapita) }} €</td>
+              </tr>
+              <tr class="total-row">
+                <td class="row-title total-title">Total par habitant</td>
+                <td class="score-main value-column">-</td>
+                <td class="score-main total-value">{{ formatNumber(totalPerCapita) }} €</td>
               </tr>
             </tbody>
           </table>
@@ -152,6 +157,10 @@ export default {
       }
 
       return rows;
+    },
+
+    totalPerCapita() {
+      return this.subventionRows.reduce((sum, row) => sum + row.perCapita, 0);
     }
   },
   methods: {
@@ -210,6 +219,28 @@ export default {
 .score-main {
   font-weight: 500;
   text-align: right;
+}
+
+.value-column {
+  font-family: 'Courier New', 'Monaco', monospace;
+  letter-spacing: 0.5px;
+}
+
+.total-row {
+  border-top: 2px solid #495057;
+  font-weight: bold;
+  background-color: #e9ecef !important;
+}
+
+.total-title {
+  font-weight: 700;
+  color: #343a40;
+}
+
+.total-value {
+  font-weight: 700;
+  color: #495057;
+  font-family: 'Courier New', 'Monaco', monospace;
 }
 
 @media (max-width: 768px) {
