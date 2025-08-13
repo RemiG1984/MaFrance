@@ -269,81 +269,110 @@ export default {
   .score-table {
     width: 100%;
     border-collapse: collapse;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    border-top: 2px solid #ccc;
-    border-bottom: 2px solid #ccc;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #e3f2fd;
     table-layout: fixed;
   }
   .score-header th {
     font-weight: bold;
-    padding: 10px;
-    border-bottom: 2px solid #ddd;
+    padding: 12px;
+    border-bottom: 2px solid #1976d2;
+    position: relative;
   }
   .score-header .row-title {
-    background-color: #e9ecef;
-    color: #333;
+    background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
   .score-header .score-main {
-    background-color: #e9ecef;
-    color: #111;
+    background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+    color: white;
     font-weight: bold;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
   .score-header .score-compare {
     text-align: right;
-    background-color: #e9ecef;
-    color: #555;
+    background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+    color: white;
     font-weight: bold;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
   .score-row {
-    border-bottom: 1px solid #eee;
-    transition: background-color 0.2s;
+    border-bottom: 1px solid #f0f0f0;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+  .score-row:not(.sub-row):hover {
+    cursor: pointer;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(33, 150, 243, 0.15);
   }
   .score-row:not(.sub-row):hover .row-title,
   .score-row:not(.sub-row):hover .score-main,
   .score-row:not(.sub-row):hover .score-compare {
-    background-color: rgba(25, 118, 210, 0.1);
+    background: linear-gradient(135deg, rgba(33, 150, 243, 0.08) 0%, rgba(25, 118, 210, 0.12) 100%);
+    color: #1565c0;
   }
-  .score-row:not(.sub-row):hover {
-    cursor: pointer;
+  .score-row:not(.sub-row):hover .row-title {
+    border-left: 3px solid #2196f3;
   }
   .sub-row {
-    background-color: #f8f9fa;
-    transition: all 0.2s ease;
+    background-color: #fafafa;
+    transition: all 0.3s ease;
+    border-left: 2px solid #e3f2fd;
+  }
+  .sub-row:hover {
+    background-color: #f3f8ff;
+    border-left-color: #90caf9;
   }
   .sub-row-hidden {
     display: none;
   }
   .row-title {
-    padding: 8px 12px;
-    font-weight: 500;
-    color: #333;
-    font-weight: bold;
+    padding: 10px 14px;
+    font-weight: 600;
+    color: #1565c0;
     max-width: 50%;
     word-wrap: break-word;
     white-space: normal;
     overflow-wrap: break-word;
+    position: relative;
+    transition: all 0.3s ease;
   }
   .row-title.sub-row {
-    padding-left: 32px;
-    font-weight: 400;
+    padding-left: 36px;
+    font-weight: 500;
     font-size: 14px;
-    font-style: italic;
-    color: #555;
+    color: #666;
     max-width: 50%;
     word-wrap: break-word;
     white-space: normal;
     overflow-wrap: break-word;
+    position: relative;
+  }
+  .row-title.sub-row::before {
+    content: "└";
+    position: absolute;
+    left: 20px;
+    color: #90caf9;
+    font-weight: bold;
   }
   .score-main {
-    padding: 8px 12px;
+    padding: 10px 14px;
     text-align: left;
-    color: #222;
+    color: #333;
+    font-weight: 500;
+    transition: all 0.3s ease;
   }
   .score-compare {
-    padding: 8px 12px;
+    padding: 10px 14px;
     text-align: right;
     font-size: 14px;
-    color: #555;
+    color: #666;
+    font-weight: 500;
+    transition: all 0.3s ease;
   }
   .score-row:nth-child(even) .row-title,
   .score-row:nth-child(even) .score-main,
@@ -353,7 +382,7 @@ export default {
   .score-row:nth-child(odd) .row-title,
   .score-row:nth-child(odd) .score-main,
   .score-row:nth-child(odd) .score-compare {
-    background-color: #f9f9f9;
+    background-color: #fafbfc;
   }
 
 /* Responsive table */
