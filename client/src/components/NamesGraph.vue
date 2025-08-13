@@ -47,43 +47,43 @@ export default {
         {
             key: "musulman_pct",
             label: "Prénoms musulmans",
-            color: "#28a745",
+            color: "#22c55e", // Modern green
             order: 1,
         },
         {
             key: "traditionnel_pct",
             label: "Prénoms français traditionnels",
-            color: "#455a64",
+            color: "#1e40af", // Dark blue
             order: 2,
         },
         {
             key: "moderne_pct",
             label: "Prénoms français modernes",
-            color: "#dc3545",
+            color: "#60a5fa", // Light blue
             order: 3,
         },
         {
             key: "europeen_pct",
             label: "Prénoms européens",
-            color: "#007bff",
+            color: "#8b5cf6", // Purple (European royalty)
             order: 4,
         },
         {
             key: "invente_pct",
             label: "Prénoms inventés",
-            color: "#17a2b8",
+            color: "#06b6d4", // Turquoise
             order: 5,
         },
         {
             key: "africain_pct",
             label: "Prénoms africains",
-            color: "#6c757d",
+            color: "#1f2937", // Modern black/dark gray
             order: 6,
         },
         {
             key: "asiatique_pct",
             label: "Prénoms asiatiques",
-            color: "#ffc107",
+            color: "#f59e0b", // Modern yellow/amber
             order: 7,
         },
       ],
@@ -91,25 +91,25 @@ export default {
         {
             key: "prenom_francais_pct",
             label: MetricsConfig.getMetricLabel("prenom_francais_pct"),
-            color: "#455a64",
+            color: "#2563eb", // Medium blue (combines traditional and modern)
             order: 1,
         },
         {
             key: "musulman_pct",
             label: MetricsConfig.getMetricLabel("musulman_pct"),
-            color: "#28a745",
+            color: "#22c55e", // Modern green
             order: 2,
         },
         {
             key: "extra_europeen_pct",
             label: MetricsConfig.getMetricLabel("extra_europeen_pct"),
-            color: "#dc3545",
+            color: "#dc2626", // Modern red (non-European)
             order: 3,
         },
         {
             key: "europeen_pct",
             label: "Prénoms européens",
-            color: "#007bff",
+            color: "#8b5cf6", // Purple (European royalty)
             order: 4,
         },
       ]
