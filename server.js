@@ -26,6 +26,7 @@ app.use(helmet({
       connectSrc: ["'self'", "https:"],
     },
   },
+  frameguard: false, // Allow iframe embedding for Replit preview
 }));
 
 app.use(cors({
