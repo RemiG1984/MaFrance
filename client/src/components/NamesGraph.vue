@@ -1,7 +1,16 @@
+
 <template>
   <v-card>
-    <v-card-title class="text-h5">
-      Évolution des Prénoms
+    <v-card-title class="text-h5 d-flex justify-space-between align-center">
+      <span>Évolution des Prénoms</span>
+      <v-btn
+        @click="toggleView"
+        color="primary"
+        variant="outlined"
+        size="small"
+      >
+        {{ currentView === 'detailed' ? 'Vue simplifiée' : 'Vue détaillée' }}
+      </v-btn>
     </v-card-title>
     
     <v-card-text>      
@@ -15,6 +24,7 @@
 <script>
 import Chart from 'chart.js/auto';
 import { watermarkPlugin } from '../utils/chartWatermark.js'
+import { MetricsConfig } from '../utils/metricsConfig.js'
 let chart = null
 
 export default {
@@ -31,8 +41,9 @@ export default {
   },
   data() {
     return {
+      currentView: 'detailed', // 'detailed' or 'simplified'
       titleBase: "Évolution des prénoms de naissance",
-      categories: [
+      detailedCategories: [
         {
             key: "musulman_pct",
             label: "Prénoms musulmans",
@@ -75,7 +86,38 @@ export default {
             color: "#ffc107",
             order: 7,
         },
+      ],
+      simplifiedCategories: [
+        {
+            key: "prenom_francais_pct",
+            label: MetricsConfig.getMetricLabel("prenom_francais_pct"),
+            color: "#455a64",
+            order: 1,
+        },
+        {
+            key: "musulman_pct",
+            label: MetricsConfig.getMetricLabel("musulman_pct"),
+            color: "#28a745",
+            order: 2,
+        },
+        {
+            key: "extra_europeen_pct",
+            label: MetricsConfig.getMetricLabel("extra_europeen_pct"),
+            color: "#dc3545",
+            order: 3,
+        },
+        {
+            key: "europeen_pct",
+            label: "Prénoms européens",
+            color: "#007bff",
+            order: 4,
+        },
       ]
+    }
+  },
+  computed: {
+    currentCategories() {
+      return this.currentView === 'detailed' ? this.detailedCategories : this.simplifiedCategories;
     }
   },
   watch: {
@@ -90,17 +132,37 @@ export default {
   mounted(){
     // Register the watermark plugin
     Chart.register(watermarkPlugin);
-    this.createChart()
+    this.createChart();
+    
+    // Listen for metrics label changes
+    window.addEventListener('metricsLabelsToggled', this.handleLabelChange);
+  },
+  beforeUnmount() {
+    if (chart) {
+      chart.destroy();
+    }
+    window.removeEventListener('metricsLabelsToggled', this.handleLabelChange);
   },
   methods: {
+    toggleView() {
+      this.currentView = this.currentView === 'detailed' ? 'simplified' : 'detailed';
+      this.updateChart();
+    },
+
+    handleLabelChange() {
+      // Update simplified categories labels with new metric labels
+      this.simplifiedCategories[0].label = MetricsConfig.getMetricLabel("prenom_francais_pct");
+      this.simplifiedCategories[1].label = MetricsConfig.getMetricLabel("musulman_pct");
+      this.simplifiedCategories[2].label = MetricsConfig.getMetricLabel("extra_europeen_pct");
+      
+      this.updateChart();
+    },
     
     createChart() {
-      // const title = chartLabels[this.metricKey].label
-
       const config = {
-        type: 'line', // Changez selon vos besoins : 'bar', 'pie', etc.
+        type: 'line',
         data: {
-          labels: [...this.data.labels], // Copie du tableau
+          labels: [...this.data.labels],
           datasets: this.generateDatasets()
         },
         options: {
@@ -150,12 +212,26 @@ export default {
       const data = this.data.data
       const datasets = []
 
-      for(const category of this.categories){
+      for(const category of this.currentCategories){
         const key = category.key
-        const values = data[key]
+        let values = data[key] || [];
+        
+        // Handle calculated metrics for simplified view
+        if (key === 'prenom_francais_pct' && this.currentView === 'simplified') {
+          values = data.traditionnel_pct?.map((val, index) => 
+            val + (data.moderne_pct?.[index] || 0)
+          ) || [];
+        }
+        
+        if (key === 'extra_europeen_pct' && this.currentView === 'simplified') {
+          values = data.musulman_pct?.map((val, index) => 
+            val + (data.africain_pct?.[index] || 0) + (data.asiatique_pct?.[index] || 0)
+          ) || [];
+        }
+
         datasets.push({
           label: category.label,
-          data: data[key] || [],
+          data: values,
           borderColor: category.color,
           backgroundColor: category.color,
           fill: false,
@@ -183,14 +259,7 @@ export default {
         
         // Redessiner le graphique
         chart.update()
-
       }
-    }
-  },
-  
-  beforeUnmount() {
-    if (chart) {
-      chart.destroy()
     }
   }
 }
@@ -221,4 +290,4 @@ export default {
     max-height: 350px;
   }
 }
-</style> 
+</style>
