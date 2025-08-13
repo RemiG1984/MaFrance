@@ -10,7 +10,7 @@ function importSubventions(db, callback) {
         return new Promise((resolve, reject) => {
             const allFields = new Set();
             const files = [
-                { path: 'setup/france_subventions.csv', excludedFields: ['commune', 'population', 'total_subventions', 'total_subventions_parHab'] },
+                { path: 'setup/france_subventions.csv', excludedFields: ['commune', 'population', 'total_subventions'] },
                 { path: 'setup/departement_subventions.csv', excludedFields: ['dept_code', 'commune', 'population', 'total_subventions'] },
                 { path: 'setup/commune_subventions.csv', excludedFields: ['COG', 'commune', 'population', 'total_subventions'] }
             ];
@@ -71,7 +71,7 @@ function importSubventions(db, callback) {
                 fs.createReadStream('setup/france_subventions.csv')
                     .pipe(csv())
                     .on('data', (row) => {
-                        const excludedFields = ['commune', 'population', 'total_subventions', 'total_subventions_parHab'];
+                        const excludedFields = ['commune', 'population', 'total_subventions'];
                         const values = ['france'];
                         
                         subventionFields.forEach(field => {
