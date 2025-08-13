@@ -15,7 +15,8 @@ export const watermarkPlugin = {
     // Watermark text
     const watermarkText = "https://ouvamafrance.replit.app";
     const padding = 10;
-    const x = chart.chartArea.left - padding;
+    const offset = 20;
+    const x = chart.chartArea.left - padding + offset;
     const y = chart.chartArea.bottom - padding;
 
     // Draw the watermark
