@@ -1,4 +1,3 @@
-
 <template>
   <v-card class="mb-4">
     <v-card-title class="text-h6">
@@ -214,7 +213,7 @@ export default {
     padding: 8px 10px;
     font-size: 12px;
   }
-  
+
   .subventions-table th {
     font-size: 11px;
   }
