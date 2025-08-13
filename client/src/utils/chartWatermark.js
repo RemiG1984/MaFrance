@@ -13,8 +13,8 @@ export const watermarkPlugin = {
     ctx.textBaseline = "bottom";
 
     // Watermark text
-    const watermarkText = "https://ouvamafrance.replit.app";
-    const padding = 10;
+    const watermarkText = "ouvamafrance.replit.app";
+    const padding = 5;
     const offset = 20;
     const x = chart.chartArea.left - padding + offset;
     const y = chart.chartArea.bottom - padding;
