@@ -40,7 +40,7 @@ router.get("/country/:country", validateCountryParam, (req, res) => {
     const { country } = req.params;
 
     const query = `
-        SELECT etat_central, autres_organismes_publics
+        SELECT etat_central, autres_organismes_publics, total_subv_commune, total_subv_EPCI, total_subv_dept, total_subv_region
         FROM country_subventions 
         WHERE country = ?
     `;
@@ -60,7 +60,11 @@ router.get("/country/:country", validateCountryParam, (req, res) => {
 
         res.json({
             etat_central: row.etat_central,
-            autres_organismes_publics: row.autres_organismes_publics
+            autres_organismes_publics: row.autres_organismes_publics,
+            total_subv_commune: row.total_subv_commune,
+            total_subv_EPCI: row.total_subv_EPCI,
+            total_subv_dept: row.total_subv_dept,
+            total_subv_region: row.total_subv_region
         });
     });
 });

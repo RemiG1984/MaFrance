@@ -12,7 +12,7 @@
                 <th>Entité</th>
                 <th>Valeur</th>
                 <th>Valeur /hab./an</th>
-                <th>Moyenne nationale /hab.</th>
+                <th>Moyenne nationale /hab./an</th>
               </tr>
             </thead>
             <tbody>
