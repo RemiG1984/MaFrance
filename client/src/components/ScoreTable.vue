@@ -1,6 +1,6 @@
 <template>
   <v-card class="mb-4">
-    <v-card-title class="text-h5">
+    <v-card-title class="text-h6">
       Indices et données pour: {{ location.name }}
     </v-card-title>
 
@@ -351,13 +351,6 @@ export default {
     white-space: normal;
     overflow-wrap: break-word;
     position: relative;
-  }
-  .row-title.sub-row::before {
-    content: "└";
-    position: absolute;
-    left: 20px;
-    color: #90caf9;
-    font-weight: bold;
   }
   .score-main {
     padding: 10px 14px;
