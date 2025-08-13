@@ -26,6 +26,7 @@ app.use(helmet({
       connectSrc: ["'self'", "https:"],
     },
   },
+  frameguard: { action: 'deny' }
 }));
 
 app.use(cors({
