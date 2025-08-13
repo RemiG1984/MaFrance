@@ -125,7 +125,7 @@ router.get("/commune/:cog", validateCOGParam, (req, res) => {
 
         res.json({
             commune: cog,
-            subventions,
+            ...subventions,
         });
     });
 });
