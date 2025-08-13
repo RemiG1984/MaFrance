@@ -84,65 +84,70 @@ export default {
 
     subventionRows() {
       const rows = [];
-      const population = this.currentPopulation;
 
-      // Row 1: Ministères (country data)
+      // Row 1: Ministères (country data) - use country population
       if (this.countryData.subventions?.etat_central != null) {
         const value = this.countryData.subventions.etat_central;
+        const countryPopulation = this.countryData.details?.population || 0;
         rows.push({
           entity: 'Ministères',
           value: value,
-          perCapita: population > 0 ? value / population : 0
+          perCapita: countryPopulation > 0 ? value / countryPopulation : 0
         });
       }
 
-      // Row 2: Autres organismes publics (country data)
+      // Row 2: Autres organismes publics (country data) - use country population
       if (this.countryData.subventions?.autres_organismes_publics != null) {
         const value = this.countryData.subventions.autres_organismes_publics;
+        const countryPopulation = this.countryData.details?.population || 0;
         rows.push({
           entity: 'Autres organismes publics',
           value: value,
-          perCapita: population > 0 ? value / population : 0
+          perCapita: countryPopulation > 0 ? value / countryPopulation : 0
         });
       }
 
-      // Row 3: Région (departement data)
+      // Row 3: Région (departement data) - use departement population
       if (this.departementData.subventions?.subvention_region_distributed != null) {
         const value = this.departementData.subventions.subvention_region_distributed;
+        const departementPopulation = this.departementData.details?.population || 0;
         rows.push({
           entity: 'Région',
           value: value,
-          perCapita: population > 0 ? value / population : 0
+          perCapita: departementPopulation > 0 ? value / departementPopulation : 0
         });
       }
 
-      // Row 4: Département (departement data)
+      // Row 4: Département (departement data) - use departement population
       if (this.departementData.subventions?.subvention_departement != null) {
         const value = this.departementData.subventions.subvention_departement;
+        const departementPopulation = this.departementData.details?.population || 0;
         rows.push({
           entity: 'Département',
           value: value,
-          perCapita: population > 0 ? value / population : 0
+          perCapita: departementPopulation > 0 ? value / departementPopulation : 0
         });
       }
 
-      // Row 5: Agglomération (commune data)
+      // Row 5: Agglomération (commune data) - use commune population
       if (this.communeData.subventions?.subvention_EPCI_distributed != null) {
         const value = this.communeData.subventions.subvention_EPCI_distributed;
+        const communePopulation = this.communeData.details?.population || 0;
         rows.push({
           entity: 'Agglomération',
           value: value,
-          perCapita: population > 0 ? value / population : 0
+          perCapita: communePopulation > 0 ? value / communePopulation : 0
         });
       }
 
-      // Row 6: Commune (commune data)
+      // Row 6: Commune (commune data) - use commune population
       if (this.communeData.subventions?.subvention_commune != null) {
         const value = this.communeData.subventions.subvention_commune;
+        const communePopulation = this.communeData.details?.population || 0;
         rows.push({
           entity: 'Commune',
           value: value,
-          perCapita: population > 0 ? value / population : 0
+          perCapita: communePopulation > 0 ? value / communePopulation : 0
         });
       }
 
