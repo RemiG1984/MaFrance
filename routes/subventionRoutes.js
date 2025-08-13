@@ -35,12 +35,13 @@ const validateCountryParam = [
 ];
 
 // Get country subventions
+// Returns: { etat_central, autres_organismes_publics }
 router.get("/country/:country", validateCountryParam, (req, res) => {
     const db = req.app.locals.db;
     const { country } = req.params;
 
     const query = `
-        SELECT * 
+        SELECT etat_central, autres_organismes_publics
         FROM country_subventions 
         WHERE country = ?
     `;
@@ -58,20 +59,21 @@ router.get("/country/:country", validateCountryParam, (req, res) => {
                 });
         }
 
-        // Extract all fields except the country identifier
-        const { country: countryField, ...subventions } = row;
-
-        res.json(subventions);
+        res.json({
+            etat_central: row.etat_central,
+            autres_organismes_publics: row.autres_organismes_publics
+        });
     });
 });
 
 // Get department subventions
+// Returns: { subvention_region_distributed, subvention_departement }
 router.get("/departement/:dept", validateDepartementParam, (req, res) => {
     const db = req.app.locals.db;
     const { dept } = req.params;
 
     const query = `
-        SELECT * 
+        SELECT subvention_region_distributed, subvention_departement
         FROM department_subventions 
         WHERE dep = ?
     `;
@@ -89,20 +91,21 @@ router.get("/departement/:dept", validateDepartementParam, (req, res) => {
                 });
         }
 
-        // Extract all fields except the department identifier
-        const { dep: deptField, ...subventions } = row;
-
-        res.json(subventions);
+        res.json({
+            subvention_region_distributed: row.subvention_region_distributed,
+            subvention_departement: row.subvention_departement
+        });
     });
 });
 
 // Get commune subventions
+// Returns: { commune, subvention_EPCI_distributed, subvention_commune }
 router.get("/commune/:cog", validateCOGParam, (req, res) => {
     const db = req.app.locals.db;
     const { cog } = req.params;
 
     const query = `
-        SELECT * 
+        SELECT subvention_EPCI_distributed, subvention_commune
         FROM commune_subventions 
         WHERE COG = ?
     `;
@@ -120,12 +123,10 @@ router.get("/commune/:cog", validateCOGParam, (req, res) => {
                 });
         }
 
-        // Extract all fields except the commune identifier
-        const { COG: cogField, ...subventions } = row;
-
         res.json({
             commune: cog,
-            ...subventions,
+            subvention_EPCI_distributed: row.subvention_EPCI_distributed,
+            subvention_commune: row.subvention_commune
         });
     });
 });
