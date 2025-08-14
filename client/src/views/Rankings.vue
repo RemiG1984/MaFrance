@@ -69,8 +69,8 @@ export default {
     const loading = ref(false)
     const error = ref('')
     const filters = ref({
-      popLower: null,
-      popUpper: null,
+      popLower: 'aucune', // Default to 'aucune'
+      popUpper: 'aucune', // Default to 'aucune'
       topLimit: 10
     })
 
@@ -144,10 +144,10 @@ export default {
         }
 
         console.log('fetchCommuneRankings - Top rankings API call:', requestParams);
-        
+
         // Get top rankings
         const topResponse = await api.getCommuneRankings(requestParams);
-        
+
         console.log('fetchCommuneRankings - Top rankings response:', {
           dataCount: topResponse?.data?.length,
           totalCount: topResponse?.total_count,
@@ -173,9 +173,9 @@ export default {
         };
 
         console.log('fetchCommuneRankings - Bottom rankings API call:', bottomParams);
-        
+
         const bottomResponse = await api.getCommuneRankings(bottomParams);
-        
+
         console.log('fetchCommuneRankings - Bottom rankings response:', {
           dataCount: bottomResponse?.data?.length,
           hasData: !!bottomResponse?.data
@@ -214,7 +214,7 @@ export default {
         });
 
         const finalRankings = [...topRankings, ...bottomRankings];
-        
+
         console.log('fetchCommuneRankings - Final result:', {
           topCount: topRankings.length,
           bottomCount: bottomRankings.length,
@@ -222,7 +222,7 @@ export default {
           deptCode,
           metric
         });
-        
+
         return finalRankings;
       } catch (err) {
         const errorMsg = deptCode 
@@ -276,18 +276,19 @@ export default {
     const constructPopulationRange = () => {
       const { popLower, popUpper } = filters.value
 
-      if (popLower !== null && popUpper !== null) {
+      // Handle string values directly, avoiding "aucune" as it means no limit
+      if (popLower !== 'aucune' && popUpper !== 'aucune') {
         if (popLower === "1k") {
           if (popUpper === "10k") return "1-10k"
-          else if (popUpper === "100k") return "1-100k"
+          if (popUpper === "100k") return "1-100k"
         } else if (popLower === "10k" && popUpper === "100k") {
           return "10-100k"
         }
-      } else if (popLower !== null) {
+      } else if (popLower !== 'aucune') {
         if (popLower === "1k") return "1k+"
         else if (popLower === "10k") return "10k+"
         else if (popLower === "100k") return "100k+"
-      } else if (popUpper !== null) {
+      } else if (popUpper !== 'aucune') {
         if (popUpper === "1k") return "0-1k"
         else if (popUpper === "10k") return "0-10k"
         else if (popUpper === "100k") return "0-100k"
@@ -307,8 +308,8 @@ export default {
 
       // Reset population filters when changing scope
       if (selection.scope === 'departements') {
-        filters.value.popLower = null
-        filters.value.popUpper = null
+        filters.value.popLower = 'aucune'
+        filters.value.popUpper = 'aucune'
       }
 
       // Update rankings if metric is selected

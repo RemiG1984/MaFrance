@@ -51,20 +51,20 @@
         <div class="form-group">
           <label for="popLower">Commune pop. min:</label>
           <select id="popLower" :value="localFilters.popLower" @change="onFilterChange('popLower', $event)">
-            <option :value="null">Aucune limite</option>
-            <option :value="'1k'">1k</option>
-            <option :value="'10k'">10k</option>
-            <option :value="'100k'">100k</option>
+            <option value="aucune">Aucune limite</option>
+            <option value="1k">1k</option>
+            <option value="10k">10k</option>
+            <option value="100k">100k</option>
           </select>
         </div>
 
         <div class="form-group">
           <label for="popUpper">Commune pop. max:</label>
           <select id="popUpper" :value="localFilters.popUpper" @change="onFilterChange('popUpper', $event)">
-            <option :value="'1k'">1k</option>
-            <option :value="'10k'">10k</option>
-            <option :value="'100k'">100k</option>
-            <option :value="null">Aucune limite</option>
+            <option value="1k">1k</option>
+            <option value="10k">10k</option>
+            <option value="100k">100k</option>
+            <option value="aucune">Aucune limite</option>
           </select>
         </div>
       </div>
@@ -206,7 +206,7 @@ export default {
     const onFilterChange = (filterKey, event) => {
       const value = event.target.type === 'number' ? 
         parseInt(event.target.value, 10) : 
-        event.target.value === 'null' ? null : event.target.value
+        event.target.value
 
       localFilters.value = { ...localFilters.value, [filterKey]: value }
 
