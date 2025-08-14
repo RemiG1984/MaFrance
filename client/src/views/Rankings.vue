@@ -219,7 +219,7 @@ export default {
         }
 
         // Get top rankings
-        const topResponse = await api.getCommuneRankings(requestParams);
+        const topResponse = await api.fetchCommunesFranceRankings(requestParams.sort, requestParams.limit, requestParams.population_range);
 
         if (!topResponse?.data) {
           error.value = "Aucune donnée communale disponible pour la France entière.";
@@ -236,7 +236,7 @@ export default {
           offset: bottomOffset
         };
 
-        const bottomResponse = await api.getCommuneRankings(bottomParams);
+        const bottomResponse = await api.fetchCommunesFranceRankings(bottomParams.sort, bottomParams.limit, bottomParams.population_range, bottomOffset);
 
         // Process top rankings
         const topRankings = topResponse.data.map((commune, index) => {

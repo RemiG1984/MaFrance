@@ -278,10 +278,11 @@ const api = {
     },
 
     // France-wide commune rankings (without department filter)
-    fetchCommunesFranceRankings: (metric, limit, populationRange) => {
+    fetchCommunesFranceRankings: (metric, limit, populationRange, offset = 0) => {
         const params = { 
             sort: metric, 
-            limit, 
+            limit,
+            offset,
             direction: 'DESC' 
         };
         if (populationRange) {
