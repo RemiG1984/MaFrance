@@ -112,8 +112,15 @@ app.get("/", (req, res, next) => {
   });
 });
 
-// Catch-all route: redirect non-API routes to root with original path
-app.get('/{*path}', (req, res) => {
+// Catch-all route: redirect non-API routes to root with original path (excluding assets)
+app.get('*', (req, res) => {
+  // Skip redirects for asset files, API routes, and static files
+  if (req.originalUrl.startsWith('/api/') || 
+      req.originalUrl.startsWith('/assets/') ||
+      req.originalUrl.includes('.')) {
+    return res.status(404).send('Not Found');
+  }
+  
   const originalUrl = req.originalUrl === '/' ? '/' : req.originalUrl;
   console.log(`Redirecting ${originalUrl} to /?redirect=${encodeURIComponent(originalUrl)}`);
   res.redirect(`/?redirect=${encodeURIComponent(originalUrl)}`);
