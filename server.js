@@ -97,6 +97,27 @@ app.use('/api/migrants', migrantRoutes);
 app.use("/api", otherRoutes); // Keep this commented to test
 app.use("/api/cache", cacheRoutes);
 
+// Version endpoint for cache validation
+app.get("/api/version", (req, res) => {
+  // Generate build hash from package.json modification time or use environment variable
+  const fs = require('fs');
+  const packagePath = path.join(__dirname, 'package.json');
+  
+  let buildHash;
+  try {
+    const stats = fs.statSync(packagePath);
+    buildHash = stats.mtime.getTime().toString();
+  } catch (error) {
+    buildHash = Date.now().toString();
+  }
+  
+  res.json({
+    buildHash: process.env.BUILD_HASH || buildHash,
+    timestamp: Date.now(),
+    version: require('./package.json').version
+  });
+});
+
 // Health check and root route
 app.get("/", (req, res, next) => {
   if (req.headers["user-agent"]?.includes("GoogleHC")) {

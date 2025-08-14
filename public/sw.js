@@ -1,6 +1,8 @@
-const CACHE_NAME = 'ma-france-v2'; // Increment version to force cache refresh
-const STATIC_CACHE_NAME = 'ma-france-static-v2';
-const API_CACHE_NAME = 'ma-france-api-v2';
+// Build hash will be injected during build process
+const BUILD_HASH = self.BUILD_HASH || Date.now().toString();
+const CACHE_NAME = `ma-france-${BUILD_HASH}`;
+const STATIC_CACHE_NAME = `ma-france-static-${BUILD_HASH}`;
+const API_CACHE_NAME = `ma-france-api-${BUILD_HASH}`;
 
 // Static assets to cache immediately
 const STATIC_ASSETS = [
@@ -24,7 +26,7 @@ const API_ROUTES = [
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
-  console.log('Service Worker installing...');
+  console.log('Service Worker installing with build hash:', BUILD_HASH);
   event.waitUntil(
     caches.open(STATIC_CACHE_NAME)
       .then((cache) => {
@@ -32,6 +34,15 @@ self.addEventListener('install', (event) => {
       })
       .then(() => {
         console.log('Static assets cached');
+        // Store build info for comparison
+        return caches.open(STATIC_CACHE_NAME).then(cache => {
+          return cache.put('__build_info__', new Response(JSON.stringify({
+            buildHash: BUILD_HASH,
+            timestamp: Date.now()
+          })));
+        });
+      })
+      .then(() => {
         return self.skipWaiting(); // Activate immediately
       })
   );
@@ -39,12 +50,12 @@ self.addEventListener('install', (event) => {
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-  console.log('Service Worker activating...');
+  console.log('Service Worker activating with build hash:', BUILD_HASH);
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          // Delete old cache versions
+          // Delete old cache versions - keep only current build hash caches
           if (cacheName !== STATIC_CACHE_NAME &&
               cacheName !== API_CACHE_NAME &&
               (cacheName.startsWith('ma-france-') || cacheName.startsWith('workbox-'))) {
@@ -54,7 +65,7 @@ self.addEventListener('activate', (event) => {
         })
       );
     }).then(() => {
-      console.log('Old caches cleaned up');
+      console.log('Old caches cleaned up for build:', BUILD_HASH);
       return self.clients.claim(); // Take control of all clients
     })
   );
@@ -212,16 +223,59 @@ async function doBackgroundSync() {
   }
 }
 
+// Check for app updates
+async function checkForUpdates() {
+  try {
+    // Fetch a version endpoint or check build info
+    const response = await fetch('/api/version?' + Date.now());
+    if (response.ok) {
+      const serverInfo = await response.json();
+      
+      // Compare with cached build info
+      const cache = await caches.open(STATIC_CACHE_NAME);
+      const cachedResponse = await cache.match('__build_info__');
+      
+      if (cachedResponse) {
+        const cachedInfo = await cachedResponse.json();
+        
+        if (serverInfo.buildHash !== cachedInfo.buildHash) {
+          console.log('New version detected, updating cache...');
+          // Clear old caches and force update
+          await clearAllCaches();
+          return true; // Update available
+        }
+      }
+    }
+  } catch (error) {
+    console.log('Error checking for updates:', error);
+  }
+  return false; // No update needed
+}
+
+async function clearAllCaches() {
+  const cacheNames = await caches.keys();
+  await Promise.all(
+    cacheNames.map(cacheName => caches.delete(cacheName))
+  );
+}
+
 // Handle messages from the main thread
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   } else if (event.data && event.data.type === 'CLEAR_CACHE') {
+    event.waitUntil(clearAllCaches());
+  } else if (event.data && event.data.type === 'CHECK_UPDATES') {
     event.waitUntil(
-      caches.keys().then((cacheNames) => {
-        return Promise.all(
-          cacheNames.map((cacheName) => caches.delete(cacheName))
-        );
+      checkForUpdates().then(hasUpdate => {
+        if (hasUpdate) {
+          // Notify clients about update
+          self.clients.matchAll().then(clients => {
+            clients.forEach(client => {
+              client.postMessage({ type: 'UPDATE_AVAILABLE' });
+            });
+          });
+        }
       })
     );
   }

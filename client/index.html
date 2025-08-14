@@ -127,9 +127,22 @@
               console.log('App is offline - using cached data');
             });
             
+            // Listen for update messages from service worker
+            navigator.serviceWorker.addEventListener('message', (event) => {
+              if (event.data && event.data.type === 'UPDATE_AVAILABLE') {
+                console.log('App update available, refreshing...');
+                window.location.reload();
+              }
+            });
+            
             // Check for updates periodically
             setInterval(() => {
               registration.update();
+              
+              // Also check our custom update mechanism
+              if (registration.active) {
+                registration.active.postMessage({ type: 'CHECK_UPDATES' });
+              }
             }, 60000); // Check every minute
             
           } catch (error) {
