@@ -23,7 +23,7 @@ router.get("/details", validateCountry, (req, res) => {
   }
 
   db.get(
-    `SELECT country, population, logements_sociaux_pct, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct, total_places_migrants, places_migrants_p1k 
+    `SELECT country, population, logements_sociaux_pct, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct, total_places_migrants, places_migrants_p1k, Subventions_parHab
      FROM country 
      WHERE UPPER(country) = ?`,
     [country.toUpperCase()],

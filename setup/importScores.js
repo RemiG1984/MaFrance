@@ -45,6 +45,7 @@ function importScores(db, callback) {
                         const logements_sociaux_pct = parseFloat(row['logements_sociaux_pct']) || 0;
                         const total_places_migrants = parseInt(row['Total_places_migrants']) || 0;
                         const places_migrants_p1k = parseFloat(row['places_migrants_p1k']) || 0;
+                        const Subventions_parHab = parseFloat(row['Subventions_parHab']) || 0;
 
                         countryRows++;
                         countryBatch.push([
@@ -61,7 +62,8 @@ function importScores(db, callback) {
                             pop_in_qpv_pct,
                             logements_sociaux_pct,
                             total_places_migrants,
-                            places_migrants_p1k
+                            places_migrants_p1k,
+                            Subventions_parHab
                         ]);
                     })
                     .on('end', () => {
@@ -96,7 +98,8 @@ function importScores(db, callback) {
                             pop_in_qpv_pct REAL,
                             logements_sociaux_pct REAL,
                             Total_places_migrants INTEGER,
-                            places_migrants_p1k REAL
+                            places_migrants_p1k REAL,
+                            Subventions_parHab REAL
                         )
                     `, (err) => {
                         if (err) {
@@ -120,10 +123,10 @@ function importScores(db, callback) {
                                 }
 
                                 if (countryBatch.length > 0) {
-                                    const placeholders = countryBatch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
+                                    const placeholders = countryBatch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
                                     const flatBatch = [].concat(...countryBatch);
                                     db.run(
-                                        `INSERT OR IGNORE INTO country (country, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct, logements_sociaux_pct, Total_places_migrants, places_migrants_p1k) VALUES ${placeholders}`,
+                                        `INSERT OR IGNORE INTO country (country, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct, logements_sociaux_pct, Total_places_migrants, places_migrants_p1k, Subventions_parHab) VALUES ${placeholders}`,
                                         flatBatch,
                                         (err) => {
                                             if (err) {
@@ -211,6 +214,7 @@ function importScores(db, callback) {
                         const logements_sociaux_pct = parseFloat(row['logements_sociaux_pct']) || 0;
                         const total_places_migrants = parseInt(row['Total_places_migrants']) || 0;
                         const places_migrants_p1k = parseFloat(row['places_migrants_p1k']) || 0;
+                        const Subventions_parHab = parseFloat(row['Subventions_parHab']) || 0;
 
                         departmentRows++;
                         departmentBatch.push([
@@ -227,7 +231,8 @@ function importScores(db, callback) {
                             pop_in_qpv_pct,
                             logements_sociaux_pct,
                             total_places_migrants,
-                            places_migrants_p1k
+                            places_migrants_p1k,
+                            Subventions_parHab
                         ]);
                     })
                     .on('end', () => {
@@ -262,7 +267,8 @@ function importScores(db, callback) {
                             pop_in_qpv_pct REAL,
                             logements_sociaux_pct REAL,
                             Total_places_migrants INTEGER,
-                            places_migrants_p1k REAL
+                            places_migrants_p1k REAL,
+                            Subventions_parHab REAL
                         )
                     `, (err) => {
                         if (err) {
@@ -287,10 +293,10 @@ function importScores(db, callback) {
 
                                 for (let i = 0; i < departmentBatch.length; i += batchSize) {
                                     const batch = departmentBatch.slice(i, i + batchSize);
-                                    const placeholders = batch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
+                                    const placeholders = batch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
                                     const flatBatch = [].concat(...batch);
                                     db.run(
-                                        `INSERT OR IGNORE INTO departements (departement, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct, logements_sociaux_pct, Total_places_migrants, places_migrants_p1k) VALUES ${placeholders}`,
+                                        `INSERT OR IGNORE INTO departements (departement, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct, logements_sociaux_pct, Total_places_migrants, places_migrants_p1k, Subventions_parHab) VALUES ${placeholders}`,
                                         flatBatch,
                                         (err) => {
                                             if (err) {
@@ -371,6 +377,7 @@ function importScores(db, callback) {
                         const pop_in_qpv_pct = parseFloat(row['Pop_in_QPV_pct']) || 0;
                         const total_places_migrants = parseInt(row['Total_places_migrants']) || 0;
                         const places_migrants_p1k = parseFloat(row['places_migrants_p1k']) || 0;
+                        const Subventions_parHab = parseFloat(row['Subventions_parHab']) || 0;
 
                         locationsMap.set(row['COG'], {
                             code: row['COG'],
@@ -388,7 +395,8 @@ function importScores(db, callback) {
                             total_qpv,
                             pop_in_qpv_pct,
                             total_places_migrants,
-                            places_migrants_p1k
+                            places_migrants_p1k,
+                            Subventions_parHab
                         });
                     })
                     .on('end', () => {
@@ -426,6 +434,7 @@ function importScores(db, callback) {
                             pop_in_qpv_pct REAL,
                             Total_places_migrants INTEGER,
                             places_migrants_p1k REAL,
+                            Subventions_parHab REAL,
                             UNIQUE(COG, commune)
                         )
                     `, (err) => {
@@ -467,16 +476,17 @@ function importScores(db, callback) {
                                         loc.total_qpv,
                                         loc.pop_in_qpv_pct,
                                         loc.total_places_migrants,
-                                        loc.places_migrants_p1k
+                                        loc.places_migrants_p1k,
+                                        loc.Subventions_parHab
                                     ]);
 
                                     locationRows++;
 
                                     if (locationBatch.length >= batchSize) {
-                                        const placeholders = locationBatch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
+                                        const placeholders = locationBatch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
                                         const flatBatch = [].concat(...locationBatch);
                                         db.run(
-                                            `INSERT OR IGNORE INTO locations (COG, departement, commune, population, logements_sociaux_pct, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct, Total_places_migrants, places_migrants_p1k) VALUES ${placeholders}`,
+                                            `INSERT OR IGNORE INTO locations (COG, departement, commune, population, logements_sociaux_pct, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct, Total_places_migrants, places_migrants_p1k, Subventions_parHab) VALUES ${placeholders}`,
                                             flatBatch,
                                             (err) => {
                                                 if (err) {

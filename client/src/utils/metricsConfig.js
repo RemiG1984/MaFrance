@@ -327,7 +327,7 @@ const MetricsConfig = {
             alt2Label: "Subventions aux associations /hab/an",
             category: "wokisme",
             format: "currency",
-            source: "subventions",
+            source: "details",
         },
     ],
 

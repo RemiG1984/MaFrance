@@ -56,6 +56,7 @@ router.get("/details", validateDepartement, (req, res) => {
       d.wokisme_score, 
       d.number_of_mosques, 
       d.mosque_p100k,
+      d.Subventions_parHab,
       COALESCE(qpv_stats.total_qpv, 0) as total_qpv,
       COALESCE(qpv_stats.total_population_qpv, 0) as total_population_qpv,
       CASE 

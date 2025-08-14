@@ -112,6 +112,7 @@ router.get(
       l.pop_in_qpv_pct,
       l.Total_places_migrants,
       l.places_migrants_p1k,
+      l.total_subventions_parHab,
       (COALESCE(l.insecurite_score, 0) + COALESCE(l.immigration_score, 0) + COALESCE(l.islamisation_score, 0) + COALESCE(l.defrancisation_score, 0) + COALESCE(l.wokisme_score, 0)) / 5 AS total_score,
       cn.musulman_pct, 
       (COALESCE(cc.coups_et_blessures_volontaires_p1k, 0) + 
@@ -139,7 +140,6 @@ router.get(
     LEFT JOIN LatestCommuneNames cn ON l.COG = cn.COG
     LEFT JOIN commune_crime cc ON l.COG = cc.COG 
       AND cc.annee = (SELECT MAX(annee) FROM commune_crime WHERE COG = l.COG)
-    LEFT JOIN commune_subventions cs ON l.COG = cs.COG
     WHERE (l.departement = ? OR ? = '')
     ${populationFilter}
     ORDER BY ${sort} ${direction}, ${secondarySort}
@@ -237,6 +237,7 @@ router.get(
       d.pop_in_qpv_pct,
       d.Total_places_migrants,
       d.places_migrants_p1k,
+      d.total_subventions_parHab,
       (COALESCE(d.insecurite_score, 0) + COALESCE(d.immigration_score, 0) + COALESCE(d.islamisation_score, 0) + COALESCE(d.defrancisation_score, 0) + COALESCE(d.wokisme_score, 0)) /5 AS total_score,
       dn.musulman_pct, 
       (COALESCE(dc.homicides_p100k, 0) + COALESCE(dc.tentatives_homicides_p100k, 0)) AS homicides_total_p100k,
@@ -265,7 +266,6 @@ router.get(
     LEFT JOIN LatestDepartmentNames dn ON d.departement = dn.dpt
     LEFT JOIN department_crime dc ON d.departement = dc.dep 
       AND dc.annee = (SELECT MAX(annee) FROM department_crime WHERE dep = d.departement)
-    LEFT JOIN department_subventions ds ON d.departement = ds.dep
     ORDER BY ${sort} ${direction}
     LIMIT ? OFFSET ?
   `;
