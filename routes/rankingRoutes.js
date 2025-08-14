@@ -186,13 +186,13 @@ router.get(
     // Try to get cached data first
     const cacheService = require('../services/cacheService');
     const cachedData = cacheService.get('department_rankings');
-    
+
     if (cachedData) {
       // Sort the cached data
       const sortedData = [...cachedData].sort((a, b) => {
         const aValue = a[sort] || 0;
         const bValue = b[sort] || 0;
-        
+
         if (direction === 'DESC') {
           if (bValue !== aValue) return bValue - aValue;
           // Secondary sort by departement code
@@ -203,10 +203,10 @@ router.get(
           return a.departement.localeCompare(b.departement);
         }
       });
-      
+
       // Apply pagination
       const paginatedData = sortedData.slice(offset, offset + parseInt(limit));
-      
+
       res.json({
         data: paginatedData,
         total_count: sortedData.length,

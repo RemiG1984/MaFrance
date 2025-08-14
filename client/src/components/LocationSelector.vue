@@ -107,7 +107,7 @@ export default {
       this.selectedCommune = null
       this.communeQuery = ''
       this.communeSuggestions = []
-      this.dataStore.currentLevel = 'country'
+      this.dataStore.setCountry()
     },
     
     onDepartementChange() {

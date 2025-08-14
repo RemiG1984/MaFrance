@@ -63,6 +63,8 @@ export const useDataStore = defineStore("data", {
       return await api.searchCommunes(query);
     },
 
+
+
     // Requêtes globales getAll()
     async fetchCountryData(code) {
       try {
@@ -204,6 +206,13 @@ export const useDataStore = defineStore("data", {
     setCountry() {
       this.fetchCountryData().then((country) => {
         this.country = country;
+
+        // Clear lower level data when moving to country level
+        this.clearDepartementData();
+        this.clearCommuneData();
+        this.levels.departement = null;
+        this.levels.commune = null;
+
         this.setLevel("country");
       });
     },
@@ -216,6 +225,10 @@ export const useDataStore = defineStore("data", {
         this.departement = departement;
         this.levels.departement = DepartementNames[deptCode];
       }
+
+      // Clear commune data when moving to departement level
+      this.clearCommuneData();
+      this.levels.commune = null;
 
       this.setLevel("departement");
     },
@@ -357,22 +370,6 @@ export const useDataStore = defineStore("data", {
     },
 
     // Actions utilitaires
-    clearCountryData() {
-      this.country = {
-        details: null,
-        names: null,
-        crime: null,
-        crimeHistory: null,
-        namesHistory: null,
-        qpv: null,
-        executive: null,
-        subventions: null,
-        migrants: null,
-        articles: null,
-      };
-      this.errors.country = null;
-    },
-
     clearDepartementData() {
       this.departement = {
         details: null,
@@ -382,31 +379,29 @@ export const useDataStore = defineStore("data", {
         namesHistory: null,
         qpv: null,
         executive: null,
+        communesRankings: null,
+        articles: null,
+        namesSeries: null,
+        crimeSeries: null,
+        crimeAggreg: null,
         subventions: null,
         migrants: null,
       };
-      this.errors.departement = null;
     },
 
     clearCommuneData() {
       this.commune = {
         details: null,
-        names: null,
         crime: null,
         crimeHistory: null,
-        namesHistory: null,
         qpv: null,
         executive: null,
+        articles: null,
+        crimeSeries: null,
+        crimeAggreg: null,
         subventions: null,
         migrants: null,
       };
-      this.errors.commune = null;
-    },
-
-    clearAllData() {
-      this.clearCountryData();
-      this.clearDepartementData();
-      this.clearCommuneData();
     },
 
     // Initialize store and sync with MetricsConfig
@@ -667,20 +662,9 @@ export const useDataStore = defineStore("data", {
         : metricKey;
     },
 
-    getCurrentSubventions() {
-            const location = this.getCurrentLocation()
-            if (location.type === 'departement') {
-                return this.subventionsDepartement
-            } else if (location.type === 'commune') {
-                return this.subventionsCommune
-            } else {
-                return this.subventionsCountry
-            }
-        },
-
-        getCurrentMigrants() {
-            const level = this.currentLevel
-            return this[level]?.migrants || { list: [], pagination: { hasMore: false, nextCursor: null, limit: 20 } }
-        },
+    getCurrentMigrants() {
+      const level = this.currentLevel
+      return this[level]?.migrants || { list: [], pagination: { hasMore: false, nextCursor: null, limit: 20 } }
+    },
   },
 });

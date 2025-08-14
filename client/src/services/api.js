@@ -65,38 +65,38 @@ class ApiService {
      */
     shouldPersistCache(endpoint) {
         const persistentEndpoints = [
-            "/api/departements/crime_history",
-            "/api/departements/names_history",
-            "/api/communes/crime_history",
-            "/api/communes/names_history",
-            "/api/country/crime_history",
-            "/api/country/names_history",
-            "/api/departements/crime",
-            "/api/departements/names",
-            "/api/departements/prefet",
-            "/api/communes/crime",
-            "/api/communes/names",
-            "/api/communes/maire",
-            "/api/country/crime",
-            "/api/country/names",
-            "/api/country/ministre",
-            "/api/qpv/",
-            "/api/departements/details",
-            "/api/communes/details",
-            "/api/country/details",
-            "/api/articles/lieux",
-            "/api/articles",
-            "/api/articles/counts",
-            "/api/departements",
-            "/api/communes",
-            "/api/rankings/departements",
-            "/api/rankings/communes",
-            "/api/communes/search",
-            "/api/migrants/departement/",
-            "/api/migrants/commune/",
-            "/api/subventions/country/",
-            "/api/subventions/departement/",
-            "/api/subventions/commune/",
+            "/departements/crime_history",
+            "/departements/names_history",
+            "/communes/crime_history",
+            "/communes/names_history",
+            "/country/crime_history",
+            "/country/names_history",
+            "/departements/crime",
+            "/departements/names",
+            "/departements/prefet",
+            "/communes/crime",
+            "/communes/names",
+            "/communes/maire",
+            "/country/crime",
+            "/country/names",
+            "/country/ministre",
+            "/qpv/",
+            "/departements/details",
+            "/communes/details",
+            "/country/details",
+            "/articles/lieux",
+            "/articles",
+            "/articles/counts",
+            "/departements",
+            "/communes",
+            "/rankings/departements",
+            "/rankings/communes",
+            "/communes/search",
+            "/migrants/departement/",
+            "/migrants/commune/",
+            "/subventions/country/",
+            "/subventions/departement/",
+            "/subventions/commune/",
         ];
 
         return persistentEndpoints.some((pattern) =>
@@ -225,96 +225,98 @@ const apiService = new ApiService();
 const api = {
     // Country data
     getCountryDetails: (country = "France") =>
-        apiService.request(`/api/country/details?country=${country}`),
+        apiService.request(`/country/details?country=${country}`),
     getCountryNames: (country = "France") =>
-        apiService.request(`/api/country/names?country=${country}`),
+        apiService.request(`/country/names?country=${country}`),
     getCountryCrime: (country = "France") =>
-        apiService.request(`/api/country/crime?country=${country}`),
+        apiService.request(`/country/crime?country=${country}`),
     getCountryCrimeHistory: (country = "France") =>
-        apiService.request(`/api/country/crime_history?country=${country}`),
+        apiService.request(`/country/crime_history?country=${country}`),
     getCountryNamesHistory: (country = "France") =>
-        apiService.request(`/api/country/names_history?country=${country}`),
+        apiService.request(`/country/names_history?country=${country}`),
     getCountryExecutive: (country = "France") =>
-        apiService.request(`/api/country/ministre?country=${country}`),
+        apiService.request(`/country/ministre?country=${country}`),
     getCountryArticles: (country = "France") =>
-        apiService.request(`/api/articles?country=${country}`),
+        apiService.request(`/articles?country=${country}`),
 
     // Departement data
     getDepartementDetails: (code) =>
-        apiService.request(`/api/departements/details?dept=${code}`),
+        apiService.request(`/departements/details?dept=${code}`),
     getDepartementNames: (code) =>
-        apiService.request(`/api/departements/names?dept=${code}`),
+        apiService.request(`/departements/names?dept=${code}`),
     getDepartementCrime: (code) =>
-        apiService.request(`/api/departements/crime?dept=${code}`),
+        apiService.request(`/departements/crime?dept=${code}`),
     getDepartementCrimeHistory: (code) =>
-        apiService.request(`/api/departements/crime_history?dept=${code}`),
+        apiService.request(`/departements/crime_history?dept=${code}`),
     getDepartementNamesHistory: (code) =>
-        apiService.request(`/api/departements/names_history?dept=${code}`),
+        apiService.request(`/departements/names_history?dept=${code}`),
     getDepartementExecutive: (deptCode) =>
-        apiService.request(`/api/departements/prefet?dept=${deptCode}`),
+        apiService.request(`/departements/prefet?dept=${deptCode}`),
     getDepartementRankings: (params) => {
         const queryString = new URLSearchParams(params).toString();
-        return apiService.request(`/api/rankings/departements?${queryString}`);
+        return apiService.request(`/rankings/departements?${queryString}`);
     },
 
     // Commune data
     getCommuneDetails: (cog) =>
-        apiService.request(`/api/communes/details?cog=${cog}`),
+        apiService.request(`/communes/details?cog=${cog}`),
     getCommuneNames: (cog) =>
-        apiService.request(`/api/communes/names?cog=${cog}`),
+        apiService.request(`/communes/names?cog=${cog}`),
     getCommuneCrime: (cog) =>
-        apiService.request(`/api/communes/crime?cog=${cog}`),
+        apiService.request(`/communes/crime?cog=${cog}`),
     getCommuneCrimeHistory: (cog) =>
-        apiService.request(`/api/communes/crime_history?cog=${cog}`),
+        apiService.request(`/communes/crime_history?cog=${cog}`),
     getCommuneNamesHistory: (cog) =>
-        apiService.request(`/api/communes/names_history?cog=${cog}`),
+        apiService.request(`/communes/names_history?cog=${cog}`),
     getCommuneExecutive: (cog) =>
         apiService.request(
-            `/api/communes/maire?cog=${encodeURIComponent(cog)}`,
+            `/communes/maire?cog=${encodeURIComponent(cog)}`,
         ),
     getCommuneRankings: (params) => {
         const queryString = new URLSearchParams(params).toString();
-        return apiService.request(`/api/rankings/communes?${queryString}`);
+        return apiService.request(`/rankings/communes?${queryString}`);
     },
+
+    
 
     // Search functionality
     searchCommunes: (query) =>
         apiService.request(
-            `/api/communes/search?q=${encodeURIComponent(query)}`,
+            `/communes/search?q=${encodeURIComponent(query)}`,
         ),
 
     // Location data
-    getDepartements: () => apiService.request("/api/departements"),
-    getCommunes: (dept) => apiService.request(`/api/communes?dept=${dept}`),
+    getDepartements: () => apiService.request("/departements"),
+    getCommunes: (dept) => apiService.request(`/communes?dept=${dept}`),
     getLieux: (dept, cog) =>
-        apiService.request(`/api/articles/lieux?dept=${dept}&cog=${cog}`),
+        apiService.request(`/articles/lieux?dept=${dept}&cog=${cog}`),
 
     // Articles
     getArticles: (params) => {
         const queryString = new URLSearchParams(params).toString();
         return apiService.request(
-            `/api/articles?${queryString}`,
+            `/articles?${queryString}`,
             {},
             !params.cursor,
         ); // Don't cache paginated requests
     },
     getArticleCounts: (params) => {
         const queryString = new URLSearchParams(params).toString();
-        return apiService.request(`/api/articles/counts?${queryString}`);
+        return apiService.request(`/articles/counts?${queryString}`);
     },
 
     // Subventions data
     getCountrySubventions: (country = "france") =>
-        apiService.request(`/api/subventions/country/${country}`),
+        apiService.request(`/subventions/country/${country}`),
     getDepartementSubventions: (code) =>
-        apiService.request(`/api/subventions/departement/${code}`),
+        apiService.request(`/subventions/departement/${code}`),
     getCommuneSubventions: (cog) =>
-        apiService.request(`/api/subventions/commune/${cog}`),
+        apiService.request(`/subventions/commune/${cog}`),
 
     // Migrant centers data
     getMigrants: (params = {}) => {
         const queryString = new URLSearchParams(params).toString();
-        const url = `/api/migrants`;
+        const url = `/migrants`;
         return apiService.request(
             queryString ? `${url}?${queryString}` : url,
             {},
@@ -325,7 +327,7 @@ const api = {
     // QPV data
     getQpv: (params = {}) => {
         const queryString = new URLSearchParams(params).toString();
-        const url = `/api/qpv`;
+        const url = `/qpv`;
         return apiService.request(
             queryString ? `${url}?${queryString}` : url,
             {},

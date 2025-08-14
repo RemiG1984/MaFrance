@@ -1,3 +1,4 @@
+
 <template>
   <div class="ranking-filters">
     <!-- Main Controls -->
@@ -6,10 +7,8 @@
         <label for="scopeSelect">Portée :</label>
         <select id="scopeSelect" :value="selectedScope" @change="onScopeChange">
           <option value="departements">Départements</option>
-          <!--
-          <option value="communes_france">Communes (France)</option>
-          -->
           <option value="communes_dept">Communes (par département)</option>
+          <option value="communes_france">Communes (France entière)</option>
         </select>
       </div>
 
@@ -47,42 +46,48 @@
       Paramètres avancés
     </button>
 
-    
     <div class="tweaking-box" :class="{ active: showFilters }">
-      <!--
-      <div class="population-controls">
+      <!-- Desktop Layout: Top Limit and Population Controls on Same Line -->
+      <div class="advanced-controls-row">
         <div class="form-group">
-          <label for="popLower">Commune pop. min:</label>
-          <select id="popLower" :value="filters.popLower" @change="onFilterChange('popLower', $event)">
-            <option :value="null">Aucune limite</option>
-            <option :value="1000">1k</option>
-            <option :value="10000">10k</option>
-            <option :value="100000">100k</option>
-          </select>
+          <label for="topLimit">Nombre de résultats (Top/Bottom) :</label>
+          <input 
+            type="number" 
+            id="topLimit" 
+            :value="filters.topLimit"
+            @input="onFilterChange('topLimit', $event)"
+            min="1" 
+            max="100"
+          >
         </div>
 
-        <div class="form-group">
-          <label for="popUpper">Commune pop. max:</label>
-          <select id="popUpper" :value="filters.popUpper" @change="onFilterChange('popUpper', $event)">
-            <option :value="1000">1k</option>
-            <option :value="10000">10k</option>
-            <option :value="100000">100k</option>
-            <option :value="null">Aucune limite</option>
-          </select>
-        </div>
-      </div>
-      -->
+        <div v-show="localScope.includes('communes')" class="population-controls">
+          <div class="form-group">
+            <label for="popLower">Commune pop. min:</label>
+            <select id="popLower" :value="localFilters.popLower" @change="onFilterChange('popLower', $event)">
+              <option 
+                v-for="option in popLowerOptions" 
+                :key="option.value" 
+                :value="option.value"
+              >
+                {{ option.label }}
+              </option>
+            </select>
+          </div>
 
-      <div class="form-group">
-        <label for="topLimit">Nombre de résultats (Top/Bottom) :</label>
-        <input 
-          type="number" 
-          id="topLimit" 
-          :value="filters.topLimit"
-          @input="onFilterChange('topLimit', $event)"
-          min="1" 
-          max="100"
-        >
+          <div class="form-group">
+            <label for="popUpper">Commune pop. max:</label>
+            <select id="popUpper" :value="localFilters.popUpper" @change="onFilterChange('popUpper', $event)">
+              <option 
+                v-for="option in popUpperOptions" 
+                :key="option.value" 
+                :value="option.value"
+              >
+                {{ option.label }}
+              </option>
+            </select>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -145,11 +150,56 @@ export default {
       const level = currentLevel.value
       // Force reactivity to store label state changes
       const labelState = store.labelState
-      
+
       // Sync MetricsConfig label state with store before getting options
       MetricsConfig.labelState = labelState
-      
+
       return MetricsConfig.getAvailableMetricOptions(level)
+    })
+
+    // Population options with filtering logic
+    const popLowerOptions = computed(() => {
+      const upperValue = localFilters.value.popUpper
+      const allOptions = [
+        { value: 'aucune', label: 'Aucune limite' },
+        { value: '1k', label: '1k' },
+        { value: '10k', label: '10k' },
+        { value: '100k', label: '100k' }
+      ]
+
+      if (upperValue === 'aucune') {
+        return allOptions
+      }
+
+      // Filter out options that would be >= upper limit
+      const upperIndex = allOptions.findIndex(opt => opt.value === upperValue)
+      if (upperIndex === -1) return allOptions
+
+      return allOptions.filter((opt, index) => 
+        opt.value === 'aucune' || index < upperIndex
+      )
+    })
+
+    const popUpperOptions = computed(() => {
+      const lowerValue = localFilters.value.popLower
+      const allOptions = [
+        { value: '1k', label: '1k' },
+        { value: '10k', label: '10k' },
+        { value: '100k', label: '100k' },
+        { value: 'aucune', label: 'Aucune limite' }
+      ]
+
+      if (lowerValue === 'aucune') {
+        return allOptions
+      }
+
+      // Filter out options that would be <= lower limit
+      const lowerIndex = allOptions.findIndex(opt => opt.value === lowerValue)
+      if (lowerIndex === -1) return allOptions
+
+      return allOptions.filter((opt, index) => 
+        opt.value === 'aucune' || index > lowerIndex
+      )
     })
 
     const departments = computed(() => {
@@ -210,15 +260,9 @@ export default {
     const onFilterChange = (filterKey, event) => {
       const value = event.target.type === 'number' ? 
         parseInt(event.target.value, 10) : 
-        event.target.value === 'null' ? null : event.target.value
+        event.target.value
 
       localFilters.value = { ...localFilters.value, [filterKey]: value }
-
-      // Simple validation
-      if (localFilters.value.popLower !== null && localFilters.value.popUpper !== null && localFilters.value.popLower > localFilters.value.popUpper) {
-        console.warn('Population min cannot be greater than max')
-        return
-      }
 
       emitFiltersChange(localFilters.value)
     }
@@ -226,7 +270,6 @@ export default {
     // Watchers
     watch(() => props.selectedScope, (newScope) => {
       localScope.value = newScope
-      // updateCurrentLevel() // No longer needed here, currentLevel is computed
     })
 
     watch(() => props.selectedDepartement, (newDept) => {
@@ -236,6 +279,10 @@ export default {
     watch(() => props.selectedMetric, (newMetric) => {
       localMetric.value = newMetric
     })
+
+    watch(() => props.filters, (newFilters) => {
+      localFilters.value = { ...newFilters }
+    }, { deep: true })
 
     // Watch for label state changes from store
     watch(() => store.labelState, () => {
@@ -270,6 +317,8 @@ export default {
       currentLevel,
       availableMetricOptions,
       departments,
+      popLowerOptions,
+      popUpperOptions,
       onScopeChange,
       onDepartementChange,
       onMetricChange,
@@ -316,16 +365,27 @@ export default {
   padding: 20px;
   margin-top: 10px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
 }
 
 .tweaking-box.active {
   display: block;
+  border-color: #007bff;
+  box-shadow: 0 2px 12px rgba(0, 123, 255, 0.2);
+  background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+}
+
+.advanced-controls-row {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  flex-wrap: wrap;
 }
 
 .population-controls {
   display: flex;
   gap: 15px;
-  margin-bottom: 15px;
+  flex-wrap: wrap;
 }
 
 .form-group {
@@ -349,17 +409,46 @@ export default {
   font-size: 14px;
 }
 
+.tweaking-box.active .form-group input,
+.tweaking-box.active .form-group select {
+  border-color: #b3d9ff;
+}
+
 @media (max-width: 768px) {
   .main-controls {
     flex-direction: column;
+    gap: 15px;
+  }
+
+  .advanced-controls-row {
+    flex-direction: column;
+    gap: 15px;
   }
 
   .population-controls {
     flex-direction: column;
+    gap: 10px;
   }
 
   .form-group {
     min-width: auto;
+    width: 100%;
+  }
+
+  .form-group select,
+  .form-group input {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+@media (max-width: 480px) {
+  .tweaking-box {
+    padding: 15px;
+  }
+
+  .form-group {
+    margin-bottom: 10px;
   }
 }
 </style>

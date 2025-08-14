@@ -44,8 +44,10 @@
           v-for="(item, i) in filteredArticles"
           :key="item.url + i"
         >
-          <div class="article-date">{{ formatDate(item.date) }}</div>
-          <div class="article-location">[{{ item.commune }}]</div>
+          <div class="article-header">
+            <span class="article-date">{{ formatDate(item.date) }}</span>
+            <span class="article-location">{{ item.commune }} ({{ item.departement }})</span>
+          </div>
           <div class="article-title">
             <a :href='item.url' target="_blank" rel="noopener noreferrer">
               {{ item.title }}
@@ -243,6 +245,13 @@ export default {
   border-bottom: none;
 }
 
+.article-header {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
 .article-date {
   font-size: 0.85rem;
   font-weight: 600;
@@ -309,6 +318,10 @@ export default {
 @media (max-width: 600px) {
   .article-item {
     padding: 10px;
+  }
+  
+  .article-header {
+    gap: 6px;
   }
   
   .article-date {
