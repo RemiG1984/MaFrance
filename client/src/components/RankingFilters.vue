@@ -47,10 +47,10 @@
 
     
     <div class="tweaking-box" :class="{ active: showFilters }">
-      <div v-show="selectedScope.includes('communes')" class="population-controls">
+      <div v-show="localScope.includes('communes')" class="population-controls">
         <div class="form-group">
           <label for="popLower">Commune pop. min:</label>
-          <select id="popLower" :value="filters.popLower" @change="onFilterChange('popLower', $event)">
+          <select id="popLower" :value="localFilters.popLower" @change="onFilterChange('popLower', $event)">
             <option :value="null">Aucune limite</option>
             <option :value="1000">1k</option>
             <option :value="10000">10k</option>
@@ -60,7 +60,7 @@
 
         <div class="form-group">
           <label for="popUpper">Commune pop. max:</label>
-          <select id="popUpper" :value="filters.popUpper" @change="onFilterChange('popUpper', $event)">
+          <select id="popUpper" :value="localFilters.popUpper" @change="onFilterChange('popUpper', $event)">
             <option :value="1000">1k</option>
             <option :value="10000">10k</option>
             <option :value="100000">100k</option>
@@ -222,7 +222,6 @@ export default {
     // Watchers
     watch(() => props.selectedScope, (newScope) => {
       localScope.value = newScope
-      // updateCurrentLevel() // No longer needed here, currentLevel is computed
     })
 
     watch(() => props.selectedDepartement, (newDept) => {
@@ -232,6 +231,10 @@ export default {
     watch(() => props.selectedMetric, (newMetric) => {
       localMetric.value = newMetric
     })
+
+    watch(() => props.filters, (newFilters) => {
+      localFilters.value = { ...newFilters }
+    }, { deep: true })
 
     // Watch for label state changes from store
     watch(() => store.labelState, () => {

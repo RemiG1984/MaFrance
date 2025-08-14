@@ -348,6 +348,12 @@ export default {
       rankings.value = []
       error.value = ''
 
+      // Reset population filters when changing scope
+      if (selection.scope === 'departements') {
+        filters.value.popLower = null
+        filters.value.popUpper = null
+      }
+
       // Update rankings if metric is selected
       if (selectedMetric.value) {
         updateRankings()
