@@ -86,16 +86,16 @@ app.locals.db = db;
 
 // Attach routes with search rate limiting where applicable
 //app.use("/api/communes", searchLimiter, communeRoutes);
-app.use("/api/communes", communeRoutes);
-app.use("/api/departements", departementRoutes);
-app.use("/api/country", countryRoutes);
-app.use("/api/articles", articleRoutes);
-app.use('/api/qpv', qpvRoutes);
-app.use('/api/rankings', rankingRoutes);
-app.use('/api/subventions', subventionRoutes);
-app.use('/api/migrants', migrantRoutes);
+// app.use("/api/communes", communeRoutes);
+// app.use("/api/departements", departementRoutes);
+// app.use("/api/country", countryRoutes);
+// app.use("/api/articles", articleRoutes);
+// app.use('/api/qpv', qpvRoutes);
+// app.use('/api/rankings', rankingRoutes);
+// app.use('/api/subventions', subventionRoutes);
+// app.use('/api/migrants', migrantRoutes);
 // app.use("/api", otherRoutes); // Keep this commented to test
-app.use("/api/cache", cacheRoutes);
+// app.use("/api/cache", cacheRoutes);
 
 // Health check and root route
 app.get("/", (req, res, next) => {
