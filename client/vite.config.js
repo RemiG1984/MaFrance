@@ -15,4 +15,14 @@ export default defineConfig({
     outDir: "../dist",
     emptyOutDir: true,
   },
+  server: {
+    host: '0.0.0.0',
+    port: 5173,
+    proxy: {
+      '/api': {
+        target: 'http://0.0.0.0:3000',
+        changeOrigin: true
+      }
+    }
+  }
 });
