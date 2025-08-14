@@ -169,6 +169,7 @@
                 Les données ont été récupérées en aout 2025 des sources officielles (data.ofgl.fr et budget.gouv.fr).
                 Les subventions des agglomérations et communautés de commune ont été ventilées par commune suivant la population.
                 Les subventions des régions ont été ventilées par département suivant la population.
+                Pour Paris, les subventions de la Mairie apparaissent en tant que département. Il n'y a donc aucune subvention au niveau des arrondissements.
               </p>
             </div>
           </div>
