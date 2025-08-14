@@ -51,20 +51,26 @@
         <div class="form-group">
           <label for="popLower">Commune pop. min:</label>
           <select id="popLower" :value="localFilters.popLower" @change="onFilterChange('popLower', $event)">
-            <option value="aucune">Aucune limite</option>
-            <option value="1k">1k</option>
-            <option value="10k">10k</option>
-            <option value="100k">100k</option>
+            <option 
+              v-for="option in popLowerOptions" 
+              :key="option.value" 
+              :value="option.value"
+            >
+              {{ option.label }}
+            </option>
           </select>
         </div>
 
         <div class="form-group">
           <label for="popUpper">Commune pop. max:</label>
           <select id="popUpper" :value="localFilters.popUpper" @change="onFilterChange('popUpper', $event)">
-            <option value="1k">1k</option>
-            <option value="10k">10k</option>
-            <option value="100k">100k</option>
-            <option value="aucune">Aucune limite</option>
+            <option 
+              v-for="option in popUpperOptions" 
+              :key="option.value" 
+              :value="option.value"
+            >
+              {{ option.label }}
+            </option>
           </select>
         </div>
       </div>
@@ -146,6 +152,51 @@ export default {
       MetricsConfig.labelState = labelState
 
       return MetricsConfig.getAvailableMetricOptions(level)
+    })
+
+    // Population options with filtering logic
+    const popLowerOptions = computed(() => {
+      const upperValue = localFilters.value.popUpper
+      const allOptions = [
+        { value: 'aucune', label: 'Aucune limite' },
+        { value: '1k', label: '1k' },
+        { value: '10k', label: '10k' },
+        { value: '100k', label: '100k' }
+      ]
+
+      if (upperValue === 'aucune') {
+        return allOptions
+      }
+
+      // Filter out options that would be >= upper limit
+      const upperIndex = allOptions.findIndex(opt => opt.value === upperValue)
+      if (upperIndex === -1) return allOptions
+
+      return allOptions.filter((opt, index) => 
+        opt.value === 'aucune' || index < upperIndex
+      )
+    })
+
+    const popUpperOptions = computed(() => {
+      const lowerValue = localFilters.value.popLower
+      const allOptions = [
+        { value: '1k', label: '1k' },
+        { value: '10k', label: '10k' },
+        { value: '100k', label: '100k' },
+        { value: 'aucune', label: 'Aucune limite' }
+      ]
+
+      if (lowerValue === 'aucune') {
+        return allOptions
+      }
+
+      // Filter out options that would be <= lower limit
+      const lowerIndex = allOptions.findIndex(opt => opt.value === lowerValue)
+      if (lowerIndex === -1) return allOptions
+
+      return allOptions.filter((opt, index) => 
+        opt.value === 'aucune' || index > lowerIndex
+      )
     })
 
     const departments = computed(() => {
@@ -263,6 +314,8 @@ export default {
       currentLevel,
       availableMetricOptions,
       departments,
+      popLowerOptions,
+      popUpperOptions,
       onScopeChange,
       onDepartementChange,
       onMetricChange,
