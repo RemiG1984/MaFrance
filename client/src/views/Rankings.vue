@@ -195,35 +195,14 @@ export default {
     };
 
     const fetchCommunesFranceRankings = async (metric, limit) => {
-      // Use communesRankings from all departments in the store
       try {
-        // First ensure we have country data with departments list
-        if (!store.country?.departements) {
-          await store.setCountry();
-        }
-
-        if (!store.country?.departements) {
-          error.value = "Impossible de charger la liste des départements.";
+        // Check if we already have data without triggering store updates
+        if (!store.departement?.communesRankings?.data) {
+          error.value = "Aucune donnée communale disponible. Sélectionnez d'abord un département dans 'Communes (par département)' pour charger des données communales.";
           return [];
         }
 
-        // Collect all commune data from departments
-        let allCommunes = [];
-
-        // For a simplified implementation, we'll use the current department's commune data if available
-        // In a real application, you'd want to load all departments' commune data
-        if (store.departement?.communesRankings?.data) {
-          allCommunes = [...store.departement.communesRankings.data];
-        } else {
-          error.value = "Aucune donnée communale disponible. Sélectionnez d'abord un département dans 'Communes (par département)'.";
-          return [];
-        }
-
-        if (allCommunes.length === 0) {
-          error.value = "Aucune donnée communale disponible.";
-          return [];
-        }
-
+        const allCommunes = [...store.departement.communesRankings.data];
         const totalCommunes = allCommunes.length;
 
         // Sort by the selected metric (DESC order for top rankings)
@@ -392,13 +371,8 @@ export default {
       // If you want it to load based on default metric, call updateRankings() here.
     })
 
-    // Watch for store data changes that might affect rankings
-    watch(() => [store.country?.departementsRankings, store.departement?.communesRankings, store.getDepartementCode()], () => {
-      // Only update if a metric is already selected to avoid unnecessary loads
-      if (selectedMetric.value) {
-        updateRankings();
-      }
-    }, { deep: true, immediate: false }); // immediate: false to not trigger on initial setup
+    // Removed problematic watcher that was causing infinite loops
+    // Rankings will update when user makes selections via onSelectionChanged
 
     return {
       store,
