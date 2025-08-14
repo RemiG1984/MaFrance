@@ -143,16 +143,8 @@ export default {
           requestParams.population_range = populationRange;
         }
 
-        console.log('fetchCommuneRankings - Top rankings API call:', requestParams);
-
         // Get top rankings
         const topResponse = await api.getCommuneRankings(requestParams);
-
-        console.log('fetchCommuneRankings - Top rankings response:', {
-          dataCount: topResponse?.data?.length,
-          totalCount: topResponse?.total_count,
-          hasData: !!topResponse?.data
-        });
 
         if (!topResponse?.data) {
           const errorMsg = deptCode 
@@ -172,14 +164,7 @@ export default {
           offset: bottomOffset
         };
 
-        console.log('fetchCommuneRankings - Bottom rankings API call:', bottomParams);
-
         const bottomResponse = await api.getCommuneRankings(bottomParams);
-
-        console.log('fetchCommuneRankings - Bottom rankings response:', {
-          dataCount: bottomResponse?.data?.length,
-          hasData: !!bottomResponse?.data
-        });
 
         // Process top rankings
         const topRankings = topResponse.data.map((commune, index) => {
@@ -214,14 +199,6 @@ export default {
         });
 
         const finalRankings = [...topRankings, ...bottomRankings];
-
-        console.log('fetchCommuneRankings - Final result:', {
-          topCount: topRankings.length,
-          bottomCount: bottomRankings.length,
-          totalReturned: finalRankings.length,
-          deptCode,
-          metric
-        });
 
         return finalRankings;
       } catch (err) {
