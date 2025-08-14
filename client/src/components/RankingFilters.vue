@@ -417,6 +417,7 @@ export default {
 @media (max-width: 768px) {
   .main-controls {
     flex-direction: column;
+    gap: 15px;
   }
 
   .advanced-controls-row {
@@ -431,6 +432,13 @@ export default {
 
   .form-group {
     min-width: auto;
+    width: 100%;
+  }
+
+  .form-group select,
+  .form-group input {
+    width: 100%;
+    box-sizing: border-box;
   }
 }
 
