@@ -210,12 +210,6 @@ export default {
 
       localFilters.value = { ...localFilters.value, [filterKey]: value }
 
-      // Simple validation
-      if (localFilters.value.popLower !== null && localFilters.value.popUpper !== null && localFilters.value.popLower > localFilters.value.popUpper) {
-        console.warn('Population min cannot be greater than max')
-        return
-      }
-
       emitFiltersChange(localFilters.value)
     }
 
