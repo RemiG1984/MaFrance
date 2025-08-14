@@ -219,24 +219,32 @@ export default {
         }
 
         // Get top rankings
-        const topResponse = await api.fetchCommunesFranceRankings(requestParams.sort, requestParams.limit, requestParams.population_range);
+        const topResponse = await api.getCommuneRankings({
+          dept: '', // Empty dept for France-wide search
+          ...requestParams
+        });
 
         if (!topResponse?.data) {
           error.value = "Aucune donnée communale disponible pour la France entière.";
-          return [];
+          loading.value = false;
+          return;
         }
 
-        const totalCommunes = topResponse.total_count || 0;
+        // Get bottom rankings
+        const totalCount = topResponse.total_count || 0;
+        const limit = Math.min(parseInt(requestParams.limit), totalCount);
+        const bottomOffset = Math.max(0, totalCount - limit);
 
-        // Get bottom rankings - calculate offset for last N items
-        const bottomOffset = Math.max(0, totalCommunes - limit);
         const bottomParams = {
-          ...requestParams,
-          limit: limit,
+          dept: '', // Empty dept for France-wide search
+          sort: requestParams.sort,
+          limit,
+          population_range: requestParams.population_range,
+          direction: 'DESC',
           offset: bottomOffset
         };
 
-        const bottomResponse = await api.fetchCommunesFranceRankings(bottomParams.sort, bottomParams.limit, bottomParams.population_range, bottomOffset);
+        const bottomResponse = await api.getCommuneRankings(bottomParams);
 
         // Process top rankings
         const topRankings = topResponse.data.map((commune, index) => {

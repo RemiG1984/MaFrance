@@ -277,20 +277,7 @@ const api = {
         return apiService.request(`/api/rankings/communes?${queryString}`);
     },
 
-    // France-wide commune rankings (without department filter)
-    fetchCommunesFranceRankings: (metric, limit, populationRange, offset = 0) => {
-        const params = { 
-            sort: metric, 
-            limit,
-            offset,
-            direction: 'DESC' 
-        };
-        if (populationRange) {
-            params.population_range = populationRange;
-        }
-        const queryString = new URLSearchParams(params).toString();
-        return apiService.request(`/api/rankings/communes?${queryString}`);
-    },
+    
 
     // Search functionality
     searchCommunes: (query) =>
