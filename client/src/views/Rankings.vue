@@ -196,32 +196,41 @@ export default {
 
     const fetchCommunesFranceRankings = async (metric, limit) => {
       try {
-        // Check if we already have the data in store
-        if (!store.country?.communesRankings?.data) {
-          // Load the data into store if not already loaded
-          await store.fetchCountryCommunesRankings();
-        }
+        // Get top rankings
+        const topResponse = await api.getCommuneRankings({
+          dept: '', // Empty dept to get all communes from France
+          limit: limit,
+          offset: 0,
+          sort: metric,
+          direction: 'DESC'
+        });
 
-        if (!store.country?.communesRankings?.data) {
+        if (!topResponse?.data) {
           error.value = "Aucune donnée communale disponible pour la France entière.";
           return [];
         }
 
-        const allCommunes = [...store.country.communesRankings.data];
-        const totalCommunes = allCommunes.length;
+        const totalCommunes = topResponse.total_count || 0;
+        
+        // Get bottom rankings - calculate offset for last N items
+        const bottomOffset = Math.max(0, totalCommunes - limit);
+        const bottomResponse = await api.getCommuneRankings({
+          dept: '', // Empty dept to get all communes from France
+          limit: limit,
+          offset: bottomOffset,
+          sort: metric,
+          direction: 'DESC'
+        });
 
-        // Sort by the selected metric (DESC order for top rankings)
-        const sortedByMetricDesc = [...allCommunes].sort((a, b) => (b[metric] || 0) - (a[metric] || 0));
-
-        // Get top rankings
-        const topRankings = sortedByMetricDesc.slice(0, limit).map((commune, index) => {
+        // Process top rankings
+        const topRankings = topResponse.data.map((commune, index) => {
           const ranking = {
             deptCode: commune.departement,
             name: commune.commune,
             population: commune.population,
             rank: index + 1,
           };
-          // Use pre-calculated values directly from store data
+          // Use pre-calculated values directly from API data
           MetricsConfig.metrics.forEach(metricConfig => {
             const metricKey = metricConfig.value;
             ranking[metricKey] = commune[metricKey] || 0;
@@ -229,23 +238,21 @@ export default {
           return ranking;
         });
 
-        // Get bottom rankings - take the last items from the sorted array
-        const bottomRankings = sortedByMetricDesc
-          .slice(-limit)
-          .map((commune, index) => {
-            const ranking = {
-              deptCode: commune.departement,
-              name: commune.commune,
-              population: commune.population,
-              rank: totalCommunes - limit + index + 1,
-            };
-            // Use pre-calculated values directly from store data
-            MetricsConfig.metrics.forEach(metricConfig => {
-              const metricKey = metricConfig.value;
-              ranking[metricKey] = commune[metricKey] || 0;
-            });
-            return ranking;
+        // Process bottom rankings
+        const bottomRankings = (bottomResponse?.data || []).map((commune, index) => {
+          const ranking = {
+            deptCode: commune.departement,
+            name: commune.commune,
+            population: commune.population,
+            rank: bottomOffset + index + 1,
+          };
+          // Use pre-calculated values directly from API data
+          MetricsConfig.metrics.forEach(metricConfig => {
+            const metricKey = metricConfig.value;
+            ranking[metricKey] = commune[metricKey] || 0;
           });
+          return ranking;
+        });
 
         return [...topRankings, ...bottomRankings];
       } catch (err) {
