@@ -232,13 +232,13 @@ export default {
 
         // Get bottom rankings
         const totalCount = topResponse.total_count || 0;
-        const limit = Math.min(parseInt(requestParams.limit), totalCount);
-        const bottomOffset = Math.max(0, totalCount - limit);
+        const actualLimit = Math.min(parseInt(requestParams.limit), totalCount);
+        const bottomOffset = Math.max(0, totalCount - actualLimit);
 
         const bottomParams = {
           dept: '', // Empty dept for France-wide search
           sort: requestParams.sort,
-          limit,
+          limit: actualLimit,
           population_range: requestParams.population_range,
           direction: 'DESC',
           offset: bottomOffset
