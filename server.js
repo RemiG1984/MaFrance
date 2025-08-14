@@ -91,10 +91,10 @@ app.use("/api/departements", departementRoutes);
 app.use("/api/country", countryRoutes);
 app.use("/api/articles", articleRoutes);
 app.use('/api/qpv', qpvRoutes);
-// app.use('/api/rankings', rankingRoutes); // Temporarily commented to test
+app.use('/api/rankings', rankingRoutes);
 app.use('/api/subventions', subventionRoutes);
 app.use('/api/migrants', migrantRoutes);
-// app.use("/api", otherRoutes); // Temporarily commented to test
+// app.use("/api", otherRoutes); // Keep this commented to test
 app.use("/api/cache", cacheRoutes);
 
 // Health check and root route

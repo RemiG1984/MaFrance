@@ -102,6 +102,9 @@ router.get(
     // Set secondary sort direction based on primary sort direction
     const secondarySort = direction === "DESC" ? "l.COG DESC" : "l.COG ASC";
 
+    // Build the ORDER BY clause safely
+    const orderByClause = `ORDER BY l.${sort} ${direction}, ${secondarySort}`;
+    
     const sql = `
     WITH LatestCommuneNames AS (
       SELECT COG, musulman_pct, africain_pct, asiatique_pct, traditionnel_pct, moderne_pct, annais
@@ -156,7 +159,7 @@ router.get(
     LEFT JOIN commune_subventions cs ON l.COG = cs.COG
     WHERE (l.departement = ? OR ? = '')
     ${populationFilter}
-    ORDER BY ${sort} ${direction}, ${secondarySort}
+    ${orderByClause}
     LIMIT ? OFFSET ?
   `;
 
