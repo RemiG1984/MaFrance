@@ -21,6 +21,7 @@ export const useDataStore = defineStore("data", {
       qpv: null,
       executive: null,
       departementsRankings: null,
+      communesRankings: null,
       namesSeries: null,
       crimeSeries: null,
       crimeAggreg: null,
@@ -61,6 +62,32 @@ export const useDataStore = defineStore("data", {
   actions: {
     async searchCommunes(query) {
       return await api.searchCommunes(query);
+    },
+
+    async fetchCountryCommunesRankings() {
+      try {
+        // Get all communes from France with high limit to get comprehensive data
+        const response = await api.getCommuneRankings({
+          dept: '', // Empty dept to get all communes from France
+          limit: 10000, // High limit to get all communes
+          offset: 0,
+          sort: 'total_score',
+          direction: 'DESC'
+        });
+
+        if (response?.data) {
+          this.country.communesRankings = {
+            data: response.data,
+            total_count: response.total_count || response.data.length,
+            lastUpdated: Date.now()
+          };
+        }
+
+        return this.country.communesRankings;
+      } catch (error) {
+        console.error('Error fetching country communes rankings:', error);
+        return null;
+      }
     },
 
     // Requêtes globales getAll()

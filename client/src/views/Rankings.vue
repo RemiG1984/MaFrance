@@ -196,32 +196,32 @@ export default {
 
     const fetchCommunesFranceRankings = async (metric, limit) => {
       try {
-        // Use the API endpoint with empty dept parameter to get all communes
-        const response = await api.getCommuneRankings({
-          dept: '', // Empty dept to get all communes from France
-          limit: limit * 2, // Get more for top + bottom
-          offset: 0,
-          sort: metric,
-          direction: 'DESC'
-        });
+        // Check if we already have the data in store
+        if (!store.country?.communesRankings?.data) {
+          // Load the data into store if not already loaded
+          await store.fetchCountryCommunesRankings();
+        }
 
-        if (!response?.data) {
+        if (!store.country?.communesRankings?.data) {
           error.value = "Aucune donnée communale disponible pour la France entière.";
           return [];
         }
 
-        const allCommunes = response.data;
-        const totalCommunes = response.total_count || allCommunes.length;
+        const allCommunes = [...store.country.communesRankings.data];
+        const totalCommunes = allCommunes.length;
+
+        // Sort by the selected metric (DESC order for top rankings)
+        const sortedByMetricDesc = [...allCommunes].sort((a, b) => (b[metric] || 0) - (a[metric] || 0));
 
         // Get top rankings
-        const topRankings = allCommunes.slice(0, limit).map((commune, index) => {
+        const topRankings = sortedByMetricDesc.slice(0, limit).map((commune, index) => {
           const ranking = {
             deptCode: commune.departement,
             name: commune.commune,
             population: commune.population,
             rank: index + 1,
           };
-          // Use pre-calculated values directly from API data
+          // Use pre-calculated values directly from store data
           MetricsConfig.metrics.forEach(metricConfig => {
             const metricKey = metricConfig.value;
             ranking[metricKey] = commune[metricKey] || 0;
@@ -229,29 +229,23 @@ export default {
           return ranking;
         });
 
-        // Get bottom rankings - need separate API call for worst performers
-        const bottomResponse = await api.getCommuneRankings({
-          dept: '', // Empty dept to get all communes from France
-          limit: limit,
-          offset: Math.max(0, totalCommunes - limit),
-          sort: metric,
-          direction: 'DESC'
-        });
-
-        const bottomRankings = (bottomResponse?.data || []).map((commune, index) => {
-          const ranking = {
-            deptCode: commune.departement,
-            name: commune.commune,
-            population: commune.population,
-            rank: totalCommunes - limit + index + 1,
-          };
-          // Use pre-calculated values directly from API data
-          MetricsConfig.metrics.forEach(metricConfig => {
-            const metricKey = metricConfig.value;
-            ranking[metricKey] = commune[metricKey] || 0;
+        // Get bottom rankings - take the last items from the sorted array
+        const bottomRankings = sortedByMetricDesc
+          .slice(-limit)
+          .map((commune, index) => {
+            const ranking = {
+              deptCode: commune.departement,
+              name: commune.commune,
+              population: commune.population,
+              rank: totalCommunes - limit + index + 1,
+            };
+            // Use pre-calculated values directly from store data
+            MetricsConfig.metrics.forEach(metricConfig => {
+              const metricKey = metricConfig.value;
+              ranking[metricKey] = commune[metricKey] || 0;
+            });
+            return ranking;
           });
-          return ranking;
-        });
 
         return [...topRankings, ...bottomRankings];
       } catch (err) {
