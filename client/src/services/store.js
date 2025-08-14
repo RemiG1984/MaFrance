@@ -21,7 +21,6 @@ export const useDataStore = defineStore("data", {
       qpv: null,
       executive: null,
       departementsRankings: null,
-      allCommunesRankings: null,
       namesSeries: null,
       crimeSeries: null,
       crimeAggreg: null,
@@ -378,7 +377,6 @@ export const useDataStore = defineStore("data", {
         namesHistory: null,
         qpv: null,
         executive: null,
-        allCommunesRankings: null,
         subventions: null,
         migrants: null,
         articles: null,
@@ -474,30 +472,6 @@ export const useDataStore = defineStore("data", {
         }
       } catch (error) {
         console.error('Failed to load commune subventions:', error)
-      }
-    },
-
-    async fetchAllCommunesRankings(params = {}) {
-      try {
-        const defaultParams = {
-          limit: 10000, // Get a large number to cover all communes
-          sort: "total_score",
-          direction: "DESC"
-        };
-        const mergedParams = { ...defaultParams, ...params };
-        
-        const response = await api.getCommuneRankings(mergedParams);
-        
-        // Store this data in a new property for all communes
-        if (!this.country.allCommunesRankings) {
-          this.country.allCommunesRankings = {};
-        }
-        this.country.allCommunesRankings = response;
-        
-        return response;
-      } catch (error) {
-        console.error('Failed to fetch all communes rankings:', error);
-        return null;
       }
     },
 

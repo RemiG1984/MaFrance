@@ -196,17 +196,13 @@ export default {
 
     const fetchCommunesFranceRankings = async (metric, limit) => {
       try {
-        // Fetch all communes data if not already loaded
-        if (!store.country?.allCommunesRankings?.data) {
-          await store.fetchAllCommunesRankings();
-        }
-
-        if (!store.country?.allCommunesRankings?.data) {
-          error.value = "Aucune donnée communale disponible pour la France entière.";
+        // Use the existing store data from departement.communesRankings
+        if (!store.departement?.communesRankings?.data) {
+          error.value = "Aucune donnée communale disponible. Sélectionnez d'abord un département dans 'Communes (par département)' pour charger des données communales.";
           return [];
         }
 
-        const allCommunes = [...store.country.allCommunesRankings.data];
+        const allCommunes = [...store.departement.communesRankings.data];
         const totalCommunes = allCommunes.length;
 
         // Sort by the selected metric (DESC order for top rankings)
