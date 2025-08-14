@@ -6,10 +6,8 @@
         <label for="scopeSelect">Portée :</label>
         <select id="scopeSelect" :value="selectedScope" @change="onScopeChange">
           <option value="departements">Départements</option>
-          <!--
-          <option value="communes_france">Communes (France)</option>
-          -->
           <option value="communes_dept">Communes (par département)</option>
+          <option value="communes_france">Communes (France entière)</option>
         </select>
       </div>
 
