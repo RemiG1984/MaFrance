@@ -128,7 +128,7 @@ export default {
       return [...topRankings, ...bottomRankings];
     };
 
-    const fetchCommuneRankings = async (deptCode, metric, limit, populationRange) => {
+    const fetchCommuneRankings = async (deptCode = '', metric, limit, populationRange) => {
       try {
         const requestParams = {
           dept: deptCode,
@@ -147,7 +147,10 @@ export default {
         const topResponse = await api.getCommuneRankings(requestParams);
 
         if (!topResponse?.data) {
-          error.value = "Aucune donnée communale disponible pour ce département.";
+          const errorMsg = deptCode 
+            ? "Aucune donnée communale disponible pour ce département."
+            : "Aucune donnée communale disponible pour la France entière.";
+          error.value = errorMsg;
           return [];
         }
 
@@ -197,91 +200,11 @@ export default {
 
         return [...topRankings, ...bottomRankings];
       } catch (err) {
-        error.value = `Erreur lors du chargement des communes département: ${err.message}`;
+        const errorMsg = deptCode 
+          ? `Erreur lors du chargement des communes département: ${err.message}`
+          : `Erreur lors du chargement des communes France: ${err.message}`;
+        error.value = errorMsg;
         console.error('Erreur fetchCommuneRankings:', err);
-        return [];
-      }
-    };
-
-    const fetchCommunesFranceRankings = async (metric, limit, populationRange) => {
-      try {
-        const requestParams = {
-          dept: '', // Empty dept to get all communes from France
-          limit: limit,
-          offset: 0,
-          sort: metric,
-          direction: 'DESC'
-        };
-
-        // Add population range if specified
-        if (populationRange) {
-          requestParams.population_range = populationRange;
-        }
-
-        // Get top rankings
-        const topResponse = await api.getCommuneRankings({
-          dept: '', // Empty dept for France-wide search
-          ...requestParams
-        });
-
-        if (!topResponse?.data) {
-          error.value = "Aucune donnée communale disponible pour la France entière.";
-          loading.value = false;
-          return;
-        }
-
-        // Get bottom rankings
-        const totalCount = topResponse.total_count || 0;
-        const actualLimit = Math.min(parseInt(requestParams.limit), totalCount);
-        const bottomOffset = Math.max(0, totalCount - actualLimit);
-
-        const bottomParams = {
-          dept: '', // Empty dept for France-wide search
-          sort: requestParams.sort,
-          limit: actualLimit,
-          population_range: requestParams.population_range,
-          direction: 'DESC',
-          offset: bottomOffset
-        };
-
-        const bottomResponse = await api.getCommuneRankings(bottomParams);
-
-        // Process top rankings
-        const topRankings = topResponse.data.map((commune, index) => {
-          const ranking = {
-            deptCode: commune.departement,
-            name: commune.commune,
-            population: commune.population,
-            rank: index + 1,
-          };
-          // Use pre-calculated values directly from API data
-          MetricsConfig.metrics.forEach(metricConfig => {
-            const metricKey = metricConfig.value;
-            ranking[metricKey] = commune[metricKey] || 0;
-          });
-          return ranking;
-        });
-
-        // Process bottom rankings
-        const bottomRankings = (bottomResponse?.data || []).map((commune, index) => {
-          const ranking = {
-            deptCode: commune.departement,
-            name: commune.commune,
-            population: commune.population,
-            rank: bottomOffset + index + 1,
-          };
-          // Use pre-calculated values directly from API data
-          MetricsConfig.metrics.forEach(metricConfig => {
-            const metricKey = metricConfig.value;
-            ranking[metricKey] = commune[metricKey] || 0;
-          });
-          return ranking;
-        });
-
-        return [...topRankings, ...bottomRankings];
-      } catch (err) {
-        error.value = `Erreur lors du chargement des communes France: ${err.message}`;
-        console.error('Erreur fetchCommunesFranceRankings:', err);
         return [];
       }
     };
@@ -308,8 +231,8 @@ export default {
         if (selectedScope.value === 'departements') {
           rankings.value = await fetchDepartmentRankings(selectedMetric.value, limit)
         } else if (selectedScope.value === 'communes_france') {
-          // This is the corrected call for France-wide commune rankings
-          rankings.value = await fetchCommunesFranceRankings(selectedMetric.value, limit, populationRange)
+          // France-wide commune rankings (empty deptCode)
+          rankings.value = await fetchCommuneRankings('', selectedMetric.value, limit, populationRange)
         } else if (selectedScope.value === 'communes_dept') {
           if (!selectedDepartement.value) {
             error.value = "Veuillez sélectionner un département."
