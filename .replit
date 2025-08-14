@@ -9,12 +9,16 @@ channel = "stable-24_11"
 localPort = 3000
 externalPort = 80
 
+[[ports]]
+localPort = 5173
+externalPort = 5173
+
 [deployment]
 deploymentTarget = "cloudrun"
 run = ["sh", "-c", "node server.js"]
 
 [workflows]
-runButton = "Build and Start Vue"
+runButton = "Production Build"
 
 [[workflows.workflow]]
 name = "Start Server"
@@ -26,22 +30,22 @@ task = "shell.exec"
 args = "node server.js"
 
 [[workflows.workflow]]
-name = "Build and Start"
+name = "HMR Development"
 author = 43584328
-mode = "sequential"
+mode = "parallel"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npm run build-css-prod"
+args = "cd client && npm run dev"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "node server.js"
 
 [[workflows.workflow]]
-name = "Build and Start Vue"
+name = "Production Build"
 author = 43584328
-mode = "sequential"
+mode = "parallel"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"

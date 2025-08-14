@@ -80,6 +80,16 @@
               :labels="crimeSeries.labels"
             />
           </v-col>
+
+          <!-- Subventions -->
+          <v-col cols="12">
+            <Subventions 
+              :location="currentLocation"
+              :countryData="dataStore.country"
+              :departementData="dataStore.departement"
+              :communeData="dataStore.commune"
+            />
+          </v-col>
         </v-row>
       </v-col>
     </v-row>
@@ -99,6 +109,7 @@ import ExecutiveDetails from '../components/ExecutiveDetails.vue'
 import ScoreTable from '../components/ScoreTable.vue'
 import CrimeGraphs from '../components/CrimeGraphs.vue'
 import Graph from '../components/Graph.vue'
+import Subventions from '../components/Subventions.vue'
 
 export default {
   name: 'Home',
@@ -113,6 +124,7 @@ export default {
     ScoreTable,
     CrimeGraphs,
     Graph,
+    Subventions,
   },
   computed: {
     ...mapStores(useDataStore),

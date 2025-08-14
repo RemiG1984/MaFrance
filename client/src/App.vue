@@ -106,6 +106,7 @@
               alt="Ko-fi" 
               class="kofi-icon-mobile"
             />
+            Offrez-moi un café
           </v-list-item-title>
         </v-list-item>
 
@@ -175,13 +176,13 @@ export default {
 }
 
 .kofi-icon {
-  width: 20px;
+  width: 25px;
   height: 20px;
   margin-right: 8px;
 }
 
 .kofi-icon-mobile {
-  width: 16px;
+  width: 20px;
   height: 16px;
   margin-right: 8px;
   vertical-align: middle;

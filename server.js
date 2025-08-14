@@ -14,18 +14,11 @@ const cacheService = require("./services/cacheService");
 // Enable compression
 app.use(compression());
 
-// Security middleware
+// Security middleware - simplified for Replit preview compatibility
 app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https:"],
-      fontSrc: ["'self'", "https:", "data:"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https:"],
-      imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "https:"],
-    },
-  },
+  contentSecurityPolicy: false, // Disable CSP completely
+  frameguard: false, // Allow iframe embedding
+  hsts: false, // Disable HSTS for development
 }));
 
 app.use(cors({
@@ -101,8 +94,29 @@ app.use('/api/qpv', qpvRoutes);
 app.use('/api/rankings', rankingRoutes);
 app.use('/api/subventions', subventionRoutes);
 app.use('/api/migrants', migrantRoutes);
-app.use("/api", otherRoutes);
+app.use("/api", otherRoutes); // Keep this commented to test
 app.use("/api/cache", cacheRoutes);
+
+// Version endpoint for cache validation
+app.get("/api/version", (req, res) => {
+  // Generate build hash from package.json modification time or use environment variable
+  const fs = require('fs');
+  const packagePath = path.join(__dirname, 'package.json');
+  
+  let buildHash;
+  try {
+    const stats = fs.statSync(packagePath);
+    buildHash = stats.mtime.getTime().toString();
+  } catch (error) {
+    buildHash = Date.now().toString();
+  }
+  
+  res.json({
+    buildHash: process.env.BUILD_HASH || buildHash,
+    timestamp: Date.now(),
+    version: require('./package.json').version
+  });
+});
 
 // Health check and root route
 app.get("/", (req, res, next) => {
@@ -119,11 +133,18 @@ app.get("/", (req, res, next) => {
   });
 });
 
-// Catch-all route: redirect non-API routes to root with original path
+// Handle Vue.js routing - serve index.html for non-API routes
 app.get('/{*path}', (req, res) => {
-  const originalUrl = req.originalUrl === '/' ? '/' : req.originalUrl;
-  console.log(`Redirecting ${originalUrl} to /?redirect=${encodeURIComponent(originalUrl)}`);
-  res.redirect(`/?redirect=${encodeURIComponent(originalUrl)}`);
+  // Skip for API routes and static files
+  if (req.originalUrl.startsWith('/api/') ||
+      req.originalUrl.startsWith('/assets/') ||
+      req.originalUrl.includes('.')) {
+    return res.status(404).send('Not Found');
+  }
+
+  // Serve index.html for client-side routing
+  const filePath = path.resolve(__dirname, "dist", "index.html");
+  res.sendFile(filePath);
 });
 
 // Error handling
