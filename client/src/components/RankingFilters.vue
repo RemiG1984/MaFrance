@@ -45,25 +45,25 @@
       Paramètres avancés
     </button>
 
-    
+
     <div class="tweaking-box" :class="{ active: showFilters }">
       <div v-show="localScope.includes('communes')" class="population-controls">
         <div class="form-group">
           <label for="popLower">Commune pop. min:</label>
           <select id="popLower" :value="localFilters.popLower" @change="onFilterChange('popLower', $event)">
             <option :value="null">Aucune limite</option>
-            <option :value="1k">1k</option>
-            <option :value="10k">10k</option>
-            <option :value="100k">100k</option>
+            <option :value="'1k'">1k</option>
+            <option :value="'10k'">10k</option>
+            <option :value="'100k'">100k</option>
           </select>
         </div>
 
         <div class="form-group">
           <label for="popUpper">Commune pop. max:</label>
           <select id="popUpper" :value="localFilters.popUpper" @change="onFilterChange('popUpper', $event)">
-            <option :value="1k">1k</option>
-            <option :value="10k">10k</option>
-            <option :value="100k">100k</option>
+            <option :value="'1k'">1k</option>
+            <option :value="'10k'">10k</option>
+            <option :value="'100k'">100k</option>
             <option :value="null">Aucune limite</option>
           </select>
         </div>
@@ -141,10 +141,10 @@ export default {
       const level = currentLevel.value
       // Force reactivity to store label state changes
       const labelState = store.labelState
-      
+
       // Sync MetricsConfig label state with store before getting options
       MetricsConfig.labelState = labelState
-      
+
       return MetricsConfig.getAvailableMetricOptions(level)
     })
 
