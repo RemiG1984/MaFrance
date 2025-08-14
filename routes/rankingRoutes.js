@@ -258,8 +258,8 @@ router.get(
        COALESCE(dc.usage_de_stupefiants_afd_p1k, 0) + 
        COALESCE(dc.trafic_de_stupefiants_p1k, 0)) AS stupefiants_p1k,
       COALESCE(dc.escroqueries_p1k, 0) AS escroqueries_p1k,
-      COALESCE(dn.musulman_pct, 0) + COALESCE(dn.africain_pct, 0)) + COALESCE(dn.asiatique_pct, 0) AS extra_europeen_pct,
-      (COALESCE(dn.traditionnel_pct, 0) + COALESCE(dn.moderne_pct, 0) AS prenom_francais_pct,
+      (COALESCE(dn.musulman_pct, 0) + COALESCE(dn.africain_pct, 0) + COALESCE(dn.asiatique_pct, 0)) AS extra_europeen_pct,
+      (COALESCE(dn.traditionnel_pct, 0) + COALESCE(dn.moderne_pct, 0)) AS prenom_francais_pct,
       COALESCE(ds.total_subventions_parHab, 0) AS total_subventions_parHab
     FROM departements d
     LEFT JOIN LatestDepartmentNames dn ON d.departement = dn.dpt
