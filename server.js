@@ -113,11 +113,11 @@ app.get("/", (req, res, next) => {
 });
 
 // Catch-all route: redirect non-API routes to root with original path
-//app.get('/{*path}', (req, res) => {
-//  const originalUrl = req.originalUrl === '/' ? '/' : req.originalUrl;
-//  console.log(`Redirecting ${originalUrl} to /?redirect=${encodeURIComponent(originalUrl)}`);
-//  res.redirect(`/?redirect=${encodeURIComponent(originalUrl)}`);
-//});
+app.get('/{*path}', (req, res) => {
+  const originalUrl = req.originalUrl === '/' ? '/' : req.originalUrl;
+  console.log(`Redirecting ${originalUrl} to /?redirect=${encodeURIComponent(originalUrl)}`);
+  res.redirect(`/?redirect=${encodeURIComponent(originalUrl)}`);
+});
 
 // Error handling
 const errorHandler = require("./middleware/errorHandler");
