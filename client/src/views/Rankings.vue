@@ -277,20 +277,20 @@ export default {
       const { popLower, popUpper } = filters.value
 
       if (popLower !== null && popUpper !== null) {
-        if (popLower === 1000) {
-          if (popUpper === 10000) return "1-10k"
-          else if (popUpper === 100000) return "1-100k"
-        } else if (popLower === 10000 && popUpper === 100000) {
+        if (popLower === "1k") {
+          if (popUpper === "10k") return "1-10k"
+          else if (popUpper === "100k") return "1-100k"
+        } else if (popLower === "10k" && popUpper === "100k") {
           return "10-100k"
         }
       } else if (popLower !== null) {
-        if (popLower === 1000) return "1k+"
-        else if (popLower === 10000) return "10k+"
-        else if (popLower === 100000) return "100k+"
+        if (popLower === "1k") return "1k+"
+        else if (popLower === "10k") return "10k+"
+        else if (popLower === "100k") return "100k+"
       } else if (popUpper !== null) {
-        if (popUpper === 1000) return "0-1k"
-        else if (popUpper === 10000) return "0-10k"
-        else if (popUpper === 100000) return "0-100k"
+        if (popUpper === "1k") return "0-1k"
+        else if (popUpper === "10k") return "0-10k"
+        else if (popUpper === "100k") return "0-100k"
       }
       return "0+"
     }
