@@ -1,4 +1,3 @@
-
 const CACHE_NAME = 'ma-france-v2'; // Increment version to force cache refresh
 const STATIC_CACHE_NAME = 'ma-france-static-v2';
 const API_CACHE_NAME = 'ma-france-api-v2';
@@ -17,7 +16,7 @@ const STATIC_ASSETS = [
 // API routes that should be cached
 const API_ROUTES = [
   '/api/country/details',
-  '/api/country/names', 
+  '/api/country/names',
   '/api/country/crime',
   '/api/departements',
   '/api/communes'
@@ -46,7 +45,7 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           // Delete old cache versions
-          if (cacheName !== STATIC_CACHE_NAME && 
+          if (cacheName !== STATIC_CACHE_NAME &&
               cacheName !== API_CACHE_NAME &&
               (cacheName.startsWith('ma-france-') || cacheName.startsWith('workbox-'))) {
             console.log('Deleting old cache:', cacheName);
@@ -119,13 +118,13 @@ async function handleAssetRequest(request) {
   } catch (error) {
     console.log('Network failed for asset, trying cache:', request.url);
   }
-  
+
   // Fallback to cache
   const cachedResponse = await caches.match(request);
   if (cachedResponse) {
     return cachedResponse;
   }
-  
+
   // If no cache, return network error
   return fetch(request);
 }
@@ -136,7 +135,7 @@ async function handleStaticRequest(request) {
   if (cachedResponse) {
     return cachedResponse;
   }
-  
+
   try {
     const response = await fetch(request);
     if (response.ok) {
@@ -165,13 +164,13 @@ async function handlePageRequest(request) {
     if (cachedResponse) {
       return cachedResponse;
     }
-    
+
     // Fallback to index.html for SPA routing
     const indexResponse = await caches.match('/index.html');
     if (indexResponse) {
       return indexResponse;
     }
-    
+
     throw error;
   }
 }
@@ -197,7 +196,7 @@ async function doBackgroundSync() {
   try {
     const cache = await caches.open(API_CACHE_NAME);
     const requests = await cache.keys();
-    
+
     for (const request of requests) {
       try {
         const response = await fetch(request);
