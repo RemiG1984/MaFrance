@@ -300,7 +300,6 @@ export default {
         if (selectedScope.value === 'departements') {
           rankings.value = await fetchDepartmentRankings(selectedMetric.value, limit)
         } else if (selectedScope.value === 'communes_france') {
-          // Use commune data from currently loaded department
           rankings.value = await fetchCommunesFranceRankings(selectedMetric.value, limit, populationRange)
         } else if (selectedScope.value === 'communes_dept') {
           if (!selectedDepartement.value) {
