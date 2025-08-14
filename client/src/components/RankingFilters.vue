@@ -47,8 +47,7 @@
 
     
     <div class="tweaking-box" :class="{ active: showFilters }">
-      <!--
-      <div class="population-controls">
+      <div v-show="selectedScope.includes('communes')" class="population-controls">
         <div class="form-group">
           <label for="popLower">Commune pop. min:</label>
           <select id="popLower" :value="filters.popLower" @change="onFilterChange('popLower', $event)">
@@ -69,7 +68,6 @@
           </select>
         </div>
       </div>
-      -->
 
       <div class="form-group">
         <label for="topLimit">Nombre de résultats (Top/Bottom) :</label>

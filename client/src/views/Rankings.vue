@@ -129,61 +129,49 @@ export default {
     };
 
     const fetchCommuneRankings = async (deptCode, metric, limit, populationRange) => {
-      // Use store data for communesRankings
-      let communeData = null;
-      if (deptCode) {
-        // Need specific department's commune rankings
-        if (!store.departement || store.getDepartementCode() !== deptCode || !store.departement?.communesRankings) {
-          await store.setDepartement(deptCode);
-        }
-        communeData = store.departement?.communesRankings?.data;
-      } else {
-        error.value = "Classement des communes pour toute la France non implémenté via le store dans cet exemple.";
-        return [];
-      }
-
-      if (!communeData) {
-        error.value = "Données de classement communal non disponibles dans le store.";
-        return [];
-      }
-
-      const totalCommunes = communeData.length;
-
-      // Filter by population range if specified
-      let filteredByPopulation = communeData;
-      if (populationRange) {
-        // Population filtering logic would go here if needed
-        // For now, keeping it simple
-      }
-
-      // Sort by the selected metric (DESC order for top rankings)
-      const sortedByMetricDesc = [...filteredByPopulation].sort((a, b) => (b[metric] || 0) - (a[metric] || 0));
-      const topRankings = sortedByMetricDesc.slice(0, limit).map((commune, index) => {
-        const ranking = {
-          deptCode: commune.departement,
-          name: commune.commune,
-          population: commune.population,
-          rank: index + 1,
+      try {
+        const requestParams = {
+          dept: deptCode,
+          limit: limit,
+          offset: 0,
+          sort: metric,
+          direction: 'DESC'
         };
-        // Use pre-calculated values directly from store data (like MapComponent)
-        MetricsConfig.metrics.forEach(metricConfig => {
-          const metricKey = metricConfig.value;
-          ranking[metricKey] = commune[metricKey] || 0;
-        });
-        return ranking;
-      });
 
-      // Get bottom rankings - take the last items from the sorted array
-      const bottomRankings = sortedByMetricDesc
-        .slice(-limit)
-        .map((commune, index) => {
+        // Add population range if specified
+        if (populationRange) {
+          requestParams.population_range = populationRange;
+        }
+
+        // Get top rankings
+        const topResponse = await api.getCommuneRankings(requestParams);
+
+        if (!topResponse?.data) {
+          error.value = "Aucune donnée communale disponible pour ce département.";
+          return [];
+        }
+
+        const totalCommunes = topResponse.total_count || 0;
+        
+        // Get bottom rankings - calculate offset for last N items
+        const bottomOffset = Math.max(0, totalCommunes - limit);
+        const bottomParams = {
+          ...requestParams,
+          limit: limit,
+          offset: bottomOffset
+        };
+
+        const bottomResponse = await api.getCommuneRankings(bottomParams);
+
+        // Process top rankings
+        const topRankings = topResponse.data.map((commune, index) => {
           const ranking = {
             deptCode: commune.departement,
             name: commune.commune,
             population: commune.population,
-            rank: totalCommunes - limit + index + 1,
+            rank: index + 1,
           };
-          // Use pre-calculated values directly from store data (like MapComponent)
+          // Use pre-calculated values directly from API data
           MetricsConfig.metrics.forEach(metricConfig => {
             const metricKey = metricConfig.value;
             ranking[metricKey] = commune[metricKey] || 0;
@@ -191,19 +179,47 @@ export default {
           return ranking;
         });
 
-      return [...topRankings, ...bottomRankings];
+        // Process bottom rankings
+        const bottomRankings = (bottomResponse?.data || []).map((commune, index) => {
+          const ranking = {
+            deptCode: commune.departement,
+            name: commune.commune,
+            population: commune.population,
+            rank: bottomOffset + index + 1,
+          };
+          // Use pre-calculated values directly from API data
+          MetricsConfig.metrics.forEach(metricConfig => {
+            const metricKey = metricConfig.value;
+            ranking[metricKey] = commune[metricKey] || 0;
+          });
+          return ranking;
+        });
+
+        return [...topRankings, ...bottomRankings];
+      } catch (err) {
+        error.value = `Erreur lors du chargement des communes département: ${err.message}`;
+        console.error('Erreur fetchCommuneRankings:', err);
+        return [];
+      }
     };
 
-    const fetchCommunesFranceRankings = async (metric, limit) => {
+    const fetchCommunesFranceRankings = async (metric, limit, populationRange) => {
       try {
-        // Get top rankings
-        const topResponse = await api.getCommuneRankings({
+        const requestParams = {
           dept: '', // Empty dept to get all communes from France
           limit: limit,
           offset: 0,
           sort: metric,
           direction: 'DESC'
-        });
+        };
+
+        // Add population range if specified
+        if (populationRange) {
+          requestParams.population_range = populationRange;
+        }
+
+        // Get top rankings
+        const topResponse = await api.getCommuneRankings(requestParams);
 
         if (!topResponse?.data) {
           error.value = "Aucune donnée communale disponible pour la France entière.";
@@ -214,13 +230,13 @@ export default {
         
         // Get bottom rankings - calculate offset for last N items
         const bottomOffset = Math.max(0, totalCommunes - limit);
-        const bottomResponse = await api.getCommuneRankings({
-          dept: '', // Empty dept to get all communes from France
+        const bottomParams = {
+          ...requestParams,
           limit: limit,
-          offset: bottomOffset,
-          sort: metric,
-          direction: 'DESC'
-        });
+          offset: bottomOffset
+        };
+
+        const bottomResponse = await api.getCommuneRankings(bottomParams);
 
         // Process top rankings
         const topRankings = topResponse.data.map((commune, index) => {
@@ -285,7 +301,7 @@ export default {
           rankings.value = await fetchDepartmentRankings(selectedMetric.value, limit)
         } else if (selectedScope.value === 'communes_france') {
           // Use commune data from currently loaded department
-          rankings.value = await fetchCommunesFranceRankings(selectedMetric.value, limit)
+          rankings.value = await fetchCommunesFranceRankings(selectedMetric.value, limit, populationRange)
         } else if (selectedScope.value === 'communes_dept') {
           if (!selectedDepartement.value) {
             error.value = "Veuillez sélectionner un département."
