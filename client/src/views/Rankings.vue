@@ -152,7 +152,7 @@ export default {
         }
 
         const totalCommunes = topResponse.total_count || 0;
-        
+
         // Get bottom rankings - calculate offset for last N items
         const bottomOffset = Math.max(0, totalCommunes - limit);
         const bottomParams = {
@@ -227,7 +227,7 @@ export default {
         }
 
         const totalCommunes = topResponse.total_count || 0;
-        
+
         // Get bottom rankings - calculate offset for last N items
         const bottomOffset = Math.max(0, totalCommunes - limit);
         const bottomParams = {
@@ -300,6 +300,7 @@ export default {
         if (selectedScope.value === 'departements') {
           rankings.value = await fetchDepartmentRankings(selectedMetric.value, limit)
         } else if (selectedScope.value === 'communes_france') {
+          // This is the corrected call for France-wide commune rankings
           rankings.value = await fetchCommunesFranceRankings(selectedMetric.value, limit, populationRange)
         } else if (selectedScope.value === 'communes_dept') {
           if (!selectedDepartement.value) {

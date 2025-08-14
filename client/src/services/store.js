@@ -63,7 +63,7 @@ export const useDataStore = defineStore("data", {
       return await api.searchCommunes(query);
     },
 
-    
+
 
     // Requêtes globales getAll()
     async fetchCountryData(code) {
@@ -206,13 +206,13 @@ export const useDataStore = defineStore("data", {
     setCountry() {
       this.fetchCountryData().then((country) => {
         this.country = country;
-        
+
         // Clear lower level data when moving to country level
         this.clearDepartementData();
         this.clearCommuneData();
         this.levels.departement = null;
         this.levels.commune = null;
-        
+
         this.setLevel("country");
       });
     },
