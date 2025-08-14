@@ -112,6 +112,20 @@ app.get("/", (req, res, next) => {
   });
 });
 
+// Handle Vue.js routing - serve index.html for non-API routes
+app.get('*', (req, res) => {
+  // Skip for API routes and static files
+  if (req.originalUrl.startsWith('/api/') ||
+      req.originalUrl.startsWith('/assets/') ||
+      req.originalUrl.includes('.')) {
+    return res.status(404).send('Not Found');
+  }
+
+  // Serve index.html for client-side routing
+  const filePath = path.resolve(__dirname, "dist", "index.html");
+  res.sendFile(filePath);
+});
+
 // Error handling
 const errorHandler = require("./middleware/errorHandler");
 app.use(errorHandler);
