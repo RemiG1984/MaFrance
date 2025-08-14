@@ -44,59 +44,6 @@ module.exports = {
     }
   },
   
-  setup: {
-    csvFiles: {
-      importScores: [
-        'setup/france_scores.csv',
-        'setup/departement_scores.csv',
-        'setup/commune_scores.csv'
-      ],
-      importArticles: ['setup/fdesouche_analyzed.csv'],
-      importNames: [
-        'setup/analyse_prenom_france.csv',
-        'setup/analyse_prenom_departement.csv',
-        'setup/analyse_prenom_commune.csv'
-      ],
-      importCrimeData: [
-        'setup/crime_data_france.csv',
-        'setup/crime_data_departement.csv',
-        'setup/crime_data_commune.csv'
-      ],
-      importElus: [
-        'setup/maires_list.csv',
-        'setup/prefets_list.csv',
-        'setup/ministre_interieur_list.csv'
-      ]
-    }
-  },
-  
-  metrics: {
-    scores: [
-      'total_score',
-      'insecurite_score',
-      'immigration_score',
-      'islamisation_score',
-      'defrancisation_score',
-      'wokisme_score'
-    ],
-    crimeRates: [
-      'homicides_p100k',
-      'violences_physiques_p1k',
-      'violences_sexuelles_p1k',
-      'vols_p1k',
-      'destructions_p1k',
-      'stupefiants_p1k',
-      'escroqueries_p1k'
-    ],
-    demographics: [
-      'prenom_francais_pct',
-      'extra_europeen_pct',
-      'musulman_pct',
-      'number_of_mosques',
-      'mosque_p100k'
-    ]
-  },
-  
   logging: {
     level: process.env.LOG_LEVEL || 'info',
     enableSqlLogging: process.env.ENABLE_SQL_LOGGING === 'true'

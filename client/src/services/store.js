@@ -368,22 +368,6 @@ export const useDataStore = defineStore("data", {
     },
 
     // Actions utilitaires
-    clearCountryData() {
-      this.country = {
-        details: null,
-        names: null,
-        crime: null,
-        crimeHistory: null,
-        namesHistory: null,
-        qpv: null,
-        executive: null,
-        subventions: null,
-        migrants: null,
-        articles: null,
-      };
-      this.errors.country = null;
-    },
-
     clearDepartementData() {
       this.departement = {
         details: null,
@@ -416,12 +400,6 @@ export const useDataStore = defineStore("data", {
         subventions: null,
         migrants: null,
       };
-    },
-
-    clearAllData() {
-      this.clearCountryData();
-      this.clearDepartementData();
-      this.clearCommuneData();
     },
 
     // Initialize store and sync with MetricsConfig
@@ -682,20 +660,9 @@ export const useDataStore = defineStore("data", {
         : metricKey;
     },
 
-    getCurrentSubventions() {
-            const location = this.getCurrentLocation()
-            if (location.type === 'departement') {
-                return this.subventionsDepartement
-            } else if (location.type === 'commune') {
-                return this.subventionsCommune
-            } else {
-                return this.subventionsCountry
-            }
-        },
-
-        getCurrentMigrants() {
-            const level = this.currentLevel
-            return this[level]?.migrants || { list: [], pagination: { hasMore: false, nextCursor: null, limit: 20 } }
-        },
+    getCurrentMigrants() {
+      const level = this.currentLevel
+      return this[level]?.migrants || { list: [], pagination: { hasMore: false, nextCursor: null, limit: 20 } }
+    },
   },
 });
