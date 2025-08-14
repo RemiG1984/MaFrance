@@ -70,7 +70,7 @@ router.get(
 
       // Now get paginated articles
       let sql = `
-      SELECT date, title, url, lieu, commune, insecurite, immigration, islamisme, defrancisation, wokisme,
+      SELECT date, title, url, lieu, commune, departement, insecurite, immigration, islamisme, defrancisation, wokisme,
              rowid
       FROM articles 
       WHERE ${baseCondition}`;

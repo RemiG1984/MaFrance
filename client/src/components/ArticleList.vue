@@ -46,7 +46,7 @@
         >
           <div class="article-header">
             <span class="article-date">{{ formatDate(item.date) }}</span>
-            <span class="article-location">[{{ item.commune }} ({{ item.departement }})]</span>
+            <span class="article-location">{{ item.commune }} ({{ item.departement }})</span>
           </div>
           <div class="article-title">
             <a :href='item.url' target="_blank" rel="noopener noreferrer">
