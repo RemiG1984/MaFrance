@@ -1,3 +1,4 @@
+
 <template>
   <div class="ranking-filters">
     <!-- Main Controls -->
@@ -45,46 +46,48 @@
       Paramètres avancés
     </button>
 
-
     <div class="tweaking-box" :class="{ active: showFilters }">
-      <div v-show="localScope.includes('communes')" class="population-controls">
+      <!-- Desktop Layout: Top Limit and Population Controls on Same Line -->
+      <div class="advanced-controls-row">
         <div class="form-group">
-          <label for="popLower">Commune pop. min:</label>
-          <select id="popLower" :value="localFilters.popLower" @change="onFilterChange('popLower', $event)">
-            <option 
-              v-for="option in popLowerOptions" 
-              :key="option.value" 
-              :value="option.value"
-            >
-              {{ option.label }}
-            </option>
-          </select>
+          <label for="topLimit">Nombre de résultats (Top/Bottom) :</label>
+          <input 
+            type="number" 
+            id="topLimit" 
+            :value="filters.topLimit"
+            @input="onFilterChange('topLimit', $event)"
+            min="1" 
+            max="100"
+          >
         </div>
 
-        <div class="form-group">
-          <label for="popUpper">Commune pop. max:</label>
-          <select id="popUpper" :value="localFilters.popUpper" @change="onFilterChange('popUpper', $event)">
-            <option 
-              v-for="option in popUpperOptions" 
-              :key="option.value" 
-              :value="option.value"
-            >
-              {{ option.label }}
-            </option>
-          </select>
-        </div>
-      </div>
+        <div v-show="localScope.includes('communes')" class="population-controls">
+          <div class="form-group">
+            <label for="popLower">Commune pop. min:</label>
+            <select id="popLower" :value="localFilters.popLower" @change="onFilterChange('popLower', $event)">
+              <option 
+                v-for="option in popLowerOptions" 
+                :key="option.value" 
+                :value="option.value"
+              >
+                {{ option.label }}
+              </option>
+            </select>
+          </div>
 
-      <div class="form-group">
-        <label for="topLimit">Nombre de résultats (Top/Bottom) :</label>
-        <input 
-          type="number" 
-          id="topLimit" 
-          :value="filters.topLimit"
-          @input="onFilterChange('topLimit', $event)"
-          min="1" 
-          max="100"
-        >
+          <div class="form-group">
+            <label for="popUpper">Commune pop. max:</label>
+            <select id="popUpper" :value="localFilters.popUpper" @change="onFilterChange('popUpper', $event)">
+              <option 
+                v-for="option in popUpperOptions" 
+                :key="option.value" 
+                :value="option.value"
+              >
+                {{ option.label }}
+              </option>
+            </select>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -362,16 +365,27 @@ export default {
   padding: 20px;
   margin-top: 10px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
 }
 
 .tweaking-box.active {
   display: block;
+  border-color: #007bff;
+  box-shadow: 0 2px 12px rgba(0, 123, 255, 0.2);
+  background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+}
+
+.advanced-controls-row {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  flex-wrap: wrap;
 }
 
 .population-controls {
   display: flex;
   gap: 15px;
-  margin-bottom: 15px;
+  flex-wrap: wrap;
 }
 
 .form-group {
@@ -395,17 +409,38 @@ export default {
   font-size: 14px;
 }
 
+.tweaking-box.active .form-group input,
+.tweaking-box.active .form-group select {
+  border-color: #b3d9ff;
+}
+
 @media (max-width: 768px) {
   .main-controls {
     flex-direction: column;
   }
 
+  .advanced-controls-row {
+    flex-direction: column;
+    gap: 15px;
+  }
+
   .population-controls {
     flex-direction: column;
+    gap: 10px;
   }
 
   .form-group {
     min-width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .tweaking-box {
+    padding: 15px;
+  }
+
+  .form-group {
+    margin-bottom: 10px;
   }
 }
 </style>
