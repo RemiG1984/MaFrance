@@ -85,26 +85,9 @@ router.get(
       }
     }
 
-    // Validate sort column to prevent SQL injection
-    const validSortColumns = [
-      'insecurite_score', 'immigration_score', 'islamisation_score', 
-      'defrancisation_score', 'wokisme_score', 'total_score', 'population',
-      'mosque_p100k', 'places_migrants_p1k', 'musulman_pct', 'extra_europeen_pct',
-      'prenom_francais_pct', 'violences_physiques_p1k', 'violences_sexuelles_p1k',
-      'vols_p1k', 'destructions_p1k', 'stupefiants_p1k', 'escroqueries_p1k',
-      'total_subventions_parHab', 'logements_sociaux_pct', 'pop_in_qpv_pct'
-    ];
-    
-    if (!validSortColumns.includes(sort)) {
-      return res.status(400).json({ error: 'Invalid sort column' });
-    }
-
     // Set secondary sort direction based on primary sort direction
     const secondarySort = direction === "DESC" ? "l.COG DESC" : "l.COG ASC";
 
-    // Build the ORDER BY clause safely
-    const orderByClause = `ORDER BY l.${sort} ${direction}, ${secondarySort}`;
-    
     const sql = `
     WITH LatestCommuneNames AS (
       SELECT COG, musulman_pct, africain_pct, asiatique_pct, traditionnel_pct, moderne_pct, annais
@@ -159,7 +142,7 @@ router.get(
     LEFT JOIN commune_subventions cs ON l.COG = cs.COG
     WHERE (l.departement = ? OR ? = '')
     ${populationFilter}
-    ${orderByClause}
+    ORDER BY ${sort} ${direction}, ${secondarySort}
     LIMIT ? OFFSET ?
   `;
 
