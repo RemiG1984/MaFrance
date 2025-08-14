@@ -4,7 +4,7 @@
     <!-- Controls Section -->
     <div class="controls-section">
       <!-- All controls moved to RankingFilters -->
-      <RankingFilters 
+      <RankingFilters
         :selectedScope="selectedScope"
         :selectedDepartement="selectedDepartement"
         :selectedMetric="selectedMetric"
@@ -25,7 +25,7 @@
         {{ error }}
       </div>
 
-      <RankingResults 
+      <RankingResults
         v-else-if="rankings.length > 0"
         :rankings="rankings"
         :metric="selectedMetric"
@@ -196,7 +196,7 @@ export default {
 
     const fetchCommunesFranceRankings = async (metric, limit) => {
       try {
-        // Check if we already have data without triggering store updates
+        // Use the existing store data from departement.communesRankings
         if (!store.departement?.communesRankings?.data) {
           error.value = "Aucune donnée communale disponible. Sélectionnez d'abord un département dans 'Communes (par département)' pour charger des données communales.";
           return [];
@@ -315,11 +315,11 @@ export default {
       selectedDepartement.value = selection.departement
       selectedMetric.value = selection.metric
       currentLevel.value = selection.level
-      
+
       // Clear previous results and errors
       rankings.value = []
       error.value = ''
-      
+
       // Update rankings if metric is selected
       if (selectedMetric.value) {
         updateRankings()
