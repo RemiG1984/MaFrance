@@ -85,7 +85,7 @@ const cacheRoutes = require("./routes/cacheRoutes");
 app.locals.db = db;
 
 // Attach routes with search rate limiting where applicable
-app.use("/api/communes", searchLimiter, communeRoutes);
+//app.use("/api/communes", searchLimiter, communeRoutes);
 app.use("/api/communes", communeRoutes);
 app.use("/api/departements", departementRoutes);
 app.use("/api/country", countryRoutes);
