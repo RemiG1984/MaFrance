@@ -180,6 +180,12 @@ cd client && npm install && cd ..
 
 ### Développement
 
+#### Mode développement avec HMR (recommandé)
+```bash
+# Utiliser le workflow "HMR Development" ou :
+npm run dev    # Démarre Vite (port 5173) + serveur API (port 3000)
+```
+
 #### Démarrage du serveur complet (build + serveur)
 ```bash
 npm run build  # Build du frontend
@@ -196,6 +202,35 @@ npm run dev    # Serveur de développement Vite
 ```bash
 npm run build        # Build frontend dans public/
 npm run build-css-prod  # Build CSS Tailwind optimisé
+```
+
+### Debugging en développement
+
+#### Console browser - Variables d'environnement
+```javascript
+// Vérifier la configuration Vite
+console.log('Import meta env:', import.meta.env);
+console.log('API Base URL:', import.meta.env.VITE_API_BASE_URL);
+console.log('Mode:', import.meta.env.MODE); // development/production
+```
+
+#### Vérification Pinia store
+```javascript
+// Vérifier que Pinia est correctement initialisé
+console.log('Pinia activated:', !!window.__PINIA__);
+
+// Accéder aux stores
+const app = document.querySelector('#app').__vue_app__;
+const store = app.config.globalProperties.$store;
+console.log('Store state:', store?.$state);
+```
+
+#### Service Worker en développement
+Le service worker n'est actif qu'en production. En développement, utilisez :
+```javascript
+// Vérifier si SW est disponible
+console.log('SW available:', 'serviceWorker' in navigator);
+console.log('SW registration:', navigator.serviceWorker.controller);
 ```
 
 ## Configuration
@@ -313,6 +348,62 @@ VITE_API_BASE_URL=http://localhost:3000/api
 - Monitoring cache hit ratio
 - Alertes erreurs
 
+## Service Worker et Cache
+
+### Fonctionnalités du Service Worker
+L'application utilise un service worker (`public/sw.js`) pour :
+- **Cache offline** : Assets statiques mis en cache automatiquement
+- **Détection de mises à jour** : Vérification périodique des changements
+- **Rechargement automatique** : Actualisation lors de nouvelles versions
+- **Cache API** : Mise en cache intelligente des réponses API
+
+### Contrôle du cache via console navigateur
+```javascript
+// Vérifier l'état du service worker
+navigator.serviceWorker.getRegistration().then(reg => console.log(reg));
+
+// Forcer la vérification de mises à jour
+navigator.serviceWorker.getRegistration().then(reg => reg.update());
+
+// Envoyer un message au service worker pour vérifier les mises à jour
+navigator.serviceWorker.controller.postMessage({ type: 'CHECK_UPDATES' });
+
+// Vider le cache du service worker
+navigator.serviceWorker.controller.postMessage({ type: 'CLEAR_CACHE' });
+
+// Désinstaller le service worker
+navigator.serviceWorker.getRegistration().then(reg => reg.unregister());
+```
+
+### Debugging Pinia Store
+Le store Pinia est accessible dans la console pour debugging :
+
+```javascript
+// Accéder au store principal
+window.__PINIA__ // Instance Pinia globale
+
+// Vérifier si Pinia est activé et fonctionnel
+console.log('Pinia activated:', !!window.__PINIA__);
+
+// Accéder aux données du store via Vue DevTools
+// Ou directement via l'instance Vue
+document.querySelector('#app').__vue_app__.config.globalProperties.$pinia
+```
+
+### Vérifications de mise à jour automatiques
+- **Périodicité** : Vérification toutes les 60 secondes
+- **Mécanisme** : Comparaison du `buildHash` via `/api/version`
+- **Actions** : Rechargement automatique si nouvelle version détectée
+
+### Console de debugging recommandée
+```javascript
+// Vérifier l'état complet de l'application
+console.log('Vue app:', document.querySelector('#app').__vue_app__);
+console.log('Service Worker:', navigator.serviceWorker.controller);
+console.log('Pinia store:', window.__PINIA__);
+console.log('API base URL:', import.meta.env.VITE_API_BASE_URL);
+```
+
 ## Déploiement sur Replit
 
 ### Configuration production
@@ -321,11 +412,12 @@ L'application est configurée pour Replit avec :
 - Build automatisé via workflows
 - Service de fichiers statiques intégré
 - Variables d'environnement configurées
+- Service worker activé pour cache offline
 
 ### Workflows disponibles
-- **Build and Start Vue** : Build frontend + démarrage serveur
+- **HMR Development** : Développement avec hot reload (client sur port 5173)
 - **Start Server** : Démarrage serveur uniquement
-- **Build and Start** : Build CSS + démarrage serveur
+- **Production Build** : Build frontend + démarrage serveur production
 
 ### Structure déployée
 ```
@@ -334,6 +426,7 @@ public/           # Fichiers statiques générés par Vite
 ├── assets/       # CSS/JS/fonts optimisés
 │   ├── index-gCHxcsa-.css (817KB)
 │   └── index-DCb9g14C.js (909KB)
+├── sw.js         # Service worker pour cache offline
 └── images/       # Assets statiques
 ```
 
