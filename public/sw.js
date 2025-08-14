@@ -43,7 +43,8 @@ self.addEventListener('install', (event) => {
         });
       })
       .then(() => {
-        return self.skipWaiting(); // Activate immediately
+        // Don't skip waiting automatically - let the browser handle it naturally
+        console.log('Static assets cached, service worker ready');
       })
   );
 });
@@ -230,14 +231,14 @@ async function checkForUpdates() {
     const response = await fetch('/api/version?' + Date.now());
     if (response.ok) {
       const serverInfo = await response.json();
-      
+
       // Compare with cached build info
       const cache = await caches.open(STATIC_CACHE_NAME);
       const cachedResponse = await cache.match('__build_info__');
-      
+
       if (cachedResponse) {
         const cachedInfo = await cachedResponse.json();
-        
+
         if (serverInfo.buildHash !== cachedInfo.buildHash) {
           console.log('New version detected, updating cache...');
           // Clear old caches and force update

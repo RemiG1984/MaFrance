@@ -21,7 +21,7 @@
     <meta name="msapplication-TileColor" content="#1976d2">
     <meta name="msapplication-tap-highlight" content="no">
     <meta name="theme-color" content="#1976d2">
-    
+
     <!-- Open Graph / Social Media -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="Ma France: état des lieux">
@@ -29,10 +29,10 @@
     <meta property="og:site_name" content="Ma France">
     <meta property="og:url" content="https://ouvamafrance.replit.app">
     <meta property="og:image" content="https://ouvamafrance.replit.app/android-chrome-512x512.png">
-    
+
     <!-- Apple Splash Screen -->
     <link rel="apple-touch-startup-image" href="/android-chrome-512x512.png">
-    
+
     <!-- Security Headers -->
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-XSS-Protection" content="1; mode=block">
@@ -74,7 +74,7 @@
     <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
 
     <script type="module" src="/src/main.js"></script>
-    
+
     <!-- Service Worker Registration -->
     <script>
       if ('serviceWorker' in navigator) {
@@ -82,24 +82,21 @@
           try {
             const registration = await navigator.serviceWorker.register('/sw.js');
             console.log('SW registered: ', registration);
-            
+
             // Check for updates immediately
             registration.update();
-            
+
             // Listen for updates
             registration.addEventListener('updatefound', () => {
               const newWorker = registration.installing;
               console.log('New service worker found, installing...');
-              
+
               newWorker.addEventListener('statechange', () => {
                 console.log('SW state changed:', newWorker.state);
                 if (newWorker.state === 'installed') {
                   if (navigator.serviceWorker.controller) {
-                    // New content is available
-                    console.log('New content available, will update on next page load');
-                    // Auto-refresh to get new content
-                    newWorker.postMessage({ type: 'SKIP_WAITING' });
-                    window.location.reload();
+                    // New content is available - update will happen on next page navigation
+                    console.log('New content available, will update on next page navigation');
                   } else {
                     // Content is cached for first time
                     console.log('Content is cached for offline use.');
@@ -107,13 +104,12 @@
                 }
               });
             });
-            
-            // Listen for controlling service worker changes
+
+            // Listen for controlling service worker changes - no auto-refresh
             navigator.serviceWorker.addEventListener('controllerchange', () => {
-              console.log('New service worker activated, refreshing...');
-              window.location.reload();
+              console.log('New service worker activated');
             });
-            
+
             // Handle offline/online status
             window.addEventListener('online', () => {
               console.log('App is online');
@@ -122,11 +118,11 @@
                 registration.sync.register('background-sync');
               }
             });
-            
+
             window.addEventListener('offline', () => {
               console.log('App is offline - using cached data');
             });
-            
+
             // Listen for update messages from service worker
             navigator.serviceWorker.addEventListener('message', (event) => {
               if (event.data && event.data.type === 'UPDATE_AVAILABLE') {
@@ -134,17 +130,16 @@
                 window.location.reload();
               }
             });
-            
-            // Check for updates periodically
+
+            // Check for updates periodically - simplified
             setInterval(() => {
               registration.update();
-              
-              // Also check our custom update mechanism
+
               if (registration.active) {
                 registration.active.postMessage({ type: 'CHECK_UPDATES' });
               }
-            }, 60000); // Check every minute
-            
+            }, 300000); // Check every 5 minutes
+
           } catch (error) {
             console.log('SW registration failed: ', error);
           }
