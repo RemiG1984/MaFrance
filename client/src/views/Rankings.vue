@@ -344,7 +344,7 @@ export default {
         else if (popUpper === 10000) return "0-10k"
         else if (popUpper === 100000) return "0-100k"
       }
-      return ""
+      return "0+"
     }
 
     const onSelectionChanged = (selection) => {
