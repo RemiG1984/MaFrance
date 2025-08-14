@@ -198,7 +198,14 @@ export default {
           return ranking;
         });
 
-        const finalRankings = [...topRankings, ...bottomRankings];
+        // Deduplicate rankings based on rank to avoid duplicates when total count is small
+        const finalRankings = [...topRankings];
+        bottomRankings.forEach(bottomRanking => {
+          // Only add bottom ranking if it's not already in top rankings
+          if (!finalRankings.some(topRanking => topRanking.rank === bottomRanking.rank)) {
+            finalRankings.push(bottomRanking);
+          }
+        });
 
         return finalRankings;
       } catch (err) {
