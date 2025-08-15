@@ -1,7 +1,7 @@
 <template>
   <v-menu offset-y>
     <template v-slot:activator="{ props }">
-      <v-btn v-bind="props" variant="text" size="small" :title="shareButtonTitle">
+      <v-btn v-bind="props" variant="text" class="mx-2" :title="shareButtonTitle">
         <v-icon start>mdi-share-variant</v-icon>
         <span v-if="showText">Partager</span>
       </v-btn>
