@@ -211,6 +211,14 @@ export default {
       await this.loadDepartementsGeoJson()
     },
     updateData(){
+      // Sync selected metric with store
+      if (this.dataStore.selectedMetric) {
+        const metricObj = this.availableMetrics.find(m => m.value === this.dataStore.selectedMetric);
+        if (metricObj && metricObj.value !== this.selectedMetric.value) {
+          this.selectedMetric = metricObj;
+        }
+      }
+      
       this.updateGeoJson()
       this.updateRanking()
       this.updateLayerColors()
