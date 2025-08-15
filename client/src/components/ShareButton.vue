@@ -1,17 +1,9 @@
 <template>
   <v-menu offset-y>
     <template v-slot:activator="{ props }">
-      <v-btn
-        v-bind="props"
-        :icon="!showText ? 'mdi-share-variant' : undefined"
-        variant="text"
-        size="small"
-        :title="shareButtonTitle"
-      >
-        <template v-if="showText">
-          <v-icon start>mdi-share-variant</v-icon>
-          Partager
-        </template>
+      <v-btn v-bind="props" variant="text" size="small" :title="shareButtonTitle">
+        <v-icon start>mdi-share-variant</v-icon>
+        <span v-if="showText">Partager</span>
       </v-btn>
     </template>
     <v-card min-width="300">
