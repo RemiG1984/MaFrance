@@ -137,7 +137,7 @@ export default {
     },
 
     shareText() {
-      return `Découvrez les données de ${this.shareLocation} sur`
+      return `Découvrez les données de ${this.shareLocation} sur:`
     }
   },
 
