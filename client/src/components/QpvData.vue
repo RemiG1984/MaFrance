@@ -4,108 +4,74 @@
       Quartiers Prioritaires (QPV) à: {{ locationName }}
     </v-card-title>
     <v-card-text>
-      <div v-if="qpvList && qpvList.length > 0">
-        <v-data-table
-          :headers="headers"
-          :items="qpvList"
-          :loading="isLoading"
-          :items-per-page="25"
-          :items-per-page-options="[10, 25, 50, 100]"
-          class="qpv-data-table"
-          density="compact"
-          :height="400"
-          fixed-header
-        >
-          <!-- Custom template for QPV name with link -->
-          <template v-slot:item.lib_qp="{ item }">
-            <a
-              :href="'https://sig.ville.gouv.fr/territoire/' + item.codeQPV"
-              target="_blank"
-              class="qpv-link"
-            >
-              {{ item.lib_qp || item.codeQPV }}
-            </a>
-          </template>
-
-          <!-- Format population numbers -->
-          <template v-slot:item.popMuniQPV="{ item }">
-            {{ formatNumber(item.popMuniQPV) }}
-          </template>
-
-          <!-- Format indice jeunesse -->
-          <template v-slot:item.indiceJeunesse="{ item }">
-            {{ formatNumber(item.indiceJeunesse) }}
-          </template>
-
-          <!-- Format logements sociaux -->
-          <template v-slot:item.nombre_logements_sociaux="{ item }">
-            {{ formatNumber(item.nombre_logements_sociaux) }}
-          </template>
-
-          <!-- Format percentage values -->
-          <template v-slot:item.taux_logements_sociaux="{ item }">
-            {{ formatPercentage(item.taux_logements_sociaux) }}
-          </template>
-
-          <template v-slot:item.partPopImmi="{ item }">
-            {{ formatPercentage(item.partPopImmi) }}
-          </template>
-
-          <template v-slot:item.partPopEt="{ item }">
-            {{ formatPercentage(item.partPopEt) }}
-          </template>
-
-          <template v-slot:item.taux_d_emploi="{ item }">
-            {{ formatPercentage(item.taux_d_emploi) }}
-          </template>
-
-          <template v-slot:item.taux_pauvrete_60="{ item }">
-            {{ formatPercentage(item.taux_pauvrete_60) }}
-          </template>
-
-          <!-- Format other numbers -->
-          <template v-slot:item.RSA_socle="{ item }">
-            {{ formatNumber(item.RSA_socle) }}
-          </template>
-
-          <template v-slot:item.allocataires_CAF="{ item }">
-            {{ formatNumber(item.allocataires_CAF) }}
-          </template>
-
-          <template v-slot:item.personnes_couvertes_CAF="{ item }">
-            {{ formatNumber(item.personnes_couvertes_CAF) }}
-          </template>
-
-          <!-- Loading template -->
-          <template v-slot:loading>
-            <div class="text-center">
-              <v-progress-circular indeterminate color="primary"></v-progress-circular>
-              <p class="mt-2">Chargement des données...</p>
-            </div>
-          </template>
-
-          <!-- No data template -->
-          <template v-slot:no-data>
-            <div class="text-center py-4">
-              <p>Aucun quartier prioritaire dans cette zone.</p>
-            </div>
-          </template>
-        </v-data-table>
-
-        <!-- Load more button for country level -->
-        <div v-if="location.type === 'country' && data.pagination?.hasMore" class="text-center mt-4">
-          <v-btn
-            @click="loadMoreQpvs"
-            :loading="isLoading"
-            color="primary"
-            variant="outlined"
-          >
-            Charger plus de QPV
-          </v-btn>
+      <div
+        class="table-container"
+        ref="tableContainer"
+        @scroll="handleScroll"
+        v-if="visibleQpvs && visibleQpvs.length > 0"
+        :style="{ maxHeight: computedContainerHeight + 'px' }"
+      >
+        <!-- Fixed header outside of virtual scroll -->
+        <table class="qpv-table qpv-table-header">
+          <thead>
+            <tr>
+              <th>Quartier QPV</th>
+              <th>Population</th>
+              <th>Commune</th>
+              <th>Indice Jeunesse</th>
+              <th>Logements sociaux</th>
+              <th>Taux logements sociaux</th>
+              <th>Pop. Immigrée</th>
+              <th>Pop. Étrangère</th>
+              <th>Taux d'emploi</th>
+              <th>Taux de pauvreté</th>
+              <th>RSA socle</th>
+              <th>Allocataires CAF</th>
+              <th>Couverture CAF</th>
+            </tr>
+          </thead>
+        </table>
+        
+        <!-- Virtual scrolled content -->
+        <div class="virtual-scroll-wrapper" :style="{ height: virtualHeight + 'px' }">
+          <div class="virtual-scroll-content" :style="{ transform: `translateY(${offsetY}px)`, paddingTop: '36px' }">
+            <table class="qpv-table qpv-table-body">
+              <tbody>
+                <tr
+                  v-for="(qpv, i) in visibleQpvs"
+                  :key="qpv.codeQPV + '-' + i"
+                  :style="{ height: itemHeight + 'px' }"
+                >
+                  <td class="row-title">
+                      <a :href="'https://sig.ville.gouv.fr/territoire/'+qpv.codeQPV" target="_blank">
+                          {{qpv.lib_qp || qpv.codeQPV}}
+                      </a>
+                  </td>
+                  <td class="score-main">{{formatNumber(qpv.popMuniQPV)}}</td>
+                  <td class="score-main">{{qpv.lib_com}}</td>
+                  <td class="score-main">{{formatNumber(qpv.indiceJeunesse)}}</td>
+                  <td class="score-main">{{formatNumber(qpv.nombre_logements_sociaux)}}</td>
+                  <td class="score-main">{{formatPercentage(qpv.taux_logements_sociaux)}}</td>
+                  <td class="score-main">{{formatPercentage(qpv.partPopImmi)}}</td>
+                  <td class="score-main">{{formatPercentage(qpv.partPopEt)}}</td>
+                  <td class="score-main">{{formatPercentage(qpv.taux_d_emploi)}}</td>
+                  <td class="score-main">{{formatPercentage(qpv.taux_pauvrete_60)}}</td>
+                  <td class="score-main">{{formatNumber(qpv.RSA_socle)}}</td>
+                  <td class="score-main">{{formatNumber(qpv.allocataires_CAF)}}</td>
+                  <td class="score-main">{{formatNumber(qpv.personnes_couvertes_CAF)}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <div v-if="isLoading" class="loading">
+          <v-progress-circular indeterminate size="24" color="primary"></v-progress-circular>
+          Chargement...
         </div>
       </div>
 
-      <div v-else class="text-center py-8">
+      <div v-else class="text-center">
         <p v-if="location.type === 'country'">
           Aucun quartier prioritaire dans cette zone.
         </p>
@@ -140,87 +106,19 @@ export default {
   data() {
     return {
       isLoading: false,
-      headers: [
-        {
-          title: 'Quartier QPV',
-          key: 'lib_qp',
-          sortable: true,
-          width: '200px'
-        },
-        {
-          title: 'Population',
-          key: 'popMuniQPV',
-          sortable: true,
-          align: 'end'
-        },
-        {
-          title: 'Commune',
-          key: 'lib_com',
-          sortable: true,
-          width: '150px'
-        },
-        {
-          title: 'Indice Jeunesse',
-          key: 'indiceJeunesse',
-          sortable: true,
-          align: 'end'
-        },
-        {
-          title: 'Logements sociaux',
-          key: 'nombre_logements_sociaux',
-          sortable: true,
-          align: 'end'
-        },
-        {
-          title: 'Taux logements sociaux',
-          key: 'taux_logements_sociaux',
-          sortable: true,
-          align: 'end'
-        },
-        {
-          title: 'Pop. Immigrée',
-          key: 'partPopImmi',
-          sortable: true,
-          align: 'end'
-        },
-        {
-          title: 'Pop. Étrangère',
-          key: 'partPopEt',
-          sortable: true,
-          align: 'end'
-        },
-        {
-          title: 'Taux d\'emploi',
-          key: 'taux_d_emploi',
-          sortable: true,
-          align: 'end'
-        },
-        {
-          title: 'Taux de pauvreté',
-          key: 'taux_pauvrete_60',
-          sortable: true,
-          align: 'end'
-        },
-        {
-          title: 'RSA socle',
-          key: 'RSA_socle',
-          sortable: true,
-          align: 'end'
-        },
-        {
-          title: 'Allocataires CAF',
-          key: 'allocataires_CAF',
-          sortable: true,
-          align: 'end'
-        },
-        {
-          title: 'Couverture CAF',
-          key: 'personnes_couvertes_CAF',
-          sortable: true,
-          align: 'end'
-        }
-      ]
+      // Virtual scrolling
+      containerHeight: 400,
+      itemHeight: 60,
+      scrollTop: 0,
+      bufferSize: 5
     }
+  },
+  mounted() {
+    this.updateContainerHeight()
+    window.addEventListener('resize', this.updateContainerHeight)
+  },
+  beforeUnmount() {
+    window.removeEventListener('resize', this.updateContainerHeight)
   },
   computed: {
     locationName() {
@@ -243,6 +141,36 @@ export default {
         return this.data
       }
       return this.data.list || []
+    },
+
+    // Virtual scrolling computed properties
+    visibleStartIndex() {
+      return Math.max(0, Math.floor(this.scrollTop / this.itemHeight) - this.bufferSize)
+    },
+
+    visibleEndIndex() {
+      const visibleCount = Math.ceil(this.containerHeight / this.itemHeight)
+      return Math.min(
+        this.qpvList.length - 1,
+        this.visibleStartIndex + visibleCount + this.bufferSize * 2
+      )
+    },
+
+    visibleQpvs() {
+      return this.qpvList.slice(this.visibleStartIndex, this.visibleEndIndex + 1)
+    },
+
+    virtualHeight() {
+      return this.qpvList.length * this.itemHeight
+    },
+
+    offsetY() {
+      return this.visibleStartIndex * this.itemHeight
+    },
+
+    computedContainerHeight() {
+      // Reduce to 50px if no QPVs and not loading
+      return this.qpvList.length === 0 && !this.isLoading ? 50 : 400;
     }
   },
   methods: {
@@ -254,6 +182,27 @@ export default {
     formatPercentage(value) {
       if (value == null || isNaN(value)) return "N/A";
       return value.toFixed(1) + "%";
+    },
+
+    updateContainerHeight() {
+      if (this.$refs.tableContainer) {
+        this.containerHeight = this.$refs.tableContainer.clientHeight
+      }
+    },
+
+    handleScroll(event) {
+      this.scrollTop = event.target.scrollTop;
+      const scrollBottom = this.scrollTop + this.containerHeight;
+      const contentHeight = this.virtualHeight;
+      // Only load more if country level
+      if (
+        this.location.type === 'country' &&
+        scrollBottom >= contentHeight - 200 &&
+        !this.isLoading &&
+        this.data.pagination?.hasMore
+      ) {
+        this.loadMoreQpvs();
+      }
     },
 
     async loadMoreQpvs() {
@@ -268,12 +217,12 @@ export default {
         const params = {
           limit: 20
         };
-
+        
         // Only add cursor if it's a valid value
         if (this.data.pagination.nextCursor != null) {
           params.cursor = this.data.pagination.nextCursor;
         }
-
+        
         await dataStore.loadMoreQpv('country', null, params);
       } catch (error) {
         console.error('Failed to load more QPVs:', error);
@@ -281,45 +230,175 @@ export default {
         this.isLoading = false;
       }
     }
+  },
+  watch: {
+    data: {
+      handler() {
+        this.$nextTick(() => {
+          this.updateContainerHeight()
+        })
+      },
+      deep: true
+    }
   }
 }
 </script>
 
 <style scoped>
-.qpv-data-table {
+.table-container {
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: auto;
+  max-height: 400px;
+  margin: 15px 0;
   border: 1px solid #dee2e6;
   border-radius: 8px;
+  background-color: #fff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
 }
 
-.qpv-link {
-  color: #1976d2;
+.virtual-scroll-wrapper {
+  position: relative;
+}
+
+.virtual-scroll-content {
+  position: relative;
+}
+
+.qpv-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1200px;
+  table-layout: fixed;
+}
+
+.qpv-table-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: #fff;
+}
+
+.qpv-table-body {
+  margin-top: -36px; /* Offset for header height */
+}
+
+.qpv-table th,
+.qpv-table td {
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid #ececec;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.qpv-table th {
+  background-color: #e9ecef;
+  font-weight: 700;
+  font-size: 12px;
+  height: 36px;
+  line-height: 1.2;
+}
+
+.qpv-table th:first-child,
+.qpv-table td:first-child {
+  position: sticky;
+  left: 0;
+  background-color: #fff;
+  z-index: 3;
+  min-width: 200px;
+  max-width: 250px;
+  white-space: normal;
+}
+
+.qpv-table th:first-child {
+  background-color: #e9ecef;
+  z-index: 4;
+}
+
+.qpv-table tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+.qpv-table tr:nth-child(even) td:first-child {
+  background-color: #f8f9fa;
+}
+
+.qpv-table tr:last-child td {
+  border-bottom: none;
+}
+
+.qpv-table a {
+  color: #007bff;
   text-decoration: none;
-  font-weight: 500;
+  display: block;
+  white-space: normal;
+  word-wrap: break-word;
 }
 
-.qpv-link:hover {
+.qpv-table a:hover {
   text-decoration: underline;
 }
 
-/* Ensure table headers are sticky and visible */
-:deep(.v-data-table__thead) {
-  background-color: #f5f5f5;
+/* Optimized column widths for horizontal scrolling */
+.qpv-table th:nth-child(1),
+.qpv-table td:nth-child(1) {
+  width: 200px;
 }
 
-:deep(.v-data-table__th) {
-  font-weight: 600 !important;
-  background-color: #f5f5f5 !important;
+.qpv-table th:nth-child(2),
+.qpv-table td:nth-child(2) {
+  width: 100px;
 }
 
-/* Responsive table styling */
-:deep(.v-data-table) {
-  font-size: 0.875rem;
+.qpv-table th:nth-child(3),
+.qpv-table td:nth-child(3) {
+  width: 120px;
 }
 
-@media (max-width: 768px) {
-  :deep(.v-data-table) {
-    font-size: 0.75rem;
-  }
+.qpv-table th:nth-child(4),
+.qpv-table td:nth-child(4) {
+  width: 120px;
+}
+
+.qpv-table th:nth-child(5),
+.qpv-table td:nth-child(5) {
+  width: 140px;
+}
+
+.qpv-table th:nth-child(6),
+.qpv-table td:nth-child(6) {
+  width: 110px;
+}
+
+.qpv-table th:nth-child(7),
+.qpv-table td:nth-child(7) {
+  width: 120px;
+}
+
+.qpv-table th:nth-child(8),
+.qpv-table td:nth-child(8) {
+  width: 100px;
+}
+
+.qpv-table th:nth-child(9),
+.qpv-table td:nth-child(9) {
+  width: 120px;
+}
+
+.qpv-table th:nth-child(10),
+.qpv-table td:nth-child(10) {
+  width: 120px;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px;
+  color: #6c757d;
 }
 </style>
