@@ -70,7 +70,7 @@
               :value="localFilters.popLower || ''"
               @input="onFilterChange('popLower', $event)"
               min="0" 
-              max="10000000"
+              max="1000000"
               placeholder="Ex: 1000"
             >
           </div>
@@ -83,7 +83,7 @@
               :value="localFilters.popUpper || ''"
               @input="onFilterChange('popUpper', $event)"
               min="0" 
-              max="10000000"
+              max="1000000"
               placeholder="Ex: 50000"
             >
           </div>
