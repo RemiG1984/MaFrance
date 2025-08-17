@@ -50,6 +50,9 @@ router.get(
         case "0-10k":
           populationFilter = "AND l.population <= 10000";
           break;
+        case "0-20k":
+          populationFilter = "AND l.population <= 20000";
+          break;
         case "0-100k":
           populationFilter = "AND l.population <= 100000";
           break;
@@ -60,12 +63,20 @@ router.get(
           populationFilter =
             "AND l.population >= 1000 AND l.population <= 10000";
           break;
+        case "1-20k":
+          populationFilter =
+            "AND l.population >= 1000 AND l.population <= 20000";
+          break;
         case "1-100k":
           populationFilter =
             "AND l.population >= 1000 AND l.population <= 100000";
           break;
         case "1k+":
           populationFilter = "AND l.population >= 1000";
+          break;
+        case "10-20k":
+          populationFilter =
+            "AND l.population >= 10000 AND l.population <= 20000";
           break;
         case "10-100k":
           populationFilter =
@@ -74,13 +85,20 @@ router.get(
         case "10k+":
           populationFilter = "AND l.population >= 10000";
           break;
+        case "20-100k":
+          populationFilter =
+            "AND l.population >= 20000 AND l.population <= 100000";
+          break;
+        case "20k+":
+          populationFilter = "AND l.population >= 20000";
+          break;
         case "100k+":
           populationFilter = "AND l.population >= 100000";
           break;
         default:
           return res.status(400).json({
             error:
-              "Plage de population invalide. Valeurs autorisées : 0-1k, 0-10k, 0-100k, 0+, 1-10k, 1-100k, 1k+, 10-100k, 10k+, 100k+",
+              "Plage de population invalide. Valeurs autorisées : 0-1k, 0-10k, 0-20k, 0-100k, 0+, 1-10k, 1-20k, 1-100k, 1k+, 10-20k, 10-100k, 10k+, 20-100k, 20k+, 100k+",
           });
       }
     }

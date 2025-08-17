@@ -164,6 +164,7 @@ export default {
         { value: 'aucune', label: 'Aucune limite' },
         { value: '1k', label: '1k' },
         { value: '10k', label: '10k' },
+        { value: '20k', label: '20k' },
         { value: '100k', label: '100k' }
       ]
 
@@ -185,6 +186,7 @@ export default {
       const allOptions = [
         { value: '1k', label: '1k' },
         { value: '10k', label: '10k' },
+        { value: '20k', label: '20k' },
         { value: '100k', label: '100k' },
         { value: 'aucune', label: 'Aucune limite' }
       ]
