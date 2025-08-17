@@ -7,6 +7,7 @@ export const useDataStore = defineStore("data", {
   state: () => ({
     currentLevel: null,
     labelState: parseInt(localStorage.getItem("metricsLabelState") || "0"),
+    selectedMetric: null,
     levels: {
       country: "France",
       departement: null,
@@ -62,6 +63,8 @@ export const useDataStore = defineStore("data", {
     async searchCommunes(query) {
       return await api.searchCommunes(query);
     },
+
+
 
     // Requêtes globales getAll()
     async fetchCountryData(code) {
@@ -231,15 +234,25 @@ export const useDataStore = defineStore("data", {
       this.setLevel("departement");
     },
 
+    // Helper method to normalize COG codes to 5 digits
+    normalizeCogCode(cog) {
+      if (!cog) return cog;
+      // Convert to string and pad with leading zeros to 5 digits
+      return cog.toString().padStart(5, '0');
+    },
+
     async setCommune(cog, communeName, deptCode) {
+      // Normalize the COG code for internal processing
+      const normalizedCog = this.normalizeCogCode(cog);
+
       const currentCommCode = this.getCommuneCode();
       const currentDeptCode = this.getDepartementCode();
 
       const promises = [];
 
       // Vérifier si on doit charger les données de la commune
-      if (cog !== currentCommCode) {
-        promises.push(this.fetchCommuneData(cog, deptCode));
+      if (normalizedCog !== currentCommCode) {
+        promises.push(this.fetchCommuneData(normalizedCog, deptCode));
       } else {
         promises.push(Promise.resolve(null)); // Placeholder pour maintenir l'ordre
       }
@@ -406,6 +419,73 @@ export const useDataStore = defineStore("data", {
     initializeStore() {
       // Sync labelState with MetricsConfig
       MetricsConfig.labelState = this.labelState;
+
+      // Handle pending navigation from shared links
+      this.handlePendingNavigation();
+    },
+
+    // Handle navigation from shared URLs
+    async handlePendingNavigation() {
+      const pendingNav = sessionStorage.getItem('pendingNavigation')
+      if (!pendingNav) {
+        // If no pending navigation, trigger LocationSelector after delay to auto-zoom map
+        setTimeout(() => {
+          this.triggerLocationSelectorAutoZoom()
+        }, 500)
+        return
+      }
+
+      try {
+        const params = JSON.parse(pendingNav)
+        sessionStorage.removeItem('pendingNavigation')
+
+        // Set version if specified
+        if (params.v) {
+          const version = parseInt(params.v)
+          if (version >= 0 && version <= 2) {
+            this.setLabelState(version)
+          }
+        }
+
+        // Set selected metric if specified (decode compact format)
+        if (params.m) {
+          const decodedMetric = MetricsConfig.getMetricFromCompact(params.m)
+          this.selectedMetric = decodedMetric
+        }
+
+        // Navigate to location based on 'c' parameter
+        if (params.c) {
+          // Check if it's a commune code (4-5 digits or special formats)
+          if (/^[0-9]{4,5}$/.test(params.c) || /^2[AB][0-9]{3}$/.test(params.c) || /^97[1-6][0-9]{2}$/.test(params.c)) {
+            // It's a commune COG code - normalize it for API call
+            const normalizedCode = this.normalizeCogCode(params.c);
+            const communeDetails = await api.getCommuneDetails(normalizedCode)
+            if (communeDetails) {
+              await this.setCommune(normalizedCode, communeDetails.commune, communeDetails.departement)
+            }
+          } else if (/^(0[1-9]|[1-8][0-9]|9[0-5]|2[AB]|97[1-6])$/.test(params.c)) {
+            // It's a department code
+            await this.setDepartement(params.c)
+          }
+        } else {
+          // Stay at country level
+          await this.setCountry()
+        }
+
+        // Trigger LocationSelector after navigation to auto-zoom map
+        setTimeout(() => {
+          this.triggerLocationSelectorAutoZoom()
+        }, 500)
+      } catch (error) {
+        console.error('Error handling shared navigation:', error)
+        sessionStorage.removeItem('pendingNavigation')
+      }
+    },
+
+    // Trigger LocationSelector to activate map auto-zoom
+    triggerLocationSelectorAutoZoom() {
+      // Dispatch event that LocationSelector can listen to for auto-zoom
+      window.dispatchEvent(new CustomEvent('triggerMapAutoZoom'))
     },
 
     // Label state management
@@ -589,30 +669,6 @@ export const useDataStore = defineStore("data", {
         }
     },
 
-    async handleLocationParam(code) {
-      // Simple logic: 3 characters or less = département, 4-5 characters = commune
-      if (code.length <= 3) {
-        // It's a département code
-        await this.setDepartement(code);
-      } else if (code.length === 4 || code.length === 5) {
-        // It's a commune code - we need to find the département
-        try {
-          const communeDetails = await api.getCommuneDetails(code);
-          if (communeDetails && communeDetails.departement) {
-            const deptCode = communeDetails.departement;
-            const communeName = communeDetails.nom;
-            await this.setCommune(code, communeName, deptCode);
-          }
-        } catch (error) {
-          console.error('Failed to load commune from URL parameter:', error);
-          // Fallback to country level
-          await this.setCountry();
-        }
-      } else {
-        console.warn('Invalid location code in URL:', code);
-        await this.setCountry();
-      }
-    },
   },
 
   getters: {
