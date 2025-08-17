@@ -2,7 +2,7 @@
 <template>
   <v-card class="mb-4">
     <v-card-title class="text-h6 pb-0">
-      Centres de clandestins pour: {{ locationName }}
+      Centres de migrants pour: {{ locationName }}
     </v-card-title>
     <v-card-text>
       <div
@@ -33,12 +33,12 @@
               <tbody>
                 <tr
                   v-for="(centre, i) in visibleMigrants"
-                  :key="centre.COG + '-' + centre.gestionnaire_centre + '-' + i"
+                  :key="centre.COG + '-' + centre.gestionnaire + '-' + i"
                   :style="{ height: itemHeight + 'px' }"
                 >
-                  <td class="row-title">{{ centre.type_centre || 'N/A' }}</td>
+                  <td class="row-title">{{ centre.type || 'N/A' }}</td>
                   <td class="score-main">{{ formatNumber(centre.places) }}</td>
-                  <td class="score-main">{{ centre.gestionnaire_centre || 'N/A' }}</td>
+                  <td class="score-main">{{ centre.gestionnaire || 'N/A' }}</td>
                   <td class="score-main">{{ centre.departement || 'N/A' }}</td>
                   <td class="score-main">{{ centre.commune || 'N/A' }}</td>
                   <td class="score-main">{{ centre.adresse || 'N/A' }}</td>

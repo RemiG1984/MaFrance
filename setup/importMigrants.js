@@ -1,4 +1,3 @@
-
 const fs = require('fs');
 const csv = require('csv-parser');
 
@@ -9,6 +8,7 @@ function importMigrants(db, callback) {
     function importMigrantCenters() {
         let migrantRows = 0;
         let allMigrantData = [];
+        let skippedRows = 0;
 
         function processSortedData() {
             return new Promise((resolve, reject) => {
@@ -17,23 +17,20 @@ function importMigrants(db, callback) {
                     return;
                 }
 
-                // Sort by places descending, then by departement, COG, gestionnaire_centre
+                // Sort by places descending, then by departement, COG, gestionnaire
                 allMigrantData.sort((a, b) => {
-                    const placesA = a[6] || 0; // places is at index 6
-                    const placesB = b[6] || 0;
+                    const placesA = a[5] || 0; // places is at index 5
+                    const placesB = b[5] || 0;
                     if (placesB !== placesA) {
                         return placesB - placesA; // descending order
                     }
-                    // Secondary sort by departement (ascending)
                     if (a[1] !== b[1]) {
                         return a[1].localeCompare(b[1]);
                     }
-                    // Tertiary sort by COG (ascending)
                     if (a[0] !== b[0]) {
                         return a[0].localeCompare(b[0]);
                     }
-                    // Quaternary sort by gestionnaire_centre (ascending)
-                    return (a[4] || '').localeCompare(b[4] || '');
+                    return (a[3] || '').localeCompare(b[3] || '');
                 });
 
                 console.log(`Données triées: ${allMigrantData.length} centres par places (décroissant)`);
@@ -43,6 +40,9 @@ function importMigrants(db, callback) {
                 function processBatch() {
                     const batch = allMigrantData.slice(batchIndex, batchIndex + batchSize);
                     if (batch.length === 0) {
+                        if (skippedRows > 0) {
+                            console.warn(`Avertissement: ${skippedRows} lignes ignorées en raison de contraintes d'unicité`);
+                        }
                         resolve();
                         return;
                     }
@@ -54,19 +54,21 @@ function importMigrants(db, callback) {
                             return;
                         }
 
-                        const placeholders = batch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
+                        const placeholders = batch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?)').join(',');
                         const flatBatch = [].concat(...batch);
                         db.run(
-                            `INSERT OR IGNORE INTO migrant_centers (
-                                COG, departement, region, type_centre, gestionnaire_centre, adresse, places,
-                                latitude, longitude, capacite, date_ouverture, date_fermeture,
-                                statut, population_cible, services_proposes,
-                                contact_telephone, contact_email, site_web, notes, derniere_maj
+                            `INSERT INTO migrant_centers (
+                                COG, departement, type, gestionnaire, adresse, places,
+                                latitude, longitude
                             ) VALUES ${placeholders}`,
                             flatBatch,
                             err => {
                                 if (err) {
                                     console.error('Erreur insertion batch migrant_centers:', err.message);
+                                    if (err.message.includes('UNIQUE constraint failed')) {
+                                        skippedRows += batch.length;
+                                        console.warn(`Batch ignoré en raison de contrainte d'unicité: ${batch.length} lignes`);
+                                    }
                                     db.run('ROLLBACK');
                                     reject(err);
                                     return;
@@ -123,61 +125,25 @@ function importMigrants(db, callback) {
                         }
 
                         // Parse numeric fields, allow null if invalid
-                        const capacite = row['capacite'] && !isNaN(parseInt(row['capacite'])) ? parseInt(row['capacite']) : null;
                         const latitude = row['latitude'] && !isNaN(parseFloat(row['latitude'])) ? parseFloat(row['latitude']) : null;
                         const longitude = row['longitude'] && !isNaN(parseFloat(row['longitude'])) ? parseFloat(row['longitude']) : null;
 
-                        // Parse dates, allow null if invalid or empty
-                        let dateOuverture = null;
-                        let dateFermeture = null;
-                        let derniereMaj = null;
-
-                        if (row['date_ouverture'] && /^\d{4}-\d{2}-\d{2}$/.test(row['date_ouverture'])) {
-                            dateOuverture = row['date_ouverture'];
-                        }
-                        if (row['date_fermeture'] && /^\d{4}-\d{2}-\d{2}$/.test(row['date_fermeture'])) {
-                            dateFermeture = row['date_fermeture'];
-                        }
-                        if (row['derniere_maj'] && /^\d{4}-\d{2}-\d{2}$/.test(row['derniere_maj'])) {
-                            derniereMaj = row['derniere_maj'];
-                        }
-
                         // Handle optional text fields
-                        const region = row['region'] ? row['region'].trim() : null;
-                        const typeCentre = row['type'] ? row['type'].trim() : null;
-                        const gestionnaireCentre = row['gestionnaire'] ? row['gestionnaire'].trim() : null;
+                        const type = row['type'] ? row['type'].trim() : null;
+                        const gestionnaire = row['gestionnaire'] ? row['gestionnaire'].trim() : null;
                         const adresse = row['adresse'] ? row['adresse'].trim() : null;
                         const places = row['places'] && !isNaN(parseInt(row['places'])) ? parseInt(row['places']) : null;
-                        const statut = row['statut'] ? row['statut'].trim() : null;
-                        const populationCible = row['population_cible'] ? row['population_cible'].trim() : null;
-                        const servicesProposes = row['services_proposes'] ? row['services_proposes'].trim() : null;
-                        const contactTelephone = row['contact_telephone'] ? row['contact_telephone'].trim() : null;
-                        const contactEmail = row['contact_email'] ? row['contact_email'].trim() : null;
-                        const siteWeb = row['site_web'] ? row['site_web'].trim() : null;
-                        const notes = row['notes'] ? row['notes'].trim() : null;
 
                         migrantRows++;
                         allMigrantData.push([
                             row['COG'],
                             departement,
-                            region,
-                            typeCentre,
-                            gestionnaireCentre,
+                            type,
+                            gestionnaire,
                             adresse,
                             places,
                             latitude,
                             longitude,
-                            capacite,
-                            dateOuverture,
-                            dateFermeture,
-                            statut,
-                            populationCible,
-                            servicesProposes,
-                            contactTelephone,
-                            contactEmail,
-                            siteWeb,
-                            notes,
-                            derniereMaj
                         ]);
                     })
                     .on('end', () => {
@@ -185,7 +151,6 @@ function importMigrants(db, callback) {
                         if (migrantRows === 0) {
                             console.warn('Avertissement: centres_migrants.csv est vide ou n\'a pas de données valides');
                         }
-                        // Sort and process all data
                         processSortedData()
                             .then(resolve)
                             .catch(reject);
@@ -202,27 +167,16 @@ function importMigrants(db, callback) {
                 db.serialize(() => {
                     db.run(`
                         CREATE TABLE IF NOT EXISTS migrant_centers (
-                            COG TEXT,
-                            departement TEXT,
-                            region TEXT,
-                            type_centre TEXT,
-                            gestionnaire_centre TEXT,
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            COG TEXT NOT NULL,
+                            departement TEXT NOT NULL,
+                            type TEXT,
+                            gestionnaire TEXT,
                             adresse TEXT,
                             places INTEGER,
                             latitude REAL,
                             longitude REAL,
-                            capacite INTEGER,
-                            date_ouverture TEXT,
-                            date_fermeture TEXT,
-                            statut TEXT,
-                            population_cible TEXT,
-                            services_proposes TEXT,
-                            contact_telephone TEXT,
-                            contact_email TEXT,
-                            site_web TEXT,
-                            notes TEXT,
-                            derniere_maj TEXT,
-                            PRIMARY KEY (COG, gestionnaire_centre, adresse)
+                            UNIQUE(COG, type, gestionnaire, adresse, places)
                         )
                     `, err => {
                         if (err) {
@@ -245,9 +199,9 @@ function importMigrants(db, callback) {
                                     return;
                                 }
 
-                                db.run('CREATE INDEX IF NOT EXISTS idx_migrant_centers_type ON migrant_centers(type_centre)', err => {
+                                db.run('CREATE INDEX IF NOT EXISTS idx_migrant_centers_places ON migrant_centers(places)', err => {
                                     if (err) {
-                                        console.error('Erreur création index migrant_centers type:', err.message);
+                                        console.error('Erreur création index migrant_centers places:', err.message);
                                         reject(err);
                                         return;
                                     }
@@ -263,7 +217,6 @@ function importMigrants(db, callback) {
         return insertMigrantCenters().then(readMigrantCenters);
     }
 
-    // Execute import
     importMigrantCenters()
         .then(() => callback(null))
         .catch(err => {

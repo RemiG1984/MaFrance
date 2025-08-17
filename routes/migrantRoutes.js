@@ -48,7 +48,7 @@ router.get(
         }
 
         query +=
-            " ORDER BY mc.places DESC, mc.departement, mc.COG, mc.gestionnaire_centre, mc.rowid ASC LIMIT ? OFFSET ?";
+            " ORDER BY mc.places DESC, mc.departement, mc.COG, mc.gestionnaire, mc.rowid ASC LIMIT ? OFFSET ?";
         params.push(pageLimit + 1);
         params.push(offset);
 
@@ -65,9 +65,9 @@ router.get(
                     : null;
 
             const migrants = centers.map(({ rowid, commune_name, ...row }) => ({
-                type_centre: row.type_centre || row.typeCentre,
-                gestionnaire_centre:
-                    row.gestionnaire_centre || row.gestionnaireCentre,
+                type: row.type || row.type,
+                gestionnaire:
+                    row.gestionnaire || row.gestionnaire,
                 adresse: row.adresse,
                 places: row.places,
                 COG: row.COG,
