@@ -71,6 +71,7 @@
               @input="onFilterChange('popLower', $event)"
               min="0" 
               max="10000000"
+              step="1000"
               placeholder="Ex: 1000"
             >
           </div>
@@ -84,6 +85,7 @@
               @input="onFilterChange('popUpper', $event)"
               min="0" 
               max="10000000"
+              step="1000"
               placeholder="Ex: 50000"
             >
           </div>
