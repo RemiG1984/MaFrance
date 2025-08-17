@@ -259,7 +259,7 @@ export default {
           if (validatePopulationFilters()) {
             emitFiltersChange(localFilters.value)
           }
-        }, 800)
+        }, 1200)
       } else {
         // Non-population filters emit immediately
         emitFiltersChange(localFilters.value)
