@@ -11,9 +11,9 @@
       </a>
     </v-card-subtitle>
     <v-card-text>
-      <v-row>
-        <v-col  cols="12" lg="6"
-        class="chart-container"
+      <v-row no-gutters>
+        <v-col cols="12" lg="6"
+        class="chart-container pa-1"
         v-for="chartKey in availableCharts"
         :key="chartKey">
           <Graph
