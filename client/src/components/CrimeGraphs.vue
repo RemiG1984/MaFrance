@@ -1,8 +1,15 @@
 <template>
   <v-card class="mb-4">
-    <v-card-title class="text-h6">
+    <v-card-title class="text-h6 pb-1">
       Graphiques de Criminalité pour: {{ locationName }}
     </v-card-title>
+    <v-card-subtitle class="text-caption pt-0 pb-3">
+      <a href="https://www.data.gouv.fr/fr/datasets/bases-statistiques-communale-et-departementale-de-la-delinquance-enregistree-par-la-police-et-la-gendarmerie-nationales/" 
+         target="_blank" 
+         class="text-decoration-none">
+        Sources
+      </a>
+    </v-card-subtitle>
     <v-card-text>
       <v-row>
         <v-col  cols="12" lg="6"
