@@ -204,13 +204,13 @@ export const useDataStore = defineStore("data", {
     setCountry() {
       this.fetchCountryData().then((country) => {
         this.country = country;
-        
+
         // Clear lower level data when moving to country level
         this.clearDepartementData();
         this.clearCommuneData();
         this.levels.departement = null;
         this.levels.commune = null;
-        
+
         this.setLevel("country");
       });
     },
@@ -589,6 +589,30 @@ export const useDataStore = defineStore("data", {
         }
     },
 
+    async handleLocationParam(code) {
+      // Simple logic: 3 characters or less = département, 4-5 characters = commune
+      if (code.length <= 3) {
+        // It's a département code
+        await this.setDepartement(code);
+      } else if (code.length === 4 || code.length === 5) {
+        // It's a commune code - we need to find the département
+        try {
+          const communeDetails = await api.getCommuneDetails(code);
+          if (communeDetails && communeDetails.departement) {
+            const deptCode = communeDetails.departement;
+            const communeName = communeDetails.nom;
+            await this.setCommune(code, communeName, deptCode);
+          }
+        } catch (error) {
+          console.error('Failed to load commune from URL parameter:', error);
+          // Fallback to country level
+          await this.setCountry();
+        }
+      } else {
+        console.warn('Invalid location code in URL:', code);
+        await this.setCountry();
+      }
+    },
   },
 
   getters: {
