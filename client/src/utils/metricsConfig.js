@@ -221,7 +221,7 @@ const MetricsConfig = {
         {
             value: "places_migrants_p1k",
             label: "Places en centre d'hébergement pour clandestin /1k hab",
-            alt1Label: "Places en centre d'hébergement pour mig /1k hab",
+            alt1Label: "Places en centre d'hébergement pour migrant /1k hab",
             alt2Label: "Places en centre d'hébergement pour colon /1k hab",
             category: "immigration",
             format: "rate_1k",
