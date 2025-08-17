@@ -4,6 +4,7 @@ hidden = [".config", "package-lock.json"]
 
 [nix]
 channel = "stable-24_11"
+packages = ["sqlite"]
 
 [[ports]]
 localPort = 3000

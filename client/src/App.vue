@@ -6,7 +6,7 @@
         <v-app-bar-title class="text-h5 font-weight-bold">
           {{ currentPageTitle }}
         </v-app-bar-title>
-       
+
         <!-- Desktop Menu -->
         <div class="header-menu d-none d-md-flex">
           <v-btn
@@ -15,7 +15,7 @@
             variant="text"
             class="mx-2 twitter-btn"
           >
-            <b>𝕏</b> 
+            <b>𝕏</b>
             @ou_va_ma_France
           </v-btn>
 
@@ -26,14 +26,14 @@
             variant="text"
             class="mx-2 kofi-btn"
           >
-            <img 
-              src="/images/kofi_symbol.webp" 
-              alt="Ko-fi" 
+            <img
+              src="/images/kofi_symbol.webp"
+              alt="Ko-fi"
               class="kofi-icon"
             />
           </v-btn>
 
-   
+
           <v-btn
             v-for="item in menuItems"
             :key="item.path"
@@ -43,9 +43,10 @@
           >
             {{ item.title }}
           </v-btn>
-          
-         
-          <VersionSelector />
+
+        <v-spacer></v-spacer>
+        <VersionSelector />
+          <ShareButton :showText="false" />
         </div>
 
         <!-- Mobile Hamburger Menu -->
@@ -80,13 +81,17 @@
         >
           <v-list-item-title>{{ item.title }}</v-list-item-title>
         </v-list-item>
-        
+
         <v-divider class="my-2"></v-divider>
-        
+
         <v-list-item>
           <VersionSelector />
         </v-list-item>
-        
+
+        <v-list-item>
+          <ShareButton :show-text="true" />
+        </v-list-item>
+
         <v-list-item
           href="https://twitter.com/intent/follow?screen_name=ou_va_ma_France"
           target="_blank"
@@ -101,17 +106,15 @@
           class="kofi-mobile"
         >
           <v-list-item-title>
-            <img 
-              src="/images/kofi_symbol.webp" 
-              alt="Ko-fi" 
+            <img
+              src="/images/kofi_symbol.webp"
+              alt="Ko-fi"
               class="kofi-icon-mobile"
             />
             Offrez-moi un café
           </v-list-item-title>
         </v-list-item>
 
-
-        
       </v-list>
     </v-navigation-drawer>
     <!-- Main Content -->
@@ -125,6 +128,8 @@
 
 <script>
 import VersionSelector from './components/VersionSelector.vue'
+import LocationSelector from './components/LocationSelector.vue'
+import ShareButton from './components/ShareButton.vue'
 import HamburgerIcon from './components/HamburgerIcon.vue'
 import { mapStores } from 'pinia'
 import { useDataStore } from './services/store.js'
@@ -133,7 +138,9 @@ export default {
   name: 'App',
   components: {
     VersionSelector,
-    HamburgerIcon,
+    LocationSelector,
+    ShareButton,
+    HamburgerIcon
   },
   computed: {
     ...mapStores(useDataStore),
