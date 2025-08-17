@@ -94,7 +94,7 @@
 </template>
 
 <script>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useDataStore } from '../services/store.js'
 import { MetricsConfig } from '../utils/metricsConfig.js'
 import { DepartementNames } from '../utils/departementNames.js'
@@ -135,6 +135,9 @@ export default {
 
     // UI state only
     const showFilters = ref(false)
+
+    // Debounce timer for population filters
+    let populationDebounceTimer = null
 
     // Helper function to update the current level based on scope
     const updateCurrentLevel = () => {
@@ -244,12 +247,21 @@ export default {
 
       localFilters.value = { ...localFilters.value, [filterKey]: value }
 
-      // Only emit if population filters are valid
-      if ((filterKey === 'popLower' || filterKey === 'popUpper')) {
-        if (validatePopulationFilters()) {
-          emitFiltersChange(localFilters.value)
+      // Handle population filters with debounce
+      if (filterKey === 'popLower' || filterKey === 'popUpper') {
+        // Clear existing timer
+        if (populationDebounceTimer) {
+          clearTimeout(populationDebounceTimer)
         }
+        
+        // Set new timer - emit after 800ms of no typing
+        populationDebounceTimer = setTimeout(() => {
+          if (validatePopulationFilters()) {
+            emitFiltersChange(localFilters.value)
+          }
+        }, 800)
       } else {
+        // Non-population filters emit immediately
         emitFiltersChange(localFilters.value)
       }
     }
@@ -287,11 +299,16 @@ export default {
       }
 
       window.addEventListener('metricsLabelsToggled', handleLabelChange)
+    })
 
-      // Cleanup listener when component unmounts
-      return () => {
-        window.removeEventListener('metricsLabelsToggled', handleLabelChange)
+    onUnmounted(() => {
+      // Clean up debounce timer
+      if (populationDebounceTimer) {
+        clearTimeout(populationDebounceTimer)
       }
+      
+      // Clean up event listener
+      window.removeEventListener('metricsLabelsToggled', () => {})
     })
 
     return {
