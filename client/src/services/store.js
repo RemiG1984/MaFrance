@@ -455,15 +455,15 @@ export const useDataStore = defineStore("data", {
 
         // Navigate to location based on 'c' parameter
         if (params.c) {
-          // Check if it's a commune code (4-5 digits or special formats)
-          if (/^[0-9]{4,5}$/.test(params.c) || /^2[AB][0-9]{3}$/.test(params.c) || /^97[1-6][0-9]{2}$/.test(params.c)) {
+          // Simple logic: 4 or 5 characters = commune code, 3 or less = departement code
+          if (params.c.length >= 4) {
             // It's a commune COG code - normalize it for API call
             const normalizedCode = this.normalizeCogCode(params.c);
             const communeDetails = await api.getCommuneDetails(normalizedCode)
             if (communeDetails) {
               await this.setCommune(normalizedCode, communeDetails.commune, communeDetails.departement)
             }
-          } else if (/^(0[1-9]|[1-8][0-9]|9[0-5]|2[AB]|97[1-6])$/.test(params.c)) {
+          } else if (params.c.length <= 3) {
             // It's a department code
             await this.setDepartement(params.c)
           }
