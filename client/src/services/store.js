@@ -234,16 +234,7 @@ export const useDataStore = defineStore("data", {
       this.setLevel("departement");
     },
 
-    // Helper method to normalize COG codes to 5 digits
-    normalizeCogCode(cog) {
-      if (!cog) return cog;
-      // Convert to string and pad with leading zeros to 5 digits
-      return cog.toString().padStart(5, '0');
-    },
-
     async setCommune(cog, communeName, deptCode) {
-      // Normalize the COG code for internal processing
-      const normalizedCog = this.normalizeCogCode(cog);
 
       const currentCommCode = this.getCommuneCode();
       const currentDeptCode = this.getDepartementCode();
@@ -251,8 +242,8 @@ export const useDataStore = defineStore("data", {
       const promises = [];
 
       // Vérifier si on doit charger les données de la commune
-      if (normalizedCog !== currentCommCode) {
-        promises.push(this.fetchCommuneData(normalizedCog, deptCode));
+      if (cog !== currentCommCode) {
+        promises.push(this.fetchCommuneData(cog, deptCode));
       } else {
         promises.push(Promise.resolve(null)); // Placeholder pour maintenir l'ordre
       }
@@ -457,11 +448,9 @@ export const useDataStore = defineStore("data", {
         if (params.c) {
           // Simple logic: 4 or 5 characters = commune code, 3 or less = departement code
           if (params.c.length >= 4) {
-            // It's a commune COG code - normalize it for API call
-            const normalizedCode = this.normalizeCogCode(params.c);
-            const communeDetails = await api.getCommuneDetails(normalizedCode)
+            const communeDetails = await api.getCommuneDetails(params.c)
             if (communeDetails) {
-              await this.setCommune(normalizedCode, communeDetails.commune, communeDetails.departement)
+              await this.setCommune(params.c, communeDetails.commune, communeDetails.departement)
             }
           } else if (params.c.length <= 3) {
             // It's a department code
