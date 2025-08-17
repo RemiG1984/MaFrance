@@ -144,25 +144,41 @@ const validatePagination = [
   handleValidationErrors,
 ];
 
-// Validation for population range
+// Validation for population range - integer format only
 const validatePopulationRange = [
   query("population_range")
     .optional()
-    .isIn([
-      "0-1k",
-      "0-10k",
-      "0-100k",
-      "0+",
-      "1-10k",
-      "1-100k",
-      "1k+",
-      "10-100k",
-      "10k+",
-      "100k+",
-    ])
-    .withMessage(
-      "Plage de population invalide. Valeurs autorisées : 0-1k, 0-10k, 0-100k, 0+, 1-10k, 1-100k, 1k+, 10-100k, 10k+, 100k+",
-    ),
+    .custom((value) => {
+      // Integer format validation: "min-max", "min+", or "0-max"
+      const rangeMatch = value.match(/^(\d+)-(\d+)$/);
+      const minOnlyMatch = value.match(/^(\d+)\+$/);
+      const maxOnlyMatch = value.match(/^0-(\d+)$/);
+
+      if (rangeMatch) {
+        const minPop = parseInt(rangeMatch[1], 10);
+        const maxPop = parseInt(rangeMatch[2], 10);
+        if (minPop >= 0 && maxPop > minPop && maxPop <= 10000000) {
+          return true;
+        }
+        throw new Error("Plage de population invalide. Format: 'min-max' où min < max et max <= 10000000");
+      } else if (minOnlyMatch) {
+        const minPop = parseInt(minOnlyMatch[1], 10);
+        if (minPop >= 0 && minPop <= 10000000) {
+          return true;
+        }
+        throw new Error("Population minimum invalide. Doit être entre 0 et 10000000");
+      } else if (maxOnlyMatch) {
+        const maxPop = parseInt(maxOnlyMatch[1], 10);
+        if (maxPop > 0 && maxPop <= 10000000) {
+          return true;
+        }
+        throw new Error("Population maximum invalide. Doit être entre 1 et 10000000");
+      }
+
+      throw new Error(
+        "Format de population invalide. Formats acceptés: '1000-50000', '10000+', '0-100000'"
+      );
+    }),
   handleValidationErrors,
 ];
 
