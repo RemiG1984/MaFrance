@@ -115,6 +115,8 @@ const validateSort = [
       "pop_in_qpv_pct",
       "logements_sociaux_pct",
       "total_subventions_parHab",
+      "Total_places_migrants",
+      "places_migrants_p1k",
     ])
     .withMessage("Paramètre de tri invalide"),
   handleValidationErrors,

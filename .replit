@@ -4,6 +4,7 @@ hidden = [".config", "package-lock.json"]
 
 [nix]
 channel = "stable-24_11"
+packages = ["sqlite"]
 
 [[ports]]
 localPort = 3000
@@ -18,7 +19,7 @@ deploymentTarget = "cloudrun"
 run = ["sh", "-c", "node server.js"]
 
 [workflows]
-runButton = "HMR Development"
+runButton = "Production Build"
 
 [[workflows.workflow]]
 name = "Start Server"
