@@ -69,8 +69,8 @@ export default {
     const loading = ref(false)
     const error = ref('')
     const filters = ref({
-      popLower: 'aucune', // Default to 'aucune'
-      popUpper: 'aucune', // Default to 'aucune'
+      popLower: null, // Default to null (no limit)
+      popUpper: null, // Default to null (no limit)
       topLimit: 10
     })
 
@@ -260,30 +260,24 @@ export default {
     const constructPopulationRange = () => {
       const { popLower, popUpper } = filters.value
 
-      // Handle string values directly, avoiding "aucune" as it means no limit
-      if (popLower !== 'aucune' && popUpper !== 'aucune') {
-        if (popLower === "1k") {
-          if (popUpper === "10k") return "1-10k"
-          if (popUpper === "20k") return "1-20k"
-          if (popUpper === "100k") return "1-100k"
-        } else if (popLower === "10k") {
-          if (popUpper === "20k") return "10-20k"
-          if (popUpper === "100k") return "10-100k"
-        } else if (popLower === "20k" && popUpper === "100k") {
-          return "20-100k"
-        }
-      } else if (popLower !== 'aucune') {
-        if (popLower === "1k") return "1k+"
-        else if (popLower === "10k") return "10k+"
-        else if (popLower === "20k") return "20k+"
-        else if (popLower === "100k") return "100k+"
-      } else if (popUpper !== 'aucune') {
-        if (popUpper === "1k") return "0-1k"
-        else if (popUpper === "10k") return "0-10k"
-        else if (popUpper === "20k") return "0-20k"
-        else if (popUpper === "100k") return "0-100k"
+      // Convert to numbers, treating null/undefined as no limit
+      const lowerNum = popLower ? parseInt(popLower, 10) : null
+      const upperNum = popUpper ? parseInt(popUpper, 10) : null
+
+      // Both limits specified
+      if (lowerNum !== null && upperNum !== null) {
+        return `${lowerNum}-${upperNum}`
       }
-      return "0+"
+      // Only lower limit
+      else if (lowerNum !== null) {
+        return `${lowerNum}+`
+      }
+      // Only upper limit
+      else if (upperNum !== null) {
+        return `0-${upperNum}`
+      }
+      // No limits
+      return null
     }
 
     const onSelectionChanged = (selection) => {
@@ -298,8 +292,8 @@ export default {
 
       // Reset population filters when changing scope
       if (selection.scope === 'departements') {
-        filters.value.popLower = 'aucune'
-        filters.value.popUpper = 'aucune'
+        filters.value.popLower = null
+        filters.value.popUpper = null
       }
 
       // Update rankings if metric is selected

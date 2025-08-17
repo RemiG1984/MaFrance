@@ -41,65 +41,48 @@ router.get(
     let populationFilter = "";
     let queryParams = [dept, dept, limit, offset];
 
-    // Handle predefined population ranges
+    // Handle dynamic population ranges
     if (population_range) {
-      switch (population_range) {
-        case "0-1k":
-          populationFilter = "AND l.population <= 1000";
-          break;
-        case "0-10k":
-          populationFilter = "AND l.population <= 10000";
-          break;
-        case "0-20k":
-          populationFilter = "AND l.population <= 20000";
-          break;
-        case "0-100k":
-          populationFilter = "AND l.population <= 100000";
-          break;
-        case "0+":
-          populationFilter = ""; // No filter needed
-          break;
-        case "1-10k":
-          populationFilter =
-            "AND l.population >= 1000 AND l.population <= 10000";
-          break;
-        case "1-20k":
-          populationFilter =
-            "AND l.population >= 1000 AND l.population <= 20000";
-          break;
-        case "1-100k":
-          populationFilter =
-            "AND l.population >= 1000 AND l.population <= 100000";
-          break;
-        case "1k+":
-          populationFilter = "AND l.population >= 1000";
-          break;
-        case "10-20k":
-          populationFilter =
-            "AND l.population >= 10000 AND l.population <= 20000";
-          break;
-        case "10-100k":
-          populationFilter =
-            "AND l.population >= 10000 AND l.population <= 100000";
-          break;
-        case "10k+":
-          populationFilter = "AND l.population >= 10000";
-          break;
-        case "20-100k":
-          populationFilter =
-            "AND l.population >= 20000 AND l.population <= 100000";
-          break;
-        case "20k+":
-          populationFilter = "AND l.population >= 20000";
-          break;
-        case "100k+":
-          populationFilter = "AND l.population >= 100000";
-          break;
-        default:
+      // Parse range patterns: "min-max", "min+", "0-max"
+      const rangeMatch = population_range.match(/^(\d+)-(\d+)$/);
+      const minOnlyMatch = population_range.match(/^(\d+)\+$/);
+      const maxOnlyMatch = population_range.match(/^0-(\d+)$/);
+
+      if (rangeMatch) {
+        // Range: min-max
+        const minPop = parseInt(rangeMatch[1], 10);
+        const maxPop = parseInt(rangeMatch[2], 10);
+        if (minPop >= 0 && maxPop > minPop && maxPop <= 10000000) {
+          populationFilter = `AND l.population >= ${minPop} AND l.population <= ${maxPop}`;
+        } else {
           return res.status(400).json({
-            error:
-              "Plage de population invalide. Valeurs autorisées : 0-1k, 0-10k, 0-20k, 0-100k, 0+, 1-10k, 1-20k, 1-100k, 1k+, 10-20k, 10-100k, 10k+, 20-100k, 20k+, 100k+",
+            error: "Plage de population invalide. Format attendu: 'min-max' où min < max et max <= 10000000",
           });
+        }
+      } else if (minOnlyMatch) {
+        // Minimum only: min+
+        const minPop = parseInt(minOnlyMatch[1], 10);
+        if (minPop >= 0 && minPop <= 10000000) {
+          populationFilter = `AND l.population >= ${minPop}`;
+        } else {
+          return res.status(400).json({
+            error: "Population minimum invalide. Doit être entre 0 et 10000000",
+          });
+        }
+      } else if (maxOnlyMatch) {
+        // Maximum only: 0-max
+        const maxPop = parseInt(maxOnlyMatch[1], 10);
+        if (maxPop > 0 && maxPop <= 10000000) {
+          populationFilter = `AND l.population <= ${maxPop}`;
+        } else {
+          return res.status(400).json({
+            error: "Population maximum invalide. Doit être entre 1 et 10000000",
+          });
+        }
+      } else {
+        return res.status(400).json({
+          error: "Format de plage de population invalide. Formats attendus: 'min-max', 'min+', '0-max'",
+        });
       }
     }
 

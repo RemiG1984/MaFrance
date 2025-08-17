@@ -63,29 +63,29 @@
 
         <div v-show="localScope.includes('communes')" class="population-controls">
           <div class="form-group">
-            <label for="popLower">Commune pop. min:</label>
-            <select id="popLower" :value="localFilters.popLower" @change="onFilterChange('popLower', $event)">
-              <option 
-                v-for="option in popLowerOptions" 
-                :key="option.value" 
-                :value="option.value"
-              >
-                {{ option.label }}
-              </option>
-            </select>
+            <label for="popLower">Population min:</label>
+            <input 
+              type="number" 
+              id="popLower" 
+              :value="localFilters.popLower || ''"
+              @input="onFilterChange('popLower', $event)"
+              min="0" 
+              max="10000000"
+              placeholder="Ex: 1000"
+            >
           </div>
 
           <div class="form-group">
-            <label for="popUpper">Commune pop. max:</label>
-            <select id="popUpper" :value="localFilters.popUpper" @change="onFilterChange('popUpper', $event)">
-              <option 
-                v-for="option in popUpperOptions" 
-                :key="option.value" 
-                :value="option.value"
-              >
-                {{ option.label }}
-              </option>
-            </select>
+            <label for="popUpper">Population max:</label>
+            <input 
+              type="number" 
+              id="popUpper" 
+              :value="localFilters.popUpper || ''"
+              @input="onFilterChange('popUpper', $event)"
+              min="0" 
+              max="10000000"
+              placeholder="Ex: 50000"
+            >
           </div>
         </div>
       </div>
@@ -157,52 +157,21 @@ export default {
       return MetricsConfig.getAvailableMetricOptions(level)
     })
 
-    // Population options with filtering logic
-    const popLowerOptions = computed(() => {
-      const upperValue = localFilters.value.popUpper
-      const allOptions = [
-        { value: 'aucune', label: 'Aucune limite' },
-        { value: '1k', label: '1k' },
-        { value: '10k', label: '10k' },
-        { value: '20k', label: '20k' },
-        { value: '100k', label: '100k' }
-      ]
-
-      if (upperValue === 'aucune') {
-        return allOptions
+    // Validate population filters
+    const validatePopulationFilters = () => {
+      const { popLower, popUpper } = localFilters.value
+      
+      // Convert to numbers for comparison
+      const lowerNum = popLower ? parseInt(popLower, 10) : null
+      const upperNum = popUpper ? parseInt(popUpper, 10) : null
+      
+      // Validate that lower is less than upper if both are set
+      if (lowerNum !== null && upperNum !== null && lowerNum >= upperNum) {
+        return false
       }
-
-      // Filter out options that would be >= upper limit
-      const upperIndex = allOptions.findIndex(opt => opt.value === upperValue)
-      if (upperIndex === -1) return allOptions
-
-      return allOptions.filter((opt, index) => 
-        opt.value === 'aucune' || index < upperIndex
-      )
-    })
-
-    const popUpperOptions = computed(() => {
-      const lowerValue = localFilters.value.popLower
-      const allOptions = [
-        { value: '1k', label: '1k' },
-        { value: '10k', label: '10k' },
-        { value: '20k', label: '20k' },
-        { value: '100k', label: '100k' },
-        { value: 'aucune', label: 'Aucune limite' }
-      ]
-
-      if (lowerValue === 'aucune') {
-        return allOptions
-      }
-
-      // Filter out options that would be <= lower limit
-      const lowerIndex = allOptions.findIndex(opt => opt.value === lowerValue)
-      if (lowerIndex === -1) return allOptions
-
-      return allOptions.filter((opt, index) => 
-        opt.value === 'aucune' || index > lowerIndex
-      )
-    })
+      
+      return true
+    }
 
     const departments = computed(() => {
       return Object.entries(DepartementNames)
@@ -260,13 +229,29 @@ export default {
     }
 
     const onFilterChange = (filterKey, event) => {
-      const value = event.target.type === 'number' ? 
-        parseInt(event.target.value, 10) : 
-        event.target.value
+      let value = event.target.value
+      
+      // Handle number inputs for population filters
+      if (filterKey === 'popLower' || filterKey === 'popUpper') {
+        value = value ? parseInt(value, 10) : null
+        // Validate the value is positive
+        if (value !== null && value < 0) {
+          value = 0
+        }
+      } else if (event.target.type === 'number') {
+        value = parseInt(value, 10)
+      }
 
       localFilters.value = { ...localFilters.value, [filterKey]: value }
 
-      emitFiltersChange(localFilters.value)
+      // Only emit if population filters are valid
+      if ((filterKey === 'popLower' || filterKey === 'popUpper')) {
+        if (validatePopulationFilters()) {
+          emitFiltersChange(localFilters.value)
+        }
+      } else {
+        emitFiltersChange(localFilters.value)
+      }
     }
 
     // Watchers
@@ -319,8 +304,7 @@ export default {
       currentLevel,
       availableMetricOptions,
       departments,
-      popLowerOptions,
-      popUpperOptions,
+      validatePopulationFilters,
       onScopeChange,
       onDepartementChange,
       onMetricChange,
