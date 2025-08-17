@@ -98,7 +98,9 @@ export default {
       } else if (this.dataStore.currentLevel === 'commune') {
         const communeCode = this.dataStore.getCommuneCode()
         if (communeCode) {
-          params.set('c', communeCode)
+          // Remove leading zeros for the URL to keep it clean
+          const cleanCode = communeCode.replace(/^0+/, '') || communeCode
+          params.set('c', cleanCode)
         }
       }
 
