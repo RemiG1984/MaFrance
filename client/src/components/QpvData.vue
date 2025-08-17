@@ -1,6 +1,6 @@
 <template>
   <v-card class="mb-4">
-    <v-card-title class="text-h6">
+    <v-card-title class="text-h6 pb-0">
       Quartiers Prioritaires (QPV) à: {{ locationName }}
     </v-card-title>
     <v-card-text>

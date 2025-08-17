@@ -219,8 +219,8 @@ export default {
               },
               color: '#343a40',
               padding: {
-                top: 10,
-                bottom: 20
+                top: 5,
+                bottom: 5
               }
             },
             legend: {
@@ -351,7 +351,7 @@ export default {
   height: 300px;
   background: white;
   border-radius: 8px;
-  padding: 20px;
+  padding: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 

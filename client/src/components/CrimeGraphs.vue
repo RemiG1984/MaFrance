@@ -7,7 +7,7 @@
       <a href="https://www.data.gouv.fr/fr/datasets/bases-statistiques-communale-et-departementale-de-la-delinquance-enregistree-par-la-police-et-la-gendarmerie-nationales/" 
          target="_blank" 
          class="text-decoration-none">
-        Source SSMSI
+        source SSMSI
       </a>
     </v-card-subtitle>
     <v-card-text>

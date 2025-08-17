@@ -1,7 +1,7 @@
 
 <template>
   <v-card>
-    <v-card-title class="text-h6">
+    <v-card-title class="text-h6 pb-0">
       Articles FdS associés à: {{ locationName }}
     </v-card-title>
 

@@ -1,7 +1,7 @@
 
 <template>
   <v-card class="mb-4">
-    <v-card-title class="text-h6">
+    <v-card-title class="text-h6 pb-0">
       Responsable exécutif de: {{ locationName }}
     </v-card-title>
     

@@ -1,7 +1,7 @@
 
 <template>
   <v-card class="mb-4">
-    <v-card-title class="text-h6">
+    <v-card-title class="text-h6 pb-0">
       Centres de clandestins pour: {{ locationName }}
     </v-card-title>
     <v-card-text>

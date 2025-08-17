@@ -1,8 +1,15 @@
 <template>
   <v-card class="mb-4">
-    <v-card-title class="text-h6">
+    <v-card-title class="text-h6 pb-0">
       Subventions publiques aux associations pour: {{ locationName }}
     </v-card-title>
+    <v-card-subtitle class="text-caption text-grey pt-0 pb-0">
+      <a href="https://data.ofgl.fr/pages/acces-donnees-comptables-detaillees/" 
+         target="_blank" 
+         class="text-decoration-none">
+        source data.ofgl.fr
+      </a>
+    </v-card-subtitle>
     <v-card-text>
       <div v-if="subventionRows && subventionRows.length > 0">
         <div class="table-container">
@@ -187,7 +194,7 @@ export default {
 .table-container {
   width: 100%;
   overflow-x: auto;
-  margin: 15px 0;
+  margin: 0px 0;
   border: 1px solid #dee2e6;
   border-radius: 8px;
   background-color: #fff;

@@ -1,7 +1,7 @@
 
 <template>
   <v-card>
-    <v-card-title class="text-h6 d-flex justify-space-between align-center">
+    <v-card-title class="text-h6 pb-0 d-flex justify-space-between align-center">
       <span>Évolution des Prénoms</span>
       <v-btn
         @click="toggleView"
@@ -12,6 +12,13 @@
         {{ currentView === 'detailed' ? 'Vue simplifiée' : 'Vue détaillée' }}
       </v-btn>
     </v-card-title>
+    <v-card-subtitle class="text-caption text-grey pt-0 pb-0">
+      <a href="https://www.insee.fr/fr/statistiques/8595130?sommaire=8595113" 
+         target="_blank" 
+         class="text-decoration-none">
+        source INSEE
+      </a>
+    </v-card-subtitle>
     
     <v-card-text>      
       <div class="chart-container">

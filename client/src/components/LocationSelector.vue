@@ -1,6 +1,6 @@
 <template>
   <v-card>
-    <v-card-title class="text-h6">
+    <v-card-title class="text-h6 pb-1">
       Sélection du niveau de visualisation
     </v-card-title>
     <v-card-text>
