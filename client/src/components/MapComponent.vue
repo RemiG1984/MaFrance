@@ -85,12 +85,12 @@ export default {
         // Fallback to current level for other cases
         dataLevel = this.currentLevel;
       }
-      
+
       const metrics = MetricsConfig.getAvailableMetricOptions(dataLevel);
       return metrics.map(metric => {
         const metricConfig = MetricsConfig.getMetricByValue(metric.value);
         if (!metricConfig) return metric;
-        
+
         const labelStateName = this.dataStore.getLabelStateName();
         let label;
         switch (labelStateName) {
@@ -103,7 +103,7 @@ export default {
           default:
             label = metricConfig.label;
         }
-        
+
         return {
           ...metric,
           label: label,
@@ -140,7 +140,7 @@ export default {
       } else {
         dataLevel = newLevel;
       }
-      
+
       const newMetrics = MetricsConfig.getAvailableMetricOptions(dataLevel);
       const isCurrentMetricAvailable = newMetrics.some(metric =>
         metric.value === this.selectedMetric.value
@@ -165,12 +165,43 @@ export default {
         this.updateLegend();
       }
     },
+    'dataStore.selectedMetric': {
+      handler(newMetric) {
+        if (newMetric) {
+          // Find the metric object that matches the value
+          const metricObj = this.availableMetrics.find(m => m.value === newMetric);
+          if (metricObj && metricObj.value !== this.selectedMetric.value) {
+            this.selectedMetric = metricObj;
+            // Trigger update immediately if data is available, or defer until data loads
+            this.$nextTick(() => {
+              if (this.dataRef && Object.keys(this.dataRef).length > 0) {
+                this.updateRanking();
+                this.updateLayerColors();
+                this.updateLegend();
+              }
+            });
+          }
+        }
+      },
+      immediate: true
+    },
   },
   mounted() {
     this.initMap()
     this.colorscale = chroma.scale(this.scaleColors).domain([0, 1]);
+
+    // Listen for metric updates from LocationSelector
+    window.addEventListener('updateMapMetric', this.handleMetricUpdate)
   },
   methods: {
+    handleMetricUpdate(event) {
+      const newMetricValue = event.detail.metric;
+      const metricObj = this.availableMetrics.find(m => m.value === newMetricValue);
+      if (metricObj && metricObj.value !== this.selectedMetric.value) {
+        this.selectedMetric = metricObj;
+        this.onMetricChange(this.selectedMetric);
+      }
+    },
     async initMap() {
       if (typeof L === 'undefined') {
         console.error('Leaflet not loaded')
@@ -247,7 +278,7 @@ export default {
       }
 
       const colorScaleConfig = MetricsConfig.getMetricColorScale(this.selectedMetric.value, level);
-      
+
       // Reset scaleDomain for dynamic scaling
       if (!colorScaleConfig.useFixedRange) {
         this.scaleDomain = {
@@ -272,7 +303,7 @@ export default {
         const code = item[codeKey]
         if(isCountryLevel && !DepartementNames[code]) return
         rankingsRef[code] = item
-        
+
         // Update scaleDomain only for dynamic scaling
         if (!colorScaleConfig.useFixedRange) {
           const value = item[this.selectedMetric.value] || 0
@@ -425,7 +456,7 @@ export default {
       const level = this.mapState.level === 'country' ? 'departement' : 'commune'
       const colorScaleConfig = MetricsConfig.getMetricColorScale(this.selectedMetric.value, level);
       let normalized;
-      
+
       if (colorScaleConfig.useFixedRange) {
         // Fixed range logic
         const { min, max, invert } = colorScaleConfig;
@@ -548,7 +579,7 @@ export default {
       const steps = [];
       const level = this.mapState.level === 'country' ? 'departement' : 'commune'
       const colorScaleConfig = MetricsConfig.getMetricColorScale(this.selectedMetric.value, level);
-      
+
       if (colorScaleConfig.useFixedRange) {
         const { min, max, invert } = colorScaleConfig;
         for (let i = 0; i < numSteps; i++) {
@@ -581,17 +612,20 @@ export default {
           });
         }
       }
-      
+
       return steps;
     },
     removeTrailingZero(code) {
       return code.startsWith('0') ? code.substring(1) : code
     },
     onMetricChange(metric) {
+      // Update store with selected metric
+      this.dataStore.selectedMetric = metric.value
       this.updateRanking()
       this.updateLayerColors()
       this.updateLegend()
     },
+
     getIndiceName() {
       const metricConfig = MetricsConfig.getMetricByValue(this.selectedMetric.value);
       if (!metricConfig) return this.selectedMetric.value;
@@ -695,6 +729,7 @@ export default {
     },
   },
   beforeUnmount() {
+    window.removeEventListener('updateMapMetric', this.handleMetricUpdate)
     if (this.map) {
       this.map.remove()
     }

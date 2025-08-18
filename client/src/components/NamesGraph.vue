@@ -243,8 +243,8 @@ export default {
           backgroundColor: category.color,
           fill: false,
           tension: 0.4,
-          pointRadius: 2,
-          pointHoverRadius: 5,
+          pointRadius: 1,
+          pointHoverRadius: 4,
           order: category.order,
         })
       }
