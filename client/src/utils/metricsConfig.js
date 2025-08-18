@@ -544,9 +544,46 @@ const MetricsConfig = {
         ],
     },
 
+    // Compact metric mapping for URLs (single character shortcuts)
+    compactMetricMap: {
+        'total_score': 't',
+        'population': 'p',
+        'insecurite_score': 'i',
+        'homicides_total_p100k': 'h',
+        'violences_physiques_p1k': 'v',
+        'violences_sexuelles_p1k': 's',
+        'vols_p1k': 'l',
+        'destructions_p1k': 'd',
+        'stupefiants_p1k': 'n',
+        'escroqueries_p1k': 'e',
+        'immigration_score': 'g',
+        'extra_europeen_pct': 'x',
+        'Total_places_migrants': 'r',
+        'places_migrants_p1k': 'k',
+        'islamisation_score': 'a',
+        'musulman_pct': 'm',
+        'number_of_mosques': 'q',
+        'mosque_p100k': 'o',
+        'defrancisation_score': 'f',
+        'prenom_francais_pct': 'b',
+        'wokisme_score': 'w',
+        'total_qpv': 'u',
+        'pop_in_qpv_pct': 'y',
+        'logements_sociaux_pct': 'z',
+        'total_subventions_parHab': 'j'
+    },
+
     // Utility functions
     getMetricByValue(value) {
         return this.metrics.find((metric) => metric.value === value);
+    },
+
+    getCompactMetric(metricKey) {
+        return this.compactMetricMap[metricKey] || metricKey;
+    },
+
+    getMetricFromCompact(compactKey) {
+        return Object.keys(this.compactMetricMap).find(key => this.compactMetricMap[key] === compactKey) || compactKey;
     },
 
     getMetricLabel(value) {
