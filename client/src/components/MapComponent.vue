@@ -620,11 +620,11 @@ export default {
     },
     onMetricChange(metric) {
       // Update store with selected metric
-      this.dataStore.selectedMetric = metric.value
-      this.updateRanking()
-      this.updateLayerColors()
-      this.updateLegend()
-    },
+      this.dataStore.selectedMetric = metric.value;
+      this.updateRanking();
+      this.updateLayerColors();
+      this.updateLegend();
+    }
 
     getIndiceName() {
       const metricConfig = MetricsConfig.getMetricByValue(this.selectedMetric.value);
