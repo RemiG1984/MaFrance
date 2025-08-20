@@ -620,10 +620,15 @@ export default {
     },
     onMetricChange(metric) {
       // Update store with selected metric
-      this.dataStore.selectedMetric = metric.value
-      this.updateRanking()
-      this.updateLayerColors()
-      this.updateLegend()
+      this.dataStore.selectedMetric = metric.value;
+      this.updateRanking();
+      this.updateLayerColors();
+      this.updateLegend();
+
+      // Update commune tooltip if at commune level and tooltip is active
+      if (this.currentLevel === 'commune' && this.globalTooltip && this.map.hasLayer(this.globalTooltip)) {
+        this.showCommuneTooltip();
+      }
     },
 
     getIndiceName() {
