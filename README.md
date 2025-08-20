@@ -1,7 +1,7 @@
 
 # Ma France - Application Vue.js
 
-Cette application Vue.js est une refonte de l'application "Ma France: état des lieux" qui analyse différents indicateurs pour évaluer l'état des lieux en France, au niveau national, départemental et communal.
+Cette Single Page Application Vue.js "Ma France: état des lieux" analyse différents indicateurs pour évaluer l'état des lieux en France, au niveau national, départemental et communal.
 
 ## Architecture de l'application
 
@@ -67,22 +67,26 @@ L'application est composée de deux parties principales :
 client/
 ├── src/
 │   ├── components/       # Composants Vue réutilisables
+│   │   ├── ArticleList.vue       # Liste articles
+│   │   ├── CacheManager.vue      # Gestionnaire cache
+│   │   ├── CentresMigrants.vue   # Centres migrants
+│   │   ├── CrimeGraphs.vue       # Graphiques criminalité (container)
+│   │   ├── ExecutiveDetails.vue  # Détails élus
+│   │   ├── Graph.vue             # Graphiques criminalité (single graph)
+│   │   ├── HamburgerIcon.vue     # Hamburger menu collapse for mobile
 │   │   ├── LocationSelector.vue  # Sélecteurs géographiques
 │   │   ├── MapComponent.vue      # Carte Leaflet
-│   │   ├── ScoreTable.vue        # Tableaux de scores
-│   │   ├── CrimeGraphs.vue       # Graphiques criminalité
-│   │   ├── NamesGraph.vue        # Graphiques prénoms
-│   │   ├── QpvData.vue          # Données QPV
-│   │   ├── ArticleList.vue       # Liste articles
-│   │   ├── ExecutiveDetails.vue  # Détails élus
-│   │   ├── CentresMigrants.vue   # Centres migrants
-│   │   ├── CacheManager.vue      # Gestionnaire cache
-│   │   ├── VersionSelector.vue   # Sélecteur de version
+│   │   ├── NamesGraph.vue        # Graphiques prénoms de naissance
+│   │   ├── QpvData.vue           # Données QPV
 │   │   ├── RankingFilters.vue    # Filtres classements
-│   │   └── RankingResults.vue    # Résultats classements
+│   │   ├── RankingResults.vue    # Résultats classements
+│   │   ├── ScoreTable.vue        # Tableaux de scores
+│   │   ├── ShareButton.vue       # Création d'url spécifiques de partage
+│   │   ├── Subventions.vue       # Tableau des subventions
+│   │   └── VersionSelector.vue   # Sélecteur de version
 │   ├── views/            # Pages principales
-│   │   ├── Home.vue      # Page d'accueil
-│   │   ├── Rankings.vue  # Page classements
+│   │   ├── Home.vue        # Page d'accueil
+│   │   ├── Rankings.vue    # Page classements
 │   │   └── Methodology.vue # Page méthodologie
 │   ├── services/
 │   │   ├── api.js        # Service API centralisé
@@ -91,7 +95,8 @@ client/
 │   │   ├── metricsConfig.js      # Configuration métriques
 │   │   ├── crime-chart-config.js # Config graphiques crime
 │   │   ├── chartWatermark.js     # Watermark graphiques
-│   │   └── departementNames.js   # Noms départements
+│   │   ├── departementNames.js   # Noms département
+│   │   └── gen.js                # fonctions generales
 │   ├── plugins/
 │   │   └── vuetify.js    # Configuration Vuetify
 │   └── router/

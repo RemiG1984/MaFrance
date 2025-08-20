@@ -157,3 +157,6 @@ dist-ssr
 
 #pnpm lock file
 .pnpm-lock.yaml
+
+#Replit Run button configuration
+.replit
