@@ -80,6 +80,8 @@ const qpvRoutes = require("./routes/qpvRoutes");
 const rankingRoutes = require("./routes/rankingRoutes");
 const subventionRoutes = require("./routes/subventionRoutes");
 const cacheRoutes = require("./routes/cacheRoutes");
+const nat1Routes = require('./routes/nat1Routes');
+
 
 // Make database available to all routes
 app.locals.db = db;
@@ -94,6 +96,7 @@ app.use('/api/qpv', qpvRoutes);
 app.use('/api/rankings', rankingRoutes);
 app.use('/api/subventions', subventionRoutes);
 app.use('/api/migrants', migrantRoutes);
+app.use('/api/nat1', nat1Routes);
 app.use("/api", otherRoutes); // Keep this commented to test
 app.use("/api/cache", cacheRoutes);
 
