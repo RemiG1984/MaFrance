@@ -117,6 +117,15 @@ const validateSort = [
       "total_subventions_parHab",
       "Total_places_migrants",
       "places_migrants_p1k",
+      // NAT1 calculated metrics
+      "etrangers_pct",
+      "francais_de_naissance_pct",
+      "naturalises_pct",
+      "europeens_pct",
+      "maghrebins_pct",
+      "africains_pct",
+      "autres_nationalites_pct",
+      "non_europeens_pct",
     ])
     .withMessage("Paramètre de tri invalide"),
   handleValidationErrors,
