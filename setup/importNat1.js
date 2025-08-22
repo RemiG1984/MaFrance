@@ -124,14 +124,57 @@ function importNat1(db, callback) {
         });
     }
 
+    function sanitizeColumnName(columnName) {
+        // Replace spaces and special characters with underscores
+        // Remove accents and special characters, keep only alphanumeric and underscores
+        return columnName
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "") // Remove diacritics
+            .replace(/[^a-zA-Z0-9_]/g, "_")   // Replace non-alphanumeric with underscores
+            .replace(/_{2,}/g, "_")           // Replace multiple underscores with single
+            .replace(/^_+|_+$/g, "");        // Remove leading/trailing underscores
+    }
+
     function createTableSchema(fieldNames) {
         const baseFields = "Code TEXT PRIMARY KEY, Type TEXT";
-        const dataFields = fieldNames.map(field => `${field} REAL`).join(", ");
+        const sanitizedFieldNames = fieldNames.map(field => sanitizeColumnName(field));
+        
+        // Check for duplicates after sanitization and make them unique
+        const uniqueFieldNames = [];
+        const nameCount = {};
+        
+        sanitizedFieldNames.forEach(name => {
+            if (nameCount[name]) {
+                nameCount[name]++;
+                uniqueFieldNames.push(`${name}_${nameCount[name]}`);
+            } else {
+                nameCount[name] = 1;
+                uniqueFieldNames.push(name);
+            }
+        });
+        
+        const dataFields = uniqueFieldNames.map(field => `${field} REAL`).join(", ");
         return `${baseFields}, ${dataFields}`;
     }
 
     function createInsertQuery(tableName, fieldNames) {
-        const allFields = ["Code", "Type", ...fieldNames];
+        const sanitizedFieldNames = fieldNames.map(field => sanitizeColumnName(field));
+        
+        // Apply same uniqueness logic as in createTableSchema
+        const uniqueFieldNames = [];
+        const nameCount = {};
+        
+        sanitizedFieldNames.forEach(name => {
+            if (nameCount[name]) {
+                nameCount[name]++;
+                uniqueFieldNames.push(`${name}_${nameCount[name]}`);
+            } else {
+                nameCount[name] = 1;
+                uniqueFieldNames.push(name);
+            }
+        });
+        
+        const allFields = ["Code", "Type", ...uniqueFieldNames];
         const placeholders = allFields.map(() => "?").join(", ");
         return `INSERT OR IGNORE INTO ${tableName} (${allFields.join(", ")}) VALUES (${placeholders})`;
     }
