@@ -335,6 +335,16 @@ const api = {
         );
     },
 
+    // NAT1 data
+    getCountryNat1: (country = "France") =>
+        apiService.request(`/nat1/country?country=${country}`),
+    getDepartementNat1: (code) =>
+        apiService.request(`/nat1/departement?dept=${code}`),
+    getCommuneNat1: (cog) =>
+        apiService.request(`/nat1/commune?cog=${cog}`),
+    getNat1Summary: () =>
+        apiService.request("/nat1/all"),
+
     // Cache management
     clearCache: () => apiService.clearCache(),
     getCacheStats: () => apiService.getCacheStats(),
