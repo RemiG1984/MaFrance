@@ -66,6 +66,13 @@ const MetricsConfig = {
                 pop_in_qpv_pct: { min: 1.5, max: 20 },
                 logements_sociaux_pct: { min: 5, max: 30 },
                 total_subventions_parHab: { min: 20, max: 100 },
+                naturalises_pct: { min: 0.5, max: 10 },
+                etrangers_pct: { min: 0.5, max: 10 },
+                europeens_pct: { min: 0.5, max: 10 },
+                maghrebins_pct: { min: 0.5, max: 5 },
+                africains_pct: { min: 0.5, max: 4 },
+                autres_nationalites_pct: { min: 0.5, max: 4 },
+                non_europeens_pct: { min: 0.5, max: 10 },
             },
             commune: {
                 total_score: { min: 40, max: 150 },
