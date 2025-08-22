@@ -159,24 +159,9 @@ router.get("/commune", validateCOG, (req, res) => {
         return res.status(500).json({ error: "Erreur lors du calcul des pourcentages" });
       }
       
-      // For communes with less than 50k population, only return etrangers_pct
-      const ensemble = parseFloat(row.Ensemble) || 0;
-      let responseData;
-      
-      if (ensemble < 50000) {
-        responseData = {
-          Code: computedData.Code,
-          Type: computedData.Type,
-          Ensemble: computedData.Ensemble,
-          etrangers_pct: computedData.etrangers_pct
-        };
-      } else {
-        responseData = computedData;
-      }
-      
       // Cache the result
-      cacheService.set(`nat1_commune_${cog}`, responseData);
-      res.json(responseData);
+      cacheService.set(`nat1_commune_${cog}`, computedData);
+      res.json(computedData);
     }
   );
 });
