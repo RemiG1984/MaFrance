@@ -67,7 +67,11 @@ function importNat1(db, callback) {
                         countryBatch.push(countryRow);
                     } else if (type === "dept") {
                         // For department level, use departement code
-                        const deptRow = [code, type];
+                        let departement = code;
+                        if (/^\d+$/.test(departement)) {
+                            departement = departement.padStart(2, '0');
+                        }
+                        const deptRow = [departement, type];
                         Object.keys(numericFields).forEach(key => {
                             deptRow.push(numericFields[key]);
                         });
