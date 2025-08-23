@@ -14,7 +14,7 @@ export default defineConfig({
       name: 'inject-build-hash',
       generateBundle() {
         // Read service worker file
-        const swPath = '../public/sw.js'
+        const swPath = resolve(__dirname, '../public/sw.js')
         let swContent = fs.readFileSync(swPath, 'utf-8')
 
         // Replace BUILD_HASH placeholder with actual build hash
@@ -41,6 +41,15 @@ export default defineConfig({
   build: {
     outDir: "../dist",
     emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['vue', 'vue-router', 'pinia'],
+          vuetify: ['vuetify'],
+          charts: ['chart.js']
+        }
+      }
+    }
   },
   server: {
     host: '0.0.0.0',
