@@ -122,6 +122,18 @@
               </p>
             </div>
             <div class="data-card">
+              <h3 class="data-title">Données de nationalité</h3>
+              <p class="data-text">
+                Les données de nationalité sont issues du recensement de l'INSEE de 2022
+              </p>
+              <p class="data-text">
+                Les valeurs au niveau national, départemental et pour les communes de plus de 50000 habitants sont directement celles fournies par l'INSEE. Pour les communes de moins de 50000 habitants, l'INSEE ne fournit que le taux d'étrangers. Les autres valeurs sont extrapolées à partir des moyennes départementales (en en ayant exclu les communes de plus de 50000 habitants). Pour les plus petites communes, les valeurs indiquées sont donc approximatives.
+              </p>
+              <p class="data-text">
+                Ces données indiquent la nationalité administrative des populations telle que déclarée lors du recensement de l'INSEE, et non l'origine ethnique ou culturelle des individus. En cas de double nationalité, la nationalité Française est seule considérée.
+              </p>
+            </div>
+            <div class="data-card">
               <h3 class="data-title">Lieux de culte musulmans</h3>
               <p class="data-text">
                 Les données ont été récupérés de divers sites internet.
@@ -189,6 +201,12 @@
                       <a href="https://www.data.gouv.fr/datasets/service-statistique-ministeriel-de-la-securite-interieure-base-des-series-chronologiques/" target="_blank" class="link">Données du Service Statistique Ministériel de la Sécurité Intérieure (SSMSI)</a>
                       et
                       <a href="https://ssmsi.shinyapps.io/donneesterritoriales/" target="_blank" class="link">Données SSMSI cartographiées dans une app officielle</a>
+                  </td>
+              </tr>
+              <tr>
+                  <td>Nationalité</td>
+                  <td>
+                      <a href="https://www.insee.fr/fr/statistiques/zones/8582090" target="_blank" class="link">Recensement de la population de l'INSEE en 2022</a>
                   </td>
               </tr>
               <tr>
