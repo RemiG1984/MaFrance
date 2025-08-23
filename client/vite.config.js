@@ -3,8 +3,8 @@ import vue from "@vitejs/plugin-vue";
 import { resolve } from "path";
 import fs from 'fs';
 
-// Generate build hash for cache busting
-const buildHash = Date.now().toString()
+// Generate stable build hash for cache busting - set once during build
+const buildHash = process.env.BUILD_HASH || Date.now().toString()
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -77,6 +77,7 @@ export default defineConfig({
   define: {
     __VUE_OPTIONS_API__: true,
     __VUE_PROD_DEVTOOLS__: false,
-    __BUILD_HASH__: JSON.stringify(buildHash)
+    __BUILD_HASH__: JSON.stringify(buildHash),
+    'window.__BUILD_HASH__': JSON.stringify(buildHash)
   },
 });

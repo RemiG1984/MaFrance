@@ -15,29 +15,60 @@ class ApiService {
      */
     async checkBuildVersion() {
         try {
-            const response = await fetch('/api/version?' + Date.now());
-            if (response.ok) {
-                const versionInfo = await response.json();
-                const currentBuildHash = versionInfo.buildHash;
-                
-                if (this.lastBuildHash && this.lastBuildHash !== currentBuildHash) {
-                    console.log('New build detected, clearing all caches');
-                    this.clearCache();
-                    
-                    // Clear service worker cache
-                    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-                        navigator.serviceWorker.controller.postMessage({ type: 'CLEAR_CACHE' });
-                    }
-                    
-                    // Force page reload to ensure fresh start
-                    setTimeout(() => {
-                        window.location.reload(true);
-                    }, 100);
-                    return;
+            // Check if we have an embedded build hash first
+            const embeddedBuildHash = window.__BUILD_HASH__;
+
+            if (embeddedBuildHash && this.lastBuildHash && this.lastBuildHash !== embeddedBuildHash) {
+                console.log('New build detected (embedded hash), clearing all caches');
+                this.clearCache();
+
+                if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.controller.postMessage({ type: 'CLEAR_CACHE' });
                 }
-                
-                localStorage.setItem('app_build_hash', currentBuildHash);
-                this.lastBuildHash = currentBuildHash;
+
+                localStorage.setItem('app_build_hash', embeddedBuildHash);
+                this.lastBuildHash = embeddedBuildHash;
+
+                // Force page reload to ensure fresh start
+                setTimeout(() => {
+                    window.location.reload(true);
+                }, 100);
+                return;
+            }
+
+            // Fallback to server check if no embedded hash
+            if (!embeddedBuildHash) {
+                const response = await fetch('/api/version?' + Date.now());
+                if (response.ok) {
+                    const versionInfo = await response.json();
+                    const currentBuildHash = versionInfo.buildHash;
+
+                    if (this.lastBuildHash && this.lastBuildHash !== currentBuildHash) {
+                        console.log('New build detected (server hash), clearing all caches');
+                        this.clearCache();
+
+                        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                            navigator.serviceWorker.controller.postMessage({ type: 'CLEAR_CACHE' });
+                        }
+
+                        localStorage.setItem('app_build_hash', currentBuildHash);
+                        this.lastBuildHash = currentBuildHash;
+
+                        setTimeout(() => {
+                            window.location.reload(true);
+                        }, 100);
+                        return;
+                    }
+
+                    localStorage.setItem('app_build_hash', currentBuildHash);
+                    this.lastBuildHash = currentBuildHash;
+                }
+            } else {
+                // Store embedded hash if it's the first time
+                if (!this.lastBuildHash) {
+                    localStorage.setItem('app_build_hash', embeddedBuildHash);
+                    this.lastBuildHash = embeddedBuildHash;
+                }
             }
         } catch (error) {
             console.warn('Failed to check build version:', error);
@@ -316,7 +347,7 @@ const api = {
         return apiService.request(`/rankings/communes?${queryString}`);
     },
 
-    
+
 
     // Search functionality
     searchCommunes: (query) =>

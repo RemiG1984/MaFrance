@@ -102,22 +102,31 @@ app.use("/api/cache", cacheRoutes);
 
 // Version endpoint for cache validation
 app.get("/api/version", (req, res) => {
-  // Generate build hash from dist directory modification time for consistency
-  let buildHash;
-  try {
-    const distPath = path.join(__dirname, 'dist');
-    if (fs.existsSync(distPath)) {
-      const stats = fs.statSync(distPath);
-      buildHash = stats.mtime.getTime().toString();
-    } else {
-      buildHash = Date.now().toString();
+  // Try to read build hash from built index.html
+  let buildHash = process.env.BUILD_HASH;
+  
+  if (!buildHash) {
+    try {
+      const indexPath = path.join(__dirname, 'dist', 'index.html');
+      if (fs.existsSync(indexPath)) {
+        const indexContent = fs.readFileSync(indexPath, 'utf-8');
+        const hashMatch = indexContent.match(/window\.__BUILD_HASH__="([^"]+)"/);
+        if (hashMatch) {
+          buildHash = hashMatch[1];
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to read build hash from index.html:', error);
     }
-  } catch (error) {
-    buildHash = Date.now().toString();
+  }
+  
+  // Fallback to package version if no build hash found
+  if (!buildHash) {
+    buildHash = require('./package.json').version;
   }
   
   res.json({
-    buildHash: process.env.BUILD_HASH || buildHash,
+    buildHash,
     timestamp: Date.now(),
     version: require('./package.json').version
   });
