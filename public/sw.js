@@ -127,41 +127,30 @@ async function clearApiCache() {
     const cache = await caches.open(API_CACHE_NAME);
     const keys = await cache.keys();
     await Promise.all(keys.map(key => cache.delete(key)));
-    
+
     // Also clear any old API caches that might still exist
     const allCaches = await caches.keys();
     const apiCaches = allCaches.filter(name => name.startsWith('ma-france-api-'));
     await Promise.all(apiCaches.map(name => caches.delete(name)));
-    
+
     console.log('All API caches cleared');
   } catch (error) {
     console.error('Failed to clear API cache:', error);
   }
 }
 
-// Handle messages from the main thread
-self.addEventListener('message', (event) => {
+// Listen for messages from the main thread
+self.addEventListener('message', async event => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
-  } else if (event.data && event.data.type === 'CLEAR_CACHE') {
-    event.waitUntil(clearApiCache());
   } else if (event.data && event.data.type === 'CHECK_UPDATES') {
-    event.waitUntil(
-      checkForUpdates().then(hasUpdate => {
-        console.log('Update check completed');
-      })
-    );
-  } else if (event.data && event.data.type === 'FORCE_UPDATE') {
-    // Force cache clear and reload
-    event.waitUntil(
-      clearApiCache().then(() => {
-        // Notify all clients to reload
-        self.clients.matchAll().then(clients => {
-          clients.forEach(client => {
-            client.postMessage({ type: 'RELOAD_REQUIRED' });
-          });
-        });
-      })
-    );
+    const hasUpdates = await checkForUpdates();
+    event.ports[0]?.postMessage({ hasUpdates });
+  } else if (event.data && event.data.type === 'CLEAR_CACHE') {
+    await clearApiCache();
+    // Also clear all caches to force complete refresh
+    const allCacheNames = await caches.keys();
+    await Promise.all(allCacheNames.map(name => caches.delete(name)));
+    event.ports[0]?.postMessage({ cleared: true });
   }
 });

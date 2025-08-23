@@ -7,7 +7,7 @@ class ApiService {
         this.activeRequests = new Map();
         this.persistentStorage = this.initPersistentStorage();
         this.lastBuildHash = localStorage.getItem('app_build_hash');
-        this.checkBuildVersion();
+        this.buildCheckPromise = this.checkBuildVersion();
     }
 
     /**
@@ -15,7 +15,7 @@ class ApiService {
      */
     async checkBuildVersion() {
         try {
-            const response = await fetch('/api/version');
+            const response = await fetch('/api/version?' + Date.now());
             if (response.ok) {
                 const versionInfo = await response.json();
                 const currentBuildHash = versionInfo.buildHash;
@@ -28,6 +28,12 @@ class ApiService {
                     if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
                         navigator.serviceWorker.controller.postMessage({ type: 'CLEAR_CACHE' });
                     }
+                    
+                    // Force page reload to ensure fresh start
+                    setTimeout(() => {
+                        window.location.reload(true);
+                    }, 100);
+                    return;
                 }
                 
                 localStorage.setItem('app_build_hash', currentBuildHash);
@@ -148,6 +154,9 @@ class ApiService {
                 }
                 this.cache.delete(cacheKey);
             }
+
+            // Ensure build check completes before using persistent cache
+            await this.buildCheckPromise;
 
             // Check persistent storage
             const persistentCached = this.persistentStorage.get(cacheKey);
