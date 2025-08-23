@@ -28,6 +28,7 @@ export const useDataStore = defineStore("data", {
       subventions: null,
       migrants: null,
       articles: null,
+      nat1: null,
     },
     departement: {
       details: null,
@@ -44,6 +45,7 @@ export const useDataStore = defineStore("data", {
       crimeAggreg: null,
       subventions: null,
       migrants: null,
+      nat1: null,
     },
     commune: {
       details: null,
@@ -56,6 +58,7 @@ export const useDataStore = defineStore("data", {
       crimeAggreg: null,
       subventions: null,
       migrants: null,
+      nat1: null,
     },
   }),
 
@@ -85,6 +88,7 @@ export const useDataStore = defineStore("data", {
           api.getArticles({ limit: 10 }),
           api.getMigrants({ limit: 10 }),
           api.getQpv({ limit: 10 }),
+          api.getCountryNat1(code),
         ]);
 
         const country = {};
@@ -100,6 +104,7 @@ export const useDataStore = defineStore("data", {
         country.articles = articlesResponse;
         country.migrants = results[9];
         country.qpv = results[10];
+        country.nat1 = results[11];
         country.namesSeries = this.serializeStats(country.namesHistory);
         country.crimeSeries = this.serializeStats(country.crimeHistory);
         country.crimeAggreg = this.aggregateStats(country.crimeSeries.data);
@@ -133,6 +138,7 @@ export const useDataStore = defineStore("data", {
           }),
           api.getDepartementSubventions(code),
           api.getMigrants({ dept: code, limit: 100 }),
+          api.getDepartementNat1(code),
         ]);
 
         const departement = {};
@@ -148,6 +154,7 @@ export const useDataStore = defineStore("data", {
         departement.articles = articlesResponse;
         departement.subventions = results[9];
         departement.migrants = results[10] || [];
+        departement.nat1 = results[11];
         departement.namesSeries = this.serializeStats(departement.namesHistory);
         departement.crimeSeries = this.serializeStats(results[3]);
         departement.crimeAggreg = this.aggregateStats(
@@ -178,6 +185,7 @@ export const useDataStore = defineStore("data", {
           }),
           api.getCommuneSubventions(code),
           api.getMigrants({ cog: code, limit: 100 }),
+          api.getCommuneNat1(code),
         ]);
 
         const commune = {};
@@ -190,6 +198,7 @@ export const useDataStore = defineStore("data", {
         commune.articles = articlesResponse;
         commune.subventions = results[6];
         commune.migrants = results[7] || [];
+        commune.nat1 = results[8];
         commune.crimeSeries = this.serializeStats(results[2]);
         commune.crimeAggreg = this.aggregateStats(commune.crimeSeries.data);
 
@@ -388,6 +397,7 @@ export const useDataStore = defineStore("data", {
         crimeAggreg: null,
         subventions: null,
         migrants: null,
+        nat1: null,
       };
     },
 
@@ -403,6 +413,7 @@ export const useDataStore = defineStore("data", {
         crimeAggreg: null,
         subventions: null,
         migrants: null,
+        nat1: null,
       };
     },
 

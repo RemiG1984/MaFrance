@@ -135,12 +135,22 @@ router.get(
       COALESCE(cc.escroqueries_p1k, 0) AS escroqueries_p1k,
       (COALESCE(cn.musulman_pct, 0) + COALESCE(cn.africain_pct, 0) + COALESCE(cn.asiatique_pct, 0)) AS extra_europeen_pct,
       (COALESCE(cn.traditionnel_pct, 0) + COALESCE(cn.moderne_pct, 0)) AS prenom_francais_pct,
-      COALESCE(cs.total_subventions_parHab, 0) AS total_subventions_parHab
+      COALESCE(cs.total_subventions_parHab, 0) AS total_subventions_parHab,
+      -- NAT1 computed percentage fields
+      CASE WHEN cnat1.Ensemble > 0 THEN ROUND((COALESCE(cnat1.Etrangers, 0) / cnat1.Ensemble) * 100, 2) ELSE 0 END AS etrangers_pct,
+      CASE WHEN cnat1.Ensemble > 0 THEN ROUND((COALESCE(cnat1.Francais_de_naissance, 0) / cnat1.Ensemble) * 100, 2) ELSE 0 END AS francais_de_naissance_pct,
+      CASE WHEN cnat1.Ensemble > 0 THEN ROUND((COALESCE(cnat1.Francais_par_acquisition, 0) / cnat1.Ensemble) * 100, 2) ELSE 0 END AS naturalises_pct,
+      CASE WHEN cnat1.Ensemble > 0 THEN ROUND(((COALESCE(cnat1.Portugais, 0) + COALESCE(cnat1.Italiens, 0) + COALESCE(cnat1.Espagnols, 0) + COALESCE(cnat1.Autres_nationalites_de_l_UE, 0) + COALESCE(cnat1.Autres_nationalites_d_Europe, 0)) / cnat1.Ensemble) * 100, 2) ELSE 0 END AS europeens_pct,
+      CASE WHEN cnat1.Ensemble > 0 THEN ROUND(((COALESCE(cnat1.Algeriens, 0) + COALESCE(cnat1.Marocains, 0) + COALESCE(cnat1.Tunisiens, 0) + COALESCE(cnat1.Turcs, 0)) / cnat1.Ensemble) * 100, 2) ELSE 0 END AS maghrebins_pct,
+      CASE WHEN cnat1.Ensemble > 0 THEN ROUND((COALESCE(cnat1.Autres_nationalites_d_Afrique, 0) / cnat1.Ensemble) * 100, 2) ELSE 0 END AS africains_pct,
+      CASE WHEN cnat1.Ensemble > 0 THEN ROUND((COALESCE(cnat1.Autres_nationalites, 0) / cnat1.Ensemble) * 100, 2) ELSE 0 END AS autres_nationalites_pct,
+      CASE WHEN cnat1.Ensemble > 0 THEN ROUND(((COALESCE(cnat1.Algeriens, 0) + COALESCE(cnat1.Marocains, 0) + COALESCE(cnat1.Tunisiens, 0) + COALESCE(cnat1.Turcs, 0) + COALESCE(cnat1.Autres_nationalites_d_Afrique, 0) + COALESCE(cnat1.Autres_nationalites, 0)) / cnat1.Ensemble) * 100, 2) ELSE 0 END AS non_europeens_pct
     FROM locations l
     LEFT JOIN LatestCommuneNames cn ON l.COG = cn.COG
     LEFT JOIN commune_crime cc ON l.COG = cc.COG 
       AND cc.annee = (SELECT MAX(annee) FROM commune_crime WHERE COG = l.COG)
     LEFT JOIN commune_subventions cs ON l.COG = cs.COG
+    LEFT JOIN commune_nat1 cnat1 ON l.COG = cnat1.Code
     WHERE (l.departement = ? OR ? = '')
     ${populationFilter}
     ORDER BY ${sort} ${direction}, ${secondarySort}
@@ -261,12 +271,22 @@ router.get(
       COALESCE(dc.escroqueries_p1k, 0) AS escroqueries_p1k,
       (COALESCE(dn.musulman_pct, 0) + COALESCE(dn.africain_pct, 0) + COALESCE(dn.asiatique_pct, 0)) AS extra_europeen_pct,
       (COALESCE(dn.traditionnel_pct, 0) + COALESCE(dn.moderne_pct, 0)) AS prenom_francais_pct,
-      COALESCE(ds.total_subventions_parHab, 0) AS total_subventions_parHab
+      COALESCE(ds.total_subventions_parHab, 0) AS total_subventions_parHab,
+      -- NAT1 computed percentage fields
+      CASE WHEN dnat1.Ensemble > 0 THEN ROUND((COALESCE(dnat1.Etrangers, 0) / dnat1.Ensemble) * 100, 2) ELSE 0 END AS etrangers_pct,
+      CASE WHEN dnat1.Ensemble > 0 THEN ROUND((COALESCE(dnat1.Francais_de_naissance, 0) / dnat1.Ensemble) * 100, 2) ELSE 0 END AS francais_de_naissance_pct,
+      CASE WHEN dnat1.Ensemble > 0 THEN ROUND((COALESCE(dnat1.Francais_par_acquisition, 0) / dnat1.Ensemble) * 100, 2) ELSE 0 END AS naturalises_pct,
+      CASE WHEN dnat1.Ensemble > 0 THEN ROUND(((COALESCE(dnat1.Portugais, 0) + COALESCE(dnat1.Italiens, 0) + COALESCE(dnat1.Espagnols, 0) + COALESCE(dnat1.Autres_nationalites_de_l_UE, 0) + COALESCE(dnat1.Autres_nationalites_d_Europe, 0)) / dnat1.Ensemble) * 100, 2) ELSE 0 END AS europeens_pct,
+      CASE WHEN dnat1.Ensemble > 0 THEN ROUND(((COALESCE(dnat1.Algeriens, 0) + COALESCE(dnat1.Marocains, 0) + COALESCE(dnat1.Tunisiens, 0) + COALESCE(dnat1.Turcs, 0)) / dnat1.Ensemble) * 100, 2) ELSE 0 END AS maghrebins_pct,
+      CASE WHEN dnat1.Ensemble > 0 THEN ROUND((COALESCE(dnat1.Autres_nationalites_d_Afrique, 0) / dnat1.Ensemble) * 100, 2) ELSE 0 END AS africains_pct,
+      CASE WHEN dnat1.Ensemble > 0 THEN ROUND((COALESCE(dnat1.Autres_nationalites, 0) / dnat1.Ensemble) * 100, 2) ELSE 0 END AS autres_nationalites_pct,
+      CASE WHEN dnat1.Ensemble > 0 THEN ROUND(((COALESCE(dnat1.Algeriens, 0) + COALESCE(dnat1.Marocains, 0) + COALESCE(dnat1.Tunisiens, 0) + COALESCE(dnat1.Turcs, 0) + COALESCE(dnat1.Autres_nationalites_d_Afrique, 0) + COALESCE(dnat1.Autres_nationalites, 0)) / dnat1.Ensemble) * 100, 2) ELSE 0 END AS non_europeens_pct
     FROM departements d
     LEFT JOIN LatestDepartmentNames dn ON d.departement = dn.dpt
     LEFT JOIN department_crime dc ON d.departement = dc.dep 
       AND dc.annee = (SELECT MAX(annee) FROM department_crime WHERE dep = d.departement)
     LEFT JOIN department_subventions ds ON d.departement = ds.dep
+    LEFT JOIN department_nat1 dnat1 ON d.departement = dnat1.Code
     ORDER BY ${sort} ${direction}
     LIMIT ? OFFSET ?
   `;

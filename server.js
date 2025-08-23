@@ -80,6 +80,8 @@ const qpvRoutes = require("./routes/qpvRoutes");
 const rankingRoutes = require("./routes/rankingRoutes");
 const subventionRoutes = require("./routes/subventionRoutes");
 const cacheRoutes = require("./routes/cacheRoutes");
+const nat1Routes = require('./routes/nat1Routes');
+
 
 // Make database available to all routes
 app.locals.db = db;
@@ -94,25 +96,37 @@ app.use('/api/qpv', qpvRoutes);
 app.use('/api/rankings', rankingRoutes);
 app.use('/api/subventions', subventionRoutes);
 app.use('/api/migrants', migrantRoutes);
+app.use('/api/nat1', nat1Routes);
 app.use("/api", otherRoutes); // Keep this commented to test
 app.use("/api/cache", cacheRoutes);
 
 // Version endpoint for cache validation
 app.get("/api/version", (req, res) => {
-  // Generate build hash from package.json modification time or use environment variable
-  const fs = require('fs');
-  const packagePath = path.join(__dirname, 'package.json');
+  // Try to read build hash from built index.html
+  let buildHash = process.env.BUILD_HASH;
   
-  let buildHash;
-  try {
-    const stats = fs.statSync(packagePath);
-    buildHash = stats.mtime.getTime().toString();
-  } catch (error) {
-    buildHash = Date.now().toString();
+  if (!buildHash) {
+    try {
+      const indexPath = path.join(__dirname, 'dist', 'index.html');
+      if (fs.existsSync(indexPath)) {
+        const indexContent = fs.readFileSync(indexPath, 'utf-8');
+        const hashMatch = indexContent.match(/window\.__BUILD_HASH__="([^"]+)"/);
+        if (hashMatch) {
+          buildHash = hashMatch[1];
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to read build hash from index.html:', error);
+    }
+  }
+  
+  // Fallback to package version if no build hash found
+  if (!buildHash) {
+    buildHash = require('./package.json').version;
   }
   
   res.json({
-    buildHash: process.env.BUILD_HASH || buildHash,
+    buildHash,
     timestamp: Date.now(),
     version: require('./package.json').version
   });

@@ -373,13 +373,37 @@ class CacheService {
               d.places_migrants_p1k,
               (COALESCE(d.insecurite_score, 0) + COALESCE(d.immigration_score, 0) + COALESCE(d.islamisation_score, 0) + COALESCE(d.defrancisation_score, 0) + COALESCE(d.wokisme_score, 0)) /5 AS total_score,
               dn.musulman_pct, 
-              dn.africain_pct, 
-              dn.asiatique_pct, 
-              dn.traditionnel_pct, 
-              dn.moderne_pct, 
-              dn.annais,
               (COALESCE(dc.homicides_p100k, 0) + COALESCE(dc.tentatives_homicides_p100k, 0)) AS homicides_total_p100k,
-              (COALESCE(dc.coups_et_blessures_volontaires_p1k, 0) + 
+              ROUND((COALESCE(dc.coups_et_blessures_volontaires_p1k, 0) + 
+               COALESCE(dc.coups_et_blessures_volontaires_intrafamiliaux_p1k, 0) + 
+               COALESCE(dc.autres_coups_et_blessures_volontaires_p1k, 0) + 
+               COALESCE(dc.vols_avec_armes_p1k, 0) + 
+               COALESCE(dc.vols_violents_sans_arme_p1k, 0)),2) AS violences_physiques_p1k,
+              COALESCE(dc.violences_sexuelles_p1k, 0) AS violences_sexuelles_p1k,
+              (COALESCE(dc.vols_avec_armes_p1k, 0) + 
+               COALESCE(dc.vols_violents_sans_arme_p1k, 0) + 
+               COALESCE(dc.vols_sans_violence_contre_des_personnes_p1k, 0) + 
+               COALESCE(dc.cambriolages_de_logement_p1k, 0) + 
+               COALESCE(dc.vols_de_vehicules_p1k, 0) + 
+               COALESCE(dc.vols_dans_les_vehicules_p1k, 0) + 
+               COALESCE(dc.vols_d_accessoires_sur_vehicules_p1k, 0)) AS vols_p1k,
+              COALESCE(dc.destructions_et_degradations_volontaires_p1k, 0) AS destructions_p1k,
+              (COALESCE(dc.usage_de_stupefiants_p1k, 0) + 
+               COALESCE(dc.usage_de_stupefiants_afd_p1k, 0) + 
+               COALESCE(dc.trafic_de_stupefiants_p1k, 0)) AS stupefiants_p1k,
+              COALESCE(dc.escroqueries_p1k, 0) AS escroqueries_p1k,
+              (COALESCE(dn.musulman_pct, 0) + COALESCE(dn.africain_pct, 0) + COALESCE(dn.asiatique_pct, 0)) AS extra_europeen_pct,
+              (COALESCE(dn.traditionnel_pct, 0) + COALESCE(dn.moderne_pct, 0)) AS prenom_francais_pct,
+              COALESCE(ds.total_subventions_parHab, 0) AS total_subventions_parHab,
+              -- NAT1 computed percentage fields
+              CASE WHEN dnat1.Ensemble > 0 THEN ROUND((COALESCE(dnat1.Etrangers, 0) / dnat1.Ensemble) * 100, 2) ELSE 0 END AS etrangers_pct,
+              CASE WHEN dnat1.Ensemble > 0 THEN ROUND((COALESCE(dnat1.Francais_de_naissance, 0) / dnat1.Ensemble) * 100, 2) ELSE 0 END AS francais_de_naissance_pct,
+              CASE WHEN dnat1.Ensemble > 0 THEN ROUND((COALESCE(dnat1.Francais_par_acquisition, 0) / dnat1.Ensemble) * 100, 2) ELSE 0 END AS naturalises_pct,
+              CASE WHEN dnat1.Ensemble > 0 THEN ROUND(((COALESCE(dnat1.Portugais, 0) + COALESCE(dnat1.Italiens, 0) + COALESCE(dnat1.Espagnols, 0) + COALESCE(dnat1.Autres_nationalites_de_l_UE, 0) + COALESCE(dnat1.Autres_nationalites_d_Europe, 0)) / dnat1.Ensemble) * 100, 2) ELSE 0 END AS europeens_pct,
+              CASE WHEN dnat1.Ensemble > 0 THEN ROUND(((COALESCE(dnat1.Algeriens, 0) + COALESCE(dnat1.Marocains, 0) + COALESCE(dnat1.Tunisiens, 0) + COALESCE(dnat1.Turcs, 0)) / dnat1.Ensemble) * 100, 2) ELSE 0 END AS maghrebins_pct,
+              CASE WHEN dnat1.Ensemble > 0 THEN ROUND((COALESCE(dnat1.Autres_nationalites_d_Afrique, 0) / dnat1.Ensemble) * 100, 2) ELSE 0 END AS africains_pct,
+              CASE WHEN dnat1.Ensemble > 0 THEN ROUND((COALESCE(dnat1.Autres_nationalites, 0) / dnat1.Ensemble) * 100, 2) ELSE 0 END AS autres_nationalites_pct,
+              CASE WHEN dnat1.Ensemble > 0 THEN ROUND(((COALESCE(dnat1.Algeriens, 0) + COALESCE(dnat1.Marocains, 0) + COALESCE(dnat1.Tunisiens, 0) + COALESCE(dnat1.Turcs, 0) + COALESCE(dnat1.Autres_nationalites_d_Afrique, 0) + COALESCE(dnat1.Autres_nationalites, 0)) / dnat1.Ensemble) * 100, 2) ELSE 0 END AS non_europeens_pct 
                COALESCE(dc.coups_et_blessures_volontaires_intrafamiliaux_p1k, 0) + 
                COALESCE(dc.autres_coups_et_blessures_volontaires_p1k, 0) + 
                COALESCE(dc.vols_avec_armes_p1k, 0) + 
@@ -405,6 +429,7 @@ class CacheService {
             LEFT JOIN department_crime dc ON d.departement = dc.dep 
               AND dc.annee = (SELECT MAX(annee) FROM department_crime WHERE dep = d.departement)
             LEFT JOIN department_subventions ds ON d.departement = ds.dep
+            LEFT JOIN department_nat1 dnat1 ON d.departement = dnat1.Code
             ORDER BY d.departement
             `;
             

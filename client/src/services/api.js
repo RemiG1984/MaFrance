@@ -6,6 +6,73 @@ class ApiService {
         this.cacheExpiry = 24 * 60 * 60 * 1000; // 24 hours
         this.activeRequests = new Map();
         this.persistentStorage = this.initPersistentStorage();
+        this.lastBuildHash = localStorage.getItem('app_build_hash');
+        this.buildCheckPromise = this.checkBuildVersion();
+    }
+
+    /**
+     * Check if build version has changed and clear cache if needed
+     */
+    async checkBuildVersion() {
+        try {
+            // Check if we have an embedded build hash first
+            const embeddedBuildHash = window.__BUILD_HASH__;
+
+            if (embeddedBuildHash && this.lastBuildHash && this.lastBuildHash !== embeddedBuildHash) {
+                console.log('New build detected (embedded hash), clearing all caches');
+                this.clearCache();
+
+                if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.controller.postMessage({ type: 'CLEAR_CACHE' });
+                }
+
+                localStorage.setItem('app_build_hash', embeddedBuildHash);
+                this.lastBuildHash = embeddedBuildHash;
+
+                // Force page reload to ensure fresh start
+                setTimeout(() => {
+                    window.location.reload(true);
+                }, 100);
+                return;
+            }
+
+            // Fallback to server check if no embedded hash
+            if (!embeddedBuildHash) {
+                const response = await fetch('/api/version?' + Date.now());
+                if (response.ok) {
+                    const versionInfo = await response.json();
+                    const currentBuildHash = versionInfo.buildHash;
+
+                    if (this.lastBuildHash && this.lastBuildHash !== currentBuildHash) {
+                        console.log('New build detected (server hash), clearing all caches');
+                        this.clearCache();
+
+                        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                            navigator.serviceWorker.controller.postMessage({ type: 'CLEAR_CACHE' });
+                        }
+
+                        localStorage.setItem('app_build_hash', currentBuildHash);
+                        this.lastBuildHash = currentBuildHash;
+
+                        setTimeout(() => {
+                            window.location.reload(true);
+                        }, 100);
+                        return;
+                    }
+
+                    localStorage.setItem('app_build_hash', currentBuildHash);
+                    this.lastBuildHash = currentBuildHash;
+                }
+            } else {
+                // Store embedded hash if it's the first time
+                if (!this.lastBuildHash) {
+                    localStorage.setItem('app_build_hash', embeddedBuildHash);
+                    this.lastBuildHash = embeddedBuildHash;
+                }
+            }
+        } catch (error) {
+            console.warn('Failed to check build version:', error);
+        }
     }
 
     /**
@@ -118,6 +185,9 @@ class ApiService {
                 }
                 this.cache.delete(cacheKey);
             }
+
+            // Ensure build check completes before using persistent cache
+            await this.buildCheckPromise;
 
             // Check persistent storage
             const persistentCached = this.persistentStorage.get(cacheKey);
@@ -277,7 +347,7 @@ const api = {
         return apiService.request(`/rankings/communes?${queryString}`);
     },
 
-    
+
 
     // Search functionality
     searchCommunes: (query) =>
@@ -334,6 +404,16 @@ const api = {
             !params.cursor,
         );
     },
+
+    // NAT1 data
+    getCountryNat1: (country = "France") =>
+        apiService.request(`/nat1/country?country=${country}`),
+    getDepartementNat1: (code) =>
+        apiService.request(`/nat1/departement?dept=${code}`),
+    getCommuneNat1: (cog) =>
+        apiService.request(`/nat1/commune?cog=${cog}`),
+    getNat1Summary: () =>
+        apiService.request("/nat1/all"),
 
     // Cache management
     clearCache: () => apiService.clearCache(),
