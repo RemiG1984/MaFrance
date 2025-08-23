@@ -102,14 +102,16 @@ app.use("/api/cache", cacheRoutes);
 
 // Version endpoint for cache validation
 app.get("/api/version", (req, res) => {
-  // Generate build hash from package.json modification time or use environment variable
-  const fs = require('fs');
-  const packagePath = path.join(__dirname, 'package.json');
-  
+  // Generate build hash from dist directory modification time for consistency
   let buildHash;
   try {
-    const stats = fs.statSync(packagePath);
-    buildHash = stats.mtime.getTime().toString();
+    const distPath = path.join(__dirname, 'dist');
+    if (fs.existsSync(distPath)) {
+      const stats = fs.statSync(distPath);
+      buildHash = stats.mtime.getTime().toString();
+    } else {
+      buildHash = Date.now().toString();
+    }
   } catch (error) {
     buildHash = Date.now().toString();
   }

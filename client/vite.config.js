@@ -1,10 +1,37 @@
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import { resolve } from "path";
+import fs from 'fs';
 
-// https://vite.dev/config/
+// Generate build hash for cache busting
+const buildHash = Date.now().toString()
+
+// https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [
+    vue(),
+    {
+      name: 'inject-build-hash',
+      generateBundle() {
+        // Read service worker file
+        const swPath = '../public/sw.js'
+        let swContent = fs.readFileSync(swPath, 'utf-8')
+
+        // Replace BUILD_HASH placeholder with actual build hash
+        swContent = swContent.replace(
+          'const BUILD_HASH = self.BUILD_HASH || Date.now().toString();',
+          `const BUILD_HASH = "${buildHash}";`
+        )
+
+        // Write to dist directory
+        this.emitFile({
+          type: 'asset',
+          fileName: 'sw.js',
+          source: swContent
+        })
+      }
+    }
+  ],
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src')
@@ -37,5 +64,10 @@ export default defineConfig({
         changeOrigin: true
       }
     }
-  }
+  },
+  define: {
+    __VUE_OPTIONS_API__: true,
+    __VUE_PROD_DEVTOOLS__: false,
+    __BUILD_HASH__: JSON.stringify(buildHash)
+  },
 });

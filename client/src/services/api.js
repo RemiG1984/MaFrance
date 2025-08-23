@@ -6,6 +6,36 @@ class ApiService {
         this.cacheExpiry = 24 * 60 * 60 * 1000; // 24 hours
         this.activeRequests = new Map();
         this.persistentStorage = this.initPersistentStorage();
+        this.lastBuildHash = localStorage.getItem('app_build_hash');
+        this.checkBuildVersion();
+    }
+
+    /**
+     * Check if build version has changed and clear cache if needed
+     */
+    async checkBuildVersion() {
+        try {
+            const response = await fetch('/api/version');
+            if (response.ok) {
+                const versionInfo = await response.json();
+                const currentBuildHash = versionInfo.buildHash;
+                
+                if (this.lastBuildHash && this.lastBuildHash !== currentBuildHash) {
+                    console.log('New build detected, clearing all caches');
+                    this.clearCache();
+                    
+                    // Clear service worker cache
+                    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                        navigator.serviceWorker.controller.postMessage({ type: 'CLEAR_CACHE' });
+                    }
+                }
+                
+                localStorage.setItem('app_build_hash', currentBuildHash);
+                this.lastBuildHash = currentBuildHash;
+            }
+        } catch (error) {
+            console.warn('Failed to check build version:', error);
+        }
     }
 
     /**
