@@ -3,7 +3,7 @@
   <v-container fluid class="pa-6 memorial-page">
     <v-row>
       <v-col cols="12">
-        <h1 class="text-h4 font-weight-bold mb-4">Mémorial des Victimes</h1>
+        <h1 class="text-h4 font-weight-bold mb-4">Mémorial des victimes de francocides</h1>
 
         <!-- Sorting Controls -->
         <v-select

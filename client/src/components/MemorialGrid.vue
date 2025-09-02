@@ -4,13 +4,13 @@
     <v-col
       v-for="victim in victims"
       :key="`${victim.prenom}-${victim.nom}-${victim.id}`"
-      cols="12" sm="6" md="6" lg="4"
+      cols="12" sm="6" md="6" lg="20"
     >
       <v-card class="memorial-card elevation-2 h-100">
         <v-img
           v-if="victim.photo"
           :src="`/images/francocides/${victim.photo}`"
-          height="200"
+          height="300"
           cover
           class="memorial-image"
         >
@@ -22,14 +22,17 @@
           <v-icon size="64" color="grey-lighten-2">mdi-account</v-icon>
         </div>
 
-        <v-card-title class="text-h6 pb-2">
+        <v-card-title class="text-h6 pb-0">
           {{ victim.prenom }} {{ victim.nom }}
-          <span class="text-body-2 text-grey-darken-1 ml-2">({{ victim.age }} ans)</span>
         </v-card-title>
 
         <v-card-subtitle class="pb-2">
-          <div>{{ formatDate(victim.date_deces) }}</div>
-          <div class="text-caption text-grey-darken-1">{{ formatLocation(victim.cog) }}</div>
+          <div class="text-body-2 text-grey-darken-1 ml-1">({{ victim.age }} ans)</div>
+        </v-card-subtitle>
+
+        <v-card-subtitle class="pb-2">
+          <div>Tué(e) le {{ formatDate(victim.date_deces) }}</div>
+          <div class="text-caption text-grey-darken-1">à {{ formatLocation(victim.cog) }}</div>
         </v-card-subtitle>
 
         <v-card-actions class="pt-0">
