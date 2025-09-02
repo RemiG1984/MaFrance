@@ -801,4 +801,14 @@ export default {
 .metric-selector .v-select__selection {
   color: white !important;
 }
+/* Fix dropdown menu item colors */
+.metric-selector .v-list-item--active {
+  background-color: #1976d2 !important;
+}
+.metric-selector .v-list-item--active .v-list-item__content {
+  color: white !important;
+}
+.metric-selector .v-list-item:not(.v-list-item--active) .v-list-item__content {
+  color: black !important;
+}
 </style>
