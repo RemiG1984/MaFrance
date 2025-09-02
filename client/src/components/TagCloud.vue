@@ -1,13 +1,13 @@
 
 <template>
-  <v-card class="tag-cloud-container pa-4 mb-4" elevation="2">
-    <v-card-title class="text-h6 pb-2">Filtrer par étiquette</v-card-title>
+  <v-card class="tag-cloud-container pa-3 mb-3" elevation="2">
+    <v-card-title class="text-subtitle-1 pb-1 pt-1">Filtrer par étiquette</v-card-title>
     
-    <div v-if="loading" class="d-flex justify-center">
-      <v-progress-circular indeterminate color="primary" />
+    <div v-if="loading" class="d-flex justify-center py-2">
+      <v-progress-circular indeterminate color="primary" size="24" />
     </div>
     
-    <div v-else-if="tags.length === 0" class="text-body-2 text-grey">
+    <div v-else-if="tags.length === 0" class="text-body-2 text-grey pa-2">
       Aucune étiquette disponible
     </div>
     
@@ -33,7 +33,7 @@
         </v-chip>
       </div>
       
-      <div v-if="selectedTag" class="mt-3 d-flex justify-center">
+      <div v-if="selectedTag" class="mt-2 d-flex justify-center">
         <v-btn
           variant="outlined"
           color="error"
@@ -170,9 +170,9 @@ export default {
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  gap: 8px;
-  padding: 16px;
-  min-height: 120px;
+  gap: 6px;
+  padding: 8px 12px;
+  min-height: 60px;
 }
 
 .word-cloud-tag {

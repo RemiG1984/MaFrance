@@ -1,34 +1,40 @@
 
 <template>
-  <v-container fluid class="pa-6 memorial-page">
-    <v-row>
-      <v-col cols="12">
-        <h1 class="text-h4 font-weight-bold mb-1">Mémorial des victimes de francocides</h1>
+  <v-container fluid class="pa-4 pa-md-6 memorial-page">
+    <v-row justify="center">
+      <v-col cols="12" lg="10" xl="8">
+        <h1 class="text-h4 font-weight-bold mb-2 mb-md-3">Mémorial des victimes de francocides</h1>
 
-        <!-- Tag Cloud Filter -->
-        <TagCloud 
-          :selected-tag="selectedTag"
-          @tag-selected="onTagSelected"
-          @tag-cleared="onTagCleared"
+        <!-- Controls Row for larger screens -->
+        <v-row class="mb-2">
+          <v-col cols="12" md="8" lg="9">
+            <!-- Tag Cloud Filter -->
+            <TagCloud 
+              :selected-tag="selectedTag"
+              @tag-selected="onTagSelected"
+              @tag-cleared="onTagCleared"
+            />
+          </v-col>
+          <v-col cols="12" md="4" lg="3">
+            <!-- Sorting Controls -->
+            <v-select
+              v-model="sortBy"
+              :items="sortOptions"
+              label="Trier par"
+              variant="outlined"
+              density="compact"
+              class="mb-1"
+            ></v-select>
+          </v-col>
+        </v-row>
+
+        <!-- Memorial Grid Component -->
+        <MemorialGrid 
+          :victims="sortedVictims"
+          :loading="loading"
         />
-
-        <!-- Sorting Controls -->
-        <v-select
-          v-model="sortBy"
-          :items="sortOptions"
-          label="Trier par"
-          variant="outlined"
-          class="mb-1"
-          style="max-width: 300px;"
-        ></v-select>
       </v-col>
     </v-row>
-
-    <!-- Memorial Grid Component -->
-    <MemorialGrid 
-      :victims="sortedVictims"
-      :loading="loading"
-    />
   </v-container>
 </template>
 
