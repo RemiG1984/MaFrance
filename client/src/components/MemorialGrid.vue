@@ -1,12 +1,16 @@
+
 <template>
-  <v-virtual-scroll
-    :items="victims"
-    height="600"
-    item-height="400"
-    class="transition-group"
-  >
-    <template v-slot:default="{ item: victim }">
-      <v-col cols="12" sm="6" md="4" lg="4">
+  <v-container fluid class="pa-0">
+    <v-row>
+      <v-col
+        v-for="victim in victims"
+        :key="victim.id || `${victim.prenom}-${victim.nom}-${victim.date_deces}`"
+        cols="12"
+        sm="6"
+        md="4"
+        lg="4"
+        xl="3"
+      >
         <v-card class="memorial-card elevation-2 h-100">
           <v-img
             v-if="victim.photo"
@@ -94,23 +98,23 @@
           </v-card-text>
         </v-card>
       </v-col>
-    </template>
-  </v-virtual-scroll>
+    </v-row>
 
-  <!-- Loading and Empty States -->
-  <v-row v-if="loading" class="mt-4">
-    <v-col cols="12">
-      <v-skeleton-loader type="card@6" />
-    </v-col>
-  </v-row>
+    <!-- Loading and Empty States -->
+    <v-row v-if="loading" class="mt-4">
+      <v-col cols="12">
+        <v-skeleton-loader type="card@6" />
+      </v-col>
+    </v-row>
 
-  <v-row v-if="!loading && !victims.length" class="mt-4">
-    <v-col cols="12">
-      <v-alert type="info" icon="mdi-information">
-        Aucune donnée disponible.
-      </v-alert>
-    </v-col>
-  </v-row>
+    <v-row v-if="!loading && !victims.length" class="mt-4">
+      <v-col cols="12">
+        <v-alert type="info" icon="mdi-information">
+          Aucune donnée disponible.
+        </v-alert>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
