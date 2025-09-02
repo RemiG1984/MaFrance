@@ -691,7 +691,7 @@ export const useDataStore = defineStore("data", {
         
         // Add selected tags to request
         if (this.memorials.selectedTags.length > 0) {
-          apiParams.tags = this.memorials.selectedTags.join(',');
+          apiParams.tags = [...this.memorials.selectedTags].join(',');
         }
         
         const response = await api.getFrancocides(apiParams);
