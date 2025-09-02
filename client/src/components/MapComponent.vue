@@ -13,9 +13,11 @@
         density="compact"
         return-object
         hide-details
-        color="blue"
-        base-color="blue"
-        bg-color="blue-lighten-5"
+        color="white"
+        base-color="white"
+        bg-color="primary"
+        class="white--text"
+        style="color: white !important;"
       ></v-select>
     </v-card-text>
   </v-card>
