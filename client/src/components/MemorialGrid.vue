@@ -31,7 +31,7 @@
         </v-card-subtitle>
 
         <v-card-subtitle class="pb-2">
-          <div>Tué(e) le {{ formatDate(victim.date_deces) }}</div>
+          <div>{{ getGenderText(victim.sexe) }} le {{ formatDate(victim.date_deces) }}</div>
           <div class="text-caption text-grey-darken-1">à {{ formatLocation(victim.cog) }}</div>
         </v-card-subtitle>
 
@@ -132,6 +132,16 @@ export default {
     formatLocation(cog) {
       if (!cog) return 'Lieu inconnu';
       return this.locationData[cog] || `COG: ${cog}`;
+    },
+
+    getGenderText(sexe) {
+      if (sexe === 'F' || sexe === 'f') {
+        return 'Tuée';
+      } else if (sexe === 'M' || sexe === 'm') {
+        return 'Tué';
+      }
+      // Fallback for unknown/missing gender
+      return 'Tué(e)';
     },
   },
 };
