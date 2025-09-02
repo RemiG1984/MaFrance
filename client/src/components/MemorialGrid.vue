@@ -1,4 +1,3 @@
-
 <template>
   <v-row>
     <v-col
@@ -129,12 +128,12 @@ export default {
 
     async fetchLocationData() {
       const uniqueCogs = [...new Set(this.victims.map(v => v.cog).filter(Boolean))];
-      
+
       for (const cog of uniqueCogs) {
         if (!this.locationData[cog]) {
           try {
             const data = await api.getCommuneDetails(cog);
-            
+
             if (data?.commune && data?.departement) {
               this.locationData[cog] = `${data.commune} (${data.departement})`;
             }
@@ -163,6 +162,11 @@ export default {
     getTagsArray(tags) {
       if (!tags) return [];
       return tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+    },
+
+    parseTagsArray(tagsString) {
+      if (!tagsString) return [];
+      return tagsString.split(',').map(tag => tag.trim()).filter(tag => tag);
     },
   },
 };
