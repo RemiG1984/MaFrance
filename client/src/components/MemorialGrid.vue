@@ -6,7 +6,7 @@
     class="transition-group"
   >
     <template v-slot:default="{ item: victim }">
-      <v-col cols="12" sm="6" md="4" lg="3">
+      <v-col cols="12" sm="6" md="4" lg="4">
         <v-card class="memorial-card elevation-2 h-100">
           <v-img
             v-if="victim.photo"
