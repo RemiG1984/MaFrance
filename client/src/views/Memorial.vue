@@ -125,12 +125,6 @@ export default {
   transition: all 0.3s ease-in-out;
 }
 
-/* Ensure TagCloud doesn't affect container width */
-.tags-container {
-  overflow-x: auto;
-  width: 100%;
-}
-
 @media (max-width: 600px) {
   .text-h4 {
     font-size: 1.5rem !important;
