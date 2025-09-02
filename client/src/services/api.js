@@ -196,7 +196,7 @@ class ApiService {
                 Date.now() - persistentCached.timestamp < this.cacheExpiry
             ) {
                 console.log("Using persistent cached data for:", endpoint);
-                this.cache.set(cacheKey, persistentCached);
+                this.cache.set(persistentCached, persistentCached);
                 return persistentCached.data;
             } else if (persistentCached) {
                 this.persistentStorage.remove(cacheKey);
@@ -204,8 +204,7 @@ class ApiService {
         }
 
         // Check if the exact same request (including parameters) is already in progress
-        const urlObj = new URL(url);
-        const requestKey = `${endpoint}${urlObj.search}`;
+        const requestKey = `${endpoint}?${new URLSearchParams(options.body ? JSON.parse(options.body) : {}).toString()}`;
         if (this.activeRequests.has(requestKey)) {
             console.log("Request already in progress, waiting...", requestKey);
             return this.activeRequests.get(requestKey);
@@ -289,7 +288,7 @@ class ApiService {
         };
     }
 
-    
+
 
     // Add other API methods here as needed
 }
