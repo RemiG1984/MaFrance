@@ -1,8 +1,6 @@
 
 <template>
-  <v-card class="tag-cloud-container pa-3 mb-3" elevation="2">
-    <v-card-title class="text-subtitle-1 pb-1 pt-1">Filtrer par étiquette</v-card-title>
-    
+  <v-card class="tag-cloud-container pa-3 mb-3" elevation="2">    
     <div v-if="loading" class="d-flex justify-center py-2">
       <v-progress-circular indeterminate color="primary" size="24" />
     </div>
