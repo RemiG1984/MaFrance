@@ -41,7 +41,8 @@
               v-for="tag in getTagsArray(victim.tags)"
               :key="tag"
               size="x-small"
-              color="grey-lighten-3"
+              color="primary"
+              variant="outlined"
               class="ma-1"
             >
               {{ tag }}
