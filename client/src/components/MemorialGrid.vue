@@ -120,7 +120,7 @@ export default {
             console.log(`API response for COG ${cog}:`, data);
             
             if (data?.commune && data?.departement) {
-              this.$set(this.locationData, cog, `${data.commune} (${data.departement})`);
+              this.locationData[cog] = `${data.commune} (${data.departement})`;
               console.log(`Successfully cached location for COG ${cog}: ${data.commune} (${data.departement})`);
             } else {
               console.warn(`Invalid API response for COG ${cog}:`, data);
