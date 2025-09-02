@@ -5,12 +5,12 @@
         <v-chip
           v-for="tagObj in tags"
           :key="tagObj.tag"
-          :color="dataStore.memorials.selectedTag === tagObj.tag ? 'primary' : 'grey'"
+          :color="isTagSelected(tagObj.tag) ? 'primary' : 'blue-grey-lighten-3'"
+          :variant="isTagSelected(tagObj.tag) ? 'elevated' : 'outlined'"
           :size="getChipSize(tagObj.count)"
-          variant="outlined"
           class="ma-1 word-cloud-tag"
           clickable
-          :aria-selected="dataStore.memorials.selectedTag === tagObj.tag"
+          :aria-selected="isTagSelected(tagObj.tag)"
           role="button"
           @click="toggleTag(tagObj.tag)"
           @keydown.enter="toggleTag(tagObj.tag)"
@@ -20,19 +20,19 @@
           <span v-if="$vuetify.display.mdAndUp" class="tag-count ml-1">({{ tagObj.count }})</span>
         </v-chip>
         <v-chip
-          v-if="dataStore.memorials.selectedTag"
-          color="grey"
+          v-if="dataStore.memorials.selectedTags && dataStore.memorials.selectedTags.length > 0"
+          color="red-lighten-1"
           size="small"
-          variant="outlined"
+          variant="elevated"
           class="ma-1 clear-filter"
           clickable
           role="button"
-          aria-label="Effacer le filtre de tag"
+          aria-label="Effacer tous les filtres"
           @click="clearSelection"
           @keydown.enter="clearSelection"
           @keydown.space.prevent="clearSelection"
         >
-          Effacer le filtre
+          Effacer tous les filtres ({{ dataStore.memorials.selectedTags.length }})
         </v-chip>
       </div>
       <v-alert v-if="!loading && !tags.length" type="info" icon="mdi-information" class="mt-2">
@@ -62,13 +62,15 @@ export default {
   },
   methods: {
     toggleTag(tag) {
-      const newTag = this.dataStore.memorials.selectedTag === tag ? null : tag;
-      this.dataStore.setSelectedTag(newTag);
-      this.$emit('tag-selected', newTag);
+      this.dataStore.toggleSelectedTag(tag);
+      this.$emit('tag-selected', this.dataStore.memorials.selectedTags);
     },
     clearSelection() {
-      this.dataStore.setSelectedTag(null);
+      this.dataStore.clearSelectedTags();
       this.$emit('tag-cleared');
+    },
+    isTagSelected(tag) {
+      return this.dataStore.memorials.selectedTags && this.dataStore.memorials.selectedTags.includes(tag);
     },
     getChipSize(count) {
       if (count > 50) return 'large';
@@ -89,15 +91,24 @@ export default {
 }
 
 .word-cloud-tag {
-  transition: transform 0.2s ease-in-out;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  border-width: 2px;
 }
 
 .word-cloud-tag:hover {
   transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
 .clear-filter {
   font-weight: bold;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
 }
 
 @media (max-width: 600px) {

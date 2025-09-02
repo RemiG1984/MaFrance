@@ -70,29 +70,18 @@
           <v-card-text v-if="victim.tags" class="pt-0 pb-0">
             <div class="tags-container">
               <v-chip
-                v-for="(tag, index) in displayedTags(victim.tags)"
+                v-for="tag in getTagsArray(victim.tags)"
                 :key="tag"
                 size="x-small"
-                color="primary"
-                variant="outlined"
-                class="ma-1"
+                :color="isTagSelected(tag) ? 'primary' : 'blue-grey-lighten-3'"
+                :variant="isTagSelected(tag) ? 'elevated' : 'outlined'"
+                class="ma-1 memorial-tag"
                 clickable
                 role="button"
+                @click="selectTag(tag)"
+                :aria-label="`Filtrer par le tag ${tag}`"
               >
                 {{ tag }}
-              </v-chip>
-              <v-chip
-                v-if="getTagsArray(victim.tags).length > 3"
-                size="x-small"
-                color="grey"
-                variant="outlined"
-                class="ma-1"
-                clickable
-                role="button"
-                @click="showAllTags(victim)"
-                :aria-label="`Voir ${getTagsArray(victim.tags).length - 3} autres étiquettes`"
-              >
-                +{{ getTagsArray(victim.tags).length - 3 }} plus
               </v-chip>
             </div>
           </v-card-text>
@@ -178,12 +167,13 @@ export default {
       return tags.split(',').map(tag => tag.trim()).filter(tag => tag);
     },
 
-    displayedTags(tags) {
-      return this.getTagsArray(tags).slice(0, 3);
+    selectTag(tag) {
+      this.dataStore.toggleSelectedTag(tag);
+      this.$emit('tag-selected', tag);
     },
 
-    showAllTags(victim) {
-      this.$emit('show-tags', victim);
+    isTagSelected(tag) {
+      return this.dataStore.memorials.selectedTags && this.dataStore.memorials.selectedTags.includes(tag);
     },
   },
 };
@@ -217,6 +207,15 @@ export default {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
+}
+
+.memorial-tag {
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.memorial-tag:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .transition-group {

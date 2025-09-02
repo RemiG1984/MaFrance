@@ -63,7 +63,8 @@ export const useDataStore = defineStore("data", {
     memorials: {
       victims: [],
       tags: [],
-      selectedTag: null,
+      selectedTag: null, // Keep for backward compatibility
+      selectedTags: [],
       sortBy: 'year_desc',
       pagination: { limit: 20, offset: 0, hasMore: true, total: 0 },
       loading: false,
@@ -683,8 +684,15 @@ export const useDataStore = defineStore("data", {
       try {
         this.memorials.loading = true;
         // Use api cache for memorials
+        const apiParams = { ...params };
+        
+        // Handle multiple tags
+        if (this.memorials.selectedTags && this.memorials.selectedTags.length > 0) {
+          apiParams.tags = this.memorials.selectedTags.join(',');
+        }
+        
         const response = await api.getFrancocides({
-          ...params,
+          ...apiParams,
           limit: this.memorials.pagination.limit,
           offset: append ? this.memorials.pagination.offset : 0,
         });
@@ -734,19 +742,46 @@ export const useDataStore = defineStore("data", {
 
     setSelectedTag(tag) {
       this.memorials.selectedTag = tag;
+      this.memorials.selectedTags = tag ? [tag] : [];
       this.memorials.pagination.offset = 0;
-      this.fetchVictims({ tag });
+      this.fetchVictims();
+    },
+
+    toggleSelectedTag(tag) {
+      if (!this.memorials.selectedTags) {
+        this.memorials.selectedTags = [];
+      }
+      
+      const index = this.memorials.selectedTags.indexOf(tag);
+      if (index > -1) {
+        this.memorials.selectedTags.splice(index, 1);
+      } else {
+        this.memorials.selectedTags.push(tag);
+      }
+      
+      // Update legacy selectedTag for backward compatibility
+      this.memorials.selectedTag = this.memorials.selectedTags.length > 0 ? this.memorials.selectedTags[0] : null;
+      
+      this.memorials.pagination.offset = 0;
+      this.fetchVictims();
+    },
+
+    clearSelectedTags() {
+      this.memorials.selectedTag = null;
+      this.memorials.selectedTags = [];
+      this.memorials.pagination.offset = 0;
+      this.fetchVictims();
     },
 
     setSortBy(sort) {
       this.memorials.sortBy = sort;
       this.memorials.pagination.offset = 0;
-      this.fetchVictims({ tag: this.memorials.selectedTag, sort });
+      this.fetchVictims();
     },
 
     async loadMoreVictims() {
       if (this.memorials.pagination.hasMore) {
-        await this.fetchVictims({ tag: this.memorials.selectedTag, sort: this.memorials.sortBy }, true);
+        await this.fetchVictims({}, true);
       }
     },
   },
