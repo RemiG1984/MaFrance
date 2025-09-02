@@ -71,8 +71,8 @@ export default {
     async fetchFrancocides() {
       try {
         this.loading = true;
-        const response = await api.get('/francocides');
-        this.francocides = response.data.list || [];
+        const data = await api.getFrancocides();
+        this.francocides = data.list || [];
       } catch (error) {
         console.error('Error fetching francocides:', error);
         this.francocides = [];
