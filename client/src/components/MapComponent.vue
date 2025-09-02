@@ -17,7 +17,6 @@
         base-color="white"
         bg-color="primary"
         class="white--text"
-        style="color: white !important;"
       ></v-select>
     </v-card-text>
   </v-card>
