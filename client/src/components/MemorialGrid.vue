@@ -3,7 +3,7 @@
     <v-col
       v-for="victim in victims"
       :key="`${victim.prenom}-${victim.nom}-${victim.id}`"
-      cols="12" sm="6" md="6" lg="20"
+      cols="12" sm="6" md="4" lg="3"
     >
       <v-card class="memorial-card elevation-2 h-100">
         <v-img
@@ -12,12 +12,13 @@
           height="300"
           cover
           class="memorial-image"
+          loading="lazy"
         >
           <template v-slot:placeholder>
             <v-skeleton-loader type="image" />
           </template>
         </v-img>
-        <div v-else class="memorial-placeholder d-flex align-center justify-center" style="height: 200px; background-color: #f5f5f5;">
+        <div v-else class="memorial-placeholder d-flex align-center justify-center" style="height: 200px; background-color: #e0e0e0;">
           <v-icon size="64" color="grey-lighten-2">mdi-account</v-icon>
         </div>
 
