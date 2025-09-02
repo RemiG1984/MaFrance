@@ -156,35 +156,42 @@ router.get(
   }
 );
 
-// GET /api/francocides/tags - Get all unique tags
-router.get("/tags", (req, res, next) => {
+// Get unique tags with occurrence counts
+router.get('/tags', (req, res) => {
   const sql = `
-    SELECT DISTINCT tags
+    SELECT tags
     FROM francocides 
     WHERE tags IS NOT NULL AND tags != ''
-    ORDER BY tags`;
+  `;
 
   db.all(sql, [], (err, rows) => {
-    if (err) return handleDbError(err, next);
+    if (err) {
+      console.error('Database error:', err);
+      return res.status(500).json({ 
+        error: 'Erreur lors de la requête à la base de données',
+        details: err.message 
+      });
+    }
 
-    // Parse comma-separated tags and flatten into unique list
-    const allTags = new Set();
-    
+    // Count tag occurrences
+    const tagCounts = new Map();
     rows.forEach(row => {
       if (row.tags) {
-        // Split by comma and clean up whitespace
-        const tags = row.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
-        tags.forEach(tag => allTags.add(tag));
+        const individualTags = row.tags.split(',').map(tag => tag.trim());
+        individualTags.forEach(tag => {
+          if (tag) {
+            tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+          }
+        });
       }
     });
 
-    // Convert Set to sorted array
-    const uniqueTags = Array.from(allTags).sort();
+    // Convert to array and sort by count (descending)
+    const tags = Array.from(tagCounts.entries())
+      .map(([tag, count]) => ({ tag, count }))
+      .sort((a, b) => b.count - a.count);
 
-    res.json({
-      tags: uniqueTags,
-      count: uniqueTags.length
-    });
+    res.json({ tags });
   });
 });
 
