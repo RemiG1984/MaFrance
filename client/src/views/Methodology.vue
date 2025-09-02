@@ -124,7 +124,7 @@
             <div class="data-card">
               <h3 class="data-title">Données de nationalité</h3>
               <p class="data-text">
-                Les données de nationalité sont issues du recensement de l'INSEE de 2022
+                Les données de nationalité sont issues du recensement de l'INSEE de 2022.
               </p>
               <p class="data-text">
                 Les valeurs au niveau national, départemental et pour les communes de plus de 50000 habitants sont directement celles fournies par l'INSEE. Pour les communes de moins de 50000 habitants, l'INSEE ne fournit que le taux d'étrangers. Les autres valeurs sont extrapolées à partir des moyennes départementales (en en ayant exclu les communes de plus de 50000 habitants). Pour les plus petites communes, les valeurs indiquées sont donc approximatives.
