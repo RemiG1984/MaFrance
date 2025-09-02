@@ -6,7 +6,7 @@
 
         <!-- Search Bar and Sort Controls Row -->
         <v-row class="mb-4">
-          <v-col cols="12" md="8" lg="9">
+          <v-col cols="12" md="6" lg="8">
             <v-text-field
               v-model="searchQuery"
               label="Rechercher par nom ou lieu"
@@ -17,7 +17,7 @@
               aria-label="Rechercher des victimes par nom ou lieu"
             ></v-text-field>
           </v-col>
-          <v-col cols="12" md="4" lg="3">
+          <v-col cols="12" md="6" lg="4">
             <v-select
               v-model="dataStore.memorials.sortBy"
               :items="sortOptions"
