@@ -156,6 +156,38 @@ router.get(
   }
 );
 
+// GET /api/francocides/tags - Get all unique tags
+router.get("/tags", (req, res, next) => {
+  const sql = `
+    SELECT DISTINCT tags
+    FROM francocides 
+    WHERE tags IS NOT NULL AND tags != ''
+    ORDER BY tags`;
+
+  db.all(sql, [], (err, rows) => {
+    if (err) return handleDbError(err, next);
+
+    // Parse comma-separated tags and flatten into unique list
+    const allTags = new Set();
+    
+    rows.forEach(row => {
+      if (row.tags) {
+        // Split by comma and clean up whitespace
+        const tags = row.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+        tags.forEach(tag => allTags.add(tag));
+      }
+    });
+
+    // Convert Set to sorted array
+    const uniqueTags = Array.from(allTags).sort();
+
+    res.json({
+      tags: uniqueTags,
+      count: uniqueTags.length
+    });
+  });
+});
+
 // GET /api/francocides/:id - Get specific francocide by ID
 router.get(
   "/:id",
