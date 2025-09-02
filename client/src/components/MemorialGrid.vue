@@ -34,22 +34,6 @@
           <div class="text-caption text-grey-darken-1">à {{ formatLocation(victim.cog) }}</div>
         </v-card-subtitle>
 
-        <v-card-text v-if="victim.tags" class="pt-0 pb-0">
-          <div class="text-caption mb-2">Étiquettes:</div>
-          <div class="tags-container">
-            <v-chip
-              v-for="tag in getTagsArray(victim.tags)"
-              :key="tag"
-              size="x-small"
-              color="primary"
-              variant="outlined"
-              class="ma-1"
-            >
-              {{ tag }}
-            </v-chip>
-          </div>
-        </v-card-text>
-
         <v-card-actions class="pt-0">
           <v-btn
             v-if="victim.url_fdesouche"
@@ -72,6 +56,21 @@
             Wikipedia
           </v-btn>
         </v-card-actions>
+
+        <v-card-text v-if="victim.tags" class="pt-0 pb-0">
+          <div class="tags-container">
+            <v-chip
+              v-for="tag in getTagsArray(victim.tags)"
+              :key="tag"
+              size="x-small"
+              color="primary"
+              variant="outlined"
+              class="ma-1"
+            >
+              {{ tag }}
+            </v-chip>
+          </div>
+        </v-card-text>
       </v-card>
     </v-col>
 

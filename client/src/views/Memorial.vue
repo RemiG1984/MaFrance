@@ -3,7 +3,7 @@
   <v-container fluid class="pa-6 memorial-page">
     <v-row>
       <v-col cols="12">
-        <h1 class="text-h4 font-weight-bold mb-4">Mémorial des victimes de francocides</h1>
+        <h1 class="text-h4 font-weight-bold mb-1">Mémorial des victimes de francocides</h1>
 
         <!-- Tag Cloud Filter -->
         <TagCloud 
@@ -18,7 +18,7 @@
           :items="sortOptions"
           label="Trier par"
           variant="outlined"
-          class="mb-4"
+          class="mb-1"
           style="max-width: 300px;"
         ></v-select>
       </v-col>
