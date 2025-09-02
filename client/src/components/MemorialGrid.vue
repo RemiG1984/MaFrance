@@ -1,6 +1,5 @@
 
 <template>
-  <v-container fluid class="pa-0">
     <v-row>
       <v-col
         v-for="victim in victims"
@@ -103,7 +102,6 @@
         </v-alert>
       </v-col>
     </v-row>
-  </v-container>
 </template>
 
 <script>
