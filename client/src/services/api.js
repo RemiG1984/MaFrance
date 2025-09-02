@@ -287,26 +287,7 @@ class ApiService {
         };
     }
 
-    // Francocides API methods
-    async getFrancocides(params = {}) {
-        const queryString = new URLSearchParams(params).toString();
-        const url = `/francocides${queryString ? `?${queryString}` : ''}`;
-        return this.request(url, {}, !params.cursor); // Don't cache paginated requests
-    },
-
-    async getFrancocidesStats(params = {}) {
-        const queryString = new URLSearchParams(params).toString();
-        const url = `/francocides/stats${queryString ? `?${queryString}` : ''}`;
-        return this.request(url);
-    },
-
-    async getFrancocidesTags() {
-        return this.request('/francocides/tags');
-    },
-
-    async getFrancocide(id) {
-        return this.request(`/francocides/${id}`);
-    },
+    
 
     // Add other API methods here as needed
 }
@@ -448,6 +429,12 @@ const api = {
             !params.cursor,
         );
     },
+    getFrancocidesStats: (params = {}) => {
+        const queryString = new URLSearchParams(params).toString();
+        return apiService.request(`/francocides/stats${queryString ? `?${queryString}` : ''}`);
+    },
+    getFrancocidesTags: () => apiService.request('/francocides/tags'),
+    getFrancocide: (id) => apiService.request(`/francocides/${id}`),
 
     // Cache management
     clearCache: () => apiService.clearCache(),
