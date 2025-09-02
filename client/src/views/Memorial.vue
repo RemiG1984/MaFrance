@@ -49,7 +49,8 @@ export default {
       sortOptions: [
         { value: 'year_desc', title: 'Année (récent en premier)' },
         { value: 'year_asc', title: 'Année (ancien en premier)' },
-        { value: 'location_asc', title: 'Localisation (A-Z)' },
+        { value: 'age_asc', title: 'Âge (jeune en premier)' },
+        { value: 'age_desc', title: 'Âge (âgé en premier)' },
       ],
     };
   },
@@ -63,8 +64,10 @@ export default {
           return sorted.sort((a, b) => new Date(b.date_deces) - new Date(a.date_deces));
         case 'year_asc':
           return sorted.sort((a, b) => new Date(a.date_deces) - new Date(b.date_deces));
-        case 'location_asc':
-          return sorted.sort((a, b) => (a.location || '').localeCompare(b.location || ''));
+        case 'age_asc':
+          return sorted.sort((a, b) => (parseInt(a.age) || 0) - (parseInt(b.age) || 0));
+        case 'age_desc':
+          return sorted.sort((a, b) => (parseInt(b.age) || 0) - (parseInt(a.age) || 0));
         default:
           return sorted;
       }
