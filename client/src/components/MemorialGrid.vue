@@ -33,7 +33,23 @@
         <v-card-subtitle class="pb-2">
           <div>{{ getGenderText(victim.sexe) }} le {{ formatDate(victim.date_deces) }}</div>
           <div class="text-caption text-grey-darken-1">à {{ formatLocation(victim.cog) }}</div>
+          <div v-if="victim.pays" class="text-caption text-grey-darken-1">Pays: {{ victim.pays }}</div>
         </v-card-subtitle>
+
+        <v-card-text v-if="victim.tags" class="pt-0 pb-0">
+          <div class="text-caption mb-2">Étiquettes:</div>
+          <div class="tags-container">
+            <v-chip
+              v-for="tag in getTagsArray(victim.tags)"
+              :key="tag"
+              size="x-small"
+              color="grey-lighten-3"
+              class="ma-1"
+            >
+              {{ tag }}
+            </v-chip>
+          </div>
+        </v-card-text>
 
         <v-card-actions class="pt-0">
           <v-btn
@@ -143,6 +159,11 @@ export default {
       // Fallback for unknown/missing gender
       return 'Tué(e)';
     },
+
+    getTagsArray(tags) {
+      if (!tags) return [];
+      return tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+    },
   },
 };
 </script>
@@ -162,5 +183,11 @@ export default {
 
 .memorial-placeholder {
   border: 1px solid #e0e0e0;
+}
+
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
 }
 </style>

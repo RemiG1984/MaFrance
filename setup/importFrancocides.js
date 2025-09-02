@@ -14,6 +14,8 @@ function importFrancocides(db, callback) {
                     nom TEXT NOT NULL,
                     sexe TEXT NOT NULL,
                     age INTEGER NOT NULL,
+                    pays TEXT NOT NULL,
+                    tags TEXT,
                     photo TEXT,
                     url_fdesouche TEXT,
                     url_wikipedia TEXT,
@@ -58,6 +60,7 @@ function importFrancocides(db, callback) {
                     if (!row['nom']) missingFields.push('nom');
                     if (!row['sexe']) missingFields.push('sexe');
                     if (!row['age']) missingFields.push('age');
+                    if (!row['pays']) missingFields.push('pays');
 
                     if (missingFields.length > 0) {
                         console.warn(`Ligne ignorée dans francocides.csv (champs manquants: ${missingFields.join(', ')}):`, row);
@@ -92,6 +95,8 @@ function importFrancocides(db, callback) {
                         nom: row['nom'].trim(),
                         sexe: row['sexe'].trim(),
                         age: age,
+                        pays: row['pays'].trim(),
+                        tags: row['tags'] ? row['tags'].trim() : null,
                         photo: row['photo'] ? row['photo'].trim() : null,
                         url_fdesouche: row['url_fdesouche'] ? row['url_fdesouche'].trim() : null,
                         url_wikipedia: row['url_wikipedia'] ? row['url_wikipedia'].trim() : null
@@ -107,8 +112,8 @@ function importFrancocides(db, callback) {
                     }
 
                     // Insert all data at once
-                    const placeholders = francocidesData.map(() => "(?, ?, ?, ?, ?, ?, ?, ?, ?)").join(", ");
-                    const insertSQL = `INSERT INTO francocides (date_deces, cog, prenom, nom, sexe, age, photo, url_fdesouche, url_wikipedia) VALUES ${placeholders}`;
+                    const placeholders = francocidesData.map(() => "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)").join(", ");
+                    const insertSQL = `INSERT INTO francocides (date_deces, cog, prenom, nom, sexe, age, pays, tags, photo, url_fdesouche, url_wikipedia) VALUES ${placeholders}`;
 
                     const values = [];
                     francocidesData.forEach(row => {
@@ -119,6 +124,8 @@ function importFrancocides(db, callback) {
                             row.nom,
                             row.sexe,
                             row.age,
+                            row.pays,
+                            row.tags,
                             row.photo,
                             row.url_fdesouche,
                             row.url_wikipedia

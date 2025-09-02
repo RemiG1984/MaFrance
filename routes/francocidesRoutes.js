@@ -1,4 +1,3 @@
-
 const express = require("express");
 const router = express.Router();
 const db = require("../config/db");
@@ -21,12 +20,12 @@ router.get(
   "/",
   [validateOptionalDepartement, validateOptionalCOG, validatePagination],
   (req, res, next) => {
-    const { dept, cog, cursor, limit = '20' } = req.query;
+    const { dept, cog, cursor, limit = '20', tag } = req.query;
     const pageLimit = Math.min(parseInt(limit), 100); // Cap at 100 items per page
 
     // Build base query
     let sql = `
-      SELECT id, date_deces, cog, prenom, nom, sexe, age, photo, url_fdesouche, url_wikipedia
+      SELECT id, date_deces, cog, prenom, nom, sexe, age, photo, url_fdesouche, url_wikipedia, pays, tags
       FROM francocides 
       WHERE 1=1`;
     const params = [];
@@ -51,6 +50,12 @@ router.get(
       sql += " AND cog = ?";
       params.push(cog);
     }
+
+    if (tag) {
+      sql += " AND (tags LIKE ? OR tags LIKE ? OR tags LIKE ? OR tags = ?)";
+      params.push(`${tag},%`, `%, ${tag},%`, `%, ${tag}`, tag);
+    }
+
 
     // Add cursor-based pagination
     if (cursor) {
@@ -85,7 +90,7 @@ router.get(
   "/stats",
   [validateOptionalDepartement, validateOptionalCOG],
   (req, res, next) => {
-    const { dept, cog } = req.query;
+    const { dept, cog, tag } = req.query;
 
     let sql = `
       SELECT 
@@ -119,6 +124,11 @@ router.get(
     if (cog) {
       sql += " AND cog = ?";
       params.push(cog);
+    }
+
+    if (tag) {
+      sql += " AND (tags LIKE ? OR tags LIKE ? OR tags LIKE ? OR tags = ?)";
+      params.push(`${tag},%`, `%, ${tag},%`, `%, ${tag}`, tag);
     }
 
     db.get(sql, params, (err, row) => {
@@ -157,7 +167,7 @@ router.get(
     }
 
     const sql = `
-      SELECT id, date_deces, cog, prenom, nom, sexe, age, photo, url_fdesouche, url_wikipedia
+      SELECT id, date_deces, cog, prenom, nom, sexe, age, photo, url_fdesouche, url_wikipedia, pays, tags
       FROM francocides 
       WHERE id = ?`;
 

@@ -196,7 +196,7 @@ class ApiService {
                 Date.now() - persistentCached.timestamp < this.cacheExpiry
             ) {
                 console.log("Using persistent cached data for:", endpoint);
-                this.cache.set(cacheKey, persistentCached);
+                this.cache.set(persistentCached, cacheEntry);
                 return persistentCached.data;
             } else if (persistentCached) {
                 this.persistentStorage.remove(cacheKey);
@@ -286,6 +286,29 @@ class ApiService {
             total: memorySize + persistentSize,
         };
     }
+
+    // Francocides API methods
+    async getFrancocides(params = {}) {
+        const queryString = new URLSearchParams(params).toString();
+        const url = `/francocides${queryString ? `?${queryString}` : ''}`;
+        return this.request(url, {}, !params.cursor); // Don't cache paginated requests
+    },
+
+    async getFrancocidesStats(params = {}) {
+        const queryString = new URLSearchParams(params).toString();
+        const url = `/francocides/stats${queryString ? `?${queryString}` : ''}`;
+        return this.request(url);
+    },
+
+    async getFrancocidesTags() {
+        return this.request('/francocides/tags');
+    },
+
+    async getFrancocide(id) {
+        return this.request(`/francocides/${id}`);
+    },
+
+    // Add other API methods here as needed
 }
 
 // Export singleton instance

@@ -5,6 +5,13 @@
       <v-col cols="12">
         <h1 class="text-h4 font-weight-bold mb-4">Mémorial des victimes de francocides</h1>
 
+        <!-- Tag Cloud Filter -->
+        <TagCloud 
+          :selected-tag="selectedTag"
+          @tag-selected="onTagSelected"
+          @tag-cleared="onTagCleared"
+        />
+
         <!-- Sorting Controls -->
         <v-select
           v-model="sortBy"
@@ -27,15 +34,17 @@
 
 <script>
 import MemorialGrid from '../components/MemorialGrid.vue';
+import TagCloud from '../components/TagCloud.vue';
 import api from '../services/api.js';
 
 export default {
   name: 'Memorial',
-  components: { MemorialGrid },
+  components: { MemorialGrid, TagCloud },
   data() {
     return {
       loading: true,
       francocides: [],
+      selectedTag: null,
       sortBy: 'year_desc',
       sortOptions: [
         { value: 'year_desc', title: 'Année (récent en premier)' },
@@ -64,11 +73,20 @@ export default {
   async mounted() {
     await this.fetchFrancocides();
   },
+  watch: {
+    selectedTag() {
+      this.fetchFrancocides();
+    }
+  },
   methods: {
     async fetchFrancocides() {
       try {
         this.loading = true;
-        const data = await api.getFrancocides();
+        const params = {};
+        if (this.selectedTag) {
+          params.tag = this.selectedTag;
+        }
+        const data = await api.getFrancocides(params);
         this.francocides = data.list || [];
       } catch (error) {
         console.error('Error fetching francocides:', error);
@@ -77,6 +95,14 @@ export default {
         this.loading = false;
       }
     },
+
+    onTagSelected(tag) {
+      this.selectedTag = tag;
+    },
+
+    onTagCleared() {
+      this.selectedTag = null;
+    }
   },
 };
 </script>
