@@ -63,11 +63,9 @@ export default {
   methods: {
     toggleTag(tag) {
       this.dataStore.toggleSelectedTag(tag);
-      this.$emit('tag-selected', this.dataStore.memorials.selectedTags);
     },
     clearSelection() {
       this.dataStore.clearSelectedTags();
-      this.$emit('tag-cleared');
     },
     isTagSelected(tag) {
       return this.dataStore.memorials.selectedTags.includes(tag);

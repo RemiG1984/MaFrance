@@ -20,11 +20,7 @@
         <v-row class="mb-2">
           <v-col cols="12" md="8" lg="9">
             <!-- Tag Cloud Filter -->
-            <TagCloud 
-              :selected-tag="dataStore.memorials.selectedTag"
-              @tag-selected="dataStore.toggleSelectedTag"
-              @tag-cleared="dataStore.clearSelectedTags"
-            />
+            <TagCloud />
           </v-col>
           <v-col cols="12" md="4" lg="3">
             <!-- Sorting Controls -->

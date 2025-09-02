@@ -690,8 +690,8 @@ export const useDataStore = defineStore("data", {
         };
         
         // Add selected tags to request
-        if (this.memorials.selectedTags.length > 0) {
-          apiParams.tags = [...this.memorials.selectedTags].join(',');
+        if (this.memorials.selectedTags.length) {
+          apiParams.tags = this.memorials.selectedTags.join(',');
         }
         
         const response = await api.getFrancocides(apiParams);
@@ -752,21 +752,22 @@ export const useDataStore = defineStore("data", {
       } else {
         this.memorials.selectedTags.push(tag);
       }
-      
-      this.memorials.pagination.offset = 0;
-      this.fetchVictims();
+      this.resetPaginationAndFetch();
     },
 
     clearSelectedTags() {
       this.memorials.selectedTags = [];
+      this.resetPaginationAndFetch();
+    },
+
+    resetPaginationAndFetch() {
       this.memorials.pagination.offset = 0;
       this.fetchVictims();
     },
 
     setSortBy(sort) {
       this.memorials.sortBy = sort;
-      this.memorials.pagination.offset = 0;
-      this.fetchVictims();
+      this.resetPaginationAndFetch();
     },
 
     async loadMoreVictims() {

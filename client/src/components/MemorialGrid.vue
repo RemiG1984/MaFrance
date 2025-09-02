@@ -169,7 +169,6 @@ export default {
 
     selectTag(tag) {
       this.dataStore.toggleSelectedTag(tag);
-      this.$emit('tag-selected', tag);
     },
 
     isTagSelected(tag) {
