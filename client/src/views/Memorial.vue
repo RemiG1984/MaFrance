@@ -116,9 +116,6 @@ export default {
 </script>
 
 <style scoped>
-.memorial-page {
-  background: linear-gradient(to bottom, #e0e0e0, #f5f5f5);
-}
 
 .transition-group {
   transition: all 0.3s ease-in-out;

@@ -180,8 +180,10 @@ export default {
 
 <style scoped>
 .memorial-card {
+  border: 1px double #b0b0b0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease-in-out;
-  background: #e8ecef;
+  background: #f0f2f5;
 }
 
 .memorial-card:hover {
