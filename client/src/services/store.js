@@ -63,7 +63,6 @@ export const useDataStore = defineStore("data", {
     memorials: {
       victims: [],
       tags: [],
-      selectedTag: null, // Keep for backward compatibility
       selectedTags: [],
       sortBy: 'year_desc',
       pagination: { limit: 20, offset: 0, hasMore: true, total: 0 },
@@ -683,19 +682,19 @@ export const useDataStore = defineStore("data", {
     async fetchVictims(params = {}, append = false) {
       try {
         this.memorials.loading = true;
-        // Use api cache for memorials
-        const apiParams = { ...params };
         
-        // Handle multiple tags
-        if (this.memorials.selectedTags && this.memorials.selectedTags.length > 0) {
+        const apiParams = { 
+          ...params,
+          limit: this.memorials.pagination.limit,
+          offset: append ? this.memorials.pagination.offset : 0,
+        };
+        
+        // Add selected tags to request
+        if (this.memorials.selectedTags.length > 0) {
           apiParams.tags = this.memorials.selectedTags.join(',');
         }
         
-        const response = await api.getFrancocides({
-          ...apiParams,
-          limit: this.memorials.pagination.limit,
-          offset: append ? this.memorials.pagination.offset : 0,
-        });
+        const response = await api.getFrancocides(apiParams);
         
         if (response && response.list) {
           this.memorials.victims = append ? [...this.memorials.victims, ...response.list] : response.list;
@@ -707,12 +706,12 @@ export const useDataStore = defineStore("data", {
           };
         } else {
           this.memorials.victims = append ? this.memorials.victims : [];
-          this.memorials.pagination.hasMore = false;
+          this.memorials.pagination = { ...this.memorials.pagination, hasMore: false };
         }
       } catch (error) {
         console.error('Error fetching victims:', error);
         this.memorials.victims = append ? this.memorials.victims : [];
-        this.memorials.pagination.hasMore = false;
+        this.memorials.pagination = { ...this.memorials.pagination, hasMore: false };
       } finally {
         this.memorials.loading = false;
       }
@@ -746,18 +745,7 @@ export const useDataStore = defineStore("data", {
       }
     },
 
-    setSelectedTag(tag) {
-      this.memorials.selectedTag = tag;
-      this.memorials.selectedTags = tag ? [tag] : [];
-      this.memorials.pagination.offset = 0;
-      this.fetchVictims();
-    },
-
     toggleSelectedTag(tag) {
-      if (!this.memorials.selectedTags) {
-        this.memorials.selectedTags = [];
-      }
-      
       const index = this.memorials.selectedTags.indexOf(tag);
       if (index > -1) {
         this.memorials.selectedTags.splice(index, 1);
@@ -765,15 +753,11 @@ export const useDataStore = defineStore("data", {
         this.memorials.selectedTags.push(tag);
       }
       
-      // Update legacy selectedTag for backward compatibility
-      this.memorials.selectedTag = this.memorials.selectedTags.length > 0 ? this.memorials.selectedTags[0] : null;
-      
       this.memorials.pagination.offset = 0;
       this.fetchVictims();
     },
 
     clearSelectedTags() {
-      this.memorials.selectedTag = null;
       this.memorials.selectedTags = [];
       this.memorials.pagination.offset = 0;
       this.fetchVictims();

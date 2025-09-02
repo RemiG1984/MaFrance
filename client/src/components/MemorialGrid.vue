@@ -173,7 +173,7 @@ export default {
     },
 
     isTagSelected(tag) {
-      return this.dataStore.memorials.selectedTags && this.dataStore.memorials.selectedTags.includes(tag);
+      return this.dataStore.memorials.selectedTags.includes(tag);
     },
   },
 };

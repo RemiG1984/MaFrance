@@ -20,7 +20,7 @@
           <span v-if="$vuetify.display.mdAndUp" class="tag-count ml-1">({{ tagObj.count }})</span>
         </v-chip>
         <v-chip
-          v-if="dataStore.memorials.selectedTags && dataStore.memorials.selectedTags.length > 0"
+          v-if="dataStore.memorials.selectedTags.length > 0"
           color="red-lighten-1"
           size="small"
           variant="elevated"
@@ -70,7 +70,7 @@ export default {
       this.$emit('tag-cleared');
     },
     isTagSelected(tag) {
-      return this.dataStore.memorials.selectedTags && this.dataStore.memorials.selectedTags.includes(tag);
+      return this.dataStore.memorials.selectedTags.includes(tag);
     },
     getChipSize(count) {
       if (count > 50) return 'large';

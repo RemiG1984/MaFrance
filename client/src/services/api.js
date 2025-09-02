@@ -204,7 +204,8 @@ class ApiService {
         }
 
         // Check if the exact same request (including parameters) is already in progress
-        const requestKey = `${endpoint}?${new URLSearchParams(options.body ? JSON.parse(options.body) : {}).toString()}`;
+        const urlObj = new URL(url);
+        const requestKey = `${endpoint}${urlObj.search}`;
         if (this.activeRequests.has(requestKey)) {
             console.log("Request already in progress, waiting...", requestKey);
             return this.activeRequests.get(requestKey);
