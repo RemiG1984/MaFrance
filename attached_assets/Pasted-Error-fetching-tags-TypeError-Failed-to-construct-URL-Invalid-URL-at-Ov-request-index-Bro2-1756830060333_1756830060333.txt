@@ -1,0 +1,70 @@
+Error fetching tags: TypeError: Failed to construct 'URL': Invalid URL
+    at Ov.request (index-Bro2cxwj.js:1:5232)
+    at async Proxy.fetchTags (index-Bro2cxwj.js:1:38430)
+    at async Proxy.mounted (index-Bro2cxwj.js:23:77445)
+fetchTags @ index-Bro2cxwj.js:1
+await in fetchTags
+B @ vendor-C1B8e14y.js:21
+mounted @ index-Bro2cxwj.js:23
+(anonyme) @ vendor-C1B8e14y.js:13
+pn @ vendor-C1B8e14y.js:13
+$e @ vendor-C1B8e14y.js:13
+Qn.t.__weh.t.__weh @ vendor-C1B8e14y.js:13
+Uo @ vendor-C1B8e14y.js:13
+Wo @ vendor-C1B8e14y.js:13
+Promise.then
+Ko @ vendor-C1B8e14y.js:13
+Js @ vendor-C1B8e14y.js:13
+l.scheduler @ vendor-C1B8e14y.js:13
+Wl.f.scheduler @ vendor-C1B8e14y.js:9
+trigger @ vendor-C1B8e14y.js:9
+Bs @ vendor-C1B8e14y.js:9
+notify @ vendor-C1B8e14y.js:9
+trigger @ vendor-C1B8e14y.js:9
+set value @ vendor-C1B8e14y.js:9
+O @ vendor-C1B8e14y.js:25
+(anonyme) @ vendor-C1B8e14y.js:25
+Promise.then
+q @ vendor-C1B8e14y.js:25
+M @ vendor-C1B8e14y.js:25
+install @ vendor-C1B8e14y.js:25
+use @ vendor-C1B8e14y.js:13
+(anonyme) @ index-Bro2cxwj.js:23Comprendre cette erreur
+index-Bro2cxwj.js:1 Error fetching victims: TypeError: Failed to construct 'URL': Invalid URL
+    at Ov.request (index-Bro2cxwj.js:1:5232)
+    at async Proxy.fetchVictims (index-Bro2cxwj.js:1:37737)
+    at async Promise.all (index 0)
+    at async Proxy.mounted (index-Bro2cxwj.js:23:79859)
+fetchVictims @ index-Bro2cxwj.js:1
+await in fetchVictims
+B @ vendor-C1B8e14y.js:21
+mounted @ index-Bro2cxwj.js:23
+(anonyme) @ vendor-C1B8e14y.js:13
+pn @ vendor-C1B8e14y.js:13
+$e @ vendor-C1B8e14y.js:13
+Qn.t.__weh.t.__weh @ vendor-C1B8e14y.js:13
+Uo @ vendor-C1B8e14y.js:13
+Wo @ vendor-C1B8e14y.js:13
+Promise.then
+Ko @ vendor-C1B8e14y.js:13
+Js @ vendor-C1B8e14y.js:13
+l.scheduler @ vendor-C1B8e14y.js:13
+Wl.f.scheduler @ vendor-C1B8e14y.js:9
+trigger @ vendor-C1B8e14y.js:9
+Bs @ vendor-C1B8e14y.js:9
+notify @ vendor-C1B8e14y.js:9
+trigger @ vendor-C1B8e14y.js:9
+set value @ vendor-C1B8e14y.js:9
+O @ vendor-C1B8e14y.js:25
+(anonyme) @ vendor-C1B8e14y.js:25
+Promise.then
+q @ vendor-C1B8e14y.js:25
+M @ vendor-C1B8e14y.js:25
+install @ vendor-C1B8e14y.js:25
+use @ vendor-C1B8e14y.js:13
+(anonyme) @ index-Bro2cxwj.js:23Comprendre cette erreur
+index-Bro2cxwj.js:1 Error fetching tags: TypeError: Failed to construct 'URL': Invalid URL
+    at Ov.request (index-Bro2cxwj.js:1:5232)
+    at async Proxy.fetchTags (index-Bro2cxwj.js:1:38430)
+    at async Promise.all (index 1)
+    at async Proxy.mounted (index-Bro2cxwj.js:23:79859)
