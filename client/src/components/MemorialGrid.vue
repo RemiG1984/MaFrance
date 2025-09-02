@@ -1,13 +1,15 @@
+
 <template>
   <v-row>
     <v-col 
       v-for="victim in victims" 
-      :key="victim.fullName"
+      :key="`${victim.prenom}-${victim.nom}-${victim.id}`"
       cols="12" sm="6" md="4"
     >
-      <v-card class="memorial-card elevation-2">
+      <v-card class="memorial-card elevation-2 h-100">
         <v-img 
-          :src="victim.photoUrl" 
+          v-if="victim.photo"
+          :src="`/images/francocides/${victim.photo}`"
           height="200" 
           cover
           class="memorial-image"
@@ -16,22 +18,28 @@
             <v-skeleton-loader type="image" />
           </template>
         </v-img>
+        <div v-else class="memorial-placeholder d-flex align-center justify-center" style="height: 200px; background-color: #f5f5f5;">
+          <v-icon size="64" color="grey-lighten-2">mdi-account</v-icon>
+        </div>
 
-        <v-card-title class="text-h6">
-          {{ victim.fullName }} ({{ victim.age }} ans)
+        <v-card-title class="text-h6 pb-2">
+          {{ victim.prenom }} {{ victim.nom }}
+          <span class="text-body-2 text-grey-darken-1 ml-2">({{ victim.age }} ans)</span>
         </v-card-title>
 
-        <v-card-subtitle>
-          Décédé le {{ victim.date_deces }} à {{ victim.location }}
+        <v-card-subtitle class="pb-2">
+          <div>{{ formatDate(victim.date_deces) }}</div>
+          <div class="text-caption text-grey-darken-1">COG: {{ victim.cog }}</div>
         </v-card-subtitle>
 
-        <v-card-actions>
+        <v-card-actions class="pt-0">
           <v-btn 
             v-if="victim.url_fdesouche" 
             :href="victim.url_fdesouche" 
             target="_blank" 
             variant="text" 
             color="primary"
+            size="small"
           >
             FdeSouche
           </v-btn>
@@ -41,6 +49,7 @@
             target="_blank" 
             variant="text" 
             color="primary"
+            size="small"
           >
             Wikipedia
           </v-btn>
@@ -49,7 +58,7 @@
     </v-col>
 
     <v-col v-if="loading" cols="12">
-      <v-skeleton-loader type="card@3" />
+      <v-skeleton-loader type="card@6" />
     </v-col>
 
     <v-col v-if="!loading && !victims.length" cols="12">
@@ -65,5 +74,39 @@ export default {
     victims: { type: Array, default: () => [] },
     loading: { type: Boolean, default: false },
   },
+  methods: {
+    formatDate(dateString) {
+      if (!dateString) return 'Date inconnue';
+      
+      try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('fr-FR', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+      } catch (error) {
+        return dateString;
+      }
+    },
+  },
 };
 </script>
+
+<style scoped>
+.memorial-card {
+  transition: transform 0.2s ease-in-out;
+}
+
+.memorial-card:hover {
+  transform: translateY(-2px);
+}
+
+.memorial-image {
+  filter: grayscale(20%);
+}
+
+.memorial-placeholder {
+  border: 1px solid #e0e0e0;
+}
+</style>

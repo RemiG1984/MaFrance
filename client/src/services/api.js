@@ -415,6 +415,17 @@ const api = {
     getNat1Summary: () =>
         apiService.request("/nat1/all"),
 
+    // Francocides data
+    getFrancocides: (params = {}) => {
+        const queryString = new URLSearchParams(params).toString();
+        const url = `/francocides`;
+        return apiService.request(
+            queryString ? `${url}?${queryString}` : url,
+            {},
+            !params.cursor,
+        );
+    },
+
     // Cache management
     clearCache: () => apiService.clearCache(),
     getCacheStats: () => apiService.getCacheStats(),
