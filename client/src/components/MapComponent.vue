@@ -13,9 +13,6 @@
         density="compact"
         return-object
         hide-details
-        color="white"
-        bg-color="primary"
-        class="metric-selector"
       ></v-select>
     </v-card-text>
   </v-card>
@@ -153,7 +150,7 @@ export default {
         this.onMetricChange(this.selectedMetric);
       }
     },
-    'dataStore.commune'(newCommune, oldCommune) {
+    'dataStore.levels.commune'(newCommune, oldCommune) {
       if (newCommune && newCommune !== oldCommune && this.currentLevel === 'commune') {
         this.showCommuneTooltipWhenReady();
       }
@@ -252,7 +249,7 @@ export default {
           this.selectedMetric = metricObj;
         }
       }
-
+      
       this.updateGeoJson()
       this.updateRanking()
       this.updateLayerColors()
@@ -792,13 +789,5 @@ export default {
   left: 0;
   transform: translateY(-50%);
 }
-.metric-selector .v-field__input {
-  color: white !important;
-}
-.metric-selector .v-field__field {
-  color: white !important;
-}
-.metric-selector .v-select__selection {
-  color: white !important;
-}
+  
 </style>

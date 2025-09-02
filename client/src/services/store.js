@@ -60,6 +60,14 @@ export const useDataStore = defineStore("data", {
       migrants: null,
       nat1: null,
     },
+    memorials: {
+      victims: [],
+      tags: [],
+      selectedTag: null,
+      sortBy: 'year_desc',
+      pagination: { limit: 20, offset: 0, hasMore: true, total: 0 },
+      loading: false,
+    },
   }),
 
   actions: {
@@ -669,6 +677,94 @@ export const useDataStore = defineStore("data", {
         }
     },
 
+    // Memorial actions
+    async fetchVictims(params = {}, append = false) {
+      try {
+        this.memorials.loading = true;
+        const cacheKey = `francocides_${JSON.stringify(params)}`;
+        const cached = await cacheService.get(cacheKey);
+        if (cached) {
+          this.memorials.victims = append ? [...this.memorials.victims, ...cached.list] : cached.list;
+          this.memorials.pagination = cached.pagination;
+          this.memorials.loading = false;
+          return;
+        }
+        const response = await api.getFrancocides({
+          ...params,
+          limit: this.memorials.pagination.limit,
+          offset: append ? this.memorials.pagination.offset : 0,
+        });
+        this.memorials.victims = append ? [...this.memorials.victims, ...response.list] : response.list;
+        this.memorials.pagination = {
+          limit: response.pagination?.limit || 20,
+          offset: (append ? this.memorials.pagination.offset : 0) + response.list.length,
+          hasMore: response.pagination?.hasMore || response.list.length === response.pagination?.limit,
+          total: response.pagination?.total || response.list.length,
+        };
+        await cacheService.set(cacheKey, {
+          list: this.memorials.victims,
+          pagination: this.memorials.pagination,
+        }, { ttl: 3600 });
+      } catch (error) {
+        console.error('Error fetching victims:', error);
+        this.memorials.victims = append ? this.memorials.victims : [];
+        this.memorials.pagination.hasMore = false;
+      } finally {
+        this.memorials.loading = false;
+      }
+    },
+
+    async fetchTags() {
+      try {
+        const cacheKey = 'francocides_tags';
+        const cached = await cacheService.get(cacheKey);
+        if (cached) {
+          this.memorials.tags = cached.tags;
+          return;
+        }
+        const response = await api.getFrancocidesTags();
+        this.memorials.tags = response.tags || [];
+        await cacheService.set(cacheKey, { tags: this.memorials.tags }, { ttl: 3600 });
+      } catch (error) {
+        console.error('Error fetching tags:', error);
+        this.memorials.tags = [];
+      }
+    },
+
+    async fetchLocationData(cogs) {
+      const uncachedCogs = cogs.filter(cog => !this.locationCache[cog]);
+      if (uncachedCogs.length) {
+        try {
+          const results = await Promise.allSettled(uncachedCogs.map(cog => api.getCommuneDetails(cog)));
+          results.forEach((result, i) => {
+            if (result.status === 'fulfilled' && result.value?.commune) {
+              this.locationCache[uncachedCogs[i]] = `${result.value.commune} (${result.value.departement})`;
+            }
+          });
+          localStorage.setItem('locationCache', JSON.stringify(this.locationCache));
+        } catch (error) {
+          console.error('Error fetching location data:', error);
+        }
+      }
+    },
+
+    setSelectedTag(tag) {
+      this.memorials.selectedTag = tag;
+      this.memorials.pagination.offset = 0;
+      this.fetchVictims({ tag });
+    },
+
+    setSortBy(sort) {
+      this.memorials.sortBy = sort;
+      this.memorials.pagination.offset = 0;
+      this.fetchVictims({ tag: this.memorials.selectedTag, sort });
+    },
+
+    async loadMoreVictims() {
+      if (this.memorials.pagination.hasMore) {
+        await this.fetchVictims({ tag: this.memorials.selectedTag, sort: this.memorials.sortBy }, true);
+      }
+    },
   },
 
   getters: {
@@ -743,6 +839,31 @@ export const useDataStore = defineStore("data", {
     getCurrentMigrants() {
       const level = this.currentLevel
       return this[level]?.migrants || { list: [], pagination: { hasMore: false, nextCursor: null, limit: 20 } }
+    },
+
+    // Getters for memorial page
+    sortedVictims: (state) => {
+      if (!state.memorials.victims.length) return [];
+      let sorted = [...state.memorials.victims];
+      switch (state.memorials.sortBy) {
+        case 'year_desc':
+          return sorted.sort((a, b) => new Date(b.date_deces) - new Date(a.date_deces));
+        case 'year_asc':
+          return sorted.sort((a, b) => new Date(a.date_deces) - new Date(b.date_deces));
+        case 'location_asc':
+          return sorted.sort((a, b) => (a.cog || '').localeCompare(b.cog || ''));
+        default:
+          return sorted;
+      }
+    },
+
+    filteredVictims: (state) => (query) => {
+      if (!query) return state.sortedVictims;
+      const lowerQuery = query.toLowerCase();
+      return state.sortedVictims.filter(victim =>
+        `${victim.prenom} ${victim.nom}`.toLowerCase().includes(lowerQuery) ||
+        state.locationCache[victim.cog]?.toLowerCase().includes(lowerQuery)
+      );
     },
   },
 });

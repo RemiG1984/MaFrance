@@ -1,24 +1,35 @@
-
 <template>
   <v-container fluid class="pa-4 pa-md-6 memorial-page">
     <v-row justify="center">
       <v-col cols="12" lg="10" xl="8">
         <h1 class="text-h4 font-weight-bold mb-2 mb-md-3">Mémorial des victimes de francocides</h1>
 
+        <!-- Search Bar -->
+        <v-text-field
+          v-model="searchQuery"
+          label="Rechercher par nom ou lieu"
+          prepend-inner-icon="mdi-magnify"
+          variant="outlined"
+          density="compact"
+          clearable
+          class="mb-4"
+          aria-label="Rechercher des victimes par nom ou lieu"
+        ></v-text-field>
+
         <!-- Controls Row for larger screens -->
         <v-row class="mb-2">
           <v-col cols="12" md="8" lg="9">
             <!-- Tag Cloud Filter -->
             <TagCloud 
-              :selected-tag="selectedTag"
-              @tag-selected="onTagSelected"
-              @tag-cleared="onTagCleared"
+              :selected-tag="dataStore.memorials.selectedTag"
+              @tag-selected="dataStore.setSelectedTag"
+              @tag-cleared="() => dataStore.setSelectedTag(null)"
             />
           </v-col>
           <v-col cols="12" md="4" lg="3">
             <!-- Sorting Controls -->
             <v-select
-              v-model="sortBy"
+              v-model="dataStore.memorials.sortBy"
               :items="sortOptions"
               label="Trier par"
               variant="outlined"
@@ -29,10 +40,45 @@
         </v-row>
 
         <!-- Memorial Grid Component -->
-        <MemorialGrid 
-          :victims="sortedVictims"
-          :loading="loading"
-        />
+        <v-row v-if="!dataStore.memorials.loading && filteredVictims.length" class="transition-group">
+          <v-col>
+            <MemorialGrid 
+              :victims="filteredVictims"
+              :loading="dataStore.memorials.loading"
+            />
+          </v-col>
+        </v-row>
+
+        <!-- Loading State -->
+        <v-row v-if="dataStore.memorials.loading" class="mt-4">
+          <v-col cols="12" class="text-center">
+            <v-progress-circular indeterminate color="primary" />
+          </v-col>
+        </v-row>
+
+        <!-- Empty State -->
+        <v-row v-if="!dataStore.memorials.loading && !filteredVictims.length" class="mt-4">
+          <v-col cols="12">
+            <v-alert type="info" icon="mdi-information">
+              Aucune donnée disponible pour les critères sélectionnés.
+            </v-alert>
+          </v-col>
+        </v-row>
+
+        <!-- Load More Button -->
+        <v-row v-if="dataStore.memorials.pagination.hasMore && !dataStore.memorials.loading && filteredVictims.length" class="mt-4">
+          <v-col cols="12" class="text-center">
+            <v-btn
+              :loading="dataStore.memorials.loading"
+              variant="outlined"
+              color="primary"
+              @click="dataStore.loadMoreVictims"
+              aria-label="Charger plus de victimes"
+            >
+              Charger plus
+            </v-btn>
+          </v-col>
+        </v-row>
       </v-col>
     </v-row>
   </v-container>
@@ -41,17 +87,15 @@
 <script>
 import MemorialGrid from '../components/MemorialGrid.vue';
 import TagCloud from '../components/TagCloud.vue';
-import api from '../services/api.js';
+import { mapStores } from 'pinia';
+import { useDataStore } from '../services/store.js';
 
 export default {
   name: 'Memorial',
   components: { MemorialGrid, TagCloud },
   data() {
     return {
-      loading: true,
-      francocides: [],
-      selectedTag: null,
-      sortBy: 'year_desc',
+      searchQuery: '',
       sortOptions: [
         { value: 'year_desc', title: 'Année (récent en premier)' },
         { value: 'year_asc', title: 'Année (ancien en premier)' },
@@ -61,63 +105,35 @@ export default {
     };
   },
   computed: {
-    sortedVictims() {
-      if (!this.francocides.length) return [];
-
-      let sorted = [...this.francocides];
-      switch (this.sortBy) {
-        case 'year_desc':
-          return sorted.sort((a, b) => new Date(b.date_deces) - new Date(a.date_deces));
-        case 'year_asc':
-          return sorted.sort((a, b) => new Date(a.date_deces) - new Date(b.date_deces));
-        case 'age_asc':
-          return sorted.sort((a, b) => (parseInt(a.age) || 0) - (parseInt(b.age) || 0));
-        case 'age_desc':
-          return sorted.sort((a, b) => (parseInt(b.age) || 0) - (parseInt(a.age) || 0));
-        default:
-          return sorted;
-      }
+    ...mapStores(useDataStore),
+    filteredVictims() {
+      return this.dataStore.filteredVictims(this.searchQuery);
     },
   },
   async mounted() {
-    await this.fetchFrancocides();
-  },
-  watch: {
-    selectedTag() {
-      this.fetchFrancocides();
-    }
-  },
-  methods: {
-    async fetchFrancocides() {
-      try {
-        this.loading = true;
-        const params = {};
-        if (this.selectedTag) {
-          params.tag = this.selectedTag;
-        }
-        const data = await api.getFrancocides(params);
-        this.francocides = data.list || [];
-      } catch (error) {
-        console.error('Error fetching francocides:', error);
-        this.francocides = [];
-      } finally {
-        this.loading = false;
-      }
-    },
-
-    onTagSelected(tag) {
-      this.selectedTag = tag;
-    },
-
-    onTagCleared() {
-      this.selectedTag = null;
-    }
+    await Promise.all([
+      this.dataStore.fetchVictims(),
+      this.dataStore.fetchTags(),
+    ]);
   },
 };
 </script>
 
 <style scoped>
 .memorial-page {
-  background-color: #f5f5f5;
+  background: linear-gradient(to bottom, #e0e0e0, #f5f5f5);
+}
+
+.transition-group {
+  transition: all 0.3s ease-in-out;
+}
+
+@media (max-width: 600px) {
+  .text-h4 {
+    font-size: 1.5rem !important;
+  }
+  .v-text-field {
+    font-size: 0.9rem;
+  }
 }
 </style>
