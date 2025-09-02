@@ -4,34 +4,34 @@
       <v-col cols="12" lg="10" xl="8">
         <h1 class="text-h4 font-weight-bold mb-2 mb-md-3">Mémorial des victimes de francocides</h1>
 
-        <!-- Search Bar -->
-        <v-text-field
-          v-model="searchQuery"
-          label="Rechercher par nom ou lieu"
-          prepend-inner-icon="mdi-magnify"
-          variant="outlined"
-          density="compact"
-          clearable
-          class="mb-4"
-          aria-label="Rechercher des victimes par nom ou lieu"
-        ></v-text-field>
-
-        <!-- Controls Row for larger screens -->
-        <v-row class="mb-2">
+        <!-- Search Bar and Sort Controls Row -->
+        <v-row class="mb-4">
           <v-col cols="12" md="8" lg="9">
-            <!-- Tag Cloud Filter -->
-            <TagCloud />
+            <v-text-field
+              v-model="searchQuery"
+              label="Rechercher par nom ou lieu"
+              prepend-inner-icon="mdi-magnify"
+              variant="outlined"
+              density="compact"
+              clearable
+              aria-label="Rechercher des victimes par nom ou lieu"
+            ></v-text-field>
           </v-col>
           <v-col cols="12" md="4" lg="3">
-            <!-- Sorting Controls -->
             <v-select
               v-model="dataStore.memorials.sortBy"
               :items="sortOptions"
               label="Trier par"
               variant="outlined"
               density="compact"
-              class="mb-1"
             ></v-select>
+          </v-col>
+        </v-row>
+
+        <!-- Tag Cloud Filter - Full Width -->
+        <v-row class="mb-2">
+          <v-col cols="12">
+            <TagCloud />
           </v-col>
         </v-row>
 
