@@ -68,6 +68,7 @@ export const useDataStore = defineStore("data", {
       pagination: { limit: 20, offset: 0, hasMore: true, total: 0 },
       loading: false,
     },
+    locationCache: JSON.parse(localStorage.getItem('locationCache') || '{}'),
   }),
 
   actions: {
