@@ -4,9 +4,6 @@
     <v-row>
       <v-col cols="12">
         <h1 class="text-h4 font-weight-bold mb-4">Mémorial des Victimes</h1>
-        <p class="text-body-1 mb-6">
-          Un hommage aux victimes de francocides. Tri par année ou localisation.
-        </p>
 
         <!-- Sorting Controls -->
         <v-select
