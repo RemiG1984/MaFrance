@@ -1,6 +1,7 @@
 <template>
   <div class="memorial-page">
-    <div class="memorial-container">
+    <v-row>
+      <v-col cols="12">
         <h1 class="text-h4 font-weight-bold mb-2 mb-md-3">Mémorial des victimes de francocides</h1>
 
         <!-- Search Bar and Sort Controls Row -->
@@ -36,7 +37,7 @@
 
         <!-- Memorial Grid Component -->
         <v-row v-if="!dataStore.memorials.loading && filteredVictims.length" class="transition-group">
-          <v-col>
+          <v-col cols="12">
             <MemorialGrid 
               :victims="filteredVictims"
               :loading="dataStore.memorials.loading"
@@ -74,7 +75,8 @@
             </v-btn>
           </v-col>
         </v-row>
-    </div>
+      </v-col>
+    </v-row>
   </div>
 </template>
 
@@ -115,13 +117,7 @@ export default {
 
 <style scoped>
 .memorial-page {
-  width: 100%;
-  padding: 20px;
-}
-
-.memorial-container {
-  width: 100%;
-  max-width: none;
+  min-height: 100vh;
 }
 
 .transition-group {
@@ -129,9 +125,6 @@ export default {
 }
 
 @media (max-width: 600px) {
-  .memorial-page {
-    padding: 16px;
-  }
   .text-h4 {
     font-size: 1.5rem !important;
   }
