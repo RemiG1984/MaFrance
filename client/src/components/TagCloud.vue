@@ -68,7 +68,7 @@ export default {
   flex-wrap: wrap;
   gap: 8px;
   justify-content: center;
-  width: 100%;
+  width: 1000px;
   max-width: none;
 }
 
