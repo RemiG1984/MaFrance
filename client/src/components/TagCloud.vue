@@ -19,21 +19,6 @@
           {{ tagObj.tag }}
           <span v-if="$vuetify.display.mdAndUp" class="tag-count ml-1">({{ tagObj.count }})</span>
         </v-chip>
-        <v-chip
-          v-if="dataStore.memorials.selectedTags.length > 0"
-          color="red-lighten-1"
-          size="small"
-          variant="elevated"
-          class="ma-1 clear-filter"
-          clickable
-          role="button"
-          aria-label="Effacer tous les filtres"
-          @click="clearSelection"
-          @keydown.enter="clearSelection"
-          @keydown.space.prevent="clearSelection"
-        >
-          Effacer tous les filtres ({{ dataStore.memorials.selectedTags.length }})
-        </v-chip>
       </div>
       <v-alert v-if="!loading && !tags.length" type="info" icon="mdi-information" class="mt-2">
         Aucun tag disponible.
@@ -63,9 +48,6 @@ export default {
   methods: {
     toggleTag(tag) {
       this.dataStore.toggleSelectedTag(tag);
-    },
-    clearSelection() {
-      this.dataStore.clearSelectedTags();
     },
     isTagSelected(tag) {
       return this.dataStore.memorials.selectedTags.includes(tag);
@@ -98,16 +80,7 @@ export default {
   box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
-.clear-filter {
-  font-weight: bold;
-  animation: pulse 2s infinite;
-}
 
-@keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.7; }
-  100% { opacity: 1; }
-}
 
 @media (max-width: 600px) {
   .tags-container {
