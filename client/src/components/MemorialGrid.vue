@@ -1,3 +1,4 @@
+
 <template>
   <v-row>
     <v-col
@@ -77,25 +78,20 @@ export default {
   },
   data() {
     return {
-      communeCache: {}, // Cache for commune names and department codes
+      locationData: {},
     };
-  },
-  async mounted() {
-    // Pre-fetch commune names and department codes for all victims
-    await this.fetchCommuneDetails();
   },
   watch: {
     victims: {
       handler() {
-        this.fetchCommuneDetails();
+        this.fetchLocationData();
       },
-      immediate: false
+      immediate: true
     }
   },
   methods: {
     formatDate(dateString) {
       if (!dateString) return 'Date inconnue';
-
       try {
         const date = new Date(dateString);
         return date.toLocaleDateString('fr-FR', {
@@ -108,38 +104,26 @@ export default {
       }
     },
 
-    async fetchCommuneDetails() {
-      const cogsToFetch = this.victims
-        .map(v => v.cog)
-        .filter(cog => cog && !this.communeCache[cog]);
-
-      for (const cog of cogsToFetch) {
-        try {
-          const data = await api.getCommuneDetails(cog);
-
-          if (data && data.commune && data.departement) {
-            this.$set(this.communeCache, cog, {
-              commune: data.commune,
-              departement: data.departement
-            });
+    async fetchLocationData() {
+      const uniqueCogs = [...new Set(this.victims.map(v => v.cog).filter(Boolean))];
+      
+      for (const cog of uniqueCogs) {
+        if (!this.locationData[cog]) {
+          try {
+            const data = await api.getCommuneDetails(cog);
+            if (data?.commune && data?.departement) {
+              this.$set(this.locationData, cog, `${data.commune} (${data.departement})`);
+            }
+          } catch (error) {
+            console.warn(`Failed to fetch location for COG ${cog}:`, error);
           }
-        } catch (error) {
-          console.warn(`Failed to fetch commune details for COG ${cog}:`, error);
         }
       }
     },
 
     formatLocation(cog) {
       if (!cog) return 'Lieu inconnu';
-
-      const communeDetails = this.communeCache[cog];
-
-      if (communeDetails && communeDetails.commune && communeDetails.departement) {
-        return `${communeDetails.commune} (${communeDetails.departement})`;
-      }
-
-      // Fallback: show COG while waiting for API response
-      return `COG: ${cog}`;
+      return this.locationData[cog] || `COG: ${cog}`;
     },
   },
 };
