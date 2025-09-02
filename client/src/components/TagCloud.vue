@@ -68,6 +68,8 @@ export default {
   flex-wrap: wrap;
   gap: 8px;
   justify-content: center;
+  width: 100%;
+  max-width: none;
 }
 
 .word-cloud-tag {
