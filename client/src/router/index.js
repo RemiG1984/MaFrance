@@ -3,6 +3,7 @@ import Home from '../views/Home.vue'
 import Rankings from '../views/Rankings.vue'
 import Methodology from '../views/Methodology.vue'
 import Memorial from '../views/Memorial.vue'
+import CacheManager from '../views/CacheManager.vue'
 
 const routes = [
   {
@@ -24,6 +25,11 @@ const routes = [
     path: '/memorial',
     name: 'Memorial',
     component: Memorial
+  },
+  {
+    path: '/cache',
+    name: 'CacheManager',
+    component: CacheManager
   }
 ]
 
