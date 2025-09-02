@@ -73,8 +73,20 @@ function importFrancocides(db, callback) {
                         return;
                     }
 
+                    // Convert French date format (DD/MM/YYYY) to ISO format (YYYY-MM-DD)
+                    function convertFrenchDateToISO(frenchDate) {
+                        const parts = frenchDate.trim().split('/');
+                        if (parts.length === 3) {
+                            const day = parts[0].padStart(2, '0');
+                            const month = parts[1].padStart(2, '0');
+                            const year = parts[2];
+                            return `${year}-${month}-${day}`;
+                        }
+                        return frenchDate; // Return original if can't parse
+                    }
+
                     francocidesData.push({
-                        date_deces: row['date_deces'].trim(),
+                        date_deces: convertFrenchDateToISO(row['date_deces']),
                         cog: row['cog'].trim(),
                         prenom: row['prenom'].trim(),
                         nom: row['nom'].trim(),
