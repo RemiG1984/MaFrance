@@ -681,14 +681,7 @@ export const useDataStore = defineStore("data", {
     async fetchVictims(params = {}, append = false) {
       try {
         this.memorials.loading = true;
-        const cacheKey = `francocides_${JSON.stringify(params)}`;
-        const cached = await cacheService.get(cacheKey);
-        if (cached) {
-          this.memorials.victims = append ? [...this.memorials.victims, ...cached.list] : cached.list;
-          this.memorials.pagination = cached.pagination;
-          this.memorials.loading = false;
-          return;
-        }
+        // Use api cache for memorials
         const response = await api.getFrancocides({
           ...params,
           limit: this.memorials.pagination.limit,
@@ -701,10 +694,6 @@ export const useDataStore = defineStore("data", {
           hasMore: response.pagination?.hasMore || response.list.length === response.pagination?.limit,
           total: response.pagination?.total || response.list.length,
         };
-        await cacheService.set(cacheKey, {
-          list: this.memorials.victims,
-          pagination: this.memorials.pagination,
-        }, { ttl: 3600 });
       } catch (error) {
         console.error('Error fetching victims:', error);
         this.memorials.victims = append ? this.memorials.victims : [];
@@ -716,15 +705,9 @@ export const useDataStore = defineStore("data", {
 
     async fetchTags() {
       try {
-        const cacheKey = 'francocides_tags';
-        const cached = await cacheService.get(cacheKey);
-        if (cached) {
-          this.memorials.tags = cached.tags;
-          return;
-        }
+        // Use api cache for tags
         const response = await api.getFrancocidesTags();
         this.memorials.tags = response.tags || [];
-        await cacheService.set(cacheKey, { tags: this.memorials.tags }, { ttl: 3600 });
       } catch (error) {
         console.error('Error fetching tags:', error);
         this.memorials.tags = [];
