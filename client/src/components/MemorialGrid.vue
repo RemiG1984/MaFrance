@@ -1,15 +1,15 @@
 <template>
   <v-row>
-    <v-col 
-      v-for="victim in victims" 
+    <v-col
+      v-for="victim in victims"
       :key="`${victim.prenom}-${victim.nom}-${victim.id}`"
       cols="12" sm="6" md="4"
     >
       <v-card class="memorial-card elevation-2 h-100">
-        <v-img 
+        <v-img
           v-if="victim.photo"
           :src="`/images/francocides/${victim.photo}`"
-          height="200" 
+          height="200"
           cover
           class="memorial-image"
         >
@@ -32,21 +32,21 @@
         </v-card-subtitle>
 
         <v-card-actions class="pt-0">
-          <v-btn 
-            v-if="victim.url_fdesouche" 
-            :href="victim.url_fdesouche" 
-            target="_blank" 
-            variant="text" 
+          <v-btn
+            v-if="victim.url_fdesouche"
+            :href="victim.url_fdesouche"
+            target="_blank"
+            variant="text"
             color="primary"
             size="small"
           >
             FdeSouche
           </v-btn>
-          <v-btn 
-            v-if="victim.url_wikipedia" 
-            :href="victim.url_wikipedia" 
-            target="_blank" 
-            variant="text" 
+          <v-btn
+            v-if="victim.url_wikipedia"
+            :href="victim.url_wikipedia"
+            target="_blank"
+            variant="text"
             color="primary"
             size="small"
           >
@@ -67,7 +67,6 @@
 </template>
 
 <script>
-import { getDepartmentFromCOG } from '../utils/gen.js';
 import api from '../services/api.js';
 
 export default {
@@ -78,17 +77,17 @@ export default {
   },
   data() {
     return {
-      communeCache: {}, // Cache for commune names
+      communeCache: {}, // Cache for commune names and department codes
     };
   },
   async mounted() {
-    // Pre-fetch commune names for all victims
-    await this.fetchCommuneNames();
+    // Pre-fetch commune names and department codes for all victims
+    await this.fetchCommuneDetails();
   },
   watch: {
     victims: {
       handler() {
-        this.fetchCommuneNames();
+        this.fetchCommuneDetails();
       },
       immediate: false
     }
@@ -109,7 +108,7 @@ export default {
       }
     },
 
-    async fetchCommuneNames() {
+    async fetchCommuneDetails() {
       const cogsToFetch = this.victims
         .map(v => v.cog)
         .filter(cog => cog && !this.communeCache[cog]);
@@ -117,11 +116,15 @@ export default {
       for (const cog of cogsToFetch) {
         try {
           const data = await api.getCommuneDetails(cog);
-          if (data && data.commune) {
-            this.$set(this.communeCache, cog, data.commune);
+
+          if (data && data.commune && data.departement) {
+            this.$set(this.communeCache, cog, {
+              commune: data.commune,
+              departement: data.departement
+            });
           }
         } catch (error) {
-          console.warn(`Failed to fetch commune name for COG ${cog}:`, error);
+          console.warn(`Failed to fetch commune details for COG ${cog}:`, error);
         }
       }
     },
@@ -129,14 +132,14 @@ export default {
     formatLocation(cog) {
       if (!cog) return 'Lieu inconnu';
 
-      const departmentCode = getDepartmentFromCOG(cog);
-      const communeName = this.communeCache[cog];
+      const communeDetails = this.communeCache[cog];
 
-      if (communeName) {
-        return `${communeName} (${departmentCode})`;
+      if (communeDetails && communeDetails.commune && communeDetails.departement) {
+        return `${communeDetails.commune} (${communeDetails.departement})`;
       }
 
-      return `COG: ${cog} (${departmentCode})`;
+      // Fallback: show COG while waiting for API response
+      return `COG: ${cog}`;
     },
   },
 };
