@@ -1,4 +1,3 @@
-
 <template>
   <v-row>
     <v-col 
@@ -29,7 +28,7 @@
 
         <v-card-subtitle class="pb-2">
           <div>{{ formatDate(victim.date_deces) }}</div>
-          <div class="text-caption text-grey-darken-1">COG: {{ victim.cog }}</div>
+          <div class="text-caption text-grey-darken-1">{{ formatLocation(victim.cog) }}</div>
         </v-card-subtitle>
 
         <v-card-actions class="pt-0">
@@ -68,16 +67,36 @@
 </template>
 
 <script>
+import { getDepartmentFromCOG } from '../utils/gen.js';
+import api from '../services/api.js';
+
 export default {
   name: 'MemorialGrid',
   props: {
     victims: { type: Array, default: () => [] },
     loading: { type: Boolean, default: false },
   },
+  data() {
+    return {
+      communeCache: {}, // Cache for commune names
+    };
+  },
+  async mounted() {
+    // Pre-fetch commune names for all victims
+    await this.fetchCommuneNames();
+  },
+  watch: {
+    victims: {
+      handler() {
+        this.fetchCommuneNames();
+      },
+      immediate: false
+    }
+  },
   methods: {
     formatDate(dateString) {
       if (!dateString) return 'Date inconnue';
-      
+
       try {
         const date = new Date(dateString);
         return date.toLocaleDateString('fr-FR', {
@@ -88,6 +107,36 @@ export default {
       } catch (error) {
         return dateString;
       }
+    },
+
+    async fetchCommuneNames() {
+      const cogsToFetch = this.victims
+        .map(v => v.cog)
+        .filter(cog => cog && !this.communeCache[cog]);
+
+      for (const cog of cogsToFetch) {
+        try {
+          const data = await api.getCommuneDetails(cog);
+          if (data && data.nom) {
+            this.$set(this.communeCache, cog, data.nom);
+          }
+        } catch (error) {
+          console.warn(`Failed to fetch commune name for COG ${cog}:`, error);
+        }
+      }
+    },
+
+    formatLocation(cog) {
+      if (!cog) return 'Lieu inconnu';
+
+      const departmentCode = getDepartmentFromCOG(cog);
+      const communeName = this.communeCache[cog];
+
+      if (communeName) {
+        return `${communeName} (${departmentCode})`;
+      }
+
+      return `COG: ${cog} (${departmentCode})`;
     },
   },
 };
