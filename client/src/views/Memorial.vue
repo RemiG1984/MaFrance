@@ -22,8 +22,8 @@
             <!-- Tag Cloud Filter -->
             <TagCloud 
               :selected-tag="dataStore.memorials.selectedTag"
-              @tag-selected="dataStore.setSelectedTag"
-              @tag-cleared="() => dataStore.setSelectedTag(null)"
+              @tag-selected="dataStore.toggleSelectedTag"
+              @tag-cleared="dataStore.clearSelectedTags"
             />
           </v-col>
           <v-col cols="12" md="4" lg="3">
