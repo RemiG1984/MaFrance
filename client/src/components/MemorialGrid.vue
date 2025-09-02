@@ -32,7 +32,6 @@
         <v-card-subtitle class="pb-2">
           <div>{{ getGenderText(victim.sexe) }} le {{ formatDate(victim.date_deces) }}</div>
           <div class="text-caption text-grey-darken-1">à {{ formatLocation(victim.cog) }}</div>
-          <div v-if="victim.pays" class="text-caption text-grey-darken-1">Pays: {{ victim.pays }}</div>
         </v-card-subtitle>
 
         <v-card-text v-if="victim.tags" class="pt-0 pb-0">
