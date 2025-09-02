@@ -1,3 +1,3 @@
-date_deces,cog,prenom,nom,sexe,age,photo,url_fdesouche,url_wikipedia
-14/10/2022,75119,Lola,Daviet,F,12,lola_daviet_2022.jfif,https://www.fdesouche.com/2024/09/16/affaire-lola-un-proces-aux-assises-pour-meurtre-accompagne-de-viol-torture-ou-actes-de-barbarie-requis/,https://fr.wikipedia.org/wiki/Meurtre_de_Lola_Daviet
-19/11/2023,26107,Thomas,Perotto,M,16,thomas_perotto_2023.jfif,https://www.fdesouche.com/2025/03/17/meurtre-de-thomas-a-crepol-un-pv-a-t-il-ete-cache-pour-dissimuler-le-mobile-raciste-des-agresseurs/,https://fr.wikipedia.org/wiki/Mort_de_Thomas_Perotto
+date_deces,cog,pays,prenom,nom,sexe,age,photo,url_fdesouche,url_wikipedia,tags
+14/10/2022,75119,france,Lola,Daviet,F,12,lola_daviet_2022.jfif,https://www.fdesouche.com/2024/09/16/affaire-lola-un-proces-aux-assises-pour-meurtre-accompagne-de-viol-torture-ou-actes-de-barbarie-requis/,https://fr.wikipedia.org/wiki/Meurtre_de_Lola_Daviet,"OTQF, viol, torture, barbarie, algerien"
+19/11/2023,26107,france,Thomas,Perotto,M,16,thomas_perotto_2023.jfif,https://www.fdesouche.com/2025/03/17/meurtre-de-thomas-a-crepol-un-pv-a-t-il-ete-cache-pour-dissimuler-le-mobile-raciste-des-agresseurs/,https://fr.wikipedia.org/wiki/Mort_de_Thomas_Perotto,"couteau, bande, maghreb"
