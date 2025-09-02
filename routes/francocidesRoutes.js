@@ -52,8 +52,8 @@ router.get(
     }
 
     if (tag) {
-      sql += " AND (',' || tags || ',' LIKE ?)";
-      params.push(`%,${tag},%`);
+      sql += " AND (tags = ? OR tags LIKE ? OR tags LIKE ? OR tags LIKE ? OR tags LIKE ? OR tags LIKE ?)";
+      params.push(tag, `${tag},%`, `${tag}, %`, `%, ${tag},%`, `%, ${tag}, %`, `%, ${tag}`);
     }
 
 
@@ -127,8 +127,8 @@ router.get(
     }
 
     if (tag) {
-      sql += " AND (',' || tags || ',' LIKE ?)";
-      params.push(`%,${tag},%`);
+      sql += " AND (tags = ? OR tags LIKE ? OR tags LIKE ? OR tags LIKE ? OR tags LIKE ? OR tags LIKE ?)";
+      params.push(tag, `${tag},%`, `${tag}, %`, `%, ${tag},%`, `%, ${tag}, %`, `%, ${tag}`);
     }
 
     db.get(sql, params, (err, row) => {
