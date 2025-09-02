@@ -13,7 +13,7 @@
         density="compact"
         return-object
         hide-details
-        color="primary"
+        color="white"
         bg-color="primary"
         class="metric-selector"
       ></v-select>
@@ -793,6 +793,12 @@ export default {
   transform: translateY(-50%);
 }
 .metric-selector .v-field__input {
-  color: #000 !important;
+  color: white !important;
+}
+.metric-selector .v-field__field {
+  color: white !important;
+}
+.metric-selector .v-select__selection {
+  color: white !important;
 }
 </style>
