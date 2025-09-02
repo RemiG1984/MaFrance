@@ -1,7 +1,7 @@
 <template>
   <v-container fluid class="pa-4 pa-md-6 memorial-page">
     <v-row justify="center">
-      <v-col cols="12" lg="10" xl="8">
+      <v-col cols="12" sm="12" md="12" lg="10" xl="8" class="memorial-container">
         <h1 class="text-h4 font-weight-bold mb-2 mb-md-3">Mémorial des victimes de francocides</h1>
 
         <!-- Search Bar and Sort Controls Row -->
@@ -116,9 +116,33 @@ export default {
 </script>
 
 <style scoped>
+.memorial-container {
+  max-width: none !important;
+  width: 100% !important;
+}
 
 .transition-group {
   transition: all 0.3s ease-in-out;
+}
+
+/* Ensure TagCloud doesn't affect container width */
+.tags-container {
+  overflow-x: auto;
+  width: 100%;
+}
+
+@media (min-width: 1264px) {
+  .memorial-container {
+    max-width: 1200px !important;
+    margin: 0 auto;
+  }
+}
+
+@media (min-width: 1904px) {
+  .memorial-container {
+    max-width: 1400px !important;
+    margin: 0 auto;
+  }
 }
 
 @media (max-width: 600px) {
