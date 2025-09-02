@@ -65,7 +65,8 @@ export default {
     async fetchTags() {
       try {
         this.loading = true;
-        this.tags = await api.getFrancocidesTags();
+        const response = await api.getFrancocidesTags();
+        this.tags = response.tags || [];
       } catch (error) {
         console.error('Error fetching tags:', error);
         this.tags = [];
