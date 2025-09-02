@@ -24,22 +24,3 @@ export function formatNumber(value, decimals = 0) {
     maximumFractionDigits: decimals
   });
 }
-
-/**
- * Extract department code from COG (Code Officiel Géographique)
- * @param {string} cog - 5-digit INSEE code
- * @returns {string} Department code (2 digits or 2A/2B for Corsica)
- */
-export function getDepartmentFromCOG(cog) {
-  if (!cog || cog.length !== 5) return '';
-
-  const firstTwo = cog.substring(0, 2);
-
-  // Special case for Corsica
-  if (firstTwo === '20') {
-    const thirdDigit = cog.charAt(2);
-    return thirdDigit === '1' ? '2A' : '2B';
-  }
-
-  return firstTwo;
-}
