@@ -117,8 +117,8 @@ export default {
       for (const cog of cogsToFetch) {
         try {
           const data = await api.getCommuneDetails(cog);
-          if (data && data.nom) {
-            this.$set(this.communeCache, cog, data.nom);
+          if (data && data.commune) {
+            this.$set(this.communeCache, cog, data.commune);
           }
         } catch (error) {
           console.warn(`Failed to fetch commune name for COG ${cog}:`, error);
