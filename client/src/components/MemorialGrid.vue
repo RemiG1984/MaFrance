@@ -78,7 +78,6 @@
                 class="ma-1 memorial-tag"
                 clickable
                 role="button"
-                :aria-selected="isTagSelected(tag)"
                 @click="selectTag(tag)"
                 :aria-label="`Filtrer par le tag ${tag}`"
               >
@@ -208,36 +207,16 @@ export default {
 .tags-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 4px;
 }
 
 .memorial-tag {
-  transition: all 0.3s ease-in-out;
-  font-weight: 500;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.12);
-  background: linear-gradient(145deg, #ffffff, #f5f7fa);
-  border: 1px solid rgba(0,0,0,0.08);
-}
-
-.memorial-tag[aria-selected="true"] {
-  background: linear-gradient(145deg, #1976D2, #1565C0);
-  color: white;
-  box-shadow: 0 3px 8px rgba(25, 118, 210, 0.35);
-  transform: translateY(-1px);
-  border: 1px solid #1976D2;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
 .memorial-tag:hover {
-  transform: scale(1.08) translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  background: linear-gradient(145deg, #f8f9fa, #e9ecef);
-  border: 1px solid rgba(0,0,0,0.15);
-}
-
-.memorial-tag[aria-selected="true"]:hover {
-  background: linear-gradient(145deg, #1565C0, #0d47a1);
-  box-shadow: 0 4px 16px rgba(25, 118, 210, 0.45);
-  border: 1px solid #0d47a1;
+  transform: scale(1.05);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .transition-group {

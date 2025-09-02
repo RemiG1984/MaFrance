@@ -84,58 +84,34 @@ export default {
 .tags-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 8px;
   justify-content: center;
 }
 
 .word-cloud-tag {
-  transition: all 0.3s ease-in-out;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   border-width: 2px;
-  font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-  background: linear-gradient(145deg, #ffffff, #f0f4f8);
-}
-
-.word-cloud-tag[aria-selected="true"] {
-  background: linear-gradient(145deg, #1976D2, #1565C0);
-  color: white;
-  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.4);
-  transform: translateY(-1px);
 }
 
 .word-cloud-tag:hover {
-  transform: scale(1.15) translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0,0,0,0.25);
-  background: linear-gradient(145deg, #f8f9fa, #e9ecef);
-}
-
-.word-cloud-tag[aria-selected="true"]:hover {
-  background: linear-gradient(145deg, #1565C0, #0d47a1);
-  box-shadow: 0 6px 20px rgba(25, 118, 210, 0.5);
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
 .clear-filter {
   font-weight: bold;
   animation: pulse 2s infinite;
-  background: linear-gradient(145deg, #f44336, #d32f2f);
-  color: white;
-  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
-}
-
-.clear-filter:hover {
-  background: linear-gradient(145deg, #d32f2f, #b71c1c);
-  box-shadow: 0 6px 20px rgba(244, 67, 54, 0.5);
 }
 
 @keyframes pulse {
-  0% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(1.02); }
-  100% { opacity: 1; transform: scale(1); }
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
 }
 
 @media (max-width: 600px) {
   .tags-container {
-    gap: 8px;
+    gap: 4px;
   }
   .word-cloud-tag {
     font-size: 0.8rem;
