@@ -4,7 +4,7 @@
     <v-col
       v-for="victim in victims"
       :key="`${victim.prenom}-${victim.nom}-${victim.id}`"
-      cols="12" sm="6" md="4"
+      cols="12" sm="6" md="6" lg="4"
     >
       <v-card class="memorial-card elevation-2 h-100">
         <v-img
@@ -110,23 +110,17 @@ export default {
 
     async fetchLocationData() {
       const uniqueCogs = [...new Set(this.victims.map(v => v.cog).filter(Boolean))];
-      console.log('Fetching location data for COGs:', uniqueCogs);
       
       for (const cog of uniqueCogs) {
         if (!this.locationData[cog]) {
           try {
-            console.log(`Fetching commune details for COG: ${cog}`);
             const data = await api.getCommuneDetails(cog);
-            console.log(`API response for COG ${cog}:`, data);
             
             if (data?.commune && data?.departement) {
               this.locationData[cog] = `${data.commune} (${data.departement})`;
-              console.log(`Successfully cached location for COG ${cog}: ${data.commune} (${data.departement})`);
-            } else {
-              console.warn(`Invalid API response for COG ${cog}:`, data);
             }
           } catch (error) {
-            console.error(`Failed to fetch location for COG ${cog}:`, error);
+            console.warn(`Failed to fetch location for COG ${cog}:`, error);
           }
         }
       }
