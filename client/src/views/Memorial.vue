@@ -38,7 +38,7 @@
         <!-- Memorial Grid Component -->
         <v-row v-if="!dataStore.memorials.loading && filteredVictims.length" class="transition-group">
           <v-col>
-            <MemorialGrid
+            <MemorialGrid 
               :victims="filteredVictims"
               :loading="dataStore.memorials.loading"
             />
@@ -117,38 +117,6 @@ export default {
 
 <style scoped>
 .memorial-container {
-  max-width: none !important;
-  width: 100% !important;
-}
-
-.memorial-page {
-  max-width: none !important;
-  width: 100% !important;
-}
-
-/* Override global width constraints for this page */
-.memorial-page :deep(.v-application) {
-  max-width: none !important;
-  width: 100% !important;
-}
-
-.memorial-page :deep(.v-main) {
-  max-width: none !important;
-  width: 100% !important;
-}
-
-.memorial-page :deep(.container) {
-  max-width: none !important;
-  width: 100% !important;
-}
-
-.memorial-page :deep(.v-container) {
-  max-width: none !important;
-  width: 100% !important;
-}
-
-/* Ensure all child containers also take full width */
-.memorial-page .v-container {
   max-width: none !important;
   width: 100% !important;
 }
