@@ -1,7 +1,6 @@
 <template>
-  <v-container fluid class="pa-4 pa-md-6 memorial-page">
-    <v-row justify="center">
-      <v-col cols="12" sm="12" md="12" lg="12" xl="12" class="memorial-container">
+  <div class="memorial-page">
+    <div class="memorial-container">
         <h1 class="text-h4 font-weight-bold mb-2 mb-md-3">Mémorial des victimes de francocides</h1>
 
         <!-- Search Bar and Sort Controls Row -->
@@ -75,9 +74,8 @@
             </v-btn>
           </v-col>
         </v-row>
-      </v-col>
-    </v-row>
-  </v-container>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -116,9 +114,14 @@ export default {
 </script>
 
 <style scoped>
+.memorial-page {
+  width: 100%;
+  padding: 20px;
+}
+
 .memorial-container {
-  max-width: none !important;
-  width: 100% !important;
+  width: 100%;
+  max-width: none;
 }
 
 .transition-group {
@@ -126,6 +129,9 @@ export default {
 }
 
 @media (max-width: 600px) {
+  .memorial-page {
+    padding: 16px;
+  }
   .text-h4 {
     font-size: 1.5rem !important;
   }
