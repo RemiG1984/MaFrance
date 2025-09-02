@@ -696,13 +696,19 @@ export const useDataStore = defineStore("data", {
           limit: this.memorials.pagination.limit,
           offset: append ? this.memorials.pagination.offset : 0,
         });
-        this.memorials.victims = append ? [...this.memorials.victims, ...response.list] : response.list;
-        this.memorials.pagination = {
-          limit: response.pagination?.limit || 20,
-          offset: (append ? this.memorials.pagination.offset : 0) + response.list.length,
-          hasMore: response.pagination?.hasMore || response.list.length === response.pagination?.limit,
-          total: response.pagination?.total || response.list.length,
-        };
+        
+        if (response && response.list) {
+          this.memorials.victims = append ? [...this.memorials.victims, ...response.list] : response.list;
+          this.memorials.pagination = {
+            limit: response.pagination?.limit || 20,
+            offset: (append ? this.memorials.pagination.offset : 0) + response.list.length,
+            hasMore: response.pagination?.hasMore || response.list.length === response.pagination?.limit,
+            total: response.pagination?.total || response.list.length,
+          };
+        } else {
+          this.memorials.victims = append ? this.memorials.victims : [];
+          this.memorials.pagination.hasMore = false;
+        }
       } catch (error) {
         console.error('Error fetching victims:', error);
         this.memorials.victims = append ? this.memorials.victims : [];
