@@ -885,11 +885,11 @@ export const useDataStore = defineStore("data", {
       }
 
       // Apply search filter
-      if (searchQuery) {
+      if (searchQuery && typeof searchQuery === 'string') {
         const query = searchQuery.toLowerCase();
         filtered = filtered.filter(victim => {
-          const name = (victim.nom_complet || '').toLowerCase();
-          const lieu = (victim.lieu || '').toLowerCase();
+          const name = victim.nom_complet ? victim.nom_complet.toString().toLowerCase() : '';
+          const lieu = victim.lieu ? victim.lieu.toString().toLowerCase() : '';
           return name.includes(query) || lieu.includes(query);
         });
       }
