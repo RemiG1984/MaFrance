@@ -90,12 +90,73 @@
     </v-row>
 
     <!-- Resume Dialog -->
-    <v-dialog v-model="resumeDialog" max-width="600px">
+    <v-dialog v-model="resumeDialog" max-width="700px">
       <v-card>
-        <v-card-title class="text-h5">
-          {{ selectedVictim?.prenom }} {{ selectedVictim?.nom }}
-        </v-card-title>
+        <!-- Victim Photo and Basic Info -->
+        <v-row no-gutters>
+          <v-col cols="12" md="4" v-if="selectedVictim?.photo">
+            <v-img
+              :src="`/images/francocides/${selectedVictim.photo}`"
+              height="250"
+              cover
+              class="dialog-image"
+              :alt="'Photo de ' + selectedVictim.prenom + ' ' + selectedVictim.nom"
+            >
+              <template v-slot:placeholder>
+                <v-skeleton-loader type="image" />
+              </template>
+            </v-img>
+          </v-col>
+          <v-col :cols="selectedVictim?.photo ? 12 : 12" :md="selectedVictim?.photo ? 8 : 12">
+            <v-card-title class="text-h5 pb-2">
+              {{ selectedVictim?.prenom }} {{ selectedVictim?.nom }}
+            </v-card-title>
+            
+            <!-- Victim Details -->
+            <v-card-text class="pb-2">
+              <div class="victim-details">
+                <div class="detail-item mb-2">
+                  <v-icon size="small" class="mr-2">mdi-calendar</v-icon>
+                  <strong>Âge:</strong> {{ selectedVictim?.age }} ans
+                </div>
+                <div class="detail-item mb-2">
+                  <v-icon size="small" class="mr-2">mdi-calendar-remove</v-icon>
+                  <strong>{{ getGenderText(selectedVictim?.sexe) }} le:</strong> {{ formatDate(selectedVictim?.date_deces) }}
+                </div>
+                <div class="detail-item mb-2">
+                  <v-icon size="small" class="mr-2">mdi-map-marker</v-icon>
+                  <strong>Lieu:</strong> {{ formatLocation(selectedVictim?.cog) }}
+                </div>
+                
+                <!-- Tags -->
+                <div v-if="selectedVictim?.tags" class="detail-item">
+                  <v-icon size="small" class="mr-2">mdi-tag-multiple</v-icon>
+                  <strong>Tags:</strong>
+                  <div class="tags-container mt-1">
+                    <v-chip
+                      v-for="tag in getTagsArray(selectedVictim.tags)"
+                      :key="tag"
+                      size="small"
+                      color="blue-grey-lighten-3"
+                      variant="outlined"
+                      class="ma-1"
+                    >
+                      {{ tag }}
+                    </v-chip>
+                  </div>
+                </div>
+              </div>
+            </v-card-text>
+          </v-col>
+        </v-row>
+
+        <!-- Resume Section -->
+        <v-divider class="mx-4"></v-divider>
         <v-card-text>
+          <div class="text-h6 mb-3">
+            <v-icon class="mr-2">mdi-text-box</v-icon>
+            Résumé
+          </div>
           <div v-if="selectedVictim?.resume" class="text-body-1">
             {{ selectedVictim.resume }}
           </div>
@@ -103,9 +164,44 @@
             Aucun résumé disponible.
           </div>
         </v-card-text>
+
+        <!-- Sources -->
+        <v-card-text v-if="selectedVictim?.source1 || selectedVictim?.source2" class="pt-0">
+          <div class="text-h6 mb-2">
+            <v-icon class="mr-2">mdi-link</v-icon>
+            Sources
+          </div>
+          <div class="sources-container">
+            <v-btn
+              v-if="selectedVictim.source1"
+              :href="selectedVictim.source1"
+              target="_blank"
+              variant="outlined"
+              color="primary"
+              size="small"
+              class="mr-2 mb-2"
+              prepend-icon="mdi-open-in-new"
+            >
+              Source 1
+            </v-btn>
+            <v-btn
+              v-if="selectedVictim.source2"
+              :href="selectedVictim.source2"
+              target="_blank"
+              variant="outlined"
+              color="primary"
+              size="small"
+              class="mb-2"
+              prepend-icon="mdi-open-in-new"
+            >
+              Source 2
+            </v-btn>
+          </div>
+        </v-card-text>
+
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="primary" text @click="resumeDialog = false">
+          <v-btn color="primary" variant="elevated" @click="resumeDialog = false">
             Fermer
           </v-btn>
         </v-card-actions>
@@ -287,5 +383,37 @@ export default {
   .v-chip {
     font-size: 0.75rem;
   }
+}
+
+.dialog-image {
+  border-radius: 8px 0 0 0;
+}
+
+.victim-details {
+  font-size: 0.95rem;
+}
+
+.detail-item {
+  display: flex;
+  align-items: flex-start;
+  line-height: 1.4;
+}
+
+.detail-item .v-icon {
+  margin-top: 2px;
+  opacity: 0.7;
+}
+
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-left: 24px;
+}
+
+.sources-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 </style>
