@@ -859,7 +859,7 @@ export const useDataStore = defineStore("data", {
     },
 
     filteredVictims(searchQuery = '') {
-      let filtered = this.memorials.victims;
+      let filtered = [...this.memorials.victims];
 
       // Apply tag filters
       if (this.memorials.selectedTags.length > 0) {
@@ -895,7 +895,20 @@ export const useDataStore = defineStore("data", {
       }
 
       // Apply sorting
-      return this.sortVictims(filtered);
+      switch (this.memorials.sortBy) {
+        case 'year_desc':
+          return filtered.sort((a, b) => new Date(b.date_deces) - new Date(a.date_deces));
+        case 'year_asc':
+          return filtered.sort((a, b) => new Date(a.date_deces) - new Date(b.date_deces));
+        case 'age_asc':
+          return filtered.sort((a, b) => (a.age || 0) - (b.age || 0));
+        case 'age_desc':
+          return filtered.sort((a, b) => (b.age || 0) - (a.age || 0));
+        case 'location_asc':
+          return filtered.sort((a, b) => (a.cog || '').localeCompare(b.cog || ''));
+        default:
+          return filtered;
+      }
     },
   },
 });
