@@ -20,8 +20,8 @@ router.get(
   "/",
   [validateOptionalDepartement, validateOptionalCOG, validatePagination],
   (req, res, next) => {
-    const { dept, cog, cursor, limit = '20', tag } = req.query;
-    const pageLimit = Math.min(parseInt(limit), 100); // Cap at 100 items per page
+    const { dept, cog, cursor, limit, tag } = req.query;
+    const pageLimit = limit ? Math.min(parseInt(limit), 100) : null; // No limit if not specified
 
     // Build base query
     let sql = `
@@ -57,30 +57,47 @@ router.get(
     }
 
 
-    // Add cursor-based pagination
-    if (cursor) {
+    // Add cursor-based pagination only if limit is specified
+    if (cursor && pageLimit) {
       sql += " AND id > ?";
       params.push(cursor);
     }
 
-    sql += " ORDER BY id ASC LIMIT ?";
-    params.push(pageLimit + 1); // Get one extra to check if there are more
+    sql += " ORDER BY id ASC";
+    
+    if (pageLimit) {
+      sql += " LIMIT ?";
+      params.push(pageLimit + 1); // Get one extra to check if there are more
+    }
 
     db.all(sql, params, (err, rows) => {
       if (err) return handleDbError(err, next);
 
-      const hasMore = rows.length > pageLimit;
-      const francocides = hasMore ? rows.slice(0, pageLimit) : rows;
-      const nextCursor = hasMore && francocides.length > 0 ? francocides[francocides.length - 1].id : null;
+      if (pageLimit) {
+        // Paginated response
+        const hasMore = rows.length > pageLimit;
+        const francocides = hasMore ? rows.slice(0, pageLimit) : rows;
+        const nextCursor = hasMore && francocides.length > 0 ? francocides[francocides.length - 1].id : null;
 
-      res.json({
-        list: francocides,
-        pagination: {
-          hasMore: hasMore,
-          nextCursor: nextCursor,
-          limit: pageLimit
-        }
-      });
+        res.json({
+          list: francocides,
+          pagination: {
+            hasMore: hasMore,
+            nextCursor: nextCursor,
+            limit: pageLimit
+          }
+        });
+      } else {
+        // Return all data without pagination
+        res.json({
+          list: rows,
+          pagination: {
+            hasMore: false,
+            nextCursor: null,
+            limit: null
+          }
+        });
+      }
     });
   }
 );
