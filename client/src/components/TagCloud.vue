@@ -63,15 +63,6 @@ export default {
 </script>
 
 <style scoped>
-.tags-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: center;
-  width: 1000px;
-  max-width: none;
-}
-
 .word-cloud-tag {
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   border-width: 2px;

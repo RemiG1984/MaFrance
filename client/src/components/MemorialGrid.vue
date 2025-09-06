@@ -7,14 +7,14 @@
         cols="12"
         sm="6"
         md="4"
-        lg="4"
-        xl="3"
+        lg="3"
+        xl="2"
       >
         <v-card class="memorial-card elevation-2 h-100">
           <v-img
             v-if="victim.photo"
             :src="`/images/francocides/${victim.photo}`"
-            height="200"
+            height="250"
             cover
             class="memorial-image"
             loading="lazy"
@@ -24,7 +24,7 @@
               <v-skeleton-loader type="image" />
             </template>
           </v-img>
-          <div v-else class="memorial-placeholder d-flex align-center justify-center" style="height: 200px; background-color: #e8ecef;">
+          <div v-else class="memorial-placeholder d-flex align-center justify-center" style="height: 250px; background-color: #e8ecef;">
             <v-icon size="64" color="grey-lighten-2">mdi-account</v-icon>
           </div>
 
@@ -36,9 +36,8 @@
             <div class="text-body-2 text-grey-darken-1 ml-1">({{ victim.age }} ans)</div>
           </v-card-subtitle>
 
-          <v-card-subtitle class="pb-2">
-            <div>{{ getGenderText(victim.sexe) }} le {{ formatDate(victim.date_deces) }}</div>
-            <div class="text-body-2 text-grey-darken-1 ml-1">à {{ formatLocation(victim.cog) }}</div>
+          <v-card-subtitle class="pb-2 text-wrap">
+            <div>{{ getGenderText(victim.sexe) }} le {{ formatDate(victim.date_deces) }} à {{ formatLocation(victim.cog) }}</div>
           </v-card-subtitle>
 
           <v-card-actions class="pt-0">
@@ -191,6 +190,10 @@ export default {
 .memorial-image {
   filter: grayscale(50%);
   transition: filter 0.3s ease-in-out;
+  aspect-ratio: 1 / 1 !important; /* Ensure square aspect ratio */
+  max-width: 250px !important; /* Cap width at height */
+  width: 100% !important; /* Stretch to column width up to max-width */
+  margin: 0 auto; /* Center within v-card */
 }
 
 .memorial-image:hover {
@@ -200,6 +203,10 @@ export default {
 .memorial-placeholder {
   border: 1px solid #d0d0d0;
   background: #e8ecef;
+  aspect-ratio: 1 / 1 !important; /* Ensure square aspect ratio */
+  max-width: 250px !important; /* Cap width at height */
+  width: 100% !important; /* Stretch to column width up to max-width */
+  margin: 0 auto; /* Center within v-card */
 }
 
 .tags-container {
