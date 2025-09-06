@@ -4,42 +4,48 @@
       <v-col cols="12">
         <h1 class="text-h4 font-weight-bold mb-2 mb-md-3">Mémorial des victimes de francocides</h1>
 
-        <!-- Search Bar and Sort Controls Row -->
+        <!-- Map and Filters Layout -->
         <v-row class="mb-4">
-          <v-col cols="12" md="6" lg="8">
-            <v-text-field
-              v-model="searchQuery"
-              label="Rechercher par nom ou lieu"
-              prepend-inner-icon="mdi-magnify"
-              variant="outlined"
-              density="compact"
-              clearable
-              aria-label="Rechercher des victimes par nom ou lieu"
-            ></v-text-field>
-          </v-col>
-          <v-col cols="12" md="6" lg="4">
-            <v-select
-              v-model="dataStore.memorials.sortBy"
-              :items="sortOptions"
-              label="Trier par"
-              variant="outlined"
-              density="compact"
-            ></v-select>
-          </v-col>
-        </v-row>
-
-        <!-- Tag Cloud Filter - Full Width -->
-        <v-row class="mb-2">
-          <v-col cols="12">
-            <TagCloud />
-          </v-col>
-        </v-row>
-
-        <!-- Francocides Map -->
-        <v-row class="mb-4">
-          <v-col cols="12">
+          <!-- Map on the left -->
+          <v-col cols="12" md="7" lg="8">
             <h3 class="text-h6 mb-2">Répartition géographique des francocides</h3>
             <FrancocidesMap />
+          </v-col>
+          
+          <!-- Filters on the right -->
+          <v-col cols="12" md="5" lg="4">
+            <v-card>
+              <v-card-title class="text-h6 pb-2">Filtres et recherche</v-card-title>
+              <v-card-text class="pb-0">
+                <!-- Search Bar -->
+                <v-text-field
+                  v-model="searchQuery"
+                  label="Rechercher par nom ou lieu"
+                  prepend-inner-icon="mdi-magnify"
+                  variant="outlined"
+                  density="compact"
+                  clearable
+                  aria-label="Rechercher des victimes par nom ou lieu"
+                  class="mb-3"
+                ></v-text-field>
+                
+                <!-- Sort Controls -->
+                <v-select
+                  v-model="dataStore.memorials.sortBy"
+                  :items="sortOptions"
+                  label="Trier par"
+                  variant="outlined"
+                  density="compact"
+                  class="mb-3"
+                ></v-select>
+                
+                <!-- Tag Cloud Filter -->
+                <div>
+                  <h4 class="text-subtitle-1 mb-2">Tags</h4>
+                  <TagCloud />
+                </div>
+              </v-card-text>
+            </v-card>
           </v-col>
         </v-row>
 
