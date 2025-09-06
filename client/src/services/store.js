@@ -679,23 +679,18 @@ export const useDataStore = defineStore("data", {
 
     // Memorial actions
     async fetchVictims() {
-      this.memorials.loading = true;
       try {
+        this.memorials.loading = true;
         const response = await api.getFrancocides();
-        if (response && response.data) {
-          // Import département names for mapping
-          const { DepartementNames } = await import('../utils/departementNames.js');
-
-          this.memorials.victims = response.data.map(victim => ({
-            ...victim,
-            tags: victim.tags || '',
-            lieu_departement_nom: victim.lieu_departement ? 
-              DepartementNames[victim.lieu_departement.toString().padStart(2, '0')] || `Département ${victim.lieu_departement}` :
-              null
-          }));
+        
+        if (response && response.list) {
+          this.memorials.victims = response.list;
+        } else {
+          this.memorials.victims = [];
         }
       } catch (error) {
         console.error('Error fetching victims:', error);
+        this.memorials.victims = [];
       } finally {
         this.memorials.loading = false;
       }
@@ -749,13 +744,13 @@ export const useDataStore = defineStore("data", {
     async fetchVictimDetails(id) {
       try {
         const victimDetails = await api.getFrancocideDetails(id);
-
+        
         // Update the victim in the victims array with the resume data
         const victimIndex = this.memorials.victims.findIndex(v => v.id === id);
         if (victimIndex !== -1) {
           this.memorials.victims[victimIndex] = { ...this.memorials.victims[victimIndex], resume: victimDetails.resume };
         }
-
+        
         return victimDetails;
       } catch (error) {
         console.error('Error fetching victim details:', error);
@@ -858,57 +853,30 @@ export const useDataStore = defineStore("data", {
       }
     },
 
-    filteredVictims(searchQuery = '') {
-      let filtered = [...this.memorials.victims];
-
-      // Apply tag filters
-      if (this.memorials.selectedTags.length > 0) {
+    filteredVictims: (state) => (query) => {
+      let filtered = state.sortedVictims;
+      
+      // Filter by selected tags
+      if (state.memorials.selectedTags.length) {
         filtered = filtered.filter(victim => {
-          // Check regular tags
-          const hasRegularTags = victim.tags ? 
-            victim.tags.split(',').map(tag => tag.trim()).some(tag => 
-              this.memorials.selectedTags.includes(tag)
-            ) : false;
-
-          // Check département tags
-          const hasDepartementTags = this.memorials.selectedTags.some(selectedTag => {
-            if (selectedTag.startsWith('Département ')) {
-              const deptName = selectedTag.replace('Département ', '');
-              return victim.lieu_departement_nom === deptName;
-            }
-            return false;
-          });
-
-          // Return true if any selected tag matches (regular or département)
-          return hasRegularTags || hasDepartementTags;
+          if (!victim.tags) return false;
+          const victimTags = victim.tags.split(',').map(tag => tag.trim());
+          return state.memorials.selectedTags.every(selectedTag =>
+            victimTags.includes(selectedTag)
+          );
         });
       }
-
-      // Apply search filter
-      if (searchQuery && typeof searchQuery === 'string') {
-        const query = searchQuery.toLowerCase();
-        filtered = filtered.filter(victim => {
-          const name = victim.nom_complet ? victim.nom_complet.toString().toLowerCase() : '';
-          const lieu = victim.lieu ? victim.lieu.toString().toLowerCase() : '';
-          return name.includes(query) || lieu.includes(query);
-        });
+      
+      // Filter by search query
+      if (query) {
+        const lowerQuery = query.toLowerCase();
+        filtered = filtered.filter(victim =>
+          `${victim.prenom} ${victim.nom}`.toLowerCase().includes(lowerQuery) ||
+          state.locationCache[victim.cog]?.toLowerCase().includes(lowerQuery)
+        );
       }
-
-      // Apply sorting
-      switch (this.memorials.sortBy) {
-        case 'year_desc':
-          return filtered.sort((a, b) => new Date(b.date_deces) - new Date(a.date_deces));
-        case 'year_asc':
-          return filtered.sort((a, b) => new Date(a.date_deces) - new Date(b.date_deces));
-        case 'age_asc':
-          return filtered.sort((a, b) => (a.age || 0) - (b.age || 0));
-        case 'age_desc':
-          return filtered.sort((a, b) => (b.age || 0) - (a.age || 0));
-        case 'location_asc':
-          return filtered.sort((a, b) => (a.cog || '').localeCompare(b.cog || ''));
-        default:
-          return filtered;
-      }
+      
+      return filtered;
     },
   },
 });
