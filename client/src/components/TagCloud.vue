@@ -1,7 +1,7 @@
 <template>
   <v-row class="word-cloud">
     <v-col cols="12">
-      <div class="tags-container">
+      <div class="tags-container text-center">
         <v-chip
           v-for="tagObj in tags"
           :key="tagObj.tag"
@@ -97,6 +97,14 @@ export default {
 </script>
 
 <style scoped>
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
 .word-cloud-tag {
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   border-width: 2px;
