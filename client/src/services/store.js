@@ -877,6 +877,10 @@ export const useDataStore = defineStore("data", {
           return sorted.sort((a, b) => new Date(b.date_deces) - new Date(a.date_deces));
         case 'year_asc':
           return sorted.sort((a, b) => new Date(a.date_deces) - new Date(b.date_deces));
+        case 'age_asc':
+          return sorted.sort((a, b) => (a.age || 0) - (b.age || 0));
+        case 'age_desc':
+          return sorted.sort((a, b) => (b.age || 0) - (a.age || 0));
         case 'location_asc':
           return sorted.sort((a, b) => (a.cog || '').localeCompare(b.cog || ''));
         default:
