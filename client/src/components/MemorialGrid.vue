@@ -358,10 +358,15 @@ export default {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
+  width: 100%;
+  max-width: 100%;
 }
 
 .memorial-tag {
   font-size: 0.7rem !important;
+  flex-shrink: 1;
+  max-width: 100%;
+  word-break: break-word;
 }
 
 .memorial-tag:hover {
