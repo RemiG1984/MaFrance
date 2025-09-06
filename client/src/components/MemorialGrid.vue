@@ -132,7 +132,7 @@
                 <div v-if="selectedVictim?.tags" class="detail-item">
                   <v-icon size="small" class="mr-2">mdi-tag-multiple</v-icon>
                   <strong>Tags:</strong>
-                  <div class="tags-container mt-1">
+                  <div class="tags-container dialog-tags mt-1">
                     <v-chip
                       v-for="tag in getTagsArray(selectedVictim.tags)"
                       :key="tag"
@@ -326,6 +326,8 @@ export default {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease-in-out;
   background: #f0f2f5;
+  box-sizing: border-box;
+  min-height: 100%;
 }
 
 .memorial-card:hover {
@@ -335,10 +337,10 @@ export default {
 .memorial-image {
   filter: grayscale(50%);
   transition: filter 0.3s ease-in-out;
-  aspect-ratio: 1 / 1 !important; /* Ensure square aspect ratio */
-  max-width: 250px !important; /* Cap width at height */
-  width: 100% !important; /* Stretch to column width up to max-width */
-  margin: 0 auto; /* Center within v-card */
+  aspect-ratio: 1 / 1 !important;
+  max-width: 250px !important;
+  width: 100% !important;
+  margin: 0 auto;
 }
 
 .memorial-image:hover {
@@ -348,10 +350,10 @@ export default {
 .memorial-placeholder {
   border: 1px solid #d0d0d0;
   background: #e8ecef;
-  aspect-ratio: 1 / 1 !important; /* Ensure square aspect ratio */
-  max-width: 250px !important; /* Cap width at height */
-  width: 100% !important; /* Stretch to column width up to max-width */
-  margin: 0 auto; /* Center within v-card */
+  aspect-ratio: 1 / 1 !important;
+  max-width: 250px !important;
+  width: 100% !important;
+  margin: 0 auto;
 }
 
 .tags-container {
@@ -360,18 +362,32 @@ export default {
   gap: 4px;
   width: 100%;
   max-width: 100%;
+  box-sizing: border-box;
+  padding: 4px 0; /* Vertical padding only */
+  overflow: hidden;
+  margin-left: 0; /* Default no margin for grid view */
+}
+
+.tags-container.dialog-tags {
+  margin-left: 24px; /* Specific margin for dialog view */
 }
 
 .memorial-tag {
   font-size: 0.7rem !important;
   flex-shrink: 1;
-  max-width: 100%;
+  max-width: 48%;
+  min-width: 0;
   word-break: break-word;
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-sizing: border-box;
+  padding: 2px 6px;
 }
 
 .memorial-tag:hover {
   transform: scale(1.05);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .transition-group {
@@ -385,8 +401,10 @@ export default {
   .v-card-title {
     font-size: 1.1rem !important;
   }
-  .v-chip {
-    font-size: 0.75rem;
+  .memorial-tag {
+    font-size: 0.65rem;
+    max-width: 49%;
+    padding: 1px 4px;
   }
 }
 
@@ -409,11 +427,8 @@ export default {
   opacity: 0.7;
 }
 
-.tags-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin-left: 24px;
+.v-card-text {
+  padding: 8px; /* Adjust to match your design */
 }
 
 .sources-container {
