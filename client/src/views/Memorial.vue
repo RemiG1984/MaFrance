@@ -35,6 +35,14 @@
           </v-col>
         </v-row>
 
+        <!-- Francocides Map -->
+        <v-row class="mb-4">
+          <v-col cols="12">
+            <h3 class="text-h6 mb-2">Répartition géographique des francocides</h3>
+            <FrancocidesMap />
+          </v-col>
+        </v-row>
+
         <!-- Memorial Grid Component -->
         <v-row v-if="!dataStore.memorials.loading && filteredVictims.length" class="transition-group">
           <v-col cols="12">
@@ -70,12 +78,13 @@
 <script>
 import MemorialGrid from '../components/MemorialGrid.vue';
 import TagCloud from '../components/TagCloud.vue';
+import FrancocidesMap from '../components/FrancocidesMap.vue';
 import { mapStores } from 'pinia';
 import { useDataStore } from '../services/store.js';
 
 export default {
   name: 'Memorial',
-  components: { MemorialGrid, TagCloud },
+  components: { MemorialGrid, TagCloud, FrancocidesMap },
   data() {
     return {
       searchQuery: '',
