@@ -67,7 +67,7 @@
             </v-btn>
           </v-card-actions>
 
-          <v-card-text v-if="victim.tags" class="pt-0 pb-0">
+          <v-card-text v-if="victim.tags" class="pt-0 pb-2">
             <div class="tags-container">
               <v-chip
                 v-for="tag in getTagsArray(victim.tags)"
@@ -358,10 +358,17 @@ export default {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
+  width: 100%;
+  overflow: hidden;
+  padding: 4px 0;
 }
 
 .memorial-tag {
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  white-space: nowrap;
+  flex-shrink: 0;
+  max-width: 100%;
+  font-size: 0.7rem !important;
 }
 
 .memorial-tag:hover {
