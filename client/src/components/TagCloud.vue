@@ -38,22 +38,22 @@ export default {
     tags() {
       const allTags = this.dataStore.memorials.tags;
       const selectedTags = this.dataStore.memorials.selectedTags;
-      
+
       // If no tags are selected, show all tags
       if (selectedTags.length === 0) {
         return allTags;
       }
-      
+
       // Get all victims that have ALL the currently selected tags
       const victimsWithSelectedTags = this.dataStore.memorials.victims.filter(victim => {
         if (!victim.tags) return false;
         const victimTags = victim.tags.split(',').map(tag => tag.trim());
         return selectedTags.every(selectedTag => victimTags.includes(selectedTag));
       });
-      
+
       // Count occurrences of each tag among these filtered victims
       const combinableTagCounts = new Map();
-      
+
       victimsWithSelectedTags.forEach(victim => {
         if (victim.tags) {
           const victimTags = victim.tags.split(',').map(tag => tag.trim());
@@ -64,12 +64,12 @@ export default {
           });
         }
       });
-      
+
       // Convert to array format and sort by count (descending)
       const combinableTags = Array.from(combinableTagCounts.entries())
         .map(([tag, count]) => ({ tag, count }))
         .sort((a, b) => b.count - a.count);
-      
+
       return combinableTags;
     },
     loading() {
@@ -103,11 +103,22 @@ export default {
 }
 
 .word-cloud-tag:hover {
-  transform: scale(1.1);
+  transform: scale(1.05);
   box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
+.tags-container {
+  height: 100%;
+  overflow-y: auto;
+  padding-right: 8px;
+}
 
+@media (max-width: 960px) {
+  .tags-container {
+    max-height: 300px;
+    height: auto;
+  }
+}
 
 @media (max-width: 600px) {
   .tags-container {

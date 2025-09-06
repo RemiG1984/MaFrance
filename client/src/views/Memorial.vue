@@ -5,18 +5,18 @@
         <h1 class="text-h4 font-weight-bold mb-2 mb-md-3">Mémorial des victimes de francocides</h1>
 
         <!-- Map and Filters Layout -->
-        <v-row class="mb-4">
+        <v-row class="mb-4 map-filter-row">
           <!-- Map on the left -->
-          <v-col cols="12" md="7" lg="8">
+          <v-col cols="12" md="6" class="map-column">
             <h3 class="text-h6 mb-2">Répartition géographique des francocides</h3>
             <FrancocidesMap />
           </v-col>
           
           <!-- Filters on the right -->
-          <v-col cols="12" md="5" lg="4">
-            <v-card>
+          <v-col cols="12" md="6" class="filter-column">
+            <v-card class="filter-card h-100 d-flex flex-column">
               <v-card-title class="text-h6 pb-2">Filtres et recherche</v-card-title>
-              <v-card-text class="pb-0">
+              <v-card-text class="pb-0 flex-grow-1 d-flex flex-column">
                 <!-- Search Bar -->
                 <v-text-field
                   v-model="searchQuery"
@@ -40,9 +40,11 @@
                 ></v-select>
                 
                 <!-- Tag Cloud Filter -->
-                <div>
+                <div class="flex-grow-1 d-flex flex-column">
                   <h4 class="text-subtitle-1 mb-2">Tags</h4>
-                  <TagCloud />
+                  <div class="tag-cloud-container flex-grow-1">
+                    <TagCloud />
+                  </div>
                 </div>
               </v-card-text>
             </v-card>
@@ -136,6 +138,27 @@ export default {
 
 .transition-group {
   transition: all 0.3s ease-in-out;
+}
+
+.map-filter-row {
+  align-items: stretch;
+}
+
+.filter-card {
+  height: 100%;
+}
+
+.tag-cloud-container {
+  overflow-y: auto;
+  min-height: 200px;
+}
+
+@media (min-width: 960px) {
+  .map-column,
+  .filter-column {
+    display: flex;
+    flex-direction: column;
+  }
 }
 
 @media (max-width: 600px) {
