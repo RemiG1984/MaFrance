@@ -65,7 +65,6 @@ export const useDataStore = defineStore("data", {
       tags: [],
       selectedTags: [],
       sortBy: 'year_desc',
-      pagination: { limit: 20, offset: 0, hasMore: true, total: 0 },
       loading: false,
     },
     locationCache: JSON.parse(localStorage.getItem('locationCache') || '{}'),
@@ -679,39 +678,19 @@ export const useDataStore = defineStore("data", {
     },
 
     // Memorial actions
-    async fetchVictims(params = {}, append = false) {
+    async fetchVictims() {
       try {
         this.memorials.loading = true;
-        
-        const apiParams = { 
-          ...params,
-          limit: this.memorials.pagination.limit,
-          offset: append ? this.memorials.pagination.offset : 0,
-        };
-        
-        // Add selected tags to request
-        if (this.memorials.selectedTags.length) {
-          apiParams.tags = this.memorials.selectedTags.join(',');
-        }
-        
-        const response = await api.getFrancocides(apiParams);
+        const response = await api.getFrancocides();
         
         if (response && response.list) {
-          this.memorials.victims = append ? [...this.memorials.victims, ...response.list] : response.list;
-          this.memorials.pagination = {
-            limit: response.pagination?.limit || 20,
-            offset: (append ? this.memorials.pagination.offset : 0) + response.list.length,
-            hasMore: response.pagination?.hasMore || response.list.length === response.pagination?.limit,
-            total: response.pagination?.total || response.list.length,
-          };
+          this.memorials.victims = response.list;
         } else {
-          this.memorials.victims = append ? this.memorials.victims : [];
-          this.memorials.pagination = { ...this.memorials.pagination, hasMore: false };
+          this.memorials.victims = [];
         }
       } catch (error) {
         console.error('Error fetching victims:', error);
-        this.memorials.victims = append ? this.memorials.victims : [];
-        this.memorials.pagination = { ...this.memorials.pagination, hasMore: false };
+        this.memorials.victims = [];
       } finally {
         this.memorials.loading = false;
       }
@@ -752,28 +731,14 @@ export const useDataStore = defineStore("data", {
       } else {
         this.memorials.selectedTags.push(tag);
       }
-      this.resetPaginationAndFetch();
     },
 
     clearSelectedTags() {
       this.memorials.selectedTags = [];
-      this.resetPaginationAndFetch();
-    },
-
-    resetPaginationAndFetch() {
-      this.memorials.pagination.offset = 0;
-      this.fetchVictims();
     },
 
     setSortBy(sort) {
       this.memorials.sortBy = sort;
-      this.resetPaginationAndFetch();
-    },
-
-    async loadMoreVictims() {
-      if (this.memorials.pagination.hasMore) {
-        await this.fetchVictims({}, true);
-      }
     },
 
     async fetchVictimDetails(id) {
@@ -889,12 +854,29 @@ export const useDataStore = defineStore("data", {
     },
 
     filteredVictims: (state) => (query) => {
-      if (!query) return state.sortedVictims;
-      const lowerQuery = query.toLowerCase();
-      return state.sortedVictims.filter(victim =>
-        `${victim.prenom} ${victim.nom}`.toLowerCase().includes(lowerQuery) ||
-        state.locationCache[victim.cog]?.toLowerCase().includes(lowerQuery)
-      );
+      let filtered = state.sortedVictims;
+      
+      // Filter by selected tags
+      if (state.memorials.selectedTags.length) {
+        filtered = filtered.filter(victim => {
+          if (!victim.tags) return false;
+          const victimTags = victim.tags.split(',').map(tag => tag.trim());
+          return state.memorials.selectedTags.every(selectedTag =>
+            victimTags.includes(selectedTag)
+          );
+        });
+      }
+      
+      // Filter by search query
+      if (query) {
+        const lowerQuery = query.toLowerCase();
+        filtered = filtered.filter(victim =>
+          `${victim.prenom} ${victim.nom}`.toLowerCase().includes(lowerQuery) ||
+          state.locationCache[victim.cog]?.toLowerCase().includes(lowerQuery)
+        );
+      }
+      
+      return filtered;
     },
   },
 });

@@ -61,20 +61,7 @@
           </v-col>
         </v-row>
 
-        <!-- Load More Button -->
-        <v-row v-if="dataStore.memorials.pagination.hasMore && !dataStore.memorials.loading && filteredVictims.length" class="mt-4">
-          <v-col cols="12" class="text-center">
-            <v-btn
-              :loading="dataStore.memorials.loading"
-              variant="outlined"
-              color="primary"
-              @click="dataStore.loadMoreVictims"
-              aria-label="Charger plus de victimes"
-            >
-              Charger plus
-            </v-btn>
-          </v-col>
-        </v-row>
+        
       </v-col>
     </v-row>
   </v-container>
