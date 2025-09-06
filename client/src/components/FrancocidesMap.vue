@@ -48,8 +48,8 @@ export default {
     }
   },
   async mounted() {
-    await this.initMap();
     this.colorscale = chroma.scale(this.scaleColors).domain([0, 1]);
+    await this.initMap();
     this.updateData();
   },
   methods: {
