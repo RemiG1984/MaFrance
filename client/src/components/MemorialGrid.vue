@@ -357,39 +357,11 @@ export default {
 .tags-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 2px;
-  width: 100%;
-  padding: 4px 0;
-  overflow: hidden;
+  gap: 4px;
 }
 
 .memorial-tag {
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-  white-space: normal !important;
-  word-wrap: break-word;
-  word-break: break-word;
-  overflow-wrap: break-word;
-  flex: 0 1 auto;
-  min-width: 0;
-  max-width: 100%;
-  font-size: 0.65rem !important;
-  line-height: 1.1;
-  height: auto;
-}
-
-/* Responsive tag sizing for different column layouts */
-@media (min-width: 1280px) {
-  .memorial-tag {
-    font-size: 0.6rem !important;
-    max-width: calc(50% - 1px);
-  }
-}
-
-@media (min-width: 1904px) {
-  .memorial-tag {
-    font-size: 0.55rem !important;
-    max-width: calc(33% - 1px);
-  }
+  font-size: 0.7rem !important;
 }
 
 .memorial-tag:hover {
