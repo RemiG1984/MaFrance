@@ -96,10 +96,10 @@ function importFrancocides(db, callback) {
                         date_deces: convertFrenchDateToISO(row['date_deces']),
                         cog: row['cog'].trim(),
                         photo: row['photo'] ? row['photo'].trim() : null,
-                        resume: row['Résumé'] ? row['Résumé'].trim() : null,
+                        resume: row['resume'] ? row['resume'].trim() : null,
                         source1: row['source1'] ? row['source1'].trim() : null,
                         source2: row['source2'] ? row['source2'].trim() : null,
-                        tags: row['Tags'] ? row['Tags'].trim() : null
+                        tags: row['tags'] ? row['tags'].trim() : null
                     });
                 })
                 .on('end', () => {
