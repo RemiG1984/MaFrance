@@ -25,7 +25,7 @@ router.get(
 
     // Build base query
     let sql = `
-      SELECT id, date_deces, cog, prenom, nom, sexe, age, photo, url_fdesouche, url_wikipedia, pays, tags
+      SELECT id, date_deces, cog, prenom, nom, sexe, age, photo, resume, source1, source2, tags
       FROM francocides 
       WHERE 1=1`;
     const params = [];
@@ -101,7 +101,9 @@ router.get(
         MIN(age) as min_age,
         MAX(age) as max_age,
         COUNT(CASE WHEN photo IS NOT NULL THEN 1 END) as with_photo_count,
-        COUNT(CASE WHEN url_wikipedia IS NOT NULL THEN 1 END) as with_wikipedia_count
+        COUNT(CASE WHEN source1 IS NOT NULL THEN 1 END) as with_source1_count,
+        COUNT(CASE WHEN source2 IS NOT NULL THEN 1 END) as with_source2_count,
+        COUNT(CASE WHEN resume IS NOT NULL THEN 1 END) as with_resume_count
       FROM francocides 
       WHERE 1=1`;
     const params = [];
@@ -147,7 +149,9 @@ router.get(
         },
         media: {
           with_photo: row?.with_photo_count || 0,
-          with_wikipedia: row?.with_wikipedia_count || 0
+          with_source1: row?.with_source1_count || 0,
+          with_source2: row?.with_source2_count || 0,
+          with_resume: row?.with_resume_count || 0
         }
       };
 
@@ -206,7 +210,7 @@ router.get(
     }
 
     const sql = `
-      SELECT id, date_deces, cog, prenom, nom, sexe, age, photo, url_fdesouche, url_wikipedia, pays, tags
+      SELECT id, date_deces, cog, prenom, nom, sexe, age, photo, resume, source1, source2, tags
       FROM francocides 
       WHERE id = ?`;
 

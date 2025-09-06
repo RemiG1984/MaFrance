@@ -19,6 +19,8 @@
             class="memorial-image"
             loading="lazy"
             :alt="'Photo de ' + victim.prenom + ' ' + victim.nom"
+            @click="showResume(victim)"
+            style="cursor: pointer;"
           >
             <template v-slot:placeholder>
               <v-skeleton-loader type="image" />
@@ -42,26 +44,26 @@
 
           <v-card-actions class="pt-0">
             <v-btn
-              v-if="victim.url_fdesouche"
-              :href="victim.url_fdesouche"
+              v-if="victim.source1"
+              :href="victim.source1"
               target="_blank"
               variant="text"
               color="primary"
               size="small"
-              aria-label="Voir l'article FdeSouche"
+              aria-label="Voir la source 1"
             >
-              FdeSouche
+              Source 1
             </v-btn>
             <v-btn
-              v-if="victim.url_wikipedia"
-              :href="victim.url_wikipedia"
+              v-if="victim.source2"
+              :href="victim.source2"
               target="_blank"
               variant="text"
               color="primary"
               size="small"
-              aria-label="Voir la page Wikipédia"
+              aria-label="Voir la source 2"
             >
-              Wikipedia
+              Source 2
             </v-btn>
           </v-card-actions>
 
@@ -86,6 +88,29 @@
         </v-card>
       </v-col>
     </v-row>
+
+    <!-- Resume Dialog -->
+    <v-dialog v-model="resumeDialog" max-width="600px">
+      <v-card>
+        <v-card-title class="text-h5">
+          {{ selectedVictim?.prenom }} {{ selectedVictim?.nom }}
+        </v-card-title>
+        <v-card-text>
+          <div v-if="selectedVictim?.resume" class="text-body-1">
+            {{ selectedVictim.resume }}
+          </div>
+          <div v-else class="text-body-2 text-grey">
+            Aucun résumé disponible.
+          </div>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="primary" text @click="resumeDialog = false">
+            Fermer
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
     <!-- Loading and Empty States -->
     <v-row v-if="loading" class="mt-4">
@@ -112,6 +137,12 @@ export default {
   props: {
     victims: { type: Array, default: () => [], required: true },
     loading: { type: Boolean, default: false },
+  },
+  data() {
+    return {
+      resumeDialog: false,
+      selectedVictim: null,
+    };
   },
   computed: {
     ...mapStores(useDataStore),
@@ -170,6 +201,11 @@ export default {
 
     isTagSelected(tag) {
       return this.dataStore.memorials.selectedTags.includes(tag);
+    },
+
+    showResume(victim) {
+      this.selectedVictim = victim;
+      this.resumeDialog = true;
     },
   },
 };
