@@ -22,7 +22,7 @@ export default {
       layerGroup: null,
       departementsLayer: null,
       globalTooltip: null,
-      scaleColors: ['#ffffe0', '#ffd59b', '#ffa474', '#f47461', '#db4551', '#b81b34', '#8b0000'],
+      scaleColors: ['#ffffff', '#fff5f0', '#fee0d2', '#fcbba1', '#fc9272', '#fb6a4a', '#ef3b2c', '#cb181d', '#a50f15', '#67000d'],
       scaleDomain: {
         min: 0,
         max: 10,
@@ -30,6 +30,7 @@ export default {
       },
       dataRef: {},
       colorscale: null,
+      legend: null,
     }
   },
   computed: {
@@ -91,6 +92,7 @@ export default {
       }
       
       await this.loadDepartementsGeoJson()
+      this.addLegend()
     },
     
     async loadDepartementsGeoJson() {
@@ -110,6 +112,9 @@ export default {
     updateData() {
       this.updateRanking();
       this.updateLayerColors();
+      if (this.map && this.legend) {
+        this.updateLegend();
+      }
     },
     
     updateRanking() {
@@ -124,20 +129,36 @@ export default {
       const deptCounts = {};
       if (this.francocidesData && Array.isArray(this.francocidesData)) {
         this.francocidesData.forEach(victim => {
-          if (victim.lieu_departement) {
-            const dept = victim.lieu_departement.toString().padStart(2, '0');
-            deptCounts[dept] = (deptCounts[dept] || 0) + 1;
+          let deptCode = null;
+          
+          // Extract département from COG code
+          if (victim.cog) {
+            const cog = victim.cog.toString();
+            // Handle special cases for overseas territories
+            if (cog.startsWith('971')) deptCode = '971'; // Guadeloupe
+            else if (cog.startsWith('972')) deptCode = '972'; // Martinique
+            else if (cog.startsWith('973')) deptCode = '973'; // Guyane
+            else if (cog.startsWith('974')) deptCode = '974'; // Réunion
+            else if (cog.startsWith('976')) deptCode = '976'; // Mayotte
+            else if (cog.startsWith('2A')) deptCode = '2A'; // Corse-du-Sud
+            else if (cog.startsWith('2B')) deptCode = '2B'; // Haute-Corse
+            else if (cog.length >= 2) {
+              // Metropolitan France - first 2 digits
+              deptCode = cog.substring(0, 2);
+            }
+          }
+          
+          if (deptCode) {
+            deptCounts[deptCode] = (deptCounts[deptCode] || 0) + 1;
           }
         });
       }
 
       // Update scale domain and create data reference
       Object.entries(deptCounts).forEach(([dept, count]) => {
-        if (DepartementNames[dept]) {
-          rankingsRef[dept] = { count };
-          this.scaleDomain.min = Math.min(this.scaleDomain.min, count);
-          this.scaleDomain.max = Math.max(this.scaleDomain.max, count);
-        }
+        rankingsRef[dept] = { count };
+        this.scaleDomain.min = Math.min(this.scaleDomain.min, count);
+        this.scaleDomain.max = Math.max(this.scaleDomain.max, count);
       });
 
       // Ensure minimum range
@@ -163,20 +184,20 @@ export default {
       const value = this.getFeatureValue(feature);
       if (value === null || value === 0) {
         return {
-          fillColor: '#ffffff',
+          fillColor: '#f5f5f5',
           weight: 1,
-          opacity: 1,
-          color: 'white',
-          fillOpacity: 0.3
+          opacity: 0.8,
+          color: '#cccccc',
+          fillOpacity: 0.5
         };
       }
       const color = this.getColor(value);
       return {
         fillColor: color,
         weight: 1,
-        opacity: 1,
-        color: 'white',
-        fillOpacity: 0.7
+        opacity: 0.8,
+        color: '#666666',
+        fillOpacity: 0.8
       };
     },
     
@@ -229,12 +250,16 @@ export default {
       layer.bringToFront();
       layer.setStyle({
         color: '#424242',
-        weight: 2,
-        opacity: 0.8
+        weight: 3,
+        opacity: 1
       });
       
       const value = this.getFeatureValue(feature) || 0;
-      const content = `<b>${properties.nom}</b><br>Francocides: ${value}`;
+      const plural = value > 1 ? 's' : '';
+      const content = `<div style="font-size: 14px; padding: 4px;">
+                        <b>${properties.nom}</b><br>
+                        <span style="color: #d32f2f; font-weight: bold;">${value} francocide${plural}</span>
+                      </div>`;
       
       this.globalTooltip
         .setLatLng(center)
@@ -244,15 +269,53 @@ export default {
     
     hideTooltip(e) {
       const layer = e.target;
-      layer.setStyle({
-        weight: 1,
-        opacity: 1,
-        color: 'white',
-      });
+      const originalStyle = this.getStyle(layer.feature);
+      layer.setStyle(originalStyle);
       
       if (this.globalTooltip) {
         this.map.removeLayer(this.globalTooltip);
       }
+    },
+    
+    addLegend() {
+      const legend = markRaw(L.control({ position: 'bottomright' }));
+      
+      legend.onAdd = () => {
+        const div = L.DomUtil.create('div', 'legend');
+        div.style.backgroundColor = 'white';
+        div.style.padding = '10px';
+        div.style.border = '2px solid rgba(0,0,0,0.2)';
+        div.style.borderRadius = '5px';
+        div.style.fontSize = '12px';
+        div.style.lineHeight = '18px';
+        
+        let html = '<strong>Francocides par département</strong><br>';
+        
+        // Create legend items based on current data
+        if (this.scaleDomain.max > 0) {
+          const steps = 5;
+          for (let i = 0; i < steps; i++) {
+            const value = Math.round((this.scaleDomain.max / steps) * (i + 1));
+            const color = this.getColor(value);
+            html += `<i style="background:${color}; width:18px; height:18px; float:left; margin-right:8px; opacity:0.8;"></i> ${value}<br>`;
+          }
+        } else {
+          html += '<i style="background:#f5f5f5; width:18px; height:18px; float:left; margin-right:8px; opacity:0.5;"></i> Aucune donnée<br>';
+        }
+        
+        div.innerHTML = html;
+        return div;
+      };
+      
+      legend.addTo(this.map);
+      this.legend = legend;
+    },
+    
+    updateLegend() {
+      if (this.legend) {
+        this.map.removeControl(this.legend);
+      }
+      this.addLegend();
     },
   },
   
