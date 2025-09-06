@@ -435,11 +435,11 @@ const api = {
         return apiService.request(`/francocides/stats${queryString ? `?${queryString}` : ''}`);
     },
     getFrancocidesTags() {
-        return this.request('/francocides/tags', {}, true);
+        return apiService.request('/francocides/tags', {}, true);
     },
 
     async getFrancocideDetails(id) {
-        return this.request(`/francocides/${id}`);
+        return apiService.request(`/francocides/${id}`);
     },
 
     // Cache management
