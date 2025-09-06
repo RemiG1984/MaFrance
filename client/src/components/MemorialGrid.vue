@@ -359,16 +359,17 @@ export default {
   flex-wrap: wrap;
   gap: 4px;
   width: 100%;
-  overflow: hidden;
   padding: 4px 0;
 }
 
 .memorial-tag {
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-  white-space: nowrap;
-  flex-shrink: 0;
-  max-width: 100%;
+  white-space: normal;
+  word-wrap: break-word;
+  flex-shrink: 1;
+  max-width: calc(100% - 8px);
   font-size: 0.7rem !important;
+  line-height: 1.2;
 }
 
 .memorial-tag:hover {
