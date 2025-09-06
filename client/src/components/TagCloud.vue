@@ -36,7 +36,41 @@ export default {
   computed: {
     ...mapStores(useDataStore),
     tags() {
-      return this.dataStore.memorials.tags;
+      const allTags = this.dataStore.memorials.tags;
+      const selectedTags = this.dataStore.memorials.selectedTags;
+      
+      // If no tags are selected, show all tags
+      if (selectedTags.length === 0) {
+        return allTags;
+      }
+      
+      // Get all victims that have ALL the currently selected tags
+      const victimsWithSelectedTags = this.dataStore.memorials.victims.filter(victim => {
+        if (!victim.tags) return false;
+        const victimTags = victim.tags.split(',').map(tag => tag.trim());
+        return selectedTags.every(selectedTag => victimTags.includes(selectedTag));
+      });
+      
+      // Count occurrences of each tag among these filtered victims
+      const combinableTagCounts = new Map();
+      
+      victimsWithSelectedTags.forEach(victim => {
+        if (victim.tags) {
+          const victimTags = victim.tags.split(',').map(tag => tag.trim());
+          victimTags.forEach(tag => {
+            if (tag) {
+              combinableTagCounts.set(tag, (combinableTagCounts.get(tag) || 0) + 1);
+            }
+          });
+        }
+      });
+      
+      // Convert to array format and sort by count (descending)
+      const combinableTags = Array.from(combinableTagCounts.entries())
+        .map(([tag, count]) => ({ tag, count }))
+        .sort((a, b) => b.count - a.count);
+      
+      return combinableTags;
     },
     loading() {
       return this.dataStore.memorials.loading;
