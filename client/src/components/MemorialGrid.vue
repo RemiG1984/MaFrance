@@ -203,7 +203,20 @@ export default {
       return this.dataStore.memorials.selectedTags.includes(tag);
     },
 
-    showResume(victim) {
+    async showResume(victim) {
+      // If resume is not loaded yet, fetch it
+      if (!victim.resume && victim.id) {
+        try {
+          const victimDetails = await this.dataStore.fetchVictimDetails(victim.id);
+          if (victimDetails) {
+            // Update the victim object with the resume
+            victim.resume = victimDetails.resume;
+          }
+        } catch (error) {
+          console.error('Error fetching victim resume:', error);
+        }
+      }
+      
       this.selectedVictim = victim;
       this.resumeDialog = true;
     },

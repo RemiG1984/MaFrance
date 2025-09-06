@@ -25,7 +25,7 @@ router.get(
 
     // Build base query
     let sql = `
-      SELECT id, date_deces, cog, prenom, nom, sexe, age, photo, resume, source1, source2, tags
+      SELECT id, date_deces, cog, prenom, nom, sexe, age, photo, source1, source2, tags
       FROM francocides 
       WHERE 1=1`;
     const params = [];

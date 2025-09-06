@@ -434,8 +434,13 @@ const api = {
         const queryString = new URLSearchParams(params).toString();
         return apiService.request(`/francocides/stats${queryString ? `?${queryString}` : ''}`);
     },
-    getFrancocidesTags: () => apiService.request('/francocides/tags'),
-    getFrancocide: (id) => apiService.request(`/francocides/${id}`),
+    getFrancocidesTags() {
+        return this.request('/francocides/tags', {}, true);
+    },
+
+    async getFrancocideDetails(id) {
+        return this.request(`/francocides/${id}`);
+    },
 
     // Cache management
     clearCache: () => apiService.clearCache(),
