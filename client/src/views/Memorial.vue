@@ -8,7 +8,6 @@
         <v-row class="mb-4 map-filter-row">
           <!-- Map on the left -->
           <v-col cols="12" md="6" class="map-column">
-            <h3 class="text-h6 mb-2">Répartition géographique des francocides</h3>
             <FrancocidesMap />
           </v-col>
           
