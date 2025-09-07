@@ -33,7 +33,7 @@ export default {
       layerGroup: null,
       departementsLayer: null,
       globalTooltip: null,
-      scaleColors: ['#ffffff', '#fff5f0', '#fee0d2', '#fcbba1', '#fc9272', '#fb6a4a', '#ef3b2c', '#cb181d', '#a50f15', '#67000d'],
+      scaleColors: ['#ffffff', '#ffff99', '#ffcc00', '#ff9900', '#ff6600', '#ff3300', '#cc0000', '#990000', '#660000'],
       scaleDomain: {
         min: 0,
         max: 10,
@@ -178,11 +178,11 @@ export default {
       const value = this.getFeatureValue(feature);
       if (value === null || value === 0) {
         return {
-          fillColor: '#f5f5f5',
+          fillColor: '#ffffff',
           weight: 1,
           opacity: 0.8,
           color: '#cccccc',
-          fillOpacity: 0.5
+          fillOpacity: 0.8
         };
       }
       const color = this.getColor(value);
@@ -283,7 +283,7 @@ export default {
     },
 
     addLegend() {
-      const legend = markRaw(L.control({ position: 'bottomright' }));
+      const legend = markRaw(L.control({ position: 'bottomleft' }));
 
       legend.onAdd = () => {
         const div = L.DomUtil.create('div', 'legend');
@@ -296,6 +296,9 @@ export default {
 
         let html = '<strong>Francocides par département</strong><br>';
 
+        // Always show zero entry first
+        html += '<i style="background:#ffffff; width:18px; height:18px; float:left; margin-right:8px; opacity:0.8; border:1px solid #ccc;"></i> 0<br>';
+        
         // Create legend items based on current data
         if (this.scaleDomain.max > 0) {
           const steps = 5;
@@ -304,8 +307,6 @@ export default {
             const color = this.getColor(value);
             html += `<i style="background:${color}; width:18px; height:18px; float:left; margin-right:8px; opacity:0.8;"></i> ${value}<br>`;
           }
-        } else {
-          html += '<i style="background:#f5f5f5; width:18px; height:18px; float:left; margin-right:8px; opacity:0.5;"></i> Aucune donnée<br>';
         }
 
         div.innerHTML = html;
