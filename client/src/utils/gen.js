@@ -24,3 +24,52 @@ export function formatNumber(value, decimals = 0) {
     maximumFractionDigits: decimals
   });
 }
+
+/**
+ * Extract département code from COG code
+ * @param {string} cog - The COG (Code Officiel Géographique) code
+ * @returns {string|null} - The département code or null if invalid
+ */
+export function getDepartementFromCog(cog) {
+  if (!cog) return null;
+  
+  const cogStr = cog.toString();
+  
+  // Handle special cases for overseas territories
+  if (cogStr.startsWith('971')) return '971'; // Guadeloupe
+  if (cogStr.startsWith('972')) return '972'; // Martinique
+  if (cogStr.startsWith('973')) return '973'; // Guyane
+  if (cogStr.startsWith('974')) return '974'; // Réunion
+  if (cogStr.startsWith('976')) return '976'; // Mayotte
+  if (cogStr.startsWith('2A')) return '2A'; // Corse-du-Sud
+  if (cogStr.startsWith('2B')) return '2B'; // Haute-Corse
+  
+  // Metropolitan France - first 2 digits
+  if (cogStr.length >= 2) {
+    return cogStr.substring(0, 2);
+  }
+  
+  return null;
+}
+
+/**
+ * Normalize département code to ensure consistent format
+ * @param {string|number} deptCode - The département code to normalize
+ * @returns {string} - The normalized département code
+ */
+export function normalizeDepartementCode(deptCode) {
+  if (!deptCode) return '';
+  
+  const deptStr = deptCode.toString().trim().toUpperCase();
+  
+  // Handle special cases (Corsica, overseas territories)
+  if (['2A', '2B'].includes(deptStr)) return deptStr;
+  if (['971', '972', '973', '974', '976'].includes(deptStr)) return deptStr;
+  
+  // For numeric départements, pad with leading zero if single digit
+  if (/^\d+$/.test(deptStr)) {
+    return deptStr.padStart(2, '0');
+  }
+  
+  return deptStr;
+}

@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import api from "./api.js";
 import { DepartementNames } from "../utils/departementNames.js";
 import { MetricsConfig } from "../utils/metricsConfig.js";
+import { getDepartementFromCog, normalizeDepartementName } from "../utils/gen.js";
 
 export const useDataStore = defineStore("data", {
   state: () => ({
@@ -683,7 +684,7 @@ export const useDataStore = defineStore("data", {
       try {
         this.memorials.loading = true;
         const response = await api.getFrancocides();
-        
+
         if (response && response.list) {
           this.memorials.victims = response.list;
         } else {
@@ -749,13 +750,13 @@ export const useDataStore = defineStore("data", {
     async fetchVictimDetails(id) {
       try {
         const victimDetails = await api.getFrancocideDetails(id);
-        
+
         // Update the victim in the victims array with the resume data
         const victimIndex = this.memorials.victims.findIndex(v => v.id === id);
         if (victimIndex !== -1) {
           this.memorials.victims[victimIndex] = { ...this.memorials.victims[victimIndex], resume: victimDetails.resume };
         }
-        
+
         return victimDetails;
       } catch (error) {
         console.error('Error fetching victim details:', error);
@@ -860,37 +861,15 @@ export const useDataStore = defineStore("data", {
 
     filteredVictims: (state) => (query) => {
       let filtered = state.sortedVictims;
-      
+
       // Filter by selected département
       if (state.memorials.selectedDepartement) {
         filtered = filtered.filter(victim => {
-          if (!victim.cog) return false;
-          const cog = victim.cog.toString();
-          let deptCode = null;
-          
-          // Extract département from COG code
-          if (cog.startsWith('971')) deptCode = '971'; // Guadeloupe
-          else if (cog.startsWith('972')) deptCode = '972'; // Martinique
-          else if (cog.startsWith('973')) deptCode = '973'; // Guyane
-          else if (cog.startsWith('974')) deptCode = '974'; // Réunion
-          else if (cog.startsWith('976')) deptCode = '976'; // Mayotte
-          else if (cog.startsWith('2A')) deptCode = '2A'; // Corse-du-Sud
-          else if (cog.startsWith('2B')) deptCode = '2B'; // Haute-Corse
-          else if (cog.length >= 2) {
-            // Metropolitan France - first 2 digits, preserving leading zeros
-            let extracted = cog.substring(0, 2);
-            // For codes starting with 0, keep the leading zero (e.g., "06001" -> "06", not "60")
-            if (extracted.startsWith('0')) {
-              deptCode = extracted; // Keep as "01", "02", ..., "09"
-            } else {
-              deptCode = extracted; // Keep as "10", "11", ..., "95"
-            }
-          }
-          
+          const deptCode = getDepartementFromCog(victim.cog);
           return deptCode === state.memorials.selectedDepartement;
         });
       }
-      
+
       // Filter by selected tags
       if (state.memorials.selectedTags.length) {
         filtered = filtered.filter(victim => {
@@ -901,7 +880,7 @@ export const useDataStore = defineStore("data", {
           );
         });
       }
-      
+
       // Filter by search query
       if (query) {
         const lowerQuery = query.toLowerCase();
@@ -910,7 +889,7 @@ export const useDataStore = defineStore("data", {
           state.locationCache[victim.cog]?.toLowerCase().includes(lowerQuery)
         );
       }
-      
+
       return filtered;
     },
   },

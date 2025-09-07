@@ -22,6 +22,7 @@
 import { mapStores } from 'pinia'
 import { useDataStore } from '../services/store.js'
 import { DepartementNames } from '../utils/departementNames.js'
+import { getDepartementFromCog, normalizeDepartementCode } from '../utils/gen.js'
 import chroma from "chroma-js";
 import { markRaw } from 'vue'
 
@@ -141,31 +142,7 @@ export default {
       const deptCounts = {};
       if (this.francocidesData && Array.isArray(this.francocidesData)) {
         this.francocidesData.forEach(victim => {
-          let deptCode = null;
-          
-          // Extract département from COG code
-          if (victim.cog) {
-            const cog = victim.cog.toString();
-            // Handle special cases for overseas territories
-            if (cog.startsWith('971')) deptCode = '971'; // Guadeloupe
-            else if (cog.startsWith('972')) deptCode = '972'; // Martinique
-            else if (cog.startsWith('973')) deptCode = '973'; // Guyane
-            else if (cog.startsWith('974')) deptCode = '974'; // Réunion
-            else if (cog.startsWith('976')) deptCode = '976'; // Mayotte
-            else if (cog.startsWith('2A')) deptCode = '2A'; // Corse-du-Sud
-            else if (cog.startsWith('2B')) deptCode = '2B'; // Haute-Corse
-            else if (cog.length >= 2) {
-              // Metropolitan France - first 2 digits, but handle leading zeros properly
-              let extracted = cog.substring(0, 2);
-              // For codes starting with 0, keep the leading zero (e.g., "06001" -> "06", not "60")
-              if (extracted.startsWith('0')) {
-                deptCode = extracted; // Keep as "01", "02", ..., "09"
-              } else {
-                deptCode = extracted; // Keep as "10", "11", ..., "95"
-              }
-            }
-          }
-          
+          const deptCode = getDepartementFromCog(victim.cog);
           if (deptCode) {
             deptCounts[deptCode] = (deptCounts[deptCode] || 0) + 1;
           }
@@ -236,7 +213,7 @@ export default {
     },
     
     onEachDepartementFeature(feature, layer) {
-      const deptCode = feature.properties.code;
+      const deptCode = normalizeDepartementCode(feature.properties.code);
       const deptName = feature.properties.nom;
       
       layer.on({
