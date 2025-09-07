@@ -3,8 +3,10 @@
     <!-- Header -->
     <v-app-bar app color="primary" dark>
       <div class="header-content-wrapper">
-        <v-app-bar-title class="text-h5 font-weight-bold">
-          {{ currentPageTitle }}
+        <v-app-bar-title
+          :class="$route.path === '/memorial' ? 'text-h4 font-weight-bold' : 'text-h5 font-weight-bold'"
+        >
+          {{ $route.path === '/memorial' ? 'Mémorial des victimes de francocides' : currentPageTitle }}
         </v-app-bar-title>
 
         <!-- Desktop Menu -->
@@ -161,28 +163,28 @@ export default {
   mounted() {
     // Handle URL parameters for shared links
     this.handleUrlParameters()
-    
+
     // Initialize store to sync with MetricsConfig
     this.dataStore.initializeStore()
   },
   methods: {
     handleUrlParameters() {
       const urlParams = new URLSearchParams(window.location.search)
-      
+
       // Check if there are any relevant parameters
       const hasParams = urlParams.has('v') || urlParams.has('c') || urlParams.has('m')
-      
+
       if (hasParams) {
         const params = {}
-        
+
         // Extract parameters
         if (urlParams.has('v')) params.v = urlParams.get('v')
         if (urlParams.has('c')) params.c = urlParams.get('c')
         if (urlParams.has('m')) params.m = urlParams.get('m')
-        
+
         // Store in sessionStorage for the store to process
         sessionStorage.setItem('pendingNavigation', JSON.stringify(params))
-        
+
         // Clear URL parameters to keep URL clean
         const url = new URL(window.location)
         url.search = ''
