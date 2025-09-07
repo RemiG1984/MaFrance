@@ -877,8 +877,14 @@ export const useDataStore = defineStore("data", {
           else if (cog.startsWith('2A')) deptCode = '2A'; // Corse-du-Sud
           else if (cog.startsWith('2B')) deptCode = '2B'; // Haute-Corse
           else if (cog.length >= 2) {
-            // Metropolitan France - first 2 digits
-            deptCode = cog.substring(0, 2);
+            // Metropolitan France - first 2 digits, preserving leading zeros
+            let extracted = cog.substring(0, 2);
+            // For codes starting with 0, keep the leading zero (e.g., "06001" -> "06", not "60")
+            if (extracted.startsWith('0')) {
+              deptCode = extracted; // Keep as "01", "02", ..., "09"
+            } else {
+              deptCode = extracted; // Keep as "10", "11", ..., "95"
+            }
           }
           
           return deptCode === state.memorials.selectedDepartement;
