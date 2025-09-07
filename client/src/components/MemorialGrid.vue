@@ -1,4 +1,3 @@
-
 <template>
     <v-row>
       <v-col
@@ -111,7 +110,7 @@
             <v-card-title class="text-h5 pb-2">
               {{ selectedVictim?.prenom }} {{ selectedVictim?.nom }}
             </v-card-title>
-            
+
             <!-- Victim Details -->
             <v-card-text class="pb-2">
               <div class="victim-details">
@@ -127,7 +126,7 @@
                   <v-icon size="small" class="mr-2">mdi-map-marker</v-icon>
                   <strong>Lieu:</strong> {{ formatLocation(selectedVictim?.cog) }}
                 </div>
-                
+
                 <!-- Tags -->
                 <div v-if="selectedVictim?.tags" class="detail-item mb-3">
                   <v-icon size="small" class="mr-2">mdi-tag-multiple</v-icon>
@@ -197,7 +196,7 @@
           </div>
         </v-card-text>
 
-        
+
 
         <v-card-actions>
           <v-spacer></v-spacer>
@@ -227,6 +226,7 @@
 <script>
 import { mapStores } from 'pinia';
 import { useDataStore } from '../services/store.js';
+import { getDepartementFromCog, normalizeDepartementCode } from '../utils/utils.js';
 
 export default {
   name: 'MemorialGrid',
@@ -312,7 +312,7 @@ export default {
           console.error('Error fetching victim resume:', error);
         }
       }
-      
+
       this.selectedVictim = victim;
       this.resumeDialog = true;
     },

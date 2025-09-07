@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import api from "./api.js";
 import { DepartementNames } from "../utils/departementNames.js";
 import { MetricsConfig } from "../utils/metricsConfig.js";
-import { getDepartementFromCog, normalizeDepartementCode } from "../utils/gen.js";
+import { getDepartementFromCog, normalizeDepartementCode } from "../utils/utils.js";
 
 export const useDataStore = defineStore("data", {
   state: () => ({
