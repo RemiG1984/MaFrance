@@ -35,7 +35,7 @@ export function getDepartementFromCog(cog) {
   
   const cogStr = cog.toString();
   
-  // Handle special cases for overseas territories
+  // Handle special cases for overseas territories (5-digit codes)
   if (cogStr.startsWith('971')) return '971'; // Guadeloupe
   if (cogStr.startsWith('972')) return '972'; // Martinique
   if (cogStr.startsWith('973')) return '973'; // Guyane
@@ -44,8 +44,16 @@ export function getDepartementFromCog(cog) {
   if (cogStr.startsWith('2A')) return '2A'; // Corse-du-Sud
   if (cogStr.startsWith('2B')) return '2B'; // Haute-Corse
   
-  // Metropolitan France - first 2 digits
-  if (cogStr.length >= 2) {
+  // Metropolitan France
+  if (cogStr.length === 4) {
+    // 4-character COG: first character is département (needs padding)
+    const deptChar = cogStr.substring(0, 1);
+    return deptChar.padStart(2, '0');
+  } else if (cogStr.length >= 5) {
+    // 5-character COG: first 2 digits are département
+    return cogStr.substring(0, 2);
+  } else if (cogStr.length >= 2) {
+    // Fallback: assume first 2 characters
     return cogStr.substring(0, 2);
   }
   
