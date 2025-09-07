@@ -10,8 +10,8 @@ function importFrancocides(db, callback) {
                 CREATE TABLE IF NOT EXISTS francocides (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     prenom TEXT NOT NULL,
-                    nom TEXT NOT NULL,
-                    age INTEGER NOT NULL,
+                    nom TEXT,
+                    age INTEGER,
                     sexe TEXT NOT NULL,
                     date_deces TEXT NOT NULL,
                     cog TEXT NOT NULL,
@@ -56,8 +56,6 @@ function importFrancocides(db, callback) {
 
                     const missingFields = [];
                     if (!row['prenom']) missingFields.push('prenom');
-                    if (!row['nom']) missingFields.push('nom');
-                    if (!row['age']) missingFields.push('age');
                     if (!row['sexe']) missingFields.push('sexe');
                     if (!row['date_deces']) missingFields.push('date_deces');
                     if (!row['cog']) missingFields.push('cog');
@@ -68,12 +66,15 @@ function importFrancocides(db, callback) {
                         return;
                     }
 
-                    // Validate age is a number
-                    const age = parseInt(row['age'], 10);
-                    if (isNaN(age)) {
-                        console.warn(`Ligne ignorée dans francocides_valides.csv (âge invalide):`, row);
-                        francocidesSkipped++;
-                        return;
+                    // Validate age is a number if provided
+                    let age = null;
+                    if (row['age'] && row['age'].trim()) {
+                        age = parseInt(row['age'], 10);
+                        if (isNaN(age)) {
+                            console.warn(`Ligne ignorée dans francocides_valides.csv (âge invalide):`, row);
+                            francocidesSkipped++;
+                            return;
+                        }
                     }
 
                     // Convert French date format (DD/MM/YYYY) to ISO format (YYYY-MM-DD)
@@ -90,7 +91,7 @@ function importFrancocides(db, callback) {
 
                     francocidesData.push({
                         prenom: row['prenom'].trim(),
-                        nom: row['nom'].trim(),
+                        nom: row['nom'] && row['nom'].trim() ? row['nom'].trim() : null,
                         age: age,
                         sexe: row['sexe'].trim(),
                         date_deces: convertFrenchDateToISO(row['date_deces']),

@@ -17,7 +17,7 @@
             cover
             class="memorial-image"
             loading="lazy"
-            :alt="'Photo de ' + victim.prenom + ' ' + victim.nom"
+            :alt="'Photo de ' + formatVictimName(victim.prenom, victim.nom)"
             @click="showResume(victim)"
             style="cursor: pointer;"
           >
@@ -30,11 +30,11 @@
           </div>
 
           <v-card-title class="text-h6 pb-0">
-            {{ victim.prenom }} {{ victim.nom }}
+            {{ formatVictimName(victim.prenom, victim.nom) }}
           </v-card-title>
 
           <v-card-subtitle class="pb-2">
-            <div class="text-body-2 text-grey-darken-1 ml-1">({{ victim.age }} ans)</div>
+            <div class="text-body-2 text-grey-darken-1 ml-1">({{ formatAge(victim.age) }})</div>
           </v-card-subtitle>
 
           <v-card-subtitle class="pb-2 text-wrap">
@@ -99,7 +99,7 @@
               height="250"
               cover
               class="dialog-image"
-              :alt="'Photo de ' + selectedVictim.prenom + ' ' + selectedVictim.nom"
+              :alt="'Photo de ' + formatVictimName(selectedVictim?.prenom, selectedVictim?.nom)"
             >
               <template v-slot:placeholder>
                 <v-skeleton-loader type="image" />
@@ -108,7 +108,7 @@
           </v-col>
           <v-col :cols="selectedVictim?.photo ? 12 : 12" :md="selectedVictim?.photo ? 8 : 12">
             <v-card-title class="text-h5 pb-2">
-              {{ selectedVictim?.prenom }} {{ selectedVictim?.nom }}
+              {{ formatVictimName(selectedVictim?.prenom, selectedVictim?.nom) }}
             </v-card-title>
 
             <!-- Victim Details -->
@@ -116,7 +116,7 @@
               <div class="victim-details">
                 <div class="detail-item mb-2">
                   <v-icon size="small" class="mr-2">mdi-calendar</v-icon>
-                  <strong>Âge:</strong> {{ selectedVictim?.age }} ans
+                  <strong>Âge:</strong> {{ formatAge(selectedVictim?.age) }}
                 </div>
                 <div class="detail-item mb-2">
                   <v-icon size="small" class="mr-2">mdi-calendar-remove</v-icon>
@@ -226,7 +226,7 @@
 <script>
 import { mapStores } from 'pinia';
 import { useDataStore } from '../services/store.js';
-import { getDepartementFromCog, normalizeDepartementCode, formatDate, getGenderText, parseTagsArray } from '../utils/utils.js';
+import { getDepartementFromCog, normalizeDepartementCode, formatDate, getGenderText, parseTagsArray, formatVictimName, formatAge } from '../utils/utils.js';
 
 export default {
   name: 'MemorialGrid',
@@ -257,6 +257,8 @@ export default {
   },
   methods: {
     formatDate,
+    formatVictimName,
+    formatAge,
 
     async fetchLocationData() {
       const uniqueCogs = [...new Set(this.victims.map(v => v.cog).filter(Boolean))];

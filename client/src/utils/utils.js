@@ -1,4 +1,3 @@
-
 export function dedupeArrByKey(arr, key) {
   const map = new Map();
   return arr.filter(obj => {
@@ -33,9 +32,9 @@ export function formatNumber(value, decimals = 0) {
  */
 export function getDepartementFromCog(cog) {
   if (!cog) return null;
-  
+
   const cogStr = cog.toString();
-  
+
   // Handle special cases for overseas territories (5-digit codes)
   if (cogStr.startsWith('971')) return '971'; // Guadeloupe
   if (cogStr.startsWith('972')) return '972'; // Martinique
@@ -44,7 +43,7 @@ export function getDepartementFromCog(cog) {
   if (cogStr.startsWith('976')) return '976'; // Mayotte
   if (cogStr.startsWith('2A')) return '2A'; // Corse-du-Sud
   if (cogStr.startsWith('2B')) return '2B'; // Haute-Corse
-  
+
   // Metropolitan France
   if (cogStr.length === 4) {
     // 4-character COG: first character is département (needs padding)
@@ -57,7 +56,7 @@ export function getDepartementFromCog(cog) {
     // Fallback: assume first 2 characters
     return cogStr.substring(0, 2);
   }
-  
+
   return null;
 }
 
@@ -68,18 +67,18 @@ export function getDepartementFromCog(cog) {
  */
 export function normalizeDepartementCode(deptCode) {
   if (!deptCode) return '';
-  
+
   const deptStr = deptCode.toString().trim().toUpperCase();
-  
+
   // Handle special cases (Corsica, overseas territories)
   if (['2A', '2B'].includes(deptStr)) return deptStr;
   if (['971', '972', '973', '974', '976'].includes(deptStr)) return deptStr;
-  
+
   // For numeric départements, pad with leading zero if single digit
   if (/^\d+$/.test(deptStr)) {
     return deptStr.padStart(2, '0');
   }
-  
+
   return deptStr;
 }
 
@@ -222,7 +221,18 @@ export function getGenderText(sexe) {
  */
 export function parseTagsArray(tags) {
   if (!tags) return [];
-  return tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+  return tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+}
+
+export function formatVictimName(prenom, nom) {
+  if (!prenom && !nom) return 'Nom inconnu';
+  if (!nom) return prenom;
+  if (!prenom) return nom;
+  return `${prenom} ${nom}`;
+}
+
+export function formatAge(age) {
+  return age ? `${age} ans` : 'Âge inconnu';
 }
 
 /**
