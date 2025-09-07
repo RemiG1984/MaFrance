@@ -3,6 +3,17 @@
   <v-card>
     <v-card-text class="pa-0 position-relative">
       <div id="francocides-map" class="map-container"></div>
+      <v-btn
+        v-if="selectedDepartement"
+        @click="clearDepartementFilter"
+        color="primary"
+        variant="elevated"
+        size="small"
+        class="france-button"
+        prepend-icon="mdi-map"
+      >
+        France
+      </v-btn>
     </v-card-text>
   </v-card>
 </template>
@@ -31,6 +42,7 @@ export default {
       dataRef: {},
       colorscale: null,
       legend: null,
+      selectedDepartement: null,
     }
   },
   computed: {
@@ -237,9 +249,20 @@ export default {
     },
     
     filterByDepartement(deptCode, deptName) {
-      // Toggle the département tag in the store
-      const tagName = `Département ${deptName}`;
-      this.dataStore.toggleSelectedTag(tagName);
+      // Set the selected département for filtering
+      if (this.selectedDepartement === deptCode) {
+        this.selectedDepartement = null;
+      } else {
+        this.selectedDepartement = deptCode;
+      }
+      
+      // Update the store with the département filter
+      this.dataStore.setDepartementFilter(this.selectedDepartement);
+    },
+
+    clearDepartementFilter() {
+      this.selectedDepartement = null;
+      this.dataStore.setDepartementFilter(null);
     },
     
     showTooltip(e, feature) {
@@ -331,5 +354,13 @@ export default {
 .map-container {
   width: 100%;
   height: 400px;
+}
+
+.france-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 </style>

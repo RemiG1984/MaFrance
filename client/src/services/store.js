@@ -64,6 +64,7 @@ export const useDataStore = defineStore("data", {
       victims: [],
       tags: [],
       selectedTags: [],
+      selectedDepartement: null,
       sortBy: 'year_desc',
       loading: false,
     },
@@ -737,6 +738,10 @@ export const useDataStore = defineStore("data", {
       this.memorials.selectedTags = [];
     },
 
+    setDepartementFilter(deptCode) {
+      this.memorials.selectedDepartement = deptCode;
+    },
+
     setSortBy(sort) {
       this.memorials.sortBy = sort;
     },
@@ -855,6 +860,30 @@ export const useDataStore = defineStore("data", {
 
     filteredVictims: (state) => (query) => {
       let filtered = state.sortedVictims;
+      
+      // Filter by selected département
+      if (state.memorials.selectedDepartement) {
+        filtered = filtered.filter(victim => {
+          if (!victim.cog) return false;
+          const cog = victim.cog.toString();
+          let deptCode = null;
+          
+          // Extract département from COG code
+          if (cog.startsWith('971')) deptCode = '971'; // Guadeloupe
+          else if (cog.startsWith('972')) deptCode = '972'; // Martinique
+          else if (cog.startsWith('973')) deptCode = '973'; // Guyane
+          else if (cog.startsWith('974')) deptCode = '974'; // Réunion
+          else if (cog.startsWith('976')) deptCode = '976'; // Mayotte
+          else if (cog.startsWith('2A')) deptCode = '2A'; // Corse-du-Sud
+          else if (cog.startsWith('2B')) deptCode = '2B'; // Haute-Corse
+          else if (cog.length >= 2) {
+            // Metropolitan France - first 2 digits
+            deptCode = cog.substring(0, 2);
+          }
+          
+          return deptCode === state.memorials.selectedDepartement;
+        });
+      }
       
       // Filter by selected tags
       if (state.memorials.selectedTags.length) {
