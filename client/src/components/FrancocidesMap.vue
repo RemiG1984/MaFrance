@@ -33,7 +33,7 @@ export default {
       layerGroup: null,
       departementsLayer: null,
       globalTooltip: null,
-      scaleColors: ['#ffffff', '#ffff99', '#ffcc00', '#ff9900', '#ff6600', '#ff3300', '#cc0000', '#990000', '#660000'],
+      scaleColors: ['#ffffff', '#fffbcc', '#ffff99', '#ffcc00', '#ff9900', '#ff6600', '#ff3300', '#cc0000', '#990000', '#660000'],
       scaleDomain: {
         min: 0,
         max: 10,
@@ -181,7 +181,7 @@ export default {
           fillColor: '#ffffff',
           weight: 1,
           opacity: 0.8,
-          color: '#cccccc',
+          color: '#666666',
           fillOpacity: 0.8
         };
       }
