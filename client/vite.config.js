@@ -53,7 +53,7 @@ export default defineConfig({
   },
   server: {
     host: '0.0.0.0',
-    port: 5173,
+    port: 5000,
     hmr: true, // Ensure HMR is enabled
     allowedHosts: [
       'ccfbc9aa-5090-4af0-90de-762081b314b7-00-28xht4x6ewgrz.spock.replit.dev', // Add the Replit host
