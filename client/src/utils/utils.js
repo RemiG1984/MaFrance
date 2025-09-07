@@ -224,12 +224,7 @@ export function parseTagsArray(tags) {
   return tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
 }
 
-export function formatVictimName(prenom, nom) {
-  if (!prenom && !nom) return 'Nom inconnu';
-  if (!nom) return prenom;
-  if (!prenom) return nom;
-  return `${prenom} ${nom}`;
-}
+
 
 export function formatAge(age) {
   return age ? `${age} ans` : 'Âge inconnu';
@@ -295,7 +290,7 @@ export function filterVictims(victims, selectedTags = [], selectedDepartement = 
   if (searchQuery) {
     const lowerQuery = searchQuery.toLowerCase();
     filtered = filtered.filter(victim =>
-      `${victim.prenom} ${victim.nom}`.toLowerCase().includes(lowerQuery) ||
+      victim.prenom.toLowerCase().includes(lowerQuery) ||
       locationCache[victim.cog]?.toLowerCase().includes(lowerQuery)
     );
   }

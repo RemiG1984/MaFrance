@@ -17,7 +17,7 @@
             cover
             class="memorial-image"
             loading="lazy"
-            :alt="'Photo de ' + formatVictimName(victim.prenom, victim.nom)"
+            :alt="'Photo de ' + victim.prenom"
             @click="showResume(victim)"
             style="cursor: pointer;"
           >
@@ -30,7 +30,7 @@
           </div>
 
           <v-card-title class="text-h6 pb-0">
-            {{ formatVictimName(victim.prenom, victim.nom) }}
+            {{ victim.prenom }}
           </v-card-title>
 
           <v-card-subtitle class="pb-2">
@@ -99,7 +99,7 @@
               height="250"
               cover
               class="dialog-image"
-              :alt="'Photo de ' + formatVictimName(selectedVictim?.prenom, selectedVictim?.nom)"
+              :alt="'Photo de ' + selectedVictim?.prenom"
             >
               <template v-slot:placeholder>
                 <v-skeleton-loader type="image" />
@@ -108,7 +108,7 @@
           </v-col>
           <v-col :cols="selectedVictim?.photo ? 12 : 12" :md="selectedVictim?.photo ? 8 : 12">
             <v-card-title class="text-h5 pb-2">
-              {{ formatVictimName(selectedVictim?.prenom, selectedVictim?.nom) }}
+              {{ selectedVictim?.prenom }}
             </v-card-title>
 
             <!-- Victim Details -->
@@ -226,7 +226,7 @@
 <script>
 import { mapStores } from 'pinia';
 import { useDataStore } from '../services/store.js';
-import { getDepartementFromCog, normalizeDepartementCode, formatDate, getGenderText, parseTagsArray, formatVictimName, formatAge } from '../utils/utils.js';
+import { getDepartementFromCog, normalizeDepartementCode, formatDate, getGenderText, parseTagsArray, formatAge } from '../utils/utils.js';
 
 export default {
   name: 'MemorialGrid',
@@ -257,7 +257,6 @@ export default {
   },
   methods: {
     formatDate,
-    formatVictimName,
     formatAge,
 
     async fetchLocationData() {
