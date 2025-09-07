@@ -2,7 +2,14 @@ import { defineStore } from "pinia";
 import api from "./api.js";
 import { DepartementNames } from "../utils/departementNames.js";
 import { MetricsConfig } from "../utils/metricsConfig.js";
-import { getDepartementFromCog, normalizeDepartementCode } from "../utils/utils.js";
+import { 
+  getDepartementFromCog, 
+  normalizeDepartementCode, 
+  serializeStats, 
+  aggregateStats,
+  sortVictims,
+  filterVictims
+} from "../utils/utils.js";
 
 export const useDataStore = defineStore("data", {
   state: () => ({
@@ -115,9 +122,9 @@ export const useDataStore = defineStore("data", {
         country.migrants = results[9];
         country.qpv = results[10];
         country.nat1 = results[11];
-        country.namesSeries = this.serializeStats(country.namesHistory);
-        country.crimeSeries = this.serializeStats(country.crimeHistory);
-        country.crimeAggreg = this.aggregateStats(country.crimeSeries.data);
+        country.namesSeries = serializeStats(country.namesHistory);
+        country.crimeSeries = serializeStats(country.crimeHistory);
+        country.crimeAggreg = aggregateStats(country.crimeSeries.data, MetricsConfig.calculatedMetrics);
 
         return country;
       } catch (error) {
@@ -165,10 +172,11 @@ export const useDataStore = defineStore("data", {
         departement.subventions = results[9];
         departement.migrants = results[10] || [];
         departement.nat1 = results[11];
-        departement.namesSeries = this.serializeStats(departement.namesHistory);
-        departement.crimeSeries = this.serializeStats(results[3]);
-        departement.crimeAggreg = this.aggregateStats(
+        departement.namesSeries = serializeStats(departement.namesHistory);
+        departement.crimeSeries = serializeStats(results[3]);
+        departement.crimeAggreg = aggregateStats(
           departement.crimeSeries.data,
+          MetricsConfig.calculatedMetrics
         );
 
         return departement;
@@ -209,8 +217,8 @@ export const useDataStore = defineStore("data", {
         commune.subventions = results[6];
         commune.migrants = results[7] || [];
         commune.nat1 = results[8];
-        commune.crimeSeries = this.serializeStats(results[2]);
-        commune.crimeAggreg = this.aggregateStats(commune.crimeSeries.data);
+        commune.crimeSeries = serializeStats(results[2]);
+        commune.crimeAggreg = aggregateStats(commune.crimeSeries.data, MetricsConfig.calculatedMetrics);
 
         return commune;
       } catch (error) {
@@ -299,96 +307,7 @@ export const useDataStore = defineStore("data", {
       this.setLevel("commune");
     },
 
-    aggregateStats(data) {
-      // crée des stats "composites" en utilisant les formules de calculatedMetrics
-      const result = {};
-
-      // Pour chaque métrique calculée définie dans MetricsConfig
-      Object.keys(MetricsConfig.calculatedMetrics).forEach((metricKey) => {
-        const calculation = MetricsConfig.calculatedMetrics[metricKey];
-
-        // Vérifier que tous les composants nécessaires sont disponibles
-        const inputSeries = calculation.components
-          .map((key) => data[key])
-          .filter((serie) => serie); // Filtrer les séries undefined/null
-
-        if (inputSeries.length === 0) return;
-
-        const seriesLength = inputSeries[0].length;
-
-        // Calculer la métrique pour chaque entrée/level en utilisant la formule
-        result[metricKey] = [];
-
-        for (let i = 0; i < seriesLength; i++) {
-          // Créer un objet de données pour cette année/période
-          const dataPoint = {};
-          calculation.components.forEach((key) => {
-            dataPoint[key] = data[key] ? data[key][i] || 0 : 0;
-          });
-
-          // Appliquer la formule
-          const calculatedValue = calculation.formula(dataPoint);
-          result[metricKey].push(calculatedValue);
-        }
-      });
-
-      return result;
-    },
-
-    serializeStats(data) {
-      // 1. Récupération de toutes les années et de toutes les clés d'indicateurs disponibles
-      const allYears = new Set();
-      const allKeys = new Set();
-
-      if (data.length === 0)
-        return {
-          labels: [],
-          data: {},
-        };
-
-      const yearKey = data[0].hasOwnProperty("annee") ? "annee" : "annais";
-
-      // ensure years order
-      data.sort((a, b) => {
-        a[yearKey] - b[yearKey];
-      });
-
-      data.forEach((entry) => {
-        Object.keys(entry).forEach((key) => {
-          if (key === yearKey) {
-            allYears.add(entry[yearKey]);
-          } else if (key !== "COG" && key !== "dep" && key !== "country") {
-            allKeys.add(key);
-          }
-        });
-      });
-
-      const labels = Array.from(allYears);
-
-      // 2. Construction de la structure de données
-      const result = {};
-
-      for (const key of allKeys) {
-        result[key] = {};
-
-        // Création d'un map année -> valeur pour ce niveau et cette clé
-        const dataMap = {};
-        data.forEach((entry) => {
-          if (entry[yearKey] && entry[key] !== undefined) {
-            const year = entry[yearKey];
-            dataMap[year] = entry[key];
-          }
-        });
-
-        // Création du tableau avec null pour les années manquantes
-        result[key] = labels.map((year) => dataMap[year] ?? null);
-      }
-
-      return {
-        labels,
-        data: result,
-      };
-    },
+    
 
     // Actions utilitaires
     clearDepartementData() {
@@ -841,56 +760,18 @@ export const useDataStore = defineStore("data", {
 
     // Getters for memorial page
     sortedVictims: (state) => {
-      if (!state.memorials.victims.length) return [];
-      let sorted = [...state.memorials.victims];
-      switch (state.memorials.sortBy) {
-        case 'year_desc':
-          return sorted.sort((a, b) => new Date(b.date_deces) - new Date(a.date_deces));
-        case 'year_asc':
-          return sorted.sort((a, b) => new Date(a.date_deces) - new Date(b.date_deces));
-        case 'age_asc':
-          return sorted.sort((a, b) => (a.age || 0) - (b.age || 0));
-        case 'age_desc':
-          return sorted.sort((a, b) => (b.age || 0) - (a.age || 0));
-        case 'location_asc':
-          return sorted.sort((a, b) => (a.cog || '').localeCompare(b.cog || ''));
-        default:
-          return sorted;
-      }
+      return sortVictims(state.memorials.victims, state.memorials.sortBy);
     },
 
     filteredVictims: (state) => (query) => {
-      let filtered = state.sortedVictims;
-
-      // Filter by selected département
-      if (state.memorials.selectedDepartement) {
-        filtered = filtered.filter(victim => {
-          const deptCode = getDepartementFromCog(victim.cog);
-          return deptCode === state.memorials.selectedDepartement;
-        });
-      }
-
-      // Filter by selected tags
-      if (state.memorials.selectedTags.length) {
-        filtered = filtered.filter(victim => {
-          if (!victim.tags) return false;
-          const victimTags = victim.tags.split(',').map(tag => tag.trim());
-          return state.memorials.selectedTags.every(selectedTag =>
-            victimTags.includes(selectedTag)
-          );
-        });
-      }
-
-      // Filter by search query
-      if (query) {
-        const lowerQuery = query.toLowerCase();
-        filtered = filtered.filter(victim =>
-          `${victim.prenom} ${victim.nom}`.toLowerCase().includes(lowerQuery) ||
-          state.locationCache[victim.cog]?.toLowerCase().includes(lowerQuery)
-        );
-      }
-
-      return filtered;
+      const sortedVictims = sortVictims(state.memorials.victims, state.memorials.sortBy);
+      return filterVictims(
+        sortedVictims,
+        state.memorials.selectedTags,
+        state.memorials.selectedDepartement,
+        query,
+        state.locationCache
+      );
     },
   },
 });

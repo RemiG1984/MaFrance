@@ -226,7 +226,7 @@
 <script>
 import { mapStores } from 'pinia';
 import { useDataStore } from '../services/store.js';
-import { getDepartementFromCog, normalizeDepartementCode } from '../utils/utils.js';
+import { getDepartementFromCog, normalizeDepartementCode, formatDate, getGenderText, parseTagsArray } from '../utils/utils.js';
 
 export default {
   name: 'MemorialGrid',
@@ -256,19 +256,7 @@ export default {
     },
   },
   methods: {
-    formatDate(dateString) {
-      if (!dateString) return 'Date inconnue';
-      try {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('fr-FR', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        });
-      } catch (error) {
-        return dateString;
-      }
-    },
+    formatDate,
 
     async fetchLocationData() {
       const uniqueCogs = [...new Set(this.victims.map(v => v.cog).filter(Boolean))];
@@ -280,16 +268,9 @@ export default {
       return this.locationData[cog] || `Lieu inconnu (COG: ${cog})`;
     },
 
-    getGenderText(sexe) {
-      if (sexe?.toLowerCase() === 'f') return 'Tuée';
-      if (sexe?.toLowerCase() === 'm') return 'Tué';
-      return 'Tué(e)';
-    },
+    getGenderText,
 
-    getTagsArray(tags) {
-      if (!tags) return [];
-      return tags.split(',').map(tag => tag.trim()).filter(tag => tag);
-    },
+    getTagsArray: parseTagsArray,
 
     selectTag(tag) {
       this.dataStore.toggleSelectedTag(tag);
