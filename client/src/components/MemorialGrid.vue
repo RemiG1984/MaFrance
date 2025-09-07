@@ -129,7 +129,7 @@
                 </div>
                 
                 <!-- Tags -->
-                <div v-if="selectedVictim?.tags" class="detail-item">
+                <div v-if="selectedVictim?.tags" class="detail-item mb-3">
                   <v-icon size="small" class="mr-2">mdi-tag-multiple</v-icon>
                   <strong>Tags:</strong>
                   <div class="tags-container dialog-tags mt-1">
@@ -143,6 +143,38 @@
                     >
                       {{ tag }}
                     </v-chip>
+                  </div>
+                </div>
+
+                <!-- Sources -->
+                <div v-if="selectedVictim?.source1 || selectedVictim?.source2" class="detail-item">
+                  <v-icon size="small" class="mr-2">mdi-link</v-icon>
+                  <strong>Sources:</strong>
+                  <div class="sources-container dialog-sources mt-1 ml-6">
+                    <v-btn
+                      v-if="selectedVictim.source1"
+                      :href="selectedVictim.source1"
+                      target="_blank"
+                      variant="outlined"
+                      color="primary"
+                      size="x-small"
+                      class="mr-2 mb-1"
+                      prepend-icon="mdi-open-in-new"
+                    >
+                      Source 1
+                    </v-btn>
+                    <v-btn
+                      v-if="selectedVictim.source2"
+                      :href="selectedVictim.source2"
+                      target="_blank"
+                      variant="outlined"
+                      color="primary"
+                      size="x-small"
+                      class="mb-1"
+                      prepend-icon="mdi-open-in-new"
+                    >
+                      Source 2
+                    </v-btn>
                   </div>
                 </div>
               </div>
@@ -165,39 +197,7 @@
           </div>
         </v-card-text>
 
-        <!-- Sources -->
-        <v-card-text v-if="selectedVictim?.source1 || selectedVictim?.source2" class="pt-0">
-          <div class="text-h6 mb-2">
-            <v-icon class="mr-2">mdi-link</v-icon>
-            Sources
-          </div>
-          <div class="sources-container">
-            <v-btn
-              v-if="selectedVictim.source1"
-              :href="selectedVictim.source1"
-              target="_blank"
-              variant="outlined"
-              color="primary"
-              size="small"
-              class="mr-2 mb-2"
-              prepend-icon="mdi-open-in-new"
-            >
-              Source 1
-            </v-btn>
-            <v-btn
-              v-if="selectedVictim.source2"
-              :href="selectedVictim.source2"
-              target="_blank"
-              variant="outlined"
-              color="primary"
-              size="small"
-              class="mb-2"
-              prepend-icon="mdi-open-in-new"
-            >
-              Source 2
-            </v-btn>
-          </div>
-        </v-card-text>
+        
 
         <v-card-actions>
           <v-spacer></v-spacer>
@@ -435,5 +435,9 @@ export default {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.sources-container.dialog-sources {
+  margin-left: 0;
 }
 </style>
