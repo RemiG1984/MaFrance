@@ -340,30 +340,34 @@ export default {
 .tags-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 3px;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  padding: 4px 0; /* Vertical padding only */
-  overflow: hidden;
+  padding: 4px 0;
+  justify-content: flex-start;
+  align-items: flex-start;
   margin-left: 0; /* Default no margin for grid view */
 }
 
 .tags-container.dialog-tags {
   margin-left: 24px; /* Specific margin for dialog view */
+  gap: 4px;
 }
 
 .memorial-tag {
   font-size: 0.7rem !important;
-  flex-shrink: 1;
-  max-width: 48%;
-  min-width: 0;
+  flex: 0 0 auto;
+  min-width: fit-content;
+  max-width: 100%;
   word-break: break-word;
-  white-space: normal;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: nowrap;
   box-sizing: border-box;
   padding: 2px 6px;
+  margin: 0 !important;
+  line-height: 1.1;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .memorial-tag:hover {
@@ -384,8 +388,17 @@ export default {
   }
   .memorial-tag {
     font-size: 0.65rem;
-    max-width: 49%;
     padding: 1px 4px;
+  }
+  .tags-container {
+    gap: 2px;
+  }
+}
+
+@media (max-width: 400px) {
+  .memorial-tag {
+    font-size: 0.6rem;
+    padding: 1px 3px;
   }
 }
 

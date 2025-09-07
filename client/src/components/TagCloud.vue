@@ -8,7 +8,7 @@
           :color="isTagSelected(tagObj.tag) ? 'primary' : 'blue-grey-lighten-3'"
           :variant="isTagSelected(tagObj.tag) ? 'elevated' : 'outlined'"
           :size="getChipSize(tagObj.count)"
-          class="ma-1 word-cloud-tag"
+          class="tag-cloud-chip word-cloud-tag"
           clickable
           :aria-selected="isTagSelected(tagObj.tag)"
           role="button"
@@ -108,24 +108,43 @@ export default {
 }
 
 .tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
   height: 100%;
   overflow-y: auto;
-  padding-right: 8px;
+  padding: 8px 8px 8px 0;
+  justify-content: flex-start;
+  align-items: flex-start;
+  align-content: flex-start;
+}
+
+.tag-cloud-chip {
+  flex: 0 0 auto;
+  margin: 0 !important;
+  max-width: calc(100% - 6px);
+  word-break: break-word;
+  line-height: 1.2;
 }
 
 @media (max-width: 960px) {
   .tags-container {
     max-height: 300px;
     height: auto;
+    gap: 5px;
   }
 }
 
 @media (max-width: 600px) {
   .tags-container {
     gap: 4px;
+    padding: 6px 6px 6px 0;
   }
   .word-cloud-tag {
     font-size: 0.8rem;
+  }
+  .tag-cloud-chip {
+    max-width: calc(100% - 4px);
   }
 }
 </style>
