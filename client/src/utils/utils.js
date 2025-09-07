@@ -291,6 +291,7 @@ export function filterVictims(victims, selectedTags = [], selectedDepartement = 
     const lowerQuery = searchQuery.toLowerCase();
     filtered = filtered.filter(victim =>
       victim.prenom.toLowerCase().includes(lowerQuery) ||
+      (victim.nom && victim.nom.toLowerCase().includes(lowerQuery)) ||
       locationCache[victim.cog]?.toLowerCase().includes(lowerQuery)
     );
   }

@@ -17,7 +17,7 @@
             cover
             class="memorial-image"
             loading="lazy"
-            :alt="'Photo de ' + victim.prenom"
+            :alt="'Photo de ' + victim.prenom + (victim.nom ? ' ' + victim.nom : '')"
             @click="showResume(victim)"
             style="cursor: pointer;"
           >
@@ -30,7 +30,7 @@
           </div>
 
           <v-card-title class="text-h6 pb-0">
-            {{ victim.prenom }}
+            {{ victim.prenom }}{{ victim.nom ? ' ' + victim.nom : '' }}
           </v-card-title>
 
           <v-card-subtitle class="pb-2">
@@ -99,7 +99,7 @@
               height="250"
               cover
               class="dialog-image"
-              :alt="'Photo de ' + selectedVictim?.prenom"
+              :alt="'Photo de ' + selectedVictim?.prenom + (selectedVictim?.nom ? ' ' + selectedVictim?.nom : '')"
             >
               <template v-slot:placeholder>
                 <v-skeleton-loader type="image" />
@@ -108,7 +108,7 @@
           </v-col>
           <v-col :cols="selectedVictim?.photo ? 12 : 12" :md="selectedVictim?.photo ? 8 : 12">
             <v-card-title class="text-h5 pb-2">
-              {{ selectedVictim?.prenom }}
+              {{ selectedVictim?.prenom }}{{ selectedVictim?.nom ? ' ' + selectedVictim?.nom : '' }}
             </v-card-title>
 
             <!-- Victim Details -->
