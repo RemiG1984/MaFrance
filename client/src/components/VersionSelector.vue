@@ -65,10 +65,12 @@ export default {
       const newTitle = this.dataStore.getCurrentPageTitle()
       document.title = newTitle
       
-      // Update header h1 if exists
-      const headerH1 = document.querySelector('h1')
-      if (headerH1) {
-        headerH1.textContent = newTitle
+      // Update header h1 only on Home page
+      if (this.$route.name === 'Home') {
+        const headerH1 = document.querySelector('h1')
+        if (headerH1) {
+          headerH1.textContent = newTitle
+        }
       }
     }
   },
