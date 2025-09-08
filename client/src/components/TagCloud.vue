@@ -157,6 +157,7 @@ export default {
   overflow-y: auto;
   overflow-x: hidden;
   padding: 8px 8px 8px 0;
+  max-width: 100%;
 }
 
 .tag-group {
