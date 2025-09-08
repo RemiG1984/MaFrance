@@ -5,26 +5,27 @@
         <h1 class="text-h4 font-weight-bold mb-2 mb-md-3">Mémorial des victimes de francocides</h1>
 
         <!-- Map and Filters Layout -->
-        <v-row class="mb-4 map-filter-row" no-gutters>
+        <v-row class="mb-3 map-filter-row" no-gutters>
           <!-- Map section -->
-          <v-col cols="12" lg="5" class="map-column pa-2">
-            <v-card class="h-100 d-flex flex-column">
-              <v-card-text class="pa-0 flex-grow-1">
+          <v-col cols="12" lg="5" xl="4" class="map-column pa-1">
+            <v-card class="h-100">
+              <v-card-text class="pa-1">
                 <FrancocidesMap />
               </v-card-text>
             </v-card>
           </v-col>
-          
+
           <!-- Filters section -->
-          <v-col cols="12" lg="7" class="filter-column pa-2">
-            <v-card class="h-100 d-flex flex-column">
-              <v-card-title class="pb-2">
-                <v-icon class="mr-2">mdi-filter-variant</v-icon>
-                Filtres
+          <v-col cols="12" lg="7" xl="8" class="filter-column pa-1">
+            <v-card class="h-100">
+              <v-card-title class="py-2 px-3">
+                <v-icon class="mr-2" size="small">mdi-filter-variant</v-icon>
+                <span class="text-subtitle-1">Filtres et recherche</span>
               </v-card-title>
-              <v-card-text class="flex-grow-1 d-flex flex-column">
+              <v-divider></v-divider>
+              <v-card-text class="pa-3 d-flex flex-column h-100">
                 <!-- Search and Sort Controls -->
-                <v-row class="mb-3">
+                <v-row class="mb-2" dense>
                   <v-col cols="12" sm="6">
                     <v-text-field
                       v-model="searchQuery"
@@ -46,7 +47,7 @@
                     ></v-select>
                   </v-col>
                 </v-row>
-                
+
                 <!-- Tag Cloud Container -->
                 <div class="tag-cloud-container flex-grow-1">
                   <TagCloud />
@@ -82,7 +83,7 @@
           </v-col>
         </v-row>
 
-        
+
       </v-col>
     </v-row>
   </v-container>
@@ -172,7 +173,7 @@ export default {
   .map-filter-row {
     min-height: auto;
   }
-  
+
   .tag-cloud-container {
     max-height: 250px;
   }
@@ -182,7 +183,7 @@ export default {
   .map-filter-row {
     flex-direction: column;
   }
-  
+
   .tag-cloud-container {
     min-height: 180px;
     max-height: 220px;
@@ -193,16 +194,16 @@ export default {
   .text-h4 {
     font-size: 1.5rem !important;
   }
-  
+
   .v-text-field {
     font-size: 0.9rem;
   }
-  
+
   .tag-cloud-container {
     min-height: 150px;
     max-height: 180px;
   }
-  
+
   .memorial-page {
     padding: 12px !important;
   }

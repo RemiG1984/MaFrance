@@ -336,7 +336,21 @@ export default {
 <style scoped>
 .map-container {
   width: 100%;
-  height: 400px;
+  height: 420px;
+  min-height: 380px;
+}
+
+@media (min-width: 1280px) {
+  .map-container {
+    height: 450px;
+  }
+}
+
+@media (max-width: 960px) {
+  .map-container {
+    height: 350px;
+    min-height: 300px;
+  }
 }
 
 .france-button {
