@@ -285,7 +285,7 @@ export default {
         const value = this.getFeatureValue(targetLayer.feature) || 0;
         const plural = value > 1 ? 's' : '';
         const content = `<div style="font-size: 14px; padding: 4px;">
-                          <b>${deptName}</b><br>
+                          <b>${deptName} (${deptCode})</b><br>
                           <span style="color: white; font-weight: bold;">${value} francocide${plural}</span>
                         </div>`;
 
@@ -311,7 +311,7 @@ export default {
       const value = this.getFeatureValue(feature) || 0;
       const plural = value > 1 ? 's' : '';
       const content = `<div style="font-size: 14px; padding: 4px;">
-                        <b>${properties.nom}</b><br>
+                        <b>${properties.nom} (${properties.code})</b><br>
                         <span style="color: #d32f2f; font-weight: bold;">${value} francocide${plural}</span>
                       </div>`;
 
