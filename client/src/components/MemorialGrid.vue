@@ -2,7 +2,7 @@
     <v-row>
       <v-col
         v-for="victim in victims"
-        :key="victim.id || `${victim.prenom}-${victim.nom}-${victim.date_deces}`"
+        :key="victim.id || `${victim.prenom}-${victim.nom}-${victim.date_deces}-${victim.age}-${victim.sexe}`"
         cols="12"
         sm="6"
         md="4"
