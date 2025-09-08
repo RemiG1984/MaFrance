@@ -2,7 +2,6 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home.vue'
 import Rankings from '../views/Rankings.vue'
 import Methodology from '../views/Methodology.vue'
-import Memorial from '../views/Memorial.vue'
 
 const routes = [
   {
