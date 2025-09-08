@@ -42,7 +42,6 @@
                 
                 <!-- Tag Cloud Filter -->
                 <div class="flex-grow-1 d-flex flex-column">
-                  <h4 class="text-subtitle-1 mb-2">Tags</h4>
                   <div class="tag-cloud-container flex-grow-1">
                     <TagCloud />
                   </div>
