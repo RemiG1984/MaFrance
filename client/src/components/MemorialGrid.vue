@@ -1,28 +1,5 @@
 <template>
-    <v-virtual-scroll
-      v-if="victims.length > 50"
-      :items="chunkedVictims"
-      :item-height="450"
-      height="600"
-      class="virtual-scroll-container"
-    >
-      <template v-slot:default="{ item: chunk }">
-        <v-row class="victim-chunk">
-          <v-col
-            v-for="victim in chunk"
-            :key="victim.id || `${victim.prenom}-${victim.nom}-${victim.date_deces}`"
-            cols="12"
-            sm="6"
-            md="4"
-            lg="3"
-            xl="2"
-          >
-            <victim-card :victim="victim" @show-resume="showResume" @select-tag="selectTag" />
-          </v-col>
-        </v-row>
-      </template>
-    </v-virtual-scroll>
-    <v-row v-else>
+    <v-row>
       <v-col
         v-for="victim in victims"
         :key="victim.id || `${victim.prenom}-${victim.nom}-${victim.date_deces}`"
@@ -197,15 +174,7 @@ export default {
     locationData() {
       return this.dataStore.locationCache;
     },
-    chunkedVictims() {
-      // Group victims into chunks for virtual scrolling
-      const chunkSize = 6; // 6 cards per row on large screens
-      const chunks = [];
-      for (let i = 0; i < this.victims.length; i += chunkSize) {
-        chunks.push(this.victims.slice(i, i + chunkSize));
-      }
-      return chunks;
-    },
+    
     // Memoize processed location data
     processedVictims() {
       return this.victims.map(victim => ({
@@ -374,14 +343,7 @@ export default {
 </script>
 
 <style scoped>
-.virtual-scroll-container {
-  max-height: 600px;
-  overflow-y: auto;
-}
 
-.victim-chunk {
-  margin-bottom: 16px;
-}
 
 .memorial-card {
   border: 1px double #b0b0b0;
