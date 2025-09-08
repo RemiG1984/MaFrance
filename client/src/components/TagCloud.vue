@@ -70,14 +70,40 @@ export default {
     tags() {
       const allTags = this.dataStore.memorials.tags;
       const selectedTags = this.dataStore.memorials.selectedTags;
+      const selectedDepartement = this.dataStore.memorials.selectedDepartement;
 
-      // If no tags are selected, show all tags
-      if (selectedTags.length === 0) {
-        return allTags;
+      // First filter victims by department if one is selected
+      let filteredVictims = this.dataStore.memorials.victims;
+      if (selectedDepartement) {
+        const { getDepartementFromCog } = require('../utils/utils.js');
+        filteredVictims = filteredVictims.filter(victim => {
+          const deptCode = getDepartementFromCog(victim.cog);
+          return deptCode === selectedDepartement;
+        });
       }
 
-      // Get all victims that have ALL the currently selected tags
-      const victimsWithSelectedTags = this.dataStore.memorials.victims.filter(victim => {
+      // If no tags are selected, show all tags from filtered victims
+      if (selectedTags.length === 0) {
+        const tagCounts = new Map();
+        
+        filteredVictims.forEach(victim => {
+          if (victim.tags) {
+            const victimTags = victim.tags.split(',').map(tag => tag.trim());
+            victimTags.forEach(tag => {
+              if (tag) {
+                tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+              }
+            });
+          }
+        });
+
+        return Array.from(tagCounts.entries())
+          .map(([tag, count]) => ({ tag, count }))
+          .sort((a, b) => b.count - a.count);
+      }
+
+      // Get all victims that have ALL the currently selected tags from filtered victims
+      const victimsWithSelectedTags = filteredVictims.filter(victim => {
         if (!victim.tags) return false;
         const victimTags = victim.tags.split(',').map(tag => tag.trim());
         return selectedTags.every(selectedTag => victimTags.includes(selectedTag));
