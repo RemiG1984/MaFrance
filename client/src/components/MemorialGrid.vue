@@ -1,5 +1,28 @@
 <template>
-    <v-row>
+    <v-virtual-scroll
+      v-if="victims.length > 50"
+      :items="chunkedVictims"
+      :item-height="450"
+      height="600"
+      class="virtual-scroll-container"
+    >
+      <template v-slot:default="{ item: chunk }">
+        <v-row class="victim-chunk">
+          <v-col
+            v-for="victim in chunk"
+            :key="victim.id || `${victim.prenom}-${victim.nom}-${victim.date_deces}`"
+            cols="12"
+            sm="6"
+            md="4"
+            lg="3"
+            xl="2"
+          >
+            <victim-card :victim="victim" @show-resume="showResume" @select-tag="selectTag" />
+          </v-col>
+        </v-row>
+      </template>
+    </v-virtual-scroll>
+    <v-row v-else>
       <v-col
         v-for="victim in victims"
         :key="victim.id || `${victim.prenom}-${victim.nom}-${victim.date_deces}`"
@@ -9,82 +32,7 @@
         lg="3"
         xl="2"
       >
-        <v-card class="memorial-card elevation-2 h-100">
-          <v-img
-            v-if="victim.photo"
-            :src="`/images/francocides/${victim.photo}`"
-            height="250"
-            cover
-            class="memorial-image"
-            loading="lazy"
-            :alt="'Photo de ' + victim.prenom + (victim.nom ? ' ' + victim.nom : '')"
-            @click="showResume(victim)"
-            style="cursor: pointer;"
-          >
-            <template v-slot:placeholder>
-              <v-skeleton-loader type="image" />
-            </template>
-          </v-img>
-          <div v-else class="memorial-placeholder d-flex align-center justify-center" style="height: 250px; background-color: #e8ecef; cursor: pointer;" @click="showResume(victim)">
-            <v-icon size="64" color="grey-lighten-2">mdi-account</v-icon>
-          </div>
-
-          <v-card-title class="text-h6 pb-0">
-            {{ victim.prenom }}{{ victim.nom ? ' ' + victim.nom : '' }}
-          </v-card-title>
-
-          <v-card-subtitle class="pb-2">
-            <div class="text-body-2 text-grey-darken-1 ml-1">({{ formatAge(victim.age) }})</div>
-          </v-card-subtitle>
-
-          <v-card-subtitle class="pb-2 text-wrap">
-            <div>{{ getGenderText(victim.sexe) }} le {{ formatDate(victim.date_deces) }} à {{ formatLocation(victim.cog) }}</div>
-          </v-card-subtitle>
-
-          <v-card-actions class="pt-0">
-            <v-btn
-              v-if="victim.source1"
-              :href="victim.source1"
-              target="_blank"
-              variant="text"
-              color="primary"
-              size="small"
-              aria-label="Voir la source 1"
-            >
-              Source 1
-            </v-btn>
-            <v-btn
-              v-if="victim.source2"
-              :href="victim.source2"
-              target="_blank"
-              variant="text"
-              color="primary"
-              size="small"
-              aria-label="Voir la source 2"
-            >
-              Source 2
-            </v-btn>
-          </v-card-actions>
-
-          <v-card-text v-if="victim.tags" class="pt-0 pb-2">
-            <div class="tags-container">
-              <v-chip
-                v-for="tag in getTagsArray(victim.tags)"
-                :key="tag"
-                size="x-small"
-                :color="isTagSelected(tag) ? 'primary' : 'blue-grey-lighten-3'"
-                :variant="isTagSelected(tag) ? 'elevated' : 'outlined'"
-                class="ma-1 memorial-tag"
-                clickable
-                role="button"
-                @click="selectTag(tag)"
-                :aria-label="`Filtrer par le tag ${tag}`"
-              >
-                {{ tag }}
-              </v-chip>
-            </div>
-          </v-card-text>
-        </v-card>
+        <victim-card :victim="victim" @show-resume="showResume" @select-tag="selectTag" />
       </v-col>
     </v-row>
 
@@ -227,9 +175,13 @@
 import { mapStores } from 'pinia';
 import { useDataStore } from '../services/store.js';
 import { getDepartementFromCog, normalizeDepartementCode, formatDate, getGenderText, parseTagsArray, formatAge } from '../utils/utils.js';
+import VictimCard from './VictimCard.vue';
 
 export default {
   name: 'MemorialGrid',
+  components: {
+    VictimCard
+  },
   props: {
     victims: { type: Array, default: () => [], required: true },
     loading: { type: Boolean, default: false },
@@ -245,24 +197,70 @@ export default {
     locationData() {
       return this.dataStore.locationCache;
     },
+    chunkedVictims() {
+      // Group victims into chunks for virtual scrolling
+      const chunkSize = 6; // 6 cards per row on large screens
+      const chunks = [];
+      for (let i = 0; i < this.victims.length; i += chunkSize) {
+        chunks.push(this.victims.slice(i, i + chunkSize));
+      }
+      return chunks;
+    },
+    // Memoize processed location data
+    processedVictims() {
+      return this.victims.map(victim => ({
+        ...victim,
+        processedLocation: this.getProcessedLocation(victim.cog),
+        processedTags: this.getProcessedTags(victim.tags),
+        fullName: `${victim.prenom}${victim.nom ? ' ' + victim.nom : ''}`
+      }));
+    }
   },
   watch: {
     victims: {
-      handler() {
-        this.fetchLocationData();
+      handler(newVictims, oldVictims) {
+        // Only fetch if victims actually changed and we have new COG codes
+        if (newVictims !== oldVictims) {
+          this.debouncedFetchLocationData();
+        }
       },
       immediate: true,
-      deep: true,
     },
+  },
+  created() {
+    // Debounce location data fetching
+    this.debouncedFetchLocationData = this.debounce(this.fetchLocationData, 100);
   },
   methods: {
     formatDate,
     formatAge,
 
+    debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    },
+
     async fetchLocationData() {
       const uniqueCogs = [...new Set(this.victims.map(v => v.cog).filter(Boolean))];
       
-      // Filter out international COG codes that don't need API calls
+      // Check if we already have all the location data we need
+      const missingCogs = uniqueCogs.filter(cog => 
+        !this.locationData[cog] && !this.isInternationalCode(cog)
+      );
+      
+      if (missingCogs.length > 0) {
+        await this.dataStore.fetchLocationData(missingCogs);
+      }
+    },
+
+    isInternationalCode(cog) {
       const internationalCodes = [
         'UK', 'ES', 'IT', 'DE', 'BE', 'CH', 'LU', 'NL', 'AT', 'PT', 'IE', 
         'DK', 'SE', 'NO', 'FI', 'PL', 'CZ', 'SK', 'HU', 'RO', 'BG', 'GR', 
@@ -270,13 +268,15 @@ export default {
         'JP', 'CN', 'IN', 'BR', 'AR', 'MX', 'ZA', 'EG', 'MA', 'TN', 'DZ', 
         'TR', 'RU', 'UA'
       ];
-      
-      // Only fetch data for French COG codes
-      const frenchCogs = uniqueCogs.filter(cog => !internationalCodes.includes(cog));
-      
-      if (frenchCogs.length > 0) {
-        await this.dataStore.fetchLocationData(frenchCogs);
-      }
+      return internationalCodes.includes(cog);
+    },
+
+    getProcessedLocation(cog) {
+      return this.formatLocation(cog);
+    },
+
+    getProcessedTags(tags) {
+      return this.getTagsArray(tags);
     },
 
     formatLocation(cog) {
@@ -374,6 +374,15 @@ export default {
 </script>
 
 <style scoped>
+.virtual-scroll-container {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.victim-chunk {
+  margin-bottom: 16px;
+}
+
 .memorial-card {
   border: 1px double #b0b0b0;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
