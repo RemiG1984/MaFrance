@@ -3,7 +3,6 @@
     <v-card-text class="pa-0 position-relative">
       <div id="francocides-map" class="map-container"></div>
       <v-btn
-        v-if="selectedDepartement"
         @click="clearDepartementFilter"
         color="primary"
         variant="elevated"
