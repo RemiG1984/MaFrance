@@ -236,8 +236,14 @@ export default {
       // Set the selected département for filtering
       if (this.selectedDepartement === deptCode) {
         this.selectedDepartement = null;
+        // Remove persistent tooltip when deselecting
+        if (this.globalTooltip) {
+          this.map.removeLayer(this.globalTooltip);
+        }
       } else {
         this.selectedDepartement = deptCode;
+        // Show persistent tooltip for selected department
+        this.showPersistentTooltip(deptCode, deptName);
       }
 
       // Update the store with the département filter
@@ -247,6 +253,37 @@ export default {
     clearDepartementFilter() {
       this.selectedDepartement = null;
       this.dataStore.setDepartementFilter(null);
+      // Remove persistent tooltip when clearing filter
+      if (this.globalTooltip) {
+        this.map.removeLayer(this.globalTooltip);
+      }
+    },
+
+    showPersistentTooltip(deptCode, deptName) {
+      if (!this.departementsLayer) return;
+      
+      // Find the layer for this department
+      let targetLayer = null;
+      this.departementsLayer.eachLayer((layer) => {
+        if (layer.feature.properties.code === deptCode) {
+          targetLayer = layer;
+        }
+      });
+
+      if (targetLayer) {
+        const center = targetLayer.getCenter();
+        const value = this.getFeatureValue(targetLayer.feature) || 0;
+        const plural = value > 1 ? 's' : '';
+        const content = `<div style="font-size: 14px; padding: 4px;">
+                          <b>${deptName} (FILTRE ACTIF)</b><br>
+                          <span style="color: #d32f2f; font-weight: bold;">${value} francocide${plural}</span>
+                        </div>`;
+
+        this.globalTooltip
+          .setLatLng(center)
+          .setContent(content)
+          .addTo(this.map);
+      }
     },
 
     showTooltip(e, feature) {
@@ -276,10 +313,12 @@ export default {
 
     hideTooltip(e) {
       const layer = e.target;
+      const deptCode = layer.feature.properties.code;
       const originalStyle = this.getStyle(layer.feature);
       layer.setStyle(originalStyle);
 
-      if (this.globalTooltip) {
+      // Don't hide tooltip if this department is selected
+      if (this.globalTooltip && this.selectedDepartement !== deptCode) {
         this.map.removeLayer(this.globalTooltip);
       }
     },
