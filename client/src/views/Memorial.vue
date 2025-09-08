@@ -41,8 +41,8 @@
                 </v-row>
                 
                 <!-- Tag Cloud Filter -->
-                <div class="flex-grow-1 d-flex flex-column">
-                  <div class="tag-cloud-container flex-grow-1">
+                <div class="tag-cloud-section">
+                  <div class="tag-cloud-container">
                     <TagCloud />
                   </div>
                 </div>
@@ -148,11 +148,20 @@ export default {
   height: 100%;
 }
 
+.tag-cloud-section {
+  flex: 1;
+  min-height: 250px;
+  display: flex;
+  flex-direction: column;
+}
+
 .tag-cloud-container {
+  flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  min-height: 250px;
   max-height: 400px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 @media (min-width: 960px) {
