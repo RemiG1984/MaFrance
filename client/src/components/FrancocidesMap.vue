@@ -286,7 +286,7 @@ export default {
         const plural = value > 1 ? 's' : '';
         const content = `<div style="font-size: 14px; padding: 4px;">
                           <b>${deptName}</b><br>
-                          <span style="color: #d32f2f; font-weight: bold;">${value} francocide${plural}</span>
+                          <span style="color: white; font-weight: bold;">${value} francocide${plural}</span>
                         </div>`;
 
         this.persistentTooltip
