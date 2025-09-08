@@ -12,7 +12,7 @@
               :key="tagObj.tag"
               :color="isTagSelected(tagObj.tag) ? 'primary' : 'blue-grey-lighten-3'"
               :variant="isTagSelected(tagObj.tag) ? 'elevated' : 'outlined'"
-              :size="getChipSize(tagObj.count)"
+              size="small"
               class="tag-cloud-chip word-cloud-tag"
               clickable
               :aria-selected="isTagSelected(tagObj.tag)"
@@ -36,7 +36,7 @@
               :key="tagObj.tag"
               :color="isTagSelected(tagObj.tag) ? 'primary' : 'blue-grey-lighten-3'"
               :variant="isTagSelected(tagObj.tag) ? 'elevated' : 'outlined'"
-              :size="getChipSize(tagObj.count)"
+              size="small"
               class="tag-cloud-chip word-cloud-tag"
               clickable
               :aria-selected="isTagSelected(tagObj.tag)"
@@ -143,12 +143,7 @@ export default {
     isTagSelected(tag) {
       return this.dataStore.memorials.selectedTags.includes(tag);
     },
-    getChipSize(count) {
-      if (count > 50) return 'large';
-      if (count > 20) return 'medium';
-      if (count > 5) return 'small';
-      return 'x-small';
-    },
+    
   },
 };
 </script>
@@ -201,9 +196,13 @@ export default {
 .tag-cloud-chip {
   flex: 0 0 auto;
   margin: 0 !important;
-  max-width: calc(100% - 6px);
+  max-width: 100%;
+  word-wrap: break-word;
   word-break: break-word;
-  line-height: 1.2;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  line-height: 1.3;
+  white-space: normal;
 }
 
 @media (max-width: 960px) {
@@ -235,7 +234,7 @@ export default {
   }
   
   .tag-cloud-chip {
-    max-width: calc(100% - 4px);
+    max-width: 100%;
   }
   
   .tag-group-title {
