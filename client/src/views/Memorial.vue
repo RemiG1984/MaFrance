@@ -16,27 +16,29 @@
             <v-card class="filter-card h-100 d-flex flex-column">
               <v-card-title class="text-h6 pb-2">Filtres et recherche</v-card-title>
               <v-card-text class="pb-0 flex-grow-1 d-flex flex-column">
-                <!-- Search Bar -->
-                <v-text-field
-                  v-model="searchQuery"
-                  label="Rechercher par nom ou lieu"
-                  prepend-inner-icon="mdi-magnify"
-                  variant="outlined"
-                  density="compact"
-                  clearable
-                  aria-label="Rechercher des victimes par nom ou lieu"
-                  class="mb-3"
-                ></v-text-field>
-                
-                <!-- Sort Controls -->
-                <v-select
-                  v-model="dataStore.memorials.sortBy"
-                  :items="sortOptions"
-                  label="Trier par"
-                  variant="outlined"
-                  density="compact"
-                  class="mb-3"
-                ></v-select>
+                <!-- Search and Sort Controls side by side -->
+                <v-row class="mb-3">
+                  <v-col cols="12" sm="6" class="pb-0">
+                    <v-text-field
+                      v-model="searchQuery"
+                      label="Rechercher par nom ou lieu"
+                      prepend-inner-icon="mdi-magnify"
+                      variant="outlined"
+                      density="compact"
+                      clearable
+                      aria-label="Rechercher des victimes par nom ou lieu"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6" class="pb-0">
+                    <v-select
+                      v-model="dataStore.memorials.sortBy"
+                      :items="sortOptions"
+                      label="Trier par"
+                      variant="outlined"
+                      density="compact"
+                    ></v-select>
+                  </v-col>
+                </v-row>
                 
                 <!-- Tag Cloud Filter -->
                 <div class="flex-grow-1 d-flex flex-column">
@@ -149,7 +151,9 @@ export default {
 
 .tag-cloud-container {
   overflow-y: auto;
-  min-height: 200px;
+  overflow-x: hidden;
+  min-height: 250px;
+  max-height: 400px;
 }
 
 @media (min-width: 960px) {

@@ -112,7 +112,8 @@ export default {
   flex-wrap: wrap;
   gap: 6px;
   height: 100%;
-  overflow-y: auto;
+  overflow-y: visible;
+  overflow-x: hidden;
   padding: 8px 8px 8px 0;
   justify-content: flex-start;
   align-items: flex-start;
