@@ -62,6 +62,7 @@
 <script>
 import { mapStores } from 'pinia';
 import { useDataStore } from '../services/store.js';
+import { getDepartementFromCog } from '../utils/utils.js';
 
 export default {
   name: 'TagCloud',
@@ -75,7 +76,6 @@ export default {
       // First filter victims by department if one is selected
       let filteredVictims = this.dataStore.memorials.victims;
       if (selectedDepartement) {
-        const { getDepartementFromCog } = require('../utils/utils.js');
         filteredVictims = filteredVictims.filter(victim => {
           const deptCode = getDepartementFromCog(victim.cog);
           return deptCode === selectedDepartement;
