@@ -275,7 +275,7 @@ export default {
         const value = this.getFeatureValue(targetLayer.feature) || 0;
         const plural = value > 1 ? 's' : '';
         const content = `<div style="font-size: 14px; padding: 4px;">
-                          <b>${deptName} (FILTRE ACTIF)</b><br>
+                          <b>${deptName}</b><br>
                           <span style="color: #d32f2f; font-weight: bold;">${value} francocide${plural}</span>
                         </div>`;
 
