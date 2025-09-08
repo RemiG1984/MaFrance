@@ -107,7 +107,7 @@ export default {
     originKeywords() {
       return [
         'maghrébin', 'algérien', 'marocain', 'tunisien', 'syrien', 'malgache', 'ultramarin',
-        'africain', 'subsaharien', 'sénégalais', 'malien', 'ivoirien', 'rwandais',
+        'africain', 'subsaharien', 'sénégalais', 'malien', 'ivoirien', 'rwandais', 'moldave',
         'camerounais', 'congolais', 'guinéen', 'burkinabé', 'mexicain', 'mauricien',
         'turc', 'kurde', 'afghan', 'pakistanais', 'bangladais', 'tchétchène', 'mahorais',
         'roumain', 'bulgare', 'albanais', 'kosovar', 'comorien', 'libanais', 'bosniaque',

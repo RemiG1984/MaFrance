@@ -9,38 +9,35 @@
           <!-- Map on the left -->
           <v-col cols="12" md="4" class="map-column">
             <FrancocidesMap />
+            <!-- Search and Sort Controls side by side -->
+            <v-row class="mb-1">
+              <v-col cols="12" sm="6" class="pb-0">
+                <v-text-field
+                  v-model="searchQuery"
+                  label="Rechercher par nom ou lieu"
+                  prepend-inner-icon="mdi-magnify"
+                  variant="outlined"
+                  density="compact"
+                  clearable
+                  aria-label="Rechercher des victimes par nom ou lieu"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6" class="pb-0">
+                <v-select
+                  v-model="dataStore.memorials.sortBy"
+                  :items="sortOptions"
+                  label="Trier par"
+                  variant="outlined"
+                  density="compact"
+                ></v-select>
+              </v-col>
+            </v-row>
           </v-col>
           
-          <!-- Filters on the right -->
+          <!-- Tag Cloud filter on the right -->
           <v-col cols="12" md="8" class="filter-column">
             <v-card class="filter-card h-100 d-flex flex-column">
-              <v-card-title class="text-h6 pb-2">Filtres et recherche</v-card-title>
               <v-card-text class="pb-0 flex-grow-1 d-flex flex-column">
-                <!-- Search and Sort Controls side by side -->
-                <v-row class="mb-1">
-                  <v-col cols="12" sm="6" class="pb-0">
-                    <v-text-field
-                      v-model="searchQuery"
-                      label="Rechercher par nom ou lieu"
-                      prepend-inner-icon="mdi-magnify"
-                      variant="outlined"
-                      density="compact"
-                      clearable
-                      aria-label="Rechercher des victimes par nom ou lieu"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" class="pb-0">
-                    <v-select
-                      v-model="dataStore.memorials.sortBy"
-                      :items="sortOptions"
-                      label="Trier par"
-                      variant="outlined"
-                      density="compact"
-                    ></v-select>
-                  </v-col>
-                </v-row>
-                
-                <!-- Tag Cloud Filter -->
                 <div class="flex-grow-1 d-flex flex-column">
                   <div class="tag-cloud-container flex-grow-1">
                     <TagCloud />
