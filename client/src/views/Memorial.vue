@@ -20,7 +20,7 @@
             <v-card class="h-100 d-flex flex-column">
               <v-card-title class="pb-2">
                 <v-icon class="mr-2">mdi-filter-variant</v-icon>
-                Filtres et recherche
+                Filtres
               </v-card-title>
               <v-card-text class="flex-grow-1 d-flex flex-column">
                 <!-- Search and Sort Controls -->
