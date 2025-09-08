@@ -189,14 +189,14 @@ export default {
     victims: {
       handler(newVictims, oldVictims) {
         // Only fetch if victims actually changed and we have new COG codes
-        if (newVictims !== oldVictims) {
+        if (newVictims !== oldVictims && this.debouncedFetchLocationData) {
           this.debouncedFetchLocationData();
         }
       },
       immediate: true,
     },
   },
-  created() {
+  beforeMount() {
     // Debounce location data fetching
     this.debouncedFetchLocationData = this.debounce(this.fetchLocationData, 100);
   },
