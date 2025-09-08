@@ -64,27 +64,10 @@ body {
 
 /* Ensure tags-container stretches */
 .tags-container {
-  width: 100% !important;
-  max-width: none !important;
-  min-width: 960px !important; /* Match md breakpoint */
-}
-
-@media (min-width: 1264px) {
-  .tags-container {
-    min-width: 1200px !important; /* Match lg breakpoint */
-  }
-}
-
-@media (min-width: 1904px) {
-  .tags-container {
-    min-width: 1536px !important; /* Match xl breakpoint */
-  }
-}
-
-@media (max-width: 960px) {
-  .tags-container {
-    min-width: 100% !important;
-  }
+  width: 100%;
+  max-width: 100%;
+  min-width: 0; /* Allows container to shrink to content or parent width */
+  box-sizing: border-box; /* Ensures padding/borders don't add to width */
 }
 
 /* Styles pour les composants */
