@@ -32,6 +32,7 @@ export default {
       layerGroup: null,
       departementsLayer: null,
       globalTooltip: null,
+      persistentTooltip: null,
       scaleColors: ['#ffffff', '#fffbcc', '#ffff99', '#ffcc00', '#ff9900', '#ff6600', '#ff3300', '#cc0000', '#990000', '#660000'],
       scaleDomain: {
         min: 0,
@@ -93,6 +94,15 @@ export default {
         interactive: false,
         direction: 'top',
         opacity: 0.9
+      }))
+
+      this.persistentTooltip = markRaw(L.tooltip({
+        permanent: true,
+        sticky: false,
+        interactive: false,
+        direction: 'top',
+        opacity: 0.9,
+        className: 'persistent-tooltip'
       }))
 
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -237,8 +247,8 @@ export default {
       if (this.selectedDepartement === deptCode) {
         this.selectedDepartement = null;
         // Remove persistent tooltip when deselecting
-        if (this.globalTooltip) {
-          this.map.removeLayer(this.globalTooltip);
+        if (this.persistentTooltip) {
+          this.map.removeLayer(this.persistentTooltip);
         }
       } else {
         this.selectedDepartement = deptCode;
@@ -254,8 +264,8 @@ export default {
       this.selectedDepartement = null;
       this.dataStore.setDepartementFilter(null);
       // Remove persistent tooltip when clearing filter
-      if (this.globalTooltip) {
-        this.map.removeLayer(this.globalTooltip);
+      if (this.persistentTooltip) {
+        this.map.removeLayer(this.persistentTooltip);
       }
     },
 
@@ -279,7 +289,7 @@ export default {
                           <span style="color: #d32f2f; font-weight: bold;">${value} francocide${plural}</span>
                         </div>`;
 
-        this.globalTooltip
+        this.persistentTooltip
           .setLatLng(center)
           .setContent(content)
           .addTo(this.map);
@@ -313,12 +323,11 @@ export default {
 
     hideTooltip(e) {
       const layer = e.target;
-      const deptCode = layer.feature.properties.code;
       const originalStyle = this.getStyle(layer.feature);
       layer.setStyle(originalStyle);
 
-      // Don't hide tooltip if this department is selected
-      if (this.globalTooltip && this.selectedDepartement !== deptCode) {
+      // Always hide the hover tooltip
+      if (this.globalTooltip) {
         this.map.removeLayer(this.globalTooltip);
       }
     },
@@ -386,5 +395,14 @@ export default {
   right: 10px;
   z-index: 1000;
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+:deep(.persistent-tooltip) {
+  background-color: #1976d2 !important;
+  color: white !important;
+  border: 2px solid #1565c0 !important;
+  border-radius: 4px !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+  font-weight: bold !important;
 }
 </style>
