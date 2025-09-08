@@ -25,7 +25,7 @@
               <v-skeleton-loader type="image" />
             </template>
           </v-img>
-          <div v-else class="memorial-placeholder d-flex align-center justify-center" style="height: 250px; background-color: #e8ecef;">
+          <div v-else class="memorial-placeholder d-flex align-center justify-center" style="height: 250px; background-color: #e8ecef; cursor: pointer;" @click="showResume(victim)">
             <v-icon size="64" color="grey-lighten-2">mdi-account</v-icon>
           </div>
 
