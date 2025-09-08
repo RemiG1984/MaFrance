@@ -5,43 +5,51 @@
         <h1 class="text-h4 font-weight-bold mb-2 mb-md-3">Mémorial des victimes de francocides</h1>
 
         <!-- Map and Filters Layout -->
-        <v-row class="mb-4 map-filter-row">
-          <!-- Map on the left -->
-          <v-col cols="12" md="4" class="map-column">
-            <FrancocidesMap />
-            <!-- Search and Sort Controls side by side -->
-            <v-row class="mb-1 mt-5"></v-row>
-              <v-col cols="12" sm="6" class="pb-0">
-                <v-text-field
-                  v-model="searchQuery"
-                  label="Rechercher par nom ou lieu"
-                  prepend-inner-icon="mdi-magnify"
-                  variant="outlined"
-                  density="compact"
-                  clearable
-                  aria-label="Rechercher des victimes par nom ou lieu"
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12" sm="6" class="pb-0">
-                <v-select
-                  v-model="dataStore.memorials.sortBy"
-                  :items="sortOptions"
-                  label="Trier par"
-                  variant="outlined"
-                  density="compact"
-                ></v-select>
-              </v-col>
-            </v-row>
+        <v-row class="mb-4 map-filter-row" no-gutters>
+          <!-- Map section -->
+          <v-col cols="12" lg="5" class="map-column pa-2">
+            <v-card class="h-100 d-flex flex-column">
+              <v-card-text class="pa-0 flex-grow-1">
+                <FrancocidesMap />
+              </v-card-text>
+            </v-card>
           </v-col>
           
-          <!-- Tag Cloud filter on the right -->
-          <v-col cols="12" md="8" class="filter-column">
-            <v-card class="filter-card h-100 d-flex flex-column">
-              <v-card-text class="pb-0 flex-grow-1 d-flex flex-column">
-                <div class="flex-grow-1 d-flex flex-column">
-                  <div class="tag-cloud-container flex-grow-1">
-                    <TagCloud />
-                  </div>
+          <!-- Filters section -->
+          <v-col cols="12" lg="7" class="filter-column pa-2">
+            <v-card class="h-100 d-flex flex-column">
+              <v-card-title class="pb-2">
+                <v-icon class="mr-2">mdi-filter-variant</v-icon>
+                Filtres et recherche
+              </v-card-title>
+              <v-card-text class="flex-grow-1 d-flex flex-column">
+                <!-- Search and Sort Controls -->
+                <v-row class="mb-3">
+                  <v-col cols="12" sm="6">
+                    <v-text-field
+                      v-model="searchQuery"
+                      label="Rechercher par nom ou lieu"
+                      prepend-inner-icon="mdi-magnify"
+                      variant="outlined"
+                      density="compact"
+                      clearable
+                      aria-label="Rechercher des victimes par nom ou lieu"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6">
+                    <v-select
+                      v-model="dataStore.memorials.sortBy"
+                      :items="sortOptions"
+                      label="Trier par"
+                      variant="outlined"
+                      density="compact"
+                    ></v-select>
+                  </v-col>
+                </v-row>
+                
+                <!-- Tag Cloud Container -->
+                <div class="tag-cloud-container flex-grow-1">
+                  <TagCloud />
                 </div>
               </v-card-text>
             </v-card>
@@ -119,6 +127,7 @@ export default {
 <style scoped>
 .memorial-page {
   min-height: 100vh;
+  background-color: #fafafa;
 }
 
 .memorial-container {
@@ -138,25 +147,45 @@ export default {
 }
 
 .map-filter-row {
-  align-items: stretch;
+  min-height: 500px;
 }
 
-.filter-card {
-  height: 100%;
+.map-column,
+.filter-column {
+  display: flex;
+  flex-direction: column;
 }
 
 .tag-cloud-container {
   overflow-y: auto;
   overflow-x: hidden;
-  min-height: 250px;
-  max-height: 400px;
+  min-height: 200px;
+  max-height: 320px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 12px;
+  background-color: #fff;
 }
 
-@media (min-width: 960px) {
-  .map-column,
-  .filter-column {
-    display: flex;
+/* Responsive adjustments */
+@media (max-width: 1264px) {
+  .map-filter-row {
+    min-height: auto;
+  }
+  
+  .tag-cloud-container {
+    max-height: 250px;
+  }
+}
+
+@media (max-width: 960px) {
+  .map-filter-row {
     flex-direction: column;
+  }
+  
+  .tag-cloud-container {
+    min-height: 180px;
+    max-height: 220px;
   }
 }
 
@@ -164,8 +193,18 @@ export default {
   .text-h4 {
     font-size: 1.5rem !important;
   }
+  
   .v-text-field {
     font-size: 0.9rem;
+  }
+  
+  .tag-cloud-container {
+    min-height: 150px;
+    max-height: 180px;
+  }
+  
+  .memorial-page {
+    padding: 12px !important;
   }
 }
 </style>
