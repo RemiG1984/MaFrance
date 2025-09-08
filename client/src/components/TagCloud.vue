@@ -104,8 +104,8 @@ export default {
 
       return combinableTags;
     },
-    originTags() {
-      const originKeywords = [
+    originKeywords() {
+      return [
         'maghrébins', 'algérien', 'marocain', 'tunisien', 'syrien',
         'africain', 'subsaharien', 'sénégalais', 'malien', 'ivoirien',
         'camerounais', 'congolais', 'guinéen', 'burkinabé',
@@ -114,26 +114,17 @@ export default {
         'sri-lankais', 'tamoul', 'chinois', 'vietnamien',
         'français', 'corse', 'antillais', 'réunionnais'
       ];
-      
+    },
+    originTags() {
       return this.tags.filter(tagObj => 
-        originKeywords.some(keyword => 
+        this.originKeywords.some(keyword => 
           tagObj.tag.toLowerCase().includes(keyword.toLowerCase())
         )
       ).sort((a, b) => b.count - a.count);
     },
     circumstancesTags() {
-      const originKeywords = [
-        'maghrébins', 'algérien', 'marocain', 'tunisien', 'syrien',
-        'africain', 'subsaharien', 'sénégalais', 'malien', 'ivoirien',
-        'camerounais', 'congolais', 'guinéen', 'burkinabé',
-        'turc', 'kurde', 'afghan', 'pakistanais', 'bangladais',
-        'rom', 'roumain', 'bulgare', 'albanais', 'kosovar',
-        'sri-lankais', 'tamoul', 'chinois', 'vietnamien',
-        'français', 'corse', 'antillais', 'réunionnais'
-      ];
-      
       return this.tags.filter(tagObj => 
-        !originKeywords.some(keyword => 
+        !this.originKeywords.some(keyword => 
           tagObj.tag.toLowerCase().includes(keyword.toLowerCase())
         )
       ).sort((a, b) => b.count - a.count);
