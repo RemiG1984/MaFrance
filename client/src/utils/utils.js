@@ -241,15 +241,53 @@ export function sortVictims(victims, sortBy) {
   let sorted = [...victims];
   switch (sortBy) {
     case 'year_desc':
-      return sorted.sort((a, b) => new Date(b.date_deces) - new Date(a.date_deces));
+      return sorted.sort((a, b) => {
+        const dateA = new Date(a.date_deces || '1900-01-01');
+        const dateB = new Date(b.date_deces || '1900-01-01');
+        // If dates are equal, sort by ID to ensure stable sorting
+        if (dateA.getTime() === dateB.getTime()) {
+          return (a.id || 0) - (b.id || 0);
+        }
+        return dateB.getTime() - dateA.getTime();
+      });
     case 'year_asc':
-      return sorted.sort((a, b) => new Date(a.date_deces) - new Date(b.date_deces));
+      return sorted.sort((a, b) => {
+        const dateA = new Date(a.date_deces || '1900-01-01');
+        const dateB = new Date(b.date_deces || '1900-01-01');
+        // If dates are equal, sort by ID to ensure stable sorting
+        if (dateA.getTime() === dateB.getTime()) {
+          return (a.id || 0) - (b.id || 0);
+        }
+        return dateA.getTime() - dateB.getTime();
+      });
     case 'age_asc':
-      return sorted.sort((a, b) => (a.age || 0) - (b.age || 0));
+      return sorted.sort((a, b) => {
+        const ageA = a.age || 0;
+        const ageB = b.age || 0;
+        if (ageA === ageB) {
+          return (a.id || 0) - (b.id || 0);
+        }
+        return ageA - ageB;
+      });
     case 'age_desc':
-      return sorted.sort((a, b) => (b.age || 0) - (a.age || 0));
+      return sorted.sort((a, b) => {
+        const ageA = a.age || 0;
+        const ageB = b.age || 0;
+        if (ageA === ageB) {
+          return (a.id || 0) - (b.id || 0);
+        }
+        return ageB - ageA;
+      });
     case 'location_asc':
-      return sorted.sort((a, b) => (a.cog || '').localeCompare(b.cog || ''));
+      return sorted.sort((a, b) => {
+        const cogA = a.cog || '';
+        const cogB = b.cog || '';
+        const comparison = cogA.localeCompare(cogB);
+        if (comparison === 0) {
+          return (a.id || 0) - (b.id || 0);
+        }
+        return comparison;
+      });
     default:
       return sorted;
   }
