@@ -7,12 +7,12 @@
         <!-- Map and Filters Layout -->
         <v-row class="mb-4 map-filter-row">
           <!-- Map on the left -->
-          <v-col cols="12" md="6" class="map-column">
+          <v-col cols="12" md="4" class="map-column">
             <FrancocidesMap />
           </v-col>
           
           <!-- Filters on the right -->
-          <v-col cols="12" md="6" class="filter-column">
+          <v-col cols="12" md="8" class="filter-column">
             <v-card class="filter-card h-100 d-flex flex-column">
               <v-card-title class="text-h6 pb-2">Filtres et recherche</v-card-title>
               <v-card-text class="pb-0 flex-grow-1 d-flex flex-column">

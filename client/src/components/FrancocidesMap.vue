@@ -294,7 +294,7 @@ export default {
         div.style.fontSize = '12px';
         div.style.lineHeight = '18px';
 
-        let html = '<strong>Francocides par département</strong><br>';
+        let html = '<strong>Francocides</strong><br>';
 
         // Always show zero entry first
         html += '<i style="background:#ffffff; width:18px; height:18px; float:left; margin-right:8px; opacity:0.8; border:1px solid #ccc;"></i> 0<br>';

@@ -106,13 +106,13 @@ export default {
     },
     originKeywords() {
       return [
-        'maghrébin', 'algérien', 'marocain', 'tunisien', 'syrien', 'malgache',
+        'maghrébin', 'algérien', 'marocain', 'tunisien', 'syrien', 'malgache', 'ultramarin',
         'africain', 'subsaharien', 'sénégalais', 'malien', 'ivoirien', 'rwandais',
         'camerounais', 'congolais', 'guinéen', 'burkinabé', 'mexicain', 'mauricien',
         'turc', 'kurde', 'afghan', 'pakistanais', 'bangladais', 'tchétchène', 'mahorais',
         'roumain', 'bulgare', 'albanais', 'kosovar', 'comorien', 'libanais', 'bosniaque',
         'sri-lankais', 'tamoul', 'chinois', 'vietnamien', 'kazakh', 'haïtien', 'cap-verdien',
-        'antillais', 'réunionnais', 'angolais', 'cambodgien', 'serbe', 'tchadien',
+        'antillais', 'réunionnais', 'angolais', 'cambodgien', 'serbe', 'tchadien', 'irakien',
       ];
     },
     originTags() {
@@ -157,7 +157,6 @@ export default {
   overflow-y: auto;
   overflow-x: hidden;
   padding: 8px 8px 8px 0;
-  max-width: 100%;
 }
 
 .tag-group {
