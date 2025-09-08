@@ -11,7 +11,7 @@
         class="france-button"
         prepend-icon="mdi-map"
       >
-        France
+        France ({{ totalVictims }})
       </v-btn>
     </v-card-text>
   </v-card>
@@ -49,6 +49,9 @@ export default {
     ...mapStores(useDataStore),
     francocidesData() {
       return this.dataStore.memorials.victims;
+    },
+    totalVictims() {
+      return this.francocidesData ? this.francocidesData.length : 0;
     },
   },
   watch: {
