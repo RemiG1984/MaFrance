@@ -1,25 +1,57 @@
+
 <template>
   <v-row class="word-cloud">
     <v-col cols="12">
-      <div class="tags-container">
-        <v-chip
-          v-for="tagObj in tags"
-          :key="tagObj.tag"
-          :color="isTagSelected(tagObj.tag) ? 'primary' : 'blue-grey-lighten-3'"
-          :variant="isTagSelected(tagObj.tag) ? 'elevated' : 'outlined'"
-          :size="getChipSize(tagObj.count)"
-          class="tag-cloud-chip word-cloud-tag"
-          clickable
-          :aria-selected="isTagSelected(tagObj.tag)"
-          role="button"
-          @click="toggleTag(tagObj.tag)"
-          @keydown.enter="toggleTag(tagObj.tag)"
-          @keydown.space.prevent="toggleTag(tagObj.tag)"
-        >
-          {{ tagObj.tag }}
-          <span v-if="$vuetify.display.mdAndUp" class="tag-count ml-1">({{ tagObj.count }})</span>
-        </v-chip>
+      <div class="hierarchical-tags-container">
+        <!-- Origin Tags Group -->
+        <div class="tag-group">
+          <h4 class="tag-group-title">Origine</h4>
+          <div class="tags-container">
+            <v-chip
+              v-for="tagObj in originTags"
+              :key="tagObj.tag"
+              :color="isTagSelected(tagObj.tag) ? 'primary' : 'blue-grey-lighten-3'"
+              :variant="isTagSelected(tagObj.tag) ? 'elevated' : 'outlined'"
+              :size="getChipSize(tagObj.count)"
+              class="tag-cloud-chip word-cloud-tag"
+              clickable
+              :aria-selected="isTagSelected(tagObj.tag)"
+              role="button"
+              @click="toggleTag(tagObj.tag)"
+              @keydown.enter="toggleTag(tagObj.tag)"
+              @keydown.space.prevent="toggleTag(tagObj.tag)"
+            >
+              {{ tagObj.tag }}
+              <span v-if="$vuetify.display.mdAndUp" class="tag-count ml-1">({{ tagObj.count }})</span>
+            </v-chip>
+          </div>
+        </div>
+
+        <!-- Circumstances Tags Group -->
+        <div class="tag-group">
+          <h4 class="tag-group-title">Circonstances</h4>
+          <div class="tags-container">
+            <v-chip
+              v-for="tagObj in circumstancesTags"
+              :key="tagObj.tag"
+              :color="isTagSelected(tagObj.tag) ? 'primary' : 'blue-grey-lighten-3'"
+              :variant="isTagSelected(tagObj.tag) ? 'elevated' : 'outlined'"
+              :size="getChipSize(tagObj.count)"
+              class="tag-cloud-chip word-cloud-tag"
+              clickable
+              :aria-selected="isTagSelected(tagObj.tag)"
+              role="button"
+              @click="toggleTag(tagObj.tag)"
+              @keydown.enter="toggleTag(tagObj.tag)"
+              @keydown.space.prevent="toggleTag(tagObj.tag)"
+            >
+              {{ tagObj.tag }}
+              <span v-if="$vuetify.display.mdAndUp" class="tag-count ml-1">({{ tagObj.count }})</span>
+            </v-chip>
+          </div>
+        </div>
       </div>
+      
       <v-alert v-if="!loading && !tags.length" type="info" icon="mdi-information" class="mt-2">
         Aucun tag disponible.
       </v-alert>
@@ -72,6 +104,40 @@ export default {
 
       return combinableTags;
     },
+    originTags() {
+      const originKeywords = [
+        'maghrébins', 'algérien', 'marocain', 'tunisien', 'syrien',
+        'africain', 'subsaharien', 'sénégalais', 'malien', 'ivoirien',
+        'camerounais', 'congolais', 'guinéen', 'burkinabé',
+        'turc', 'kurde', 'afghan', 'pakistanais', 'bangladais',
+        'rom', 'roumain', 'bulgare', 'albanais', 'kosovar',
+        'sri-lankais', 'tamoul', 'chinois', 'vietnamien',
+        'français', 'corse', 'antillais', 'réunionnais'
+      ];
+      
+      return this.tags.filter(tagObj => 
+        originKeywords.some(keyword => 
+          tagObj.tag.toLowerCase().includes(keyword.toLowerCase())
+        )
+      ).sort((a, b) => b.count - a.count);
+    },
+    circumstancesTags() {
+      const originKeywords = [
+        'maghrébins', 'algérien', 'marocain', 'tunisien', 'syrien',
+        'africain', 'subsaharien', 'sénégalais', 'malien', 'ivoirien',
+        'camerounais', 'congolais', 'guinéen', 'burkinabé',
+        'turc', 'kurde', 'afghan', 'pakistanais', 'bangladais',
+        'rom', 'roumain', 'bulgare', 'albanais', 'kosovar',
+        'sri-lankais', 'tamoul', 'chinois', 'vietnamien',
+        'français', 'corse', 'antillais', 'réunionnais'
+      ];
+      
+      return this.tags.filter(tagObj => 
+        !originKeywords.some(keyword => 
+          tagObj.tag.toLowerCase().includes(keyword.toLowerCase())
+        )
+      ).sort((a, b) => b.count - a.count);
+    },
     loading() {
       return this.dataStore.memorials.loading;
     },
@@ -97,6 +163,31 @@ export default {
 </script>
 
 <style scoped>
+.hierarchical-tags-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 8px 8px 8px 0;
+}
+
+.tag-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tag-group-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1976d2;
+  margin: 0;
+  padding: 4px 0;
+  border-bottom: 2px solid #e3f2fd;
+}
+
 .word-cloud-tag {
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   border-width: 2px;
@@ -111,10 +202,6 @@ export default {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  height: 100%;
-  overflow-y: visible;
-  overflow-x: hidden;
-  padding: 8px 8px 8px 0;
   justify-content: flex-start;
   align-items: flex-start;
   align-content: flex-start;
@@ -129,23 +216,39 @@ export default {
 }
 
 @media (max-width: 960px) {
+  .hierarchical-tags-container {
+    gap: 16px;
+  }
+  
   .tags-container {
-    max-height: 300px;
-    height: auto;
     gap: 5px;
+  }
+  
+  .tag-group-title {
+    font-size: 1rem;
   }
 }
 
 @media (max-width: 600px) {
-  .tags-container {
-    gap: 4px;
+  .hierarchical-tags-container {
+    gap: 12px;
     padding: 6px 6px 6px 0;
   }
+  
+  .tags-container {
+    gap: 4px;
+  }
+  
   .word-cloud-tag {
     font-size: 0.8rem;
   }
+  
   .tag-cloud-chip {
     max-width: calc(100% - 4px);
+  }
+  
+  .tag-group-title {
+    font-size: 0.9rem;
   }
 }
 </style>
