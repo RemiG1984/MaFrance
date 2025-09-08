@@ -153,12 +153,11 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
   padding: 8px 8px 8px 0;
   max-width: 100%;
-  width: 100%;
-  box-sizing: border-box;
 }
 
 .tag-group {
