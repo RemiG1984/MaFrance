@@ -261,7 +261,22 @@ export default {
 
     async fetchLocationData() {
       const uniqueCogs = [...new Set(this.victims.map(v => v.cog).filter(Boolean))];
-      await this.dataStore.fetchLocationData(uniqueCogs);
+      
+      // Filter out international COG codes that don't need API calls
+      const internationalCodes = [
+        'UK', 'ES', 'IT', 'DE', 'BE', 'CH', 'LU', 'NL', 'AT', 'PT', 'IE', 
+        'DK', 'SE', 'NO', 'FI', 'PL', 'CZ', 'SK', 'HU', 'RO', 'BG', 'GR', 
+        'HR', 'SI', 'EE', 'LV', 'LT', 'MT', 'CY', 'US', 'CA', 'AU', 'NZ', 
+        'JP', 'CN', 'IN', 'BR', 'AR', 'MX', 'ZA', 'EG', 'MA', 'TN', 'DZ', 
+        'TR', 'RU', 'UA'
+      ];
+      
+      // Only fetch data for French COG codes
+      const frenchCogs = uniqueCogs.filter(cog => !internationalCodes.includes(cog));
+      
+      if (frenchCogs.length > 0) {
+        await this.dataStore.fetchLocationData(frenchCogs);
+      }
     },
 
     formatLocation(cog) {
