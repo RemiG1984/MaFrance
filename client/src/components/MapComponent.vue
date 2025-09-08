@@ -789,4 +789,5 @@ export default {
   left: 0;
   transform: translateY(-50%);
 }
+  
 </style>

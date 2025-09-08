@@ -102,7 +102,7 @@ export default {
       if (this.countryData.subventions?.etat_central != null) {
         const value = this.countryData.subventions.etat_central;
         rows.push({
-          entity: 'Ministères',
+          entity: 'Par les ministères',
           perCapita: countryPopulation > 0 ? value / countryPopulation : 0,
           nationalAverage: countryPopulation > 0 ? value / countryPopulation : 0
         });
@@ -112,7 +112,7 @@ export default {
       if (this.countryData.subventions?.autres_organismes_publics != null) {
         const value = this.countryData.subventions.autres_organismes_publics;
         rows.push({
-          entity: 'Autres organismes publics',
+          entity: 'Par les autres organismes publics',
           perCapita: countryPopulation > 0 ? value / countryPopulation : 0,
           nationalAverage: countryPopulation > 0 ? value / countryPopulation : 0
         });
@@ -125,7 +125,7 @@ export default {
         const nationalRegionAverage = this.countryData.subventions?.total_subv_region && countryPopulation > 0 
           ? this.countryData.subventions.total_subv_region / countryPopulation : 0;
         rows.push({
-          entity: 'Région',
+          entity: 'Par la région',
           perCapita: departementPopulation > 0 ? value / departementPopulation : 0,
           nationalAverage: nationalRegionAverage
         });
@@ -138,7 +138,7 @@ export default {
         const nationalDeptAverage = this.countryData.subventions?.total_subv_dept && countryPopulation > 0 
           ? this.countryData.subventions.total_subv_dept / countryPopulation : 0;
         rows.push({
-          entity: 'Département',
+          entity: 'Par le département',
           perCapita: departementPopulation > 0 ? value / departementPopulation : 0,
           nationalAverage: nationalDeptAverage
         });
@@ -151,7 +151,7 @@ export default {
         const nationalEPCIAverage = this.countryData.subventions?.total_subv_EPCI && countryPopulation > 0 
           ? this.countryData.subventions.total_subv_EPCI / countryPopulation : 0;
         rows.push({
-          entity: 'Agglomération',
+          entity: 'Par l\'agglomération',
           perCapita: communePopulation > 0 ? value / communePopulation : 0,
           nationalAverage: nationalEPCIAverage
         });
@@ -164,7 +164,7 @@ export default {
         const nationalCommuneAverage = this.countryData.subventions?.total_subv_commune && countryPopulation > 0 
           ? this.countryData.subventions.total_subv_commune / countryPopulation : 0;
         rows.push({
-          entity: 'Commune',
+          entity: 'Par la commune',
           perCapita: communePopulation > 0 ? value / communePopulation : 0,
           nationalAverage: nationalCommuneAverage
         });

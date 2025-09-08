@@ -196,17 +196,18 @@ class ApiService {
                 Date.now() - persistentCached.timestamp < this.cacheExpiry
             ) {
                 console.log("Using persistent cached data for:", endpoint);
-                this.cache.set(cacheKey, persistentCached);
+                this.cache.set(persistentCached, persistentCached);
                 return persistentCached.data;
             } else if (persistentCached) {
                 this.persistentStorage.remove(cacheKey);
             }
         }
 
-        // Check if request is already in progress
-        if (this.activeRequests.has(endpoint)) {
-            console.log("Request already in progress, waiting...", endpoint);
-            return this.activeRequests.get(endpoint);
+        // Check if the exact same request (including parameters) is already in progress
+        const requestKey = `${endpoint}?${new URLSearchParams(options.body ? JSON.parse(options.body) : {}).toString()}`;
+        if (this.activeRequests.has(requestKey)) {
+            console.log("Request already in progress, waiting...", requestKey);
+            return this.activeRequests.get(requestKey);
         }
 
         const config = {
@@ -249,10 +250,10 @@ class ApiService {
                 return null;
             })
             .finally(() => {
-                this.activeRequests.delete(endpoint);
+                this.activeRequests.delete(requestKey);
             });
 
-        this.activeRequests.set(endpoint, requestPromise);
+        this.activeRequests.set(requestKey, requestPromise);
         return requestPromise;
     }
 
@@ -286,6 +287,10 @@ class ApiService {
             total: memorySize + persistentSize,
         };
     }
+
+
+
+    // Add other API methods here as needed
 }
 
 // Export singleton instance
@@ -414,6 +419,28 @@ const api = {
         apiService.request(`/nat1/commune?cog=${cog}`),
     getNat1Summary: () =>
         apiService.request("/nat1/all"),
+
+    // Francocides data
+    getFrancocides: (params = {}) => {
+        const queryString = new URLSearchParams(params).toString();
+        const url = `/francocides`;
+        return apiService.request(
+            queryString ? `${url}?${queryString}` : url,
+            {},
+            !params.cursor,
+        );
+    },
+    getFrancocidesStats: (params = {}) => {
+        const queryString = new URLSearchParams(params).toString();
+        return apiService.request(`/francocides/stats${queryString ? `?${queryString}` : ''}`);
+    },
+    getFrancocidesTags() {
+        return apiService.request('/francocides/tags', {}, true);
+    },
+
+    async getFrancocideDetails(id) {
+        return apiService.request(`/francocides/${id}`);
+    },
 
     // Cache management
     clearCache: () => apiService.clearCache(),
