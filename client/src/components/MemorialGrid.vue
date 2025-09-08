@@ -266,6 +266,62 @@ export default {
 
     formatLocation(cog) {
       if (!cog) return 'Lieu inconnu';
+      
+      // Handle international locations
+      const internationalLocations = {
+        'UK': 'Royaume-Uni',
+        'ES': 'Espagne',
+        'IT': 'Italie',
+        'DE': 'Allemagne',
+        'BE': 'Belgique',
+        'CH': 'Suisse',
+        'LU': 'Luxembourg',
+        'NL': 'Pays-Bas',
+        'AT': 'Autriche',
+        'PT': 'Portugal',
+        'IE': 'Irlande',
+        'DK': 'Danemark',
+        'SE': 'Suède',
+        'NO': 'Norvège',
+        'FI': 'Finlande',
+        'PL': 'Pologne',
+        'CZ': 'République tchèque',
+        'SK': 'Slovaquie',
+        'HU': 'Hongrie',
+        'RO': 'Roumanie',
+        'BG': 'Bulgarie',
+        'GR': 'Grèce',
+        'HR': 'Croatie',
+        'SI': 'Slovénie',
+        'EE': 'Estonie',
+        'LV': 'Lettonie',
+        'LT': 'Lituanie',
+        'MT': 'Malte',
+        'CY': 'Chypre',
+        'US': 'États-Unis',
+        'CA': 'Canada',
+        'AU': 'Australie',
+        'NZ': 'Nouvelle-Zélande',
+        'JP': 'Japon',
+        'CN': 'Chine',
+        'IN': 'Inde',
+        'BR': 'Brésil',
+        'AR': 'Argentine',
+        'MX': 'Mexique',
+        'ZA': 'Afrique du Sud',
+        'EG': 'Égypte',
+        'MA': 'Maroc',
+        'TN': 'Tunisie',
+        'DZ': 'Algérie',
+        'TR': 'Turquie',
+        'RU': 'Russie',
+        'UA': 'Ukraine'
+      };
+      
+      if (internationalLocations[cog]) {
+        return internationalLocations[cog];
+      }
+      
       return this.locationData[cog] || `Lieu inconnu (COG: ${cog})`;
     },
 
