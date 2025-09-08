@@ -152,7 +152,7 @@ export default {
 .hierarchical-tags-container {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 12px;
   height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
@@ -162,7 +162,7 @@ export default {
 .tag-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .tag-group-title {
@@ -207,7 +207,7 @@ export default {
 
 @media (max-width: 960px) {
   .hierarchical-tags-container {
-    gap: 16px;
+    gap: 10px;
   }
   
   .tags-container {
@@ -221,7 +221,7 @@ export default {
 
 @media (max-width: 600px) {
   .hierarchical-tags-container {
-    gap: 12px;
+    gap: 8px;
     padding: 6px 6px 6px 0;
   }
   

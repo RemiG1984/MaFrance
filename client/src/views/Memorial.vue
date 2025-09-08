@@ -17,7 +17,7 @@
               <v-card-title class="text-h6 pb-2">Filtres et recherche</v-card-title>
               <v-card-text class="pb-0 flex-grow-1 d-flex flex-column">
                 <!-- Search and Sort Controls side by side -->
-                <v-row class="mb-3">
+                <v-row class="mb-1">
                   <v-col cols="12" sm="6" class="pb-0">
                     <v-text-field
                       v-model="searchQuery"
