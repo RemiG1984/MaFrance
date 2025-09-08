@@ -106,13 +106,13 @@ export default {
     },
     originKeywords() {
       return [
-        'maghrébins', 'algérien', 'marocain', 'tunisien', 'syrien',
-        'africain', 'subsaharien', 'sénégalais', 'malien', 'ivoirien',
-        'camerounais', 'congolais', 'guinéen', 'burkinabé',
-        'turc', 'kurde', 'afghan', 'pakistanais', 'bangladais',
-        'rom', 'roumain', 'bulgare', 'albanais', 'kosovar',
-        'sri-lankais', 'tamoul', 'chinois', 'vietnamien',
-        'français', 'corse', 'antillais', 'réunionnais'
+        'maghrébin', 'algérien', 'marocain', 'tunisien', 'syrien', 'malgache',
+        'africain', 'subsaharien', 'sénégalais', 'malien', 'ivoirien', 'rwandais',
+        'camerounais', 'congolais', 'guinéen', 'burkinabé', 'mexicain', 'mauricien',
+        'turc', 'kurde', 'afghan', 'pakistanais', 'bangladais', 'tchétchène', 'mahorais',
+        'roumain', 'bulgare', 'albanais', 'kosovar', 'comorien', 'libanais', 'bosniaque',
+        'sri-lankais', 'tamoul', 'chinois', 'vietnamien', 'kazakh', 'haïtien', 'cap-verdien',
+        'antillais', 'réunionnais', 'angolais', 'cambodgien', 'serbe', 'tchadien',
       ];
     },
     originTags() {
