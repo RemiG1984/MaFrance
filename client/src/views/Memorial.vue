@@ -10,7 +10,7 @@
           <v-col cols="12" md="4" class="map-column">
             <FrancocidesMap />
             <!-- Search and Sort Controls side by side -->
-            <v-row class="mb-1">
+            <v-row class="mb-1 mt-3"></v-row>
               <v-col cols="12" sm="6" class="pb-0">
                 <v-text-field
                   v-model="searchQuery"
