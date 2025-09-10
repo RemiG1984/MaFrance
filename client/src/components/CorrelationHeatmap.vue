@@ -70,7 +70,7 @@ export default {
       default: () => []
     },
     labels: {
-      type: Array,
+      type: [Array, Object],
       required: true,
       default: () => []
     },
@@ -109,6 +109,11 @@ export default {
       const data = []
       const colorScale = createColorScale()
       
+      // Check if labels is an object (inter-category mode) or array (standard mode)
+      const isInterCategory = props.labels && typeof props.labels === 'object' && props.labels.x && props.labels.y
+      const labelsX = isInterCategory ? props.labels.x : props.labels
+      const labelsY = isInterCategory ? props.labels.y : props.labels
+      
       for (let i = 0; i < props.matrix.length; i++) {
         for (let j = 0; j < props.matrix[i].length; j++) {
           const value = props.matrix[i][j]
@@ -122,8 +127,8 @@ export default {
             v: displayValue,
             originalValue: value, // Keep track of original null
             color: color,
-            xLabel: props.labels[j],
-            yLabel: props.labels[i],
+            xLabel: labelsX[j],
+            yLabel: labelsY[i],
             isInsufficientData: value === null
           })
         }
@@ -164,17 +169,23 @@ export default {
             borderColor: 'rgba(0,0,0,0.1)',
             borderWidth: 1,
             pointRadius: (context) => {
+              const isInterCategory = props.labels && typeof props.labels === 'object' && props.labels.x && props.labels.y
+              const labelsX = isInterCategory ? props.labels.x : props.labels
+              const labelsY = isInterCategory ? props.labels.y : props.labels
               const size = Math.min(
-                chartCanvas.value.width / props.labels.length / 2,
-                chartCanvas.value.height / props.labels.length / 2,
+                chartCanvas.value.width / labelsX.length / 2,
+                chartCanvas.value.height / labelsY.length / 2,
                 25
               )
               return Math.max(size, 8)
             },
             pointHoverRadius: (context) => {
+              const isInterCategory = props.labels && typeof props.labels === 'object' && props.labels.x && props.labels.y
+              const labelsX = isInterCategory ? props.labels.x : props.labels
+              const labelsY = isInterCategory ? props.labels.y : props.labels
               const size = Math.min(
-                chartCanvas.value.width / props.labels.length / 2,
-                chartCanvas.value.height / props.labels.length / 2,
+                chartCanvas.value.width / labelsX.length / 2,
+                chartCanvas.value.height / labelsY.length / 2,
                 25
               )
               return Math.max(size + 3, 11)
@@ -251,13 +262,19 @@ export default {
               type: 'linear',
               position: 'bottom',
               min: -0.5,
-              max: props.labels.length - 0.5,
+              max: (() => {
+                const isInterCategory = props.labels && typeof props.labels === 'object' && props.labels.x && props.labels.y
+                const labelsX = isInterCategory ? props.labels.x : props.labels
+                return labelsX.length - 0.5
+              })(),
               ticks: {
                 stepSize: 1,
                 callback: (value, index) => {
+                  const isInterCategory = props.labels && typeof props.labels === 'object' && props.labels.x && props.labels.y
+                  const labelsX = isInterCategory ? props.labels.x : props.labels
                   const labelIndex = Math.round(value)
-                  if (labelIndex >= 0 && labelIndex < props.labels.length) {
-                    const label = props.labels[labelIndex]
+                  if (labelIndex >= 0 && labelIndex < labelsX.length) {
+                    const label = labelsX[labelIndex]
                     return label.length > 15 ? label.substring(0, 12) + '...' : label
                   }
                   return ''
@@ -275,13 +292,19 @@ export default {
             y: {
               type: 'linear',
               min: -0.5,
-              max: props.labels.length - 0.5,
+              max: (() => {
+                const isInterCategory = props.labels && typeof props.labels === 'object' && props.labels.x && props.labels.y
+                const labelsY = isInterCategory ? props.labels.y : props.labels
+                return labelsY.length - 0.5
+              })(),
               ticks: {
                 stepSize: 1,
                 callback: (value, index) => {
-                  const actualIndex = props.labels.length - 1 - Math.round(value)
-                  if (actualIndex >= 0 && actualIndex < props.labels.length) {
-                    const label = props.labels[actualIndex]
+                  const isInterCategory = props.labels && typeof props.labels === 'object' && props.labels.x && props.labels.y
+                  const labelsY = isInterCategory ? props.labels.y : props.labels
+                  const actualIndex = labelsY.length - 1 - Math.round(value)
+                  if (actualIndex >= 0 && actualIndex < labelsY.length) {
+                    const label = labelsY[actualIndex]
                     return label.length > 15 ? label.substring(0, 12) + '...' : label
                   }
                   return ''

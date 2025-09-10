@@ -36,6 +36,18 @@
       <!-- Metric Category Filters -->
       <v-row class="mb-3">
         <v-col cols="12">
+          <v-switch
+            v-model="interCategoryMode"
+            label="Mode comparaison inter-catégories"
+            color="primary"
+            hide-details
+            class="mb-3"
+          ></v-switch>
+        </v-col>
+      </v-row>
+
+      <v-row class="mb-3" v-if="!interCategoryMode">
+        <v-col cols="12">
           <v-chip-group
             v-model="selectedCategories"
             multiple
@@ -51,6 +63,29 @@
               {{ getCategoryLabel(category) }}
             </v-chip>
           </v-chip-group>
+        </v-col>
+      </v-row>
+
+      <v-row class="mb-3" v-if="interCategoryMode">
+        <v-col cols="12" md="6">
+          <v-select
+            v-model="categoryX"
+            :items="categoryOptions"
+            label="Catégorie X (axe horizontal)"
+            variant="outlined"
+            density="compact"
+            @update:model-value="onInterCategorySelectionChanged"
+          />
+        </v-col>
+        <v-col cols="12" md="6">
+          <v-select
+            v-model="categoryY"
+            :items="categoryOptions"
+            label="Catégorie Y (axe vertical)"
+            variant="outlined"
+            density="compact"
+            @update:model-value="onInterCategorySelectionChanged"
+          />
         </v-col>
       </v-row>
     </div>
@@ -71,7 +106,8 @@
       <div v-else-if="correlationMatrix && correlationMatrix.length > 0" class="heatmap-section">
         <!-- Heatmap Title -->
         <div class="heatmap-title">
-          <h3>Matrice des corrélations entre métriques</h3>
+          <h3 v-if="!interCategoryMode">Matrice des corrélations entre métriques</h3>
+          <h3 v-else>Corrélations inter-catégories: {{ getCategoryLabel(categoryX) }} vs {{ getCategoryLabel(categoryY) }}</h3>
           <p class="subtitle">
             Coefficients de corrélation de Pearson ({{ currentType.toLowerCase() }}{{ selectedScope === 'communes_dept' ? ` - ${selectedDepartement}` : '' }})
           </p>
@@ -143,6 +179,9 @@ export default {
     const selectedScope = ref('departements')
     const selectedDepartement = ref('')
     const selectedCategories = ref(['général', 'insécurité', 'immigration'])
+    const interCategoryMode = ref(false)
+    const categoryX = ref('immigration')
+    const categoryY = ref('insécurité')
     const correlationMatrix = ref([])
     const metricLabels = ref([])
     const loading = ref(false)
@@ -166,11 +205,18 @@ export default {
     const availableCategories = computed(() => {
       const categories = new Set()
       MetricsConfig.metrics.forEach(metric => {
-        if (metric.category) {
+        if (metric.category && metric.category !== 'général') {
           categories.add(metric.category)
         }
       })
       return Array.from(categories).sort()
+    })
+
+    const categoryOptions = computed(() => {
+      return availableCategories.value.map(category => ({
+        value: category,
+        title: getCategoryLabel(category)
+      }))
     })
 
     // Computed properties
@@ -209,20 +255,40 @@ export default {
     })
 
     const topCorrelations = computed(() => {
-      if (!correlationMatrix.value.length || !metricLabels.value.length) return []
+      if (!correlationMatrix.value.length) return []
       const correlations = []
       
-      for (let i = 0; i < correlationMatrix.value.length; i++) {
-        for (let j = i + 1; j < correlationMatrix.value[i].length; j++) {
-          const value = correlationMatrix.value[i][j]
-          // Only show meaningful correlations that are not null
-          if (value !== null && !isNaN(value) && Math.abs(value) > 0.1) {
-            correlations.push({
-              key: `${i}-${j}`,
-              metric1: metricLabels.value[i],
-              metric2: metricLabels.value[j],
-              value: value
-            })
+      if (interCategoryMode.value && metricLabels.value.x && metricLabels.value.y) {
+        // Inter-category mode
+        const labelsX = metricLabels.value.x
+        const labelsY = metricLabels.value.y
+        
+        for (let i = 0; i < correlationMatrix.value.length; i++) {
+          for (let j = 0; j < correlationMatrix.value[i].length; j++) {
+            const value = correlationMatrix.value[i][j]
+            if (value !== null && !isNaN(value) && Math.abs(value) > 0.1) {
+              correlations.push({
+                key: `${i}-${j}`,
+                metric1: labelsX[j],
+                metric2: labelsY[i],
+                value: value
+              })
+            }
+          }
+        }
+      } else {
+        // Standard mode
+        for (let i = 0; i < correlationMatrix.value.length; i++) {
+          for (let j = i + 1; j < correlationMatrix.value[i].length; j++) {
+            const value = correlationMatrix.value[i][j]
+            if (value !== null && !isNaN(value) && Math.abs(value) > 0.1) {
+              correlations.push({
+                key: `${i}-${j}`,
+                metric1: metricLabels.value[i],
+                metric2: metricLabels.value[j],
+                value: value
+              })
+            }
           }
         }
       }
@@ -256,19 +322,34 @@ export default {
     const getSelectedMetrics = () => {
       const currentLevel = selectedScope.value === 'departements' ? 'departement' : 'commune'
       
-      return MetricsConfig.metrics.filter(metric => {
-        // Check if metric is available for current level
-        const isAvailable = MetricsConfig.isMetricAvailable(metric.value, currentLevel)
+      if (interCategoryMode.value) {
+        // In inter-category mode, get metrics from both selected categories
+        const metricsX = MetricsConfig.metrics.filter(metric => {
+          const isAvailable = MetricsConfig.isMetricAvailable(metric.value, currentLevel)
+          const isFromCategoryX = metric.category === categoryX.value
+          const notPopulation = metric.value !== 'population'
+          return isAvailable && isFromCategoryX && notPopulation
+        })
         
-        // Check if metric category is selected
-        const categorySelected = selectedCategories.value.length === 0 || 
-                                selectedCategories.value.includes(metric.category)
+        const metricsY = MetricsConfig.metrics.filter(metric => {
+          const isAvailable = MetricsConfig.isMetricAvailable(metric.value, currentLevel)
+          const isFromCategoryY = metric.category === categoryY.value
+          const notPopulation = metric.value !== 'population'
+          return isAvailable && isFromCategoryY && notPopulation
+        })
         
-        // Exclude population for correlation analysis
-        const notPopulation = metric.value !== 'population'
-        
-        return isAvailable && categorySelected && notPopulation
-      })
+        return { metricsX, metricsY }
+      } else {
+        // Standard mode - return all metrics from selected categories
+        return MetricsConfig.metrics.filter(metric => {
+          const isAvailable = MetricsConfig.isMetricAvailable(metric.value, currentLevel)
+          const categorySelected = selectedCategories.value.length === 0 || 
+                                  selectedCategories.value.includes(metric.category)
+          const notPopulation = metric.value !== 'population'
+          
+          return isAvailable && categorySelected && notPopulation
+        })
+      }
     }
 
     const calculatePearsonCorrelation = (x, y) => {
@@ -288,48 +369,73 @@ export default {
       return numerator / denominator
     }
 
-    const calculateCorrelationMatrix = (data, metrics) => {
-      const matrix = []
-      const labels = []
-      const pairwiseCounts = []
-      
-      metrics.forEach(metric => {
-        labels.push(MetricsConfig.getMetricLabel(metric.value))
-      })
-      
-      for (let i = 0; i < metrics.length; i++) {
-        const row = []
-        const countRow = []
-        for (let j = 0; j < metrics.length; j++) {
-          if (i === j) {
-            row.push(1) // Self correlation is always 1
-            countRow.push(data.length)
-          } else {
-            // Implement pairwise deletion: only use rows where both values are valid
+    const calculateCorrelationMatrix = (data, metricsData) => {
+      if (interCategoryMode.value && metricsData.metricsX && metricsData.metricsY) {
+        // Inter-category correlation matrix
+        const { metricsX, metricsY } = metricsData
+        const matrix = []
+        const labelsX = metricsX.map(metric => MetricsConfig.getMetricLabel(metric.value))
+        const labelsY = metricsY.map(metric => MetricsConfig.getMetricLabel(metric.value))
+        
+        for (let i = 0; i < metricsY.length; i++) {
+          const row = []
+          for (let j = 0; j < metricsX.length; j++) {
             const validPairs = data.filter(item => {
-              const xVal = parseFloat(item[metrics[i].value])
-              const yVal = parseFloat(item[metrics[j].value])
+              const xVal = parseFloat(item[metricsX[j].value])
+              const yVal = parseFloat(item[metricsY[i].value])
               return !isNaN(xVal) && isFinite(xVal) && !isNaN(yVal) && isFinite(yVal)
             })
             
             if (validPairs.length < 20) {
-              // Not enough data points for reliable correlation
               row.push(null)
-              countRow.push(validPairs.length)
             } else {
-              const xValues = validPairs.map(item => parseFloat(item[metrics[i].value]))
-              const yValues = validPairs.map(item => parseFloat(item[metrics[j].value]))
+              const xValues = validPairs.map(item => parseFloat(item[metricsX[j].value]))
+              const yValues = validPairs.map(item => parseFloat(item[metricsY[i].value]))
               const correlation = calculatePearsonCorrelation(xValues, yValues)
               row.push(isNaN(correlation) ? null : correlation)
-              countRow.push(validPairs.length)
             }
           }
+          matrix.push(row)
         }
-        matrix.push(row)
-        pairwiseCounts.push(countRow)
+        
+        return { matrix, labels: { x: labelsX, y: labelsY } }
+      } else {
+        // Standard correlation matrix
+        const metrics = metricsData
+        const matrix = []
+        const labels = []
+        
+        metrics.forEach(metric => {
+          labels.push(MetricsConfig.getMetricLabel(metric.value))
+        })
+        
+        for (let i = 0; i < metrics.length; i++) {
+          const row = []
+          for (let j = 0; j < metrics.length; j++) {
+            if (i === j) {
+              row.push(1) // Self correlation is always 1
+            } else {
+              const validPairs = data.filter(item => {
+                const xVal = parseFloat(item[metrics[i].value])
+                const yVal = parseFloat(item[metrics[j].value])
+                return !isNaN(xVal) && isFinite(xVal) && !isNaN(yVal) && isFinite(yVal)
+              })
+              
+              if (validPairs.length < 20) {
+                row.push(null)
+              } else {
+                const xValues = validPairs.map(item => parseFloat(item[metrics[i].value]))
+                const yValues = validPairs.map(item => parseFloat(item[metrics[j].value]))
+                const correlation = calculatePearsonCorrelation(xValues, yValues)
+                row.push(isNaN(correlation) ? null : correlation)
+              }
+            }
+          }
+          matrix.push(row)
+        }
+        
+        return { matrix, labels }
       }
-      
-      return { matrix, labels, pairwiseCounts }
     }
 
     const fetchDepartmentData = async () => {
@@ -407,9 +513,18 @@ export default {
         }
 
         const selectedMetrics = getSelectedMetrics()
-        if (selectedMetrics.length < 2) {
-          error.value = "Il faut au moins 2 métriques pour calculer des corrélations."
-          return
+        
+        if (interCategoryMode.value) {
+          if (!selectedMetrics.metricsX || !selectedMetrics.metricsY || 
+              selectedMetrics.metricsX.length === 0 || selectedMetrics.metricsY.length === 0) {
+            error.value = "Il faut sélectionner deux catégories avec des métriques disponibles."
+            return
+          }
+        } else {
+          if (selectedMetrics.length < 2) {
+            error.value = "Il faut au moins 2 métriques pour calculer des corrélations."
+            return
+          }
         }
 
         // Filter data to only include rows with valid values for selected metrics
@@ -457,16 +572,42 @@ export default {
       }
     }
 
+    const onInterCategorySelectionChanged = () => {
+      if (interCategoryMode.value && categoryX.value && categoryY.value && categoryX.value !== categoryY.value) {
+        updateCorrelations()
+      }
+    }
+
     // Watchers
     watch(selectedCategories, () => {
-      updateCorrelations()
+      if (!interCategoryMode.value) {
+        updateCorrelations()
+      }
     }, { deep: true })
+
+    watch(interCategoryMode, () => {
+      correlationMatrix.value = []
+      metricLabels.value = interCategoryMode.value ? { x: [], y: [] } : []
+      error.value = ''
+      if (interCategoryMode.value) {
+        onInterCategorySelectionChanged()
+      } else {
+        updateCorrelations()
+      }
+    })
 
     watch(() => store.labelState, () => {
       // Update labels when label state changes
       if (correlationMatrix.value.length > 0) {
         const selectedMetrics = getSelectedMetrics()
-        metricLabels.value = selectedMetrics.map(metric => MetricsConfig.getMetricLabel(metric.value))
+        if (interCategoryMode.value && selectedMetrics.metricsX && selectedMetrics.metricsY) {
+          metricLabels.value = {
+            x: selectedMetrics.metricsX.map(metric => MetricsConfig.getMetricLabel(metric.value)),
+            y: selectedMetrics.metricsY.map(metric => MetricsConfig.getMetricLabel(metric.value))
+          }
+        } else {
+          metricLabels.value = selectedMetrics.map(metric => MetricsConfig.getMetricLabel(metric.value))
+        }
       }
     })
 
@@ -487,6 +628,9 @@ export default {
       selectedScope,
       selectedDepartement,
       selectedCategories,
+      interCategoryMode,
+      categoryX,
+      categoryY,
       correlationMatrix,
       metricLabels,
       loading,
@@ -495,6 +639,7 @@ export default {
       scopeOptions,
       departementOptions,
       availableCategories,
+      categoryOptions,
       currentType,
       maxCorrelation,
       minCorrelation,
@@ -503,6 +648,7 @@ export default {
       getCategoryLabel,
       onScopeChanged,
       onSelectionChanged,
+      onInterCategorySelectionChanged,
       updateCorrelations
     }
   }
