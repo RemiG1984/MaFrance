@@ -107,37 +107,54 @@ export default {
 
     const createHeatmapData = () => {
       const data = []
-      const colorScale = createColorScale()
       
       // Labels should always be in { x: [], y: [] } format now
       const labelsX = props.labels?.x || []
       const labelsY = props.labels?.y || []
       
+      if (!props.matrix || !Array.isArray(props.matrix) || props.matrix.length === 0) {
+        console.log('Matrix is empty or invalid')
+        return data
+      }
+      
+      console.log('Matrix dimensions:', props.matrix.length, 'x', props.matrix[0]?.length || 0)
+      console.log('Labels dimensions:', labelsY.length, 'x', labelsX.length)
+      
       for (let i = 0; i < props.matrix.length; i++) {
+        if (!Array.isArray(props.matrix[i])) continue
+        
         for (let j = 0; j < props.matrix[i].length; j++) {
           const value = props.matrix[i][j]
-          // Handle null values (insufficient data)
-          const displayValue = value !== null ? value : 0
-          const color = value !== null ? colorScale(value).hex() : '#f0f0f0' // Gray for null values
+          const isInsufficientData = value === null || value === undefined || isNaN(value)
+          const displayValue = isInsufficientData ? 0 : Number(value)
           
           data.push({
             x: j,
-            y: props.matrix.length - 1 - i, // Invert Y axis
+            y: props.matrix.length - 1 - i, // Invert Y axis so first row appears at top
             v: displayValue,
-            originalValue: value, // Keep track of original null
-            color: color,
-            xLabel: labelsX[j] || `Metric ${j}`,
-            yLabel: labelsY[i] || `Metric ${i}`,
-            isInsufficientData: value === null
+            originalValue: value,
+            xLabel: labelsX[j] || `Metric X${j}`,
+            yLabel: labelsY[i] || `Metric Y${i}`,
+            isInsufficientData: isInsufficientData
           })
         }
       }
       
+      console.log('Generated heatmap data points:', data.length)
       return data
     }
 
     const createChart = async () => {
-      if (!chartCanvas.value || !props.matrix.length || !props.labels.length) {
+      if (!chartCanvas.value || !props.matrix.length) {
+        return
+      }
+
+      // Check if labels are properly structured
+      const labelsX = props.labels?.x || []
+      const labelsY = props.labels?.y || []
+      
+      if (labelsX.length === 0 || labelsY.length === 0) {
+        console.log('Labels not ready, skipping chart creation')
         return
       }
 
@@ -146,10 +163,18 @@ export default {
       const ctx = chartCanvas.value.getContext('2d')
       const heatmapData = createHeatmapData()
 
+      console.log('Creating heatmap with data:', heatmapData.length, 'points')
+      console.log('Labels X:', labelsX.length, 'Labels Y:', labelsY.length)
+
       // Destroy existing chart
       if (chartInstance) {
         chartInstance.destroy()
       }
+
+      // Calculate cell size based on canvas and data dimensions
+      const cellWidth = Math.max(30, Math.min(60, chartCanvas.value.clientWidth / labelsX.length))
+      const cellHeight = Math.max(30, Math.min(60, chartCanvas.value.clientHeight / labelsY.length))
+      const cellSize = Math.min(cellWidth, cellHeight)
 
       chartInstance = new Chart(ctx, {
         type: 'scatter',
@@ -159,34 +184,19 @@ export default {
             data: heatmapData,
             backgroundColor: (context) => {
               const point = context.raw
-              // Use gray for insufficient data, otherwise use correlation color
-              if (point.isInsufficientData) {
+              if (point && point.isInsufficientData) {
                 return '#f0f0f0'
               }
-              return getCorrelationColor(context.raw.v)
+              if (point && typeof point.v === 'number') {
+                return getCorrelationColor(point.v)
+              }
+              return '#f0f0f0'
             },
-            borderColor: 'rgba(0,0,0,0.1)',
+            borderColor: 'rgba(0,0,0,0.2)',
             borderWidth: 1,
-            pointRadius: (context) => {
-              const labelsX = props.labels?.x || []
-              const labelsY = props.labels?.y || []
-              const size = Math.min(
-                chartCanvas.value.width / labelsX.length / 2,
-                chartCanvas.value.height / labelsY.length / 2,
-                25
-              )
-              return Math.max(size, 8)
-            },
-            pointHoverRadius: (context) => {
-              const labelsX = props.labels?.x || []
-              const labelsY = props.labels?.y || []
-              const size = Math.min(
-                chartCanvas.value.width / labelsX.length / 2,
-                chartCanvas.value.height / labelsY.length / 2,
-                25
-              )
-              return Math.max(size + 3, 11)
-            }
+            pointRadius: cellSize / 2,
+            pointHoverRadius: cellSize / 2 + 2,
+            pointStyle: 'rect'
           }]
         },
         options: {
@@ -259,55 +269,49 @@ export default {
               type: 'linear',
               position: 'bottom',
               min: -0.5,
-              max: (() => {
-                const labelsX = props.labels?.x || []
-                return labelsX.length - 0.5
-              })(),
+              max: labelsX.length - 0.5,
               ticks: {
                 stepSize: 1,
                 callback: (value, index) => {
-                  const labelsX = props.labels?.x || []
                   const labelIndex = Math.round(value)
                   if (labelIndex >= 0 && labelIndex < labelsX.length) {
                     const label = labelsX[labelIndex]
-                    return label.length > 15 ? label.substring(0, 12) + '...' : label
+                    return label.length > 20 ? label.substring(0, 17) + '...' : label
                   }
                   return ''
                 },
                 font: {
-                  size: 10
+                  size: 9
                 },
                 maxRotation: 45,
                 minRotation: 0
               },
               grid: {
-                display: false
+                display: true,
+                color: 'rgba(0,0,0,0.1)'
               }
             },
             y: {
               type: 'linear',
               min: -0.5,
-              max: (() => {
-                const labelsY = props.labels?.y || []
-                return labelsY.length - 0.5
-              })(),
+              max: labelsY.length - 0.5,
               ticks: {
                 stepSize: 1,
                 callback: (value, index) => {
-                  const labelsY = props.labels?.y || []
                   const actualIndex = labelsY.length - 1 - Math.round(value)
                   if (actualIndex >= 0 && actualIndex < labelsY.length) {
                     const label = labelsY[actualIndex]
-                    return label.length > 15 ? label.substring(0, 12) + '...' : label
+                    return label.length > 20 ? label.substring(0, 17) + '...' : label
                   }
                   return ''
                 },
                 font: {
-                  size: 10
+                  size: 9
                 }
               },
               grid: {
-                display: false
+                display: true,
+                color: 'rgba(0,0,0,0.1)'
               }
             }
           },
