@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home.vue'
 import Rankings from '../views/Rankings.vue'
 import Methodology from '../views/Methodology.vue'
+import Memorial from '../views/Memorial.vue'
+import Correlations from '../views/Correlations.vue'
 
 const routes = [
   {
@@ -23,6 +25,11 @@ const routes = [
     path: '/memorial',
     name: 'Memorial',
     component: Memorial
+  },
+  {
+    path: '/correlations',
+    name: 'Correlations',
+    component: Correlations
   }
 ]
 

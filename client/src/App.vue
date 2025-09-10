@@ -154,6 +154,8 @@ export default {
       menuItems: [
         { title: 'Accueil', path: '/' },
         { title: 'Classements', path: '/classements' },
+        { title: 'Corrélations', path: '/correlations' },
+        { title: 'Mémorial', path: '/memorial' },
         { title: 'Méthodologie', path: '/methodologie' }
       ]
     }
