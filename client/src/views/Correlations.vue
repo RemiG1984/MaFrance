@@ -294,7 +294,7 @@ export default {
       const pairwiseCounts = []
       
       metrics.forEach(metric => {
-        labels.push(MetricsConfig.getDisplayLabel(metric.value))
+        labels.push(MetricsConfig.getMetricLabel(metric.value))
       })
       
       for (let i = 0; i < metrics.length; i++) {
@@ -466,7 +466,7 @@ export default {
       // Update labels when label state changes
       if (correlationMatrix.value.length > 0) {
         const selectedMetrics = getSelectedMetrics()
-        metricLabels.value = selectedMetrics.map(metric => MetricsConfig.getDisplayLabel(metric.value))
+        metricLabels.value = selectedMetrics.map(metric => MetricsConfig.getMetricLabel(metric.value))
       }
     })
 
