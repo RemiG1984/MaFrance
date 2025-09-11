@@ -10,7 +10,7 @@ const { importQPV } = require('./setup/importQPV');
 const { importSubventions } = require('./setup/importSubventions');
 const { importMigrants } = require('./setup/importMigrants');
 const { importNat1 } = require('./setup/importNat1');
-const { importFrancocides } = require('./setup/importFrancocides');
+
 
 const dbFile = config.database.path;
 
@@ -102,27 +102,19 @@ function runImports() {
                     }
                     console.log('✓ Importation données NAT1 terminée');
 
-                    importFrancocides(db, (err) => {
-                      if (err) {
-                        console.error('Échec importation données francocides:', err.message);
+                    // Create search indexes for better performance
+                    createSearchIndexes()
+                      .then(() => {
+                        console.log('✓ Index de recherche créés');
+                        console.log('🎉 Configuration de la base de données terminée !');
+                        db.close();
+                        process.exit(0);
+                      })
+                      .catch((indexErr) => {
+                        console.error('Échec création des index:', indexErr.message);
+                        db.close();
                         process.exit(1);
-                      }
-                      console.log('✓ Importation données francocides terminée');
-
-                      // Create search indexes for better performance
-                      createSearchIndexes()
-                        .then(() => {
-                          console.log('✓ Index de recherche créés');
-                          console.log('🎉 Configuration de la base de données terminée !');
-                          db.close();
-                          process.exit(0);
-                        })
-                        .catch((indexErr) => {
-                          console.error('Échec création des index:', indexErr.message);
-                          db.close();
-                          process.exit(1);
-                        });
-                    });
+                      });
                   });
                 });
               });
