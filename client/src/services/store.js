@@ -643,32 +643,7 @@ export const useDataStore = defineStore("data", {
           console.error('Error fetching location data:', error);
         }
       }
-    },
-
-    toggleSelectedTag(tag) {
-      const index = this.memorials.selectedTags.indexOf(tag);
-      if (index > -1) {
-        this.memorials.selectedTags.splice(index, 1);
-      } else {
-        this.memorials.selectedTags.push(tag);
-      }
-    },
-
-    clearSelectedTags() {
-      this.memorials.selectedTags = [];
-    },
-
-    setDepartementFilter(deptCode) {
-      this.memorials.selectedDepartement = deptCode;
-    },
-
-    setSortBy(sort) {
-      this.memorials.sortBy = sort;
-    },
-
-    async fetchVictimDetails(id) {
-      try {
-        const victimDetails = await api.getFrancocideDetails(id);
+    },cideDetails(id);
 
         // Update the victim in the victims array with the resume data
         const victimIndex = this.memorials.victims.findIndex(v => v.id === id);
