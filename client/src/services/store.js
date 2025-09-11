@@ -589,20 +589,7 @@ export const useDataStore = defineStore("data", {
         }
     },
 
-    cideDetails(id);
-
-        // Update the victim in the victims array with the resume data
-        const victimIndex = this.memorials.victims.findIndex(v => v.id === id);
-        if (victimIndex !== -1) {
-          this.memorials.victims[victimIndex] = { ...this.memorials.victims[victimIndex], resume: victimDetails.resume };
-        }
-
-        return victimDetails;
-      } catch (error) {
-        console.error('Error fetching victim details:', error);
-        return null;
-      }
-    },
+    
   },
 
   getters: {
