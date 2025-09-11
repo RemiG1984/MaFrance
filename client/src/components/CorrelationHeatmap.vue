@@ -4,7 +4,7 @@
       <h3>{{ title }}</h3>
     </div>
     <div class="heatmap-wrapper">
-      <Plotly :data="plotlyData" :layout="plotlyLayout" :style="{ width: '100%', height: '600px' }" @plotly-hover="handleHover" @plotly-unhover="handleUnhover" />
+      <div ref="plotlyDiv" style="width: 100%; height: 600px;"></div>
     </div>
 
     <!-- Legend -->
@@ -29,12 +29,11 @@
 </template>
 
 <script>
-import { defineComponent, ref, computed, watch } from 'vue'
-import { Vue3Plotly } from 'vue3-plotly'
+import { defineComponent, ref, computed, watch, onMounted, nextTick } from 'vue'
+import Plotly from 'plotly.js-dist-min'
 
 export default defineComponent({
   name: 'CorrelationHeatmap',
-  components: { Plotly: Vue3Plotly },
   props: {
     matrix: {
       type: Array,
@@ -53,7 +52,7 @@ export default defineComponent({
   },
   emits: ['correlation-hover'],
   setup(props, { emit }) {
-    const plotlyData = ref([])
+    const plotlyDiv = ref(null)
     const hoverData = ref(null)
 
     // Prepare data for Plotly heatmap
@@ -81,37 +80,45 @@ export default defineComponent({
     }
 
     // Configure Plotly layout
-    const plotlyLayout = computed(() => ({
+    const getLayout = () => ({
       title: {
         text: props.title,
         font: { size: 18, family: 'Inter, sans-serif', color: '#1a1a1a' }
       },
       xaxis: {
         title: '',
-        tickangle: 0, // Horizontal labels
+        tickangle: 0,
         tickmode: 'array',
-        tickvals: props.labels.x.map((_, i) => i), // Center ticks on squares
-        ticktext: props.labels.x.map(label => `<br>${label.split(' ').join('<br>')}`), // Wrap text with <br>
-        side: 'top', // X-axis at top
+        tickvals: props.labels.x.map((_, i) => i),
+        ticktext: props.labels.x.map(label => label.split(' ').join('<br>')),
+        side: 'top',
         automargin: true
       },
       yaxis: {
         title: '',
         tickmode: 'array',
-        tickvals: props.labels.y.map((_, i) => i), // Center ticks on squares
+        tickvals: props.labels.y.map((_, i) => i),
         ticktext: props.labels.y,
         automargin: true
       },
-      margin: { t: 50, l: 150, r: 50, b: 50 }, // Adjust margins for labels
+      margin: { t: 50, l: 150, r: 50, b: 50 },
       height: 600,
-      width: '100%',
       showlegend: false
-    }))
+    })
 
-    // Update data when props change
-    watch(() => [props.matrix, props.labels], () => {
-      plotlyData.value = preparePlotlyData()
-    }, { immediate: true })
+    // Render plot
+    const renderPlot = async () => {
+      if (!plotlyDiv.value) return
+      
+      const data = preparePlotlyData()
+      const layout = getLayout()
+      
+      await Plotly.newPlot(plotlyDiv.value, data, layout, { responsive: true })
+      
+      // Add event listeners
+      plotlyDiv.value.on('plotly_hover', handleHover)
+      plotlyDiv.value.on('plotly_unhover', handleUnhover)
+    }
 
     // Handle hover events
     const handleHover = (event) => {
@@ -133,7 +140,21 @@ export default defineComponent({
       emit('correlation-hover', null)
     }
 
-    return { plotlyData, plotlyLayout, handleHover, handleUnhover }
+    // Watch for prop changes and re-render
+    watch(() => [props.matrix, props.labels], () => {
+      nextTick(() => {
+        renderPlot()
+      })
+    })
+
+    // Initial render on mount
+    onMounted(() => {
+      nextTick(() => {
+        renderPlot()
+      })
+    })
+
+    return { plotlyDiv }
   }
 })
 </script>
