@@ -28,7 +28,8 @@
 
   <script>
   import { defineComponent, ref, computed, watch, onMounted, onUnmounted } from 'vue'
-  import Plotly from 'plotly.js' // Corrected import to the main plotly.js entry point
+  import Plotly from 'plotly.js/lib/core'
+  import 'plotly.js/lib/heatmap'
 
   export default defineComponent({
     name: 'CorrelationHeatmap',
@@ -116,31 +117,45 @@
         }
       }
 
-      // Update chart when props change
+      // Update chart when props change with debouncing
+      let updateTimeout = null
       watch(() => [props.matrix, props.labels], () => {
-        if (plotlyInstance) {
-          const data = preparePlotlyData()
-          const layout = plotlyLayout.value
-          Plotly.react(plotlyInstance, data, layout)
-        }
+        if (updateTimeout) clearTimeout(updateTimeout)
+        updateTimeout = setTimeout(() => {
+          if (plotlyInstance) {
+            const data = preparePlotlyData()
+            const layout = plotlyLayout.value
+            Plotly.react(plotlyInstance, data, layout)
+          }
+        }, 100)
       }, { immediate: true })
 
-      // Handle hover events
+      // Handle hover events with throttling
+      let hoverTimeout = null
       const handleMouseOver = (event) => {
-        const data = plotlyInstance.data[0]
-        const x = Math.round(plotlyInstance._fullLayout.xaxis.p2c(event.layerX))
-        const y = Math.round(plotlyInstance._fullLayout.yaxis.p2c(event.layerY))
-        const i = Math.floor(y / (600 / props.labels.y.length))
-        const j = Math.floor(x / (600 / props.labels.x.length))
+        if (hoverTimeout) return
+        hoverTimeout = setTimeout(() => {
+          try {
+            if (!plotlyInstance || !plotlyInstance._fullLayout) return
+            
+            const x = Math.round(plotlyInstance._fullLayout.xaxis.p2c(event.layerX))
+            const y = Math.round(plotlyInstance._fullLayout.yaxis.p2c(event.layerY))
+            const i = Math.floor(y / (600 / props.labels.y.length))
+            const j = Math.floor(x / (600 / props.labels.x.length))
 
-        if (i >= 0 && j >= 0 && props.matrix[i] && !isNaN(props.matrix[i][j])) {
-          hoverData.value = {
-            metric1: props.labels.x[j],
-            metric2: props.labels.y[i],
-            correlation: props.matrix[i][j]
+            if (i >= 0 && j >= 0 && props.matrix[i] && !isNaN(props.matrix[i][j])) {
+              hoverData.value = {
+                metric1: props.labels.x[j],
+                metric2: props.labels.y[i],
+                correlation: props.matrix[i][j]
+              }
+              emit('correlation-hover', hoverData.value)
+            }
+          } catch (error) {
+            console.warn('Hover event error:', error)
           }
-          emit('correlation-hover', hoverData.value)
-        }
+          hoverTimeout = null
+        }, 50)
       }
 
       const handleMouseLeave = () => {
