@@ -420,27 +420,7 @@ const api = {
     getNat1Summary: () =>
         apiService.request("/nat1/all"),
 
-    // Francocides data
-    getFrancocides: (params = {}) => {
-        const queryString = new URLSearchParams(params).toString();
-        const url = `/francocides`;
-        return apiService.request(
-            queryString ? `${url}?${queryString}` : url,
-            {},
-            !params.cursor,
-        );
-    },
-    getFrancocidesStats: (params = {}) => {
-        const queryString = new URLSearchParams(params).toString();
-        return apiService.request(`/francocides/stats${queryString ? `?${queryString}` : ''}`);
-    },
-    getFrancocidesTags() {
-        return apiService.request('/francocides/tags', {}, true);
-    },
-
-    async getFrancocideDetails(id) {
-        return apiService.request(`/francocides/${id}`);
-    },
+    
 
     // Cache management
     clearCache: () => apiService.clearCache(),

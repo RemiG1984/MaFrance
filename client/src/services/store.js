@@ -6,9 +6,7 @@ import {
   getDepartementFromCog, 
   normalizeDepartementCode, 
   serializeStats, 
-  aggregateStats,
-  sortVictims,
-  filterVictims
+  aggregateStats
 } from "../utils/utils.js";
 
 export const useDataStore = defineStore("data", {
@@ -68,15 +66,8 @@ export const useDataStore = defineStore("data", {
       migrants: null,
       nat1: null,
     },
-    memorials: {
-      victims: [],
-      tags: [],
-      selectedTags: [],
-      selectedDepartement: null,
-      sortBy: 'year_desc',
-      loading: false,
-    },
-    locationCache: JSON.parse(localStorage.getItem('locationCache') || '{}'),
+    
+    
   }),
 
   actions: {
@@ -598,52 +589,7 @@ export const useDataStore = defineStore("data", {
         }
     },
 
-    // Memorial actions
-    async fetchVictims() {
-      try {
-        this.memorials.loading = true;
-        const response = await api.getFrancocides();
-
-        if (response && response.list) {
-          this.memorials.victims = response.list;
-        } else {
-          this.memorials.victims = [];
-        }
-      } catch (error) {
-        console.error('Error fetching victims:', error);
-        this.memorials.victims = [];
-      } finally {
-        this.memorials.loading = false;
-      }
-    },
-
-    async fetchTags() {
-      try {
-        // Use api cache for tags
-        const response = await api.getFrancocidesTags();
-        this.memorials.tags = response.tags || [];
-      } catch (error) {
-        console.error('Error fetching tags:', error);
-        this.memorials.tags = [];
-      }
-    },
-
-    async fetchLocationData(cogs) {
-      const uncachedCogs = cogs.filter(cog => !this.locationCache[cog]);
-      if (uncachedCogs.length) {
-        try {
-          const results = await Promise.allSettled(uncachedCogs.map(cog => api.getCommuneDetails(cog)));
-          results.forEach((result, i) => {
-            if (result.status === 'fulfilled' && result.value?.commune) {
-              this.locationCache[uncachedCogs[i]] = `${result.value.commune} (${result.value.departement})`;
-            }
-          });
-          localStorage.setItem('locationCache', JSON.stringify(this.locationCache));
-        } catch (error) {
-          console.error('Error fetching location data:', error);
-        }
-      }
-    },cideDetails(id);
+    cideDetails(id);
 
         // Update the victim in the victims array with the resume data
         const victimIndex = this.memorials.victims.findIndex(v => v.id === id);
@@ -733,20 +679,6 @@ export const useDataStore = defineStore("data", {
       return this[level]?.migrants || { list: [], pagination: { hasMore: false, nextCursor: null, limit: 20 } }
     },
 
-    // Getters for memorial page
-    sortedVictims: (state) => {
-      return sortVictims(state.memorials.victims, state.memorials.sortBy);
-    },
-
-    filteredVictims: (state) => (query) => {
-      const sortedVictims = sortVictims(state.memorials.victims, state.memorials.sortBy);
-      return filterVictims(
-        sortedVictims,
-        state.memorials.selectedTags,
-        state.memorials.selectedDepartement,
-        query,
-        state.locationCache
-      );
-    },
+    
   },
 });
