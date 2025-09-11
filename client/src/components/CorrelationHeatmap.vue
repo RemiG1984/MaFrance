@@ -30,7 +30,7 @@
 
 <script>
 import { defineComponent, ref, computed, watch } from 'vue'
-import { Plotly } from 'vue3-plotly'
+import Plotly from 'vue3-plotly'
 
 export default defineComponent({
   name: 'CorrelationHeatmap',
