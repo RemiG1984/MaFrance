@@ -10,19 +10,19 @@
       <div class="legend-scale">
         <div class="legend-item">
           <div class="legend-color" style="background: #b10026"></div>
-          <span>Très forte (+1.0)</span>
+          <span>Très forte (+0.7)</span>
         </div>
         <div class="legend-item">
           <div class="legend-color" style="background: #e31a1c"></div>
-          <span>Forte (+0.7)</span>
+          <span>Forte (+0.5)</span>
         </div>
         <div class="legend-item">
           <div class="legend-color" style="background: #fd8d3c"></div>
-          <span>Modérée (+0.5)</span>
+          <span>Modérée (+0.3)</span>
         </div>
         <div class="legend-item">
           <div class="legend-color" style="background: #fecc5c"></div>
-          <span>Faible (+0.3)</span>
+          <span>Faible (+0.1)</span>
         </div>
         <div class="legend-item">
           <div class="legend-color" style="background: #ffffb2"></div>
@@ -30,19 +30,19 @@
         </div>
         <div class="legend-item">
           <div class="legend-color" style="background: #c7e9b4"></div>
-          <span>Faible (-0.3)</span>
+          <span>Faible (-0.1)</span>
         </div>
         <div class="legend-item">
           <div class="legend-color" style="background: #7fcdbb"></div>
-          <span>Modérée (-0.5)</span>
+          <span>Modérée (-0.3)</span>
         </div>
         <div class="legend-item">
           <div class="legend-color" style="background: #41b6c4"></div>
-          <span>Forte (-0.7)</span>
+          <span>Forte (-0.5)</span>
         </div>
         <div class="legend-item">
           <div class="legend-color" style="background: #2c7fb8"></div>
-          <span>Très forte (-1.0)</span>
+          <span>Très forte (-0.7)</span>
         </div>
         <div class="legend-item">
           <div class="legend-color" style="background: #f0f0f0; border: 2px solid #ccc"></div>
@@ -97,7 +97,7 @@ export default {
         '#fd8d3c',  // Weak positive
         '#e31a1c',  // Moderate positive
         '#b10026'   // Strong positive correlation
-      ]).domain([-1, -0.7, -0.5, -0.3, 0, 0.3, 0.5, 0.7, 1])
+      ]).domain([-0.7, -0.5, -0.3, -0.1, 0, 0.1, 0.3, 0.5, 0.7])
     }
 
     const getCorrelationColor = (value) => {
@@ -242,10 +242,10 @@ export default {
                   let strength = ''
                   
                   const absCorr = Math.abs(correlation)
-                  if (absCorr >= 0.9) strength = 'très forte'
-                  else if (absCorr >= 0.7) strength = 'forte'
-                  else if (absCorr >= 0.5) strength = 'modérée'
-                  else if (absCorr >= 0.3) strength = 'faible'
+                  if (absCorr >= 0.7) strength = 'très forte'
+                  else if (absCorr >= 0.5) strength = 'forte'
+                  else if (absCorr >= 0.3) strength = 'modérée'
+                  else if (absCorr >= 0.1) strength = 'faible'
                   else strength = 'très faible'
                   
                   const direction = correlation > 0 ? 'positive' : correlation < 0 ? 'négative' : 'nulle'

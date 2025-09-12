@@ -95,7 +95,7 @@ export default {
         '#fd8d3c',  // Weak positive
         '#e31a1c',  // Moderate positive
         '#b10026'   // Strong positive correlation
-      ]).domain([-1, -0.7, -0.5, -0.3, 0, 0.3, 0.5, 0.7, 1])
+      ]).domain([-0.7, -0.5, -0.3, -0.1, 0, 0.1, 0.3, 0.5, 0.7])
     }
 
     const getCorrelationColor = (value) => {
