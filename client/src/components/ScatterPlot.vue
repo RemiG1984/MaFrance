@@ -7,13 +7,13 @@
         <p class="text-grey">pour afficher le nuage de points correspondant</p>
       </v-card>
     </div>
-    
+
     <div v-else class="chart-wrapper">
       <div class="chart-header">
         <h3>{{ selectedMetrics.metric1 }} vs {{ selectedMetrics.metric2 }}</h3>
         <div class="correlation-info">
-          <v-chip 
-            :color="getCorrelationColor(correlationValue)" 
+          <v-chip
+            :color="getCorrelationColor(correlationValue)"
             :variant="Math.abs(correlationValue) < 0.3 ? 'outlined' : 'elevated'"
             size="large"
           >
@@ -65,22 +65,22 @@ export default {
 
     const calculateTrendLine = (data) => {
       if (!data || data.length < 2) return []
-      
+
       // Calculate linear regression
       const n = data.length
       const sumX = data.reduce((sum, point) => sum + point.x, 0)
       const sumY = data.reduce((sum, point) => sum + point.y, 0)
       const sumXY = data.reduce((sum, point) => sum + (point.x * point.y), 0)
       const sumXX = data.reduce((sum, point) => sum + (point.x * point.x), 0)
-      
+
       const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX)
       const intercept = (sumY - slope * sumX) / n
-      
+
       // Find min and max X values
       const xValues = data.map(point => point.x)
       const minX = Math.min(...xValues)
       const maxX = Math.max(...xValues)
-      
+
       return [
         { x: minX, y: slope * minX + intercept },
         { x: maxX, y: slope * maxX + intercept }
@@ -100,7 +100,7 @@ export default {
       for (const item of props.rawData) {
         const x = parseFloat(item[metric1Key])
         const y = parseFloat(item[metric2Key])
-        
+
         if (!isNaN(x) && !isNaN(y) && isFinite(x) && isFinite(y)) {
           points.push({
             x: x,
@@ -111,7 +111,7 @@ export default {
       }
 
       const trendLine = calculateTrendLine(points)
-      
+
       return { points, trendLine }
     }
 
@@ -332,6 +332,9 @@ export default {
 .scatter-chart {
   width: 100% !important;
   height: 400px !important;
+  min-height: 400px;
+  display: block;
+  background-color: transparent;
 }
 
 @media (max-width: 768px) {
@@ -339,12 +342,12 @@ export default {
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
   .chart-header h3 {
     font-size: 1.1rem;
     min-width: auto;
   }
-  
+
   .scatter-chart {
     height: 350px !important;
   }
@@ -354,7 +357,7 @@ export default {
   .chart-wrapper {
     padding: 15px;
   }
-  
+
   .scatter-chart {
     height: 300px !important;
   }
