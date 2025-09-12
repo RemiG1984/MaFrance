@@ -3,7 +3,6 @@
     <!-- Header Section -->
     <div class="header-section">
       <h1>{{ getPageTitle() }}</h1>
-      <VersionSelector />
     </div>
 
     <!-- Controls Section -->
@@ -392,7 +391,7 @@ export default {
       try {
         const requestParams = {
           dept: '', // All départements
-          limit: 5000, // Get more data to filter properly
+          limit: 1000, // Get more data to filter properly
           offset: 0,
           sort: 'population',
           direction: 'DESC',
