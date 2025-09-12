@@ -128,11 +128,15 @@ export default {
       // Destroy existing chart
       if (chartInstance) {
         chartInstance.destroy()
+        chartInstance = null
       }
 
       if (points.length === 0) {
+        console.log('No valid data points found for scatter plot')
         return
       }
+
+      console.log(`Creating scatter plot with ${points.length} points`)
 
       chartInstance = new Chart(ctx, {
         type: 'scatter',
@@ -259,6 +263,7 @@ export default {
 
     // Lifecycle
     onMounted(() => {
+      createChart()
       window.addEventListener('resize', resizeChart)
     })
 
