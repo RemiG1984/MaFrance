@@ -89,7 +89,7 @@
           @correlation-hover="handleCorrelationHover"
           @correlation-click="handleCorrelationClick"
         />
-        
+
         <!-- Scatter Plot Section -->
         <ScatterPlot
           :selectedMetrics="selectedScatterMetrics"
@@ -156,7 +156,7 @@ export default {
 
     // Reactive state
     const selectedScope = ref('departements')
-    
+
     const selectedMetricsX = ref(['prenom_francais_pct', 'extra_europeen_pct', 'musulman_pct', 'naturalises_pct'])
     const selectedMetricsY = ref(['homicides_total_p100k', 'violences_physiques_p1k', 'violences_sexuelles_p1k', 'vols_p1k','destructions_p1k', 'stupefiants_p1k', 'escroqueries_p1k'])
     const correlationMatrix = ref([])
@@ -164,7 +164,7 @@ export default {
     const loading = ref(false)
     const error = ref('')
     const dataSize = ref(0)
-    
+
     // Scatter plot state
     const selectedScatterMetrics = ref({ metric1: null, metric2: null })
     const selectedCorrelationValue = ref(null)
@@ -176,11 +176,11 @@ export default {
       { value: 'communes_france', title: 'Communes (population > 50k)' }
     ]
 
-    
+
 
     const availableMetricOptions = computed(() => {
       const currentLevel = selectedScope.value === 'departements' ? 'departement' : 'commune'
-      
+
       return MetricsConfig.metrics
         .filter(metric => {
           const isAvailable = MetricsConfig.isMetricAvailable(metric.value, currentLevel)
@@ -239,10 +239,10 @@ export default {
     const topCorrelations = computed(() => {
       if (!correlationMatrix.value.length || !metricLabels.value.x || !metricLabels.value.y) return []
       const correlations = []
-      
+
       const labelsX = metricLabels.value.x
       const labelsY = metricLabels.value.y
-      
+
       for (let i = 0; i < correlationMatrix.value.length; i++) {
         for (let j = 0; j < correlationMatrix.value[i].length; j++) {
           const value = correlationMatrix.value[i][j]
@@ -256,7 +256,7 @@ export default {
           }
         }
       }
-      
+
       return correlations.sort((a, b) => Math.abs(b.value) - Math.abs(a.value))
     })
 
@@ -285,33 +285,33 @@ export default {
 
     const getSelectedMetrics = () => {
       const currentLevel = selectedScope.value === 'departements' ? 'departement' : 'commune'
-      
+
       const metricsX = MetricsConfig.metrics.filter(metric => {
         return selectedMetricsX.value.includes(metric.value) &&
                MetricsConfig.isMetricAvailable(metric.value, currentLevel)
       })
-      
+
       const metricsY = MetricsConfig.metrics.filter(metric => {
         return selectedMetricsY.value.includes(metric.value) &&
                MetricsConfig.isMetricAvailable(metric.value, currentLevel)
       })
-      
+
       return { metricsX, metricsY }
     }
 
     const calculatePearsonCorrelation = (x, y) => {
       if (x.length !== y.length || x.length === 0) return null
-      
+
       const n = x.length
       const sumX = x.reduce((a, b) => a + b, 0)
       const sumY = y.reduce((a, b) => a + b, 0)
       const sumXY = x.reduce((acc, val, i) => acc + val * y[i], 0)
       const sumXX = x.reduce((acc, val) => acc + val * val, 0)
       const sumYY = y.reduce((acc, val) => acc + val * val, 0)
-      
+
       const numerator = n * sumXY - sumX * sumY
       const denominator = Math.sqrt((n * sumXX - sumX * sumX) * (n * sumYY - sumY * sumY))
-      
+
       if (denominator === 0) return null
       return numerator / denominator
     }
@@ -321,7 +321,7 @@ export default {
       const matrix = []
       const labelsX = metricsX.map(metric => MetricsConfig.getMetricLabel(metric.value))
       const labelsY = metricsY.map(metric => MetricsConfig.getMetricLabel(metric.value))
-      
+
       for (let i = 0; i < metricsY.length; i++) {
         const row = []
         for (let j = 0; j < metricsX.length; j++) {
@@ -330,7 +330,7 @@ export default {
             const yVal = parseFloat(item[metricsY[i].value])
             return !isNaN(xVal) && isFinite(xVal) && !isNaN(yVal) && isFinite(yVal)
           })
-          
+
           if (validPairs.length < 20) {
             row.push(null)
           } else {
@@ -342,7 +342,7 @@ export default {
         }
         matrix.push(row)
       }
-      
+
       return { 
         matrix, 
         labels: { 
@@ -356,7 +356,7 @@ export default {
 
     const fetchDepartmentData = async () => {
       let departmentData = store.country?.departementsRankings?.data
-      
+
       if (!departmentData) {
         // Fallback: fetch département data from API if not in store
         try {
@@ -368,17 +368,17 @@ export default {
             direction: 'DESC'
           })
           departmentData = response?.data || []
-          
+
           if (departmentData.length === 0) {
             throw new Error("Aucune donnée de département trouvée.")
           }
-          
+
           console.log(`Loaded ${departmentData.length} départements from API`)
         } catch (err) {
           throw new Error(`Erreur lors du chargement des données de département : ${err.message}`)
         }
       }
-      
+
       // Filter out overseas départements (971, 972, 973, 974, 976)
       const overseasDepts = ['971', '972', '973', '974', '976']
       return departmentData.filter(dept => {
@@ -401,14 +401,14 @@ export default {
 
         const response = await api.getCommuneRankings(requestParams)
         let communeData = response?.data || []
-        
-        // Filter out overseas départements at commune level too
+
+        // Filter out overseas départements
         const overseasDepts = ['971', '972', '973', '974', '976']
         communeData = communeData.filter(commune => {
           const deptCode = commune.departement || ''
           return !overseasDepts.includes(deptCode.toString())
         })
-        
+
         return communeData
       } catch (err) {
         throw new Error(`Erreur lors du chargement des données communales: ${err.message}`)
@@ -426,7 +426,7 @@ export default {
 
       try {
         let fetchedData = []
-        
+
         if (selectedScope.value === 'departements') {
           fetchedData = await fetchDepartmentData()
         } else if (selectedScope.value === 'communes_france') {
@@ -438,12 +438,12 @@ export default {
           rawData.value = []
           return
         }
-        
+
         // Store raw data for scatter plot
         rawData.value = fetchedData
 
         const selectedMetrics = getSelectedMetrics()
-        
+
         if (!selectedMetrics.metricsX || !selectedMetrics.metricsY || 
             selectedMetrics.metricsX.length === 0 || selectedMetrics.metricsY.length === 0) {
           error.value = "Il faut sélectionner des métriques disponibles pour chaque axe."
@@ -465,7 +465,7 @@ export default {
         }
 
         const { matrix, labels } = calculateCorrelationMatrix(validData, selectedMetrics)
-        
+
         correlationMatrix.value = matrix
         metricLabels.value = labels
         dataSize.value = validData.length
@@ -483,7 +483,7 @@ export default {
       correlationMatrix.value = []
       metricLabels.value = []
       error.value = ''
-      
+
       updateCorrelations()
     }
 
@@ -540,7 +540,7 @@ export default {
 
     return {
       selectedScope,
-      
+
       selectedMetricsX,
       selectedMetricsY,
       correlationMatrix,
@@ -549,7 +549,7 @@ export default {
       error,
       dataSize,
       scopeOptions,
-      
+
       availableMetricOptions,
       currentType,
       maxCorrelation,
@@ -558,7 +558,7 @@ export default {
       getPageTitle,
       getCategoryLabel,
       onScopeChanged,
-      
+
       onAxisSelectionChanged,
       updateCorrelations,
       // Scatter plot
@@ -659,7 +659,7 @@ export default {
     flex-direction: column;
     gap: 15px;
   }
-  
+
   .correlations-container {
     padding: 15px;
   }
