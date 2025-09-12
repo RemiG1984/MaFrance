@@ -197,8 +197,9 @@ export default {
               backgroundColor: 'rgba(54, 162, 235, 0.6)',
               borderColor: 'rgba(54, 162, 235, 1)',
               borderWidth: 2,
-              pointRadius: 4,
-              pointHoverRadius: 6
+              pointRadius: 5,
+              pointHoverRadius: 8,
+              pointHitRadius: 12
             },
             {
               label: 'Droite de régression',
@@ -223,7 +224,7 @@ export default {
           },
           interaction: {
             intersect: false,
-            mode: 'point'
+            mode: 'nearest'
           },
           plugins: {
             title: {
@@ -238,6 +239,12 @@ export default {
               }
             },
             tooltip: {
+              enabled: true,
+              mode: 'nearest',
+              intersect: false,
+              animation: {
+                duration: 0
+              },
               callbacks: {
                 title: (context) => {
                   const point = context[0]
@@ -260,7 +267,10 @@ export default {
               bodyColor: 'white',
               borderColor: '#ccc',
               borderWidth: 1,
-              padding: 10
+              padding: 10,
+              caretPadding: 8,
+              cornerRadius: 4,
+              displayColors: false
             }
           },
           scales: {
