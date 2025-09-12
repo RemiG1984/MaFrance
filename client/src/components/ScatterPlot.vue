@@ -116,7 +116,7 @@ export default {
       const points = []
       const metric1Key = props.selectedMetrics.metric1
       const metric2Key = props.selectedMetrics.metric2
-      
+
       console.log('Looking for metrics:', metric1Key, 'vs', metric2Key)
 
       let validCount = 0
@@ -137,10 +137,30 @@ export default {
         const y = parseFloat(item[metric2Key])
 
         if (!isNaN(x) && !isNaN(y) && isFinite(x) && isFinite(y)) {
+          // Format label based on data type
+          let label = 'Point'
+
+          if (item.commune_name && item.departement) {
+            // Commune data: "Commune Name (Dept Code)"
+            label = `${item.commune_name} (${item.departement})`
+          } else if (item.departement_name && item.departement_code) {
+            // Departement data: "Dept Name (Dept Code)"
+            label = `${item.departement_name} (${item.departement_code})`
+          } else if (item.name && item.departement_code) {
+            // Alternative departement format
+            label = `${item.name} (${item.departement_code})`
+          } else if (item.departement_name && item.departement) {
+            // Fallback departement format
+            label = `${item.departement_name} (${item.departement})`
+          } else {
+            // Fallback to any available name
+            label = item.name || item.departement_name || item.commune_name || item.departement || 'Point'
+          }
+
           points.push({
             x: x,
             y: y,
-            label: item.name || item.departement_name || item.commune_name || item.departement || 'Point'
+            label: label
           })
           validCount++
         } else {
