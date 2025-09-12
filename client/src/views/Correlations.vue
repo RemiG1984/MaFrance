@@ -103,7 +103,6 @@
               <v-card class="pa-3">
                 <v-card-title class="text-h6">Statistiques</v-card-title>
                 <v-card-text>
-                  <p><strong>Nb. de métriques:</strong> {{ metricLabels.length }}</p>
                   <p><strong>Nb. d'observations:</strong> {{ dataSize }}</p>
                   <p><strong>Corrélation max:</strong> {{ maxCorrelation.toFixed(3) }}</p>
                   <p><strong>Corrélation min:</strong> {{ minCorrelation.toFixed(3) }}</p>
@@ -114,9 +113,9 @@
               <v-card class="pa-3">
                 <v-card-title class="text-h6">Corrélations les plus fortes</v-card-title>
                 <v-card-text>
-                  <div v-for="corr in topCorrelations.slice(0, 5)" :key="corr.key" class="mb-2">
-                    <strong>{{ corr.metric1 }} ↔ {{ corr.metric2 }}</strong>: {{ corr.value.toFixed(3) }}
-                  </div>
+                  <p v-for="corr in topCorrelations.slice(0, 5)" :key="corr.key" class="mb-2">
+                    <strong>{{ corr.metric1 }} ↔ {{ corr.metric2 }}:</strong> {{ corr.value.toFixed(3) }}
+                  </p>
                 </v-card-text>
               </v-card>
             </v-col>
