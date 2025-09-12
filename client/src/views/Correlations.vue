@@ -358,7 +358,6 @@ export default {
       if (!departmentData) {
         // Fallback: fetch département data from API if not in store
         try {
-          console.log('Department data not in store, fetching from API...')
           const response = await api.getDepartementRankings({
             limit: 101, // Get all departments
             offset: 0,
@@ -370,8 +369,6 @@ export default {
           if (departmentData.length === 0) {
             throw new Error("Aucune donnée de département trouvée.")
           }
-
-          console.log(`Loaded ${departmentData.length} départements from API`)
         } catch (err) {
           throw new Error(`Erreur lors du chargement des données de département : ${err.message}`)
         }
@@ -470,7 +467,6 @@ export default {
 
       } catch (err) {
         error.value = `Erreur lors du calcul des corrélations : ${err.message}`
-        console.error('Erreur updateCorrelations:', err)
         rawData.value = []
       } finally {
         loading.value = false
@@ -497,7 +493,6 @@ export default {
     }
 
     const handleCorrelationClick = (data) => {
-      console.log('Correlation clicked:', data)
       selectedScatterMetrics.value = {
         metric1: data.metric1,
         metric2: data.metric2
