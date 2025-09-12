@@ -10,7 +10,7 @@
 
     <div v-else class="chart-wrapper">
       <div class="chart-header">
-        <h3>{{ selectedMetrics.metric1 }} vs {{ selectedMetrics.metric2 }}</h3>
+        <h3>{{ getMetricDisplayName(selectedMetrics.metric1) }} vs {{ getMetricDisplayName(selectedMetrics.metric2) }}</h3>
         <div class="correlation-info">
           <v-chip
             :color="getCorrelationColor(correlationValue)"
@@ -30,6 +30,7 @@
 import { ref, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { Chart, registerables } from 'chart.js'
 import chroma from 'chroma-js'
+import { MetricsConfig } from '../utils/metricsConfig.js'
 
 // Register Chart.js components
 Chart.register(...registerables)
@@ -246,8 +247,8 @@ export default {
                   const point = context.raw
                   if (context.datasetIndex === 0) { // Data points
                     return [
-                      `${props.selectedMetrics.metric1}: ${point.x.toFixed(2)}`,
-                      `${props.selectedMetrics.metric2}: ${point.y.toFixed(2)}`
+                      `${getMetricDisplayName(props.selectedMetrics.metric1)}: ${point.x.toFixed(2)}`,
+                      `${getMetricDisplayName(props.selectedMetrics.metric2)}: ${point.y.toFixed(2)}`
                     ]
                   } else { // Trend line
                     return `Droite de régression`
@@ -267,7 +268,7 @@ export default {
               type: 'linear',
               title: {
                 display: true,
-                text: props.selectedMetrics.metric1,
+                text: getMetricDisplayName(props.selectedMetrics.metric1),
                 font: {
                   size: 14,
                   weight: 'bold'
@@ -282,7 +283,7 @@ export default {
               type: 'linear',
               title: {
                 display: true,
-                text: props.selectedMetrics.metric2,
+                text: getMetricDisplayName(props.selectedMetrics.metric2),
                 font: {
                   size: 14,
                   weight: 'bold'
@@ -322,10 +323,15 @@ export default {
       window.removeEventListener('resize', resizeChart)
     })
 
+    const getMetricDisplayName = (metricKey) => {
+      return MetricsConfig.getMetricLabel(metricKey) || metricKey
+    }
+
     return {
       chartCanvas,
       chartId,
-      getCorrelationColor
+      getCorrelationColor,
+      getMetricDisplayName
     }
   }
 }
