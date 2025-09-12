@@ -79,7 +79,7 @@ export default {
       default: 'Corrélations'
     }
   },
-  emits: ['correlation-hover'],
+  emits: ['correlation-hover', 'correlation-click'],
   setup(props, { emit }) {
     const chartCanvas = ref(null)
     const chartId = `correlation-chart-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
@@ -129,8 +129,8 @@ export default {
           const displayValue = isInsufficientData ? 0 : Number(value)
           
           data.push({
-            x: j,
-            y: props.matrix.length - 1 - i, // Invert Y axis so first row appears at top
+            x: j * 2 + 1, // Place marks at 1, 3, 5, etc.
+            y: (props.matrix.length - 1 - i) * 2 + 1, // Place marks at 1, 3, 5, etc. with inversion
             v: displayValue,
             originalValue: value,
             xLabel: labelsX[j] || `Metric X${j}`,
@@ -268,32 +268,38 @@ export default {
             x: {
               type: 'linear',
               position: 'top',
-              min: -0.5,
-              max: labelsX.length - 0.5,
+              min: 0,
+              max: labelsX.length * 2,
               ticks: {
-                stepSize: 1,
                 callback: (value, index) => {
-                  const labelIndex = Math.round(value)
-                  if (labelIndex >= 0 && labelIndex < labelsX.length) {
-                    const label = labelsX[labelIndex]
-                    // Allow longer labels since they're horizontal now
-                    return label.length > 25 ? label.substring(0, 22) + '...' : label
+                  if (Number.isInteger(value) && value % 2 === 1) {
+                    const labelIndex = Math.floor(value / 2);
+                    if (labelIndex >= 0 && labelIndex < labelsX.length) {
+                      return labelsX[labelIndex];
+                    }
                   }
-                  return ''
+                  return ''; // Return empty string for even positions to generate ticks without labels
                 },
+                stepSize: 1, // Ensure ticks at every integer (0, 1, 2, 3, ...)
                 font: {
                   size: 11,
                   weight: 'bold'
                 },
-                maxRotation: 0,
-                minRotation: 0,
-                padding: 10,
+                maxRotation: 45,
+                minRotation: 45,
+                padding: 5,
                 align: 'center'
               },
               grid: {
                 display: true,
-                color: 'rgba(0,0,0,0.3)',
-                lineWidth: 1
+                color: (context) => {
+                  const value = context.tick.value;
+                  return Number.isInteger(value) && value % 2 === 0 ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0)';
+                },
+                lineWidth: 2, // Increased for visibility
+                drawOnChartArea: true,
+                drawTicks: false,
+                z: 1 // Ensure grid lines are above the chart
               },
               border: {
                 display: true,
@@ -303,29 +309,38 @@ export default {
             },
             y: {
               type: 'linear',
-              min: -0.5,
-              max: labelsY.length - 0.5,
+              min: 0,
+              max: labelsY.length * 2,
               ticks: {
-                stepSize: 1,
                 callback: (value, index) => {
-                  const actualIndex = labelsY.length - 1 - Math.round(value)
-                  if (actualIndex >= 0 && actualIndex < labelsY.length) {
-                    const label = labelsY[actualIndex]
-                    return label.length > 25 ? label.substring(0, 22) + '...' : label
+                  if (Number.isInteger(value) && value % 2 === 1) {
+                    const actualIndex = Math.floor((labelsY.length * 2 - value) / 2);
+                    if (actualIndex >= 0 && actualIndex < labelsY.length) {
+                      return labelsY[actualIndex];
+                    }
                   }
-                  return ''
+                  return ''; // Return empty string for even positions to generate ticks without labels
                 },
+                stepSize: 1, // Ensure ticks at every integer (0, 1, 2, 3, ...)
                 font: {
                   size: 11,
                   weight: 'bold'
                 },
-                padding: 10,
-                align: 'center'
+                padding: 5,
+                align: 'center',
+                maxRotation: 0,
+                minRotation: 0
               },
               grid: {
                 display: true,
-                color: 'rgba(0,0,0,0.3)',
-                lineWidth: 1
+                color: (context) => {
+                  const value = context.tick.value;
+                  return Number.isInteger(value) && value % 2 === 0 ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0)';
+                },
+                lineWidth: 2, // Increased for visibility
+                drawOnChartArea: true,
+                drawTicks: false,
+                z: 1 // Ensure grid lines are above the chart
               },
               border: {
                 display: true,
@@ -342,6 +357,17 @@ export default {
                 metric1: data.xLabel,
                 metric2: data.yLabel,
                 correlation: data.v
+              })
+            }
+          },
+          onClick: (event, elements) => {
+            if (elements.length > 0) {
+              const element = elements[0]
+              const data = element.element.$context.raw
+              emit('correlation-click', {
+                metric1: data.xLabel,
+                metric2: data.yLabel,
+                correlation: data.originalValue !== undefined ? data.originalValue : data.v
               })
             }
           }
@@ -402,7 +428,7 @@ export default {
   margin-bottom: 20px;
   background: white;
   border-radius: 8px;
-  padding: 10px;
+  padding: 0;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
@@ -450,7 +476,7 @@ export default {
 @media (max-width: 768px) {
   .chart-wrapper {
     height: 500px;
-    padding: 5px;
+    padding: 0;
   }
   
   .legend-scale {

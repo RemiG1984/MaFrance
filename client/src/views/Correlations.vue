@@ -37,9 +37,9 @@
       <v-row class="mb-3">
         <v-col cols="12" md="6">
           <v-select
-            v-model="selectedMetricsX"
+            v-model="selectedMetricsY"
             :items="availableMetricOptions"
-            label="Métriques Axe X (horizontal)"
+            label="Métriques Axe Y (vertical)"
             variant="outlined"
             density="compact"
             multiple
@@ -50,9 +50,9 @@
         </v-col>
         <v-col cols="12" md="6">
           <v-select
-            v-model="selectedMetricsY"
+            v-model="selectedMetricsX"
             :items="availableMetricOptions"
-            label="Métriques Axe Y (vertical)"
+            label="Métriques Axe X (horizontal)"
             variant="outlined"
             density="compact"
             multiple
@@ -95,6 +95,15 @@
           :matrix="correlationMatrix"
           :labels="metricLabels"
           :title="`Corrélations - ${currentType}`"
+          @correlation-hover="handleCorrelationHover"
+          @correlation-click="handleCorrelationClick"
+        />
+        
+        <!-- Scatter Plot Section -->
+        <ScatterPlot
+          :selectedMetrics="selectedScatterMetrics"
+          :rawData="rawData"
+          :correlationValue="selectedCorrelationValue"
         />
 
         <!-- Summary Statistics -->
@@ -142,12 +151,14 @@ import { MetricsConfig } from '../utils/metricsConfig.js'
 import { DepartementNames } from '../utils/departementNames.js'
 import VersionSelector from '../components/VersionSelector.vue'
 import CorrelationHeatmap from '../components/CorrelationHeatmap.vue'
+import ScatterPlot from '../components/ScatterPlot.vue'
 
 export default {
   name: 'Correlations',
   components: {
     VersionSelector,
-    CorrelationHeatmap
+    CorrelationHeatmap,
+    ScatterPlot
   },
   setup() {
     const store = useDataStore()
@@ -155,13 +166,18 @@ export default {
     // Reactive state
     const selectedScope = ref('departements')
     const selectedDepartement = ref('')
-    const selectedMetricsX = ref(['extra_europeen_pct', 'musulman_pct', 'Total_places_migrants'])
-    const selectedMetricsY = ref(['homicides_total_p100k', 'violences_physiques_p1k', 'vols_p1k'])
+    const selectedMetricsX = ref(['prenom_francais_pct', 'extra_europeen_pct', 'musulman_pct', 'naturalises_pct'])
+    const selectedMetricsY = ref(['homicides_total_p100k', 'violences_physiques_p1k', 'violences_sexuelles_p1k', 'vols_p1k','destructions_p1k', 'stupefiants_p1k', 'escroqueries_p1k'])
     const correlationMatrix = ref([])
     const metricLabels = ref([])
     const loading = ref(false)
     const error = ref('')
     const dataSize = ref(0)
+    
+    // Scatter plot state
+    const selectedScatterMetrics = ref({ metric1: null, metric2: null })
+    const selectedCorrelationValue = ref(null)
+    const rawData = ref([])
 
     // Options
     const scopeOptions = [
@@ -400,24 +416,28 @@ export default {
       error.value = ''
 
       try {
-        let rawData = []
+        let fetchedData = []
         
         if (selectedScope.value === 'departements') {
-          rawData = await fetchDepartmentData()
+          fetchedData = await fetchDepartmentData()
         } else if (selectedScope.value === 'communes_france') {
-          rawData = await fetchCommuneData('')
+          fetchedData = await fetchCommuneData('')
         } else if (selectedScope.value === 'communes_dept') {
           if (!selectedDepartement.value) {
             error.value = "Veuillez sélectionner un département."
             return
           }
-          rawData = await fetchCommuneData(selectedDepartement.value)
+          fetchedData = await fetchCommuneData(selectedDepartement.value)
         }
 
-        if (rawData.length === 0) {
+        if (fetchedData.length === 0) {
           error.value = "Aucune donnée disponible pour l'analyse."
+          rawData.value = []
           return
         }
+        
+        // Store raw data for scatter plot
+        rawData.value = fetchedData
 
         const selectedMetrics = getSelectedMetrics()
         
@@ -429,7 +449,7 @@ export default {
 
         // Filter data to only include rows with valid values for selected metrics
         const allMetrics = [...selectedMetrics.metricsX, ...selectedMetrics.metricsY]
-        const validData = rawData.filter(item => {
+        const validData = fetchedData.filter(item => {
           return allMetrics.some(metric => {
             const value = parseFloat(item[metric.value])
             return !isNaN(value) && value !== null && value !== undefined
@@ -450,6 +470,7 @@ export default {
       } catch (err) {
         error.value = `Erreur lors du calcul des corrélations : ${err.message}`
         console.error('Erreur updateCorrelations:', err)
+        rawData.value = []
       } finally {
         loading.value = false
       }
@@ -477,6 +498,20 @@ export default {
       if (selectedMetricsX.value.length > 0 && selectedMetricsY.value.length > 0) {
         updateCorrelations()
       }
+    }
+
+    // Scatter plot methods
+    const handleCorrelationHover = (data) => {
+      // Optional: Could show additional info on hover
+    }
+
+    const handleCorrelationClick = (data) => {
+      console.log('Correlation clicked:', data)
+      selectedScatterMetrics.value = {
+        metric1: data.metric1,
+        metric2: data.metric2
+      }
+      selectedCorrelationValue.value = data.correlation
     }
 
     // Watchers
@@ -532,7 +567,13 @@ export default {
       onScopeChanged,
       onSelectionChanged,
       onAxisSelectionChanged,
-      updateCorrelations
+      updateCorrelations,
+      // Scatter plot
+      selectedScatterMetrics,
+      selectedCorrelationValue,
+      rawData,
+      handleCorrelationHover,
+      handleCorrelationClick
     }
   }
 }
