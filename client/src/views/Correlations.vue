@@ -358,7 +358,15 @@ export default {
         matrix.push(row)
       }
       
-      return { matrix, labels: { x: labelsX, y: labelsY } }
+      return { 
+        matrix, 
+        labels: { 
+          x: labelsX, 
+          y: labelsY,
+          xKeys: metricsX.map(m => m.value),
+          yKeys: metricsY.map(m => m.value)
+        } 
+      }
     }
 
     const fetchDepartmentData = async () => {

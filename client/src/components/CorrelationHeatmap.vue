@@ -135,6 +135,8 @@ export default {
             originalValue: value,
             xLabel: labelsX[j] || `Metric X${j}`,
             yLabel: labelsY[i] || `Metric Y${i}`,
+            xMetricKey: props.labels?.xKeys?.[j] || labelsX[j],
+            yMetricKey: props.labels?.yKeys?.[i] || labelsY[i],
             isInsufficientData: isInsufficientData
           })
         }
@@ -365,8 +367,8 @@ export default {
               const element = elements[0]
               const data = element.element.$context.raw
               emit('correlation-click', {
-                metric1: data.xLabel,
-                metric2: data.yLabel,
+                metric1: data.xMetricKey || data.xLabel,
+                metric2: data.yMetricKey || data.yLabel,
                 correlation: data.originalValue !== undefined ? data.originalValue : data.v
               })
             }
