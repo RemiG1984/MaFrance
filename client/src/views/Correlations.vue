@@ -360,7 +360,7 @@ export default {
         try {
           console.log('Department data not in store, fetching from API...')
           const response = await api.getDepartementRankings({
-            limit: 100, // Get all departments
+            limit: 101, // Get all departments
             offset: 0,
             sort: 'population',
             direction: 'DESC'
