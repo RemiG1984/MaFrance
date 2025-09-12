@@ -160,6 +160,12 @@ export default {
       }
 
       for (const item of props.rawData) {
+        // Ensure item exists and is an object
+        if (!item || typeof item !== 'object') {
+          invalidCount++
+          continue
+        }
+
         const x = parseFloat(item[metric1Key])
         const y = parseFloat(item[metric2Key])
 
@@ -200,7 +206,7 @@ export default {
               [metric2Key]: item[metric2Key],
               x: x,
               y: y,
-              item: Object.keys(item).slice(0, 10)
+              item: item ? Object.keys(item).slice(0, 10) : 'null item'
             })
           }
         }
@@ -215,10 +221,18 @@ export default {
 
     const createChart = async () => {
       if (!chartCanvas.value || !props.selectedMetrics.metric1 || !props.selectedMetrics.metric2) {
+        console.log('Chart creation aborted - missing canvas or metrics')
         return
       }
 
       await nextTick()
+
+      // Ensure canvas is ready
+      if (!chartCanvas.value.getContext) {
+        console.log('Canvas context not ready, delaying chart creation')
+        setTimeout(createChart, 100)
+        return
+      }
 
       const ctx = chartCanvas.value.getContext('2d')
       const { points, trendLine } = createScatterData()
@@ -231,6 +245,11 @@ export default {
 
       if (points.length === 0) {
         console.log('No valid data points found for scatter plot')
+        // Force a retry if we have raw data but no points
+        if (props.rawData.length > 0) {
+          console.log('Raw data exists but no points created, retrying in 100ms')
+          setTimeout(createChart, 100)
+        }
         return
       }
 
@@ -366,7 +385,21 @@ export default {
 
     // Watchers
     watch(() => [props.selectedMetrics, props.rawData, props.correlationValue], () => {
-      createChart()
+      // Add a small delay to ensure all props are properly updated
+      nextTick(() => {
+        createChart()
+      })
+    }, { deep: true, immediate: false })
+
+    // Watch specifically for when selectedMetrics changes from null to actual values
+    watch(() => props.selectedMetrics, (newMetrics, oldMetrics) => {
+      if (newMetrics.metric1 && newMetrics.metric2 && 
+          (!oldMetrics.metric1 || !oldMetrics.metric2)) {
+        // This is the initial selection, give it extra time
+        setTimeout(() => {
+          createChart()
+        }, 50)
+      }
     }, { deep: true })
 
     // Lifecycle
