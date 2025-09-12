@@ -113,12 +113,8 @@ export default {
       const labelsY = props.labels?.y || []
       
       if (!props.matrix || !Array.isArray(props.matrix) || props.matrix.length === 0) {
-        console.log('Matrix is empty or invalid')
         return data
       }
-      
-      console.log('Matrix dimensions:', props.matrix.length, 'x', props.matrix[0]?.length || 0)
-      console.log('Labels dimensions:', labelsY.length, 'x', labelsX.length)
       
       for (let i = 0; i < props.matrix.length; i++) {
         if (!Array.isArray(props.matrix[i])) continue
@@ -142,7 +138,6 @@ export default {
         }
       }
       
-      console.log('Generated heatmap data points:', data.length)
       return data
     }
 
@@ -156,7 +151,6 @@ export default {
       const labelsY = props.labels?.y || []
       
       if (labelsX.length === 0 || labelsY.length === 0) {
-        console.log('Labels not ready, skipping chart creation')
         return
       }
 
@@ -164,9 +158,6 @@ export default {
 
       const ctx = chartCanvas.value.getContext('2d')
       const heatmapData = createHeatmapData()
-
-      console.log('Creating heatmap with data:', heatmapData.length, 'points')
-      console.log('Labels X:', labelsX.length, 'Labels Y:', labelsY.length)
 
       // Destroy existing chart
       if (chartInstance) {
