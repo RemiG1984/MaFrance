@@ -29,6 +29,7 @@
 <script>
 import { ref, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { Chart, registerables } from 'chart.js'
+import chroma from 'chroma-js'
 
 // Register Chart.js components
 Chart.register(...registerables)
@@ -54,13 +55,25 @@ export default {
     const chartId = `scatter-plot-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
     let chartInstance = null
 
+    // Color scale for correlations (same as heatmap)
+    const createColorScale = () => {
+      return chroma.scale([
+        '#2c7fb8',  // Strong negative correlation
+        '#41b6c4',  // Moderate negative
+        '#7fcdbb',  // Weak negative  
+        '#c7e9b4',  // Very weak negative
+        '#ffffb2',  // No correlation
+        '#fecc5c',  // Very weak positive
+        '#fd8d3c',  // Weak positive
+        '#e31a1c',  // Moderate positive
+        '#b10026'   // Strong positive correlation
+      ]).domain([-1, -0.7, -0.5, -0.3, 0, 0.3, 0.5, 0.7, 1])
+    }
+
     const getCorrelationColor = (value) => {
-      if (!value || isNaN(value)) return 'grey'
-      const abs = Math.abs(value)
-      if (abs >= 0.7) return value > 0 ? 'green' : 'red'
-      if (abs >= 0.5) return value > 0 ? 'light-green' : 'orange'
-      if (abs >= 0.3) return value > 0 ? 'yellow-darken-2' : 'deep-orange'
-      return 'grey'
+      if (!value || isNaN(value)) return '#grey'
+      const colorScale = createColorScale()
+      return colorScale(value).hex()
     }
 
     const calculateTrendLine = (data) => {
