@@ -129,14 +129,7 @@ export default {
     }
 
     const createScatterData = () => {
-      console.log('Creating scatter data with:', {
-        metric1: props.selectedMetrics.metric1,
-        metric2: props.selectedMetrics.metric2,
-        rawDataLength: props.rawData.length
-      })
-
       if (!props.selectedMetrics.metric1 || !props.selectedMetrics.metric2 || !props.rawData.length) {
-        console.log('Missing required data for scatter plot')
         return { points: [], trendLine: [] }
       }
 
@@ -144,20 +137,8 @@ export default {
       const metric1Key = props.selectedMetrics.metric1
       const metric2Key = props.selectedMetrics.metric2
 
-      console.log('Looking for metrics:', metric1Key, 'vs', metric2Key)
-
       let validCount = 0
       let invalidCount = 0
-
-      // Extract valid data points
-      for (let i = 0; i < Math.min(5, props.rawData.length); i++) {
-        const item = props.rawData[i]
-        console.log(`Sample item ${i}:`, {
-          [metric1Key]: item[metric1Key],
-          [metric2Key]: item[metric2Key],
-          keys: Object.keys(item).slice(0, 10)
-        })
-      }
 
       for (const item of props.rawData) {
         // Ensure item exists and is an object
@@ -200,19 +181,8 @@ export default {
           validCount++
         } else {
           invalidCount++
-          if (invalidCount <= 3) {
-            console.log('Invalid data point:', {
-              [metric1Key]: item[metric1Key],
-              [metric2Key]: item[metric2Key],
-              x: x,
-              y: y,
-              item: item ? Object.keys(item).slice(0, 10) : 'null item'
-            })
-          }
         }
       }
-
-      console.log(`Data filtering results: ${validCount} valid, ${invalidCount} invalid points`)
 
       const trendLine = calculateTrendLine(points)
 
@@ -221,7 +191,6 @@ export default {
 
     const createChart = async () => {
       if (!chartCanvas.value || !props.selectedMetrics.metric1 || !props.selectedMetrics.metric2) {
-        console.log('Chart creation aborted - missing canvas or metrics')
         return
       }
 
@@ -229,7 +198,6 @@ export default {
 
       // Ensure canvas is ready
       if (!chartCanvas.value.getContext) {
-        console.log('Canvas context not ready, delaying chart creation')
         setTimeout(createChart, 100)
         return
       }
@@ -244,16 +212,12 @@ export default {
       }
 
       if (points.length === 0) {
-        console.log('No valid data points found for scatter plot')
         // Force a retry if we have raw data but no points
         if (props.rawData.length > 0) {
-          console.log('Raw data exists but no points created, retrying in 100ms')
           setTimeout(createChart, 100)
         }
         return
       }
-
-      console.log(`Creating scatter plot with ${points.length} points`)
 
       chartInstance = new Chart(ctx, {
         type: 'scatter',
