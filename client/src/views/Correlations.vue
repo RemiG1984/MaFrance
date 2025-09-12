@@ -20,16 +20,7 @@
           />
         </v-col>
         <v-col cols="12" md="6">
-          <v-select
-            v-model="selectedDepartement"
-            :items="departementOptions"
-            :disabled="selectedScope !== 'communes_dept'"
-            label="Département (si communes)"
-            variant="outlined"
-            density="compact"
-            clearable
-            @update:model-value="onSelectionChanged"
-          />
+          <!-- Department selection removed - now handled automatically -->
         </v-col>
       </v-row>
 
@@ -82,7 +73,7 @@
         <div class="heatmap-title">
           <h3>Matrice des corrélations entre métriques sélectionnées</h3>
           <p class="subtitle">
-            Coefficients de corrélation de Pearson ({{ currentType.toLowerCase() }}{{ selectedScope === 'communes_dept' ? ` - ${selectedDepartement}` : '' }})
+            Coefficients de corrélation de Pearson ({{ currentType.toLowerCase() }}{{ selectedScope === 'communes_france' ? ' - population > 50k' : '' }})
           </p>
           <p class="axis-info">
             <strong>Axe X:</strong> {{ selectedMetricsX.length }} métrique{{ selectedMetricsX.length > 1 ? 's' : '' }} | 
@@ -148,7 +139,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useDataStore } from '../services/store.js'
 import api from '../services/api.js'
 import { MetricsConfig } from '../utils/metricsConfig.js'
-import { DepartementNames } from '../utils/departementNames.js'
+
 import VersionSelector from '../components/VersionSelector.vue'
 import CorrelationHeatmap from '../components/CorrelationHeatmap.vue'
 import ScatterPlot from '../components/ScatterPlot.vue'
@@ -165,7 +156,7 @@ export default {
 
     // Reactive state
     const selectedScope = ref('departements')
-    const selectedDepartement = ref('')
+    
     const selectedMetricsX = ref(['prenom_francais_pct', 'extra_europeen_pct', 'musulman_pct', 'naturalises_pct'])
     const selectedMetricsY = ref(['homicides_total_p100k', 'violences_physiques_p1k', 'violences_sexuelles_p1k', 'vols_p1k','destructions_p1k', 'stupefiants_p1k', 'escroqueries_p1k'])
     const correlationMatrix = ref([])
@@ -182,16 +173,10 @@ export default {
     // Options
     const scopeOptions = [
       { value: 'departements', title: 'Départements' },
-      { value: 'communes_france', title: 'Communes (France entière)' },
-      { value: 'communes_dept', title: 'Communes (par département)' }
+      { value: 'communes_france', title: 'Communes (population > 50k)' }
     ]
 
-    const departementOptions = computed(() => {
-      return Object.entries(DepartementNames).map(([code, name]) => ({
-        value: code,
-        title: `${code} - ${name}`
-      })).sort((a, b) => a.title.localeCompare(b.title))
-    })
+    
 
     const availableMetricOptions = computed(() => {
       const currentLevel = selectedScope.value === 'departements' ? 'departement' : 'commune'
@@ -403,18 +388,28 @@ export default {
       })
     }
 
-    const fetchCommuneData = async (deptCode = '') => {
+    const fetchCommuneData = async () => {
       try {
         const requestParams = {
-          dept: deptCode,
-          limit: 1000, // Get a good sample size
+          dept: '', // All départements
+          limit: 5000, // Get more data to filter properly
           offset: 0,
           sort: 'population',
-          direction: 'DESC'
+          direction: 'DESC',
+          population_range: '50000+' // Only communes with population > 50k
         }
 
         const response = await api.getCommuneRankings(requestParams)
-        return response?.data || []
+        let communeData = response?.data || []
+        
+        // Filter out overseas départements at commune level too
+        const overseasDepts = ['971', '972', '973', '974', '976']
+        communeData = communeData.filter(commune => {
+          const deptCode = commune.departement || ''
+          return !overseasDepts.includes(deptCode.toString())
+        })
+        
+        return communeData
       } catch (err) {
         throw new Error(`Erreur lors du chargement des données communales: ${err.message}`)
       }
@@ -435,13 +430,7 @@ export default {
         if (selectedScope.value === 'departements') {
           fetchedData = await fetchDepartmentData()
         } else if (selectedScope.value === 'communes_france') {
-          fetchedData = await fetchCommuneData('')
-        } else if (selectedScope.value === 'communes_dept') {
-          if (!selectedDepartement.value) {
-            error.value = "Veuillez sélectionner un département."
-            return
-          }
-          fetchedData = await fetchCommuneData(selectedDepartement.value)
+          fetchedData = await fetchCommuneData()
         }
 
         if (fetchedData.length === 0) {
@@ -495,17 +484,7 @@ export default {
       metricLabels.value = []
       error.value = ''
       
-      if (selectedScope.value === 'departements') {
-        selectedDepartement.value = ''
-      }
-      
       updateCorrelations()
-    }
-
-    const onSelectionChanged = () => {
-      if (selectedScope.value === 'communes_dept' && selectedDepartement.value) {
-        updateCorrelations()
-      }
     }
 
     const onAxisSelectionChanged = () => {
@@ -561,7 +540,7 @@ export default {
 
     return {
       selectedScope,
-      selectedDepartement,
+      
       selectedMetricsX,
       selectedMetricsY,
       correlationMatrix,
@@ -570,7 +549,7 @@ export default {
       error,
       dataSize,
       scopeOptions,
-      departementOptions,
+      
       availableMetricOptions,
       currentType,
       maxCorrelation,
@@ -579,7 +558,7 @@ export default {
       getPageTitle,
       getCategoryLabel,
       onScopeChanged,
-      onSelectionChanged,
+      
       onAxisSelectionChanged,
       updateCorrelations,
       // Scatter plot
