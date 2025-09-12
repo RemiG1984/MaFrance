@@ -394,7 +394,13 @@ export default {
         }
       }
       
-      return departmentData.filter(dept => dept && typeof dept === 'object')
+      // Filter out overseas départements (971, 972, 973, 974, 976)
+      const overseasDepts = ['971', '972', '973', '974', '976']
+      return departmentData.filter(dept => {
+        if (!dept || typeof dept !== 'object') return false
+        const deptCode = dept.departement || dept.code || ''
+        return !overseasDepts.includes(deptCode.toString())
+      })
     }
 
     const fetchCommuneData = async (deptCode = '') => {
