@@ -341,7 +341,7 @@ export default {
                     const actualIndex = Math.floor((labelsY.length * 2 - value) / 2);
                     if (actualIndex >= 0 && actualIndex < labelsY.length) {
                       const label = labelsY[actualIndex];
-                      // Wrap long labels by splitting at spaces and inserting line breaks
+                      // Wrap long labels by splitting at spaces and returning array
                       if (label.length > 25) {
                         const words = label.split(' ');
                         const lines = [];
@@ -356,7 +356,7 @@ export default {
                           }
                         }
                         if (currentLine) lines.push(currentLine);
-                        return lines.join('\n');
+                        return lines;
                       }
                       return label;
                     }
