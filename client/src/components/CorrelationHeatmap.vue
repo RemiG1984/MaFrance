@@ -3,7 +3,7 @@
     <div class="chart-wrapper">
       <canvas ref="chartCanvas" :id="chartId" class="correlation-chart"></canvas>
     </div>
-    
+
     <!-- Legend -->
     <div class="correlation-legend">
       <div class="legend-title">Intensité des corrélations</div>
@@ -90,7 +90,7 @@ export default {
       return chroma.scale([
         '#2c7fb8',  // Strong negative correlation
         '#41b6c4',  // Moderate negative
-        '#7fcdbb',  // Weak negative  
+        '#7fcdbb',  // Weak negative
         '#c7e9b4',  // Very weak negative
         '#ffffb2',  // No correlation
         '#fecc5c',  // Very weak positive
@@ -107,23 +107,23 @@ export default {
 
     const createHeatmapData = () => {
       const data = []
-      
+
       // Labels should always be in { x: [], y: [] } format now
       const labelsX = props.labels?.x || []
       const labelsY = props.labels?.y || []
-      
+
       if (!props.matrix || !Array.isArray(props.matrix) || props.matrix.length === 0) {
         return data
       }
-      
+
       for (let i = 0; i < props.matrix.length; i++) {
         if (!Array.isArray(props.matrix[i])) continue
-        
+
         for (let j = 0; j < props.matrix[i].length; j++) {
           const value = props.matrix[i][j]
           const isInsufficientData = value === null || value === undefined || isNaN(value)
           const displayValue = isInsufficientData ? 0 : Number(value)
-          
+
           data.push({
             x: j * 2 + 1, // Place marks at 1, 3, 5, etc.
             y: (props.matrix.length - 1 - i) * 2 + 1, // Place marks at 1, 3, 5, etc. with inversion
@@ -137,7 +137,7 @@ export default {
           })
         }
       }
-      
+
       return data
     }
 
@@ -149,7 +149,7 @@ export default {
       // Check if labels are properly structured
       const labelsX = props.labels?.x || []
       const labelsY = props.labels?.y || []
-      
+
       if (labelsX.length === 0 || labelsY.length === 0) {
         return
       }
@@ -168,7 +168,7 @@ export default {
       const screenWidth = window.innerWidth
       let maxCellSize = 60
       let minCellSize = 30
-      
+
       // Adjust max/min cell size based on screen width
       if (screenWidth <= 480) {
         maxCellSize = 25
@@ -177,7 +177,7 @@ export default {
         maxCellSize = 35
         minCellSize = 20
       }
-      
+
       const cellWidth = Math.max(minCellSize, Math.min(maxCellSize, chartCanvas.value.clientWidth / labelsX.length))
       const cellHeight = Math.max(minCellSize, Math.min(maxCellSize, chartCanvas.value.clientHeight / labelsY.length))
       const cellSize = Math.min(cellWidth, cellHeight)
@@ -233,7 +233,7 @@ export default {
                 title: () => '',
                 label: (context) => {
                   const point = context.raw
-                  
+
                   if (point.isInsufficientData) {
                     return [
                       `${point.xLabel} ↔ ${point.yLabel}`,
@@ -241,19 +241,19 @@ export default {
                       'Moins de 20 observations valides'
                     ]
                   }
-                  
+
                   const correlation = point.originalValue || point.v
                   let strength = ''
-                  
+
                   const absCorr = Math.abs(correlation)
                   if (absCorr >= 0.7) strength = 'très forte'
                   else if (absCorr >= 0.5) strength = 'forte'
                   else if (absCorr >= 0.3) strength = 'modérée'
                   else if (absCorr >= 0.1) strength = 'faible'
                   else strength = 'très faible'
-                  
+
                   const direction = correlation > 0 ? 'positive' : correlation < 0 ? 'négative' : 'nulle'
-                  
+
                   return [
                     `${point.xLabel} ↔ ${point.yLabel}`,
                     `Corrélation: ${correlation.toFixed(3)}`,
@@ -287,7 +287,7 @@ export default {
                         const words = label.split(' ');
                         const lines = [];
                         let currentLine = '';
-                        
+
                         for (const word of words) {
                           if ((currentLine + ' ' + word).length > 20) {
                             if (currentLine) lines.push(currentLine);
@@ -341,22 +341,9 @@ export default {
                     const actualIndex = Math.floor((labelsY.length * 2 - value) / 2);
                     if (actualIndex >= 0 && actualIndex < labelsY.length) {
                       const label = labelsY[actualIndex];
-                      // Wrap long labels by splitting at spaces and returning array
-                      if (label.length > 25) {
-                        const words = label.split(' ');
-                        const lines = [];
-                        let currentLine = '';
-                        
-                        for (const word of words) {
-                          if ((currentLine + ' ' + word).length > 20) {
-                            if (currentLine) lines.push(currentLine);
-                            currentLine = word;
-                          } else {
-                            currentLine = currentLine ? currentLine + ' ' + word : word;
-                          }
-                        }
-                        if (currentLine) lines.push(currentLine);
-                        return lines;
+                      // Truncate long labels for y-axis to ensure visibility
+                      if (label.length > 20) {
+                        return label.substring(0, 17) + '...';
                       }
                       return label;
                     }
@@ -520,12 +507,12 @@ export default {
     height: 500px;
     padding: 0;
   }
-  
+
   .legend-scale {
     flex-direction: column;
     align-items: center;
   }
-  
+
   .legend-item {
     font-size: 0.8rem;
   }
