@@ -354,6 +354,14 @@ const MetricsConfig = {
             format: "percentage",
             source: "names",
         },
+        {
+            value: "francais_d_origine_pct",
+            label: "Pop. d'origine française (%)",
+            alt1Label: "Pop. d'origine française (%)",
+            alt2Label: "Pop. d'origine française (%)",
+            format: "percentage",
+            source: "nat1"
+        }
         // Wokisme category
         {
             value: "wokisme_score",
