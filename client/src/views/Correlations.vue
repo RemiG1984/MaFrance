@@ -143,7 +143,7 @@ export default {
     // Reactive state
     const selectedScope = ref('departements')
 
-    const selectedMetricsX = ref(['prenom_francais_pct', 'extra_europeen_pct', 'musulman_pct', 'naturalises_pct'])
+    const selectedMetricsX = ref(['prenom_francais_pct', 'extra_europeen_pct', 'musulman_pct', 'naturalises_pct', 'francais_de_naissance_pct', 'etrangers_pct', 'europeens_pct', 'autres_nationalites_pct', 'africains_pct', 'maghrebins_pct' ])
     const selectedMetricsY = ref(['homicides_total_p100k', 'violences_physiques_p1k', 'violences_sexuelles_p1k', 'vols_p1k','destructions_p1k', 'stupefiants_p1k', 'escroqueries_p1k'])
     const correlationMatrix = ref([])
     const metricLabels = ref([])
