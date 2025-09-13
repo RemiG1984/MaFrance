@@ -342,8 +342,8 @@ export default {
                     if (actualIndex >= 0 && actualIndex < labelsY.length) {
                       const label = labelsY[actualIndex];
                       // Truncate long labels for y-axis to ensure visibility
-                      if (label.length > 20) {
-                        return label.substring(0, 17) + '...';
+                      if (label.length > 30) {
+                        return label.substring(0, 27) + '...';
                       }
                       return label;
                     }
