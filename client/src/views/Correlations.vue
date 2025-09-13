@@ -2,7 +2,7 @@
   <div class="correlations-container">
     <!-- Header Section -->
     <div class="header-section">
-      <h1>{{ getPageTitle() }}</h1>
+      <h1>Corrélations statistiques entre les différentes métriques</h1>
     </div>
 
     <!-- Controls Section -->
@@ -247,15 +247,6 @@ export default {
     })
 
     // Methods
-    const getPageTitle = () => {
-      const labelState = store.labelState || 0
-      const titles = {
-        0: "Corrélations entre métriques",
-        1: "Analyse des liens inclusifs",
-        2: "Matrice des corrélations identitaires"
-      }
-      return titles[labelState] || titles[0]
-    }
 
     const getCategoryLabel = (category) => {
       const labels = {
@@ -536,7 +527,6 @@ export default {
       maxCorrelation,
       minCorrelation,
       topCorrelations,
-      getPageTitle,
       getCategoryLabel,
       onScopeChanged,
 
