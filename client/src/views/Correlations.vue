@@ -68,23 +68,11 @@
       </div>
 
       <div v-else-if="correlationMatrix && correlationMatrix.length > 0" class="heatmap-section">
-        <!-- Heatmap Title -->
-        <div class="heatmap-title">
-          <h3>Matrice des corrélations entre métriques sélectionnées</h3>
-          <p class="subtitle">
-            Coefficients de corrélation de Pearson ({{ currentType.toLowerCase() }}{{ selectedScope === 'communes_france' ? ' - population > 50k' : '' }})
-          </p>
-          <p class="axis-info">
-            <strong>Axe X:</strong> {{ selectedMetricsX.length }} métrique{{ selectedMetricsX.length > 1 ? 's' : '' }} | 
-            <strong>Axe Y:</strong> {{ selectedMetricsY.length }} métrique{{ selectedMetricsY.length > 1 ? 's' : '' }}
-          </p>
-        </div>
-
         <!-- Heatmap Component -->
         <CorrelationHeatmap 
           :matrix="correlationMatrix"
           :labels="metricLabels"
-          :title="`Corrélations - ${currentType}`"
+          :title="`Coefficients de corrélation de Pearson - ${currentType}`"
           @correlation-hover="handleCorrelationHover"
           @correlation-click="handleCorrelationClick"
         />
