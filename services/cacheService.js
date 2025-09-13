@@ -14,14 +14,19 @@ class CacheService {
             console.log('Initializing server-side cache...');
             
             // Preload all department data
+            console.log('Starting department data preload...');
             await this.preloadDepartmentData();
+            console.log('Department data preload completed');
             
             // Preload country data
+            console.log('Starting country data preload...');
             await this.preloadCountryData();
+            console.log('Country data preload completed');
             
             console.log('Server-side cache initialized successfully');
         } catch (error) {
-            console.error('Error initializing cache:', error);
+            console.error('Error initializing cache:', error.message);
+            console.error('Stack trace:', error.stack);
         }
     }
 
@@ -52,7 +57,8 @@ class CacheService {
                         await this.cachePrefetData(departement);
                         
                     } catch (error) {
-                        console.error(`Error caching data for department ${departement}:`, error);
+                        console.error(`Error caching data for department ${departement}:`, error.message);
+                        // Don't throw - continue with other departments
                     }
                 });
                 
@@ -66,29 +72,37 @@ class CacheService {
     async preloadCountryData() {
         try {
             // Cache country details
+            console.log('Caching country details...');
             await this.cacheCountryDetails('France');
             
             // Cache country crime history
+            console.log('Caching country crime history...');
             await this.cacheCountryCrimeHistory('France');
             
             // Cache country names history
+            console.log('Caching country names history...');
             await this.cacheCountryNamesHistory('France');
             
             // Cache current country crime data
+            console.log('Caching current country crime data...');
             await this.cacheCountryCrime('France');
             
             // Cache current country names data
+            console.log('Caching current country names data...');
             await this.cacheCountryNames('France');
             
             // Cache ministre data
+            console.log('Caching ministre data...');
             await this.cacheMinistereData('France');
             
             // Cache department rankings
+            console.log('Caching department rankings...');
             await this.cacheDepartmentRankings();
             
             console.log('Cached data for France');
         } catch (error) {
-            console.error('Error caching country data:', error);
+            console.error('Error caching country data:', error.message);
+            console.error('Stack trace:', error.stack);
         }
     }
 
@@ -403,27 +417,7 @@ class CacheService {
               CASE WHEN dnat1.Ensemble > 0 THEN ROUND(((COALESCE(dnat1.Algeriens, 0) + COALESCE(dnat1.Marocains, 0) + COALESCE(dnat1.Tunisiens, 0) + COALESCE(dnat1.Turcs, 0)) / dnat1.Ensemble) * 100, 2) ELSE 0 END AS maghrebins_pct,
               CASE WHEN dnat1.Ensemble > 0 THEN ROUND((COALESCE(dnat1.Autres_nationalites_d_Afrique, 0) / dnat1.Ensemble) * 100, 2) ELSE 0 END AS africains_pct,
               CASE WHEN dnat1.Ensemble > 0 THEN ROUND((COALESCE(dnat1.Autres_nationalites, 0) / dnat1.Ensemble) * 100, 2) ELSE 0 END AS autres_nationalites_pct,
-              CASE WHEN dnat1.Ensemble > 0 THEN ROUND(((COALESCE(dnat1.Algeriens, 0) + COALESCE(dnat1.Marocains, 0) + COALESCE(dnat1.Tunisiens, 0) + COALESCE(dnat1.Turcs, 0) + COALESCE(dnat1.Autres_nationalites_d_Afrique, 0) + COALESCE(dnat1.Autres_nationalites, 0)) / dnat1.Ensemble) * 100, 2) ELSE 0 END AS non_europeens_pct 
-               COALESCE(dc.coups_et_blessures_volontaires_intrafamiliaux_p1k, 0) + 
-               COALESCE(dc.autres_coups_et_blessures_volontaires_p1k, 0) + 
-               COALESCE(dc.vols_avec_armes_p1k, 0) + 
-               COALESCE(dc.vols_violents_sans_arme_p1k, 0)) AS violences_physiques_p1k,
-              COALESCE(dc.violences_sexuelles_p1k, 0) AS violences_sexuelles_p1k,
-              (COALESCE(dc.vols_avec_armes_p1k, 0) + 
-               COALESCE(dc.vols_violents_sans_arme_p1k, 0) + 
-               COALESCE(dc.vols_sans_violence_contre_des_personnes_p1k, 0) + 
-               COALESCE(dc.cambriolages_de_logement_p1k, 0) + 
-               COALESCE(dc.vols_de_vehicules_p1k, 0) + 
-               COALESCE(dc.vols_dans_les_vehicules_p1k, 0) + 
-               COALESCE(dc.vols_d_accessoires_sur_vehicules_p1k, 0)) AS vols_p1k,
-              COALESCE(dc.destructions_et_degradations_volontaires_p1k, 0) AS destructions_p1k,
-              (COALESCE(dc.usage_de_stupefiants_p1k, 0) + 
-               COALESCE(dc.usage_de_stupefiants_afd_p1k, 0) + 
-               COALESCE(dc.trafic_de_stupefiants_p1k, 0)) AS stupefiants_p1k,
-              COALESCE(dc.escroqueries_p1k, 0) AS escroqueries_p1k,
-              ROUND(COALESCE(dn.musulman_pct, 0) + COALESCE(dn.africain_pct, 0) + COALESCE(dn.asiatique_pct, 0)) AS extra_europeen_pct,
-              ROUND(COALESCE(dn.traditionnel_pct, 0) + COALESCE(dn.moderne_pct, 0)) AS prenom_francais_pct,
-              COALESCE(ds.total_subventions_parHab, 0) AS total_subventions_parHab
+              CASE WHEN dnat1.Ensemble > 0 THEN ROUND(((COALESCE(dnat1.Algeriens, 0) + COALESCE(dnat1.Marocains, 0) + COALESCE(dnat1.Tunisiens, 0) + COALESCE(dnat1.Turcs, 0) + COALESCE(dnat1.Autres_nationalites_d_Afrique, 0) + COALESCE(dnat1.Autres_nationalites, 0)) / dnat1.Ensemble) * 100, 2) ELSE 0 END AS non_europeens_pct
             FROM departements d
             LEFT JOIN LatestDepartmentNames dn ON d.departement = dn.dpt
             LEFT JOIN department_crime dc ON d.departement = dc.dep 
