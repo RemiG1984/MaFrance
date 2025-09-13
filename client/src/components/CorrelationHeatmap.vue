@@ -164,9 +164,22 @@ export default {
         chartInstance.destroy()
       }
 
-      // Calculate cell size based on canvas and data dimensions
-      const cellWidth = Math.max(30, Math.min(60, chartCanvas.value.clientWidth / labelsX.length))
-      const cellHeight = Math.max(30, Math.min(60, chartCanvas.value.clientHeight / labelsY.length))
+      // Calculate cell size based on canvas, data dimensions, and screen width
+      const screenWidth = window.innerWidth
+      let maxCellSize = 60
+      let minCellSize = 30
+      
+      // Adjust max/min cell size based on screen width
+      if (screenWidth <= 480) {
+        maxCellSize = 25
+        minCellSize = 15
+      } else if (screenWidth <= 768) {
+        maxCellSize = 35
+        minCellSize = 20
+      }
+      
+      const cellWidth = Math.max(minCellSize, Math.min(maxCellSize, chartCanvas.value.clientWidth / labelsX.length))
+      const cellHeight = Math.max(minCellSize, Math.min(maxCellSize, chartCanvas.value.clientHeight / labelsY.length))
       const cellSize = Math.min(cellWidth, cellHeight)
 
       chartInstance = new Chart(ctx, {
