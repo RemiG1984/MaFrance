@@ -268,19 +268,37 @@ export default {
                   if (Number.isInteger(value) && value % 2 === 1) {
                     const labelIndex = Math.floor(value / 2);
                     if (labelIndex >= 0 && labelIndex < labelsX.length) {
-                      return labelsX[labelIndex];
+                      const label = labelsX[labelIndex];
+                      // Wrap long labels by splitting at spaces and inserting line breaks
+                      if (label.length > 20) {
+                        const words = label.split(' ');
+                        const lines = [];
+                        let currentLine = '';
+                        
+                        for (const word of words) {
+                          if ((currentLine + ' ' + word).length > 15) {
+                            if (currentLine) lines.push(currentLine);
+                            currentLine = word;
+                          } else {
+                            currentLine = currentLine ? currentLine + ' ' + word : word;
+                          }
+                        }
+                        if (currentLine) lines.push(currentLine);
+                        return lines;
+                      }
+                      return label;
                     }
                   }
                   return ''; // Return empty string for even positions to generate ticks without labels
                 },
                 stepSize: 1, // Ensure ticks at every integer (0, 1, 2, 3, ...)
                 font: {
-                  size: 11,
+                  size: 10,
                   weight: 'bold'
                 },
                 maxRotation: 45,
                 minRotation: 45,
-                padding: 5,
+                padding: 8,
                 align: 'center'
               },
               grid: {
@@ -309,17 +327,35 @@ export default {
                   if (Number.isInteger(value) && value % 2 === 1) {
                     const actualIndex = Math.floor((labelsY.length * 2 - value) / 2);
                     if (actualIndex >= 0 && actualIndex < labelsY.length) {
-                      return labelsY[actualIndex];
+                      const label = labelsY[actualIndex];
+                      // Wrap long labels by splitting at spaces and inserting line breaks
+                      if (label.length > 25) {
+                        const words = label.split(' ');
+                        const lines = [];
+                        let currentLine = '';
+                        
+                        for (const word of words) {
+                          if ((currentLine + ' ' + word).length > 20) {
+                            if (currentLine) lines.push(currentLine);
+                            currentLine = word;
+                          } else {
+                            currentLine = currentLine ? currentLine + ' ' + word : word;
+                          }
+                        }
+                        if (currentLine) lines.push(currentLine);
+                        return lines;
+                      }
+                      return label;
                     }
                   }
                   return ''; // Return empty string for even positions to generate ticks without labels
                 },
                 stepSize: 1, // Ensure ticks at every integer (0, 1, 2, 3, ...)
                 font: {
-                  size: 11,
+                  size: 10,
                   weight: 'bold'
                 },
-                padding: 5,
+                padding: 8,
                 align: 'center',
                 maxRotation: 0,
                 minRotation: 0
