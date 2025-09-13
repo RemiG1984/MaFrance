@@ -7,51 +7,61 @@
 
     <!-- Controls Section -->
     <div class="controls-section">
-      <v-row class="align-center mb-4">
-        <v-col cols="12" md="6">
-          <v-select
-            v-model="selectedScope"
-            :items="scopeOptions"
-            label="Niveau d'analyse"
-            variant="outlined"
-            density="compact"
-            @update:model-value="onScopeChanged"
-          />
-        </v-col>
-        <v-col cols="12" md="6">
-          <!-- Department selection removed - now handled automatically -->
-        </v-col>
-      </v-row>
+      <v-expansion-panels v-model="expandedPanels" multiple>
+        <v-expansion-panel>
+          <v-expansion-panel-title>
+            <v-icon left>mdi-cog</v-icon>
+            Paramètres
+          </v-expansion-panel-title>
+          <v-expansion-panel-text>
+            <v-row class="align-center mb-4">
+              <v-col cols="12" md="6">
+                <v-select
+                  v-model="selectedScope"
+                  :items="scopeOptions"
+                  label="Niveau d'analyse"
+                  variant="outlined"
+                  density="compact"
+                  @update:model-value="onScopeChanged"
+                />
+              </v-col>
+              <v-col cols="12" md="6">
+                <!-- Department selection removed - now handled automatically -->
+              </v-col>
+            </v-row>
 
-      <!-- Metric Axis Selection -->
-      <v-row class="mb-3">
-        <v-col cols="12" md="6">
-          <v-select
-            v-model="selectedMetricsY"
-            :items="availableMetricOptions"
-            label="Métriques Axe Y (vertical)"
-            variant="outlined"
-            density="compact"
-            multiple
-            chips
-            closable-chips
-            @update:model-value="onAxisSelectionChanged"
-          />
-        </v-col>
-        <v-col cols="12" md="6">
-          <v-select
-            v-model="selectedMetricsX"
-            :items="availableMetricOptions"
-            label="Métriques Axe X (horizontal)"
-            variant="outlined"
-            density="compact"
-            multiple
-            chips
-            closable-chips
-            @update:model-value="onAxisSelectionChanged"
-          />
-        </v-col>
-      </v-row>
+            <!-- Metric Axis Selection -->
+            <v-row class="mb-3">
+              <v-col cols="12" md="6">
+                <v-select
+                  v-model="selectedMetricsY"
+                  :items="availableMetricOptions"
+                  label="Métriques Axe Y (vertical)"
+                  variant="outlined"
+                  density="compact"
+                  multiple
+                  chips
+                  closable-chips
+                  @update:model-value="onAxisSelectionChanged"
+                />
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-select
+                  v-model="selectedMetricsX"
+                  :items="availableMetricOptions"
+                  label="Métriques Axe X (horizontal)"
+                  variant="outlined"
+                  density="compact"
+                  multiple
+                  chips
+                  closable-chips
+                  @update:model-value="onAxisSelectionChanged"
+                />
+              </v-col>
+            </v-row>
+          </v-expansion-panel-text>
+        </v-expansion-panel>
+      </v-expansion-panels>
     </div>
 
     <!-- Results Section -->
@@ -142,6 +152,7 @@ export default {
 
     // Reactive state
     const selectedScope = ref('departements')
+    const expandedPanels = ref([0]) // Start with the parameters panel expanded
 
     const selectedMetricsX = ref(['prenom_francais_pct', 'musulman_pct', 'naturalises_pct', 'francais_de_naissance_pct', 'etrangers_pct', 'europeens_pct', 'africains_pct', 'maghrebins_pct' ])
     const selectedMetricsY = ref(['homicides_total_p100k', 'violences_physiques_p1k', 'violences_sexuelles_p1k', 'vols_p1k','destructions_p1k', 'stupefiants_p1k', 'escroqueries_p1k'])
@@ -512,6 +523,7 @@ export default {
 
     return {
       selectedScope,
+      expandedPanels,
 
       selectedMetricsX,
       selectedMetricsY,
@@ -564,9 +576,6 @@ export default {
 }
 
 .controls-section {
-  background: #f5f5f5;
-  padding: 20px;
-  border-radius: 8px;
   margin-bottom: 30px;
 }
 
