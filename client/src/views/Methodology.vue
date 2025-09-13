@@ -274,6 +274,7 @@
               <li>Les indices sont relatifs et doivent être interprétés dans leur contexte</li>
               <li>Cette analyse ne prétend pas être exhaustive ou définitive</li>
               <li>RGPD: Aucune donnée personnelle n'est stockée sur ce site. L'ensemble des données utilisées sont publiques et anonymisées.</li>
+              <li>Une corrélation n'implique pas nécessairement une causalité.</li>
               <li>Auteur: Rémi G.</li>
             </ul>
           </div>
