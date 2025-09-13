@@ -270,7 +270,7 @@ export default {
                     if (labelIndex >= 0 && labelIndex < labelsX.length) {
                       const label = labelsX[labelIndex];
                       // Wrap long labels by splitting at spaces and inserting line breaks
-                      if (label.length > 30) {
+                      if (label.length > 25) {
                         const words = label.split(' ');
                         const lines = [];
                         let currentLine = '';
@@ -284,7 +284,7 @@ export default {
                           }
                         }
                         if (currentLine) lines.push(currentLine);
-                        return lines.join('\n');
+                        return lines;
                       }
                       return label;
                     }
@@ -329,7 +329,7 @@ export default {
                     if (actualIndex >= 0 && actualIndex < labelsY.length) {
                       const label = labelsY[actualIndex];
                       // Wrap long labels by splitting at spaces and inserting line breaks
-                      if (label.length > 30) {
+                      if (label.length > 25) {
                         const words = label.split(' ');
                         const lines = [];
                         let currentLine = '';
