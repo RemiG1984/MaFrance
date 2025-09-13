@@ -244,7 +244,10 @@ export default {
               pointRadius: 0,
               pointHoverRadius: 0,
               tension: 0,
-              showLine: true
+              showLine: true,
+              tooltip: {
+                filter: () => false
+              }
             }
           ]
         },
