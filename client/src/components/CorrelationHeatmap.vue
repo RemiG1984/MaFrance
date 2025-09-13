@@ -270,13 +270,13 @@ export default {
                     if (labelIndex >= 0 && labelIndex < labelsX.length) {
                       const label = labelsX[labelIndex];
                       // Wrap long labels by splitting at spaces and inserting line breaks
-                      if (label.length > 20) {
+                      if (label.length > 35) {
                         const words = label.split(' ');
                         const lines = [];
                         let currentLine = '';
                         
                         for (const word of words) {
-                          if ((currentLine + ' ' + word).length > 15) {
+                          if ((currentLine + ' ' + word).length > 25) {
                             if (currentLine) lines.push(currentLine);
                             currentLine = word;
                           } else {
@@ -284,7 +284,7 @@ export default {
                           }
                         }
                         if (currentLine) lines.push(currentLine);
-                        return lines;
+                        return lines.join('\n');
                       }
                       return label;
                     }
@@ -329,13 +329,13 @@ export default {
                     if (actualIndex >= 0 && actualIndex < labelsY.length) {
                       const label = labelsY[actualIndex];
                       // Wrap long labels by splitting at spaces and inserting line breaks
-                      if (label.length > 25) {
+                      if (label.length > 40) {
                         const words = label.split(' ');
                         const lines = [];
                         let currentLine = '';
                         
                         for (const word of words) {
-                          if ((currentLine + ' ' + word).length > 20) {
+                          if ((currentLine + ' ' + word).length > 30) {
                             if (currentLine) lines.push(currentLine);
                             currentLine = word;
                           } else {
@@ -343,7 +343,7 @@ export default {
                           }
                         }
                         if (currentLine) lines.push(currentLine);
-                        return lines;
+                        return lines.join('\n');
                       }
                       return label;
                     }
