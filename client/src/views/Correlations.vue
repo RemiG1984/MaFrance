@@ -152,7 +152,7 @@ export default {
 
     // Reactive state
     const selectedScope = ref('departements')
-    const expandedPanels = ref([0]) // Start with the parameters panel expanded
+    const expandedPanels = ref([]) // Collapsed by default
 
     const selectedMetricsX = ref(['prenom_francais_pct', 'musulman_pct', 'naturalises_pct', 'francais_de_naissance_pct', 'etrangers_pct', 'europeens_pct', 'africains_pct', 'maghrebins_pct' ])
     const selectedMetricsY = ref(['homicides_total_p100k', 'violences_physiques_p1k', 'violences_sexuelles_p1k', 'vols_p1k','destructions_p1k', 'stupefiants_p1k', 'escroqueries_p1k'])
@@ -440,7 +440,7 @@ export default {
         const validData = fetchedData.filter(item => {
           return allMetrics.some(metric => {
             const value = parseFloat(item[metric.value])
-            return !isNaN(value) && value !== null && value !== undefined
+            return !isNaN(value) && isFinite(value) && !isNaN(value) && value !== null && value !== undefined
           })
         })
 
@@ -643,5 +643,20 @@ export default {
   .correlations-container {
     padding: 15px;
   }
+}
+
+/* Custom styles for the parameters panel to match Rankings.vue */
+.parameters-panel {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+}
+
+.parameters-title {
+  background-color: #1976d2 !important;
+  color: white !important;
+}
+
+.parameters-title .v-expansion-panel-title__overlay {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 </style>
