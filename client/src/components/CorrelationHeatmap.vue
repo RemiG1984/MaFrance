@@ -2,6 +2,7 @@
   <div class="heatmap-container">
     <div class="chart-wrapper">
       <canvas ref="chartCanvas" :id="chartId" class="correlation-chart"></canvas>
+      <div ref="yAxisTooltip" class="y-axis-tooltip"></div>
     </div>
 
     <!-- Legend -->
@@ -83,6 +84,7 @@ export default {
   setup(props, { emit }) {
     const chartCanvas = ref(null)
     const chartId = `correlation-chart-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    const yAxisTooltip = ref(null)
     let chartInstance = null
 
     // Color scale for correlations (from -1 to +1)
@@ -229,6 +231,10 @@ export default {
               display: false
             },
             tooltip: {
+              filter: (tooltipItem, data) => {
+                // Show tooltip for data points
+                return true
+              },
               callbacks: {
                 title: () => '',
                 label: (context) => {
@@ -387,6 +393,26 @@ export default {
                 metric2: data.yLabel,
                 correlation: data.v
               })
+            } else {
+              // Check if hovering over y-axis area
+              const rect = chartCanvas.value.getBoundingClientRect()
+              const canvasPosition = Chart.helpers.getRelativePosition(event, chartInstance)
+              const yAxisArea = chartInstance.chartArea.left
+              
+              if (canvasPosition.x < yAxisArea && canvasPosition.x > 0) {
+                const yValue = chartInstance.scales.y.getValueForPixel(canvasPosition.y)
+                if (Number.isInteger(yValue) && yValue % 2 === 1) {
+                  const actualIndex = Math.floor((labelsY.length * 2 - yValue) / 2)
+                  if (actualIndex >= 0 && actualIndex < labelsY.length) {
+                    const fullLabel = labelsY[actualIndex]
+                    showYAxisTooltip(event, fullLabel)
+                  }
+                } else {
+                  hideYAxisTooltip()
+                }
+              } else {
+                hideYAxisTooltip()
+              }
             }
           },
           onClick: (event, elements) => {
@@ -402,6 +428,22 @@ export default {
           }
         }
       })
+    }
+
+    const showYAxisTooltip = (event, labelText) => {
+      if (!yAxisTooltip.value) return
+      
+      const rect = chartCanvas.value.getBoundingClientRect()
+      yAxisTooltip.value.textContent = labelText
+      yAxisTooltip.value.style.display = 'block'
+      yAxisTooltip.value.style.left = `${event.clientX - rect.left + 10}px`
+      yAxisTooltip.value.style.top = `${event.clientY - rect.top - 30}px`
+    }
+
+    const hideYAxisTooltip = () => {
+      if (yAxisTooltip.value) {
+        yAxisTooltip.value.style.display = 'none'
+      }
     }
 
     const resizeChart = () => {
@@ -437,7 +479,8 @@ export default {
 
     return {
       chartCanvas,
-      chartId
+      chartId,
+      yAxisTooltip
     }
   }
 }
@@ -464,6 +507,22 @@ export default {
 .correlation-chart {
   width: 100% !important;
   height: 100% !important;
+}
+
+.y-axis-tooltip {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  pointer-events: none;
+  z-index: 1000;
+  display: none;
+  max-width: 300px;
+  word-wrap: break-word;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .correlation-legend {
