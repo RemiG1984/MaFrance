@@ -73,6 +73,7 @@ const MetricsConfig = {
                 africains_pct: { min: 0.5, max: 4 },
                 autres_nationalites_pct: { min: 0.5, max: 4 },
                 non_europeens_pct: { min: 0.5, max: 10 },
+                francais_de_naissance_pct: { min: 75, max: 95, invert: true }
             },
             commune: {
                 total_score: { min: 40, max: 150 },
@@ -101,6 +102,13 @@ const MetricsConfig = {
                 logements_sociaux_pct: { min: 5, max: 30 },
                 total_subventions_parHab: { min: 5, max: 100 },
                 naturalises_pct: { min: 0.5, max: 10 },
+                etrangers_pct: { min: 0.5, max: 10 },
+                europeens_pct: { min: 0.5, max: 10 },
+                maghrebins_pct: { min: 0.5, max: 5 },
+                africains_pct: { min: 0.5, max: 4 },
+                autres_nationalites_pct: { min: 0.5, max: 4 },
+                non_europeens_pct: { min: 0.5, max: 10 },
+                francais_de_naissance_pct: { min: 75, max: 95, invert: true }
             },
         },
     },
@@ -354,6 +362,15 @@ const MetricsConfig = {
             format: "percentage",
             source: "names",
         },
+        {
+            value: "francais_de_naissance_pct",
+            label: "Pop. francais de naissance (%)",
+            alt1Label: "Pop. francais de naissance (%)",
+            alt2Label: "Pop. francais de naissance (%)",
+            category: "défrancisation",
+            format: "percentage",
+            source: "nat1"
+        },
         // Wokisme category
         {
             value: "wokisme_score",
@@ -569,6 +586,7 @@ const MetricsConfig = {
             "africains_pct",
             "autres_nationalites_pct",
             "non_europeens_pct",
+            "francais_de_naissance_pct",
         ],
         departement: [
             "total_score",
@@ -603,6 +621,7 @@ const MetricsConfig = {
             "africains_pct",
             "autres_nationalites_pct",
             "non_europeens_pct",
+            "francais_de_naissance_pct",
         ],
         commune: [
             "total_score",
@@ -633,6 +652,7 @@ const MetricsConfig = {
             "africains_pct",
             "autres_nationalites_pct",
             "non_europeens_pct",
+            "francais_de_naissance_pct",
         ],
     },
 

@@ -6,9 +6,7 @@ import {
   getDepartementFromCog, 
   normalizeDepartementCode, 
   serializeStats, 
-  aggregateStats,
-  sortVictims,
-  filterVictims
+  aggregateStats
 } from "../utils/utils.js";
 
 export const useDataStore = defineStore("data", {
@@ -68,15 +66,8 @@ export const useDataStore = defineStore("data", {
       migrants: null,
       nat1: null,
     },
-    memorials: {
-      victims: [],
-      tags: [],
-      selectedTags: [],
-      selectedDepartement: null,
-      sortBy: 'year_desc',
-      loading: false,
-    },
-    locationCache: JSON.parse(localStorage.getItem('locationCache') || '{}'),
+    
+    
   }),
 
   actions: {
@@ -598,90 +589,7 @@ export const useDataStore = defineStore("data", {
         }
     },
 
-    // Memorial actions
-    async fetchVictims() {
-      try {
-        this.memorials.loading = true;
-        const response = await api.getFrancocides();
-
-        if (response && response.list) {
-          this.memorials.victims = response.list;
-        } else {
-          this.memorials.victims = [];
-        }
-      } catch (error) {
-        console.error('Error fetching victims:', error);
-        this.memorials.victims = [];
-      } finally {
-        this.memorials.loading = false;
-      }
-    },
-
-    async fetchTags() {
-      try {
-        // Use api cache for tags
-        const response = await api.getFrancocidesTags();
-        this.memorials.tags = response.tags || [];
-      } catch (error) {
-        console.error('Error fetching tags:', error);
-        this.memorials.tags = [];
-      }
-    },
-
-    async fetchLocationData(cogs) {
-      const uncachedCogs = cogs.filter(cog => !this.locationCache[cog]);
-      if (uncachedCogs.length) {
-        try {
-          const results = await Promise.allSettled(uncachedCogs.map(cog => api.getCommuneDetails(cog)));
-          results.forEach((result, i) => {
-            if (result.status === 'fulfilled' && result.value?.commune) {
-              this.locationCache[uncachedCogs[i]] = `${result.value.commune} (${result.value.departement})`;
-            }
-          });
-          localStorage.setItem('locationCache', JSON.stringify(this.locationCache));
-        } catch (error) {
-          console.error('Error fetching location data:', error);
-        }
-      }
-    },
-
-    toggleSelectedTag(tag) {
-      const index = this.memorials.selectedTags.indexOf(tag);
-      if (index > -1) {
-        this.memorials.selectedTags.splice(index, 1);
-      } else {
-        this.memorials.selectedTags.push(tag);
-      }
-    },
-
-    clearSelectedTags() {
-      this.memorials.selectedTags = [];
-    },
-
-    setDepartementFilter(deptCode) {
-      this.memorials.selectedDepartement = deptCode;
-    },
-
-    setSortBy(sort) {
-      this.memorials.sortBy = sort;
-    },
-
-    async fetchVictimDetails(id) {
-      try {
-        const victimDetails = await api.getFrancocideDetails(id);
-
-        // Update the victim in the victims array with the resume data
-        const victimIndex = this.memorials.victims.findIndex(v => v.id === id);
-        if (victimIndex !== -1) {
-          this.memorials.victims[victimIndex] = { ...this.memorials.victims[victimIndex], resume: victimDetails.resume };
-        }
-
-        return victimDetails;
-      } catch (error) {
-        console.error('Error fetching victim details:', error);
-        return null;
-      }
-    },
+    
   },
 
   getters: {
@@ -758,20 +666,6 @@ export const useDataStore = defineStore("data", {
       return this[level]?.migrants || { list: [], pagination: { hasMore: false, nextCursor: null, limit: 20 } }
     },
 
-    // Getters for memorial page
-    sortedVictims: (state) => {
-      return sortVictims(state.memorials.victims, state.memorials.sortBy);
-    },
-
-    filteredVictims: (state) => (query) => {
-      const sortedVictims = sortVictims(state.memorials.victims, state.memorials.sortBy);
-      return filterVictims(
-        sortedVictims,
-        state.memorials.selectedTags,
-        state.memorials.selectedDepartement,
-        query,
-        state.locationCache
-      );
-    },
+    
   },
 });
