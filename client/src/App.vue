@@ -34,15 +34,40 @@
           </v-btn>
 
 
-          <v-btn
-            v-for="item in menuItems"
-            :key="item.path"
-            :to="item.path"
-            variant="text"
-            class="mx-2"
-          >
-            {{ item.title }}
-          </v-btn>
+          <template v-for="item in menuItems" :key="item.title">
+            <!-- Regular menu item -->
+            <v-btn
+              v-if="!item.children"
+              :to="item.path"
+              variant="text"
+              class="mx-2"
+            >
+              {{ item.title }}
+            </v-btn>
+            
+            <!-- Dropdown menu item -->
+            <v-menu v-else offset-y>
+              <template v-slot:activator="{ props }">
+                <v-btn
+                  v-bind="props"
+                  variant="text"
+                  class="mx-2"
+                  append-icon="mdi-chevron-down"
+                >
+                  {{ item.title }}
+                </v-btn>
+              </template>
+              <v-list>
+                <v-list-item
+                  v-for="child in item.children"
+                  :key="child.path"
+                  :to="child.path"
+                >
+                  <v-list-item-title>{{ child.title }}</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-menu>
+          </template>
 
         <v-spacer></v-spacer>
         <VersionSelector />
@@ -73,14 +98,34 @@
       class="d-flex d-md-none mobile-menu"
     >
       <v-list>
-        <v-list-item
-          v-for="item in menuItems"
-          :key="item.path"
-          :to="item.path"
-          @click="mobileMenuOpen = false"
-        >
-          <v-list-item-title>{{ item.title }}</v-list-item-title>
-        </v-list-item>
+        <template v-for="item in menuItems" :key="item.title">
+          <!-- Regular menu item -->
+          <v-list-item
+            v-if="!item.children"
+            :to="item.path"
+            @click="mobileMenuOpen = false"
+          >
+            <v-list-item-title>{{ item.title }}</v-list-item-title>
+          </v-list-item>
+          
+          <!-- Expandable menu item -->
+          <v-list-group v-else :value="item.title">
+            <template v-slot:activator="{ props }">
+              <v-list-item v-bind="props">
+                <v-list-item-title>{{ item.title }}</v-list-item-title>
+              </v-list-item>
+            </template>
+            <v-list-item
+              v-for="child in item.children"
+              :key="child.path"
+              :to="child.path"
+              @click="mobileMenuOpen = false"
+              class="pl-8"
+            >
+              <v-list-item-title>{{ child.title }}</v-list-item-title>
+            </v-list-item>
+          </v-list-group>
+        </template>
 
         <v-divider class="my-2"></v-divider>
 
@@ -153,8 +198,13 @@ export default {
       mobileMenuOpen: false,
       menuItems: [
         { title: 'Accueil', path: '/' },
-        { title: 'Classements', path: '/classements' },
-        { title: 'Corrélations', path: '/correlations' },
+        {
+          title: 'Outils',
+          children: [
+            { title: 'Classements', path: '/classements' },
+            { title: 'Corrélations', path: '/correlations' }
+          ]
+        },
         { title: 'Méthodologie', path: '/methodologie' }
       ]
     }
