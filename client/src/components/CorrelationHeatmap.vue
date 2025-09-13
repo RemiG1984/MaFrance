@@ -270,13 +270,13 @@ export default {
                     if (labelIndex >= 0 && labelIndex < labelsX.length) {
                       const label = labelsX[labelIndex];
                       // Wrap long labels by splitting at spaces and inserting line breaks
-                      if (label.length > 35) {
+                      if (label.length > 30) {
                         const words = label.split(' ');
                         const lines = [];
                         let currentLine = '';
                         
                         for (const word of words) {
-                          if ((currentLine + ' ' + word).length > 25) {
+                          if ((currentLine + ' ' + word).length > 20) {
                             if (currentLine) lines.push(currentLine);
                             currentLine = word;
                           } else {
@@ -329,13 +329,13 @@ export default {
                     if (actualIndex >= 0 && actualIndex < labelsY.length) {
                       const label = labelsY[actualIndex];
                       // Wrap long labels by splitting at spaces and inserting line breaks
-                      if (label.length > 40) {
+                      if (label.length > 30) {
                         const words = label.split(' ');
                         const lines = [];
                         let currentLine = '';
                         
                         for (const word of words) {
-                          if ((currentLine + ' ' + word).length > 30) {
+                          if ((currentLine + ' ' + word).length > 20) {
                             if (currentLine) lines.push(currentLine);
                             currentLine = word;
                           } else {
