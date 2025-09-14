@@ -2,7 +2,7 @@
 const fs = require('fs');
 
 function importQpvGeoJson(db, callback) {
-    const geoJsonPath = 'setup/qpv2024.json'; // You'll place your GeoJSON file here
+    const geoJsonPath = 'setup/qpv2024_simplified.geojson'; // You'll place your GeoJSON file here
     
     if (!fs.existsSync(geoJsonPath)) {
         console.log('QPV GeoJSON file not found, skipping...');

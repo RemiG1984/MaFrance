@@ -102,7 +102,7 @@ router.get(
 // Get QPV GeoJSON data
 router.get('/geojson', (req, res) => {
     try {
-        const geoJsonPath = path.join(__dirname, '../setup/qpv2024.geojson');
+        const geoJsonPath = path.join(__dirname, '../setup/qpv2024_simplified.geojson');
 
         if (!fs.existsSync(geoJsonPath)) {
             return res.status(404).json({ error: 'QPV GeoJSON file not found' });
