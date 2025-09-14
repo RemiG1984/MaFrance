@@ -231,8 +231,10 @@ export default {
         this.updateLegendContent(div)
         return div
       }
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: '©<a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> | <a href="https://ouvamafrance.replit.app">https://ouvamafrance.replit.app</a>'
+      L.tileLayer("/api/tiles/{z}/{x}/{y}.png", {
+        attribution: 'Map data © Local Server | <a href="https://ouvamafrance.replit.app">https://ouvamafrance.replit.app</a>',
+        maxZoom: 18,
+        tileSize: 256
       }).addTo(this.map)
       if (L.Control.Fullscreen) {
         this.map.addControl(new L.Control.Fullscreen({

@@ -191,8 +191,10 @@ export default {
       map = L.map('localisationMap').setView([46.603354, 1.888334], 6)
       
       // Add tile layer
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
+      L.tileLayer('/api/tiles/{z}/{x}/{y}.png', {
+        attribution: '© Local Server',
+        maxZoom: 18,
+        tileSize: 256
       }).addTo(map)
 
       // Add click handler
