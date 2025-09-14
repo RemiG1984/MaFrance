@@ -203,7 +203,7 @@ export default {
           children: [
             { title: 'Classements', path: '/classements' },
             { title: 'Corrélations', path: '/correlations' },
-            { title: 'Localisation', path: '/localisation' }
+            //{ title: 'Localisation', path: '/localisation' }
           ]
         },
         { title: 'Méthodologie', path: '/methodologie' }
