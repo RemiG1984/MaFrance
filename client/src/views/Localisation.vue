@@ -140,9 +140,6 @@ L.Icon.Default.mergeOptions({
 
 export default {
   name: 'Localisation',
-  components: {
-    VersionSelector
-  },
   setup() {
     // Reactive data
     const addressInput = ref('')
