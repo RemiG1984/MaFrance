@@ -136,14 +136,12 @@ import { useDataStore } from '../services/store.js'
 import api from '../services/api.js'
 import { MetricsConfig } from '../utils/metricsConfig.js'
 
-import VersionSelector from '../components/VersionSelector.vue'
 import CorrelationHeatmap from '../components/CorrelationHeatmap.vue'
 import ScatterPlot from '../components/ScatterPlot.vue'
 
 export default {
   name: 'Correlations',
   components: {
-    VersionSelector,
     CorrelationHeatmap,
     ScatterPlot
   },
