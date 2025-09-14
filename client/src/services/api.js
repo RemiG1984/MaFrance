@@ -411,6 +411,8 @@ const api = {
         return apiService.request(`/qpv${queryString}`);
     },
 
+    getQpvs: () => apiService.request('/qpv/geojson'),
+
     getNearbyQpv: (lat, lng, limit = 5) => {
         const params = { lat, lng, limit };
         const queryString = buildQueryString(params);

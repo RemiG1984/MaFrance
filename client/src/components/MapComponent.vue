@@ -352,7 +352,7 @@ export default {
     async loadQpvGeoJson() {
       try {
         const response = await api.getQpvs()
-        if (response && response.geojson) {
+        if (response && response.geojson && response.geojson.features) {
           this.qpvLayer = markRaw(L.geoJSON(response.geojson, {
             style: () => ({
               fillColor: '#ff0000',
@@ -361,7 +361,11 @@ export default {
               color: '#cc0000',
               fillOpacity: 0.6
             }),
-            onEachFeature: this.onEachQpvFeature.bind(this)
+            onEachFeature: this.onEachQpvFeature.bind(this),
+            filter: (feature) => {
+              // Only include features with valid geometry and properties
+              return feature && feature.geometry && feature.properties;
+            }
           }))
           this.layerGroup.addLayer(this.qpvLayer)
         }
@@ -476,10 +480,12 @@ export default {
       });
     },
     onEachQpvFeature(feature, layer) {
-      const qpvCode = feature.properties.code_qp
-      const qpvName = feature.properties.lib_qp
-      const commune = feature.properties.lib_com
-      const departement = feature.properties.lib_dep
+      if (!feature || !feature.properties) return;
+      
+      const qpvCode = feature.properties.code_qp || 'N/A'
+      const qpvName = feature.properties.lib_qp || 'N/A'
+      const commune = feature.properties.lib_com || 'N/A'
+      const departement = feature.properties.lib_dep || 'N/A'
       
       layer.on('mouseover', (e) => {
         const center = layer.getBounds().getCenter()
