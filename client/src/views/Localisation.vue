@@ -53,7 +53,7 @@
           <div id="localisationMap" class="localisation-map"></div>
         </v-card-text>
       </v-card>
-      
+
       <!-- Selected Location Info -->
       <div v-if="selectedLocation" class="location-info mb-4">
         <v-alert type="info" class="mb-0">
@@ -149,7 +149,7 @@ export default {
     const searchPerformed = ref(false)
     const selectedLocationType = ref({ value: 'migrants', title: 'Centres de migrants' })
     const nearbyPlaces = ref([])
-    
+
     // Map instance
     let map = null
     let selectedMarker = null
@@ -157,8 +157,8 @@ export default {
 
     // Location types (extensible for future additions)
     const locationTypes = [
-      { value: 'migrants', title: 'Centres de migrants' }
-      // Future additions: QPV, mosquées, etc.
+      { value: 'migrants', title: 'Centres de migrants' },
+      { value: 'qpv', title: 'Quartiers Prioritaires (QPV)' }
     ]
 
     // Distance calculation (Haversine formula)
@@ -183,10 +183,10 @@ export default {
     // Initialize map
     const initMap = async () => {
       await nextTick()
-      
+
       // Initialize map centered on France
       map = L.map('localisationMap').setView([46.603354, 1.888334], 6)
-      
+
       // Add tile layer - using CartoDB for consistency and caching
       L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
         attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a>',
@@ -206,12 +206,12 @@ export default {
     // Set selected location and find nearby places
     const setSelectedLocation = async (lat, lng, address = null) => {
       selectedLocation.value = { lat, lng, address }
-      
+
       // Clear existing marker
       if (selectedMarker) {
         map.removeLayer(selectedMarker)
       }
-      
+
       // Add new marker
       selectedMarker = L.marker([lat, lng])
         .addTo(map)
@@ -230,13 +230,34 @@ export default {
     const findNearbyPlaces = async (lat, lng) => {
       try {
         let places = []
-        
+
         if (selectedLocationType.value.value === 'migrants') {
           const response = await api.getMigrants({ limit: 1500 })
           places = response.list || []
           console.log('Loaded migrant centers:', places.length)
+        } else if (selectedLocationType.value.value === 'qpv') {
+          // Assuming you have a new API endpoint for QPV data
+          // const response = await api.getQpvs({ limit: 1500 }) 
+          // places = response.list || []
+          // console.log('Loaded QPVs:', places.length)
+
+          // For now, let's use dummy data or a placeholder if the API isn't ready
+          // Replace this with your actual QPV data fetching logic
+          const qpvData = [
+            { id: 1, nom: 'QPV A', departement: '75', commune: 'Paris', adresse: '1 Rue de Paris', latitude: 48.8566, longitude: 2.3522, distance: 5.2 },
+            { id: 2, nom: 'QPV B', departement: '13', commune: 'Marseille', adresse: '1 Avenue de Marseille', latitude: 43.2965, longitude: 5.3698, distance: 15.1 },
+            { id: 3, nom: 'QPV C', departement: '69', commune: 'Lyon', adresse: '1 Place de Lyon', latitude: 45.7640, longitude: 4.8357, distance: 25.3 }
+          ]
+          // In a real scenario, you'd calculate the distance here. For dummy data, we'll assume it's pre-calculated or mock it.
+          places = qpvData.map(qpv => ({
+            ...qpv,
+            distance: calculateDistance(lat, lng, qpv.latitude, qpv.longitude) // Recalculate distance for accuracy
+          }))
+          .sort((a, b) => a.distance - b.distance)
+          .slice(0, 5); // Get 5 closest
+          console.log('Using dummy QPV data:', places.length)
+
         }
-        // Future: Add other types here (QPV, mosquées, etc.)
 
         // Calculate distances and sort
         const placesWithDistances = places
@@ -261,7 +282,7 @@ export default {
         console.log('Places with distances:', placesWithDistances)
         nearbyPlaces.value = placesWithDistances
         showNearbyPlacesOnMap(placesWithDistances)
-        
+
       } catch (error) {
         console.error('Error finding nearby places:', error)
       }
@@ -285,12 +306,15 @@ export default {
         })
         .addTo(map)
         .bindPopup(`
-          <strong>${place.commune || 'N/A'}</strong><br>
+          <strong>${place.commune || place.nom || 'N/A'}</strong><br>
           ${place.adresse || 'N/A'}<br>
           <strong>Distance:</strong> ${place.distance.toFixed(1)} km<br>
           ${selectedLocationType.value.value === 'migrants' ? 
             `<strong>Places:</strong> ${place.places || 'N/A'}<br><strong>Type:</strong> ${place.type || 'N/A'}<br><strong>Gestionnaire:</strong> ${place.gestionnaire || 'N/A'}` : 
-            ''
+            (selectedLocationType.value.value === 'qpv' ?
+              `<strong>Nom:</strong> ${place.nom || 'N/A'}<br><strong>Département:</strong> ${place.departement || 'N/A'}` :
+              ''
+            )
           }
         `)
 
@@ -310,14 +334,14 @@ export default {
     // Search address using geocoding
     const searchAddress = async () => {
       if (!addressInput.value.trim()) return
-      
+
       searchingAddress.value = true
       try {
         const response = await fetch(
           `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addressInput.value)}&limit=1&countrycodes=fr`
         )
         const data = await response.json()
-        
+
         if (data && data.length > 0) {
           const result = data[0]
           await setSelectedLocation(
@@ -473,7 +497,7 @@ export default {
   .localisation-map {
     height: 400px;
   }
-  
+
   .header-section {
     flex-direction: column;
     align-items: flex-start;

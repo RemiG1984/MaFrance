@@ -7,6 +7,7 @@ const { importElus } = require('./setup/importElus');
 const { importNames } = require('./setup/importNames');
 const { importCrimeData } = require('./setup/importCrimeData');
 const { importQPV } = require('./setup/importQPV');
+const { importQpvGeoJson } = require('./setup/importQpvGeoJson.js');
 const { importSubventions } = require('./setup/importSubventions');
 const { importMigrants } = require('./setup/importMigrants');
 const { importNat1 } = require('./setup/importNat1');

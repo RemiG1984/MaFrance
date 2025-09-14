@@ -98,3 +98,68 @@ router.get(
 );
 
 module.exports = router;
+// GET /api/qpv/nearby - Get QPVs near coordinates
+router.get("/nearby", (req, res, next) => {
+    const { lat, lng, limit = "5" } = req.query;
+    
+    if (!lat || !lng) {
+        return res.status(400).json({ error: "Latitude and longitude are required" });
+    }
+    
+    const latitude = parseFloat(lat);
+    const longitude = parseFloat(lng);
+    const maxResults = Math.min(parseInt(limit), 20);
+    
+    if (isNaN(latitude) || isNaN(longitude)) {
+        return res.status(400).json({ error: "Invalid coordinates" });
+    }
+    
+    // Calculate distance using Haversine formula in SQL
+    const sql = `
+        SELECT 
+            qc.*,
+            qd.popMuniQPV,
+            qd.indiceJeunesse,
+            qd.partPopEt,
+            qd.partPopImmi,
+            qd.taux_logements_sociaux,
+            qd.taux_d_emploi,
+            qd.taux_pauvrete_60,
+            (
+                6371 * 2 * ASIN(
+                    SQRT(
+                        POWER(SIN((? - qc.latitude) * PI() / 180 / 2), 2) +
+                        COS(? * PI() / 180) * COS(qc.latitude * PI() / 180) *
+                        POWER(SIN((? - qc.longitude) * PI() / 180 / 2), 2)
+                    )
+                )
+            ) as distance_km
+        FROM qpv_coordinates qc
+        LEFT JOIN qpv_data qd ON qc.code_qp = qd.codeQPV
+        ORDER BY distance_km ASC
+        LIMIT ?
+    `;
+    
+    db.all(sql, [latitude, latitude, longitude, maxResults], (err, rows) => {
+        if (err) return handleDbError(err, next);
+        
+        const qpvs = rows.map(row => ({
+            code_qp: row.code_qp,
+            lib_qp: row.lib_qp,
+            commune: row.lib_com,
+            departement: row.lib_dep,
+            latitude: row.latitude,
+            longitude: row.longitude,
+            distance_km: Math.round(row.distance_km * 100) / 100,
+            population: row.popMuniQPV,
+            indice_jeunesse: row.indiceJeunesse,
+            part_pop_etrangere: row.partPopEt,
+            part_pop_immigree: row.partPopImmi,
+            taux_logements_sociaux: row.taux_logements_sociaux,
+            taux_emploi: row.taux_d_emploi,
+            taux_pauvrete: row.taux_pauvrete_60
+        }));
+        
+        res.json(qpvs);
+    });
+});
