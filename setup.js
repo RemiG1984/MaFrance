@@ -82,40 +82,48 @@ function runImports() {
               }
               console.log('✓ Importation données QPV terminée');
 
-              importSubventions(db, (err) => {
+              importQpvGeoJson(db, (err) => {
                 if (err) {
-                  console.error('Échec importation données subventions:', err.message);
+                  console.error('Échec importation QPV GeoJSON:', err.message);
                   process.exit(1);
                 }
-                console.log('✓ Importation données subventions terminée');
+                console.log('✓ Importation QPV GeoJSON terminée');
 
-                importMigrants(db, (err) => {
+                importSubventions(db, (err) => {
                   if (err) {
-                    console.error('Échec importation données centres migrants:', err.message);
+                    console.error('Échec importation données subventions:', err.message);
                     process.exit(1);
                   }
-                  console.log('✓ Importation données centres migrants terminée');
+                  console.log('✓ Importation données subventions terminée');
 
-                  importNat1(db, (err) => {
+                  importMigrants(db, (err) => {
                     if (err) {
-                      console.error('Échec importation données NAT1:', err.message);
+                      console.error('Échec importation données centres migrants:', err.message);
                       process.exit(1);
                     }
-                    console.log('✓ Importation données NAT1 terminée');
+                    console.log('✓ Importation données centres migrants terminée');
 
-                    // Create search indexes for better performance
-                    createSearchIndexes()
-                      .then(() => {
-                        console.log('✓ Index de recherche créés');
-                        console.log('🎉 Configuration de la base de données terminée !');
-                        db.close();
-                        process.exit(0);
-                      })
-                      .catch((indexErr) => {
-                        console.error('Échec création des index:', indexErr.message);
-                        db.close();
+                    importNat1(db, (err) => {
+                      if (err) {
+                        console.error('Échec importation données NAT1:', err.message);
                         process.exit(1);
-                      });
+                      }
+                      console.log('✓ Importation données NAT1 terminée');
+
+                      // Create search indexes for better performance
+                      createSearchIndexes()
+                        .then(() => {
+                          console.log('✓ Index de recherche créés');
+                          console.log('🎉 Configuration de la base de données terminée !');
+                          db.close();
+                          process.exit(0);
+                        })
+                        .catch((indexErr) => {
+                          console.error('Échec création des index:', indexErr.message);
+                          db.close();
+                          process.exit(1);
+                        });
+                    });
                   });
                 });
               });
