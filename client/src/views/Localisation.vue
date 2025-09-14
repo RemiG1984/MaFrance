@@ -236,21 +236,33 @@ export default {
         let places = []
         
         if (selectedLocationType.value.value === 'migrants') {
-          const response = await api.getMigrants({ limit: 1000 })
+          const response = await api.getMigrants({ limit: 2000 })
           places = response.list || []
+          console.log('Loaded migrant centers:', places.length)
         }
         // Future: Add other types here (QPV, mosquées, etc.)
 
         // Calculate distances and sort
         const placesWithDistances = places
-          .filter(place => place.latitude && place.longitude)
+          .filter(place => {
+            const hasCoords = place.latitude && place.longitude && 
+                            !isNaN(parseFloat(place.latitude)) && 
+                            !isNaN(parseFloat(place.longitude))
+            if (!hasCoords) {
+              console.log('Filtering out place without valid coordinates:', place)
+            }
+            return hasCoords
+          })
           .map(place => ({
             ...place,
-            distance: calculateDistance(lat, lng, place.latitude, place.longitude)
+            latitude: parseFloat(place.latitude),
+            longitude: parseFloat(place.longitude),
+            distance: calculateDistance(lat, lng, parseFloat(place.latitude), parseFloat(place.longitude))
           }))
           .sort((a, b) => a.distance - b.distance)
           .slice(0, 5) // Get 5 closest
 
+        console.log('Places with distances:', placesWithDistances)
         nearbyPlaces.value = placesWithDistances
         showNearbyPlacesOnMap(placesWithDistances)
         
@@ -277,11 +289,11 @@ export default {
         })
         .addTo(map)
         .bindPopup(`
-          <strong>${place.commune}</strong><br>
+          <strong>${place.commune || 'N/A'}</strong><br>
           ${place.adresse || 'N/A'}<br>
           <strong>Distance:</strong> ${place.distance.toFixed(1)} km<br>
           ${selectedLocationType.value.value === 'migrants' ? 
-            `<strong>Places:</strong> ${place.places || 'N/A'}<br><strong>Type:</strong> ${place.type || 'N/A'}` : 
+            `<strong>Places:</strong> ${place.places || 'N/A'}<br><strong>Type:</strong> ${place.type || 'N/A'}<br><strong>Gestionnaire:</strong> ${place.gestionnaire || 'N/A'}` : 
             ''
           }
         `)
