@@ -125,7 +125,6 @@
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import L from 'leaflet'
 import api from '../services/api.js'
-import VersionSelector from '../components/VersionSelector.vue'
 
 // Fix for default Leaflet icons
 import iconRetinaUrl from 'leaflet/dist/images/marker-icon-2x.png'
@@ -179,9 +178,8 @@ export default {
 
     // Color coding for distances
     const getDistanceColor = (distance) => {
-      if (distance <= 5) return 'green'
-      if (distance <= 15) return 'orange'
-      if (distance <= 30) return 'red'
+      if (distance <= 10) return 'red'
+      if (distance <= 30) return 'orange'
       return 'grey'
     }
 
