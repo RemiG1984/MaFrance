@@ -10,6 +10,7 @@ function importNat1(db, callback) {
     let departmentBatch = [];
     let communeBatch = [];
     let skippedRows = 0;
+    let ignoredLines = [];
 
     function readNat1Data() {
         return new Promise((resolve, reject) => {
@@ -29,10 +30,12 @@ function importNat1(db, callback) {
                     if (!row["Code"]) missingFields.push("Code");
 
                     if (missingFields.length > 0) {
-                        console.warn(
-                            `Ligne ignorée dans insee_NAT1_detailed_inferred.csv (champs manquants: ${missingFields.join(", ")}):`,
-                            row,
-                        );
+                        const reason = `Champs manquants: ${missingFields.join(", ")}`;
+                        ignoredLines.push({
+                            lineNumber: totalRows + skippedRows + 1,
+                            reason: reason,
+                            data: { Type: row["Type"] || "N/A", Code: row["Code"] || "N/A" }
+                        });
                         skippedRows++;
                         return;
                     }
@@ -42,6 +45,11 @@ function importNat1(db, callback) {
 
                     // Skip dept- entries
                     if (type === "dept-") {
+                        ignoredLines.push({
+                            lineNumber: totalRows + skippedRows + 1,
+                            reason: "Type 'dept-' ignoré (non supporté)",
+                            data: { Type: type, Code: code }
+                        });
                         skippedRows++;
                         return;
                     }
@@ -90,6 +98,40 @@ function importNat1(db, callback) {
                         `Lecture de insee_NAT1_detailed_inferred.csv terminée: ${totalRows} lignes traitées, ${skippedRows} lignes ignorées`,
                     );
                     console.log(`Répartition: ${countryBatch.length} country, ${departmentBatch.length} dept, ${communeBatch.length} commune`);
+                    
+                    // Report ignored lines
+                    if (ignoredLines.length > 0) {
+                        console.log("\n📋 RAPPORT DES LIGNES IGNORÉES:");
+                        console.log("=" .repeat(50));
+                        
+                        // Group by reason
+                        const groupedByReason = ignoredLines.reduce((acc, line) => {
+                            if (!acc[line.reason]) {
+                                acc[line.reason] = [];
+                            }
+                            acc[line.reason].push(line);
+                            return acc;
+                        }, {});
+                        
+                        Object.keys(groupedByReason).forEach(reason => {
+                            const lines = groupedByReason[reason];
+                            console.log(`\n🔸 ${reason} (${lines.length} lignes):`);
+                            
+                            // Show first 5 examples for each reason
+                            const examples = lines.slice(0, 5);
+                            examples.forEach(line => {
+                                console.log(`   Ligne ${line.lineNumber}: Type="${line.data.Type}", Code="${line.data.Code}"`);
+                            });
+                            
+                            if (lines.length > 5) {
+                                console.log(`   ... et ${lines.length - 5} autres lignes similaires`);
+                            }
+                        });
+                        
+                        console.log("\n" + "=" .repeat(50));
+                        console.log(`Total des lignes ignorées: ${ignoredLines.length}`);
+                    }
+                    
                     resolve();
                 })
                 .on("error", (err) => {
