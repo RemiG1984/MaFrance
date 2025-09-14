@@ -154,6 +154,7 @@ export default {
     let map = null
     let selectedMarker = null
     let nearbyMarkers = []
+    let qpvLayer = null
 
     // Location types (extensible for future additions)
     const locationTypes = [
@@ -196,6 +197,9 @@ export default {
 
       // Add click handler
       map.on('click', onMapClick)
+
+      // Load QPV layer
+      await loadQpvLayer()
     }
 
     // Handle map click
@@ -386,6 +390,61 @@ export default {
       )
     }
 
+    // Load QPV GeoJSON layer
+    const loadQpvLayer = async () => {
+      try {
+        const response = await api.getQpvs()
+        if (response && response.geojson && response.geojson.features) {
+          qpvLayer = L.geoJSON(response.geojson, {
+            style: () => ({
+              fillColor: '#ff0000',
+              color: '#cc0000',
+              weight: 1,
+              fillOpacity: 0.4,
+              opacity: 0.8
+            }),
+            onEachFeature: (feature, layer) => {
+              if (!feature || !feature.properties) return;
+              
+              const qpvCode = feature.properties.code_qp || 'N/A'
+              const qpvName = feature.properties.lib_qp || 'N/A'
+              const commune = feature.properties.lib_com || 'N/A'
+              const departement = feature.properties.lib_dep || 'N/A'
+              
+              layer.bindPopup(`
+                <strong>QPV: ${qpvName}</strong><br>
+                <strong>Code:</strong> ${qpvCode}<br>
+                <strong>Commune:</strong> ${commune}<br>
+                <strong>Département:</strong> ${departement}
+              `)
+              
+              layer.on('mouseover', (e) => {
+                layer.setStyle({
+                  fillOpacity: 0.7,
+                  weight: 2
+                })
+              })
+              
+              layer.on('mouseout', (e) => {
+                layer.setStyle({
+                  fillOpacity: 0.4,
+                  weight: 1
+                })
+              })
+            },
+            filter: (feature) => {
+              // Only include features with valid geometry and properties
+              return feature && feature.geometry && feature.properties;
+            }
+          })
+          qpvLayer.addTo(map)
+          console.log('QPV layer loaded successfully')
+        }
+      } catch (error) {
+        console.error('Error loading QPV layer:', error)
+      }
+    }
+
     // Handle location type change
     const onLocationTypeChanged = () => {
       if (selectedLocation.value) {
@@ -416,7 +475,8 @@ export default {
       searchAddress,
       getCurrentLocation,
       onLocationTypeChanged,
-      getDistanceColor
+      getDistanceColor,
+      loadQpvLayer
     }
   }
 }
