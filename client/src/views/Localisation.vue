@@ -3,7 +3,6 @@
     <!-- Header Section -->
     <div class="header-section">
       <h1>Localisation des centres proches</h1>
-      <VersionSelector />
     </div>
 
     <!-- Controls Section -->
@@ -236,7 +235,7 @@ export default {
         let places = []
         
         if (selectedLocationType.value.value === 'migrants') {
-          const response = await api.getMigrants({ limit: 2000 })
+          const response = await api.getMigrants({ limit: 1500 })
           places = response.list || []
           console.log('Loaded migrant centers:', places.length)
         }
