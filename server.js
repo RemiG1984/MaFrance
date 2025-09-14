@@ -81,7 +81,6 @@ const rankingRoutes = require("./routes/rankingRoutes");
 const subventionRoutes = require("./routes/subventionRoutes");
 const cacheRoutes = require("./routes/cacheRoutes");
 const nat1Routes = require('./routes/nat1Routes');
-const tileRoutes = require('./routes/tileRoutes');
 
 
 // Make database available to all routes
@@ -98,7 +97,6 @@ app.use('/api/rankings', rankingRoutes);
 app.use('/api/subventions', subventionRoutes);
 app.use('/api/migrants', migrantRoutes);
 app.use('/api/nat1', nat1Routes);
-app.use('/api/tiles', tileRoutes);
 app.use("/api", otherRoutes); // Keep this commented to test
 app.use("/api/cache", cacheRoutes);
 
