@@ -22,7 +22,7 @@ router.get(
     (req, res) => {
         const db = req.app.locals.db;
         const { dept, cog, cursor, limit = "20" } = req.query;
-        const pageLimit = Math.min(parseInt(limit), 100);
+        const pageLimit = Math.min(parseInt(limit), 2000);
         const offset = cursor ? parseInt(cursor) : 0;
 
         // Prevent simultaneous dept and cog
@@ -73,6 +73,8 @@ router.get(
                 COG: row.COG,
                 departement: row.departement,
                 commune: commune_name,
+                latitude: row.latitude,
+                longitude: row.longitude,
             }));
 
             res.json({

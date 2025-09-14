@@ -57,9 +57,10 @@
 import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { Chart, registerables } from 'chart.js'
 import chroma from 'chroma-js'
+import { watermarkPlugin } from '../utils/chartWatermark.js'
 
 // Register Chart.js components
-Chart.register(...registerables)
+Chart.register(...registerables, watermarkPlugin)
 
 export default {
   name: 'CorrelationHeatmap',
@@ -205,6 +206,41 @@ export default {
             pointStyle: 'rect'
           }]
         },
+        plugins: [{
+          id: 'correlationLabels',
+          afterDatasetsDraw: (chart) => {
+            const ctx = chart.ctx
+            const dataset = chart.data.datasets[0]
+            
+            chart.getDatasetMeta(0).data.forEach((element, index) => {
+              const point = dataset.data[index]
+              if (!point || point.isInsufficientData) return
+              
+              const value = point.originalValue !== undefined ? point.originalValue : point.v
+              if (value === null || isNaN(value)) return
+              
+              const { x, y } = element.getProps(['x', 'y'])
+              
+              // Set text style
+              ctx.save()
+              ctx.font = `bold ${Math.max(10, Math.min(14, cellSize / 4))}px Arial`
+              ctx.textAlign = 'center'
+              ctx.textBaseline = 'middle'
+              
+              // Choose text color based on correlation value for better contrast
+              const absValue = Math.abs(value)
+              if (absValue > 0.4) {
+                ctx.fillStyle = 'white'
+              } else {
+                ctx.fillStyle = 'black'
+              }
+              
+              // Draw the correlation value with 2 decimal places
+              ctx.fillText(value.toFixed(2), x, y)
+              ctx.restore()
+            })
+          }
+        }],
         options: {
           responsive: true,
           maintainAspectRatio: false,

@@ -3,6 +3,7 @@ import Home from '../views/Home.vue'
 import Rankings from '../views/Rankings.vue'
 import Methodology from '../views/Methodology.vue'
 import Correlations from '../views/Correlations.vue'
+import Localisation from '../views/Localisation.vue'
 
 const routes = [
   {
@@ -24,6 +25,11 @@ const routes = [
     path: '/correlations',
     name: 'Correlations',
     component: Correlations
+  },
+  {
+    path: '/localisation',
+    name: 'Localisation',
+    component: Localisation
   }
 ]
 

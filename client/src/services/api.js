@@ -293,6 +293,12 @@ class ApiService {
     // Add other API methods here as needed
 }
 
+// Helper function to build query string
+const buildQueryString = (params) => {
+    const queryString = new URLSearchParams(params).toString();
+    return queryString ? `?${queryString}` : "";
+};
+
 // Export singleton instance
 const apiService = new ApiService();
 
@@ -390,10 +396,10 @@ const api = {
 
     // Migrant centers data
     getMigrants: (params = {}) => {
-        const queryString = new URLSearchParams(params).toString();
+        const queryString = buildQueryString(params);
         const url = `/migrants`;
         return apiService.request(
-            queryString ? `${url}?${queryString}` : url,
+            queryString ? `${url}${queryString}` : url,
             {},
             !params.cursor,
         );
@@ -401,13 +407,14 @@ const api = {
 
     // QPV data
     getQpv: (params = {}) => {
-        const queryString = new URLSearchParams(params).toString();
-        const url = `/qpv`;
-        return apiService.request(
-            queryString ? `${url}?${queryString}` : url,
-            {},
-            !params.cursor,
-        );
+        const queryString = buildQueryString(params);
+        return apiService.request(`/qpv${queryString}`);
+    },
+
+    getNearbyQpv: (lat, lng, limit = 5) => {
+        const params = { lat, lng, limit };
+        const queryString = buildQueryString(params);
+        return apiService.request(`/qpv/nearby${queryString}`);
     },
 
     // NAT1 data
@@ -420,7 +427,7 @@ const api = {
     getNat1Summary: () =>
         apiService.request("/nat1/all"),
 
-    
+
 
     // Cache management
     clearCache: () => apiService.clearCache(),

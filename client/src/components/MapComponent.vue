@@ -231,8 +231,10 @@ export default {
         this.updateLegendContent(div)
         return div
       }
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: '©<a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> | <a href="https://ouvamafrance.replit.app">https://ouvamafrance.replit.app</a>'
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a> | <a href="https://ouvamafrance.replit.app">https://ouvamafrance.replit.app</a>',
+        subdomains: 'abcd',
+        maxZoom: 19
       }).addTo(this.map)
       if (L.Control.Fullscreen) {
         this.map.addControl(new L.Control.Fullscreen({
@@ -240,6 +242,7 @@ export default {
         }))
       }
       await this.loadDepartementsGeoJson()
+      await this.loadQpvGeoJson()
     },
     updateData(){
       // Sync selected metric with store
@@ -346,6 +349,26 @@ export default {
         console.error('Erreur chargement GeoJSON:', error)
       }
     },
+    async loadQpvGeoJson() {
+      try {
+        const response = await api.getQpvs()
+        if (response && response.geojson) {
+          this.qpvLayer = markRaw(L.geoJSON(response.geojson, {
+            style: () => ({
+              fillColor: '#ff0000',
+              weight: 1,
+              opacity: 0.8,
+              color: '#cc0000',
+              fillOpacity: 0.6
+            }),
+            onEachFeature: this.onEachQpvFeature.bind(this)
+          }))
+          this.layerGroup.addLayer(this.qpvLayer)
+        }
+      } catch (error) {
+        console.error('Erreur chargement QPV GeoJSON:', error)
+      }
+    },
     async loadCommunesGeoJson(deptCode) {
       if(!deptCode) return null
       try {
@@ -450,6 +473,38 @@ export default {
       });
       layer.on('mouseout', (e) => {
         this.hideTooltip(e);
+      });
+    },
+    onEachQpvFeature(feature, layer) {
+      const qpvCode = feature.properties.code_qp
+      const qpvName = feature.properties.lib_qp
+      const commune = feature.properties.lib_com
+      const departement = feature.properties.lib_dep
+      
+      layer.on('mouseover', (e) => {
+        const center = layer.getBounds().getCenter()
+        layer.setStyle({
+          weight: 2,
+          opacity: 1,
+          color: '#990000'
+        });
+        
+        const content = `<b>QPV: ${qpvName}</b><br>Code: ${qpvCode}<br>Commune: ${commune}<br>Département: ${departement}`
+        this.globalTooltip
+          .setLatLng(center)
+          .setContent(content)
+          .addTo(this.map)
+      });
+      
+      layer.on('mouseout', (e) => {
+        layer.setStyle({
+          weight: 1,
+          opacity: 0.8,
+          color: '#cc0000'
+        });
+        if (this.globalTooltip) {
+          this.map.removeLayer(this.globalTooltip)
+        }
       });
     },
     getColor(value) {

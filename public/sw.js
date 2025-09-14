@@ -2,6 +2,7 @@
 const BUILD_HASH = self.BUILD_HASH || Date.now().toString();
 const API_CACHE_NAME = `ma-france-api-${BUILD_HASH}`;
 const IMAGE_CACHE_NAME = `ma-france-images-${BUILD_HASH}`;
+const TILE_CACHE_NAME = `ma-france-tiles-${BUILD_HASH}`;
 
 // API routes that should be cached
 const API_ROUTES = [
@@ -29,6 +30,7 @@ self.addEventListener('activate', (event) => {
           // Delete old cache versions - keep only current build hash caches
           if (cacheName !== API_CACHE_NAME && 
               cacheName !== IMAGE_CACHE_NAME &&
+              cacheName !== TILE_CACHE_NAME &&
               (cacheName.startsWith('ma-france-') || cacheName.startsWith('workbox-'))) {
             console.log('Deleting old cache:', cacheName);
             return caches.delete(cacheName);
@@ -59,6 +61,10 @@ self.addEventListener('fetch', (event) => {
   // Handle francocides images with caching
   else if (url.pathname.startsWith('/images/francocides/')) {
     event.respondWith(handleImageRequest(request));
+  }
+  // Handle map tiles from CartoDB with caching
+  else if (url.hostname.includes('basemaps.cartocdn.com')) {
+    event.respondWith(handleTileRequest(request));
   }
   // Let all other requests (HTML, CSS, JS) go directly to network
 });
@@ -102,6 +108,48 @@ async function handleImageRequest(request) {
     console.log('Image request failed:', request.url);
     // Return a placeholder or let it fail gracefully
     throw error;
+  }
+}
+
+// Handle map tile requests - cache first with network fallback and size management
+async function handleTileRequest(request) {
+  try {
+    const cache = await caches.open(TILE_CACHE_NAME);
+    const cachedResponse = await cache.match(request);
+    
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+    
+    const response = await fetch(request);
+    if (response.ok) {
+      // Cache the tile
+      await cache.put(request, response.clone());
+      
+      // Manage cache size - keep only recent tiles (limit to ~100MB worth of tiles)
+      await manageTileCache(cache);
+    }
+    return response;
+  } catch (error) {
+    console.log('Tile request failed:', request.url);
+    throw error;
+  }
+}
+
+// Manage tile cache size to prevent unlimited growth
+async function manageTileCache(cache) {
+  try {
+    const keys = await cache.keys();
+    const maxTiles = 1000; // Approximate limit - each tile is ~10-50KB
+    
+    if (keys.length > maxTiles) {
+      // Remove oldest tiles (FIFO)
+      const tilesToDelete = keys.slice(0, keys.length - maxTiles);
+      await Promise.all(tilesToDelete.map(key => cache.delete(key)));
+      console.log(`Cleaned up ${tilesToDelete.length} old map tiles`);
+    }
+  } catch (error) {
+    console.log('Error managing tile cache:', error);
   }
 }
 
@@ -161,7 +209,11 @@ async function clearApiCache() {
     const apiCaches = allCaches.filter(name => name.startsWith('ma-france-api-'));
     await Promise.all(apiCaches.map(name => caches.delete(name)));
 
-    console.log('All API caches cleared');
+    // Clear tile cache as well
+    const tileCaches = allCaches.filter(name => name.startsWith('ma-france-tiles-'));
+    await Promise.all(tileCaches.map(name => caches.delete(name)));
+
+    console.log('All API and tile caches cleared');
   } catch (error) {
     console.error('Failed to clear API cache:', error);
   }
