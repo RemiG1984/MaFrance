@@ -73,6 +73,8 @@ router.get(
                 COG: row.COG,
                 departement: row.departement,
                 commune: commune_name,
+                latitude: row.latitude,
+                longitude: row.longitude,
             }));
 
             res.json({
