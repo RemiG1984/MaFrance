@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../config/db");
+const fs = require('fs');
+const path = require('path');
 const {
     validateDepartement,
     validateOptionalCOG,
@@ -97,23 +99,73 @@ router.get(
     },
 );
 
-module.exports = router;
+// Get QPV GeoJSON data
+router.get('/geojson', (req, res) => {
+    try {
+        const geoJsonPath = path.join(__dirname, '../setup/qpv2024.geojson');
+
+        if (!fs.existsSync(geoJsonPath)) {
+            return res.status(404).json({ error: 'QPV GeoJSON file not found' });
+        }
+
+        const geoJsonData = JSON.parse(fs.readFileSync(geoJsonPath, 'utf8'));
+        res.json({ geojson: geoJsonData });
+    } catch (error) {
+        console.error('Error reading QPV GeoJSON:', error);
+        res.status(500).json({ error: 'Error reading QPV data' });
+    }
+});
+
+// Get closest QPVs to coordinates
+router.get('/closest', (req, res) => {
+    const { lat, lng, limit = 5 } = req.query;
+
+    if (!lat || !lng) {
+        return res.status(400).json({ error: 'Latitude and longitude are required' });
+    }
+
+    const query = `
+        SELECT 
+            code_qp, lib_qp, insee_com, lib_com, insee_dep, lib_dep,
+            latitude, longitude,
+            ((latitude - ?) * (latitude - ?) + (longitude - ?) * (longitude - ?)) as distance_sq
+        FROM qpv_coordinates 
+        ORDER BY distance_sq ASC 
+        LIMIT ?
+    `;
+
+    db.all(query, [lat, lat, lng, lng, parseInt(limit)], (err, rows) => {
+        if (err) {
+            console.error('Error fetching closest QPVs:', err);
+            return res.status(500).json({ error: 'Database error' });
+        }
+
+        // Calculate actual distance and format results
+        const results = rows.map(row => ({
+            ...row,
+            distance: Math.sqrt(row.distance_sq) * 111.32 // Rough conversion to km
+        }));
+
+        res.json({ list: results });
+    });
+});
+
 // GET /api/qpv/nearby - Get QPVs near coordinates
 router.get("/nearby", (req, res, next) => {
     const { lat, lng, limit = "5" } = req.query;
-    
+
     if (!lat || !lng) {
         return res.status(400).json({ error: "Latitude and longitude are required" });
     }
-    
+
     const latitude = parseFloat(lat);
     const longitude = parseFloat(lng);
     const maxResults = Math.min(parseInt(limit), 20);
-    
+
     if (isNaN(latitude) || isNaN(longitude)) {
         return res.status(400).json({ error: "Invalid coordinates" });
     }
-    
+
     // Calculate distance using Haversine formula in SQL
     const sql = `
         SELECT 
@@ -139,10 +191,10 @@ router.get("/nearby", (req, res, next) => {
         ORDER BY distance_km ASC
         LIMIT ?
     `;
-    
+
     db.all(sql, [latitude, latitude, longitude, maxResults], (err, rows) => {
         if (err) return handleDbError(err, next);
-        
+
         const qpvs = rows.map(row => ({
             code_qp: row.code_qp,
             lib_qp: row.lib_qp,
@@ -159,7 +211,10 @@ router.get("/nearby", (req, res, next) => {
             taux_emploi: row.taux_d_emploi,
             taux_pauvrete: row.taux_pauvrete_60
         }));
-        
+
         res.json(qpvs);
     });
 });
+
+
+module.exports = router;
