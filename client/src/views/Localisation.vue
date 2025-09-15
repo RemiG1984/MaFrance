@@ -163,6 +163,7 @@
             ">🕌</div>
             <strong>{{ distanceInfo.mosque.distance }}</strong> de la mosquée la plus proche
             <div class="text-caption text-grey ml-6">
+              <strong>Nom:</strong> {{ distanceInfo.mosque.name }}<br>
               <strong>Adresse:</strong> {{ distanceInfo.mosque.address }}<br>
               <strong>Commune:</strong> {{ distanceInfo.mosque.commune }}
             </div>
@@ -201,6 +202,18 @@ import api from '../services/api.js'
 import iconRetinaUrl from 'leaflet/dist/images/marker-icon-2x.png'
 import iconUrl from 'leaflet/dist/images/marker-icon.png'
 import shadowUrl from 'leaflet/dist/images/marker-shadow.png'
+
+// Load Leaflet fullscreen plugin
+if (typeof window !== 'undefined' && !L.Control.Fullscreen) {
+  const script = document.createElement('script')
+  script.src = 'https://unpkg.com/leaflet.fullscreen@2.4.0/Control.FullScreen.min.js'
+  document.head.appendChild(script)
+  
+  const link = document.createElement('link')
+  link.rel = 'stylesheet'
+  link.href = 'https://unpkg.com/leaflet.fullscreen@2.4.0/Control.FullScreen.css'
+  document.head.appendChild(link)
+}
 
 delete L.Icon.Default.prototype._getIconUrl
 L.Icon.Default.mergeOptions({
@@ -420,6 +433,7 @@ export default {
 
             newDistanceInfo.mosque = {
               distance: formattedDistance,
+              name: closest.name || 'Mosquée',
               address: closest.address || 'N/A',
               commune: closest.commune || 'N/A'
             }
@@ -534,7 +548,7 @@ export default {
       } else if (location.type === 'qpv') {
         locationName = `QPV - ${location.lib_qp || location.code_qp || 'N/A'}`
       } else if (location.type === 'mosque') {
-        locationName = `Mosquée - ${location.address || 'N/A'}`
+        locationName = `${location.name || 'Mosquée'} - ${location.commune || 'N/A'}`
       }
 
       arrowLine.bindPopup(`
@@ -546,7 +560,8 @@ export default {
           ? `<br><strong>Commune:</strong> ${location.lib_com || 'N/A'}
              <br><strong>Département:</strong> ${location.lib_dep || 'N/A'}`
           : location.type === 'mosque'
-          ? `<br><strong>Adresse:</strong> ${location.address || 'N/A'}
+          ? `<br><strong>Nom:</strong> ${location.name || 'Mosquée'}
+             <br><strong>Adresse:</strong> ${location.address || 'N/A'}
              <br><strong>Commune:</strong> ${location.commune || 'N/A'}`
           : ''
         }
@@ -766,7 +781,7 @@ export default {
           icon: createMosqueIcon(currentZoom)
         })
         .bindPopup(`
-          <strong>Mosquée</strong><br>
+          <strong>${mosque.name || 'Mosquée'}</strong><br>
           <strong>Adresse:</strong> ${mosque.address || 'N/A'}<br>
           <strong>Commune:</strong> ${mosque.commune || 'N/A'}<br>
           <strong>Latitude:</strong> ${mosque.latitude.toFixed(4)}<br>
@@ -906,6 +921,7 @@ export default {
               !overseasDepartements.includes(mosque.departement)
             )
             .map(mosque => ({
+              name: mosque.name,
               address: mosque.address,
               commune: mosque.commune,
               latitude: parseFloat(mosque.latitude),
