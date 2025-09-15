@@ -21,7 +21,7 @@
             :loading="searchingAddress"
           />
         </v-col>
-        <v-col cols="12" md="6">
+        <v-col cols="12" md="6" class="d-flex align-center">
           <v-btn
             color="primary"
             variant="outlined"
@@ -44,67 +44,81 @@
 
           <!-- Map Overlay Controls -->
           <div class="map-overlay-controls">
-            <v-card class="pa-2" elevation="2">
-              <div class="text-subtitle-2 mb-2">Affichage des lieux</div>
-              <v-checkbox
-                v-model="showQpv"
-                label="Quartiers QPV"
-                density="compact"
-                hide-details
-                @change="onOverlayToggle"
-              >
-                <template v-slot:prepend>
-                  <v-icon color="red" size="16" style="margin-right: 4px;">mdi-map-marker</v-icon>
-                </template>
-              </v-checkbox>
-              <v-checkbox
-                v-model="showMigrantCenters"
-                label="Centres de migrants"
-                density="compact"
-                hide-details
-                @change="onOverlayToggle"
-              >
-                <template v-slot:prepend>
-                  <div style="
-                    background: #000000;
-                    color: white;
-                    border-radius: 50%;
-                    width: 16px;
-                    height: 16px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 10px;
-                    font-weight: bold;
-                    margin-right: 4px;
-                    border: 1px solid #333333;
-                  ">↑</div>
-                </template>
-              </v-checkbox>
-              <v-checkbox
-                v-model="showMosques"
-                label="Mosquées"
-                density="compact"
-                hide-details
-                @change="onOverlayToggle"
-              >
-                <template v-slot:prepend>
-                  <div style="
-                    background: #2e7d32;
-                    color: white;
-                    border-radius: 50%;
-                    width: 16px;
-                    height: 16px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 10px;
-                    font-weight: bold;
-                    margin-right: 4px;
-                    border: 1px solid #1b5e20;
-                  ">🕌</div>
-                </template>
-              </v-checkbox>
+            <v-card elevation="2">
+              <v-card-title class="pa-2 pb-0 d-flex align-center justify-space-between">
+                <span class="text-subtitle-2">Affichage des lieux</span>
+                <v-btn
+                  icon
+                  size="small"
+                  variant="text"
+                  @click="overlayExpanded = !overlayExpanded"
+                >
+                  <v-icon size="16">{{ overlayExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+                </v-btn>
+              </v-card-title>
+              <v-expand-transition>
+                <v-card-text v-show="overlayExpanded" class="pa-2 pt-0">
+                  <v-checkbox
+                    v-model="showQpv"
+                    label="Quartiers QPV"
+                    density="compact"
+                    hide-details
+                    @change="onOverlayToggle"
+                  >
+                    <template v-slot:prepend>
+                      <v-icon color="red" size="16" style="margin-right: 4px;">mdi-map-marker</v-icon>
+                    </template>
+                  </v-checkbox>
+                  <v-checkbox
+                    v-model="showMigrantCenters"
+                    label="Centres de migrants"
+                    density="compact"
+                    hide-details
+                    @change="onOverlayToggle"
+                  >
+                    <template v-slot:prepend>
+                      <div style="
+                        background: #000000;
+                        color: white;
+                        border-radius: 50%;
+                        width: 16px;
+                        height: 16px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 10px;
+                        font-weight: bold;
+                        margin-right: 4px;
+                        border: 1px solid #333333;
+                      ">↑</div>
+                    </template>
+                  </v-checkbox>
+                  <v-checkbox
+                    v-model="showMosques"
+                    label="Mosquées"
+                    density="compact"
+                    hide-details
+                    @change="onOverlayToggle"
+                  >
+                    <template v-slot:prepend>
+                      <div style="
+                        background: #2e7d32;
+                        color: white;
+                        border-radius: 50%;
+                        width: 16px;
+                        height: 16px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 10px;
+                        font-weight: bold;
+                        margin-right: 4px;
+                        border: 1px solid #1b5e20;
+                      ">🕌</div>
+                    </template>
+                  </v-checkbox>
+                </v-card-text>
+              </v-expand-transition>
             </v-card>
           </div>
         </v-card-text>
@@ -219,6 +233,7 @@ export default {
     const showQpv = ref(true)
     const showMosques = ref(false)
     const distanceInfo = ref(null)
+    const overlayExpanded = ref(true)
 
     // Map instance
     let map = null
@@ -274,12 +289,15 @@ export default {
         maxZoom: 19
       }).addTo(map)
 
-      // Add fullscreen control
-      if (L.Control.Fullscreen) {
-        map.addControl(new L.Control.Fullscreen({
-          position: 'topleft'
-        }))
-      }
+      // Add fullscreen control after a short delay to ensure plugin is loaded
+      setTimeout(() => {
+        if (L.Control && L.Control.Fullscreen) {
+          const fullscreenControl = new L.Control.Fullscreen({
+            position: 'topleft'
+          })
+          map.addControl(fullscreenControl)
+        }
+      }, 100)
 
       // Add click handler
       map.on('click', onMapClick)
@@ -1014,6 +1032,7 @@ export default {
       showQpv,
       showMosques,
       distanceInfo,
+      overlayExpanded,
       searchAddress,
       getCurrentLocation,
       onOverlayToggle
