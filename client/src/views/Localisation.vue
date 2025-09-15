@@ -799,19 +799,26 @@ export default {
       }
     }
 
-    // Load mosques CSV data
+    // Load mosques data
     const loadMosques = async () => {
       try {
         const response = await api.getMosques()
-        if (response && response.csvData) {
-          allMosques = response.csvData.map(row => ({
-            address: row.address,
-            commune: row.commune,
-            latitude: parseFloat(row.latitude),
-            longitude: parseFloat(row.longitude)
-          })).filter(mosque =>
-            !isNaN(mosque.latitude) && !isNaN(mosque.longitude)
-          )
+        if (response && response.list) {
+          // Filter to metropolitan France only (exclude overseas territories)
+          const overseasDepartements = ['971', '972', '973', '974', '976']
+          allMosques = response.list
+            .filter(mosque => 
+              mosque.latitude && mosque.longitude &&
+              !isNaN(parseFloat(mosque.latitude)) &&
+              !isNaN(parseFloat(mosque.longitude)) &&
+              !overseasDepartements.includes(mosque.departement)
+            )
+            .map(mosque => ({
+              address: mosque.address,
+              commune: mosque.commune,
+              latitude: parseFloat(mosque.latitude),
+              longitude: parseFloat(mosque.longitude)
+            }))
           console.log('Loaded mosques:', allMosques.length)
           if (showMosques.value) {
             showMosquesOnMap()
