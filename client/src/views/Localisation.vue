@@ -433,7 +433,7 @@ export default {
           font-size: ${Math.max(8, size - 4)}px;
           border: 2px solid #212121;
           box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        ">→</div>`,
+        ">↑</div>`,
         className: 'migration-icon',
         iconSize: [size, size],
         iconAnchor: [size/2, size/2]
