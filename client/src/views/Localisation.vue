@@ -531,6 +531,8 @@ export default {
             color: ${arrowColor};
             white-space: nowrap;
             box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            width: max-content;
+            text-align: center;
           ">${formattedDistance}</div>`,
           className: 'distance-label',
           iconSize: [0, 0],
