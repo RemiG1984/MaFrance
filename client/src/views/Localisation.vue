@@ -8,7 +8,7 @@
     <!-- Controls Section -->
     <div class="controls-section">
       <v-row class="align-center mb-4">
-        <v-col cols="12" md="6">
+        <v-col cols="12" md="6" class="d-flex align-center">
           <v-text-field
             v-model="addressInput"
             label="Rechercher une adresse"
