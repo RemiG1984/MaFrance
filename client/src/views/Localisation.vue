@@ -1100,7 +1100,7 @@ export default {
   position: absolute;
   top: 10px;
   right: 10px;
-  z-index: 1000;
+  z-index: 999;
   max-width: 200px;
 }
 
