@@ -74,47 +74,7 @@
       </div>
     </div>
 
-    <!-- Results Section -->
-    <div v-if="nearbyPlaces.length > 0" class="results-section">
-      <h3>Centres de migrants les plus proches</h3>
-      <div class="table-container">
-        <v-table>
-          <thead>
-            <tr>
-              <th>Distance</th>
-              <th>Type</th>
-              <th>Places</th>
-              <th>Gestionnaire</th>
-              <th>Département</th>
-              <th>Commune</th>
-              <th>Adresse</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(place, index) in nearbyPlaces" :key="index">
-              <td class="distance-cell">
-                <v-chip :color="getDistanceColor(place.distance)" size="small">
-                  {{ place.distance.toFixed(1) }} km
-                </v-chip>
-              </td>
-              <td>{{ place.type || 'N/A' }}</td>
-              <td>{{ place.places || 'N/A' }}</td>
-              <td>{{ place.gestionnaire || 'N/A' }}</td>
-              <td>{{ place.departement || 'N/A' }}</td>
-              <td>{{ place.commune || 'N/A' }}</td>
-              <td>{{ place.adresse || 'N/A' }}</td>
-            </tr>
-          </tbody>
-        </v-table>
-      </div>
-    </div>
-
-    <!-- No Results -->
-    <div v-else-if="searchPerformed && selectedLocation" class="no-results">
-      <v-alert type="warning">
-        Aucun centre de migrants trouvé dans la zone.
-      </v-alert>
-    </div>
+    
 
     <!-- Instructions -->
     <div v-if="!selectedLocation" class="instructions">
@@ -157,18 +117,17 @@ export default {
     const selectedLocation = ref(null)
     const searchingAddress = ref(false)
     const gettingLocation = ref(false)
-    const searchPerformed = ref(false)
-    const nearbyPlaces = ref([])
     const showMigrantCenters = ref(true)
     const showQpv = ref(false)
 
     // Map instance
     let map = null
     let selectedMarker = null
-    let nearbyMarkers = []
+    let arrowLayers = []
     let qpvLayer = null
     let migrantCentersLayer = null
     let allMigrantCenters = []
+    let allQpvs = []
 
     // Distance calculation (Haversine formula)
     const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -219,14 +178,15 @@ export default {
       setSelectedLocation(e.latlng.lat, e.latlng.lng)
     }
 
-    // Set selected location and find nearby places
+    // Set selected location and create arrows to closest locations
     const setSelectedLocation = async (lat, lng, address = null) => {
       selectedLocation.value = { lat, lng, address }
 
-      // Clear existing marker
+      // Clear existing marker and arrows
       if (selectedMarker) {
         map.removeLayer(selectedMarker)
       }
+      clearArrows()
 
       // Add new marker
       selectedMarker = L.marker([lat, lng])
@@ -237,46 +197,154 @@ export default {
       // Center map on location
       map.setView([lat, lng], Math.max(map.getZoom(), 10))
 
-      // Find nearby places
-      await findNearbyPlaces(lat, lng)
-      searchPerformed.value = true
+      // Create arrows to closest locations
+      await createArrowsToClosest(lat, lng)
     }
 
-    // Find nearby places (for the results table)
-    const findNearbyPlaces = async (lat, lng) => {
+    // Create arrows pointing to closest locations of each type
+    const createArrowsToClosest = async (lat, lng) => {
       try {
-        // Only find migrant centers for the results table
-        const response = await api.getMigrants({ limit: 1500 })
-        const places = response.list || []
-        console.log('Loaded migrant centers:', places.length)
+        const closestLocations = []
 
-        // Calculate distances and sort
-        const placesWithDistances = places
-          .filter(place => {
-            const hasCoords = place.latitude && place.longitude && 
-                            !isNaN(parseFloat(place.latitude)) && 
-                            !isNaN(parseFloat(place.longitude))
-            if (!hasCoords) {
-              console.log('Filtering out place without valid coordinates:', place)
-            }
-            return hasCoords
-          })
-          .map(place => ({
-            ...place,
-            latitude: parseFloat(place.latitude),
-            longitude: parseFloat(place.longitude),
-            distance: calculateDistance(lat, lng, parseFloat(place.latitude), parseFloat(place.longitude))
-          }))
-          .sort((a, b) => a.distance - b.distance)
-          .slice(0, 5) // Get 5 closest
+        // Find closest migrant center
+        if (allMigrantCenters.length > 0) {
+          const migrantCentersWithDistances = allMigrantCenters
+            .filter(center => center.latitude && center.longitude && 
+                            !isNaN(parseFloat(center.latitude)) && 
+                            !isNaN(parseFloat(center.longitude)))
+            .map(center => ({
+              ...center,
+              latitude: parseFloat(center.latitude),
+              longitude: parseFloat(center.longitude),
+              distance: calculateDistance(lat, lng, parseFloat(center.latitude), parseFloat(center.longitude)),
+              type: 'migrant'
+            }))
+            .sort((a, b) => a.distance - b.distance)
 
-        console.log('Places with distances:', placesWithDistances)
-        nearbyPlaces.value = placesWithDistances
-        showNearbyPlacesOnMap(placesWithDistances)
+          if (migrantCentersWithDistances.length > 0) {
+            closestLocations.push(migrantCentersWithDistances[0])
+          }
+        }
+
+        // Find closest QPV
+        if (allQpvs.length > 0) {
+          const qpvsWithDistances = allQpvs
+            .filter(qpv => qpv.latitude && qpv.longitude && 
+                          !isNaN(parseFloat(qpv.latitude)) && 
+                          !isNaN(parseFloat(qpv.longitude)))
+            .map(qpv => ({
+              ...qpv,
+              latitude: parseFloat(qpv.latitude),
+              longitude: parseFloat(qpv.longitude),
+              distance: calculateDistance(lat, lng, parseFloat(qpv.latitude), parseFloat(qpv.longitude)),
+              type: 'qpv'
+            }))
+            .sort((a, b) => a.distance - b.distance)
+
+          if (qpvsWithDistances.length > 0) {
+            closestLocations.push(qpvsWithDistances[0])
+          }
+        }
+
+        // Create arrows for each closest location
+        closestLocations.forEach(location => {
+          createArrowToLocation(lat, lng, location)
+        })
 
       } catch (error) {
-        console.error('Error finding nearby places:', error)
+        console.error('Error creating arrows to closest locations:', error)
       }
+    }
+
+    // Clear all arrow layers
+    const clearArrows = () => {
+      arrowLayers.forEach(layer => {
+        map.removeLayer(layer)
+      })
+      arrowLayers = []
+    }
+
+    // Create an arrow pointing from selected location to target location
+    const createArrowToLocation = (fromLat, fromLng, location) => {
+      const fromPoint = [fromLat, fromLng]
+      const toPoint = [location.latitude, location.longitude]
+      
+      // Create polyline arrow
+      const arrowLine = L.polyline([fromPoint, toPoint], {
+        color: location.type === 'migrant' ? '#424242' : '#ff0000',
+        weight: 3,
+        opacity: 0.8
+      }).addTo(map)
+
+      // Create arrow head using a marker
+      const angle = Math.atan2(location.longitude - fromLng, location.latitude - fromLat) * 180 / Math.PI
+      
+      const arrowHead = L.marker(toPoint, {
+        icon: L.divIcon({
+          html: `<div style="
+            width: 0; 
+            height: 0; 
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 20px solid ${location.type === 'migrant' ? '#424242' : '#ff0000'};
+            transform: rotate(${angle}deg);
+            transform-origin: center;
+          "></div>`,
+          className: 'arrow-head',
+          iconSize: [16, 20],
+          iconAnchor: [8, 20]
+        })
+      }).addTo(map)
+
+      // Format distance
+      const formattedDistance = location.distance < 1 
+        ? `${Math.round(location.distance * 1000)}m`
+        : `${location.distance.toFixed(1)}km`
+
+      // Create distance label
+      const midPoint = [
+        (fromLat + location.latitude) / 2,
+        (fromLng + location.longitude) / 2
+      ]
+      
+      const distanceLabel = L.marker(midPoint, {
+        icon: L.divIcon({
+          html: `<div style="
+            background: white;
+            padding: 2px 6px;
+            border: 1px solid ${location.type === 'migrant' ? '#424242' : '#ff0000'};
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            color: ${location.type === 'migrant' ? '#424242' : '#ff0000'};
+            white-space: nowrap;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+          ">${formattedDistance}</div>`,
+          className: 'distance-label',
+          iconSize: [0, 0],
+          iconAnchor: [0, 0]
+        })
+      }).addTo(map)
+
+      // Store layers for cleanup
+      arrowLayers.push(arrowLine, arrowHead, distanceLabel)
+
+      // Add popup to arrow line
+      const locationName = location.type === 'migrant' 
+        ? `Centre de migrants - ${location.commune || 'N/A'}`
+        : `QPV - ${location.lib_qp || location.code_qp || 'N/A'}`
+      
+      arrowLine.bindPopup(`
+        <strong>${locationName}</strong><br>
+        <strong>Distance:</strong> ${formattedDistance}
+        ${location.type === 'migrant' 
+          ? `<br><strong>Places:</strong> ${location.places || 'N/A'}
+             <br><strong>Type:</strong> ${location.type || 'N/A'}
+             <br><strong>Gestionnaire:</strong> ${location.gestionnaire || 'N/A'}`
+          : `<br><strong>Commune:</strong> ${location.lib_com || 'N/A'}
+             <br><strong>Département:</strong> ${location.lib_dep || 'N/A'}`
+        }
+      `)
     }
 
     // Handle overlay toggle changes
@@ -298,44 +366,7 @@ export default {
       }
     }
 
-    // Show nearby places on map (for the closest results)
-    const showNearbyPlacesOnMap = (places) => {
-      // Clear existing markers
-      nearbyMarkers.forEach(marker => map.removeLayer(marker))
-      nearbyMarkers = []
-
-      // Add markers for nearby places
-      places.forEach((place, index) => {
-        const marker = L.marker([place.latitude, place.longitude], {
-          icon: L.divIcon({
-            html: `<div style="background: ${getDistanceColor(place.distance)}; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">${index + 1}</div>`,
-            className: 'custom-div-icon',
-            iconSize: [30, 30],
-            iconAnchor: [15, 15]
-          })
-        })
-        .addTo(map)
-        .bindPopup(`
-          <strong>${place.commune || 'N/A'}</strong><br>
-          ${place.adresse || 'N/A'}<br>
-          <strong>Distance:</strong> ${place.distance.toFixed(1)} km<br>
-          <strong>Places:</strong> ${place.places || 'N/A'}<br>
-          <strong>Type:</strong> ${place.type || 'N/A'}<br>
-          <strong>Gestionnaire:</strong> ${place.gestionnaire || 'N/A'}
-        `)
-
-        nearbyMarkers.push(marker)
-      })
-
-      // Adjust map view to show all markers
-      if (places.length > 0 && selectedLocation.value) {
-        const group = new L.featureGroup([
-          selectedMarker,
-          ...nearbyMarkers
-        ])
-        map.fitBounds(group.getBounds().pad(0.1))
-      }
-    }
+    
 
     // Search address using geocoding
     const searchAddress = async () => {
@@ -488,6 +519,21 @@ export default {
       try {
         const response = await api.getQpvs()
         if (response && response.geojson && response.geojson.features) {
+          // Store QPV data with calculated centroids for arrow creation
+          allQpvs = response.geojson.features.map(feature => {
+            if (!feature || !feature.properties) return null;
+            
+            // Calculate centroid from geometry
+            const centroid = calculateGeometryCentroid(feature.geometry)
+            if (!centroid) return null;
+            
+            return {
+              ...feature.properties,
+              latitude: centroid.lat,
+              longitude: centroid.lng
+            }
+          }).filter(qpv => qpv !== null)
+          
           qpvLayer = L.geoJSON(response.geojson, {
             style: () => ({
               fillColor: '#ff0000',
@@ -541,6 +587,40 @@ export default {
       }
     }
 
+    // Calculate centroid from GeoJSON geometry
+    const calculateGeometryCentroid = (geometry) => {
+      try {
+        if (geometry.type === 'MultiPolygon') {
+          // For MultiPolygon, use the first polygon's first ring
+          const coordinates = geometry.coordinates[0][0]
+          return getPolygonCentroid(coordinates)
+        } else if (geometry.type === 'Polygon') {
+          const coordinates = geometry.coordinates[0]
+          return getPolygonCentroid(coordinates)
+        }
+        return null
+      } catch (error) {
+        console.error('Error calculating centroid:', error)
+        return null
+      }
+    }
+
+    // Get polygon centroid
+    const getPolygonCentroid = (coordinates) => {
+      let x = 0, y = 0
+      const len = coordinates.length
+      
+      coordinates.forEach(coord => {
+        x += coord[0] // longitude
+        y += coord[1] // latitude
+      })
+      
+      return {
+        lng: x / len,
+        lat: y / len
+      }
+    }
+
     
 
     // Lifecycle
@@ -559,14 +639,11 @@ export default {
       selectedLocation,
       searchingAddress,
       gettingLocation,
-      searchPerformed,
-      nearbyPlaces,
       showMigrantCenters,
       showQpv,
       searchAddress,
       getCurrentLocation,
-      onOverlayToggle,
-      getDistanceColor
+      onOverlayToggle
     }
   }
 }
@@ -652,6 +729,16 @@ export default {
 }
 
 :deep(.migration-icon) {
+  border: none;
+  background: transparent;
+}
+
+:deep(.arrow-head) {
+  border: none;
+  background: transparent;
+}
+
+:deep(.distance-label) {
   border: none;
   background: transparent;
 }
