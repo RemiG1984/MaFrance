@@ -2,7 +2,7 @@
   <div class="localisation-container">
     <!-- Header Section -->
     <div class="header-section">
-      <h1>Localisation des centres proches</h1>
+      <h1>Localisation des QPV, centres de migrants et mosquées</h1>
     </div>
 
     <!-- Controls Section -->
