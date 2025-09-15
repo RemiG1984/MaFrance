@@ -323,11 +323,26 @@ export default {
       }
       clearArrows()
 
-      // Add new marker
+      // Add new marker with click handler
+      const popupContent = `
+        <div>
+          <strong>${address || `Position: ${lat.toFixed(4)}, ${lng.toFixed(4)}`}</strong><br>
+          <button onclick="window.removePositionMarker()" style="
+            margin-top: 8px;
+            padding: 4px 8px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+          ">Supprimer la position</button>
+        </div>
+      `
+      
       selectedMarker = L.marker([lat, lng])
         .addTo(map)
-        .bindPopup(address || `Position: ${lat.toFixed(4)}, ${lng.toFixed(4)}`)
-        .openPopup()
+        .bindPopup(popupContent)
 
       // Center map on location
       map.setView([lat, lng], Math.max(map.getZoom(), 10))
@@ -977,12 +992,29 @@ export default {
 
 
 
+    // Function to remove position marker and arrows
+    const removePositionMarker = () => {
+      if (selectedMarker) {
+        map.removeLayer(selectedMarker)
+        selectedMarker = null
+      }
+      clearArrows()
+      selectedLocation.value = null
+      distanceInfo.value = null
+    }
+
+    // Make removePositionMarker globally available for popup button
+    window.removePositionMarker = removePositionMarker
+
     // Lifecycle
     onMounted(() => {
       initMap()
     })
 
     onUnmounted(() => {
+      // Clean up global function
+      delete window.removePositionMarker
+      
       if (map) {
         map.remove()
       }
