@@ -412,8 +412,8 @@ export default {
       }
     }
 
-    // Create mosque/islamic symbol icon based on zoom level
-    const createMosqueIcon = (zoom) => {
+    // Create migration symbol icon based on zoom level
+    const createMigrationIcon = (zoom) => {
       let size = 8
       if (zoom >= 10) size = 16
       if (zoom >= 12) size = 20
@@ -421,7 +421,7 @@ export default {
       
       return L.divIcon({
         html: `<div style="
-          background: #2e7d32; 
+          background: #424242; 
           color: white; 
           border-radius: 50%; 
           width: ${size}px; 
@@ -431,10 +431,10 @@ export default {
           justify-content: center; 
           font-weight: bold; 
           font-size: ${Math.max(8, size - 4)}px;
-          border: 2px solid #1b5e20;
+          border: 2px solid #212121;
           box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        ">☪</div>`,
-        className: 'mosque-icon',
+        ">→</div>`,
+        className: 'migration-icon',
         iconSize: [size, size],
         iconAnchor: [size/2, size/2]
       })
@@ -453,7 +453,7 @@ export default {
       
       allMigrantCenters.forEach(center => {
         const marker = L.marker([parseFloat(center.latitude), parseFloat(center.longitude)], {
-          icon: createMosqueIcon(currentZoom)
+          icon: createMigrationIcon(currentZoom)
         })
         .bindPopup(`
           <strong>Centre de migrants</strong><br>
@@ -478,7 +478,7 @@ export default {
       const currentZoom = map.getZoom()
       migrantCentersLayer.eachLayer(layer => {
         if (layer.setIcon) {
-          layer.setIcon(createMosqueIcon(currentZoom))
+          layer.setIcon(createMigrationIcon(currentZoom))
         }
       })
     }
@@ -647,6 +647,11 @@ export default {
 
 /* Custom marker styles */
 :deep(.custom-div-icon) {
+  border: none;
+  background: transparent;
+}
+
+:deep(.migration-icon) {
   border: none;
   background: transparent;
 }
