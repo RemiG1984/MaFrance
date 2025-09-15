@@ -55,11 +55,11 @@ function importMosques(db, callback) {
                     }
 
                     results.push({
-                        name: row.name || 'Mosquée',
-                        address: row.address || row.adresse || '',
+                        name: row.nom || 'Mosquée',
+                        address: row.adresse || '',
                         latitude: latitude,
                         longitude: longitude,
-                        commune: row.commune || row.ville || '',
+                        commune: row.commune || '',
                         departement: departement,
                         cog: row.cog || row.COG || ''
                     });

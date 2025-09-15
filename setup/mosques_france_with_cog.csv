@@ -1,4 +1,4 @@
-departement,commune,code postal,adresse,name,COG,validation,latitude,longitude,confidence
+departement,commune,code postal,adresse,nom,COG,validation,latitude,longitude,confidence
 78,Achères,78260,allée des Piverts - 78260 ACHERES,Mosquée D'Achères,78005,exact_match,48.95918023173,2.06192305244334,1
 34,Agde,34300,8 rue jean bedos - 34300 AGDE,Mosquée Association recherche et culture,34003,exact_match,43.3162106,3.4677992,1
 34,Agde,34300,"48, rue Sadi Carnot - 34300 AGDE",Mosquée,34003,exact_match,43.309093,3.468982,1
