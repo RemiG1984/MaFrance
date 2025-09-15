@@ -52,21 +52,33 @@
                 density="compact"
                 hide-details
                 @change="onOverlayToggle"
-              ></v-checkbox>
+              >
+                <template v-slot:prepend>
+                  <span style="color: #424242; font-size: 16px; margin-right: 4px;">↑</span>
+                </template>
+              </v-checkbox>
               <v-checkbox
                 v-model="showQpv"
                 label="Quartiers Prioritaires (QPV)"
                 density="compact"
                 hide-details
                 @change="onOverlayToggle"
-              ></v-checkbox>
+              >
+                <template v-slot:prepend>
+                  <v-icon color="red" size="16" style="margin-right: 4px;">mdi-map-marker</v-icon>
+                </template>
+              </v-checkbox>
               <v-checkbox
                 v-model="showMosques"
                 label="Mosquées"
                 density="compact"
                 hide-details
                 @change="onOverlayToggle"
-              ></v-checkbox>
+              >
+                <template v-slot:prepend>
+                  <span style="color: #2e7d32; font-size: 16px; margin-right: 4px;">🕌</span>
+                </template>
+              </v-checkbox>
             </v-card>
           </div>
         </v-card-text>
@@ -85,19 +97,31 @@
         <v-card class="pa-4">
           <h4 class="mb-3">Votre position est à:</h4>
           <div v-if="distanceInfo.migrantCenter">
-            <v-icon color="grey-darken-2" class="mr-2">mdi-arrow-up</v-icon>
+            <span style="color: #424242; font-size: 18px; margin-right: 8px;">↑</span>
             <strong>{{ distanceInfo.migrantCenter.distance }}</strong> du centre de migrants le plus proche
-            <div class="text-caption text-grey ml-6">{{ distanceInfo.migrantCenter.name }}</div>
+            <div class="text-caption text-grey ml-6">
+              <strong>Type:</strong> {{ distanceInfo.migrantCenter.type }}<br>
+              <strong>Places:</strong> {{ distanceInfo.migrantCenter.places }}<br>
+              <strong>Gestionnaire:</strong> {{ distanceInfo.migrantCenter.gestionnaire }}<br>
+              <strong>Adresse:</strong> {{ distanceInfo.migrantCenter.address }}<br>
+              <strong>Commune:</strong> {{ distanceInfo.migrantCenter.commune }}
+            </div>
           </div>
           <div v-if="distanceInfo.qpv" class="mt-2">
             <v-icon color="red" class="mr-2">mdi-map-marker</v-icon>
             <strong>{{ distanceInfo.qpv.distance }}</strong> du QPV le plus proche
-            <div class="text-caption text-grey ml-6">{{ distanceInfo.qpv.name }}</div>
+            <div class="text-caption text-grey ml-6">
+              <strong>QPV:</strong> <a :href="distanceInfo.qpv.link" target="_blank">{{ distanceInfo.qpv.name }}</a><br>
+              <strong>Commune:</strong> {{ distanceInfo.qpv.commune }}
+            </div>
           </div>
           <div v-if="distanceInfo.mosque" class="mt-2">
-            <v-icon color="blue" class="mr-2">mdi-mosque</v-icon>
+            <span style="color: #2e7d32; font-size: 18px; margin-right: 8px;">🕌</span>
             <strong>{{ distanceInfo.mosque.distance }}</strong> de la mosquée la plus proche
-            <div class="text-caption text-grey ml-6">{{ distanceInfo.mosque.name }}</div>
+            <div class="text-caption text-grey ml-6">
+              <strong>Adresse:</strong> {{ distanceInfo.mosque.address }}<br>
+              <strong>Commune:</strong> {{ distanceInfo.mosque.commune }}
+            </div>
           </div>
           <div v-if="!distanceInfo.migrantCenter && !distanceInfo.qpv && !distanceInfo.mosque" class="text-grey">
             Aucune donnée disponible pour cette position
@@ -279,7 +303,11 @@ export default {
 
             newDistanceInfo.migrantCenter = {
               distance: formattedDistance,
-              name: `${closest.commune || 'N/A'} - ${closest.gestionnaire || 'N/A'}`
+              type: closest.type || 'N/A',
+              places: closest.places || 'N/A',
+              gestionnaire: closest.gestionnaire || 'N/A',
+              address: closest.adresse || 'N/A',
+              commune: closest.commune || 'N/A'
             }
           }
         }
@@ -309,7 +337,9 @@ export default {
 
             newDistanceInfo.qpv = {
               distance: formattedDistance,
-              name: `${closest.lib_qp || closest.code_qp || 'N/A'} - ${closest.lib_com || 'N/A'}`
+              name: closest.lib_qp || closest.code_qp || 'N/A',
+              link: `https://sig.ville.gouv.fr/territoire/${closest.code_qp}`,
+              commune: closest.lib_com || 'N/A'
             }
           }
         }
@@ -339,7 +369,8 @@ export default {
 
             newDistanceInfo.mosque = {
               distance: formattedDistance,
-              name: `${closest.address || 'N/A'} - ${closest.commune || 'N/A'}`
+              address: closest.address || 'N/A',
+              commune: closest.commune || 'N/A'
             }
           }
         }
@@ -373,7 +404,7 @@ export default {
       // Determine arrow color based on location type
       let arrowColor = '#424242' // Default for migrant centers
       if (location.type === 'qpv') arrowColor = '#ff0000'
-      if (location.type === 'mosque') arrowColor = '#0000ff'
+      if (location.type === 'mosque') arrowColor = '#2e7d32'
 
       // Create polyline arrow
       const arrowLine = L.polyline([fromPoint, toPoint], {
@@ -637,7 +668,7 @@ export default {
 
       return L.divIcon({
         html: `<div style="
-          background: #0000ff;
+          background: #2e7d32;
           color: white;
           border-radius: 50%;
           width: ${size}px;
@@ -647,7 +678,7 @@ export default {
           justify-content: center;
           font-weight: bold;
           font-size: ${Math.max(10, size - 6)}px;
-          border: 2px solid #000088;
+          border: 2px solid #1b5e20;
           box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         ">🕌</div>`,
         className: 'mosque-icon',
