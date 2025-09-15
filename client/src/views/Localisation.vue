@@ -48,7 +48,7 @@
               <div class="text-subtitle-2 mb-2">Affichage des lieux</div>
               <v-checkbox
                 v-model="showQpv"
-                label="Quartiers Prioritaires (QPV)"
+                label="Quartiers QPV"
                 density="compact"
                 hide-details
                 @change="onOverlayToggle"
@@ -163,7 +163,7 @@
             ">🕌</div>
             <strong>{{ distanceInfo.mosque.distance }}</strong> de la mosquée la plus proche
             <div class="text-caption text-grey ml-6">
-              <strong>Nom:</strong> {{ distanceInfo.mosque.name }}<br>
+              {{ distanceInfo.mosque.name }}<br>
               <strong>Adresse:</strong> {{ distanceInfo.mosque.address }}<br>
               <strong>Commune:</strong> {{ distanceInfo.mosque.commune }}
             </div>
@@ -174,21 +174,6 @@
         </v-card>
       </div>
 
-
-
-      <!-- Instructions -->
-      <div v-if="!selectedLocation" class="instructions">
-        <v-card class="text-center pa-6">
-          <v-icon size="64" color="grey-lighten-1">mdi-map-marker-question</v-icon>
-          <h3 class="text-grey-darken-1 mt-4">Comment utiliser cette page</h3>
-          <p class="text-grey">
-            1. Saisissez une adresse dans le champ de recherche<br>
-            2. Ou utilisez le bouton "Ma position" pour vous géolocaliser<br>
-            3. Ou cliquez directement sur la carte pour choisir un point<br>
-            4. Les 5 lieux les plus proches s'afficheront automatiquement
-          </p>
-        </v-card>
-      </div>
     </div>
   </div>
 </template>
@@ -284,7 +269,7 @@ export default {
 
       // Add tile layer - using CartoDB for consistency and caching
       L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a>',
+        attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a> | <a href="https://ouvamafrance.replit.app">https://ouvamafrance.replit.app</a>',
         subdomains: 'abcd',
         maxZoom: 19
       }).addTo(map)
