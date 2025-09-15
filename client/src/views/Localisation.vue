@@ -483,9 +483,7 @@ export default {
 
       // Handle mosque layer
       if (showMosques.value) {
-        if (mosqueLayer && !map.hasLayer(mosqueLayer)) {
-          mosqueLayer.addTo(map)
-        }
+        showMosquesOnMap()
       } else if (mosqueLayer && map.hasLayer(mosqueLayer)) {
         map.removeLayer(mosqueLayer)
       }
