@@ -132,9 +132,7 @@
             ">↑</div>
             <strong>{{ distanceInfo.migrantCenter.distance }}</strong> du centre de migrants le plus proche
             <div class="text-caption text-grey ml-6">
-              <strong>Type:</strong> {{ distanceInfo.migrantCenter.type }}<br>
-              <strong>Places:</strong> {{ distanceInfo.migrantCenter.places }}<br>
-              <strong>Gestionnaire:</strong> {{ distanceInfo.migrantCenter.gestionnaire }}<br>
+              <strong>Type:</strong> {{ distanceInfo.migrantCenter.type }} | <strong>Places:</strong> {{ distanceInfo.migrantCenter.places }} | <strong>Gestionnaire:</strong> {{ distanceInfo.migrantCenter.gestionnaire }}<br>
               <strong>Adresse:</strong> {{ distanceInfo.migrantCenter.address }}<br>
               <strong>Commune:</strong> {{ distanceInfo.migrantCenter.commune }}
             </div>
@@ -278,6 +276,13 @@ export default {
         maxZoom: 19
       }).addTo(map)
 
+      // Add fullscreen control
+      if (L.Control.Fullscreen) {
+        map.addControl(new L.Control.Fullscreen({
+          position: 'topleft'
+        }))
+      }
+
       // Add click handler
       map.on('click', onMapClick)
 
@@ -349,7 +354,7 @@ export default {
 
             newDistanceInfo.migrantCenter = {
               distance: formattedDistance,
-              type: closest.type || 'N/A',
+              type: closest.type_centre || closest.type || 'N/A',
               places: closest.places || 'N/A',
               gestionnaire: closest.gestionnaire || 'N/A',
               address: closest.adresse || 'N/A',
@@ -536,9 +541,7 @@ export default {
         <strong>${locationName}</strong><br>
         <strong>Distance:</strong> ${formattedDistance}
         ${location.type === 'migrant'
-          ? `<br><strong>Places:</strong> ${location.places || 'N/A'}
-             <br><strong>Type:</strong> ${location.type || 'N/A'}
-             <br><strong>Gestionnaire:</strong> ${location.gestionnaire || 'N/A'}`
+          ? `<br><strong>Type:</strong> ${location.type_centre || location.type || 'N/A'} | <strong>Places:</strong> ${location.places || 'N/A'} | <strong>Gestionnaire:</strong> ${location.gestionnaire || 'N/A'}`
           : location.type === 'qpv'
           ? `<br><strong>Commune:</strong> ${location.lib_com || 'N/A'}
              <br><strong>Département:</strong> ${location.lib_dep || 'N/A'}`
@@ -707,9 +710,7 @@ export default {
         })
         .bindPopup(`
           <strong>Centre de migrants</strong><br>
-          <strong>Type:</strong> ${center.type || 'N/A'}<br>
-          <strong>Places:</strong> ${center.places || 'N/A'}<br>
-          <strong>Gestionnaire:</strong> ${center.gestionnaire || 'N/A'}<br>
+          <strong>Type:</strong> ${center.type_centre || center.type || 'N/A'} | <strong>Places:</strong> ${center.places || 'N/A'} | <strong>Gestionnaire:</strong> ${center.gestionnaire || 'N/A'}<br>
           <strong>Commune:</strong> ${center.commune || 'N/A'}<br>
           <strong>Département:</strong> ${center.departement || 'N/A'}<br>
           <strong>Adresse:</strong> ${center.adresse || 'N/A'}
