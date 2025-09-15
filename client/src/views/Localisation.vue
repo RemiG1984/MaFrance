@@ -285,15 +285,12 @@ export default {
         maxZoom: 19
       }).addTo(map)
 
-      // Add fullscreen control after a short delay to ensure plugin is loaded
-      setTimeout(() => {
-        if (L.Control && L.Control.Fullscreen) {
-          const fullscreenControl = new L.Control.Fullscreen({
-            position: 'topleft'
-          })
-          map.addControl(fullscreenControl)
-        }
-      }, 100)
+      // Add fullscreen control
+      if (L.Control.Fullscreen) {
+        map.addControl(new L.Control.Fullscreen({
+          position: 'topleft'
+        }))
+      }
 
       // Add click handler
       map.on('click', onMapClick)
