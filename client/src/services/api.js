@@ -405,6 +405,23 @@ const api = {
         );
     },
 
+    // Mosque data
+    getMosques: (params = {}) => {
+        const queryString = buildQueryString(params);
+        const url = `/mosques`;
+        return apiService.request(
+            queryString ? `${url}${queryString}` : url,
+            {},
+            !params.cursor,
+        );
+    },
+
+    getClosestMosques: (lat, lng, limit = 5) => {
+        const params = { lat, lng, limit };
+        const queryString = buildQueryString(params);
+        return apiService.request(`/mosques/closest${queryString}`);
+    },
+
     // QPV data
     getQpv: (params = {}) => {
         const queryString = buildQueryString(params);
