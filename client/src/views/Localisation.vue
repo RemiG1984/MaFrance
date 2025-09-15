@@ -45,16 +45,12 @@
           <!-- Map Overlay Controls -->
           <div class="map-overlay-controls">
             <v-card elevation="2">
-              <v-card-title class="pa-2 pb-0 d-flex align-center justify-space-between">
+              <v-card-title 
+                class="pa-2 pb-0 d-flex align-center justify-space-between cursor-pointer"
+                @click="overlayExpanded = !overlayExpanded"
+              >
                 <span class="text-subtitle-2">Affichage des lieux</span>
-                <v-btn
-                  icon
-                  size="small"
-                  variant="text"
-                  @click="overlayExpanded = !overlayExpanded"
-                >
-                  <v-icon size="16">{{ overlayExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-                </v-btn>
+                <v-icon size="16">{{ overlayExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
               </v-card-title>
               <v-expand-transition>
                 <v-card-text v-show="overlayExpanded" class="pa-2 pt-0">
