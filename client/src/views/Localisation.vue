@@ -195,6 +195,9 @@ import 'leaflet.fullscreen'
 import 'leaflet.fullscreen/Control.FullScreen.css'
 import api from '../services/api.js'
 
+// Shared constant for overseas departments
+const OVERSEAS_DEPARTMENTS = ['971', '972', '973', '974', '976']
+
 // Fix for default Leaflet icons
 import iconRetinaUrl from 'leaflet/dist/images/marker-icon-2x.png'
 import iconUrl from 'leaflet/dist/images/marker-icon.png'
@@ -244,12 +247,7 @@ export default {
       return R * c
     }
 
-    // Color coding for distances
-    const getDistanceColor = (distance) => {
-      if (distance <= 10) return 'red'
-      if (distance <= 30) return 'orange'
-      return 'grey'
-    }
+    
 
     // Initialize map
     const initMap = async () => {
@@ -259,13 +257,13 @@ export default {
       map = L.map('localisationMap').setView([46.603354, 1.888334], 6)
 
       // Set map bounds to metropolitan France (including Corsica)
-      const metropolitanFranceBounds = L.latLngBounds(
+      const bounds = L.latLngBounds(
         [41.0, -5.5], // Southwest corner (south of Corsica, west of Brittany)
         [51.5, 10.0]  // Northeast corner (north of Nord, east of Alsace)
       )
-      map.setMaxBounds(metropolitanFranceBounds)
+      map.setMaxBounds(bounds)
       map.on('drag', function() {
-        map.panInsideBounds(metropolitanFranceBounds, { animate: false })
+        map.panInsideBounds(bounds, { animate: false })
       })
 
       // Add tile layer - using CartoDB for consistency and caching
@@ -664,12 +662,11 @@ export default {
         const response = await api.getMigrants({ limit: 1500 })
         if (response && response.list) {
           // Filter to metropolitan France only (exclude overseas territories)
-          const overseasDepartements = ['971', '972', '973', '974', '976']
           allMigrantCenters = response.list.filter(center =>
             center.latitude && center.longitude &&
             !isNaN(parseFloat(center.latitude)) &&
             !isNaN(parseFloat(center.longitude)) &&
-            !overseasDepartements.includes(center.departement)
+            !OVERSEAS_DEPARTMENTS.includes(center.departement)
           )
           console.log('Loaded migrant centers:', allMigrantCenters.length)
           if (showMigrantCenters.value) {
@@ -833,15 +830,12 @@ export default {
       try {
         const response = await api.getQpvs()
         if (response && response.geojson && response.geojson.features) {
-          // Filter to metropolitan France only (exclude overseas territories)
-          const overseasDepartements = ['971', '972', '973', '974', '976']
-
           // Store QPV data with calculated centroids for arrow creation
           allQpvs = response.geojson.features.map(feature => {
             if (!feature || !feature.properties) return null;
 
             // Skip overseas territories
-            if (overseasDepartements.includes(feature.properties.insee_dep)) return null;
+            if (OVERSEAS_DEPARTMENTS.includes(feature.properties.insee_dep)) return null;
 
             // Calculate centroid from geometry
             const centroid = calculateGeometryCentroid(feature.geometry)
@@ -893,9 +887,8 @@ export default {
             },
             filter: (feature) => {
               // Only include metropolitan France features
-              const overseasDepartements = ['971', '972', '973', '974', '976']
               return feature && feature.geometry && feature.properties &&
-                     !overseasDepartements.includes(feature.properties.insee_dep);
+                     !OVERSEAS_DEPARTMENTS.includes(feature.properties.insee_dep);
             }
           })
 
@@ -915,13 +908,12 @@ export default {
         const response = await api.getMosques()
         if (response && response.list) {
           // Filter to metropolitan France only (exclude overseas territories)
-          const overseasDepartements = ['971', '972', '973', '974', '976']
           allMosques = response.list
             .filter(mosque => 
               mosque.latitude && mosque.longitude &&
               !isNaN(parseFloat(mosque.latitude)) &&
               !isNaN(parseFloat(mosque.longitude)) &&
-              !overseasDepartements.includes(mosque.departement)
+              !OVERSEAS_DEPARTMENTS.includes(mosque.departement)
             )
             .map(mosque => ({
               name: mosque.name,
