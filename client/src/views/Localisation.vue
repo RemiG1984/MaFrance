@@ -191,24 +191,14 @@
 <script>
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import L from 'leaflet'
+import 'leaflet.fullscreen'
+import 'leaflet.fullscreen/Control.FullScreen.css'
 import api from '../services/api.js'
 
 // Fix for default Leaflet icons
 import iconRetinaUrl from 'leaflet/dist/images/marker-icon-2x.png'
 import iconUrl from 'leaflet/dist/images/marker-icon.png'
 import shadowUrl from 'leaflet/dist/images/marker-shadow.png'
-
-// Load Leaflet fullscreen plugin
-if (typeof window !== 'undefined' && !L.Control.Fullscreen) {
-  const script = document.createElement('script')
-  script.src = 'https://unpkg.com/leaflet.fullscreen@2.4.0/Control.FullScreen.min.js'
-  document.head.appendChild(script)
-  
-  const link = document.createElement('link')
-  link.rel = 'stylesheet'
-  link.href = 'https://unpkg.com/leaflet.fullscreen@2.4.0/Control.FullScreen.css'
-  document.head.appendChild(link)
-}
 
 delete L.Icon.Default.prototype._getIconUrl
 L.Icon.Default.mergeOptions({
@@ -286,11 +276,9 @@ export default {
       }).addTo(map)
 
       // Add fullscreen control
-      if (L.Control.Fullscreen) {
-        map.addControl(new L.Control.Fullscreen({
-          position: 'topleft'
-        }))
-      }
+      map.addControl(new L.Control.Fullscreen({
+        position: 'topleft'
+      }))
 
       // Add click handler
       map.on('click', onMapClick)
