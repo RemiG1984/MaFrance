@@ -72,6 +72,26 @@
           {{ selectedLocation.address || `${selectedLocation.lat.toFixed(4)}, ${selectedLocation.lng.toFixed(4)}` }}
         </v-alert>
       </div>
+
+      <!-- Distance Information -->
+      <div v-if="selectedLocation && distanceInfo" class="distance-info mb-4">
+        <v-card class="pa-4">
+          <h4 class="mb-3">Votre position est à:</h4>
+          <div v-if="distanceInfo.migrantCenter">
+            <v-icon color="grey-darken-2" class="mr-2">mdi-arrow-up</v-icon>
+            <strong>{{ distanceInfo.migrantCenter.distance }}</strong> du centre de migrants le plus proche
+            <div class="text-caption text-grey ml-6">{{ distanceInfo.migrantCenter.name }}</div>
+          </div>
+          <div v-if="distanceInfo.qpv" class="mt-2">
+            <v-icon color="red" class="mr-2">mdi-map-marker</v-icon>
+            <strong>{{ distanceInfo.qpv.distance }}</strong> du QPV le plus proche
+            <div class="text-caption text-grey ml-6">{{ distanceInfo.qpv.name }}</div>
+          </div>
+          <div v-if="!distanceInfo.migrantCenter && !distanceInfo.qpv" class="text-grey">
+            Aucune donnée disponible pour cette position
+          </div>
+        </v-card>
+      </div>
     </div>
 
     
@@ -119,6 +139,7 @@ export default {
     const gettingLocation = ref(false)
     const showMigrantCenters = ref(true)
     const showQpv = ref(false)
+    const distanceInfo = ref(null)
 
     // Map instance
     let map = null
@@ -154,6 +175,16 @@ export default {
 
       // Initialize map centered on France
       map = L.map('localisationMap').setView([46.603354, 1.888334], 6)
+
+      // Set map bounds to metropolitan France (including Corsica)
+      const metropolitanFranceBounds = L.latLngBounds(
+        [41.0, -5.5], // Southwest corner (south of Corsica, west of Brittany)
+        [51.5, 10.0]  // Northeast corner (north of Nord, east of Alsace)
+      )
+      map.setMaxBounds(metropolitanFranceBounds)
+      map.on('drag', function() {
+        map.panInsideBounds(metropolitanFranceBounds, { animate: false })
+      })
 
       // Add tile layer - using CartoDB for consistency and caching
       L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
@@ -197,7 +228,7 @@ export default {
       // Center map on location
       map.setView([lat, lng], Math.max(map.getZoom(), 10))
 
-      // Create arrows to closest locations
+      // Create arrows to closest locations and calculate distance info
       await createArrowsToClosest(lat, lng)
     }
 
@@ -205,6 +236,7 @@ export default {
     const createArrowsToClosest = async (lat, lng) => {
       try {
         const closestLocations = []
+        const newDistanceInfo = {}
 
         // Find closest migrant center
         if (allMigrantCenters.length > 0) {
@@ -222,7 +254,17 @@ export default {
             .sort((a, b) => a.distance - b.distance)
 
           if (migrantCentersWithDistances.length > 0) {
-            closestLocations.push(migrantCentersWithDistances[0])
+            const closest = migrantCentersWithDistances[0]
+            closestLocations.push(closest)
+            
+            const formattedDistance = closest.distance < 1 
+              ? `${Math.round(closest.distance * 1000)}m`
+              : `${closest.distance.toFixed(1)}km`
+            
+            newDistanceInfo.migrantCenter = {
+              distance: formattedDistance,
+              name: `${closest.commune || 'N/A'} - ${closest.gestionnaire || 'N/A'}`
+            }
           }
         }
 
@@ -242,9 +284,22 @@ export default {
             .sort((a, b) => a.distance - b.distance)
 
           if (qpvsWithDistances.length > 0) {
-            closestLocations.push(qpvsWithDistances[0])
+            const closest = qpvsWithDistances[0]
+            closestLocations.push(closest)
+            
+            const formattedDistance = closest.distance < 1 
+              ? `${Math.round(closest.distance * 1000)}m`
+              : `${closest.distance.toFixed(1)}km`
+            
+            newDistanceInfo.qpv = {
+              distance: formattedDistance,
+              name: `${closest.lib_qp || closest.code_qp || 'N/A'} - ${closest.lib_com || 'N/A'}`
+            }
           }
         }
+
+        // Update distance info
+        distanceInfo.value = newDistanceInfo
 
         // Create arrows for each closest location
         closestLocations.forEach(location => {
@@ -428,10 +483,13 @@ export default {
       try {
         const response = await api.getMigrants({ limit: 1500 })
         if (response && response.list) {
+          // Filter to metropolitan France only (exclude overseas territories)
+          const overseasDepartements = ['971', '972', '973', '974', '976']
           allMigrantCenters = response.list.filter(center => 
             center.latitude && center.longitude && 
             !isNaN(parseFloat(center.latitude)) && 
-            !isNaN(parseFloat(center.longitude))
+            !isNaN(parseFloat(center.longitude)) &&
+            !overseasDepartements.includes(center.departement)
           )
           console.log('Loaded migrant centers:', allMigrantCenters.length)
           if (showMigrantCenters.value) {
@@ -519,9 +577,15 @@ export default {
       try {
         const response = await api.getQpvs()
         if (response && response.geojson && response.geojson.features) {
+          // Filter to metropolitan France only (exclude overseas territories)
+          const overseasDepartements = ['971', '972', '973', '974', '976']
+          
           // Store QPV data with calculated centroids for arrow creation
           allQpvs = response.geojson.features.map(feature => {
             if (!feature || !feature.properties) return null;
+            
+            // Skip overseas territories
+            if (overseasDepartements.includes(feature.properties.insee_dep)) return null;
             
             // Calculate centroid from geometry
             const centroid = calculateGeometryCentroid(feature.geometry)
@@ -572,8 +636,10 @@ export default {
               })
             },
             filter: (feature) => {
-              // Only include features with valid geometry and properties
-              return feature && feature.geometry && feature.properties;
+              // Only include metropolitan France features
+              const overseasDepartements = ['971', '972', '973', '974', '976']
+              return feature && feature.geometry && feature.properties &&
+                     !overseasDepartements.includes(feature.properties.insee_dep);
             }
           })
           
@@ -641,6 +707,7 @@ export default {
       gettingLocation,
       showMigrantCenters,
       showQpv,
+      distanceInfo,
       searchAddress,
       getCurrentLocation,
       onOverlayToggle
@@ -703,6 +770,15 @@ export default {
 
 .distance-cell {
   min-width: 100px;
+}
+
+.distance-info h4 {
+  color: #333;
+  font-weight: 500;
+}
+
+.distance-info .v-icon {
+  vertical-align: middle;
 }
 
 .instructions {
