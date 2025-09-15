@@ -54,7 +54,20 @@
                 @change="onOverlayToggle"
               >
                 <template v-slot:prepend>
-                  <span style="color: #424242; font-size: 16px; margin-right: 4px;">↑</span>
+                  <div style="
+                    background: #000000;
+                    color: white;
+                    border-radius: 50%;
+                    width: 16px;
+                    height: 16px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 10px;
+                    font-weight: bold;
+                    margin-right: 4px;
+                    border: 1px solid #333333;
+                  ">↑</div>
                 </template>
               </v-checkbox>
               <v-checkbox
@@ -76,7 +89,20 @@
                 @change="onOverlayToggle"
               >
                 <template v-slot:prepend>
-                  <span style="color: #2e7d32; font-size: 16px; margin-right: 4px;">🕌</span>
+                  <div style="
+                    background: #2e7d32;
+                    color: white;
+                    border-radius: 50%;
+                    width: 16px;
+                    height: 16px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 10px;
+                    font-weight: bold;
+                    margin-right: 4px;
+                    border: 1px solid #1b5e20;
+                  ">🕌</div>
                 </template>
               </v-checkbox>
             </v-card>
@@ -97,7 +123,21 @@
         <v-card class="pa-4">
           <h4 class="mb-3">Votre position est à:</h4>
           <div v-if="distanceInfo.migrantCenter">
-            <span style="color: #424242; font-size: 18px; margin-right: 8px;">↑</span>
+            <div style="
+              display: inline-flex;
+              background: #000000;
+              color: white;
+              border-radius: 50%;
+              width: 18px;
+              height: 18px;
+              align-items: center;
+              justify-content: center;
+              font-size: 12px;
+              font-weight: bold;
+              margin-right: 8px;
+              border: 1px solid #333333;
+              vertical-align: middle;
+            ">↑</div>
             <strong>{{ distanceInfo.migrantCenter.distance }}</strong> du centre de migrants le plus proche
             <div class="text-caption text-grey ml-6">
               <strong>Type:</strong> {{ distanceInfo.migrantCenter.type }}<br>
@@ -116,7 +156,21 @@
             </div>
           </div>
           <div v-if="distanceInfo.mosque" class="mt-2">
-            <span style="color: #2e7d32; font-size: 18px; margin-right: 8px;">🕌</span>
+            <div style="
+              display: inline-flex;
+              background: #2e7d32;
+              color: white;
+              border-radius: 50%;
+              width: 18px;
+              height: 18px;
+              align-items: center;
+              justify-content: center;
+              font-size: 12px;
+              font-weight: bold;
+              margin-right: 8px;
+              border: 1px solid #1b5e20;
+              vertical-align: middle;
+            ">🕌</div>
             <strong>{{ distanceInfo.mosque.distance }}</strong> de la mosquée la plus proche
             <div class="text-caption text-grey ml-6">
               <strong>Adresse:</strong> {{ distanceInfo.mosque.address }}<br>
@@ -278,8 +332,8 @@ export default {
         const closestLocations = []
         const newDistanceInfo = {}
 
-        // Find closest migrant center
-        if (allMigrantCenters.length > 0) {
+        // Find closest migrant center (only if migrant centers are shown)
+        if (showMigrantCenters.value && allMigrantCenters.length > 0) {
           const migrantCentersWithDistances = allMigrantCenters
             .filter(center => center.latitude && center.longitude &&
                             !isNaN(parseFloat(center.latitude)) &&
@@ -312,8 +366,8 @@ export default {
           }
         }
 
-        // Find closest QPV
-        if (allQpvs.length > 0) {
+        // Find closest QPV (only if QPVs are shown)
+        if (showQpv.value && allQpvs.length > 0) {
           const qpvsWithDistances = allQpvs
             .filter(qpv => qpv.latitude && qpv.longitude &&
                           !isNaN(parseFloat(qpv.latitude)) &&
@@ -344,8 +398,8 @@ export default {
           }
         }
 
-        // Find closest mosque
-        if (allMosques.length > 0) {
+        // Find closest mosque (only if mosques are shown)
+        if (showMosques.value && allMosques.length > 0) {
           const mosquesWithDistances = allMosques
             .filter(mosque => mosque.latitude && mosque.longitude &&
                               !isNaN(parseFloat(mosque.latitude)) &&
@@ -399,37 +453,47 @@ export default {
     // Create an arrow pointing from selected location to target location
     const createArrowToLocation = (fromLat, fromLng, location) => {
       const fromPoint = [fromLat, fromLng]
-      const toPoint = [location.latitude, location.longitude]
+      
+      // Calculate direction vector
+      const deltaLat = location.latitude - fromLat
+      const deltaLng = location.longitude - fromLng
+      const distance = Math.sqrt(deltaLat * deltaLat + deltaLng * deltaLng)
+      
+      // Stop arrow just before the destination marker (about 80% of the way)
+      const stopRatio = 0.8
+      const endLat = fromLat + (deltaLat * stopRatio)
+      const endLng = fromLng + (deltaLng * stopRatio)
+      const endPoint = [endLat, endLng]
 
       // Determine arrow color based on location type
-      let arrowColor = '#424242' // Default for migrant centers
+      let arrowColor = '#000000' // Black for migrant centers (consistent with icon)
       if (location.type === 'qpv') arrowColor = '#ff0000'
       if (location.type === 'mosque') arrowColor = '#2e7d32'
 
       // Create polyline arrow
-      const arrowLine = L.polyline([fromPoint, toPoint], {
+      const arrowLine = L.polyline([fromPoint, endPoint], {
         color: arrowColor,
         weight: 3,
         opacity: 0.8
       }).addTo(map)
 
-      // Create arrow head using a marker
-      const angle = Math.atan2(location.longitude - fromLng, location.latitude - fromLat) * 180 / Math.PI
+      // Calculate angle for arrow head (pointing toward destination)
+      const angle = Math.atan2(deltaLng, deltaLat) * 180 / Math.PI
 
-      const arrowHead = L.marker(toPoint, {
+      const arrowHead = L.marker(endPoint, {
         icon: L.divIcon({
           html: `<div style="
             width: 0;
             height: 0;
             border-left: 8px solid transparent;
             border-right: 8px solid transparent;
-            border-bottom: 20px solid ${arrowColor};
+            border-bottom: 16px solid ${arrowColor};
             transform: rotate(${angle}deg);
-            transform-origin: center;
+            transform-origin: center bottom;
           "></div>`,
           className: 'arrow-head',
-          iconSize: [16, 20],
-          iconAnchor: [8, 20]
+          iconSize: [16, 16],
+          iconAnchor: [8, 16]
         })
       }).addTo(map)
 
@@ -438,10 +502,10 @@ export default {
         ? `${Math.round(location.distance * 1000)}m`
         : `${location.distance.toFixed(1)}km`
 
-      // Create distance label
+      // Create distance label at midpoint of the visible arrow
       const midPoint = [
-        (fromLat + location.latitude) / 2,
-        (fromLng + location.longitude) / 2
+        (fromLat + endLat) / 2,
+        (fromLng + endLng) / 2
       ]
 
       const distanceLabel = L.marker(midPoint, {
@@ -517,6 +581,12 @@ export default {
         showMosquesOnMap()
       } else if (mosqueLayer && map.hasLayer(mosqueLayer)) {
         map.removeLayer(mosqueLayer)
+      }
+
+      // Refresh arrows if a location is selected
+      if (selectedLocation.value) {
+        clearArrows()
+        createArrowsToClosest(selectedLocation.value.lat, selectedLocation.value.lng)
       }
     }
 
@@ -602,14 +672,14 @@ export default {
 
     // Create migration symbol icon based on zoom level
     const createMigrationIcon = (zoom) => {
-      let size = 8
-      if (zoom >= 10) size = 16
-      if (zoom >= 12) size = 20
-      if (zoom >= 14) size = 24
+      let size = 16
+      if (zoom >= 10) size = 20
+      if (zoom >= 12) size = 24
+      if (zoom >= 14) size = 28
 
       return L.divIcon({
         html: `<div style="
-          background: #424242;
+          background: #000000;
           color: white;
           border-radius: 50%;
           width: ${size}px;
@@ -618,8 +688,8 @@ export default {
           align-items: center;
           justify-content: center;
           font-weight: bold;
-          font-size: ${Math.max(8, size - 4)}px;
-          border: 2px solid #212121;
+          font-size: ${Math.max(12, size - 4)}px;
+          border: 2px solid #333333;
           box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         ">↑</div>`,
         className: 'migration-icon',
@@ -661,10 +731,10 @@ export default {
 
     // Create mosque symbol icon based on zoom level
     const createMosqueIcon = (zoom) => {
-      let size = 12
+      let size = 16
       if (zoom >= 10) size = 20
-      if (zoom >= 12) size = 28
-      if (zoom >= 14) size = 36
+      if (zoom >= 12) size = 24
+      if (zoom >= 14) size = 28
 
       return L.divIcon({
         html: `<div style="
@@ -677,7 +747,7 @@ export default {
           align-items: center;
           justify-content: center;
           font-weight: bold;
-          font-size: ${Math.max(10, size - 6)}px;
+          font-size: ${Math.max(12, size - 4)}px;
           border: 2px solid #1b5e20;
           box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         ">🕌</div>`,
