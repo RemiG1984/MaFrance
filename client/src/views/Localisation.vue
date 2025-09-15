@@ -62,7 +62,13 @@
                     @change="onOverlayToggle"
                   >
                     <template v-slot:prepend>
-                      <v-icon color="red" size="16" style="margin-right: 4px;">mdi-map-marker</v-icon>
+                      <div style="
+                        background: #ff0000;
+                        border: 2px solid #cc0000;
+                        width: 16px;
+                        height: 16px;
+                        margin-right: 4px;
+                      "></div>
                     </template>
                   </v-checkbox>
                   <v-checkbox
@@ -148,7 +154,15 @@
             </div>
           </div>
           <div v-if="distanceInfo.qpv" class="mt-2">
-            <v-icon color="red" class="mr-2">mdi-map-marker</v-icon>
+            <div style="
+              display: inline-block;
+              background: #ff0000;
+              border: 2px solid #cc0000;
+              width: 18px;
+              height: 18px;
+              margin-right: 8px;
+              vertical-align: middle;
+            "></div>
             <strong>{{ distanceInfo.qpv.distance }}</strong> du QPV le plus proche
             <div class="text-caption text-grey ml-6">
               <strong>QPV:</strong> <a :href="distanceInfo.qpv.link" target="_blank">{{ distanceInfo.qpv.name }}</a><br>
