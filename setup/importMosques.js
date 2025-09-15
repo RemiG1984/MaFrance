@@ -55,7 +55,7 @@ function importMosques(db, callback) {
                     }
 
                     results.push({
-                        name: row.name || row.nom || 'Mosquée',
+                        name: row.name || 'Mosquée',
                         address: row.address || row.adresse || '',
                         latitude: latitude,
                         longitude: longitude,

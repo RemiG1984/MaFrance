@@ -110,14 +110,6 @@
         </v-card-text>
       </v-card>
 
-      <!-- Selected Location Info -->
-      <div v-if="selectedLocation" class="location-info mb-4">
-        <v-alert type="info" class="mb-0">
-          <strong>Position sélectionnée:</strong>
-          {{ selectedLocation.address || `${selectedLocation.lat.toFixed(4)}, ${selectedLocation.lng.toFixed(4)}` }}
-        </v-alert>
-      </div>
-
       <!-- Distance Information -->
       <div v-if="selectedLocation && distanceInfo" class="distance-info mb-4">
         <v-card class="pa-4">
