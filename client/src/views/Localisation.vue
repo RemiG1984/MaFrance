@@ -21,7 +21,7 @@
             :loading="searchingAddress"
           />
         </v-col>
-        <v-col cols="12" md="3">
+        <v-col cols="12" md="6">
           <v-btn
             color="primary"
             variant="outlined"
@@ -33,24 +33,35 @@
             Ma position
           </v-btn>
         </v-col>
-        <v-col cols="12" md="3">
-          <v-select
-            v-model="selectedLocationType"
-            :items="locationTypes"
-            label="Type de lieux"
-            variant="outlined"
-            density="compact"
-            @update:model-value="onLocationTypeChanged"
-          />
-        </v-col>
       </v-row>
     </div>
 
     <!-- Map Section -->
     <div class="map-section">
       <v-card class="mb-4">
-        <v-card-text class="pa-0">
+        <v-card-text class="pa-0 position-relative">
           <div id="localisationMap" class="localisation-map"></div>
+          
+          <!-- Map Overlay Controls -->
+          <div class="map-overlay-controls">
+            <v-card class="pa-2" elevation="2">
+              <div class="text-subtitle-2 mb-2">Affichage des lieux</div>
+              <v-checkbox
+                v-model="showMigrantCenters"
+                label="Centres de migrants"
+                density="compact"
+                hide-details
+                @change="onOverlayToggle"
+              ></v-checkbox>
+              <v-checkbox
+                v-model="showQpv"
+                label="Quartiers Prioritaires (QPV)"
+                density="compact"
+                hide-details
+                @change="onOverlayToggle"
+              ></v-checkbox>
+            </v-card>
+          </div>
         </v-card-text>
       </v-card>
 
@@ -65,14 +76,14 @@
 
     <!-- Results Section -->
     <div v-if="nearbyPlaces.length > 0" class="results-section">
-      <h3>{{ selectedLocationType.title }} les plus proches</h3>
+      <h3>Centres de migrants les plus proches</h3>
       <div class="table-container">
         <v-table>
           <thead>
             <tr>
               <th>Distance</th>
-              <th v-if="selectedLocationType.value === 'migrants'">Type</th>
-              <th v-if="selectedLocationType.value === 'migrants'">Places</th>
+              <th>Type</th>
+              <th>Places</th>
               <th>Gestionnaire</th>
               <th>Département</th>
               <th>Commune</th>
@@ -86,8 +97,8 @@
                   {{ place.distance.toFixed(1) }} km
                 </v-chip>
               </td>
-              <td v-if="selectedLocationType.value === 'migrants'">{{ place.type || 'N/A' }}</td>
-              <td v-if="selectedLocationType.value === 'migrants'">{{ place.places || 'N/A' }}</td>
+              <td>{{ place.type || 'N/A' }}</td>
+              <td>{{ place.places || 'N/A' }}</td>
               <td>{{ place.gestionnaire || 'N/A' }}</td>
               <td>{{ place.departement || 'N/A' }}</td>
               <td>{{ place.commune || 'N/A' }}</td>
@@ -101,7 +112,7 @@
     <!-- No Results -->
     <div v-else-if="searchPerformed && selectedLocation" class="no-results">
       <v-alert type="warning">
-        Aucun {{ selectedLocationType.title.toLowerCase() }} trouvé dans la zone.
+        Aucun centre de migrants trouvé dans la zone.
       </v-alert>
     </div>
 
@@ -147,20 +158,17 @@ export default {
     const searchingAddress = ref(false)
     const gettingLocation = ref(false)
     const searchPerformed = ref(false)
-    const selectedLocationType = ref({ value: 'migrants', title: 'Centres de migrants' })
     const nearbyPlaces = ref([])
+    const showMigrantCenters = ref(true)
+    const showQpv = ref(false)
 
     // Map instance
     let map = null
     let selectedMarker = null
     let nearbyMarkers = []
     let qpvLayer = null
-
-    // Location types (extensible for future additions)
-    const locationTypes = [
-      { value: 'migrants', title: 'Centres de migrants' },
-      { value: 'qpv', title: 'Quartiers Prioritaires (QPV)' }
-    ]
+    let migrantCentersLayer = null
+    let allMigrantCenters = []
 
     // Distance calculation (Haversine formula)
     const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -198,8 +206,12 @@ export default {
       // Add click handler
       map.on('click', onMapClick)
 
-      // Load QPV layer
+      // Add zoom handler for updating migrant center icons
+      map.on('zoomend', updateMigrantCenterIcons)
+
+      // Load layers
       await loadQpvLayer()
+      await loadMigrantCenters()
     }
 
     // Handle map click
@@ -230,38 +242,13 @@ export default {
       searchPerformed.value = true
     }
 
-    // Find nearby places based on selected type
+    // Find nearby places (for the results table)
     const findNearbyPlaces = async (lat, lng) => {
       try {
-        let places = []
-
-        if (selectedLocationType.value.value === 'migrants') {
-          const response = await api.getMigrants({ limit: 1500 })
-          places = response.list || []
-          console.log('Loaded migrant centers:', places.length)
-        } else if (selectedLocationType.value.value === 'qpv') {
-          // Assuming you have a new API endpoint for QPV data
-          // const response = await api.getQpvs({ limit: 1500 }) 
-          // places = response.list || []
-          // console.log('Loaded QPVs:', places.length)
-
-          // For now, let's use dummy data or a placeholder if the API isn't ready
-          // Replace this with your actual QPV data fetching logic
-          const qpvData = [
-            { id: 1, nom: 'QPV A', departement: '75', commune: 'Paris', adresse: '1 Rue de Paris', latitude: 48.8566, longitude: 2.3522, distance: 5.2 },
-            { id: 2, nom: 'QPV B', departement: '13', commune: 'Marseille', adresse: '1 Avenue de Marseille', latitude: 43.2965, longitude: 5.3698, distance: 15.1 },
-            { id: 3, nom: 'QPV C', departement: '69', commune: 'Lyon', adresse: '1 Place de Lyon', latitude: 45.7640, longitude: 4.8357, distance: 25.3 }
-          ]
-          // In a real scenario, you'd calculate the distance here. For dummy data, we'll assume it's pre-calculated or mock it.
-          places = qpvData.map(qpv => ({
-            ...qpv,
-            distance: calculateDistance(lat, lng, qpv.latitude, qpv.longitude) // Recalculate distance for accuracy
-          }))
-          .sort((a, b) => a.distance - b.distance)
-          .slice(0, 5); // Get 5 closest
-          console.log('Using dummy QPV data:', places.length)
-
-        }
+        // Only find migrant centers for the results table
+        const response = await api.getMigrants({ limit: 1500 })
+        const places = response.list || []
+        console.log('Loaded migrant centers:', places.length)
 
         // Calculate distances and sort
         const placesWithDistances = places
@@ -292,7 +279,26 @@ export default {
       }
     }
 
-    // Show nearby places on map
+    // Handle overlay toggle changes
+    const onOverlayToggle = () => {
+      // Handle migrant centers layer
+      if (showMigrantCenters.value) {
+        showMigrantCentersOnMap()
+      } else if (migrantCentersLayer) {
+        map.removeLayer(migrantCentersLayer)
+      }
+
+      // Handle QPV layer
+      if (showQpv.value) {
+        if (qpvLayer && !map.hasLayer(qpvLayer)) {
+          qpvLayer.addTo(map)
+        }
+      } else if (qpvLayer && map.hasLayer(qpvLayer)) {
+        map.removeLayer(qpvLayer)
+      }
+    }
+
+    // Show nearby places on map (for the closest results)
     const showNearbyPlacesOnMap = (places) => {
       // Clear existing markers
       nearbyMarkers.forEach(marker => map.removeLayer(marker))
@@ -302,7 +308,7 @@ export default {
       places.forEach((place, index) => {
         const marker = L.marker([place.latitude, place.longitude], {
           icon: L.divIcon({
-            html: `<div style="background: ${getDistanceColor(place.distance)}; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px;">${index + 1}</div>`,
+            html: `<div style="background: ${getDistanceColor(place.distance)}; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">${index + 1}</div>`,
             className: 'custom-div-icon',
             iconSize: [30, 30],
             iconAnchor: [15, 15]
@@ -310,16 +316,12 @@ export default {
         })
         .addTo(map)
         .bindPopup(`
-          <strong>${place.commune || place.nom || 'N/A'}</strong><br>
+          <strong>${place.commune || 'N/A'}</strong><br>
           ${place.adresse || 'N/A'}<br>
           <strong>Distance:</strong> ${place.distance.toFixed(1)} km<br>
-          ${selectedLocationType.value.value === 'migrants' ? 
-            `<strong>Places:</strong> ${place.places || 'N/A'}<br><strong>Type:</strong> ${place.type || 'N/A'}<br><strong>Gestionnaire:</strong> ${place.gestionnaire || 'N/A'}` : 
-            (selectedLocationType.value.value === 'qpv' ?
-              `<strong>Nom:</strong> ${place.nom || 'N/A'}<br><strong>Département:</strong> ${place.departement || 'N/A'}` :
-              ''
-            )
-          }
+          <strong>Places:</strong> ${place.places || 'N/A'}<br>
+          <strong>Type:</strong> ${place.type || 'N/A'}<br>
+          <strong>Gestionnaire:</strong> ${place.gestionnaire || 'N/A'}
         `)
 
         nearbyMarkers.push(marker)
@@ -390,6 +392,97 @@ export default {
       )
     }
 
+    // Load migrant centers data
+    const loadMigrantCenters = async () => {
+      try {
+        const response = await api.getMigrants({ limit: 1500 })
+        if (response && response.list) {
+          allMigrantCenters = response.list.filter(center => 
+            center.latitude && center.longitude && 
+            !isNaN(parseFloat(center.latitude)) && 
+            !isNaN(parseFloat(center.longitude))
+          )
+          console.log('Loaded migrant centers:', allMigrantCenters.length)
+          if (showMigrantCenters.value) {
+            showMigrantCentersOnMap()
+          }
+        }
+      } catch (error) {
+        console.error('Error loading migrant centers:', error)
+      }
+    }
+
+    // Create mosque/islamic symbol icon based on zoom level
+    const createMosqueIcon = (zoom) => {
+      let size = 8
+      if (zoom >= 10) size = 16
+      if (zoom >= 12) size = 20
+      if (zoom >= 14) size = 24
+      
+      return L.divIcon({
+        html: `<div style="
+          background: #2e7d32; 
+          color: white; 
+          border-radius: 50%; 
+          width: ${size}px; 
+          height: ${size}px; 
+          display: flex; 
+          align-items: center; 
+          justify-content: center; 
+          font-weight: bold; 
+          font-size: ${Math.max(8, size - 4)}px;
+          border: 2px solid #1b5e20;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        ">☪</div>`,
+        className: 'mosque-icon',
+        iconSize: [size, size],
+        iconAnchor: [size/2, size/2]
+      })
+    }
+
+    // Show migrant centers on map
+    const showMigrantCentersOnMap = () => {
+      if (!map || !allMigrantCenters.length) return
+      
+      if (migrantCentersLayer) {
+        map.removeLayer(migrantCentersLayer)
+      }
+      
+      const currentZoom = map.getZoom()
+      migrantCentersLayer = L.layerGroup()
+      
+      allMigrantCenters.forEach(center => {
+        const marker = L.marker([parseFloat(center.latitude), parseFloat(center.longitude)], {
+          icon: createMosqueIcon(currentZoom)
+        })
+        .bindPopup(`
+          <strong>Centre de migrants</strong><br>
+          <strong>Type:</strong> ${center.type || 'N/A'}<br>
+          <strong>Places:</strong> ${center.places || 'N/A'}<br>
+          <strong>Gestionnaire:</strong> ${center.gestionnaire || 'N/A'}<br>
+          <strong>Commune:</strong> ${center.commune || 'N/A'}<br>
+          <strong>Département:</strong> ${center.departement || 'N/A'}<br>
+          <strong>Adresse:</strong> ${center.adresse || 'N/A'}
+        `)
+        
+        migrantCentersLayer.addLayer(marker)
+      })
+      
+      migrantCentersLayer.addTo(map)
+    }
+
+    // Update migrant center icon sizes on zoom
+    const updateMigrantCenterIcons = () => {
+      if (!migrantCentersLayer || !map) return
+      
+      const currentZoom = map.getZoom()
+      migrantCentersLayer.eachLayer(layer => {
+        if (layer.setIcon) {
+          layer.setIcon(createMosqueIcon(currentZoom))
+        }
+      })
+    }
+
     // Load QPV GeoJSON layer
     const loadQpvLayer = async () => {
       try {
@@ -437,7 +530,10 @@ export default {
               return feature && feature.geometry && feature.properties;
             }
           })
-          qpvLayer.addTo(map)
+          
+          if (showQpv.value) {
+            qpvLayer.addTo(map)
+          }
           console.log('QPV layer loaded successfully')
         }
       } catch (error) {
@@ -445,12 +541,7 @@ export default {
       }
     }
 
-    // Handle location type change
-    const onLocationTypeChanged = () => {
-      if (selectedLocation.value) {
-        findNearbyPlaces(selectedLocation.value.lat, selectedLocation.value.lng)
-      }
-    }
+    
 
     // Lifecycle
     onMounted(() => {
@@ -469,14 +560,13 @@ export default {
       searchingAddress,
       gettingLocation,
       searchPerformed,
-      selectedLocationType,
-      locationTypes,
       nearbyPlaces,
+      showMigrantCenters,
+      showQpv,
       searchAddress,
       getCurrentLocation,
-      onLocationTypeChanged,
-      getDistanceColor,
-      loadQpvLayer
+      onOverlayToggle,
+      getDistanceColor
     }
   }
 }
@@ -545,6 +635,14 @@ export default {
 
 .no-results {
   margin: 20px 0;
+}
+
+.map-overlay-controls {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+  max-width: 200px;
 }
 
 /* Custom marker styles */
