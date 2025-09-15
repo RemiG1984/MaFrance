@@ -236,8 +236,8 @@ export default {
         subdomains: 'abcd',
         maxZoom: 19
       }).addTo(this.map)
-      if (L.Control.Fullscreen) {
-        this.map.addControl(new L.Control.Fullscreen({
+      if (L.control.fullscreen) {
+        this.map.addControl(new L.control.fullscreen({
           position: "topleft"
         }))
       }

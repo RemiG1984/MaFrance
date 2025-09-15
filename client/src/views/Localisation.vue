@@ -276,7 +276,7 @@ export default {
       }).addTo(map)
 
       // Add fullscreen control
-      map.addControl(new L.Control.Fullscreen({
+      map.addControl(new L.control.fullscreen({
         position: 'topleft'
       }))
 
@@ -1046,7 +1046,7 @@ export default {
   background: #f5f5f5;
   padding: 20px;
   border-radius: 8px;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 
 .map-section {
