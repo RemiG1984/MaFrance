@@ -47,6 +47,17 @@
             <v-card class="pa-2" elevation="2">
               <div class="text-subtitle-2 mb-2">Affichage des lieux</div>
               <v-checkbox
+                v-model="showQpv"
+                label="Quartiers Prioritaires (QPV)"
+                density="compact"
+                hide-details
+                @change="onOverlayToggle"
+              >
+                <template v-slot:prepend>
+                  <v-icon color="red" size="16" style="margin-right: 4px;">mdi-map-marker</v-icon>
+                </template>
+              </v-checkbox>
+              <v-checkbox
                 v-model="showMigrantCenters"
                 label="Centres de migrants"
                 density="compact"
@@ -68,17 +79,6 @@
                     margin-right: 4px;
                     border: 1px solid #333333;
                   ">↑</div>
-                </template>
-              </v-checkbox>
-              <v-checkbox
-                v-model="showQpv"
-                label="Quartiers Prioritaires (QPV)"
-                density="compact"
-                hide-details
-                @change="onOverlayToggle"
-              >
-                <template v-slot:prepend>
-                  <v-icon color="red" size="16" style="margin-right: 4px;">mdi-map-marker</v-icon>
                 </template>
               </v-checkbox>
               <v-checkbox
@@ -230,8 +230,8 @@ export default {
     const selectedLocation = ref(null)
     const searchingAddress = ref(false)
     const gettingLocation = ref(false)
-    const showMigrantCenters = ref(true)
-    const showQpv = ref(false)
+    const showMigrantCenters = ref(false)
+    const showQpv = ref(true)
     const showMosques = ref(false)
     const distanceInfo = ref(null)
 
@@ -682,10 +682,11 @@ export default {
 
     // Create migration symbol icon based on zoom level
     const createMigrationIcon = (zoom) => {
-      let size = 16
-      if (zoom >= 10) size = 20
-      if (zoom >= 12) size = 24
-      if (zoom >= 14) size = 28
+      let size = 12
+      if (zoom >= 8) size = 14
+      if (zoom >= 10) size = 16
+      if (zoom >= 12) size = 20
+      if (zoom >= 14) size = 24
 
       return L.divIcon({
         html: `<div style="
@@ -739,10 +740,11 @@ export default {
 
     // Create mosque symbol icon based on zoom level
     const createMosqueIcon = (zoom) => {
-      let size = 16
-      if (zoom >= 10) size = 20
-      if (zoom >= 12) size = 24
-      if (zoom >= 14) size = 28
+      let size = 12
+      if (zoom >= 8) size = 14
+      if (zoom >= 10) size = 16
+      if (zoom >= 12) size = 20
+      if (zoom >= 14) size = 24
 
       return L.divIcon({
         html: `<div style="
