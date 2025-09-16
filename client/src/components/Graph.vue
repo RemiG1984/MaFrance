@@ -246,10 +246,12 @@ export default {
                   if (label) {
                     label += ': ';
                   }
-                  const unit = context.dataset.label.includes('Homicides') ?
-                    ' (pour 100k hab.)' : ' (pour mille hab.)';
+                  // Check if it's homicides metric by looking at the metric key or label content
+                  const isHomicides = this.metricKey === 'homicides_p100k' || 
+                    (context.dataset.label && context.dataset.label.toLowerCase().includes('homicide'));
+                  const unit = isHomicides ? ' (pour 100k hab.)' : ' (pour mille hab.)';
                   return label + context.parsed.y.toFixed(1) + unit;
-                }
+                }.bind(this)
               }
             }
           },
