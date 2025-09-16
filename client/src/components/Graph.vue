@@ -62,15 +62,7 @@ export default {
       }
     }
   },
-  // created() {
-  //   // Définir des propriétés non-réactives
-  //   Object.defineProperty(this, 'chart', {
-  //     value: null,
-  //     writable: true,
-  //     enumerable: false,
-  //     configurable: true
-  //   });
-  // },
+
   mounted(){
     // Register the watermark plugin
     Chart.register(watermarkPlugin);

@@ -105,8 +105,8 @@
         <!-- Controls Section -->
         <div class="controls-section mb-4">
           <v-card class="pa-4">
-            <v-card-title class="pa-0 mb-3">
-              <h3>Recherche</h3>
+            <v-card-title class="pa-0 mb-3 text-h4">
+              Recherche
             </v-card-title>
             <v-text-field
               v-model="addressInput"
@@ -137,6 +137,22 @@
         <div v-if="selectedLocation && distanceInfo" class="distance-info mb-4">
           <v-card class="pa-4">
             <h4 class="mb-3">Votre position est à:</h4>
+            <div v-if="distanceInfo.qpv" class="mt-2">
+              <div style="
+                display: inline-block;
+                background: #ff0000;
+                border: 2px solid #cc0000;
+                width: 18px;
+                height: 18px;
+                margin-right: 8px;
+                vertical-align: middle;
+              "></div>
+              <strong>{{ distanceInfo.qpv.distance }}</strong> du QPV le plus proche
+              <div class="text-caption text-grey ml-6">
+                <strong>QPV:</strong> <a :href="distanceInfo.qpv.link" target="_blank">{{ distanceInfo.qpv.name }}</a><br>
+                <strong>Commune:</strong> {{ distanceInfo.qpv.commune }}
+              </div>
+            </div>
             <div v-if="distanceInfo.migrantCenter">
               <div style="
                 display: inline-flex;
@@ -158,22 +174,6 @@
                 <strong>Type:</strong> {{ distanceInfo.migrantCenter.type }} | <strong>Places:</strong> {{ distanceInfo.migrantCenter.places }} | <strong>Gestionnaire:</strong> {{ distanceInfo.migrantCenter.gestionnaire }}<br>
                 <strong>Adresse:</strong> {{ distanceInfo.migrantCenter.address }}<br>
                 <strong>Commune:</strong> {{ distanceInfo.migrantCenter.commune }}
-              </div>
-            </div>
-            <div v-if="distanceInfo.qpv" class="mt-2">
-              <div style="
-                display: inline-block;
-                background: #ff0000;
-                border: 2px solid #cc0000;
-                width: 18px;
-                height: 18px;
-                margin-right: 8px;
-                vertical-align: middle;
-              "></div>
-              <strong>{{ distanceInfo.qpv.distance }}</strong> du QPV le plus proche
-              <div class="text-caption text-grey ml-6">
-                <strong>QPV:</strong> <a :href="distanceInfo.qpv.link" target="_blank">{{ distanceInfo.qpv.name }}</a><br>
-                <strong>Commune:</strong> {{ distanceInfo.qpv.commune }}
               </div>
             </div>
             <div v-if="distanceInfo.mosque" class="mt-2">
@@ -1064,7 +1064,7 @@ export default {
 }
 
 .localisation-map {
-  height: 500px;
+  height: 600px;
   width: 100%;
   border-radius: 8px;
 }
