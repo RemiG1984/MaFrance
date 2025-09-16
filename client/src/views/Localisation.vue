@@ -105,7 +105,7 @@
         <!-- Controls Section -->
         <div class="controls-section mb-4">
           <v-card class="pa-4">
-            <v-card-title class="pa-0 mb-3 text-h4">
+            <v-card-title class="pa-0 mb-3 text-h5">
               Recherche
             </v-card-title>
             <v-text-field
