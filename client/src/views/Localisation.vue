@@ -137,68 +137,117 @@
         <div v-if="selectedLocation && distanceInfo" class="distance-info mb-4">
           <v-card class="pa-4">
             <h4 class="mb-3">Votre position est à:</h4>
+            
+            <!-- QPV Distance -->
             <div v-if="distanceInfo.qpv" class="mt-2">
-              <div style="
-                display: inline-block;
-                background: #ff0000;
-                border: 2px solid #cc0000;
-                width: 18px;
-                height: 18px;
-                margin-right: 8px;
-                vertical-align: middle;
-              "></div>
-              <strong>{{ distanceInfo.qpv.distance }}</strong> du QPV le plus proche
-              <div class="text-caption text-grey ml-6">
-                <strong>QPV:</strong> <a :href="distanceInfo.qpv.link" target="_blank">{{ distanceInfo.qpv.name }}</a><br>
-                <strong>Commune:</strong> {{ distanceInfo.qpv.commune }}
+              <div 
+                class="distance-summary cursor-pointer d-flex align-center"
+                @click="distanceInfo.qpv.expanded = !distanceInfo.qpv.expanded"
+              >
+                <div style="
+                  display: inline-block;
+                  background: #ff0000;
+                  border: 2px solid #cc0000;
+                  width: 18px;
+                  height: 18px;
+                  margin-right: 8px;
+                  vertical-align: middle;
+                "></div>
+                <strong>{{ distanceInfo.qpv.distance }}</strong> du QPV le plus proche
+                <v-icon 
+                  size="16" 
+                  class="ml-2"
+                  :class="distanceInfo.qpv.expanded ? 'rotate-180' : ''"
+                >
+                  mdi-chevron-down
+                </v-icon>
               </div>
+              <v-expand-transition>
+                <div v-show="distanceInfo.qpv.expanded" class="text-caption text-grey ml-6 mt-1">
+                  <strong>QPV:</strong> <a :href="distanceInfo.qpv.link" target="_blank">{{ distanceInfo.qpv.name }}</a><br>
+                  <strong>Commune:</strong> {{ distanceInfo.qpv.commune }}
+                </div>
+              </v-expand-transition>
             </div>
-            <div v-if="distanceInfo.migrantCenter">
-              <div style="
-                display: inline-flex;
-                background: #000000;
-                color: white;
-                border-radius: 50%;
-                width: 18px;
-                height: 18px;
-                align-items: center;
-                justify-content: center;
-                font-size: 12px;
-                font-weight: bold;
-                margin-right: 8px;
-                border: 1px solid #333333;
-                vertical-align: middle;
-              ">↑</div>
-              <strong>{{ distanceInfo.migrantCenter.distance }}</strong> du centre de migrants le plus proche
-              <div class="text-caption text-grey ml-6">
-                <strong>Type:</strong> {{ distanceInfo.migrantCenter.type }} | <strong>Places:</strong> {{ distanceInfo.migrantCenter.places }} | <strong>Gestionnaire:</strong> {{ distanceInfo.migrantCenter.gestionnaire }}<br>
-                <strong>Adresse:</strong> {{ distanceInfo.migrantCenter.address }}<br>
-                <strong>Commune:</strong> {{ distanceInfo.migrantCenter.commune }}
+
+            <!-- Migrant Center Distance -->
+            <div v-if="distanceInfo.migrantCenter" class="mt-2">
+              <div 
+                class="distance-summary cursor-pointer d-flex align-center"
+                @click="distanceInfo.migrantCenter.expanded = !distanceInfo.migrantCenter.expanded"
+              >
+                <div style="
+                  display: inline-flex;
+                  background: #000000;
+                  color: white;
+                  border-radius: 50%;
+                  width: 18px;
+                  height: 18px;
+                  align-items: center;
+                  justify-content: center;
+                  font-size: 12px;
+                  font-weight: bold;
+                  margin-right: 8px;
+                  border: 1px solid #333333;
+                  vertical-align: middle;
+                ">↑</div>
+                <strong>{{ distanceInfo.migrantCenter.distance }}</strong> du centre de migrants le plus proche
+                <v-icon 
+                  size="16" 
+                  class="ml-2"
+                  :class="distanceInfo.migrantCenter.expanded ? 'rotate-180' : ''"
+                >
+                  mdi-chevron-down
+                </v-icon>
               </div>
+              <v-expand-transition>
+                <div v-show="distanceInfo.migrantCenter.expanded" class="text-caption text-grey ml-6 mt-1">
+                  <strong>Type:</strong> {{ distanceInfo.migrantCenter.type }} | <strong>Places:</strong> {{ distanceInfo.migrantCenter.places }} | <strong>Gestionnaire:</strong> {{ distanceInfo.migrantCenter.gestionnaire }}<br>
+                  <strong>Adresse:</strong> {{ distanceInfo.migrantCenter.address }}<br>
+                  <strong>Commune:</strong> {{ distanceInfo.migrantCenter.commune }}
+                </div>
+              </v-expand-transition>
             </div>
+
+            <!-- Mosque Distance -->
             <div v-if="distanceInfo.mosque" class="mt-2">
-              <div style="
-                display: inline-flex;
-                background: #2e7d32;
-                color: white;
-                border-radius: 50%;
-                width: 18px;
-                height: 18px;
-                align-items: center;
-                justify-content: center;
-                font-size: 12px;
-                font-weight: bold;
-                margin-right: 8px;
-                border: 1px solid #1b5e20;
-                vertical-align: middle;
-              ">🕌</div>
-              <strong>{{ distanceInfo.mosque.distance }}</strong> de la mosquée la plus proche
-              <div class="text-caption text-grey ml-6">
-                {{ distanceInfo.mosque.name }}<br>
-                <strong>Adresse:</strong> {{ distanceInfo.mosque.address }}<br>
-                <strong>Commune:</strong> {{ distanceInfo.mosque.commune }}
+              <div 
+                class="distance-summary cursor-pointer d-flex align-center"
+                @click="distanceInfo.mosque.expanded = !distanceInfo.mosque.expanded"
+              >
+                <div style="
+                  display: inline-flex;
+                  background: #2e7d32;
+                  color: white;
+                  border-radius: 50%;
+                  width: 18px;
+                  height: 18px;
+                  align-items: center;
+                  justify-content: center;
+                  font-size: 12px;
+                  font-weight: bold;
+                  margin-right: 8px;
+                  border: 1px solid #1b5e20;
+                  vertical-align: middle;
+                ">🕌</div>
+                <strong>{{ distanceInfo.mosque.distance }}</strong> de la mosquée la plus proche
+                <v-icon 
+                  size="16" 
+                  class="ml-2"
+                  :class="distanceInfo.mosque.expanded ? 'rotate-180' : ''"
+                >
+                  mdi-chevron-down
+                </v-icon>
               </div>
+              <v-expand-transition>
+                <div v-show="distanceInfo.mosque.expanded" class="text-caption text-grey ml-6 mt-1">
+                  {{ distanceInfo.mosque.name }}<br>
+                  <strong>Adresse:</strong> {{ distanceInfo.mosque.address }}<br>
+                  <strong>Commune:</strong> {{ distanceInfo.mosque.commune }}
+                </div>
+              </v-expand-transition>
             </div>
+
             <div v-if="!distanceInfo.migrantCenter && !distanceInfo.qpv && !distanceInfo.mosque" class="text-grey">
               Aucune donnée disponible pour cette position
             </div>
@@ -389,7 +438,8 @@ export default {
               places: closest.places || 'N/A',
               gestionnaire: closest.gestionnaire || 'N/A',
               address: closest.adresse || 'N/A',
-              commune: closest.commune || 'N/A'
+              commune: closest.commune || 'N/A',
+              expanded: false
             }
           }
         }
@@ -421,7 +471,8 @@ export default {
               distance: formattedDistance,
               name: closest.lib_qp || closest.code_qp || 'N/A',
               link: `https://sig.ville.gouv.fr/territoire/${closest.code_qp}`,
-              commune: closest.lib_com || 'N/A'
+              commune: closest.lib_com || 'N/A',
+              expanded: false
             }
           }
         }
@@ -453,7 +504,8 @@ export default {
               distance: formattedDistance,
               name: closest.name || 'Mosquée',
               address: closest.address || 'N/A',
-              commune: closest.commune || 'N/A'
+              commune: closest.commune || 'N/A',
+              expanded: false
             }
           }
         }
@@ -1104,6 +1156,25 @@ export default {
 
 .no-results {
   margin: 20px 0;
+}
+
+.distance-summary {
+  padding: 4px 0;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.distance-summary:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.rotate-180 {
+  transform: rotate(180deg);
+  transition: transform 0.2s ease;
+}
+
+.v-icon {
+  transition: transform 0.2s ease;
 }
 
 .map-overlay-controls {
