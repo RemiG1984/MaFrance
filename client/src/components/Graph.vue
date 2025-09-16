@@ -241,17 +241,16 @@ export default {
                 size: 12
               },
               callbacks: {
-                label: function (context) {
+                label: (context) => {
                   let label = context.dataset.label || '';
                   if (label) {
                     label += ': ';
                   }
-                  // Check if it's homicides metric by looking at the metric key or label content
-                  const isHomicides = this.metricKey === 'homicides_p100k' || 
-                    (context.dataset.label && context.dataset.label.toLowerCase().includes('homicide'));
+                  // Check if it's homicides metric by looking at the metric key
+                  const isHomicides = this.metricKey === 'homicides_p100k' || this.metricKey === 'homicides_total_p100k';
                   const unit = isHomicides ? ' (pour 100k hab.)' : ' (pour mille hab.)';
                   return label + context.parsed.y.toFixed(1) + unit;
-                }.bind(this)
+                }
               }
             }
           },
