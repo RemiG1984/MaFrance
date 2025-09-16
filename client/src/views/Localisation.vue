@@ -153,7 +153,7 @@
                   margin-right: 8px;
                   vertical-align: middle;
                 "></div>
-                <strong>{{ distanceInfo.qpv.distance }}</strong> du QPV le plus proche
+                <strong>{{ distanceInfo.qpv.distance }}&nbsp;</strong>du QPV le plus proche
                 <v-icon 
                   size="16" 
                   class="ml-2"
@@ -191,7 +191,7 @@
                   border: 1px solid #333333;
                   vertical-align: middle;
                 ">↑</div>
-                <strong>{{ distanceInfo.migrantCenter.distance }}</strong> du centre de migrants le plus proche
+                <strong>{{ distanceInfo.migrantCenter.distance }}&nbsp;</strong>du centre de migrants le plus proche
                 <v-icon 
                   size="16" 
                   class="ml-2"
@@ -230,7 +230,7 @@
                   border: 1px solid #1b5e20;
                   vertical-align: middle;
                 ">🕌</div>
-                <strong>{{ distanceInfo.mosque.distance }}</strong> de la mosquée la plus proche
+                <strong>{{ distanceInfo.mosque.distance }}&nbsp;</strong>de la mosquée la plus proche
                 <v-icon 
                   size="16" 
                   class="ml-2"
