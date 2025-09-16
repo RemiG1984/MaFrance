@@ -3,7 +3,7 @@ class ApiService {
     constructor() {
         this.baseURL = import.meta.env.VITE_API_BASE_URL || "";
         this.cache = new Map();
-        this.cacheExpiry = 24 * 60 * 60 * 1000; // 24 hours
+        this.cacheExpiry = 30 * 24 * 60 * 60 * 1000; // 30 days
         this.activeRequests = new Map();
         this.persistentStorage = this.initPersistentStorage();
         this.lastBuildHash = localStorage.getItem('app_build_hash');
