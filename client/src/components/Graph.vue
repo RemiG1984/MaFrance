@@ -62,15 +62,7 @@ export default {
       }
     }
   },
-  // created() {
-  //   // Définir des propriétés non-réactives
-  //   Object.defineProperty(this, 'chart', {
-  //     value: null,
-  //     writable: true,
-  //     enumerable: false,
-  //     configurable: true
-  //   });
-  // },
+
   mounted(){
     // Register the watermark plugin
     Chart.register(watermarkPlugin);
@@ -249,13 +241,14 @@ export default {
                 size: 12
               },
               callbacks: {
-                label: function (context) {
+                label: (context) => {
                   let label = context.dataset.label || '';
                   if (label) {
                     label += ': ';
                   }
-                  const unit = context.dataset.label.includes('Homicides') ?
-                    ' (pour 100k hab.)' : ' (pour mille hab.)';
+                  // Check if it's homicides metric by looking at the metric key
+                  const isHomicides = this.metricKey === 'homicides_p100k' || this.metricKey === 'homicides_total_p100k';
+                  const unit = isHomicides ? ' (pour 100k hab.)' : ' (pour mille hab.)';
                   return label + context.parsed.y.toFixed(1) + unit;
                 }
               }

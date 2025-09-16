@@ -30,6 +30,7 @@
     "express-validator": "^7.2.1",
     "helmet": "^8.1.0",
     "leaflet": "^1.9.4",
+    "leaflet.fullscreen": "^4.0.0",
     "pinia": "^3.0.3",
     "sqlite3": "^5.1.7",
     "uuid": "^13.0.0",

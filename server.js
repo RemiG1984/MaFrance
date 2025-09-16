@@ -75,6 +75,7 @@ const communeRoutes = require("./routes/communeRoutes");
 const countryRoutes = require("./routes/countryRoutes");
 const departementRoutes = require("./routes/departementRoutes");
 const migrantRoutes = require("./routes/migrantRoutes");
+const mosqueRoutes = require("./routes/mosqueRoutes");
 const otherRoutes = require("./routes/otherRoutes");
 const qpvRoutes = require("./routes/qpvRoutes");
 const rankingRoutes = require("./routes/rankingRoutes");
@@ -96,6 +97,7 @@ app.use('/api/qpv', qpvRoutes);
 app.use('/api/rankings', rankingRoutes);
 app.use('/api/subventions', subventionRoutes);
 app.use('/api/migrants', migrantRoutes);
+app.use('/api/mosques', mosqueRoutes);
 app.use('/api/nat1', nat1Routes);
 app.use("/api", otherRoutes); // Keep this commented to test
 app.use("/api/cache", cacheRoutes);

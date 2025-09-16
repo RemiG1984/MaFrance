@@ -30,6 +30,21 @@
               </v-col>
             </v-row>
 
+            <!-- Correlation Explanation -->
+            <v-row class="mb-4">
+              <v-col cols="12">
+                <v-alert
+                  type="info"
+                  variant="tonal"
+                  density="compact"
+                  class="text-body-2"
+                >
+                  <div class="text-subtitle-2 mb-2">Principe de la corrélation</div>
+                  La corrélation statistique mesure le lien entre deux variables, c'est-à-dire si elles évoluent ensemble d'une certaine manière. Par exemple, si on observe que quand une variable augmente, l'autre augmente aussi (ou diminue), on parle de corrélation. Le coefficient de Pearson, noté r, est un nombre entre -1 et 1 qui quantifie cette relation. Si r est proche de 1, les variables augmentent ensemble (corrélation positive forte) ; si r est proche de -1, l'une augmente quand l'autre diminue (corrélation négative forte) ; si r est proche de 0, il n'y a pas de lien clair. C'est un outil simple pour repérer des tendances, mais il ne prouve pas que l'une cause l'autre.
+                </v-alert>
+              </v-col>
+            </v-row>
+
             <!-- Metric Axis Selection -->
             <v-row class="mb-3">
               <v-col cols="12" md="6">

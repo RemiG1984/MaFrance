@@ -1,8 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../config/db");
-const fs = require('fs');
-const path = require('path');
 const {
     validateDepartement,
     validateOptionalCOG,
@@ -99,20 +97,51 @@ router.get(
     },
 );
 
-// Get QPV GeoJSON data
+// Get QPV GeoJSON data from database
 router.get('/geojson', (req, res) => {
     try {
-        const geoJsonPath = path.join(__dirname, '../setup/qpv2024.geojson');
+        const query = `
+            SELECT 
+                code_qp,
+                lib_qp,
+                insee_com,
+                lib_com,
+                insee_dep,
+                lib_dep,
+                geometry
+            FROM qpv_coordinates
+        `;
 
-        if (!fs.existsSync(geoJsonPath)) {
-            return res.status(404).json({ error: 'QPV GeoJSON file not found' });
-        }
+        db.all(query, [], (err, rows) => {
+            if (err) {
+                console.error('Error fetching QPV GeoJSON from database:', err);
+                return res.status(500).json({ error: 'Database error' });
+            }
 
-        const geoJsonData = JSON.parse(fs.readFileSync(geoJsonPath, 'utf8'));
-        res.json({ geojson: geoJsonData });
+            // Convert database rows back to GeoJSON format
+            const features = rows.map(row => ({
+                type: "Feature",
+                properties: {
+                    code_qp: row.code_qp,
+                    lib_qp: row.lib_qp,
+                    insee_com: row.insee_com,
+                    lib_com: row.lib_com,
+                    insee_dep: row.insee_dep,
+                    lib_dep: row.lib_dep
+                },
+                geometry: JSON.parse(row.geometry)
+            }));
+
+            const geoJsonData = {
+                type: "FeatureCollection",
+                features: features
+            };
+
+            res.json({ geojson: geoJsonData });
+        });
     } catch (error) {
-        console.error('Error reading QPV GeoJSON:', error);
-        res.status(500).json({ error: 'Error reading QPV data' });
+        console.error('Error processing QPV GeoJSON:', error);
+        res.status(500).json({ error: 'Error processing QPV data' });
     }
 });
 
