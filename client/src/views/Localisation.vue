@@ -5,200 +5,207 @@
       <h1>Localisation des QPV, centres de migrants et mosquées</h1>
     </div>
 
-    <!-- Controls Section -->
-    <div class="controls-section">
-      <v-row class="align-center mb-4">
-        <v-col cols="12" md="6" class="d-flex align-center">
-          <v-text-field
-            v-model="addressInput"
-            label="Rechercher une adresse"
-            placeholder="Ex: 123 Rue de la Paix, Paris"
-            variant="outlined"
-            density="compact"
-            append-inner-icon="mdi-magnify"
-            @click:append-inner="searchAddress"
-            @keyup.enter="searchAddress"
-            :loading="searchingAddress"
-          />
-        </v-col>
-        <v-col cols="12" md="6" class="d-flex align-center">
-          <v-btn
-            color="primary"
-            variant="outlined"
-            prepend-icon="mdi-crosshairs-gps"
-            @click="getCurrentLocation"
-            :loading="gettingLocation"
-            block
-          >
-            Ma position
-          </v-btn>
-        </v-col>
-      </v-row>
-    </div>
+    <!-- Main Content Layout -->
+    <v-row>
+      <!-- Map Section (8/12 columns) -->
+      <v-col cols="12" md="8">
+        <div class="map-section">
+          <v-card class="mb-4">
+            <v-card-text class="pa-0 position-relative">
+              <div id="localisationMap" class="localisation-map"></div>
 
-    <!-- Map Section -->
-    <div class="map-section">
-      <v-card class="mb-4">
-        <v-card-text class="pa-0 position-relative">
-          <div id="localisationMap" class="localisation-map"></div>
-
-          <!-- Map Overlay Controls -->
-          <div class="map-overlay-controls">
-            <v-card elevation="2">
-              <v-card-title 
-                class="pa-2 pb-0 d-flex align-center justify-space-between cursor-pointer"
-                @click="overlayExpanded = !overlayExpanded"
-              >
-                <span class="text-subtitle-2">Affichage des lieux</span>
-                <v-icon size="16">{{ overlayExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-              </v-card-title>
-              <v-expand-transition>
-                <v-card-text v-show="overlayExpanded" class="pa-2 pt-0">
-                  <v-checkbox
-                    v-model="showQpv"
-                    label="Quartiers QPV"
-                    density="compact"
-                    hide-details
-                    @change="onOverlayToggle"
+              <!-- Map Overlay Controls -->
+              <div class="map-overlay-controls">
+                <v-card elevation="2">
+                  <v-card-title 
+                    class="pa-2 pb-0 d-flex align-center justify-space-between cursor-pointer"
+                    @click="overlayExpanded = !overlayExpanded"
                   >
-                    <template v-slot:prepend>
-                      <div style="
-                        background: #ff0000;
-                        border: 2px solid #cc0000;
-                        width: 16px;
-                        height: 16px;
-                        margin-right: 4px;
-                      "></div>
-                    </template>
-                  </v-checkbox>
-                  <v-checkbox
-                    v-model="showMigrantCenters"
-                    label="Centres de migrants"
-                    density="compact"
-                    hide-details
-                    @change="onOverlayToggle"
-                  >
-                    <template v-slot:prepend>
-                      <div style="
-                        background: #000000;
-                        color: white;
-                        border-radius: 50%;
-                        width: 16px;
-                        height: 16px;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        font-size: 10px;
-                        font-weight: bold;
-                        margin-right: 4px;
-                        border: 1px solid #333333;
-                      ">↑</div>
-                    </template>
-                  </v-checkbox>
-                  <v-checkbox
-                    v-model="showMosques"
-                    label="Mosquées"
-                    density="compact"
-                    hide-details
-                    @change="onOverlayToggle"
-                  >
-                    <template v-slot:prepend>
-                      <div style="
-                        background: #2e7d32;
-                        color: white;
-                        border-radius: 50%;
-                        width: 16px;
-                        height: 16px;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        font-size: 10px;
-                        font-weight: bold;
-                        margin-right: 4px;
-                        border: 1px solid #1b5e20;
-                      ">🕌</div>
-                    </template>
-                  </v-checkbox>
-                </v-card-text>
-              </v-expand-transition>
-            </v-card>
-          </div>
-        </v-card-text>
-      </v-card>
+                    <span class="text-subtitle-2">Affichage des lieux</span>
+                    <v-icon size="16">{{ overlayExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+                  </v-card-title>
+                  <v-expand-transition>
+                    <v-card-text v-show="overlayExpanded" class="pa-2 pt-0">
+                      <v-checkbox
+                        v-model="showQpv"
+                        label="Quartiers QPV"
+                        density="compact"
+                        hide-details
+                        @change="onOverlayToggle"
+                      >
+                        <template v-slot:prepend>
+                          <div style="
+                            background: #ff0000;
+                            border: 2px solid #cc0000;
+                            width: 16px;
+                            height: 16px;
+                            margin-right: 4px;
+                          "></div>
+                        </template>
+                      </v-checkbox>
+                      <v-checkbox
+                        v-model="showMigrantCenters"
+                        label="Centres de migrants"
+                        density="compact"
+                        hide-details
+                        @change="onOverlayToggle"
+                      >
+                        <template v-slot:prepend>
+                          <div style="
+                            background: #000000;
+                            color: white;
+                            border-radius: 50%;
+                            width: 16px;
+                            height: 16px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 10px;
+                            font-weight: bold;
+                            margin-right: 4px;
+                            border: 1px solid #333333;
+                          ">↑</div>
+                        </template>
+                      </v-checkbox>
+                      <v-checkbox
+                        v-model="showMosques"
+                        label="Mosquées"
+                        density="compact"
+                        hide-details
+                        @change="onOverlayToggle"
+                      >
+                        <template v-slot:prepend>
+                          <div style="
+                            background: #2e7d32;
+                            color: white;
+                            border-radius: 50%;
+                            width: 16px;
+                            height: 16px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 10px;
+                            font-weight: bold;
+                            margin-right: 4px;
+                            border: 1px solid #1b5e20;
+                          ">🕌</div>
+                        </template>
+                      </v-checkbox>
+                    </v-card-text>
+                  </v-expand-transition>
+                </v-card>
+              </div>
+            </v-card-text>
+          </v-card>
+        </div>
+      </v-col>
 
-      <!-- Distance Information -->
-      <div v-if="selectedLocation && distanceInfo" class="distance-info mb-4">
-        <v-card class="pa-4">
-          <h4 class="mb-3">Votre position est à:</h4>
-          <div v-if="distanceInfo.migrantCenter">
-            <div style="
-              display: inline-flex;
-              background: #000000;
-              color: white;
-              border-radius: 50%;
-              width: 18px;
-              height: 18px;
-              align-items: center;
-              justify-content: center;
-              font-size: 12px;
-              font-weight: bold;
-              margin-right: 8px;
-              border: 1px solid #333333;
-              vertical-align: middle;
-            ">↑</div>
-            <strong>{{ distanceInfo.migrantCenter.distance }}</strong> du centre de migrants le plus proche
-            <div class="text-caption text-grey ml-6">
-              <strong>Type:</strong> {{ distanceInfo.migrantCenter.type }} | <strong>Places:</strong> {{ distanceInfo.migrantCenter.places }} | <strong>Gestionnaire:</strong> {{ distanceInfo.migrantCenter.gestionnaire }}<br>
-              <strong>Adresse:</strong> {{ distanceInfo.migrantCenter.address }}<br>
-              <strong>Commune:</strong> {{ distanceInfo.migrantCenter.commune }}
-            </div>
-          </div>
-          <div v-if="distanceInfo.qpv" class="mt-2">
-            <div style="
-              display: inline-block;
-              background: #ff0000;
-              border: 2px solid #cc0000;
-              width: 18px;
-              height: 18px;
-              margin-right: 8px;
-              vertical-align: middle;
-            "></div>
-            <strong>{{ distanceInfo.qpv.distance }}</strong> du QPV le plus proche
-            <div class="text-caption text-grey ml-6">
-              <strong>QPV:</strong> <a :href="distanceInfo.qpv.link" target="_blank">{{ distanceInfo.qpv.name }}</a><br>
-              <strong>Commune:</strong> {{ distanceInfo.qpv.commune }}
-            </div>
-          </div>
-          <div v-if="distanceInfo.mosque" class="mt-2">
-            <div style="
-              display: inline-flex;
-              background: #2e7d32;
-              color: white;
-              border-radius: 50%;
-              width: 18px;
-              height: 18px;
-              align-items: center;
-              justify-content: center;
-              font-size: 12px;
-              font-weight: bold;
-              margin-right: 8px;
-              border: 1px solid #1b5e20;
-              vertical-align: middle;
-            ">🕌</div>
-            <strong>{{ distanceInfo.mosque.distance }}</strong> de la mosquée la plus proche
-            <div class="text-caption text-grey ml-6">
-              {{ distanceInfo.mosque.name }}<br>
-              <strong>Adresse:</strong> {{ distanceInfo.mosque.address }}<br>
-              <strong>Commune:</strong> {{ distanceInfo.mosque.commune }}
-            </div>
-          </div>
-          <div v-if="!distanceInfo.migrantCenter && !distanceInfo.qpv && !distanceInfo.mosque" class="text-grey">
-            Aucune donnée disponible pour cette position
-          </div>
-        </v-card>
-      </div>
+      <!-- Controls and Distance Information Section (4/12 columns) -->
+      <v-col cols="12" md="4">
+        <!-- Controls Section -->
+        <div class="controls-section mb-4">
+          <v-card class="pa-4">
+            <v-card-title class="pa-0 mb-3">
+              <h3>Recherche</h3>
+            </v-card-title>
+            <v-text-field
+              v-model="addressInput"
+              label="Rechercher une adresse"
+              placeholder="Ex: 123 Rue de la Paix, Paris"
+              variant="outlined"
+              density="compact"
+              append-inner-icon="mdi-magnify"
+              @click:append-inner="searchAddress"
+              @keyup.enter="searchAddress"
+              :loading="searchingAddress"
+              class="mb-3"
+            />
+            <v-btn
+              color="primary"
+              variant="outlined"
+              prepend-icon="mdi-crosshairs-gps"
+              @click="getCurrentLocation"
+              :loading="gettingLocation"
+              block
+            >
+              Ma position
+            </v-btn>
+          </v-card>
+        </div>
 
-    </div>
+        <!-- Distance Information -->
+        <div v-if="selectedLocation && distanceInfo" class="distance-info mb-4">
+          <v-card class="pa-4">
+            <h4 class="mb-3">Votre position est à:</h4>
+            <div v-if="distanceInfo.migrantCenter">
+              <div style="
+                display: inline-flex;
+                background: #000000;
+                color: white;
+                border-radius: 50%;
+                width: 18px;
+                height: 18px;
+                align-items: center;
+                justify-content: center;
+                font-size: 12px;
+                font-weight: bold;
+                margin-right: 8px;
+                border: 1px solid #333333;
+                vertical-align: middle;
+              ">↑</div>
+              <strong>{{ distanceInfo.migrantCenter.distance }}</strong> du centre de migrants le plus proche
+              <div class="text-caption text-grey ml-6">
+                <strong>Type:</strong> {{ distanceInfo.migrantCenter.type }} | <strong>Places:</strong> {{ distanceInfo.migrantCenter.places }} | <strong>Gestionnaire:</strong> {{ distanceInfo.migrantCenter.gestionnaire }}<br>
+                <strong>Adresse:</strong> {{ distanceInfo.migrantCenter.address }}<br>
+                <strong>Commune:</strong> {{ distanceInfo.migrantCenter.commune }}
+              </div>
+            </div>
+            <div v-if="distanceInfo.qpv" class="mt-2">
+              <div style="
+                display: inline-block;
+                background: #ff0000;
+                border: 2px solid #cc0000;
+                width: 18px;
+                height: 18px;
+                margin-right: 8px;
+                vertical-align: middle;
+              "></div>
+              <strong>{{ distanceInfo.qpv.distance }}</strong> du QPV le plus proche
+              <div class="text-caption text-grey ml-6">
+                <strong>QPV:</strong> <a :href="distanceInfo.qpv.link" target="_blank">{{ distanceInfo.qpv.name }}</a><br>
+                <strong>Commune:</strong> {{ distanceInfo.qpv.commune }}
+              </div>
+            </div>
+            <div v-if="distanceInfo.mosque" class="mt-2">
+              <div style="
+                display: inline-flex;
+                background: #2e7d32;
+                color: white;
+                border-radius: 50%;
+                width: 18px;
+                height: 18px;
+                align-items: center;
+                justify-content: center;
+                font-size: 12px;
+                font-weight: bold;
+                margin-right: 8px;
+                border: 1px solid #1b5e20;
+                vertical-align: middle;
+              ">🕌</div>
+              <strong>{{ distanceInfo.mosque.distance }}</strong> de la mosquée la plus proche
+              <div class="text-caption text-grey ml-6">
+                {{ distanceInfo.mosque.name }}<br>
+                <strong>Adresse:</strong> {{ distanceInfo.mosque.address }}<br>
+                <strong>Commune:</strong> {{ distanceInfo.mosque.commune }}
+              </div>
+            </div>
+            <div v-if="!distanceInfo.migrantCenter && !distanceInfo.qpv && !distanceInfo.mosque" class="text-grey">
+              Aucune donnée disponible pour cette position
+            </div>
+          </v-card>
+        </div>
+      </v-col>
+    </v-row>
   </div>
 </template>
 
@@ -1049,10 +1056,7 @@ export default {
 }
 
 .controls-section {
-  background: #f5f5f5;
-  padding: 20px;
-  border-radius: 8px;
-  margin-bottom: 20px;
+  /* Removed background and padding since it's now in a v-card */
 }
 
 .map-section {
