@@ -305,10 +305,10 @@ export default {
       // Add zoom handler for updating icons
       map.on('zoomend', updateAllIcons)
 
-      // Load layers
-      await loadQpvLayer()
-      await loadMigrantCenters()
-      await loadMosques()
+      // Load QPV layer by default since showQpv is true by default
+      if (showQpv.value) {
+        await loadQpvLayer()
+      }
     }
 
     // Handle map click
@@ -589,9 +589,12 @@ export default {
     }
 
     // Handle overlay toggle changes
-    const onOverlayToggle = () => {
+    const onOverlayToggle = async () => {
       // Handle migrant centers layer
       if (showMigrantCenters.value) {
+        if (allMigrantCenters.length === 0) {
+          await loadMigrantCenters()
+        }
         showMigrantCentersOnMap()
       } else if (migrantCentersLayer) {
         map.removeLayer(migrantCentersLayer)
@@ -599,7 +602,9 @@ export default {
 
       // Handle QPV layer
       if (showQpv.value) {
-        if (qpvLayer && !map.hasLayer(qpvLayer)) {
+        if (!qpvLayer) {
+          await loadQpvLayer()
+        } else if (!map.hasLayer(qpvLayer)) {
           qpvLayer.addTo(map)
         }
       } else if (qpvLayer && map.hasLayer(qpvLayer)) {
@@ -608,6 +613,9 @@ export default {
 
       // Handle mosque layer
       if (showMosques.value) {
+        if (allMosques.length === 0) {
+          await loadMosques()
+        }
         showMosquesOnMap()
       } else if (mosqueLayer && map.hasLayer(mosqueLayer)) {
         map.removeLayer(mosqueLayer)
@@ -690,9 +698,6 @@ export default {
             !OVERSEAS_DEPARTMENTS.includes(center.departement)
           )
           console.log('Loaded migrant centers:', allMigrantCenters.length)
-          if (showMigrantCenters.value) {
-            showMigrantCentersOnMap()
-          }
         }
       } catch (error) {
         console.error('Error loading migrant centers:', error)
@@ -913,9 +918,7 @@ export default {
             }
           })
 
-          if (showQpv.value) {
-            qpvLayer.addTo(map)
-          }
+          qpvLayer.addTo(map)
           console.log('QPV layer loaded successfully')
         }
       } catch (error) {
@@ -944,9 +947,6 @@ export default {
               longitude: parseFloat(mosque.longitude)
             }))
           console.log('Loaded mosques:', allMosques.length)
-          if (showMosques.value) {
-            showMosquesOnMap()
-          }
         }
       } catch (error) {
         console.error('Error loading mosques:', error)
