@@ -388,7 +388,7 @@ export const useDataStore = defineStore("data", {
             await this.setDepartement(params.c)
           }
         } else {
-          // Stay at country level
+          // Stay at country level but ensure we load country data
           await this.setCountry()
         }
 
@@ -399,6 +399,10 @@ export const useDataStore = defineStore("data", {
       } catch (error) {
         console.error('Error handling shared navigation:', error)
         sessionStorage.removeItem('pendingNavigation')
+        // Fallback to country level
+        setTimeout(() => {
+          this.triggerLocationSelectorAutoZoom()
+        }, 500)
       }
     },
 
