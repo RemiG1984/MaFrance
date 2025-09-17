@@ -14,6 +14,7 @@
           <!-- Map -->
           <v-col cols="12">
             <MapComponent 
+              ref="mapComponent"
               :location="currentLocation"
             />
           </v-col>
@@ -284,6 +285,20 @@ export default {
       levels: ['country', 'departement', 'commune'],
       crimeData: null
     }
+  },
+  beforeRouteEnter(to, from, next) {
+    next(vm => {
+      // When navigating to Home from another route, ensure map refreshes
+      if (from.name && from.name !== 'Home') {
+        vm.$nextTick(() => {
+          // Trigger map update after component is ready
+          const mapComponent = vm.$refs.mapComponent;
+          if (mapComponent && typeof mapComponent.updateData === 'function') {
+            mapComponent.updateData();
+          }
+        });
+      }
+    });
   },
   mounted() {
 
