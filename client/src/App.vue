@@ -178,7 +178,6 @@ import ShareButton from './components/ShareButton.vue'
 import HamburgerIcon from './components/HamburgerIcon.vue'
 import { mapStores } from 'pinia'
 import { useDataStore } from './services/store.js'
-import { useTheme } from 'vuetify'
 
 export default {
   name: 'App',
@@ -187,24 +186,6 @@ export default {
     LocationSelector,
     ShareButton,
     HamburgerIcon
-  },
-  setup() {
-    const theme = useTheme()
-    
-    // Listen for system theme changes
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-    const handleThemeChange = (e) => {
-      theme.global.name.value = e.matches ? 'dark' : 'light'
-    }
-    
-    mediaQuery.addEventListener('change', handleThemeChange)
-    
-    // Cleanup listener on unmount
-    const cleanup = () => {
-      mediaQuery.removeEventListener('change', handleThemeChange)
-    }
-    
-    return { cleanup }
   },
   computed: {
     ...mapStores(useDataStore),
@@ -235,12 +216,6 @@ export default {
     
     // Initialize store to sync with MetricsConfig
     this.dataStore.initializeStore()
-  },
-  beforeUnmount() {
-    // Cleanup theme listener
-    if (this.cleanup) {
-      this.cleanup()
-    }
   },
   methods: {
     handleUrlParameters() {
@@ -285,11 +260,6 @@ export default {
 .twitter-btn {
   background-color: #000000 !important; /* Black background */
   color: #ffffff !important; /* White text for contrast */
-}
-
-.v-theme--dark .twitter-btn {
-  background-color: #1d9bf0 !important; /* Twitter blue for dark mode */
-  color: #ffffff !important;
 }
 
 .kofi-icon {
@@ -346,10 +316,6 @@ export default {
   color: #ffffff !important;
   margin: 8px 16px;
   border-radius: 4px;
-}
-
-.v-theme--dark .twitter-mobile {
-  background-color: #1d9bf0 !important;
 }
 
 .kofi-mobile {
