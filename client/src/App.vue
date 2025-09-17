@@ -211,13 +211,11 @@ export default {
     }
   },
   mounted() {
-    // Initialize store to sync with MetricsConfig first
-    this.dataStore.initializeStore()
+    // Handle URL parameters for shared links
+    this.handleUrlParameters()
     
-    // Handle URL parameters for shared links only if not on home page
-    if (this.$route.path !== '/') {
-      this.handleUrlParameters()
-    }
+    // Initialize store to sync with MetricsConfig
+    this.dataStore.initializeStore()
   },
   methods: {
     handleUrlParameters() {
