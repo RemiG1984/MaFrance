@@ -125,14 +125,42 @@
               }
             });
 
-            // Check for updates periodically - simplified
-            setInterval(() => {
-              registration.update();
-
-              if (registration.active) {
-                registration.active.postMessage({ type: 'CHECK_UPDATES' });
+            // Smart update checking - only when page is visible
+            let updateInterval;
+            
+            const startUpdateChecking = () => {
+              if (updateInterval) return;
+              updateInterval = setInterval(() => {
+                // Only check if page is visible
+                if (!document.hidden) {
+                  registration.update();
+                  if (registration.active) {
+                    registration.active.postMessage({ type: 'CHECK_UPDATES' });
+                  }
+                }
+              }, 1800000); // Check every 30 minutes
+            };
+            
+            const stopUpdateChecking = () => {
+              if (updateInterval) {
+                clearInterval(updateInterval);
+                updateInterval = null;
               }
-            }, 300000); // Check every 5 minutes
+            };
+            
+            // Start checking
+            startUpdateChecking();
+            
+            // Pause/resume checking based on page visibility
+            document.addEventListener('visibilitychange', () => {
+              if (document.hidden) {
+                stopUpdateChecking();
+              } else {
+                startUpdateChecking();
+                // Check once immediately when page becomes visible
+                registration.update();
+              }
+            });
 
           } catch (error) {
             console.log('SW registration failed: ', error);
