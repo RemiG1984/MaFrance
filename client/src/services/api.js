@@ -164,6 +164,9 @@ class ApiService {
             "/subventions/country/",
             "/subventions/departement/",
             "/subventions/commune/",
+            "/mosques",
+            "/migrants",
+            "/nat1",
         ];
 
         return persistentEndpoints.some((pattern) =>
