@@ -445,33 +445,42 @@ export default {
         }
 
         // Find closest QPV (only if QPVs are shown)
-        if (showQpv.value && allQpvs.length > 0) {
-          const qpvsWithDistances = allQpvs
-            .filter(qpv => qpv.latitude && qpv.longitude &&
-                          !isNaN(parseFloat(qpv.latitude)) &&
-                          !isNaN(parseFloat(qpv.longitude)))
-            .map(qpv => ({
-              ...qpv,
-              latitude: parseFloat(qpv.latitude),
-              longitude: parseFloat(qpv.longitude),
-              distance: calculateDistance(lat, lng, parseFloat(qpv.latitude), parseFloat(qpv.longitude)),
-              type: 'qpv'
-            }))
-            .sort((a, b) => a.distance - b.distance)
+        if (showQpv.value && qpvLayer) {
+          let closestQpv = null
+          let minDistance = Infinity
 
-          if (qpvsWithDistances.length > 0) {
-            const closest = qpvsWithDistances[0]
-            closestLocations.push(closest)
+          qpvLayer.eachLayer((layer) => {
+            const feature = layer.feature
+            if (!feature || !feature.properties) return
 
-            const formattedDistance = closest.distance < 1
-              ? `${Math.round(closest.distance * 1000)}m`
-              : `${closest.distance.toFixed(1)}km`
+            // Calculate distance to closest point on this QPV polygon
+            const distanceToPolygon = getDistanceToPolygon(lat, lng, feature.geometry)
+            
+            if (distanceToPolygon < minDistance) {
+              minDistance = distanceToPolygon
+              const centroid = calculateGeometryCentroid(feature.geometry)
+              closestQpv = {
+                ...feature.properties,
+                latitude: centroid ? centroid.lat : null,
+                longitude: centroid ? centroid.lng : null,
+                distance: distanceToPolygon,
+                type: 'qpv'
+              }
+            }
+          })
+
+          if (closestQpv) {
+            closestLocations.push(closestQpv)
+
+            const formattedDistance = closestQpv.distance < 1
+              ? `${Math.round(closestQpv.distance * 1000)}m`
+              : `${closestQpv.distance.toFixed(1)}km`
 
             newDistanceInfo.qpv = {
               distance: formattedDistance,
-              name: closest.lib_qp || closest.code_qp || 'N/A',
-              link: `https://sig.ville.gouv.fr/territoire/${closest.code_qp}`,
-              commune: closest.lib_com || 'N/A',
+              name: closestQpv.lib_qp || closestQpv.code_qp || 'N/A',
+              link: `https://sig.ville.gouv.fr/territoire/${closestQpv.code_qp}`,
+              commune: closestQpv.lib_com || 'N/A',
               expanded: false
             }
           }
@@ -1021,6 +1030,86 @@ export default {
         console.error('Error calculating centroid:', error)
         return null
       }
+    }
+
+    // Calculate distance from point to polygon (minimum distance to any point on polygon boundary)
+    const getDistanceToPolygon = (pointLat, pointLng, geometry) => {
+      try {
+        let minDistance = Infinity
+        
+        const processCoordinateRing = (coordinates) => {
+          for (let i = 0; i < coordinates.length - 1; i++) {
+            const segmentDistance = getDistanceToLineSegment(
+              pointLat, pointLng,
+              coordinates[i][1], coordinates[i][0],
+              coordinates[i + 1][1], coordinates[i + 1][0]
+            )
+            minDistance = Math.min(minDistance, segmentDistance)
+          }
+        }
+
+        if (geometry.type === 'MultiPolygon') {
+          geometry.coordinates.forEach(polygon => {
+            polygon.forEach(ring => processCoordinateRing(ring))
+          })
+        } else if (geometry.type === 'Polygon') {
+          geometry.coordinates.forEach(ring => processCoordinateRing(ring))
+        }
+
+        return minDistance
+      } catch (error) {
+        console.error('Error calculating distance to polygon:', error)
+        return Infinity
+      }
+    }
+
+    // Calculate distance from point to line segment
+    const getDistanceToLineSegment = (px, py, x1, y1, x2, y2) => {
+      // Convert to radians for more accurate calculation
+      const toRad = (deg) => deg * Math.PI / 180
+      
+      px = toRad(px)
+      py = toRad(py)
+      x1 = toRad(x1)
+      y1 = toRad(y1)
+      x2 = toRad(x2)
+      y2 = toRad(y2)
+
+      // Calculate the closest point on the line segment
+      const A = px - x1
+      const B = py - y1
+      const C = x2 - x1
+      const D = y2 - y1
+
+      const dot = A * C + B * D
+      const lenSq = C * C + D * D
+      
+      let param = -1
+      if (lenSq !== 0) {
+        param = dot / lenSq
+      }
+
+      let xx, yy
+      if (param < 0) {
+        xx = x1
+        yy = y1
+      } else if (param > 1) {
+        xx = x2
+        yy = y2
+      } else {
+        xx = x1 + param * C
+        yy = y1 + param * D
+      }
+
+      // Calculate distance using Haversine formula
+      const R = 6371 // Earth's radius in km
+      const dLat = px - xx
+      const dLon = py - yy
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(xx) * Math.cos(px) *
+                Math.sin(dLon/2) * Math.sin(dLon/2)
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+      return R * c
     }
 
     // Get polygon centroid
