@@ -131,46 +131,21 @@ class ApiService {
      * Determine if endpoint should be persistently cached
      */
     shouldPersistCache(endpoint) {
-        const persistentEndpoints = [
-            "/departements/crime_history",
-            "/departements/names_history",
-            "/communes/crime_history",
-            "/communes/names_history",
-            "/country/crime_history",
-            "/country/names_history",
-            "/departements/crime",
-            "/departements/names",
-            "/departements/prefet",
-            "/communes/crime",
-            "/communes/names",
-            "/communes/maire",
-            "/country/crime",
-            "/country/names",
-            "/country/ministre",
-            "/qpv/",
-            "/departements/details",
-            "/communes/details",
-            "/country/details",
-            "/articles/lieux",
-            "/articles",
-            "/articles/counts",
+        const persistentPatterns = [
             "/departements",
-            "/communes",
-            "/rankings/departements",
-            "/rankings/communes",
-            "/communes/search",
-            "/migrants/departement/",
-            "/migrants/commune/",
-            "/subventions/country/",
-            "/subventions/departement/",
-            "/subventions/commune/",
-            "/mosques",
+            "/communes", 
+            "/country",
+            "/qpv",
+            "/rankings",
+            "/subventions",
             "/migrants",
+            "/mosques",
             "/nat1",
+            "/articles"
         ];
 
-        return persistentEndpoints.some((pattern) =>
-            endpoint.includes(pattern),
+        return persistentPatterns.some((pattern) =>
+            endpoint.startsWith(pattern),
         );
     }
 

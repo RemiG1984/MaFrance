@@ -4,14 +4,7 @@ const API_CACHE_NAME = `ma-france-api-${BUILD_HASH}`;
 const IMAGE_CACHE_NAME = `ma-france-images-${BUILD_HASH}`;
 const TILE_CACHE_NAME = `ma-france-tiles-${BUILD_HASH}`;
 
-// API routes that should be cached
-const API_ROUTES = [
-  '/api/country/details',
-  '/api/country/names',
-  '/api/country/crime',
-  '/api/departements',
-  '/api/communes'
-];
+// All API routes are cached automatically based on /api/ prefix
 
 // Install event - no static asset caching
 self.addEventListener('install', (event) => {
