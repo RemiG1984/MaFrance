@@ -193,6 +193,15 @@ export default {
     // Listen for metric updates from LocationSelector
     window.addEventListener('updateMapMetric', this.handleMetricUpdate)
   },
+  
+  activated() {
+    // Reinitialize data when component becomes active (navigation back)
+    if (this.map && this.dataStore.currentLevel) {
+      this.$nextTick(() => {
+        this.updateData()
+      })
+    }
+  },
   methods: {
     handleMetricUpdate(event) {
       const newMetricValue = event.detail.metric;

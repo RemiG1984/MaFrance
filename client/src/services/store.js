@@ -350,7 +350,11 @@ export const useDataStore = defineStore("data", {
     async handlePendingNavigation() {
       const pendingNav = sessionStorage.getItem('pendingNavigation')
       if (!pendingNav) {
-        // If no pending navigation, trigger LocationSelector after delay to auto-zoom map
+        // If no pending navigation and we're at country level, ensure country data is loaded
+        if (!this.currentLevel || this.currentLevel === 'country') {
+          await this.setCountry()
+        }
+        // Trigger LocationSelector after delay to auto-zoom map
         setTimeout(() => {
           this.triggerLocationSelectorAutoZoom()
         }, 500)
