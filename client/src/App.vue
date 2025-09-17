@@ -232,8 +232,7 @@ export default {
         if (urlParams.has('c')) params.c = urlParams.get('c')
         if (urlParams.has('m')) params.m = urlParams.get('m')
         
-        // Always store in sessionStorage, even if there's already a pending navigation
-        // This ensures shared links work on subsequent visits
+        // Store in sessionStorage for the store to process
         sessionStorage.setItem('pendingNavigation', JSON.stringify(params))
         
         // Clear URL parameters to keep URL clean
