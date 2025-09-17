@@ -377,9 +377,6 @@ export const useDataStore = defineStore("data", {
 
         // Navigate to location based on 'c' parameter
         if (params.c) {
-          // Reset current level to force navigation even if data is cached
-          this.currentLevel = null
-          
           // Simple logic: 4 or 5 characters = commune code, 3 or less = departement code
           if (params.c.length >= 4) {
             const communeDetails = await api.getCommuneDetails(params.c)
@@ -391,8 +388,7 @@ export const useDataStore = defineStore("data", {
             await this.setDepartement(params.c)
           }
         } else {
-          // Reset current level and stay at country level
-          this.currentLevel = null
+          // Stay at country level
           await this.setCountry()
         }
 
