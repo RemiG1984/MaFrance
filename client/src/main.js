@@ -12,8 +12,11 @@ const pinia = createPinia()
 // Configuration globale
 // app.config.globalProperties.$api = api
 
-console.log('import.meta.env:', import.meta.env);
-console.log('VITE_API_BASE_URL:', import.meta.env.VITE_API_BASE_URL);
+// Only log in development
+if (import.meta.env.DEV) {
+  console.log('import.meta.env:', import.meta.env);
+  console.log('VITE_API_BASE_URL:', import.meta.env.VITE_API_BASE_URL);
+}
 
 app.use(router)
 app.use(pinia)

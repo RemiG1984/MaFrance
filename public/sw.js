@@ -181,11 +181,16 @@ async function checkForUpdates() {
     const response = await fetch('/api/version?' + Date.now());
     if (response.ok) {
       const serverInfo = await response.json();
-      console.log('Server version checked:', serverInfo);
+      // Only log in development-like environments
+      if (self.location.hostname === 'localhost' || self.location.hostname.includes('127.0.0.1')) {
+        console.log('Server version checked:', serverInfo);
+      }
       return true; // Always return true to indicate check completed
     }
   } catch (error) {
-    console.log('Error checking for updates:', error);
+    if (self.location.hostname === 'localhost' || self.location.hostname.includes('127.0.0.1')) {
+      console.log('Error checking for updates:', error);
+    }
   }
   return false;
 }

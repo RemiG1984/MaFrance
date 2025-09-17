@@ -158,7 +158,9 @@ class ApiService {
             if (this.cache.has(cacheKey)) {
                 const cached = this.cache.get(cacheKey);
                 if (Date.now() - cached.timestamp < this.cacheExpiry) {
-                    console.log("Using memory cached data for:", endpoint);
+                    if (import.meta.env.DEV) {
+                        console.log("Using memory cached data for:", endpoint);
+                    }
                     return cached.data;
                 }
                 this.cache.delete(cacheKey);
@@ -173,7 +175,9 @@ class ApiService {
                 persistentCached &&
                 Date.now() - persistentCached.timestamp < this.cacheExpiry
             ) {
-                console.log("Using persistent cached data for:", endpoint);
+                if (import.meta.env.DEV) {
+                    console.log("Using persistent cached data for:", endpoint);
+                }
                 this.cache.set(persistentCached, persistentCached);
                 return persistentCached.data;
             } else if (persistentCached) {
@@ -184,7 +188,9 @@ class ApiService {
         // Check if the exact same request (including parameters) is already in progress
         const requestKey = `${endpoint}?${new URLSearchParams(options.body ? JSON.parse(options.body) : {}).toString()}`;
         if (this.activeRequests.has(requestKey)) {
-            console.log("Request already in progress, waiting...", requestKey);
+            if (import.meta.env.DEV) {
+                console.log("Request already in progress, waiting...", requestKey);
+            }
             return this.activeRequests.get(requestKey);
         }
 
