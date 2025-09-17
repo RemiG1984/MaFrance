@@ -45,6 +45,20 @@ const searchLimiter = rateLimit({
   message: 'Limite de recherche atteinte, veuillez attendre.',
 });
 
+// Domain redirection middleware
+app.use((req, res, next) => {
+  const host = req.get('host');
+  
+  // Redirect from old Replit domain to new custom domain
+  if (host === 'ouvamafrance.replit.app') {
+    const protocol = req.get('x-forwarded-proto') || req.protocol;
+    const newUrl = `https://mafrance.app${req.originalUrl}`;
+    return res.redirect(301, newUrl);
+  }
+  
+  next();
+});
+
 // Middleware
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.json({ limit: '10mb' }));
