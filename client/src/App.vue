@@ -178,6 +178,7 @@ import ShareButton from './components/ShareButton.vue'
 import HamburgerIcon from './components/HamburgerIcon.vue'
 import { mapStores } from 'pinia'
 import { useDataStore } from './services/store.js'
+import { useTheme } from 'vuetify'
 
 export default {
   name: 'App',
@@ -186,6 +187,22 @@ export default {
     LocationSelector,
     ShareButton,
     HamburgerIcon
+  },
+  setup() {
+    const theme = useTheme()
+    
+    // Listen for system theme changes
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    const handleThemeChange = (e) => {
+      theme.global.name.value = e.matches ? 'dark' : 'light'
+    }
+    
+    mediaQuery.addEventListener('change', handleThemeChange)
+    
+    // Return cleanup function
+    return {
+      cleanup: () => mediaQuery.removeEventListener('change', handleThemeChange)
+    }
   },
   computed: {
     ...mapStores(useDataStore),
@@ -216,6 +233,11 @@ export default {
     
     // Initialize store to sync with MetricsConfig
     this.dataStore.initializeStore()
+  },
+  beforeUnmount() {
+    if (this.cleanup) {
+      this.cleanup()
+    }
   },
   methods: {
     handleUrlParameters() {
