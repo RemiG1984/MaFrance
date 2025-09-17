@@ -232,7 +232,7 @@ export default {
         return div
       }
       L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a> | <a href="https://ouvamafrance.replit.app">https://ouvamafrance.replit.app</a>',
+        attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a> | <a href="https://mafrance.app">mafrance.app</a>',
         subdomains: 'abcd',
         maxZoom: 19
       }).addTo(this.map)
