@@ -544,12 +544,24 @@ export default {
     const createArrowToLocation = (fromLat, fromLng, location) => {
       const fromPoint = [fromLat, fromLng]
       
+      let targetLat = location.latitude
+      let targetLng = location.longitude
+      
+      // For QPV, find the actual closest point on the polygon boundary
+      if (location.type === 'qpv' && qpvLayer) {
+        const closestPoint = findClosestPointOnQpvPolygon(fromLat, fromLng, location)
+        if (closestPoint) {
+          targetLat = closestPoint.lat
+          targetLng = closestPoint.lng
+        }
+      }
+      
       // Calculate direction vector
-      const deltaLat = location.latitude - fromLat
-      const deltaLng = location.longitude - fromLng
+      const deltaLat = targetLat - fromLat
+      const deltaLng = targetLng - fromLng
       const distance = Math.sqrt(deltaLat * deltaLat + deltaLng * deltaLng)
       
-      // Stop arrow just before the destination marker (about 80% of the way)
+      // Stop arrow just before the destination (about 80% of the way)
       const stopRatio = 0.8
       const endLat = fromLat + (deltaLat * stopRatio)
       const endLng = fromLng + (deltaLng * stopRatio)
@@ -1110,6 +1122,86 @@ export default {
                 Math.sin(dLon/2) * Math.sin(dLon/2)
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
       return R * c
+    }
+
+    // Find the closest point on a QPV polygon boundary for arrow targeting
+    const findClosestPointOnQpvPolygon = (pointLat, pointLng, qpvLocation) => {
+      let closestPoint = null
+      let minDistance = Infinity
+
+      qpvLayer.eachLayer((layer) => {
+        const feature = layer.feature
+        if (!feature || !feature.properties) return
+        
+        // Match the QPV by code
+        if (feature.properties.code_qp !== qpvLocation.code_qp) return
+
+        const geometry = feature.geometry
+        
+        const processCoordinateRing = (coordinates) => {
+          for (let i = 0; i < coordinates.length - 1; i++) {
+            const segmentClosestPoint = getClosestPointOnLineSegment(
+              pointLat, pointLng,
+              coordinates[i][1], coordinates[i][0],
+              coordinates[i + 1][1], coordinates[i + 1][0]
+            )
+            
+            const distance = calculateDistance(
+              pointLat, pointLng,
+              segmentClosestPoint.lat, segmentClosestPoint.lng
+            )
+            
+            if (distance < minDistance) {
+              minDistance = distance
+              closestPoint = segmentClosestPoint
+            }
+          }
+        }
+
+        if (geometry.type === 'MultiPolygon') {
+          geometry.coordinates.forEach(polygon => {
+            polygon.forEach(ring => processCoordinateRing(ring))
+          })
+        } else if (geometry.type === 'Polygon') {
+          geometry.coordinates.forEach(ring => processCoordinateRing(ring))
+        }
+      })
+
+      return closestPoint
+    }
+
+    // Get closest point on a line segment
+    const getClosestPointOnLineSegment = (px, py, x1, y1, x2, y2) => {
+      // Calculate the closest point on the line segment
+      const A = px - x1
+      const B = py - y1
+      const C = x2 - x1
+      const D = y2 - y1
+
+      const dot = A * C + B * D
+      const lenSq = C * C + D * D
+      
+      let param = -1
+      if (lenSq !== 0) {
+        param = dot / lenSq
+      }
+
+      let closestLat, closestLng
+      if (param < 0) {
+        closestLat = x1
+        closestLng = y1
+      } else if (param > 1) {
+        closestLat = x2
+        closestLng = y2
+      } else {
+        closestLat = x1 + param * C
+        closestLng = y1 + param * D
+      }
+
+      return {
+        lat: closestLat,
+        lng: closestLng
+      }
     }
 
     // Get polygon centroid
