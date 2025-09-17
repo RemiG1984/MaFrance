@@ -20,6 +20,9 @@ if (import.meta.env.DEV) {
 
 app.use(router)
 app.use(pinia)
-//window.__pinia = pinia; // temporarily expose Pinia globally for debugging
+// Only expose Pinia globally for debugging in development
+if (import.meta.env.DEV) {
+  window.__pinia = pinia;
+}
 app.use(vuetify)
 app.mount('#app')
