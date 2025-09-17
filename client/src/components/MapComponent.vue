@@ -122,6 +122,16 @@ export default {
       };
     }
   },
+  beforeRouteEnter(to, from, next) {
+    next(vm => {
+      // When navigating to home page from another page, force map data refresh
+      if (to.name === 'Home' && from.name && from.name !== 'Home') {
+        vm.$nextTick(() => {
+          vm.updateData();
+        });
+      }
+    });
+  },
   watch: {
     mapState(newState, oldState) {
       if (!oldState ||
