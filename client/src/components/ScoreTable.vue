@@ -202,8 +202,8 @@ export default {
 
       // Handle France country level with metro vs entiere
       if (this.location.type === 'country' && this.location.name === 'France') {
-        const main = this.getFormattedValueFromFranceData(storeSection, metricKey, source, 'metro')
-        const entiere = this.getFormattedValueFromFranceData(storeSection, metricKey, source, 'entiere')
+        const main = this.getFormattedValueFromCountryArray(storeSection, metricKey, source, 'france metro')
+        const entiere = this.getFormattedValueFromCountryArray(storeSection, metricKey, source, 'france entiere')
         return { title, main, compare: '', entiere, subRow: isSubRow }
       }
 
@@ -215,7 +215,7 @@ export default {
       if (compareStoreSection) {
         if (this.location.type === 'departement') {
           // For departements, compare with France metro
-          compare = this.getFormattedValueFromFranceData(compareStoreSection, metricKey, source, 'metro')
+          compare = this.getFormattedValueFromCountryArray(compareStoreSection, metricKey, source, 'france metro')
         } else {
           compare = this.getFormattedValue(compareStoreSection, metricKey, source)
         }
@@ -243,11 +243,13 @@ export default {
       return formatted
     },
 
-    getFormattedValueFromFranceData(storeSection, metricKey, source, type) {
+    getFormattedValueFromCountryArray(storeSection, metricKey, source, countryType) {
       const sectionData = storeSection[source]
-      if (!sectionData || !sectionData[type]) return 'N/A'
+      if (!sectionData || !Array.isArray(sectionData)) return 'N/A'
 
-      const data = sectionData[type]
+      const data = sectionData.find(item => item.country === countryType)
+      if (!data) return 'N/A'
+
       let value = MetricsConfig.calculateMetric(metricKey, data)
       if (value == null || value === undefined || isNaN(value)) return 'N/A'
 

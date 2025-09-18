@@ -289,18 +289,18 @@ const apiService = new ApiService();
 // Convenience methods for common endpoints
 const api = {
     // Country data
-    getCountryDetails: (country = "France") =>
-        apiService.request(`/country/details?country=${country}`),
-    getCountryNames: (country = "France") =>
-        apiService.request(`/country/names?country=${country}`),
-    getCountryCrime: (country = "France") =>
-        apiService.request(`/country/crime?country=${country}`),
-    getCountryCrimeHistory: (country = "France") =>
-        apiService.request(`/country/crime_history?country=${country}`),
-    getCountryNamesHistory: (country = "France") =>
-        apiService.request(`/country/names_history?country=${country}`),
-    getCountryExecutive: (country = "France") =>
-        apiService.request(`/country/ministre?country=${country}`),
+    getCountryDetails: () =>
+        apiService.request(`/country/details`),
+    getCountryNames: () =>
+        apiService.request(`/country/names`),
+    getCountryCrime: () =>
+        apiService.request(`/country/crime`),
+    getCountryCrimeHistory: () =>
+        apiService.request(`/country/crime_history`),
+    getCountryNamesHistory: (country) =>
+        apiService.request(`/country/names_history${country ? `?country=${encodeURIComponent(country)}` : ''}`),
+    getCountryExecutive: () =>
+        apiService.request(`/country/ministre`),
     getCountryArticles: (country = "France") =>
         apiService.request(`/articles?country=${country}`),
 

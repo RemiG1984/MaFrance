@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const db = require("../config/db");
 const cacheService = require("../services/cacheService");
-const { validateCountry } = require("../middleware/validate");
+const { validateCountry, validateCountryHistory } = require("../middleware/validate");
 
 // Centralized error handler for database queries
 const handleDbError = (err, next) => {
@@ -131,64 +131,36 @@ router.get("/names", validateCountry, (req, res) => {
 });
 
 // GET /api/country/names_history
-router.get("/names_history", validateCountry, (req, res) => {
-  const country = req.query.country || "France";
+router.get("/names_history", validateCountryHistory, (req, res) => {
+  const country = req.query.country;
 
   // Try cache first
-  const cachedData = cacheService.get(
-    `country_names_history_${country.toLowerCase()}`,
-  );
+  const cacheKey = country ? `country_names_history_${country.toLowerCase().replace(' ', '_')}` : "country_names_history_all";
+  const cachedData = cacheService.get(cacheKey);
   if (cachedData) {
     return res.json(cachedData);
   }
 
-  // For France, get both metro and entiere data
-  if (country.toLowerCase() === "france") {
-    db.all(
-      `SELECT country, musulman_pct, africain_pct, asiatique_pct, traditionnel_pct, moderne_pct, invente_pct, europeen_pct, annais
-       FROM country_names 
-       WHERE UPPER(country) LIKE 'FRANCE%'
-       ORDER BY country, annais ASC`,
-      [],
-      (err, rows) => {
-        if (err) return handleDbError(err, next);
+  let sql = `SELECT country, musulman_pct, africain_pct, asiatique_pct, traditionnel_pct, moderne_pct, invente_pct, europeen_pct, annais
+             FROM country_names 
+             ORDER BY country, annais ASC`;
+  let params = [];
 
-        const result = {
-          metro: rows.filter((row) =>
-            row.country.toUpperCase().includes("METRO"),
-          ),
-          entiere: rows.filter((row) =>
-            row.country.toUpperCase().includes("ENTIERE"),
-          ),
-        };
-
-        // Cache the result
-        cacheService.set(
-          `country_names_history_${country.toLowerCase()}`,
-          result,
-        );
-        res.json(result);
-      },
-    );
-  } else {
-    db.all(
-      `SELECT musulman_pct, africain_pct, asiatique_pct, traditionnel_pct, moderne_pct, invente_pct, europeen_pct, annais
-       FROM country_names 
-       WHERE UPPER(country) = ? 
-       ORDER BY annais ASC`,
-      [country.toUpperCase()],
-      (err, rows) => {
-        if (err) return handleDbError(err, next);
-
-        // Cache the result
-        cacheService.set(
-          `country_names_history_${country.toLowerCase()}`,
-          rows,
-        );
-        res.json(rows);
-      },
-    );
+  if (country) {
+    sql = `SELECT country, musulman_pct, africain_pct, asiatique_pct, traditionnel_pct, moderne_pct, invente_pct, europeen_pct, annais
+           FROM country_names 
+           WHERE country = ?
+           ORDER BY annais ASC`;
+    params = [country];
   }
+
+  db.all(sql, params, (err, rows) => {
+    if (err) return handleDbError(err, next);
+
+    // Cache the result
+    cacheService.set(cacheKey, rows);
+    res.json(rows);
+  });
 });
 
 // GET /api/country/crime

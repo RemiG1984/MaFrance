@@ -202,6 +202,15 @@ const validateCountry = [
   handleValidationErrors,
 ];
 
+// Validation for country history (names_history endpoint)
+const validateCountryHistory = [
+  query("country")
+    .optional()
+    .isIn(["france entiere", "france metro"])
+    .withMessage("Pays doit être 'france entiere' ou 'france metro'"),
+  handleValidationErrors,
+];
+
 // Validation for lieu
 const validateLieu = [
   query("lieu")
@@ -257,5 +266,6 @@ module.exports = {
   validatePagination,
   validatePopulationRange,
   validateCountry,
+  validateCountryHistory,
   validateLieu,
 };
