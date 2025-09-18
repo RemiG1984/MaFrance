@@ -67,9 +67,8 @@ function importNat1(db, callback) {
 
                     // Route data based on Type
                     if (type === "country") {
-                        // For country level, normalize the code to lowercase for consistency with other tables
-                        const countryValue = code.toLowerCase();
-                        const countryRow = [countryValue, type];
+                        // For country level, use the Code value as the country field
+                        const countryRow = [code, type];
                         Object.keys(numericFields).forEach(key => {
                             countryRow.push(numericFields[key]);
                         });
