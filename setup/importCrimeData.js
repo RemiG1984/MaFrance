@@ -76,7 +76,7 @@ function importCrimeData(db, callback) {
         
                         countryRows++;
                         countryBatch.push([
-                            row['country'],
+                            row['country'].toUpperCase(),
                             row['annee'],
                             ...crimeFields.map(field => values[field])
                         ]);

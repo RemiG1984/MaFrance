@@ -67,8 +67,8 @@ function importNat1(db, callback) {
 
                     // Route data based on Type
                     if (type === "country") {
-                        // For country level, use 'france' as code
-                        const countryRow = ["france", type];
+                        // For country level, use the actual code value (e.g., "FRANCE METRO", "FRANCE ENTIERE")
+                        const countryRow = [code, type];
                         Object.keys(numericFields).forEach(key => {
                             countryRow.push(numericFields[key]);
                         });
