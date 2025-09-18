@@ -307,8 +307,6 @@ export default {
 
     getCompareColumnWidthStyle() {
       return 'width: 25%'
-    },
-
     }
   }
 }
