@@ -50,7 +50,7 @@ const computePercentageFields = (row) => {
   // Calculate percentages and multiply by 100, round to 2 decimal places
   const result = {
     Type: row.Type,
-    Code: row.Code,
+    country: row.Code, // Rename Code to country for consistency with other country data
     Ensemble: ensemble,
     etrangers_pct: parseFloat(((etrangers / ensemble) * 100).toFixed(2)),
     francais_de_naissance_pct: parseFloat(((francais_de_naissance / ensemble) * 100).toFixed(2)),
