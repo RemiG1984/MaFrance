@@ -255,8 +255,8 @@ const MetricsConfig = {
         {
             value: "etrangers_pct",
             label: "Pop. étrangère (%)",
-            alt1Label: "Pop. étrangère  (%)",
-            alt2Label: "Pop. étrangère  (%)",
+            alt1Label: "Pop. étrangère (%)",
+            alt2Label: "Pop. étrangère (%)",
             category: "immigration",
             format: "percentage",
             source: "nat1",
