@@ -6,7 +6,6 @@ const cacheService = require("../services/cacheService");
 const {
   validateDepartement,
   validateCOG,
-  validateCountry,
 } = require("../middleware/validate");
 
 // Centralized error handler for database queries
