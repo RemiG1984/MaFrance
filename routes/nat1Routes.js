@@ -69,7 +69,7 @@ const computePercentageFields = (row) => {
 // GET /api/nat1/country
 router.get("/country", (req, res) => {
   // Try cache first
-  const cachedData = cacheService.get(`nat1_country_france`);
+  const cachedData = cacheService.get(`nat1_country_all`);
   if (cachedData) {
     return res.json(cachedData);
   }
@@ -80,27 +80,13 @@ router.get("/country", (req, res) => {
     (err, rows) => {
       if (err) return handleDbError(err, res);
       if (!rows || rows.length === 0) {
-        return res.status(404).json({ error: "Données NAT1 non trouvées pour la France" });
+        return res.status(404).json({ error: "Données NAT1 non trouvées" });
       }
       
-      const result = {
-        metro: null,
-        entiere: null
-      };
-      
-      rows.forEach(row => {
-        const computedData = computePercentageFields(row);
-        if (computedData) {
-          if (row.Code.toUpperCase().includes('METRO')) {
-            result.metro = computedData;
-          } else if (row.Code.toUpperCase().includes('ENTIERE')) {
-            result.entiere = computedData;
-          }
-        }
-      });
+      const result = rows.map(row => computePercentageFields(row)).filter(Boolean);
       
       // Cache the result
-      cacheService.set(`nat1_country_france`, result);
+      cacheService.set(`nat1_country_all`, result);
       res.json(result);
     }
   );

@@ -31,7 +31,6 @@ router.get("/country", (req, res) => {
     db.all(
         `SELECT country, etat_central, autres_organismes_publics, total_subv_commune, total_subv_EPCI, total_subv_dept, total_subv_region, total_subventions_parHab
          FROM country_subventions 
-         WHERE UPPER(country) LIKE 'FRANCE%'
          ORDER BY country`,
         [],
         (err, rows) => {
@@ -41,16 +40,11 @@ router.get("/country", (req, res) => {
 
             if (!rows || rows.length === 0) {
                 return res.status(404).json({
-                    error: "Données de subventions non trouvées pour la France",
+                    error: "Données de subventions non trouvées",
                 });
             }
 
-            const result = {
-                metro: rows.find(row => row.country.toUpperCase().includes('METRO')) || null,
-                entiere: rows.find(row => row.country.toUpperCase().includes('ENTIERE')) || null
-            };
-
-            res.json(result);
+            res.json(rows);
         }
     );
 });
