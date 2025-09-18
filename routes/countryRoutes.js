@@ -15,7 +15,7 @@ const handleDbError = (err, next) => {
 // GET /api/country/details
 router.get("/details", validateCountry, (req, res) => {
   const country = req.query.country || "France";
-
+  
   // Try cache first
   const cachedData = cacheService.get(`country_details_${country.toLowerCase()}`);
   if (cachedData) {
@@ -25,20 +25,20 @@ router.get("/details", validateCountry, (req, res) => {
   // For France, get both metro and entiere data
   if (country.toLowerCase() === 'france') {
     db.all(
-      `SELECT country, population, logements_sociaux_pct, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct, total_places_migrants, places_migrants_p1k
-       FROM country
+      `SELECT country, population, logements_sociaux_pct, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct, total_places_migrants, places_migrants_p1k 
+       FROM country 
        WHERE UPPER(country) LIKE 'FRANCE%'
        ORDER BY country`,
       [],
       (err, rows) => {
         if (err) return handleDbError(err, next);
         if (!rows || rows.length === 0) return res.status(404).json({ error: "Données France non trouvées" });
-
+        
         const result = {
-          metro: rows.find(row => row.country.toUpperCase().includes('METRO') || row.country.toLowerCase().includes('metro')) || null,
-          entiere: rows.find(row => row.country.toUpperCase().includes('ENTIERE') || row.country.toLowerCase().includes('entiere')) || null
+          metro: rows.find(row => row.country.toUpperCase().includes('METRO')) || null,
+          entiere: rows.find(row => row.country.toUpperCase().includes('ENTIERE')) || null
         };
-
+        
         // Cache the result
         cacheService.set(`country_details_${country.toLowerCase()}`, result);
         res.json(result);
@@ -46,14 +46,14 @@ router.get("/details", validateCountry, (req, res) => {
     );
   } else {
     db.get(
-      `SELECT country, population, logements_sociaux_pct, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct, total_places_migrants, places_migrants_p1k
-       FROM country
+      `SELECT country, population, logements_sociaux_pct, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct, total_places_migrants, places_migrants_p1k 
+       FROM country 
        WHERE UPPER(country) = ?`,
       [country.toUpperCase()],
       (err, row) => {
         if (err) return handleDbError(err, next);
         if (!row) return res.status(404).json({ error: "Pays non trouvé" });
-
+        
         // Cache the result
         cacheService.set(`country_details_${country.toLowerCase()}`, row);
         res.json(row);
@@ -65,7 +65,7 @@ router.get("/details", validateCountry, (req, res) => {
 // GET /api/country/names
 router.get("/names", validateCountry, (req, res) => {
   const country = req.query.country || "France";
-
+  
   // Try cache first
   const cachedData = cacheService.get(`country_names_${country.toLowerCase()}`);
   if (cachedData) {
@@ -76,7 +76,7 @@ router.get("/names", validateCountry, (req, res) => {
   if (country.toLowerCase() === 'france') {
     db.all(
       `SELECT country, musulman_pct, africain_pct, asiatique_pct, traditionnel_pct, moderne_pct, annais
-       FROM country_names
+       FROM country_names 
        WHERE UPPER(country) LIKE 'FRANCE%'
        AND annais = (SELECT MAX(annais) FROM country_names WHERE UPPER(country) LIKE 'FRANCE%')
        ORDER BY country`,
@@ -87,12 +87,12 @@ router.get("/names", validateCountry, (req, res) => {
           return res.status(404).json({
             error: "Données de prénoms non trouvées pour la dernière année",
           });
-
+        
         const result = {
-          metro: rows.find(row => row.country.toUpperCase().includes('METRO') || row.country.toLowerCase().includes('metro')) || null,
-          entiere: rows.find(row => row.country.toUpperCase().includes('ENTIERE') || row.country.toLowerCase().includes('entiere')) || null
+          metro: rows.find(row => row.country.toUpperCase().includes('METRO')) || null,
+          entiere: rows.find(row => row.country.toUpperCase().includes('ENTIERE')) || null
         };
-
+        
         // Cache the result
         cacheService.set(`country_names_${country.toLowerCase()}`, result);
         res.json(result);
@@ -101,7 +101,7 @@ router.get("/names", validateCountry, (req, res) => {
   } else {
     db.get(
       `SELECT musulman_pct, africain_pct, asiatique_pct, traditionnel_pct, moderne_pct, annais
-       FROM country_names
+       FROM country_names 
        WHERE UPPER(country) = ? AND annais = (SELECT MAX(annais) FROM country_names WHERE UPPER(country) = ?)`,
       [country.toUpperCase(), country.toUpperCase()],
       (err, row) => {
@@ -112,7 +112,7 @@ router.get("/names", validateCountry, (req, res) => {
             .json({
               error: "Données de prénoms non trouvées pour la dernière année",
             });
-
+        
         // Cache the result
         cacheService.set(`country_names_${country.toLowerCase()}`, row);
         res.json(row);
@@ -124,7 +124,7 @@ router.get("/names", validateCountry, (req, res) => {
 // GET /api/country/names_history
 router.get("/names_history", validateCountry, (req, res) => {
   const country = req.query.country || "France";
-
+  
   // Try cache first
   const cachedData = cacheService.get(`country_names_history_${country.toLowerCase()}`);
   if (cachedData) {
@@ -135,18 +135,18 @@ router.get("/names_history", validateCountry, (req, res) => {
   if (country.toLowerCase() === 'france') {
     db.all(
       `SELECT country, musulman_pct, africain_pct, asiatique_pct, traditionnel_pct, moderne_pct, invente_pct, europeen_pct, annais
-       FROM country_names
+       FROM country_names 
        WHERE UPPER(country) LIKE 'FRANCE%'
        ORDER BY country, annais ASC`,
       [],
       (err, rows) => {
         if (err) return handleDbError(err, next);
-
+        
         const result = {
-          metro: rows.filter(row => row.country.toUpperCase().includes('METRO') || row.country.toLowerCase().includes('metro')),
-          entiere: rows.filter(row => row.country.toUpperCase().includes('ENTIERE') || row.country.toLowerCase().includes('entiere'))
+          metro: rows.filter(row => row.country.toUpperCase().includes('METRO')),
+          entiere: rows.filter(row => row.country.toUpperCase().includes('ENTIERE'))
         };
-
+        
         // Cache the result
         cacheService.set(`country_names_history_${country.toLowerCase()}`, result);
         res.json(result);
@@ -155,13 +155,13 @@ router.get("/names_history", validateCountry, (req, res) => {
   } else {
     db.all(
       `SELECT musulman_pct, africain_pct, asiatique_pct, traditionnel_pct, moderne_pct, invente_pct, europeen_pct, annais
-       FROM country_names
-       WHERE UPPER(country) = ?
+       FROM country_names 
+       WHERE UPPER(country) = ? 
        ORDER BY annais ASC`,
       [country.toUpperCase()],
       (err, rows) => {
         if (err) return handleDbError(err, next);
-
+        
         // Cache the result
         cacheService.set(`country_names_history_${country.toLowerCase()}`, rows);
         res.json(rows);
@@ -173,7 +173,7 @@ router.get("/names_history", validateCountry, (req, res) => {
 // GET /api/country/crime
 router.get("/crime", validateCountry, (req, res) => {
   const country = req.query.country || "France";
-
+  
   // Try cache first
   const cachedData = cacheService.get(`country_crime_${country.toLowerCase()}`);
   if (cachedData) {
@@ -183,8 +183,8 @@ router.get("/crime", validateCountry, (req, res) => {
   // For France, get both metro and entiere data
   if (country.toLowerCase() === 'france') {
     db.all(
-      `SELECT *
-       FROM country_crime
+      `SELECT * 
+       FROM country_crime 
        WHERE UPPER(country) LIKE 'FRANCE%'
        AND annee = (SELECT MAX(annee) FROM country_crime WHERE UPPER(country) LIKE 'FRANCE%')
        ORDER BY country`,
@@ -195,12 +195,12 @@ router.get("/crime", validateCountry, (req, res) => {
           return res.status(404).json({
             error: "Données criminelles non trouvées pour la dernière année",
           });
-
+        
         const result = {
-          metro: rows.find(row => row.country.toUpperCase().includes('METRO') || row.country.toLowerCase().includes('metro')) || null,
-          entiere: rows.find(row => row.country.toUpperCase().includes('ENTIERE') || row.country.toLowerCase().includes('entiere')) || null
+          metro: rows.find(row => row.country.toUpperCase().includes('METRO')) || null,
+          entiere: rows.find(row => row.country.toUpperCase().includes('ENTIERE')) || null
         };
-
+        
         // Cache the result
         cacheService.set(`country_crime_${country.toLowerCase()}`, result);
         res.json(result);
@@ -208,8 +208,8 @@ router.get("/crime", validateCountry, (req, res) => {
     );
   } else {
     db.get(
-      `SELECT *
-       FROM country_crime
+      `SELECT * 
+       FROM country_crime 
        WHERE UPPER(country) = ? AND annee = (SELECT MAX(annee) FROM country_crime WHERE UPPER(country) = ?)`,
       [country.toUpperCase(), country.toUpperCase()],
       (err, row) => {
@@ -220,7 +220,7 @@ router.get("/crime", validateCountry, (req, res) => {
             .json({
               error: "Données criminelles non trouvées pour la dernière année",
             });
-
+        
         // Cache the result
         cacheService.set(`country_crime_${country.toLowerCase()}`, row);
         res.json(row);
@@ -232,7 +232,7 @@ router.get("/crime", validateCountry, (req, res) => {
 // GET /api/country/crime_history
 router.get("/crime_history", validateCountry, (req, res) => {
   const country = req.query.country || "France";
-
+  
   // Try cache first
   const cachedData = cacheService.get(`country_crime_history_${country.toLowerCase()}`);
   if (cachedData) {
@@ -243,18 +243,18 @@ router.get("/crime_history", validateCountry, (req, res) => {
   if (country.toLowerCase() === 'france') {
     db.all(
       `SELECT *
-       FROM country_crime
+       FROM country_crime 
        WHERE UPPER(country) LIKE 'FRANCE%'
        ORDER BY country, annee ASC`,
       [],
       (err, rows) => {
         if (err) return handleDbError(err, next);
-
+        
         const result = {
-          metro: rows.filter(row => row.country.toUpperCase().includes('METRO') || row.country.toLowerCase().includes('metro')),
-          entiere: rows.filter(row => row.country.toUpperCase().includes('ENTIERE') || row.country.toLowerCase().includes('entiere'))
+          metro: rows.filter(row => row.country.toUpperCase().includes('METRO')),
+          entiere: rows.filter(row => row.country.toUpperCase().includes('ENTIERE'))
         };
-
+        
         // Cache the result
         cacheService.set(`country_crime_history_${country.toLowerCase()}`, result);
         res.json(result);
@@ -263,13 +263,13 @@ router.get("/crime_history", validateCountry, (req, res) => {
   } else {
     db.all(
       `SELECT *
-       FROM country_crime
-       WHERE UPPER(country) = ?
+       FROM country_crime 
+       WHERE UPPER(country) = ? 
        ORDER BY annee ASC`,
       [country.toUpperCase()],
       (err, rows) => {
         if (err) return handleDbError(err, next);
-
+        
         // Cache the result
         cacheService.set(`country_crime_history_${country.toLowerCase()}`, rows);
         res.json(rows);
@@ -281,7 +281,7 @@ router.get("/crime_history", validateCountry, (req, res) => {
 // GET /api/country/ministre
 router.get("/ministre", validateCountry, (req, res) => {
   const country = req.query.country || "France";
-
+  
   // Try cache first
   const cachedData = cacheService.get(`ministre_${country.toLowerCase()}`);
   if (cachedData) {
@@ -289,15 +289,15 @@ router.get("/ministre", validateCountry, (req, res) => {
   }
 
   db.get(
-    `SELECT prenom, nom, date_mandat, famille_nuance, nuance_politique
-     FROM ministre_interieur
-     WHERE UPPER(country) = ?
+    `SELECT prenom, nom, date_mandat, famille_nuance, nuance_politique 
+     FROM ministre_interieur 
+     WHERE UPPER(country) = ? 
      ORDER BY date_mandat DESC LIMIT 1`,
     [country.toUpperCase()],
     (err, row) => {
       if (err) return handleDbError(res, err);
       if (!row) return res.status(404).json({ error: "Ministre non trouvé" });
-
+      
       // Cache the result
       cacheService.set(`ministre_${country.toLowerCase()}`, row);
       res.json(row);
