@@ -133,7 +133,7 @@ class ApiService {
     shouldPersistCache(endpoint) {
         const persistentPatterns = [
             "/departements",
-            "/communes", 
+            "/communes",
             "/country",
             "/qpv",
             "/rankings",

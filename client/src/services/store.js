@@ -92,11 +92,11 @@ export const useDataStore = defineStore("data", {
             sort: "total_score",
             direction: "DESC",
           }),
-          api.getCountrySubventions(code),
+          api.getCountrySubventions(),
           api.getArticles({ limit: 10 }),
           api.getMigrants({ limit: 10 }),
           api.getQpv({ limit: 10 }),
-          api.getCountryNat1(code),
+          api.getCountryNat1(),
         ]);
 
         const country = {};
@@ -222,7 +222,7 @@ export const useDataStore = defineStore("data", {
     },
 
     setCountry() {
-      this.fetchCountryData().then((country) => {
+      this.fetchCountryData('france').then((country) => {
         this.country = country;
 
         // Clear lower level data when moving to country level
