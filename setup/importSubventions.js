@@ -122,12 +122,13 @@ function importSubventions(db, callback) {
                                 return;
                             }
 
-                            const placeholders = `(${Array(subventionFields.length + 1).fill('?').join(', ')})`;
                             const fieldsList = ['country'].concat(subventionFields).join(', ');
+                            const placeholders = `(${Array(subventionFields.length + 1).fill('?').join(', ')})`;
+                            const batchPlaceholders = countryBatch.map(() => placeholders).join(',');
                             const flatBatch = [].concat(...countryBatch);
                             
                             db.run(
-                                `INSERT OR REPLACE INTO country_subventions (${fieldsList}) VALUES ${placeholders}`,
+                                `INSERT OR REPLACE INTO country_subventions (${fieldsList}) VALUES ${batchPlaceholders}`,
                                 flatBatch,
                                 (err) => {
                                     if (err) {
