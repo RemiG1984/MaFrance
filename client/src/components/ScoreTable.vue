@@ -17,7 +17,6 @@
             <th class="row-title" :style="getHeaderWidthStyle()"></th>
             <th class="score-main" :style="getMainColumnWidthStyle()">{{ mainHeader }}</th>
             <th v-if="compareHeader" class="score-compare" :style="getCompareColumnWidthStyle()">{{ compareHeader }}</th>
-            <th v-if="franceEntiereHeader" class="score-entiere" :style="getEntiereColumnWidthStyle()">{{ franceEntiereHeader }}</th>
           </tr>
         </thead>
         <tbody>
@@ -33,7 +32,6 @@
             </td>
             <td class="score-main">{{ row.main }}</td>
             <td v-if="compareHeader" class="score-compare">{{ row.compare || '' }}</td>
-            <td v-if="franceEntiereHeader" class="score-entiere">{{ row.entiere || '' }}</td>
           </tr>
         </tbody>
       </v-table>
@@ -65,7 +63,6 @@ export default {
       tableRows: [],
       mainHeader: '',
       compareHeader: '',
-      franceEntiereHeader: ''
     }
   },
   computed: {
@@ -167,20 +164,17 @@ export default {
     setHeaders(level, storeSection) {
       if (level === 'country') {
         this.mainHeader = 'France métropolitaine'
-        this.compareHeader = ''
-        this.franceEntiereHeader = 'France entière'
+        this.compareHeader = 'France entière'
       } else if (level === 'departement') {
         const deptCode = this.location.code
         this.mainHeader = `${deptCode} - ${DepartementNames[deptCode] || deptCode}`
         this.compareHeader = 'France métropolitaine'
-        this.franceEntiereHeader = ''
       } else if (level === 'commune') {
         const communeData = storeSection.details
         const departement = communeData.departement
         const commune = communeData.commune
         this.mainHeader = `${departement} - ${commune}`
         this.compareHeader = DepartementNames[departement] || departement
-        this.franceEntiereHeader = ''
       }
     },
 
@@ -200,11 +194,11 @@ export default {
       const title = MetricsConfig.getMetricLabel(metricKey)
       const source = metric.source || 'details'
 
-      // Handle France country level with metro vs entiere
+      // Handle France country level
       if (this.location.type === 'country' && this.location.name === 'France') {
         const main = this.getFormattedValueFromCountryArray(storeSection, metricKey, source, 'france metro')
-        const entiere = this.getFormattedValueFromCountryArray(storeSection, metricKey, source, 'france entiere')
-        return { title, main, compare: '', entiere, subRow: isSubRow }
+        const compare = this.getFormattedValueFromCountryArray(storeSection, metricKey, source, 'france entiere')
+        return { title, main, compare, subRow: isSubRow }
       }
 
       // Get main value
@@ -221,7 +215,7 @@ export default {
         }
       }
 
-      return { title, main, compare, entiere: '', subRow: isSubRow }
+      return { title, main, compare, subRow: isSubRow }
     },
 
     getFormattedValue(storeSection, metricKey, source) {
@@ -302,24 +296,19 @@ export default {
     },
 
     getHeaderWidthStyle() {
-      if (this.franceEntiereHeader) return 'width: 40%'
       if (this.compareHeader) return 'width: 50%'
       return 'width: 70%'
     },
 
     getMainColumnWidthStyle() {
-      if (this.franceEntiereHeader) return 'width: 30%'
       if (this.compareHeader) return 'width: 25%'
       return 'width: 30%'
     },
 
     getCompareColumnWidthStyle() {
-      if (this.franceEntiereHeader) return 'width: 30%'
       return 'width: 25%'
     },
 
-    getEntiereColumnWidthStyle() {
-      return 'width: 30%'
     }
   }
 }
@@ -360,13 +349,6 @@ export default {
     font-weight: bold;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
-  .score-header .score-entiere {
-    text-align: right;
-    background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
-    color: white;
-    font-weight: bold;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  }
   .score-row {
     border-bottom: 1px solid #f0f0f0;
     transition: all 0.3s ease;
@@ -379,8 +361,7 @@ export default {
   }
   .score-row:not(.sub-row):hover .row-title,
   .score-row:not(.sub-row):hover .score-main,
-  .score-row:not(.sub-row):hover .score-compare,
-  .score-row:not(.sub-row):hover .score-entiere {
+  .score-row:not(.sub-row):hover .score-compare {
     background: linear-gradient(135deg, rgba(33, 150, 243, 0.08) 0%, rgba(25, 118, 210, 0.12) 100%);
     color: #1565c0;
   }
@@ -436,24 +417,14 @@ export default {
     font-weight: 500;
     transition: all 0.3s ease;
   }
-  .score-entiere {
-    padding: 10px 14px;
-    text-align: right;
-    font-size: 14px;
-    color: #666;
-    font-weight: 500;
-    transition: all 0.3s ease;
-  }
   .score-row:nth-child(even) .row-title,
   .score-row:nth-child(even) .score-main,
-  .score-row:nth-child(even) .score-compare,
-  .score-row:nth-child(even) .score-entiere {
+  .score-row:nth-child(even) .score-compare {
     background-color: #ffffff;
   }
   .score-row:nth-child(odd) .row-title,
   .score-row:nth-child(odd) .score-main,
-  .score-row:nth-child(odd) .score-compare,
-  .score-row:nth-child(odd) .score-entiere {
+  .score-row:nth-child(odd) .score-compare {
     background-color: #fafbfc;
   }
 
@@ -481,8 +452,7 @@ export default {
   }
   
   .score-main,
-  .score-compare,
-  .score-entiere {
+  .score-compare {
     width: 25%;
     padding: 6px 4px;
     font-size: 0.875rem;
@@ -510,8 +480,7 @@ export default {
   }
   
   .score-main,
-  .score-compare,
-  .score-entiere {
+  .score-compare {
     padding: 4px 3px;
     font-size: 0.8125rem;
   }

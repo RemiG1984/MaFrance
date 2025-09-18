@@ -34,6 +34,7 @@ function importNames(db, callback) {
                             return;
                         }
 
+                        const country = row["country"];
                         const musulman_pct =
                             parseFloat(row["Musulman_pct"]) || 0;
                         const africain_pct =
