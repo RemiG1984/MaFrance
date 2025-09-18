@@ -78,14 +78,14 @@ export const useDataStore = defineStore("data", {
 
 
     // Requêtes globales getAll()
-    async fetchCountryData(code) {
+    async fetchCountryData() {
       try {
         const results = await Promise.all([
-          api.getCountryDetails(code),
-          api.getCountryNames(code),
-          api.getCountryCrime(code),
+          api.getCountryDetails(),
+          api.getCountryNames(),
+          api.getCountryCrime(),
           api.getCountryCrimeHistory("france metro"),
-          api.getCountryNamesHistory(code),
+          api.getCountryNamesHistory(),
           api.getCountryExecutive(code),
           api.getDepartementRankings({
             limit: 101,
@@ -222,7 +222,7 @@ export const useDataStore = defineStore("data", {
     },
 
     setCountry() {
-      this.fetchCountryData('france').then((country) => {
+      this.fetchCountryData().then((country) => {
         this.country = country;
 
         // Clear lower level data when moving to country level
