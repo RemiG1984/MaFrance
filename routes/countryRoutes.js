@@ -27,7 +27,7 @@ router.get("/details", validateCountry, (req, res) => {
     db.all(
       `SELECT country, population, logements_sociaux_pct, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct, total_places_migrants, places_migrants_p1k 
        FROM country 
-       WHERE UPPER(country) IN ('FRANCE METRO', 'FRANCE ENTIERE')
+       WHERE UPPER(country) LIKE 'FRANCE%'
        ORDER BY country`,
       [],
       (err, rows) => {
@@ -35,8 +35,8 @@ router.get("/details", validateCountry, (req, res) => {
         if (!rows || rows.length === 0) return res.status(404).json({ error: "Données France non trouvées" });
         
         const result = {
-          metro: rows.find(row => row.country.toUpperCase() === 'FRANCE METRO') || null,
-          entiere: rows.find(row => row.country.toUpperCase() === 'FRANCE ENTIERE') || null
+          metro: rows.find(row => row.country.toUpperCase().includes('METRO')) || null,
+          entiere: rows.find(row => row.country.toUpperCase().includes('ENTIERE')) || null
         };
         
         // Cache the result
@@ -77,8 +77,8 @@ router.get("/names", validateCountry, (req, res) => {
     db.all(
       `SELECT country, musulman_pct, africain_pct, asiatique_pct, traditionnel_pct, moderne_pct, annais
        FROM country_names 
-       WHERE UPPER(country) IN ('FRANCE METRO', 'FRANCE ENTIERE') 
-       AND annais = (SELECT MAX(annais) FROM country_names WHERE UPPER(country) IN ('FRANCE METRO', 'FRANCE ENTIERE'))
+       WHERE UPPER(country) LIKE 'FRANCE%'
+       AND annais = (SELECT MAX(annais) FROM country_names WHERE UPPER(country) LIKE 'FRANCE%')
        ORDER BY country`,
       [],
       (err, rows) => {
@@ -89,8 +89,8 @@ router.get("/names", validateCountry, (req, res) => {
           });
         
         const result = {
-          metro: rows.find(row => row.country.toUpperCase() === 'FRANCE METRO') || null,
-          entiere: rows.find(row => row.country.toUpperCase() === 'FRANCE ENTIERE') || null
+          metro: rows.find(row => row.country.toUpperCase().includes('METRO')) || null,
+          entiere: rows.find(row => row.country.toUpperCase().includes('ENTIERE')) || null
         };
         
         // Cache the result
@@ -136,15 +136,15 @@ router.get("/names_history", validateCountry, (req, res) => {
     db.all(
       `SELECT country, musulman_pct, africain_pct, asiatique_pct, traditionnel_pct, moderne_pct, invente_pct, europeen_pct, annais
        FROM country_names 
-       WHERE UPPER(country) IN ('FRANCE METRO', 'FRANCE ENTIERE') 
+       WHERE UPPER(country) LIKE 'FRANCE%'
        ORDER BY country, annais ASC`,
       [],
       (err, rows) => {
         if (err) return handleDbError(err, next);
         
         const result = {
-          metro: rows.filter(row => row.country.toUpperCase() === 'FRANCE METRO'),
-          entiere: rows.filter(row => row.country.toUpperCase() === 'FRANCE ENTIERE')
+          metro: rows.filter(row => row.country.toUpperCase().includes('METRO')),
+          entiere: rows.filter(row => row.country.toUpperCase().includes('ENTIERE'))
         };
         
         // Cache the result
@@ -185,8 +185,8 @@ router.get("/crime", validateCountry, (req, res) => {
     db.all(
       `SELECT * 
        FROM country_crime 
-       WHERE UPPER(country) IN ('FRANCE METRO', 'FRANCE ENTIERE') 
-       AND annee = (SELECT MAX(annee) FROM country_crime WHERE UPPER(country) IN ('FRANCE METRO', 'FRANCE ENTIERE'))
+       WHERE UPPER(country) LIKE 'FRANCE%'
+       AND annee = (SELECT MAX(annee) FROM country_crime WHERE UPPER(country) LIKE 'FRANCE%')
        ORDER BY country`,
       [],
       (err, rows) => {
@@ -197,8 +197,8 @@ router.get("/crime", validateCountry, (req, res) => {
           });
         
         const result = {
-          metro: rows.find(row => row.country.toUpperCase() === 'FRANCE METRO') || null,
-          entiere: rows.find(row => row.country.toUpperCase() === 'FRANCE ENTIERE') || null
+          metro: rows.find(row => row.country.toUpperCase().includes('METRO')) || null,
+          entiere: rows.find(row => row.country.toUpperCase().includes('ENTIERE')) || null
         };
         
         // Cache the result
@@ -244,15 +244,15 @@ router.get("/crime_history", validateCountry, (req, res) => {
     db.all(
       `SELECT *
        FROM country_crime 
-       WHERE UPPER(country) IN ('FRANCE METRO', 'FRANCE ENTIERE') 
+       WHERE UPPER(country) LIKE 'FRANCE%'
        ORDER BY country, annee ASC`,
       [],
       (err, rows) => {
         if (err) return handleDbError(err, next);
         
         const result = {
-          metro: rows.filter(row => row.country.toUpperCase() === 'FRANCE METRO'),
-          entiere: rows.filter(row => row.country.toUpperCase() === 'FRANCE ENTIERE')
+          metro: rows.filter(row => row.country.toUpperCase().includes('METRO')),
+          entiere: rows.filter(row => row.country.toUpperCase().includes('ENTIERE'))
         };
         
         // Cache the result
