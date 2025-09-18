@@ -14,9 +14,10 @@
       <v-table v-else-if="tableRows.length > 0" class="score-table">
         <thead>
           <tr class="score-header">
-            <th class="row-title" :style="compareHeader ? 'width: 50%' : 'width: 70%'"></th>
-            <th class="score-main" :style="compareHeader ? 'width: 25%' : 'width: 30%'">{{ mainHeader }}</th>
-            <th v-if="compareHeader" class="score-compare" style="width: 25%">{{ compareHeader }}</th>
+            <th class="row-title" :style="getHeaderWidthStyle()"></th>
+            <th class="score-main" :style="getMainColumnWidthStyle()">{{ mainHeader }}</th>
+            <th v-if="compareHeader" class="score-compare" :style="getCompareColumnWidthStyle()">{{ compareHeader }}</th>
+            <th v-if="franceEntiereHeader" class="score-entiere" :style="getEntiereColumnWidthStyle()">{{ franceEntiereHeader }}</th>
           </tr>
         </thead>
         <tbody>
@@ -32,6 +33,7 @@
             </td>
             <td class="score-main">{{ row.main }}</td>
             <td v-if="compareHeader" class="score-compare">{{ row.compare || '' }}</td>
+            <td v-if="franceEntiereHeader" class="score-entiere">{{ row.entiere || '' }}</td>
           </tr>
         </tbody>
       </v-table>
@@ -62,7 +64,8 @@ export default {
       loading: false,
       tableRows: [],
       mainHeader: '',
-      compareHeader: ''
+      compareHeader: '',
+      franceEntiereHeader: ''
     }
   },
   computed: {
@@ -163,18 +166,21 @@ export default {
 
     setHeaders(level, storeSection) {
       if (level === 'country') {
-        this.mainHeader = this.location.name
+        this.mainHeader = 'France métropolitaine'
         this.compareHeader = ''
+        this.franceEntiereHeader = 'France entière'
       } else if (level === 'departement') {
         const deptCode = this.location.code
         this.mainHeader = `${deptCode} - ${DepartementNames[deptCode] || deptCode}`
-        this.compareHeader = 'France'
+        this.compareHeader = 'France métropolitaine'
+        this.franceEntiereHeader = ''
       } else if (level === 'commune') {
         const communeData = storeSection.details
         const departement = communeData.departement
         const commune = communeData.commune
         this.mainHeader = `${departement} - ${commune}`
         this.compareHeader = DepartementNames[departement] || departement
+        this.franceEntiereHeader = ''
       }
     },
 
@@ -194,16 +200,28 @@ export default {
       const title = MetricsConfig.getMetricLabel(metricKey)
       const source = metric.source || 'details'
 
+      // Handle France country level with metro vs entiere
+      if (this.location.type === 'country' && this.location.name === 'France') {
+        const main = this.getFormattedValueFromFranceData(storeSection, metricKey, source, 'metro')
+        const entiere = this.getFormattedValueFromFranceData(storeSection, metricKey, source, 'entiere')
+        return { title, main, compare: '', entiere, subRow: isSubRow }
+      }
+
       // Get main value
       const main = this.getFormattedValue(storeSection, metricKey, source)
 
       // Get comparison value (if applicable)
       let compare = ''
       if (compareStoreSection) {
-        compare = this.getFormattedValue(compareStoreSection, metricKey, source)
+        if (this.location.type === 'departement') {
+          // For departements, compare with France metro
+          compare = this.getFormattedValueFromFranceData(compareStoreSection, metricKey, source, 'metro')
+        } else {
+          compare = this.getFormattedValue(compareStoreSection, metricKey, source)
+        }
       }
 
-      return { title, main, compare, subRow: isSubRow }
+      return { title, main, compare, entiere: '', subRow: isSubRow }
     },
 
     getFormattedValue(storeSection, metricKey, source) {
@@ -220,6 +238,26 @@ export default {
         formatted += ` (${sectionData.annais})`
       } else if (source === 'crime' && sectionData.annee) {
         formatted += ` (${sectionData.annee})`
+      }
+
+      return formatted
+    },
+
+    getFormattedValueFromFranceData(storeSection, metricKey, source, type) {
+      const sectionData = storeSection[source]
+      if (!sectionData || !sectionData[type]) return 'N/A'
+
+      const data = sectionData[type]
+      let value = MetricsConfig.calculateMetric(metricKey, data)
+      if (value == null || value === undefined || isNaN(value)) return 'N/A'
+
+      let formatted = MetricsConfig.formatMetricValue(value, metricKey)
+
+      // Add year suffix for specific sources
+      if (source === 'names' && data.annais) {
+        formatted += ` (${data.annais})`
+      } else if (source === 'crime' && data.annee) {
+        formatted += ` (${data.annee})`
       }
 
       return formatted
@@ -259,6 +297,27 @@ export default {
           subRow.classList.toggle('sub-row-hidden')
         })
       }
+    },
+
+    getHeaderWidthStyle() {
+      if (this.franceEntiereHeader) return 'width: 40%'
+      if (this.compareHeader) return 'width: 50%'
+      return 'width: 70%'
+    },
+
+    getMainColumnWidthStyle() {
+      if (this.franceEntiereHeader) return 'width: 30%'
+      if (this.compareHeader) return 'width: 25%'
+      return 'width: 30%'
+    },
+
+    getCompareColumnWidthStyle() {
+      if (this.franceEntiereHeader) return 'width: 30%'
+      return 'width: 25%'
+    },
+
+    getEntiereColumnWidthStyle() {
+      return 'width: 30%'
     }
   }
 }
@@ -299,6 +358,13 @@ export default {
     font-weight: bold;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
+  .score-header .score-entiere {
+    text-align: right;
+    background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+    color: white;
+    font-weight: bold;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
   .score-row {
     border-bottom: 1px solid #f0f0f0;
     transition: all 0.3s ease;
@@ -311,7 +377,8 @@ export default {
   }
   .score-row:not(.sub-row):hover .row-title,
   .score-row:not(.sub-row):hover .score-main,
-  .score-row:not(.sub-row):hover .score-compare {
+  .score-row:not(.sub-row):hover .score-compare,
+  .score-row:not(.sub-row):hover .score-entiere {
     background: linear-gradient(135deg, rgba(33, 150, 243, 0.08) 0%, rgba(25, 118, 210, 0.12) 100%);
     color: #1565c0;
   }
@@ -367,14 +434,24 @@ export default {
     font-weight: 500;
     transition: all 0.3s ease;
   }
+  .score-entiere {
+    padding: 10px 14px;
+    text-align: right;
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
   .score-row:nth-child(even) .row-title,
   .score-row:nth-child(even) .score-main,
-  .score-row:nth-child(even) .score-compare {
+  .score-row:nth-child(even) .score-compare,
+  .score-row:nth-child(even) .score-entiere {
     background-color: #ffffff;
   }
   .score-row:nth-child(odd) .row-title,
   .score-row:nth-child(odd) .score-main,
-  .score-row:nth-child(odd) .score-compare {
+  .score-row:nth-child(odd) .score-compare,
+  .score-row:nth-child(odd) .score-entiere {
     background-color: #fafbfc;
   }
 
@@ -402,7 +479,8 @@ export default {
   }
   
   .score-main,
-  .score-compare {
+  .score-compare,
+  .score-entiere {
     width: 25%;
     padding: 6px 4px;
     font-size: 0.875rem;
@@ -430,7 +508,8 @@ export default {
   }
   
   .score-main,
-  .score-compare {
+  .score-compare,
+  .score-entiere {
     padding: 4px 3px;
     font-size: 0.8125rem;
   }
