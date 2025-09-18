@@ -296,7 +296,7 @@ const api = {
     getCountryCrime: () =>
         apiService.request(`/country/crime`),
     getCountryCrimeHistory: () =>
-        apiService.request(`/country/crime_history`),
+        apiService.request(`/country/crime_history${country ? `?country=${encodeURIComponent(country)}` : ''}`),
     getCountryNamesHistory: (country) =>
         apiService.request(`/country/names_history${country ? `?country=${encodeURIComponent(country)}` : ''}`),
     getCountryExecutive: () =>

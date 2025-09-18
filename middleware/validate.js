@@ -197,17 +197,8 @@ const validatePopulationRange = [
 const validateCountry = [
   query("country")
     .optional()
-    .isIn(["France", "FRANCE"])
-    .withMessage("Pays doit être France"),
-  handleValidationErrors,
-];
-
-// Validation for country history (names_history endpoint)
-const validateCountryHistory = [
-  query("country")
-    .optional()
-    .isIn(["france entiere", "france metro"])
-    .withMessage("Pays doit être 'france entiere' ou 'france metro'"),
+    .isIn(["france metro", "france entiere"])
+    .withMessage("Pays doit être france entiere ou metro"),
   handleValidationErrors,
 ];
 
@@ -266,6 +257,5 @@ module.exports = {
   validatePagination,
   validatePopulationRange,
   validateCountry,
-  validateCountryHistory,
   validateLieu,
 };

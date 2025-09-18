@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const db = require("../config/db");
 const cacheService = require("../services/cacheService");
-const { validateCountry, validateCountryHistory } = require("../middleware/validate");
+const { validateCountry } = require("../middleware/validate");
 
 // Centralized error handler for database queries
 const handleDbError = (err, next) => {
@@ -131,7 +131,7 @@ router.get("/names", validateCountry, (req, res) => {
 });
 
 // GET /api/country/names_history
-router.get("/names_history", validateCountryHistory, (req, res) => {
+router.get("/names_history", validateCountry, (req, res) => {
   const country = req.query.country;
 
   // Try cache first
