@@ -160,40 +160,4 @@ router.get("/commune", validateCOG, (req, res) => {
   );
 });
 
-// GET /api/nat1/all - Get all available NAT1 data types
-router.get("/all", (req, res) => {
-  // Try cache first
-  const cachedData = cacheService.get("nat1_all_summary");
-  if (cachedData) {
-    return res.json(cachedData);
-  }
-
-  const queries = [
-    { name: "country", query: "SELECT COUNT(*) as count FROM country_nat1" },
-    { name: "departement", query: "SELECT COUNT(*) as count FROM department_nat1" },
-    { name: "commune", query: "SELECT COUNT(*) as count FROM commune_nat1" }
-  ];
-
-  const results = {};
-  let completed = 0;
-
-  queries.forEach(({ name, query }) => {
-    db.get(query, [], (err, row) => {
-      if (err) {
-        console.error(`Error querying ${name}:`, err.message);
-        results[name] = { count: 0, error: err.message };
-      } else {
-        results[name] = { count: row.count };
-      }
-      
-      completed++;
-      if (completed === queries.length) {
-        // Cache the result
-        cacheService.set("nat1_all_summary", results);
-        res.json(results);
-      }
-    });
-  });
-});
-
 module.exports = router;
