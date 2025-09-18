@@ -74,7 +74,7 @@ function importSubventions(db, callback) {
                         const excludedFields = ['commune', 'population', 'total_subventions'];
                         
                         // Use the country field from the CSV, or default to 'FRANCE' if not present
-                        const country = row['country'] ? row['country'].toUpperCase() : 'FRANCE';
+                        const country = row['country'];
                         const values = [country];
                         
                         subventionFields.forEach(field => {
