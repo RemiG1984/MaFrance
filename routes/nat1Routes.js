@@ -67,32 +67,41 @@ const computePercentageFields = (row) => {
 };
 
 // GET /api/nat1/country
-router.get("/country", validateCountry, (req, res) => {
-  const country = req.query.country || "France";
-  
+router.get("/country", (req, res) => {
   // Try cache first
-  const cachedData = cacheService.get(`nat1_country_${country.toLowerCase()}`);
+  const cachedData = cacheService.get(`nat1_country_france`);
   if (cachedData) {
     return res.json(cachedData);
   }
 
-  db.get(
-    `SELECT * FROM country_nat1 WHERE UPPER(Code) = ?`,
-    [country.toUpperCase()],
-    (err, row) => {
+  db.all(
+    `SELECT * FROM country_nat1 WHERE UPPER(Code) LIKE 'FRANCE%' ORDER BY Code`,
+    [],
+    (err, rows) => {
       if (err) return handleDbError(err, res);
-      if (!row) {
-        return res.status(404).json({ error: "Données NAT1 non trouvées pour ce pays" });
+      if (!rows || rows.length === 0) {
+        return res.status(404).json({ error: "Données NAT1 non trouvées pour la France" });
       }
       
-      const computedData = computePercentageFields(row);
-      if (!computedData) {
-        return res.status(500).json({ error: "Erreur lors du calcul des pourcentages" });
-      }
+      const result = {
+        metro: null,
+        entiere: null
+      };
+      
+      rows.forEach(row => {
+        const computedData = computePercentageFields(row);
+        if (computedData) {
+          if (row.Code.toUpperCase().includes('METRO')) {
+            result.metro = computedData;
+          } else if (row.Code.toUpperCase().includes('ENTIERE')) {
+            result.entiere = computedData;
+          }
+        }
+      });
       
       // Cache the result
-      cacheService.set(`nat1_country_${country.toLowerCase()}`, computedData);
-      res.json(computedData);
+      cacheService.set(`nat1_country_france`, result);
+      res.json(result);
     }
   );
 });

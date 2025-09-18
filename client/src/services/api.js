@@ -371,8 +371,8 @@ const api = {
     },
 
     // Subventions data
-    getCountrySubventions: (country = "france") =>
-        apiService.request(`/subventions/country/${country}`),
+    getCountrySubventions: () =>
+        apiService.request(`/subventions/country`),
     getDepartementSubventions: (code) =>
         apiService.request(`/subventions/departement/${code}`),
     getCommuneSubventions: (cog) =>
@@ -421,8 +421,8 @@ const api = {
     },
 
     // NAT1 data
-    getCountryNat1: (country = "France") =>
-        apiService.request(`/nat1/country?country=${country}`),
+    getCountryNat1: () =>
+        apiService.request(`/nat1/country`),
     getDepartementNat1: (code) =>
         apiService.request(`/nat1/departement?dept=${code}`),
     getCommuneNat1: (cog) =>
