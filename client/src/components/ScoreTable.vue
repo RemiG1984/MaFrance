@@ -433,22 +433,22 @@ export default {
     table-layout: fixed;
     font-size: 0.875rem;
   }
-  
+
   .score-header th {
     padding: 8px 6px;
   }
-  
+
   .row-title {
     width: 50%;
     padding: 6px 8px;
     font-size: 0.875rem;
   }
-  
+
   .row-title.sub-row {
     padding-left: 24px;
     font-size: 0.8125rem;
   }
-  
+
   .score-main,
   .score-compare {
     width: 25%;
@@ -461,22 +461,22 @@ export default {
   .score-table {
     font-size: 0.8125rem;
   }
-  
+
   .score-header th {
     padding: 6px 4px;
     font-size: 0.8125rem;
   }
-  
+
   .row-title {
     padding: 4px 6px;
     font-size: 0.8125rem;
   }
-  
+
   .row-title.sub-row {
     padding-left: 20px;
     font-size: 0.75rem;
   }
-  
+
   .score-main,
   .score-compare {
     padding: 4px 3px;

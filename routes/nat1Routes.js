@@ -74,7 +74,7 @@ router.get("/country", (req, res) => {
   }
 
   db.all(
-    `SELECT * FROM country_nat1 ORDER BY Code`,
+    `SELECT * FROM country_nat1 ORDER BY country`,
     [],
     (err, rows) => {
       if (err) return handleDbError(err, res);

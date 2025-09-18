@@ -67,8 +67,9 @@ function importNat1(db, callback) {
 
                     // Route data based on Type
                     if (type === "country") {
-                        // For country level, use the actual code value (e.g., "FRANCE METRO", "FRANCE ENTIERE")
-                        const countryRow = [code, type];
+                        // For country level, normalize the code to lowercase for consistency with other tables
+                        const countryValue = code.toLowerCase();
+                        const countryRow = [countryValue, type];
                         Object.keys(numericFields).forEach(key => {
                             countryRow.push(numericFields[key]);
                         });
@@ -181,8 +182,8 @@ function importNat1(db, callback) {
             .replace(/^_+|_+$/g, "");        // Remove leading/trailing underscores
     }
 
-    function createTableSchema(fieldNames) {
-        const baseFields = "Code TEXT PRIMARY KEY, Type TEXT";
+    function createTableSchema(fieldNames, isCountry = false) {
+        const baseFields = isCountry ? "country TEXT PRIMARY KEY, Type TEXT" : "Code TEXT PRIMARY KEY, Type TEXT";
         const sanitizedFieldNames = fieldNames.map(field => sanitizeColumnName(field));
         
         // Check for duplicates after sanitization and make them unique
@@ -203,7 +204,7 @@ function importNat1(db, callback) {
         return `${baseFields}, ${dataFields}`;
     }
 
-    function createInsertQuery(tableName, fieldNames) {
+    function createInsertQuery(tableName, fieldNames, isCountry = false) {
         const sanitizedFieldNames = fieldNames.map(field => sanitizeColumnName(field));
         
         // Apply same uniqueness logic as in createTableSchema
@@ -220,7 +221,8 @@ function importNat1(db, callback) {
             }
         });
         
-        const allFields = ["Code", "Type", ...uniqueFieldNames];
+        const primaryKey = isCountry ? "country" : "Code";
+        const allFields = [primaryKey, "Type", ...uniqueFieldNames];
         const placeholders = allFields.map(() => "?").join(", ");
         return `INSERT OR IGNORE INTO ${tableName} (${allFields.join(", ")}) VALUES (${placeholders})`;
     }
@@ -233,7 +235,7 @@ function importNat1(db, callback) {
             }
 
             db.serialize(() => {
-                const schema = createTableSchema(fieldNames);
+                const schema = createTableSchema(fieldNames, true);
                 db.run(
                     `CREATE TABLE IF NOT EXISTS country_nat1 (${schema})`,
                     (err) => {
@@ -244,7 +246,7 @@ function importNat1(db, callback) {
                         }
 
                         db.run(
-                            "CREATE INDEX IF NOT EXISTS idx_country_nat1 ON country_nat1(Code)",
+                            "CREATE INDEX IF NOT EXISTS idx_country_nat1 ON country_nat1(country)",
                             (err) => {
                                 if (err) {
                                     console.error("Erreur création index country_nat1:", err.message);
@@ -252,7 +254,7 @@ function importNat1(db, callback) {
                                     return;
                                 }
 
-                                const insertQuery = createInsertQuery("country_nat1", fieldNames);
+                                const insertQuery = createInsertQuery("country_nat1", fieldNames, true);
                                 
                                 db.run("BEGIN TRANSACTION", (err) => {
                                     if (err) {
