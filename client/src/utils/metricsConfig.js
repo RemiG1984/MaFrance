@@ -468,16 +468,14 @@ const MetricsConfig = {
         // Extra-European percentage calculation
         extra_europeen_pct: {
             formula: (data) =>
-                Math.round(
-                    data.musulman_pct + data.africain_pct + data.asiatique_pct,
-                ),
+                data.musulman_pct + data.africain_pct + data.asiatique_pct,
             components: ["musulman_pct", "africain_pct", "asiatique_pct"],
         },
 
         // French names percentage calculation
         prenom_francais_pct: {
             formula: (data) =>
-                Math.round(data.traditionnel_pct + data.moderne_pct),
+                data.traditionnel_pct + data.moderne_pct,
             components: ["traditionnel_pct", "moderne_pct"],
         },
 

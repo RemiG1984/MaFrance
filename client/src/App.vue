@@ -15,10 +15,9 @@
             variant="text"
             class="mx-2 twitter-btn"
           >
+            @ 
             <b>𝕏</b>
-            @ou_va_ma_France
           </v-btn>
-
 
           <v-btn
             href="https://ko-fi.com/remi63047"
