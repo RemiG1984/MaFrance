@@ -84,7 +84,7 @@ export const useDataStore = defineStore("data", {
           api.getCountryDetails(code),
           api.getCountryNames(code),
           api.getCountryCrime(code),
-          api.getCountryCrimeHistory(code),
+          api.getCountryCrimeHistory("france metro"),
           api.getCountryNamesHistory(code),
           api.getCountryExecutive(code),
           api.getDepartementRankings({
