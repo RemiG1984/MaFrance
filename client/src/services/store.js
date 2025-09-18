@@ -86,7 +86,7 @@ export const useDataStore = defineStore("data", {
           api.getCountryCrime(),
           api.getCountryCrimeHistory("france metro"),
           api.getCountryNamesHistory("france metro"),
-          api.getCountryExecutive(code),
+          api.getCountryExecutive(),
           api.getDepartementRankings({
             limit: 101,
             sort: "total_score",
