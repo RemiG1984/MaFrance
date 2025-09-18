@@ -50,6 +50,7 @@ const computePercentageFields = (row) => {
   // Calculate percentages and multiply by 100, round to 2 decimal places
   const result = {
     Type: row.Type,
+    Code: row.Code,
     Ensemble: ensemble,
     etrangers_pct: parseFloat(((etrangers / ensemble) * 100).toFixed(2)),
     francais_de_naissance_pct: parseFloat(((francais_de_naissance / ensemble) * 100).toFixed(2)),
@@ -60,13 +61,6 @@ const computePercentageFields = (row) => {
     autres_nationalites_pct: parseFloat(((autres_nationalites / ensemble) * 100).toFixed(2)),
     non_europeens_pct: parseFloat((((algeriens + marocains + tunisiens + turcs + autres_afrique + autres_nationalites) / ensemble) * 100).toFixed(2))
   };
-  
-  // Add appropriate identifier field based on type
-  if (row.Type === 'country') {
-    result.country = row.country;
-  } else {
-    result.Code = row.Code;
-  }
   
   return result;
 };
@@ -80,7 +74,7 @@ router.get("/country", (req, res) => {
   }
 
   db.all(
-    `SELECT * FROM country_nat1 ORDER BY country`,
+    `SELECT * FROM country_nat1 ORDER BY Code`,
     [],
     (err, rows) => {
       if (err) return handleDbError(err, res);
