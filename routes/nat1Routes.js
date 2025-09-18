@@ -75,7 +75,7 @@ router.get("/country", (req, res) => {
   }
 
   db.all(
-    `SELECT * FROM country_nat1 WHERE UPPER(Code) LIKE 'FRANCE%' ORDER BY Code`,
+    `SELECT * FROM country_nat1 ORDER BY Code`,
     [],
     (err, rows) => {
       if (err) return handleDbError(err, res);

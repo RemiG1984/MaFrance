@@ -50,7 +50,7 @@ function importNames(db, callback) {
 
                         countryRows++;
                         countryBatch.push([
-                            row["country"].toUpperCase(),
+                            country,
                             annais,
                             musulman_pct,
                             africain_pct,
