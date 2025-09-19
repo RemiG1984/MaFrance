@@ -37,6 +37,14 @@ const MetricsConfig = {
             "#e53935",
             "#b10026",
         ],
+        alt1Colors: [
+            "#ffffff",
+            "#e8f5e8",
+            "#c8e6c8",
+            "#a3d9a3",
+            "#66bb6a",
+            "#2e7d32",
+        ],
         // Define level-specific min/max values for metrics
         // Values below min are pure white (#ffffff), values above max are darkest red (#b10026)
         metricRanges: {
