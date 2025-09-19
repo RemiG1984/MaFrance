@@ -592,8 +592,21 @@ export default {
       div.innerHTML = content
     },
     generateVerticalGradient() {
+      const level = this.mapState.level === 'country' ? 'departement' : 'commune'
+      const colorScaleConfig = MetricsConfig.getMetricColorScale(this.selectedMetric.value, level);
+      
       const step = 100 / (this.scaleColors.length - 1);
-      const colorStops = this.scaleColors.map((color, index) => {
+      let colors = [...this.scaleColors];
+      
+      // For inverted metrics (or prenom_francais_pct in dynamic mode), reverse the color order in legend
+      const shouldInvertLegend = (colorScaleConfig.useFixedRange && colorScaleConfig.invert) || 
+                                 (!colorScaleConfig.useFixedRange && this.selectedMetric.value === 'prenom_francais_pct');
+      
+      if (shouldInvertLegend) {
+        colors = colors.reverse();
+      }
+      
+      const colorStops = colors.map((color, index) => {
         const position = index * step;
         return `${color} ${position}%`;
       });
