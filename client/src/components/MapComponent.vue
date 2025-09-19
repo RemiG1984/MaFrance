@@ -188,12 +188,21 @@ export default {
   },
   mounted() {
     this.initMap()
-    this.colorscale = chroma.scale(this.scaleColors).domain([0, 1]);
+    this.updateColorScale()
 
     // Listen for metric updates from LocationSelector
     window.addEventListener('updateMapMetric', this.handleMetricUpdate)
   },
   methods: {
+    updateColorScale() {
+      const labelStateName = this.dataStore.getLabelStateName();
+      if (labelStateName === 'alt1') {
+        this.scaleColors = MetricsConfig.colorScale.alt1Colors;
+      } else {
+        this.scaleColors = MetricsConfig.colorScale.defaultColors;
+      }
+      this.colorscale = chroma.scale(this.scaleColors).domain([0, 1]);
+    },
     handleMetricUpdate(event) {
       const newMetricValue = event.detail.metric;
       const metricObj = this.availableMetrics.find(m => m.value === newMetricValue);
@@ -251,7 +260,7 @@ export default {
           this.selectedMetric = metricObj;
         }
       }
-      
+
       this.updateGeoJson()
       this.updateRanking()
       this.updateLayerColors()
@@ -623,6 +632,7 @@ export default {
     onMetricChange(metric) {
       // Update store with selected metric
       this.dataStore.selectedMetric = metric.value;
+      this.updateColorScale(); // Ensure scale colors are updated based on labelState
       this.updateRanking();
       this.updateLayerColors();
       this.updateLegend();
@@ -791,5 +801,5 @@ export default {
   left: 0;
   transform: translateY(-50%);
 }
-  
+
 </style>
