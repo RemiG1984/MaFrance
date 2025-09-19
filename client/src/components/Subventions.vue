@@ -4,8 +4,8 @@
       Subventions publiques aux associations pour: {{ locationName }}
     </v-card-title>
     <v-card-subtitle class="text-caption text-grey pt-0 pb-0">
-      <a href="https://data.ofgl.fr/pages/acces-donnees-comptables-detaillees/" 
-         target="_blank" 
+      <a href="https://data.ofgl.fr/pages/acces-donnees-comptables-detaillees/"
+         target="_blank"
          class="text-decoration-none">
         source data.ofgl.fr
       </a>
@@ -96,12 +96,20 @@ export default {
 
     subventionRows() {
       const rows = [];
-      
+
       // Get country subventions data - prefer france metro, fallback to france entiere or first available
       const countrySubventions = this.getCountrySubventions();
-      
-      // Get population from the country details or from the subventions data itself
-      const countryPopulation = this.countryData.details?.population || countrySubventions?.population || 0;
+
+      // Get population from the country details array - match the same country as subventions
+      let countryPopulation = 0;
+      if (this.countryData.details && Array.isArray(this.countryData.details)) {
+        const selectedCountry = countrySubventions?.country || 'france metro';
+        const countryDetails = this.countryData.details.find(item => item.country === selectedCountry);
+        countryPopulation = countryDetails?.population || 0;
+      } else if (this.countryData.details?.population) {
+        // Fallback for old structure
+        countryPopulation = this.countryData.details.population;
+      }
 
       // Row 1: Ministères (country data) - use country population
       if (countrySubventions?.etat_central != null) {
@@ -127,7 +135,7 @@ export default {
       if (this.departementData.subventions?.subvention_region_distributed != null) {
         const value = this.departementData.subventions.subvention_region_distributed;
         const departementPopulation = this.departementData.details?.population || 0;
-        const nationalRegionAverage = countrySubventions?.total_subv_region && countryPopulation > 0 
+        const nationalRegionAverage = countrySubventions?.total_subv_region && countryPopulation > 0
           ? countrySubventions.total_subv_region / countryPopulation : 0;
         rows.push({
           entity: 'Par la région',
@@ -140,7 +148,7 @@ export default {
       if (this.departementData.subventions?.subvention_departement != null) {
         const value = this.departementData.subventions.subvention_departement;
         const departementPopulation = this.departementData.details?.population || 0;
-        const nationalDeptAverage = countrySubventions?.total_subv_dept && countryPopulation > 0 
+        const nationalDeptAverage = countrySubventions?.total_subv_dept && countryPopulation > 0
           ? countrySubventions.total_subv_dept / countryPopulation : 0;
         rows.push({
           entity: 'Par le département',
@@ -153,7 +161,7 @@ export default {
       if (this.communeData.subventions?.subvention_EPCI_distributed != null) {
         const value = this.communeData.subventions.subvention_EPCI_distributed;
         const communePopulation = this.communeData.details?.population || 0;
-        const nationalEPCIAverage = countrySubventions?.total_subv_EPCI && countryPopulation > 0 
+        const nationalEPCIAverage = countrySubventions?.total_subv_EPCI && countryPopulation > 0
           ? countrySubventions.total_subv_EPCI / countryPopulation : 0;
         rows.push({
           entity: 'Par l\'agglomération',
@@ -166,7 +174,7 @@ export default {
       if (this.communeData.subventions?.subvention_commune != null) {
         const value = this.communeData.subventions.subvention_commune;
         const communePopulation = this.communeData.details?.population || 0;
-        const nationalCommuneAverage = countrySubventions?.total_subv_commune && countryPopulation > 0 
+        const nationalCommuneAverage = countrySubventions?.total_subv_commune && countryPopulation > 0
           ? countrySubventions.total_subv_commune / countryPopulation : 0;
         rows.push({
           entity: 'Par la commune',
@@ -200,10 +208,10 @@ export default {
           // Prefer "france metro", fallback to "france entiere" or first available
           const franceMetro = this.countryData.subventions.find(item => item.country === 'france metro');
           if (franceMetro) return franceMetro;
-          
+
           const franceEntiere = this.countryData.subventions.find(item => item.country === 'france entiere');
           if (franceEntiere) return franceEntiere;
-          
+
           // Fallback to first item if available
           return this.countryData.subventions[0] || null;
         } else {
