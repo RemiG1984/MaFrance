@@ -160,11 +160,6 @@ export default {
         this.showCommuneTooltipWhenReady();
       }
     },
-    'dataStore.labelState': {
-      handler() {
-        this.updateLegend();
-      }
-    },
     'dataStore.selectedMetric': {
       handler(newMetric) {
         if (newMetric) {
@@ -185,6 +180,18 @@ export default {
       },
       immediate: true
     },
+    'dataStore.labelState': {
+      handler() {
+        // Update color scale when version changes
+        this.updateColorScale();
+        // Update layer colors and legend if data is available
+        if (this.dataRef && Object.keys(this.dataRef).length > 0) {
+          this.updateLayerColors();
+          this.updateLegend();
+        }
+      },
+      immediate: false
+    },
   },
   mounted() {
     this.initMap()
@@ -192,6 +199,9 @@ export default {
 
     // Listen for metric updates from LocationSelector
     window.addEventListener('updateMapMetric', this.handleMetricUpdate)
+
+    // Listen for version changes
+    window.addEventListener('versionChanged', this.handleVersionChange)
   },
   methods: {
     updateColorScale() {
@@ -210,6 +220,9 @@ export default {
         this.selectedMetric = metricObj;
         this.onMetricChange(this.selectedMetric);
       }
+    },
+    handleVersionChange() {
+      this.updateData()
     },
     async initMap() {
       if (typeof L === 'undefined') {
@@ -747,6 +760,7 @@ export default {
   },
   beforeUnmount() {
     window.removeEventListener('updateMapMetric', this.handleMetricUpdate)
+    window.removeEventListener('versionChanged', this.handleVersionChange)
     if (this.map) {
       this.map.remove()
     }

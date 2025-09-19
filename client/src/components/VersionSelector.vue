@@ -1,4 +1,3 @@
-
 <template>
   <v-menu offset-y>
     <template v-slot:activator="{ props }">
@@ -41,17 +40,17 @@ export default {
     },
     versionOptions() {
       return [
-        { 
+        {
           label: MetricsConfig.versionLabels?.standard || 'Version Standard',
-          value: 0 
+          value: 0
         },
-        { 
+        {
           label: MetricsConfig.versionLabels?.alt1 || 'Version Alternative 1',
-          value: 1 
+          value: 1
         },
-        { 
+        {
           label: MetricsConfig.versionLabels?.alt2 || 'Version Alternative 2',
-          value: 2 
+          value: 2
         }
       ]
     }
@@ -60,11 +59,16 @@ export default {
     selectVersion(index) {
       this.dataStore.setLabelState(index)
       this.updatePageTitle()
+
+      // Dispatch event to notify components about version change
+      window.dispatchEvent(new CustomEvent('versionChanged', {
+        detail: { labelState: index }
+      }))
     },
     updatePageTitle() {
       const newTitle = this.dataStore.getCurrentPageTitle()
       document.title = newTitle
-      
+
       // Update header h1 only on Home page
       if (this.$route.name === 'Home') {
         const headerH1 = document.querySelector('h1')
