@@ -99,7 +99,9 @@ export default {
       
       // Get country subventions data - prefer france metro, fallback to france entiere or first available
       const countrySubventions = this.getCountrySubventions();
-      const countryPopulation = countrySubventions?.population || 0;
+      
+      // Get population from the country details or from the subventions data itself
+      const countryPopulation = this.countryData.details?.population || countrySubventions?.population || 0;
 
       // Row 1: Ministères (country data) - use country population
       if (countrySubventions?.etat_central != null) {
