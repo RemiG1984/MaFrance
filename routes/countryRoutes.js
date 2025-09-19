@@ -200,18 +200,29 @@ router.get("/ministre", (req, res, next) => {
     sql += ` WHERE UPPER(country) = ? 
              ORDER BY date_mandat DESC LIMIT 1`;
     params = [country.toUpperCase()];
+    
+    // Use db.get for single result when querying specific country
+    db.get(sql, params, (err, row) => {
+      if (err) return handleDbError(err, next);
+      if (!row) return res.status(404).json({ error: "Ministre non trouvé" });
+
+      // Cache the result
+      cacheService.set(cacheKey, row);
+      res.json(row);
+    });
   } else {
     sql += ` ORDER BY country, date_mandat DESC`;
+    
+    // Use db.all for multiple results when getting all countries
+    db.all(sql, params, (err, rows) => {
+      if (err) return handleDbError(err, next);
+      if (!rows || rows.length === 0) return res.status(404).json({ error: "Ministres non trouvés" });
+
+      // Cache the result
+      cacheService.set(cacheKey, rows);
+      res.json(rows);
+    });
   }
-
-  db.all(sql, params, (err, rows) => {
-    if (err) return handleDbError(err, next);
-    if (!rows || rows.length === 0) return res.status(404).json({ error: "Ministres non trouvés" });
-
-    // Cache the result
-    cacheService.set(cacheKey, rows);
-    res.json(rows);
-  });
 });
 
 module.exports = router;
