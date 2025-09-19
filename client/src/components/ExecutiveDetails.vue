@@ -41,6 +41,7 @@
 </template>
 
 <script>
+import { mapStores } from 'pinia'
 import { useDataStore } from '../services/store.js'
 import { DepartementNames } from '../utils/departementNames.js'
 
@@ -58,9 +59,7 @@ export default {
     }
   },
   computed: {
-    dataStore() {
-      return useDataStore()
-    },
+    ...mapStores(useDataStore),
     
     locationName() {
       if (!this.location) return '';
