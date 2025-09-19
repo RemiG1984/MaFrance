@@ -183,46 +183,26 @@ router.get("/crime_history", validateCountry, (req, res, next) => {
 
 // GET /api/country/ministre
 router.get("/ministre", (req, res, next) => {
-  const country = req.query.country;
-
   // Try cache first
-  const cacheKey = country ? `ministre_${country.toLowerCase()}` : "ministre_all";
+  const cacheKey = "ministre_france";
   const cachedData = cacheService.get(cacheKey);
   if (cachedData) {
     return res.json(cachedData);
   }
 
-  let sql = `SELECT country, prenom, nom, date_mandat, famille_nuance, nuance_politique 
-             FROM ministre_interieur`;
-  let params = [];
+  const sql = `SELECT country, prenom, nom, date_mandat, famille_nuance, nuance_politique 
+               FROM ministre_interieur 
+               WHERE UPPER(country) = 'FRANCE'
+               ORDER BY date_mandat DESC LIMIT 1`;
 
-  if (country) {
-    sql += ` WHERE UPPER(country) = ? 
-             ORDER BY date_mandat DESC LIMIT 1`;
-    params = [country.toUpperCase()];
-    
-    // Use db.get for single result when querying specific country
-    db.get(sql, params, (err, row) => {
-      if (err) return handleDbError(err, next);
-      if (!row) return res.status(404).json({ error: "Ministre non trouvé" });
+  db.get(sql, [], (err, row) => {
+    if (err) return handleDbError(err, next);
+    if (!row) return res.status(404).json({ error: "Ministre non trouvé" });
 
-      // Cache the result
-      cacheService.set(cacheKey, row);
-      res.json(row);
-    });
-  } else {
-    sql += ` ORDER BY country, date_mandat DESC`;
-    
-    // Use db.all for multiple results when getting all countries
-    db.all(sql, params, (err, rows) => {
-      if (err) return handleDbError(err, next);
-      if (!rows || rows.length === 0) return res.status(404).json({ error: "Ministres non trouvés" });
-
-      // Cache the result
-      cacheService.set(cacheKey, rows);
-      res.json(rows);
-    });
-  }
+    // Cache the result
+    cacheService.set(cacheKey, row);
+    res.json(row);
+  });
 });
 
 module.exports = router;
