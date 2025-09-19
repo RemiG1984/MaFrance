@@ -38,12 +38,12 @@ const MetricsConfig = {
             "#b10026",
         ],
         alt1Colors: [
-            "#f0f4f0", 
-            "#d4e8d4", 
-            "#a3d8a3",
-            "#66c266",
-            "#2e9d2e",
-            "#1a731a",
+            "#f5f5e8", // Pale cream (neutral, minimal positive change)
+            "#e6f0b3", // Light yellow-green (slight improvement)
+            "#b8e084", // Warm green (moderate improvement)
+            "#80cc66", // Vibrant green (significant improvement)
+            "#4db8a3", // Bright teal (strong positive change)
+            "#2e8b8b", // Deep teal-blue (maximum positive change)
         ],
         // Define level-specific min/max values for metrics
         // Values below min are pure white (#ffffff), values above max are darkest red (#b10026)
