@@ -24,6 +24,6 @@ app.use(pinia)
 if (import.meta.env.DEV) {
   window.__pinia = pinia;
 }
-window.__pinia = pinia;
+//window.__pinia = pinia;
 app.use(vuetify)
 app.mount('#app')
