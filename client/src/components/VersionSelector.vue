@@ -1,26 +1,38 @@
 <template>
-  <v-menu offset-y>
-    <template v-slot:activator="{ props }">
-      <v-btn
-        v-bind="props"
-        variant="text"
-        class="mx-2"
-        append-icon="mdi-chevron-down"
-      >
-        {{ currentVersionLabel }}
-      </v-btn>
+  <v-tooltip bottom>
+    <template v-slot:activator="{ props: tooltipProps }">
+      <v-menu offset-y>
+        <template v-slot:activator="{ props: menuProps }">
+          <v-btn
+            v-bind="{ ...menuProps, ...tooltipProps }"
+            variant="text"
+            class="mx-2"
+            append-icon="mdi-chevron-down"
+          >
+            {{ currentVersionLabel }}
+          </v-btn>
+        </template>
+        <v-list>
+          <v-list-item
+            v-for="(option, index) in versionOptions"
+            :key="index"
+            @click="selectVersion(index)"
+            :class="{ 'v-list-item--active': labelState === index }"
+          >
+            <v-list-item-title>{{ option.label }}</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
     </template>
-    <v-list>
-      <v-list-item
-        v-for="(option, index) in versionOptions"
-        :key="index"
-        @click="selectVersion(index)"
-        :class="{ 'v-list-item--active': labelState === index }"
-      >
-        <v-list-item-title>{{ option.label }}</v-list-item-title>
-      </v-list-item>
-    </v-list>
-  </v-menu>
+    <span>
+      Sélectionnez une version des données :<br>
+      • Version Standard : Données officielles de base<br>
+      • Version Alternative 1 : Données avec méthodologie ajustée<br>
+      • Version Alternative 2 : Données avec analyse étendue
+    </span>
+  </v-tooltip>
+</template>
+    </v-menu>
 </template>
 
 <script>
