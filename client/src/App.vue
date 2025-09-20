@@ -91,8 +91,22 @@
           </template>
 
         <v-spacer></v-spacer>
-        <VersionSelector />
-          <ShareButton :showText="false" />
+        <v-tooltip bottom>
+          <template v-slot:activator="{ props }">
+            <div v-bind="props">
+              <VersionSelector />
+            </div>
+          </template>
+          <span>Choisissez entre différentes versions d'analyse des données</span>
+        </v-tooltip>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ props }">
+            <div v-bind="props">
+              <ShareButton :showText="false" />
+            </div>
+          </template>
+          <span>Partagez cette visualisation avec un lien personnalisé</span>
+        </v-tooltip>
         </div>
 
         <!-- Mobile Hamburger Menu -->
