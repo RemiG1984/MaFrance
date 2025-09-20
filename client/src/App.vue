@@ -41,7 +41,7 @@
                 />
               </v-btn>
             </template>
-            <span>Soutenez le projet en offrant un café</span>
+            <span>Soutenez le projet</span>
           </v-tooltip>
 
 
