@@ -9,63 +9,85 @@
 
         <!-- Desktop Menu -->
         <div class="header-menu d-none d-md-flex">
-          <v-btn
-            href="https://twitter.com/intent/follow?screen_name=ou_va_ma_France"
-            target="_blank"
-            variant="text"
-            class="mx-2 twitter-btn"
-          >
-            @ 
-            <b>𝕏</b>
-          </v-btn>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ props }">
+              <v-btn
+                v-bind="props"
+                href="https://twitter.com/intent/follow?screen_name=ou_va_ma_France"
+                target="_blank"
+                variant="text"
+                class="mx-2 twitter-btn"
+              >
+                @ 
+                <b>𝕏</b>
+              </v-btn>
+            </template>
+            <span>Suivez-nous sur X (Twitter) pour les dernières mises à jour</span>
+          </v-tooltip>
 
-          <v-btn
-            href="https://ko-fi.com/remi63047"
-            target="_blank"
-            variant="text"
-            class="mx-2 kofi-btn"
-          >
-            <img
-              src="/images/kofi_symbol.webp"
-              alt="Ko-fi"
-              class="kofi-icon"
-            />
-          </v-btn>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ props }">
+              <v-btn
+                v-bind="props"
+                href="https://ko-fi.com/remi63047"
+                target="_blank"
+                variant="text"
+                class="mx-2 kofi-btn"
+              >
+                <img
+                  src="/images/kofi_symbol.webp"
+                  alt="Ko-fi"
+                  class="kofi-icon"
+                />
+              </v-btn>
+            </template>
+            <span>Soutenez le projet en offrant un café</span>
+          </v-tooltip>
 
 
           <template v-for="item in menuItems" :key="item.title">
             <!-- Regular menu item -->
-            <v-btn
-              v-if="!item.children"
-              :to="item.path"
-              variant="text"
-              class="mx-2"
-            >
-              {{ item.title }}
-            </v-btn>
-            
-            <!-- Dropdown menu item -->
-            <v-menu v-else offset-y>
+            <v-tooltip v-if="!item.children" bottom>
               <template v-slot:activator="{ props }">
                 <v-btn
                   v-bind="props"
+                  :to="item.path"
                   variant="text"
                   class="mx-2"
-                  append-icon="mdi-chevron-down"
                 >
                   {{ item.title }}
                 </v-btn>
               </template>
-              <v-list>
-                <v-list-item
-                  v-for="child in item.children"
-                  :key="child.path"
-                  :to="child.path"
-                >
-                  <v-list-item-title>{{ child.title }}</v-list-item-title>
-                </v-list-item>
-              </v-list>
-            </v-menu>
+              <span>{{ item.tooltip }}</span>
+            </v-tooltip>
+            
+            <!-- Dropdown menu item -->
+            <v-tooltip v-else bottom>
+              <template v-slot:activator="{ props: tooltipProps }">
+                <v-menu offset-y>
+                  <template v-slot:activator="{ props: menuProps }">
+                    <v-btn
+                      v-bind="{ ...menuProps, ...tooltipProps }"
+                      variant="text"
+                      class="mx-2"
+                      append-icon="mdi-chevron-down"
+                    >
+                      {{ item.title }}
+                    </v-btn>
+                  </template>
+                  <v-list>
+                    <v-list-item
+                      v-for="child in item.children"
+                      :key="child.path"
+                      :to="child.path"
+                    >
+                      <v-list-item-title>{{ child.title }}</v-list-item-title>
+                    </v-list-item>
+                  </v-list>
+                </v-menu>
+              </template>
+              <span>{{ item.tooltip }}</span>
+            </v-tooltip>
           </template>
 
         <v-spacer></v-spacer>
@@ -196,16 +218,25 @@ export default {
     return {
       mobileMenuOpen: false,
       menuItems: [
-        { title: 'Accueil', path: '/' },
+        { 
+          title: 'Accueil', 
+          path: '/',
+          tooltip: 'Retour à la page principale avec les données nationales'
+        },
         {
           title: 'Outils',
+          tooltip: 'Accédez aux différents outils d\'analyse et de visualisation',
           children: [
             { title: 'Classements', path: '/classements' },
             { title: 'Corrélations', path: '/correlations' },
             { title: 'Localisation', path: '/localisation' }
           ]
         },
-        { title: 'Méthodologie', path: '/methodologie' }
+        { 
+          title: 'Méthodologie', 
+          path: '/methodologie',
+          tooltip: 'Découvrez comment les données sont collectées et analysées'
+        }
       ]
     }
   },
