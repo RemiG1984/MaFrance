@@ -97,7 +97,7 @@
               <VersionSelector />
             </div>
           </template>
-          <span>Choisissez entre différentes versions d'analyse des données</span>
+          <span>Modifiez la cosmétique du site, pas les données</span>
         </v-tooltip>
         <v-tooltip bottom>
           <template v-slot:activator="{ props }">
