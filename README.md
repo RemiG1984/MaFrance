@@ -13,6 +13,8 @@ L'application est composée de deux parties principales :
 ### Pages principales
 - **Accueil** (`/`) : Carte interactive, sélecteurs de localisation, et toutes les données
 - **Classements** (`/classements`) : Tableaux de classements des départements et communes
+- **Corrélations** (`/correlations`) : Analyse des corrélations statistiques entre métriques avec heatmap et nuages de points
+- **Localisation** (`/localisation`) : Carte interactive des QPV, centres de migrants et mosquées avec recherche d'adresse
 - **Méthodologie** (`/methodologie`) : Explication des sources et calculs
 
 ## Technologies utilisées
@@ -24,13 +26,14 @@ L'application est composée de deux parties principales :
 - **Utilitaires** : Compression, dotenv, csv-parser, chroma-js
 
 ### Frontend
-- **Vue.js 3** (3.5.17) avec Options API
+- **Vue.js 3** (3.5.17) avec Options API et Composition API
 - **Vue Router 4** (4.5.1) pour la navigation
 - **Vuetify 3** (3.5.0) pour l'interface utilisateur
 - **Leaflet** (1.9.4) pour les cartes interactives
-- **Chart.js** (4.5.0) pour les graphiques
+- **Chart.js** (4.5.0) pour les graphiques et visualisations de corrélations
 - **Vite** (7.0.6) comme bundler
 - **Pinia** (3.0.3) pour la gestion d'état
+- **Chroma.js** pour les échelles de couleurs
 
 ## Structure des fichiers
 
@@ -47,6 +50,8 @@ L'application est composée de deux parties principales :
 │   ├── countryRoutes.js  # Données nationales
 │   ├── departementRoutes.js # Données départementales
 │   ├── migrantRoutes.js  # Centres migrants
+│   ├── mosqueRoutes.js   # Mosquées
+│   ├── nat1Routes.js     # Données nationalité NAT1
 │   ├── qpvRoutes.js      # Quartiers prioritaires
 │   ├── rankingRoutes.js  # Classements
 │   ├── subventionRoutes.js # Subventions
@@ -67,36 +72,39 @@ L'application est composée de deux parties principales :
 client/
 ├── src/
 │   ├── components/       # Composants Vue réutilisables
-│   │   ├── ArticleList.vue       # Liste articles
-│   │   ├── CacheManager.vue      # Gestionnaire cache
-│   │   ├── CentresMigrants.vue   # Centres migrants
-│   │   ├── CrimeGraphs.vue       # Graphiques criminalité (container)
-│   │   ├── ExecutiveDetails.vue  # Détails élus
-│   │   ├── Graph.vue             # Graphiques criminalité (single graph)
-│   │   ├── HamburgerIcon.vue     # Hamburger menu collapse for mobile
-│   │   ├── LocationSelector.vue  # Sélecteurs géographiques
-│   │   ├── MapComponent.vue      # Carte Leaflet
-│   │   ├── NamesGraph.vue        # Graphiques prénoms de naissance
-│   │   ├── QpvData.vue           # Données QPV
-│   │   ├── RankingFilters.vue    # Filtres classements
-│   │   ├── RankingResults.vue    # Résultats classements
-│   │   ├── ScoreTable.vue        # Tableaux de scores
-│   │   ├── ShareButton.vue       # Création d'url spécifiques de partage
-│   │   ├── Subventions.vue       # Tableau des subventions
-│   │   └── VersionSelector.vue   # Sélecteur de version
+│   │   ├── ArticleList.vue         # Liste articles
+│   │   ├── CacheManager.vue        # Gestionnaire cache
+│   │   ├── CentresMigrants.vue     # Centres migrants
+│   │   ├── CorrelationHeatmap.vue  # Heatmap des corrélations
+│   │   ├── CrimeGraphs.vue         # Graphiques criminalité (container)
+│   │   ├── ExecutiveDetails.vue    # Détails élus
+│   │   ├── Graph.vue               # Graphiques criminalité (single graph)
+│   │   ├── HamburgerIcon.vue       # Menu hamburger mobile
+│   │   ├── LocationSelector.vue    # Sélecteurs géographiques
+│   │   ├── MapComponent.vue        # Carte Leaflet
+│   │   ├── NamesGraph.vue          # Graphiques prénoms de naissance
+│   │   ├── QpvData.vue             # Données QPV
+│   │   ├── RankingFilters.vue      # Filtres classements
+│   │   ├── RankingResults.vue      # Résultats classements
+│   │   ├── ScatterPlot.vue         # Nuages de points pour corrélations
+│   │   ├── ScoreTable.vue          # Tableaux de scores
+│   │   ├── ShareButton.vue         # Création d'url spécifiques de partage
+│   │   ├── Subventions.vue         # Tableau des subventions
+│   │   └── VersionSelector.vue     # Sélecteur de version
 │   ├── views/            # Pages principales
-│   │   ├── Home.vue        # Page d'accueil
-│   │   ├── Rankings.vue    # Page classements
-│   │   └── Methodology.vue # Page méthodologie
+│   │   ├── Home.vue          # Page d'accueil
+│   │   ├── Rankings.vue      # Page classements
+│   │   ├── Correlations.vue  # Page analyse des corrélations
+│   │   ├── Localisation.vue  # Page carte des lieux d'intérêt
+│   │   └── Methodology.vue   # Page méthodologie
 │   ├── services/
 │   │   ├── api.js        # Service API centralisé
 │   │   └── store.js      # Store Pinia
 │   ├── utils/            # Utilitaires
 │   │   ├── metricsConfig.js      # Configuration métriques
-│   │   ├── crime-chart-config.js # Config graphiques crime
 │   │   ├── chartWatermark.js     # Watermark graphiques
 │   │   ├── departementNames.js   # Noms département
-│   │   └── gen.js                # fonctions generales
+│   │   └── utils.js              # Fonctions utilitaires
 │   ├── plugins/
 │   │   └── vuetify.js    # Configuration Vuetify
 │   └── router/
@@ -112,7 +120,7 @@ client/
 - `GET /api/country/crime_history?country=France` - Historique criminalité
 - `GET /api/country/names_history?country=France` - Historique prénoms
 - `GET /api/country/ministre?country=France` - Données ministres
-- `GET /api/subventions/country/france` - Subventions nationales
+- `GET /api/subventions/country` - Subventions nationales
 
 ### Départements
 - `GET /api/departements/:code/details` - Détails département
@@ -120,7 +128,7 @@ client/
 - `GET /api/departements/:code/crime` - Criminalité département
 - `GET /api/departements/:code/crime_history` - Historique criminalité
 - `GET /api/departements/:code/names_history` - Historique prénoms
-- `GET /api/departements/:code/ministre` - Élus département
+- `GET /api/departements/:code/prefet` - Préfet département
 - `GET /api/subventions/departement/:code` - Subventions département
 
 ### Communes
@@ -128,19 +136,43 @@ client/
 - `GET /api/communes/:code/details` - Détails commune
 - `GET /api/communes/:code/crime` - Criminalité commune
 - `GET /api/communes/:code/crime_history` - Historique criminalité
-- `GET /api/communes/:code/ministre` - Élus commune
+- `GET /api/communes/:code/maire` - Maire commune
 - `GET /api/subventions/commune/:code` - Subventions commune
 
 ### Données spécialisées
 - `GET /api/rankings/departements` - Classements départements
 - `GET /api/rankings/communes` - Classements communes
-- `GET /api/migrants/centres` - Centres migrants
-- `GET /api/qpv` - Quartiers prioritaires
+- `GET /api/migrants` - Centres migrants avec pagination
+- `GET /api/mosques` - Mosquées avec filtrage géographique
+- `GET /api/mosques/closest` - Mosquées les plus proches d'une position
+- `GET /api/qpv` - Quartiers prioritaires avec pagination
+- `GET /api/qpv/geojson` - Données géographiques QPV
+- `GET /api/qpv/closest` - QPV les plus proches d'une position
+- `GET /api/nat1/country` - Données nationalité niveau national
+- `GET /api/nat1/departement` - Données nationalité niveau départemental
+- `GET /api/nat1/commune` - Données nationalité niveau communal
 - `GET /api/articles` - Articles FdeSouche avec filtres et pagination
 
 ### Cache et utilitaires
-- `GET /api/cache/status` - Statut du cache
+- `GET /api/cache/stats` - Statut du cache
 - `POST /api/cache/clear` - Vider le cache
+- `POST /api/cache/refresh` - Rafraîchir le cache
+
+## Nouvelles fonctionnalités
+
+### Analyse des corrélations
+- **Matrice de corrélation** : Calcul et visualisation des coefficients de Pearson entre toutes les métriques
+- **Heatmap interactive** : Visualisation colorée des corrélations avec légende détaillée
+- **Nuages de points** : Graphiques de dispersion pour explorer les relations entre variables
+- **Filtrage par niveau** : Analyse au niveau départemental ou communal
+- **Sélection des métriques** : Choix des variables à inclure dans l'analyse
+
+### Carte de localisation
+- **Carte interactive** : Visualisation des QPV, centres de migrants et mosquées
+- **Recherche d'adresse** : Géolocalisation d'adresses avec API de géocodage
+- **Géolocalisation** : Détection de la position de l'utilisateur
+- **Calcul de distances** : Distances aux QPV, centres et mosquées les plus proches
+- **Overlays configurables** : Affichage sélectif des différents types de lieux
 
 ## Métriques et scores
 
@@ -153,7 +185,7 @@ client/
 - `wokisme_score` - Score wokisme
 
 ### Indicateurs criminalité
-- `homicides_p100k` - Homicides pour 100k habitants
+- `homicides_total_p100k` - Homicides pour 100k habitants
 - `violences_physiques_p1k` - Violences physiques pour 1k habitants
 - `violences_sexuelles_p1k` - Violences sexuelles pour 1k habitants
 - `vols_p1k` - Vols pour 1k habitants
@@ -161,10 +193,16 @@ client/
 - `stupefiants_p1k` - Stupéfiants pour 1k habitants
 - `escroqueries_p1k` - Escroqueries pour 1k habitants
 
-### Indicateurs démographiques
+### Indicateurs démographiques et sociologiques
 - `prenom_francais_pct` - Pourcentage prénoms français
+- `musulman_pct` - Pourcentage prénoms musulmans
 - `extra_europeen_pct` - Pourcentage extra-européens
-- `musulman_pct` - Pourcentage musulmans
+- `etrangers_pct` - Pourcentage d'étrangers
+- `francais_de_naissance_pct` - Pourcentage français de naissance
+- `naturalises_pct` - Pourcentage naturalisés
+- `europeens_pct` - Pourcentage européens
+- `maghrebins_pct` - Pourcentage maghrébins
+- `africains_pct` - Pourcentage africains
 - `number_of_mosques` - Nombre de mosquées
 - `mosque_p100k` - Mosquées pour 100k habitants
 
@@ -206,36 +244,6 @@ npm run dev    # Serveur de développement Vite
 #### Build de production
 ```bash
 npm run build        # Build frontend dans public/
-npm run build-css-prod  # Build CSS Tailwind optimisé
-```
-
-### Debugging en développement
-
-#### Console browser - Variables d'environnement
-```javascript
-// Vérifier la configuration Vite
-console.log('Import meta env:', import.meta.env);
-console.log('API Base URL:', import.meta.env.VITE_API_BASE_URL);
-console.log('Mode:', import.meta.env.MODE); // development/production
-```
-
-#### Vérification Pinia store
-```javascript
-// Vérifier que Pinia est correctement initialisé
-console.log('Pinia activated:', !!window.__PINIA__);
-
-// Accéder aux stores
-const app = document.querySelector('#app').__vue_app__;
-const store = app.config.globalProperties.$store;
-console.log('Store state:', store?.$state);
-```
-
-#### Service Worker en développement
-Le service worker n'est actif qu'en production. En développement, utilisez :
-```javascript
-// Vérifier si SW est disponible
-console.log('SW available:', 'serviceWorker' in navigator);
-console.log('SW registration:', navigator.serviceWorker.controller);
 ```
 
 ## Configuration
@@ -256,12 +264,6 @@ VITE_API_BASE_URL=http://localhost:3000/api
 - **Sécurité** : Helmet, CORS, validation entrées
 - **Cache** : Service de cache persistant pour optimisation
 
-### Configuration Vuetify
-- Thème clair par défaut
-- Couleurs personnalisées
-- Police Roboto
-- Icons Material Design
-
 ## Fonctionnalités principales
 
 ### Navigation multi-niveaux
@@ -270,15 +272,23 @@ VITE_API_BASE_URL=http://localhost:3000/api
 - **Communal** : Données par commune
 - Transition fluide entre les niveaux
 
-### Carte interactive
-- Visualisation géographique avec Leaflet
+### Cartes interactives
+- **Carte principale** : Visualisation géographique avec Leaflet
+- **Carte de localisation** : QPV, centres de migrants, mosquées
 - Sélection départements/communes
 - Données contextuelles par zone
+- Géolocalisation et calcul de distances
 
 ### Système de versioning
 - 3 versions de labels configurables
 - Commutation dynamique via `VersionSelector`
 - Persistance des préférences utilisateur
+
+### Analyses statistiques avancées
+- **Corrélations** : Calcul des coefficients de Pearson
+- **Visualisations** : Heatmaps et nuages de points interactifs
+- **Filtrage** : Sélection des métriques et niveaux d'analyse
+- **Export** : Possibilité de partage des analyses
 
 ### Articles et actualités
 - Intégration articles FdeSouche
@@ -286,9 +296,10 @@ VITE_API_BASE_URL=http://localhost:3000/api
 - Pagination avec curseur
 - Compteurs par catégorie
 
-### Centres migrants et QPV
-- Cartographie des centres d'accueil
-- Données quartiers prioritaires de la ville
+### Données géolocalisées
+- **QPV** : Cartographie des quartiers prioritaires
+- **Centres migrants** : Localisation et capacités
+- **Mosquées** : Répartition géographique
 - Pagination et filtrage avancés
 
 ### Système de cache avancé
@@ -301,19 +312,8 @@ VITE_API_BASE_URL=http://localhost:3000/api
 - Chart.js pour visualisations
 - Graphiques criminalité évolutifs
 - Histogrammes prénoms temporels
+- Heatmaps de corrélation
 - Watermarking automatique
-
-### Recherche et filtrage
-- Recherche de communes en temps réel
-- Filtres de classements avancés
-- Tri multi-critères
-- Résultats paginés
-
-### Gestion d'état centralisée
-- Store Pinia avec actions asynchrones
-- Chargement de données optimisé
-- Gestion des erreurs intégrée
-- Réactivité Vue 3
 
 ## Sécurité
 
@@ -325,12 +325,6 @@ VITE_API_BASE_URL=http://localhost:3000/api
 - **CORS** : Contrôle origine des requêtes
 - **CSP** : Content Security Policy
 
-### Validation des données
-- Codes département/commune
-- Paramètres de pagination
-- Filtres de recherche
-- Prévention injection SQL
-
 ## Performance
 
 ### Optimisations backend
@@ -341,17 +335,11 @@ VITE_API_BASE_URL=http://localhost:3000/api
 - Batch processing pour imports
 
 ### Optimisations frontend
-- Bundle splitting Vite (909KB minifié)
+- Bundle splitting Vite
 - Lazy loading composants
 - Cache persistant localStorage
 - Debouncing recherches
 - Virtual scrolling pour grandes listes
-
-### Monitoring
-- Logs structurés avec niveaux
-- Métriques de performance
-- Monitoring cache hit ratio
-- Alertes erreurs
 
 ## Service Worker et Cache
 
@@ -361,53 +349,6 @@ L'application utilise un service worker (`public/sw.js`) pour :
 - **Détection de mises à jour** : Vérification périodique des changements
 - **Rechargement automatique** : Actualisation lors de nouvelles versions
 - **Cache API** : Mise en cache intelligente des réponses API
-
-### Contrôle du cache via console navigateur
-```javascript
-// Vérifier l'état du service worker
-navigator.serviceWorker.getRegistration().then(reg => console.log(reg));
-
-// Forcer la vérification de mises à jour
-navigator.serviceWorker.getRegistration().then(reg => reg.update());
-
-// Envoyer un message au service worker pour vérifier les mises à jour
-navigator.serviceWorker.controller.postMessage({ type: 'CHECK_UPDATES' });
-
-// Vider le cache du service worker
-navigator.serviceWorker.controller.postMessage({ type: 'CLEAR_CACHE' });
-
-// Désinstaller le service worker
-navigator.serviceWorker.getRegistration().then(reg => reg.unregister());
-```
-
-### Debugging Pinia Store
-Le store Pinia est accessible dans la console pour debugging :
-
-```javascript
-// Accéder au store principal
-window.__PINIA__ // Instance Pinia globale
-
-// Vérifier si Pinia est activé et fonctionnel
-console.log('Pinia activated:', !!window.__PINIA__);
-
-// Accéder aux données du store via Vue DevTools
-// Ou directement via l'instance Vue
-document.querySelector('#app').__vue_app__.config.globalProperties.$pinia
-```
-
-### Vérifications de mise à jour automatiques
-- **Périodicité** : Vérification toutes les 60 secondes
-- **Mécanisme** : Comparaison du `buildHash` via `/api/version`
-- **Actions** : Rechargement automatique si nouvelle version détectée
-
-### Console de debugging recommandée
-```javascript
-// Vérifier l'état complet de l'application
-console.log('Vue app:', document.querySelector('#app').__vue_app__);
-console.log('Service Worker:', navigator.serviceWorker.controller);
-console.log('Pinia store:', window.__PINIA__);
-console.log('API base URL:', import.meta.env.VITE_API_BASE_URL);
-```
 
 ## Déploiement sur Replit
 
@@ -421,81 +362,34 @@ L'application est configurée pour Replit avec :
 
 ### Workflows disponibles
 - **HMR Development** : Développement avec hot reload (client sur port 5173)
-- **Start Server** : Démarrage serveur uniquement
 - **Production Build** : Build frontend + démarrage serveur production
-
-### Structure déployée
-```
-public/           # Fichiers statiques générés par Vite
-├── index.html    # Point d'entrée SPA
-├── assets/       # CSS/JS/fonts optimisés
-│   ├── index-gCHxcsa-.css (817KB)
-│   └── index-DCb9g14C.js (909KB)
-├── sw.js         # Service worker pour cache offline
-└── images/       # Assets statiques
-```
+- **Backend API** : Démarrage serveur uniquement
+- **Frontend Dev Server** : Serveur de développement frontend
 
 ## Base de données SQLite
 
 ### Tables principales
-- `country_*` - Données nationales (scores, criminalité, prénoms)
+- `country_*` - Données nationales (scores, criminalité, prénoms, NAT1)
 - `departement_*` - Données départementales
 - `commune_*` - Données communales
 - `articles` - Articles FdeSouche avec catégorisation
-- `qpv` - Quartiers prioritaires
-- `migrants_centres` - Centres d'accueil migrants
+- `qpv_data` - Quartiers prioritaires
+- `qpv_coordinates` - Coordonnées géographiques QPV
+- `migrant_centers` - Centres d'accueil migrants
+- `mosques` - Lieux de culte musulmans
 - `*_subventions` - Données subventions par niveau
+- `*_nat1` - Données de nationalité INSEE NAT1
 
 ### Import de données
 Scripts dans `setup/` pour importer :
 - Scores calculés (CSV)
 - Données criminalité INSEE
 - Analyse prénoms par géolocalisation
-- Quartiers prioritaires (QPV)
+- Quartiers prioritaires (QPV) avec géométries
 - Listes élus (maires, préfets, ministres)
 - Articles FdeSouche catégorisés
 - Centres migrants géolocalisés
+- Mosquées avec coordonnées
+- Données NAT1 de nationalité
 
-### Commandes d'import
-```bash
-node setup.js  # Import complet de toutes les données
-```
-
-## Maintenance
-
-### Logs et monitoring
-- Niveaux configurables (info/debug/error)
-- Logs SQL optionnels pour debug
-- Monitoring erreurs API
-- Métriques de performance cache
-
-### Gestion du cache
-- Endpoint `/api/cache/clear` pour reset
-- Interface admin dans `CacheManager.vue`
-- Monitoring utilisation mémoire
-- TTL configurables par type de données
-
-### Mise à jour des données
-Les données peuvent être mises à jour en remplaçant les fichiers CSV dans `setup/` et en relançant l'import.
-
-## Caractéristiques techniques
-
-### Pagination avancée
-- Cursor-based pagination pour les articles
-- Limit configurable (défaut: 20, max: 100)
-- Chargement incrémental ("Load More")
-- Compteurs de catégories en temps réel
-
-### Filtrage multi-critères
-- Par département, commune, lieu
-- Par catégorie d'articles
-- Par type de centres migrants
-- Combinaisons de filtres
-
-### Responsive design
-- Interface Vuetify adaptative
-- Cartes optimisées mobile
-- Tableaux avec défilement horizontal
-- Navigation hamburger sur mobile
-
-Cette application fournit une interface complète d'analyse territoriale française avec des données actualisées, une architecture moderne scalable et des fonctionnalités avancées de visualisation et d'analyse.
+Cette application fournit une interface complète d'analyse territoriale française avec des données actualisées, une architecture moderne scalable et des fonctionnalités avancées de visualisation, d'analyse statistique et de géolocalisation.
