@@ -380,7 +380,13 @@ const api = {
 
     // Migrant centers data
     getMigrants: (params = {}) => {
-        const queryString = buildQueryString(params);
+        // Remove undefined/null cursor before building query string
+        const cleanParams = { ...params };
+        if (cleanParams.cursor === undefined || cleanParams.cursor === null) {
+            delete cleanParams.cursor;
+        }
+        
+        const queryString = buildQueryString(cleanParams);
         const url = `/migrants`;
         return apiService.request(
             queryString ? `${url}${queryString}` : url,
@@ -391,7 +397,13 @@ const api = {
 
     // Mosque data
     getMosques: (params = {}) => {
-        const queryString = buildQueryString(params);
+        // Remove undefined/null cursor before building query string
+        const cleanParams = { ...params };
+        if (cleanParams.cursor === undefined || cleanParams.cursor === null) {
+            delete cleanParams.cursor;
+        }
+        
+        const queryString = buildQueryString(cleanParams);
         const url = `/mosques`;
         return apiService.request(
             queryString ? `${url}${queryString}` : url,
@@ -408,8 +420,14 @@ const api = {
 
     // QPV data
     getQpv: (params = {}) => {
-        const queryString = buildQueryString(params);
-        return apiService.request(`/qpv${queryString}`);
+        // Remove undefined/null cursor before building query string
+        const cleanParams = { ...params };
+        if (cleanParams.cursor === undefined || cleanParams.cursor === null) {
+            delete cleanParams.cursor;
+        }
+        
+        const queryString = buildQueryString(cleanParams);
+        return apiService.request(`/qpv${queryString ? queryString : ''}`);
     },
 
     getQpvs: () => apiService.request('/qpv/geojson'),
