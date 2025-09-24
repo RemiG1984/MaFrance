@@ -627,7 +627,6 @@ export const useDataStore = defineStore("data", {
         if (migrantParams.cursor === undefined || migrantParams.cursor === null) {
           delete migrantParams.cursor;
         }
-        } // No dept/cog for country
 
         const moreMigrants = await api.getMigrants(migrantParams);
         if (moreMigrants && moreMigrants.list) {
@@ -668,8 +667,7 @@ export const useDataStore = defineStore("data", {
         // Remove undefined cursor parameter
         if (qpvParams.cursor === undefined || qpvParams.cursor === null) {
           delete qpvParams.cursor;
-        }e;
-        } // No dept/cog for country
+        }
 
         const moreQpv = await api.getQpv(qpvParams);
         if (moreQpv && moreQpv.list) {
