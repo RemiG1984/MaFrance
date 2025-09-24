@@ -13,7 +13,7 @@ const handleDbError = (err, next) => {
 
 // GET /api/mosques - Get all mosques with optional filtering
 router.get("/", (req, res, next) => {
-    const { dept, commune, limit = "1000" } = req.query;
+    const { dept, commune, limit = "5000" } = req.query;
     const queryLimit = Math.min(parseInt(limit), 5000);
 
     let sql = `
