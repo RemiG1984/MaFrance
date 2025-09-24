@@ -179,9 +179,14 @@ export default {
         const { useDataStore } = await import('../services/store.js');
         const dataStore = useDataStore();
         const params = {
-          cursor: this.data.pagination.nextCursor,
           limit: 20
         };
+        
+        // Only include cursor if it has a valid value
+        if (this.data.pagination.nextCursor) {
+          params.cursor = this.data.pagination.nextCursor;
+        }
+        
         await dataStore.loadMoreMigrants('country', null, params);
       } catch (error) {
         console.error('Failed to load more migrants:', error);

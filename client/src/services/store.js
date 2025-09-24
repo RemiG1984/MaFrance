@@ -621,6 +621,12 @@ export const useDataStore = defineStore("data", {
           migrantParams.dept = code;
         } else if (level === 'commune') {
           migrantParams.cog = code;
+        }
+        
+        // Remove undefined cursor parameter
+        if (migrantParams.cursor === undefined || migrantParams.cursor === null) {
+          delete migrantParams.cursor;
+        }
         } // No dept/cog for country
 
         const moreMigrants = await api.getMigrants(migrantParams);
@@ -657,6 +663,12 @@ export const useDataStore = defineStore("data", {
           qpvParams.dept = code;
         } else if (level === 'commune') {
           qpvParams.cog = code;
+        }
+        
+        // Remove undefined cursor parameter
+        if (qpvParams.cursor === undefined || qpvParams.cursor === null) {
+          delete qpvParams.cursor;
+        }e;
         } // No dept/cog for country
 
         const moreQpv = await api.getQpv(qpvParams);
