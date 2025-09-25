@@ -1,15 +1,14 @@
-
 <template>
   <v-card class="mb-4">
     <v-card-title class="text-h6 pb-0">
       {{ cardTitle }}
     </v-card-title>
-    
+
     <v-card-text>
       <div v-if="loading" class="d-flex justify-center align-center py-8">
         <v-progress-circular indeterminate color="primary" size="32"></v-progress-circular>
       </div>
-      
+
       <div v-else-if="executiveData" class="executive-box">
         <p>
           {{ executiveData.position }} {{ executiveData.locationPreposition }} {{ executiveData.location }}: 
@@ -60,22 +59,22 @@ export default {
   },
   computed: {
     ...mapStores(useDataStore),
-    
+
     cardTitle() {
       const isEnglish = this.dataStore.labelState === 3;
       const baseTitle = isEnglish ? 'Executive leader of' : 'Responsable exécutif de';
       return `${baseTitle}: ${this.locationName}`;
     },
-    
+
     politicalFamilyLabel() {
       return this.dataStore.labelState === 3 ? 'Political family' : 'Famille politique';
     },
-    
+
     locationName() {
       if (!this.location) return '';
-      
+
       const isEnglish = this.dataStore.labelState === 3;
-      
+
       switch (this.location.type) {
         case 'country':
           return 'France';
@@ -87,10 +86,10 @@ export default {
           return '';
       }
     },
-    
+
     noDataMessages() {
       const isEnglish = this.dataStore.labelState === 3;
-      
+
       if (isEnglish) {
         return {
           country: 'Displaying the Minister of Interior for France.',
@@ -107,30 +106,30 @@ export default {
         };
       }
     },
-    
+
     executiveData() {
       if (!this.location) return null;
-      
+
       let executive = null;
       let position = '';
       let locationName = '';
-      
+
       const isEnglish = this.dataStore.labelState === 3;
-      
+
       switch (this.location.type) {
         case 'country':
           executive = this.dataStore.country.executive;
           position = isEnglish ? 'Minister of Interior' : 'Ministre de l\'intérieur';
           locationName = 'France';
           break;
-          
+
         case 'departement':
           executive = this.dataStore.departement.executive;
           position = isEnglish ? 'Prefect' : 'Préfet';
           const deptCode = this.location.code;
           locationName = `${DepartementNames[deptCode]} (${deptCode})`;
           break;
-          
+
         case 'commune':
           executive = this.dataStore.commune.executive;
           position = isEnglish ? 'Mayor' : 'Maire';
@@ -141,15 +140,14 @@ export default {
             locationName = this.location.name || (isEnglish ? 'Municipality' : 'Commune');
           }
           break;
-          
+
         default:
           return null;
       }
-      
+
       if (!executive) return null;
-      
+
       // Format the date label
-      const isEnglish = this.dataStore.labelState === 3;
       let dateLabel = '';
       if (executive.date_mandat) {
         dateLabel = isEnglish 
@@ -160,10 +158,10 @@ export default {
           ? ` since ${this.formatDate(executive.date_poste)}`
           : ` depuis le ${this.formatDate(executive.date_poste)}`;
       }
-      
+
       // Get appropriate preposition for English
       const locationPreposition = isEnglish ? 'of' : 'de';
-      
+
       return {
         position,
         location: locationName,
@@ -175,11 +173,11 @@ export default {
       };
     }
   },
-  
+
   methods: {
     formatDate(dateString) {
       if (!dateString) return '';
-      
+
       try {
         const date = new Date(dateString);
         return date.toLocaleDateString('fr-FR', {
@@ -193,7 +191,7 @@ export default {
       }
     }
   },
-  
+
   watch: {
     location: {
       handler(newLocation) {
