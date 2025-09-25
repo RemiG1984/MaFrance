@@ -1,7 +1,7 @@
 <template>
   <v-card class="mb-4">
     <v-card-title class="text-h6 pb-0">
-      Indices et données pour: {{ location.name }}
+      {{ cardTitle }}
     </v-card-title>
 
     <v-card-text>
@@ -38,7 +38,7 @@
 
       <!-- Show message if no data is available -->
       <div v-else class="text-center py-8 text-grey">
-        Aucune donnée disponible pour cette localisation
+        {{ noDataMessage }}
       </div>
     </v-card-text>
   </v-card>
@@ -68,6 +68,17 @@ export default {
   computed: {
     dataStore() {
       return useDataStore()
+    },
+    cardTitle() {
+      const isEnglish = this.dataStore.labelState === 3;
+      return isEnglish 
+        ? `Indices and data for: ${this.location.name}`
+        : `Indices et données pour: ${this.location.name}`;
+    },
+    noDataMessage() {
+      return this.dataStore.labelState === 3 
+        ? 'No data available for this location'
+        : 'Aucune donnée disponible pour cette localisation';
     }
   },
   watch: {
@@ -162,13 +173,15 @@ export default {
     },
 
     setHeaders(level, storeSection) {
+      const isEnglish = this.dataStore.labelState === 3;
+      
       if (level === 'country') {
-        this.mainHeader = 'France métropolitaine'
-        this.compareHeader = 'France entière'
+        this.mainHeader = isEnglish ? 'Metropolitan France' : 'France métropolitaine'
+        this.compareHeader = isEnglish ? 'Entire France' : 'France entière'
       } else if (level === 'departement') {
         const deptCode = this.location.code
         this.mainHeader = `${deptCode} - ${DepartementNames[deptCode] || deptCode}`
-        this.compareHeader = 'France métropolitaine'
+        this.compareHeader = isEnglish ? 'Metropolitan France' : 'France métropolitaine'
       } else if (level === 'commune') {
         const communeData = storeSection.details
         const departement = communeData.departement

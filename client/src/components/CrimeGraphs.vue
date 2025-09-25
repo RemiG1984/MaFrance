@@ -1,13 +1,13 @@
 <template>
   <v-card class="mb-4">
     <v-card-title class="text-h6 pb-0">
-      Graphiques de Criminalité pour: {{ locationName }}
+      {{ cardTitle }}
     </v-card-title>
     <v-card-subtitle class="text-caption text-grey pt-0 pb-0">
       <a href="https://www.data.gouv.fr/fr/datasets/bases-statistiques-communale-et-departementale-de-la-delinquance-enregistree-par-la-police-et-la-gendarmerie-nationales/" 
          target="_blank" 
          class="text-decoration-none">
-        source SSMSI
+        {{ sourceText }}
       </a>
     </v-card-subtitle>
     <v-card-text>
@@ -73,16 +73,28 @@ export default {
   computed: {
     ...mapStores(useDataStore),
     
+    cardTitle() {
+      const isEnglish = this.dataStore.labelState === 3;
+      const baseTitle = isEnglish ? 'Crime Charts for' : 'Graphiques de Criminalité pour';
+      return `${baseTitle}: ${this.locationName}`;
+    },
+    
+    sourceText() {
+      return this.dataStore.labelState === 3 ? 'source SSMSI' : 'source SSMSI';
+    },
+    
     locationName() {
       if (!this.location) return '';
+      
+      const isEnglish = this.dataStore.labelState === 3;
       
       switch (this.location.type) {
         case 'country':
           return 'France';
         case 'departement':
-          return this.location.name || `Département ${this.location.code}`;
+          return this.location.name || (isEnglish ? `Department ${this.location.code}` : `Département ${this.location.code}`);
         case 'commune':
-          return this.location.name || 'Commune';
+          return this.location.name || (isEnglish ? 'Municipality' : 'Commune');
         default:
           return '';
       }

@@ -1,7 +1,7 @@
 <template>
   <v-card>
     <v-card-title class="text-h6 pb-1">
-      Sélection du niveau de visualisation
+      {{ cardTitle }}
     </v-card-title>
     <v-card-text>
       <v-row>
@@ -23,7 +23,7 @@
             :items="sortedDepartements"
             item-title="name"
             item-value="code"
-            label="Choisir un département"
+            :label="departementLabel"
             variant="outlined"
             clearable
             density="compact"
@@ -39,7 +39,7 @@
             :items="communeSuggestions"
             item-title="displayName"
             item-value="COG"
-            label="Rechercher une commune"
+            :label="communeLabel"
             variant="outlined"
             clearable
             :loading="loading"
@@ -82,6 +82,21 @@ export default {
   },
   computed: {
     ...mapStores(useDataStore),
+    cardTitle() {
+      return this.dataStore.labelState === 3 
+        ? 'Visualization level selection'
+        : 'Sélection du niveau de visualisation';
+    },
+    departementLabel() {
+      return this.dataStore.labelState === 3 
+        ? 'Choose a department'
+        : 'Choisir un département';
+    },
+    communeLabel() {
+      return this.dataStore.labelState === 3 
+        ? 'Search for a municipality'
+        : 'Rechercher une commune';
+    },
     sortedDepartements() {
       return Object.entries(this.departementNames)
         .sort(([a], [b]) => {

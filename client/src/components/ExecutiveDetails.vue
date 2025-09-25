@@ -2,7 +2,7 @@
 <template>
   <v-card class="mb-4">
     <v-card-title class="text-h6 pb-0">
-      Responsable exécutif de: {{ locationName }}
+      {{ cardTitle }}
     </v-card-title>
     
     <v-card-text>
@@ -12,28 +12,28 @@
       
       <div v-else-if="executiveData" class="executive-box">
         <p>
-          {{ executiveData.position }} de {{ executiveData.location }}: 
+          {{ executiveData.position }} {{ executiveData.locationPreposition }} {{ executiveData.location }}: 
           <span class="executive-name font-weight-bold">{{ executiveData.prenom }} {{ executiveData.nom }}</span>
           <span v-if="executiveData.dateLabel">{{ executiveData.dateLabel }}</span>
           <br v-if="executiveData.familleNuance">
           <span v-if="executiveData.familleNuance">
-            Famille politique: <span class="executive-famille">{{ executiveData.familleNuance }}</span>
+            {{ politicalFamilyLabel }}: <span class="executive-famille">{{ executiveData.familleNuance }}</span>
           </span>
         </p>
       </div>
 
       <div v-else class="text-center py-8 text-grey">
         <p v-if="location.type === 'country'">
-          Affichage du ministre de l'intérieur pour la France.
+          {{ noDataMessages.country }}
         </p>
         <p v-else-if="location.type === 'departement'">
-          Aucune information disponible sur le préfet.
+          {{ noDataMessages.departement }}
         </p>
         <p v-else-if="location.type === 'commune'">
-          Aucune information disponible sur le maire.
+          {{ noDataMessages.commune }}
         </p>
         <p v-else>
-          Sélectionnez un niveau administratif pour voir les détails des élus.
+          {{ noDataMessages.default }}
         </p>
       </div>
     </v-card-text>
@@ -61,18 +61,50 @@ export default {
   computed: {
     ...mapStores(useDataStore),
     
+    cardTitle() {
+      const isEnglish = this.dataStore.labelState === 3;
+      const baseTitle = isEnglish ? 'Executive leader of' : 'Responsable exécutif de';
+      return `${baseTitle}: ${this.locationName}`;
+    },
+    
+    politicalFamilyLabel() {
+      return this.dataStore.labelState === 3 ? 'Political family' : 'Famille politique';
+    },
+    
     locationName() {
       if (!this.location) return '';
+      
+      const isEnglish = this.dataStore.labelState === 3;
       
       switch (this.location.type) {
         case 'country':
           return 'France';
         case 'departement':
-          return this.location.name || `Département ${this.location.code}`;
+          return this.location.name || (isEnglish ? `Department ${this.location.code}` : `Département ${this.location.code}`);
         case 'commune':
-          return this.location.name || 'Commune';
+          return this.location.name || (isEnglish ? 'Municipality' : 'Commune');
         default:
           return '';
+      }
+    },
+    
+    noDataMessages() {
+      const isEnglish = this.dataStore.labelState === 3;
+      
+      if (isEnglish) {
+        return {
+          country: 'Displaying the Minister of Interior for France.',
+          departement: 'No information available about the prefect.',
+          commune: 'No information available about the mayor.',
+          default: 'Select an administrative level to see elected officials details.'
+        };
+      } else {
+        return {
+          country: 'Affichage du ministre de l\'intérieur pour la France.',
+          departement: 'Aucune information disponible sur le préfet.',
+          commune: 'Aucune information disponible sur le maire.',
+          default: 'Sélectionnez un niveau administratif pour voir les détails des élus.'
+        };
       }
     },
     
@@ -83,28 +115,30 @@ export default {
       let position = '';
       let locationName = '';
       
+      const isEnglish = this.dataStore.labelState === 3;
+      
       switch (this.location.type) {
         case 'country':
           executive = this.dataStore.country.executive;
-          position = 'Ministre de l\'intérieur';
+          position = isEnglish ? 'Minister of Interior' : 'Ministre de l\'intérieur';
           locationName = 'France';
           break;
           
         case 'departement':
           executive = this.dataStore.departement.executive;
-          position = 'Préfet';
+          position = isEnglish ? 'Prefect' : 'Préfet';
           const deptCode = this.location.code;
           locationName = `${DepartementNames[deptCode]} (${deptCode})`;
           break;
           
         case 'commune':
           executive = this.dataStore.commune.executive;
-          position = 'Maire';
+          position = isEnglish ? 'Mayor' : 'Maire';
           const communeDetails = this.dataStore.commune.details;
           if (communeDetails) {
             locationName = `${this.location.name} (${communeDetails.departement})`;
           } else {
-            locationName = this.location.name || 'Commune';
+            locationName = this.location.name || (isEnglish ? 'Municipality' : 'Commune');
           }
           break;
           
@@ -115,16 +149,25 @@ export default {
       if (!executive) return null;
       
       // Format the date label
+      const isEnglish = this.dataStore.labelState === 3;
       let dateLabel = '';
       if (executive.date_mandat) {
-        dateLabel = ` depuis le ${this.formatDate(executive.date_mandat)}`;
+        dateLabel = isEnglish 
+          ? ` since ${this.formatDate(executive.date_mandat)}`
+          : ` depuis le ${this.formatDate(executive.date_mandat)}`;
       } else if (executive.date_poste) {
-        dateLabel = ` depuis le ${this.formatDate(executive.date_poste)}`;
+        dateLabel = isEnglish 
+          ? ` since ${this.formatDate(executive.date_poste)}`
+          : ` depuis le ${this.formatDate(executive.date_poste)}`;
       }
+      
+      // Get appropriate preposition for English
+      const locationPreposition = isEnglish ? 'of' : 'de';
       
       return {
         position,
         location: locationName,
+        locationPreposition,
         prenom: executive.prenom,
         nom: executive.nom,
         dateLabel,
