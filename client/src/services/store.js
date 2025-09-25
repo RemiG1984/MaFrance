@@ -820,6 +820,8 @@ export const useDataStore = defineStore("data", {
           return "alt1";
         case 2:
           return "alt2";
+        case 3:
+          return "english";
         default:
           return "standard";
       }
