@@ -249,7 +249,7 @@ export default {
             children: [
               { title: 'Rankings', path: '/classements' },
               { title: 'Correlations', path: '/correlations' },
-              { title: 'Location', path: '/localisation' }
+              { title: 'Locations', path: '/localisation' }
             ]
           },
           { 
