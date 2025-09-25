@@ -2,7 +2,7 @@
   <div class="localisation-container">
     <!-- Header Section -->
     <div class="header-section">
-      <h1>Localisation des QPV, centres de migrants et mosquées</h1>
+      <h1>{{ isEnglish ? 'Location of Priority Neighborhoods, Migrant Centers and Mosques' : 'Localisation des QPV, centres de migrants et mosquées' }}</h1>
     </div>
 
     <!-- Main Content Layout -->
@@ -21,14 +21,14 @@
                     class="pa-2 pb-0 d-flex align-center justify-space-between cursor-pointer"
                     @click="overlayExpanded = !overlayExpanded"
                   >
-                    <span class="text-subtitle-2">Affichage des lieux</span>
+                    <span class="text-subtitle-2">{{ isEnglish ? 'Display places' : 'Affichage des lieux' }}</span>
                     <v-icon size="16">{{ overlayExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
                   </v-card-title>
                   <v-expand-transition>
                     <v-card-text v-show="overlayExpanded" class="pa-2 pt-0">
                       <v-checkbox
                         v-model="showQpv"
-                        label="Quartiers QPV"
+                        :label="isEnglish ? 'Priority Neighborhoods' : 'Quartiers QPV'"
                         density="compact"
                         hide-details
                         @change="onOverlayToggle"
@@ -45,7 +45,7 @@
                       </v-checkbox>
                       <v-checkbox
                         v-model="showMigrantCenters"
-                        label="Centres de migrants"
+                        :label="isEnglish ? 'Migrant Centers' : 'Centres de migrants'"
                         density="compact"
                         hide-details
                         @change="onOverlayToggle"
@@ -69,7 +69,7 @@
                       </v-checkbox>
                       <v-checkbox
                         v-model="showMosques"
-                        label="Mosquées"
+                        :label="isEnglish ? 'Mosques' : 'Mosquées'"
                         density="compact"
                         hide-details
                         @change="onOverlayToggle"
@@ -106,12 +106,12 @@
         <div class="controls-section mb-4">
           <v-card class="pa-4">
             <v-card-title class="pa-0 mb-3 text-h5">
-              Recherche
+              {{ isEnglish ? 'Search' : 'Recherche' }}
             </v-card-title>
             <v-text-field
               v-model="addressInput"
-              label="Rechercher une adresse"
-              placeholder="Ex: 123 Rue de la Paix, Paris"
+              :label="isEnglish ? 'Search for an address' : 'Rechercher une adresse'"
+              :placeholder="isEnglish ? 'Ex: 123 Peace Street, Paris' : 'Ex: 123 Rue de la Paix, Paris'"
               variant="outlined"
               density="compact"
               append-inner-icon="mdi-magnify"
@@ -128,7 +128,7 @@
               :loading="gettingLocation"
               block
             >
-              Ma position
+              {{ isEnglish ? 'My location' : 'Ma position' }}
             </v-btn>
           </v-card>
         </div>
@@ -136,7 +136,7 @@
         <!-- Distance Information -->
         <div v-if="selectedLocation && distanceInfo" class="distance-info mb-4">
           <v-card class="pa-4">
-            <h4 class="mb-3">Votre position est à:</h4>
+            <h4 class="mb-3">{{ isEnglish ? 'Your location is:' : 'Votre position est à:' }}</h4>
 
             <!-- QPV Distance -->
             <div v-if="distanceInfo.qpv" class="mt-2">
@@ -249,7 +249,7 @@
             </div>
 
             <div v-if="!distanceInfo.migrantCenter && !distanceInfo.qpv && !distanceInfo.mosque" class="text-grey">
-              Aucune donnée disponible pour cette position
+              {{ isEnglish ? 'No data available for this location' : 'Aucune donnée disponible pour cette position' }}
             </div>
           </v-card>
         </div>
@@ -283,6 +283,10 @@ L.Icon.Default.mergeOptions({
 export default {
   name: 'Localisation',
   setup() {
+    // Import the store
+    const { useDataStore } = require('../services/store.js')
+    const store = useDataStore()
+
     // Reactive data
     const addressInput = ref('')
     const selectedLocation = ref(null)
@@ -298,8 +302,7 @@ export default {
 
     // Computed for English state
     const isEnglish = computed(() => {
-      // Access store through a global or import if needed
-      return false // Default to false for now, can be enhanced later
+      return store && store.labelState === 3
     })
 
     // Map instance
@@ -1259,6 +1262,7 @@ export default {
     })
 
     return {
+      store,
       addressInput,
       selectedLocation,
       searchingAddress,
