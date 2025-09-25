@@ -452,7 +452,7 @@ export const useDataStore = defineStore("data", {
         // Set version if specified
         if (params.v) {
           const version = parseInt(params.v)
-          if (version >= 0 && version <= 2) {
+          if (version >= 0 && version <= 3) {
             this.setLabelState(version)
           }
         }
@@ -511,7 +511,7 @@ export const useDataStore = defineStore("data", {
     },
 
     cycleLabelState() {
-      const newState = (this.labelState + 1) % 3;
+      const newState = (this.labelState + 1) % 4;
       this.setLabelState(newState);
     },
 

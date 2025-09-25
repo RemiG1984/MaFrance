@@ -1,4 +1,3 @@
-
 <template>
   <div class="ranking-filters">
     <!-- Main Controls -->
@@ -165,16 +164,16 @@ export default {
     // Validate population filters
     const validatePopulationFilters = () => {
       const { popLower, popUpper } = localFilters.value
-      
+
       // Convert to numbers for comparison
       const lowerNum = popLower ? parseInt(popLower, 10) : null
       const upperNum = popUpper ? parseInt(popUpper, 10) : null
-      
+
       // Validate that lower is less than upper if both are set
       if (lowerNum !== null && upperNum !== null && lowerNum >= upperNum) {
         return false
       }
-      
+
       return true
     }
 
@@ -235,7 +234,7 @@ export default {
 
     const onFilterChange = (filterKey, event) => {
       let value = event.target.value
-      
+
       // Handle number inputs for population filters
       if (filterKey === 'popLower' || filterKey === 'popUpper') {
         value = value ? parseInt(value, 10) : null
@@ -255,7 +254,7 @@ export default {
         if (populationDebounceTimer) {
           clearTimeout(populationDebounceTimer)
         }
-        
+
         // Set new timer - emit after 800ms of no typing
         populationDebounceTimer = setTimeout(() => {
           if (validatePopulationFilters()) {
@@ -308,7 +307,7 @@ export default {
       if (populationDebounceTimer) {
         clearTimeout(populationDebounceTimer)
       }
-      
+
       // Clean up event listener
       window.removeEventListener('metricsLabelsToggled', () => {})
     })

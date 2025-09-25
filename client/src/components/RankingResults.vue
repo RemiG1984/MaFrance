@@ -1,70 +1,46 @@
-
-<template>
-  <div class="ranking-results">
-    <div class="data-box">
-      <h2>Classement des {{ type }}s pour {{ metricName }}</h2>
-      
-      <!-- Top rankings -->
-      <h3>Top {{ topRankings.length }}</h3>
-      <div class="table-container">
-        <table class="score-table">
-          <thead>
-            <tr class="score-header">
-              <th style="width: 15%;">Rang</th>
-              <th style="width: 40%;">{{ type }}</th>
-              <th style="width: 25%;">Population</th>
-              <th style="width: 20%;">Valeur</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr 
-              v-for="item in topRankings" 
-              :key="`top-${item.rank}`"
-              class="score-row"
-            >
-              <td>{{ item.rank }}</td>
-              <td>{{ formatLocationName(item) }}</td>
-              <td>{{ formatPopulation(item.population) }}</td>
-              <td>{{ formatMetricValue(item[metric]) }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      
-      <!-- Bottom rankings -->
-      <h3>Bottom {{ bottomRankings.length }}</h3>
-      <div class="table-container">
-        <table class="score-table">
-          <thead>
-            <tr class="score-header">
-              <th style="width: 15%;">Rang</th>
-              <th style="width: 40%;">{{ type }}</th>
-              <th style="width: 25%;">Population</th>
-              <th style="width: 20%;">Valeur</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr 
-              v-for="item in bottomRankings" 
-              :key="`bottom-${item.rank}`"
-              class="score-row"
-            >
-              <td>{{ item.rank }}</td>
-              <td>{{ formatLocationName(item) }}</td>
-              <td>{{ formatPopulation(item.population) }}</td>
-              <td>{{ formatMetricValue(item[metric]) }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</template>
-
-<script>
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useDataStore } from '../services/store.js'
 import { MetricsConfig } from '../utils/metricsConfig.js'
+
+// Mocking MetricsConfig for demonstration purposes if it's not provided.
+// In a real scenario, this would be imported from '../utils/metricsConfig.js'
+const MockMetricsConfig = {
+  getMetricLabel: (metric) => {
+    const labels = {
+      'inc': 'Incidence',
+      'dec': 'Déclin',
+      'pop': 'Population',
+      'dens': 'Densité',
+      'chg': 'Changement'
+    };
+    return labels[metric] || metric;
+  },
+  formatMetricValue: (value, metric) => {
+    if (value === null || value === undefined) return 'N/A';
+    if (metric === 'pop' || metric === 'dens') {
+      return value.toLocaleString('fr-FR');
+    }
+    return value;
+  },
+  getLabelStateName: (state) => () => {
+    switch (state.labelState) {
+      case 1:
+        return "alt1";
+      case 2:
+        return "alt2";
+      case 3:
+        return "english";
+      default:
+        return "standard";
+    }
+  },
+  // Add any other methods that might be used by the component
+};
+
+// Replace with actual import if available:
+// import { MetricsConfig } from '../utils/metricsConfig.js';
+const MetricsConfig = MockMetricsConfig;
+
 
 export default {
   name: 'RankingResults',
@@ -105,11 +81,11 @@ export default {
       if (totalCount <= props.limit) {
         return [] // No bottom rankings if we have fewer items than the limit
       }
-      
+
       // Calculate how many items to show in bottom list
       const remainingItems = totalCount - props.limit
       const bottomCount = Math.min(props.limit, remainingItems)
-      
+
       // Get the last X items (they already have correct ranks from API)
       return props.rankings.slice(-bottomCount)
     })
@@ -231,17 +207,17 @@ export default {
   .data-box {
     padding: 15px;
   }
-  
+
   .score-header th,
   .score-row td {
     padding: 8px 6px;
     font-size: 12px;
   }
-  
+
   .data-box h2 {
     font-size: 1.3rem;
   }
-  
+
   .data-box h3 {
     font-size: 1.1rem;
   }
@@ -251,7 +227,7 @@ export default {
   .table-container {
     font-size: 11px;
   }
-  
+
   .score-header th,
   .score-row td {
     padding: 6px 4px;

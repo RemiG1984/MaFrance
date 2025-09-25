@@ -100,6 +100,9 @@ export default {
           case 'alt2':
             label = metricConfig.alt2Label || metricConfig.label;
             break;
+          case 'english':
+            label = metricConfig.englishLabel || metricConfig.label;
+            break;
           default:
             label = metricConfig.label;
         }
@@ -108,7 +111,8 @@ export default {
           ...metric,
           label: label,
           alt1Label: metricConfig.alt1Label,
-          alt2Label: metricConfig.alt2Label
+          alt2Label: metricConfig.alt2Label,
+          englishLabel: metricConfig.englishLabel
         };
       });
     },
