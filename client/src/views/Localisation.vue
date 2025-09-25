@@ -2,7 +2,7 @@
   <div class="localisation-container">
     <!-- Header Section -->
     <div class="header-section">
-      <h1>{{ isEnglish ? 'Location of Priority Neighborhoods, Migrant Centers and Mosques' : 'Localisation des QPV, centres de migrants et mosquées' }}</h1>
+      <h1>Localisation des QPV, centres de migrants et mosquées</h1>
     </div>
 
     <!-- Main Content Layout -->
@@ -21,14 +21,14 @@
                     class="pa-2 pb-0 d-flex align-center justify-space-between cursor-pointer"
                     @click="overlayExpanded = !overlayExpanded"
                   >
-                    <span class="text-subtitle-2">{{ isEnglish ? 'Display places' : 'Affichage des lieux' }}</span>
+                    <span class="text-subtitle-2">Affichage des lieux</span>
                     <v-icon size="16">{{ overlayExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
                   </v-card-title>
                   <v-expand-transition>
                     <v-card-text v-show="overlayExpanded" class="pa-2 pt-0">
                       <v-checkbox
                         v-model="showQpv"
-                        :label="isEnglish ? 'Priority Neighborhoods' : 'Quartiers QPV'"
+                        label="Quartiers QPV"
                         density="compact"
                         hide-details
                         @change="onOverlayToggle"
@@ -45,7 +45,7 @@
                       </v-checkbox>
                       <v-checkbox
                         v-model="showMigrantCenters"
-                        :label="isEnglish ? 'Migrant Centers' : 'Centres de migrants'"
+                        label="Centres de migrants"
                         density="compact"
                         hide-details
                         @change="onOverlayToggle"
@@ -69,7 +69,7 @@
                       </v-checkbox>
                       <v-checkbox
                         v-model="showMosques"
-                        :label="isEnglish ? 'Mosques' : 'Mosquées'"
+                        label="Mosquées"
                         density="compact"
                         hide-details
                         @change="onOverlayToggle"
@@ -106,12 +106,12 @@
         <div class="controls-section mb-4">
           <v-card class="pa-4">
             <v-card-title class="pa-0 mb-3 text-h5">
-              {{ isEnglish ? 'Search' : 'Recherche' }}
+              Recherche
             </v-card-title>
             <v-text-field
               v-model="addressInput"
-              :label="isEnglish ? 'Search for an address' : 'Rechercher une adresse'"
-              :placeholder="isEnglish ? 'Ex: 123 Peace Street, Paris' : 'Ex: 123 Rue de la Paix, Paris'"
+              label="Rechercher une adresse"
+              placeholder="Ex: 123 Rue de la Paix, Paris"
               variant="outlined"
               density="compact"
               append-inner-icon="mdi-magnify"
@@ -128,7 +128,7 @@
               :loading="gettingLocation"
               block
             >
-              {{ isEnglish ? 'My location' : 'Ma position' }}
+              Ma position
             </v-btn>
           </v-card>
         </div>
@@ -136,8 +136,8 @@
         <!-- Distance Information -->
         <div v-if="selectedLocation && distanceInfo" class="distance-info mb-4">
           <v-card class="pa-4">
-            <h4 class="mb-3">{{ isEnglish ? 'Your location is:' : 'Votre position est à:' }}</h4>
-
+            <h4 class="mb-3">Votre position est à:</h4>
+            
             <!-- QPV Distance -->
             <div v-if="distanceInfo.qpv" class="mt-2">
               <div 
@@ -249,7 +249,7 @@
             </div>
 
             <div v-if="!distanceInfo.migrantCenter && !distanceInfo.qpv && !distanceInfo.mosque" class="text-grey">
-              {{ isEnglish ? 'No data available for this location' : 'Aucune donnée disponible pour cette position' }}
+              Aucune donnée disponible pour cette position
             </div>
           </v-card>
         </div>
@@ -259,7 +259,7 @@
 </template>
 
 <script>
-import { ref, onMounted, onUnmounted, nextTick, computed } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import L from 'leaflet'
 import 'leaflet.fullscreen'
 import 'leaflet.fullscreen/Control.FullScreen.css'
@@ -283,10 +283,6 @@ L.Icon.Default.mergeOptions({
 export default {
   name: 'Localisation',
   setup() {
-    // Import the store
-    const { useDataStore } = require('../services/store.js')
-    const store = useDataStore()
-
     // Reactive data
     const addressInput = ref('')
     const selectedLocation = ref(null)
@@ -297,13 +293,6 @@ export default {
     const showMosques = ref(false)
     const distanceInfo = ref(null)
     const overlayExpanded = ref(true)
-    // UI state only
-    const showFilters = ref(true)
-
-    // Computed for English state
-    const isEnglish = computed(() => {
-      return store && store.labelState === 3
-    })
 
     // Map instance
     let map = null
@@ -328,7 +317,7 @@ export default {
       return R * c
     }
 
-
+    
 
     // Initialize map
     const initMap = async () => {
@@ -402,7 +391,7 @@ export default {
           ">Supprimer la position</button>
         </div>
       `
-
+      
       selectedMarker = L.marker([lat, lng])
         .addTo(map)
         .bindPopup(popupContent)
@@ -456,42 +445,33 @@ export default {
         }
 
         // Find closest QPV (only if QPVs are shown)
-        if (showQpv.value && qpvLayer) {
-          let closestQpv = null
-          let minDistance = Infinity
+        if (showQpv.value && allQpvs.length > 0) {
+          const qpvsWithDistances = allQpvs
+            .filter(qpv => qpv.latitude && qpv.longitude &&
+                          !isNaN(parseFloat(qpv.latitude)) &&
+                          !isNaN(parseFloat(qpv.longitude)))
+            .map(qpv => ({
+              ...qpv,
+              latitude: parseFloat(qpv.latitude),
+              longitude: parseFloat(qpv.longitude),
+              distance: calculateDistance(lat, lng, parseFloat(qpv.latitude), parseFloat(qpv.longitude)),
+              type: 'qpv'
+            }))
+            .sort((a, b) => a.distance - b.distance)
 
-          qpvLayer.eachLayer((layer) => {
-            const feature = layer.feature
-            if (!feature || !feature.properties) return
+          if (qpvsWithDistances.length > 0) {
+            const closest = qpvsWithDistances[0]
+            closestLocations.push(closest)
 
-            // Calculate distance to closest point on this QPV polygon
-            const distanceToPolygon = getDistanceToPolygon(lat, lng, feature.geometry)
-
-            if (distanceToPolygon < minDistance) {
-              minDistance = distanceToPolygon
-              const centroid = calculateGeometryCentroid(feature.geometry)
-              closestQpv = {
-                ...feature.properties,
-                latitude: centroid ? centroid.lat : null,
-                longitude: centroid ? centroid.lng : null,
-                distance: distanceToPolygon,
-                type: 'qpv'
-              }
-            }
-          })
-
-          if (closestQpv) {
-            closestLocations.push(closestQpv)
-
-            const formattedDistance = closestQpv.distance < 1
-              ? `${Math.round(closestQpv.distance * 1000)}m`
-              : `${closestQpv.distance.toFixed(1)}km`
+            const formattedDistance = closest.distance < 1
+              ? `${Math.round(closest.distance * 1000)}m`
+              : `${closest.distance.toFixed(1)}km`
 
             newDistanceInfo.qpv = {
               distance: formattedDistance,
-              name: closestQpv.lib_qp || closestQpv.code_qp || 'N/A',
-              link: `https://sig.ville.gouv.fr/territoire/${closestQpv.code_qp}`,
-              commune: closestQpv.lib_com || 'N/A',
+              name: closest.lib_qp || closest.code_qp || 'N/A',
+              link: `https://sig.ville.gouv.fr/territoire/${closest.code_qp}`,
+              commune: closest.lib_com || 'N/A',
               expanded: false
             }
           }
@@ -554,25 +534,13 @@ export default {
     // Create an arrow pointing from selected location to target location
     const createArrowToLocation = (fromLat, fromLng, location) => {
       const fromPoint = [fromLat, fromLng]
-
-      let targetLat = location.latitude
-      let targetLng = location.longitude
-
-      // For QPV, find the actual closest point on the polygon boundary
-      if (location.type === 'qpv' && qpvLayer) {
-        const closestPoint = findClosestPointOnQpvPolygon(fromLat, fromLng, location)
-        if (closestPoint) {
-          targetLat = closestPoint.lat
-          targetLng = closestPoint.lng
-        }
-      }
-
+      
       // Calculate direction vector
-      const deltaLat = targetLat - fromLat
-      const deltaLng = targetLng - fromLng
+      const deltaLat = location.latitude - fromLat
+      const deltaLng = location.longitude - fromLng
       const distance = Math.sqrt(deltaLat * deltaLat + deltaLng * deltaLng)
-
-      // Stop arrow just before the destination (about 80% of the way)
+      
+      // Stop arrow just before the destination marker (about 80% of the way)
       const stopRatio = 0.8
       const endLat = fromLat + (deltaLat * stopRatio)
       const endLng = fromLng + (deltaLng * stopRatio)
@@ -1055,166 +1023,6 @@ export default {
       }
     }
 
-    // Calculate distance from point to polygon (minimum distance to any point on polygon boundary)
-    const getDistanceToPolygon = (pointLat, pointLng, geometry) => {
-      try {
-        let minDistance = Infinity
-
-        const processCoordinateRing = (coordinates) => {
-          for (let i = 0; i < coordinates.length - 1; i++) {
-            const segmentDistance = getDistanceToLineSegment(
-              pointLat, pointLng,
-              coordinates[i][1], coordinates[i][0],
-              coordinates[i + 1][1], coordinates[i + 1][0]
-            )
-            minDistance = Math.min(minDistance, segmentDistance)
-          }
-        }
-
-        if (geometry.type === 'MultiPolygon') {
-          geometry.coordinates.forEach(polygon => {
-            polygon.forEach(ring => processCoordinateRing(ring))
-          })
-        } else if (geometry.type === 'Polygon') {
-          geometry.coordinates.forEach(ring => processCoordinateRing(ring))
-        }
-
-        return minDistance
-      } catch (error) {
-        console.error('Error calculating distance to polygon:', error)
-        return Infinity
-      }
-    }
-
-    // Calculate distance from point to line segment
-    const getDistanceToLineSegment = (px, py, x1, y1, x2, y2) => {
-      // Convert to radians for more accurate calculation
-      const toRad = (deg) => deg * Math.PI / 180
-
-      px = toRad(px)
-      py = toRad(py)
-      x1 = toRad(x1)
-      y1 = toRad(y1)
-      x2 = toRad(x2)
-      y2 = toRad(y2)
-
-      // Calculate the closest point on the line segment
-      const A = px - x1
-      const B = py - y1
-      const C = x2 - x1
-      const D = y2 - y1
-
-      const dot = A * C + B * D
-      const lenSq = C * C + D * D
-
-      let param = -1
-      if (lenSq !== 0) {
-        param = dot / lenSq
-      }
-
-      let xx, yy
-      if (param < 0) {
-        xx = x1
-        yy = y1
-      } else if (param > 1) {
-        xx = x2
-        yy = y2
-      } else {
-        xx = x1 + param * C
-        yy = y1 + param * D
-      }
-
-      // Calculate distance using Haversine formula
-      const R = 6371 // Earth's radius in km
-      const dLat = px - xx
-      const dLon = py - yy
-      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                Math.cos(xx) * Math.cos(px) *
-                Math.sin(dLon/2) * Math.sin(dLon/2)
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
-      return R * c
-    }
-
-    // Find the closest point on a QPV polygon boundary for arrow targeting
-    const findClosestPointOnQpvPolygon = (pointLat, pointLng, qpvLocation) => {
-      let closestPoint = null
-      let minDistance = Infinity
-
-      qpvLayer.eachLayer((layer) => {
-        const feature = layer.feature
-        if (!feature || !feature.properties) return
-
-        // Match the QPV by code
-        if (feature.properties.code_qp !== qpvLocation.code_qp) return
-
-        const geometry = feature.geometry
-
-        const processCoordinateRing = (coordinates) => {
-          for (let i = 0; i < coordinates.length - 1; i++) {
-            const segmentClosestPoint = getClosestPointOnLineSegment(
-              pointLat, pointLng,
-              coordinates[i][1], coordinates[i][0],
-              coordinates[i + 1][1], coordinates[i + 1][0]
-            )
-
-            const distance = calculateDistance(
-              pointLat, pointLng,
-              segmentClosestPoint.lat, segmentClosestPoint.lng
-            )
-
-            if (distance < minDistance) {
-              minDistance = distance
-              closestPoint = segmentClosestPoint
-            }
-          }
-        }
-
-        if (geometry.type === 'MultiPolygon') {
-          geometry.coordinates.forEach(polygon => {
-            polygon.forEach(ring => processCoordinateRing(ring))
-          })
-        } else if (geometry.type === 'Polygon') {
-          geometry.coordinates.forEach(ring => processCoordinateRing(ring))
-        }
-      })
-
-      return closestPoint
-    }
-
-    // Get closest point on a line segment
-    const getClosestPointOnLineSegment = (px, py, x1, y1, x2, y2) => {
-      // Calculate the closest point on the line segment
-      const A = px - x1
-      const B = py - y1
-      const C = x2 - x1
-      const D = y2 - y1
-
-      const dot = A * C + B * D
-      const lenSq = C * C + D * D
-
-      let param = -1
-      if (lenSq !== 0) {
-        param = dot / lenSq
-      }
-
-      let closestLat, closestLng
-      if (param < 0) {
-        closestLat = x1
-        closestLng = y1
-      } else if (param > 1) {
-        closestLat = x2
-        closestLng = y2
-      } else {
-        closestLat = x1 + param * C
-        closestLng = y1 + param * D
-      }
-
-      return {
-        lat: closestLat,
-        lng: closestLng
-      }
-    }
-
     // Get polygon centroid
     const getPolygonCentroid = (coordinates) => {
       let x = 0, y = 0
@@ -1255,14 +1063,13 @@ export default {
     onUnmounted(() => {
       // Clean up global function
       delete window.removePositionMarker
-
+      
       if (map) {
         map.remove()
       }
     })
 
     return {
-      store,
       addressInput,
       selectedLocation,
       searchingAddress,
@@ -1272,8 +1079,6 @@ export default {
       showMosques,
       distanceInfo,
       overlayExpanded,
-      showFilters,
-      isEnglish,
       searchAddress,
       getCurrentLocation,
       onOverlayToggle
