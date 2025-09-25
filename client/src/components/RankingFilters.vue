@@ -3,18 +3,18 @@
     <!-- Main Controls -->
     <div class="main-controls">
       <div class="form-group">
-        <label for="scopeSelect">Portée :</label>
+        <label for="scopeSelect">{{ isEnglish ? 'Scope:' : 'Portée :' }}</label>
         <select id="scopeSelect" :value="selectedScope" @change="onScopeChange">
-          <option value="departements">Départements</option>
-          <option value="communes_dept">Communes (par département)</option>
-          <option value="communes_france">Communes (France entière)</option>
+          <option value="departements">{{ isEnglish ? 'Departments' : 'Départements' }}</option>
+          <option value="communes_dept">{{ isEnglish ? 'Municipalities (by department)' : 'Communes (par département)' }}</option>
+          <option value="communes_france">{{ isEnglish ? 'Municipalities (entire France)' : 'Communes (France entière)' }}</option>
         </select>
       </div>
 
       <div v-show="selectedScope === 'communes_dept'" class="form-group">
-        <label for="departementSelect">Département :</label>
+        <label for="departementSelect">{{ isEnglish ? 'Department:' : 'Département :' }}</label>
         <select id="departementSelect" :value="selectedDepartement" @change="onDepartementChange">
-          <option value="">-- Tous les départements --</option>
+          <option value="">{{ isEnglish ? '-- All departments --' : '-- Tous les départements --' }}</option>
           <option 
             v-for="dept in departments" 
             :key="dept.code" 
@@ -26,9 +26,9 @@
       </div>
 
       <div class="form-group">
-        <label for="metricSelect">Métrique :</label>
+        <label for="metricSelect">{{ isEnglish ? 'Metric:' : 'Métrique :' }}</label>
         <select id="metricSelect" :value="selectedMetric" @change="onMetricChange">
-          <option value="">-- Choisir une métrique --</option>
+          <option value="">{{ isEnglish ? '-- Choose a metric --' : '-- Choisir une métrique --' }}</option>
           <option 
             v-for="option in availableMetricOptions" 
             :key="option.value" 
@@ -42,14 +42,14 @@
 
     <!-- Advanced Filters Toggle -->
     <button class="tweaking-toggle" @click="showFilters = !showFilters">
-      Paramètres avancés
+      {{ isEnglish ? 'Advanced Parameters' : 'Paramètres avancés' }}
     </button>
 
     <div class="tweaking-box" :class="{ active: showFilters }">
       <!-- Desktop Layout: Top Limit and Population Controls on Same Line -->
       <div class="advanced-controls-row">
         <div class="form-group">
-          <label for="topLimit">Nombre de résultats (Top/Bottom) :</label>
+          <label for="topLimit">{{ isEnglish ? 'Number of results (Top/Bottom):' : 'Nombre de résultats (Top/Bottom) :' }}</label>
           <input 
             type="number" 
             id="topLimit" 
@@ -62,7 +62,7 @@
 
         <div v-show="localScope.includes('communes')" class="population-controls">
           <div class="form-group">
-            <label for="popLower">Population min:</label>
+            <label for="popLower">{{ isEnglish ? 'Population min:' : 'Population min:' }}</label>
             <input 
               type="number" 
               id="popLower" 
@@ -71,12 +71,12 @@
               min="0" 
               max="1000000"
               step="1000"
-              placeholder="Ex: 1000"
+              :placeholder="isEnglish ? 'e.g.: 1000' : 'Ex: 1000'"
             >
           </div>
 
           <div class="form-group">
-            <label for="popUpper">Population max:</label>
+            <label for="popUpper">{{ isEnglish ? 'Population max:' : 'Population max:' }}</label>
             <input 
               type="number" 
               id="popUpper" 
@@ -85,7 +85,7 @@
               min="0" 
               max="1000000"
               step="1000"
-              placeholder="Ex: 50000"
+              :placeholder="isEnglish ? 'e.g.: 50000' : 'Ex: 50000'"
             >
           </div>
         </div>
@@ -148,6 +148,10 @@ export default {
     // Computed properties based on props and local state
     const currentLevel = computed(() => {
       return localScope.value.includes('communes') ? 'commune' : 'departement'
+    })
+
+    const isEnglish = computed(() => {
+      return store.labelState === 3
     })
 
     const availableMetricOptions = computed(() => {
@@ -323,6 +327,7 @@ export default {
       availableMetricOptions,
       departments,
       validatePopulationFilters,
+      isEnglish,
       onScopeChange,
       onDepartementChange,
       onMetricChange,

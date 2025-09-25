@@ -137,7 +137,7 @@
         <div v-if="selectedLocation && distanceInfo" class="distance-info mb-4">
           <v-card class="pa-4">
             <h4 class="mb-3">Votre position est à:</h4>
-            
+
             <!-- QPV Distance -->
             <div v-if="distanceInfo.qpv" class="mt-2">
               <div 
@@ -259,7 +259,7 @@
 </template>
 
 <script>
-import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick, computed } from 'vue'
 import L from 'leaflet'
 import 'leaflet.fullscreen'
 import 'leaflet.fullscreen/Control.FullScreen.css'
@@ -293,6 +293,14 @@ export default {
     const showMosques = ref(false)
     const distanceInfo = ref(null)
     const overlayExpanded = ref(true)
+    // UI state only
+    const showFilters = ref(true)
+
+    // Computed for English state
+    const isEnglish = computed(() => {
+      // Access store through a global or import if needed
+      return false // Default to false for now, can be enhanced later
+    })
 
     // Map instance
     let map = null
@@ -317,7 +325,7 @@ export default {
       return R * c
     }
 
-    
+
 
     // Initialize map
     const initMap = async () => {
@@ -391,7 +399,7 @@ export default {
           ">Supprimer la position</button>
         </div>
       `
-      
+
       selectedMarker = L.marker([lat, lng])
         .addTo(map)
         .bindPopup(popupContent)
@@ -455,7 +463,7 @@ export default {
 
             // Calculate distance to closest point on this QPV polygon
             const distanceToPolygon = getDistanceToPolygon(lat, lng, feature.geometry)
-            
+
             if (distanceToPolygon < minDistance) {
               minDistance = distanceToPolygon
               const centroid = calculateGeometryCentroid(feature.geometry)
@@ -543,10 +551,10 @@ export default {
     // Create an arrow pointing from selected location to target location
     const createArrowToLocation = (fromLat, fromLng, location) => {
       const fromPoint = [fromLat, fromLng]
-      
+
       let targetLat = location.latitude
       let targetLng = location.longitude
-      
+
       // For QPV, find the actual closest point on the polygon boundary
       if (location.type === 'qpv' && qpvLayer) {
         const closestPoint = findClosestPointOnQpvPolygon(fromLat, fromLng, location)
@@ -555,12 +563,12 @@ export default {
           targetLng = closestPoint.lng
         }
       }
-      
+
       // Calculate direction vector
       const deltaLat = targetLat - fromLat
       const deltaLng = targetLng - fromLng
       const distance = Math.sqrt(deltaLat * deltaLat + deltaLng * deltaLng)
-      
+
       // Stop arrow just before the destination (about 80% of the way)
       const stopRatio = 0.8
       const endLat = fromLat + (deltaLat * stopRatio)
@@ -1048,7 +1056,7 @@ export default {
     const getDistanceToPolygon = (pointLat, pointLng, geometry) => {
       try {
         let minDistance = Infinity
-        
+
         const processCoordinateRing = (coordinates) => {
           for (let i = 0; i < coordinates.length - 1; i++) {
             const segmentDistance = getDistanceToLineSegment(
@@ -1079,7 +1087,7 @@ export default {
     const getDistanceToLineSegment = (px, py, x1, y1, x2, y2) => {
       // Convert to radians for more accurate calculation
       const toRad = (deg) => deg * Math.PI / 180
-      
+
       px = toRad(px)
       py = toRad(py)
       x1 = toRad(x1)
@@ -1095,7 +1103,7 @@ export default {
 
       const dot = A * C + B * D
       const lenSq = C * C + D * D
-      
+
       let param = -1
       if (lenSq !== 0) {
         param = dot / lenSq
@@ -1132,12 +1140,12 @@ export default {
       qpvLayer.eachLayer((layer) => {
         const feature = layer.feature
         if (!feature || !feature.properties) return
-        
+
         // Match the QPV by code
         if (feature.properties.code_qp !== qpvLocation.code_qp) return
 
         const geometry = feature.geometry
-        
+
         const processCoordinateRing = (coordinates) => {
           for (let i = 0; i < coordinates.length - 1; i++) {
             const segmentClosestPoint = getClosestPointOnLineSegment(
@@ -1145,12 +1153,12 @@ export default {
               coordinates[i][1], coordinates[i][0],
               coordinates[i + 1][1], coordinates[i + 1][0]
             )
-            
+
             const distance = calculateDistance(
               pointLat, pointLng,
               segmentClosestPoint.lat, segmentClosestPoint.lng
             )
-            
+
             if (distance < minDistance) {
               minDistance = distance
               closestPoint = segmentClosestPoint
@@ -1180,7 +1188,7 @@ export default {
 
       const dot = A * C + B * D
       const lenSq = C * C + D * D
-      
+
       let param = -1
       if (lenSq !== 0) {
         param = dot / lenSq
@@ -1244,7 +1252,7 @@ export default {
     onUnmounted(() => {
       // Clean up global function
       delete window.removePositionMarker
-      
+
       if (map) {
         map.remove()
       }
@@ -1260,6 +1268,8 @@ export default {
       showMosques,
       distanceInfo,
       overlayExpanded,
+      showFilters,
+      isEnglish,
       searchAddress,
       getCurrentLocation,
       onOverlayToggle

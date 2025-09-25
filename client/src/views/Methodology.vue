@@ -2,26 +2,33 @@
 <template>
   <div class="methodology">
     <div class="content-card">
-      <h1 class="main-title">Méthodologie, termes utilisés et logique</h1>
+      <h1 class="main-title">{{ isEnglish ? 'Methodology, terms used and logic' : 'Méthodologie, termes utilisés et logique' }}</h1>
       
       <div class="content">
         <section class="section">
-          <h2 class="section-title">Présentation</h2>
+          <h2 class="section-title">{{ isEnglish ? 'Presentation' : 'Présentation' }}</h2>
           <p class="text">
-            Cette application analyse différents indicateurs pour évaluer l'état des lieux en France, 
-            au niveau des départements et des communes. Les données proviennent de sources officielles 
-            et sont traitées selon une méthodologie rigoureuse.
+            {{ isEnglish ? 
+              'This application analyzes different indicators to assess the state of affairs in France, at the level of departments and municipalities. The data comes from official sources and is processed according to a rigorous methodology.' :
+              'Cette application analyse différents indicateurs pour évaluer l\'état des lieux en France, au niveau des départements et des communes. Les données proviennent de sources officielles et sont traitées selon une méthodologie rigoureuse.'
+            }}
           </p>
           <p class="text">
-            Le site est en béta ouverte. Il est possible que des bugs ou erreurs soient présents. Des fonctions et données supplémentaires sont ajoutées régulièrement.
+            {{ isEnglish ?
+              'The site is in open beta. Bugs or errors may be present. Additional functions and data are added regularly.' :
+              'Le site est en béta ouverte. Il est possible que des bugs ou erreurs soient présents. Des fonctions et données supplémentaires sont ajoutées régulièrement.'
+            }}
           </p>
           <p class="text">
-            Si vous souhaitez m'aider, vous pouver m'apporter une petite contribution via le lien Ko-fi pour m'aider à couvrir les frais de fonctionnement du site: <a href="https://ko-fi.com/remi63047" target="_blank" class="link">ko-fi.com/remi63047</a>
+            {{ isEnglish ?
+              'If you would like to help me, you can make a small contribution via the Ko-fi link to help me cover the site\'s operating costs: ' :
+              'Si vous souhaitez m\'aider, vous pouver m\'apporter une petite contribution via le lien Ko-fi pour m\'aider à couvrir les frais de fonctionnement du site: '
+            }}<a href="https://ko-fi.com/remi63047" target="_blank" class="link">ko-fi.com/remi63047</a>
           </p>
         </section>
 
         <section class="section">
-          <h2 class="section-title">Calcul des indices</h2>
+          <h2 class="section-title">{{ isEnglish ? 'Index calculation' : 'Calcul des indices' }}</h2>
           <p class="text">
             Pour chaque indice, le calcul est effectué via une matrice de pondération sur chaque donnée d'entrée (par habitant). La pondération est la même pour l'ensemble des niveaux géographiques (communes, départements, France), ce qui permet de comparer les résultats directement. La valeur des coefficients de pondération n'est pas très importante, puisque ces coefficients sont les mêmes partout.
             L'étalonage des indices est effectué de manière à ce que la moyenne nationale ait une valeur de 100. Cela permet de comparer les résultats directement entre les différents niveaux géographiques. Un département ou une commune ayant une valeur inférieure à 100 est en dessous de la moyenne nationale pour cet indice.
@@ -285,8 +292,22 @@
 </template>
 
 <script>
+import { computed } from 'vue'
+import { useDataStore } from '../services/store.js'
+
 export default {
-  name: 'Methodology'
+  name: 'Methodology',
+  setup() {
+    const store = useDataStore()
+    
+    const isEnglish = computed(() => {
+      return store.labelState === 3
+    })
+    
+    return {
+      isEnglish
+    }
+  }
 }
 </script>
 

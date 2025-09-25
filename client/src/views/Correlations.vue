@@ -2,7 +2,7 @@
   <div class="correlations-container">
     <!-- Header Section -->
     <div class="header-section">
-      <h1>Corrélations statistiques entre les différentes métriques</h1>
+      <h1>{{ store.labelState === 3 ? 'Statistical correlations between different metrics' : 'Corrélations statistiques entre les différentes métriques' }}</h1>
     </div>
 
     <!-- Controls Section -->
@@ -19,7 +19,7 @@
                 <v-select
                   v-model="selectedScope"
                   :items="scopeOptions"
-                  label="Niveau d'analyse"
+                  :label="store.labelState === 3 ? 'Analysis level' : 'Niveau d\\'analyse'"
                   variant="outlined"
                   density="compact"
                   @update:model-value="onScopeChanged"
@@ -39,8 +39,11 @@
                   density="compact"
                   class="text-body-2"
                 >
-                  <div class="text-subtitle-2 mb-2">Principe de la corrélation</div>
-                  La corrélation statistique mesure le lien entre deux variables, c'est-à-dire si elles évoluent ensemble d'une certaine manière. Par exemple, si on observe que quand une variable augmente, l'autre augmente aussi (ou diminue), on parle de corrélation. Le coefficient de Pearson, noté r, est un nombre entre -1 et 1 qui quantifie cette relation. Si r est proche de 1, les variables augmentent ensemble (corrélation positive forte) ; si r est proche de -1, l'une augmente quand l'autre diminue (corrélation négative forte) ; si r est proche de 0, il n'y a pas de lien clair. C'est un outil simple pour repérer des tendances, mais il ne prouve pas que l'une cause l'autre.
+                  <div class="text-subtitle-2 mb-2">{{ store.labelState === 3 ? 'Correlation principle' : 'Principe de la corrélation' }}</div>
+                  {{ store.labelState === 3 ? 
+                    'Statistical correlation measures the relationship between two variables, i.e., whether they evolve together in a certain way. For example, if we observe that when one variable increases, the other also increases (or decreases), we speak of correlation. The Pearson coefficient, denoted r, is a number between -1 and 1 that quantifies this relationship. If r is close to 1, the variables increase together (strong positive correlation); if r is close to -1, one increases when the other decreases (strong negative correlation); if r is close to 0, there is no clear link. It is a simple tool to spot trends, but it does not prove that one causes the other.' :
+                    'La corrélation statistique mesure le lien entre deux variables, c\\'est-à-dire si elles évoluent ensemble d\\'une certaine manière. Par exemple, si on observe que quand une variable augmente, l\\'autre augmente aussi (ou diminue), on parle de corrélation. Le coefficient de Pearson, noté r, est un nombre entre -1 et 1 qui quantifie cette relation. Si r est proche de 1, les variables augmentent ensemble (corrélation positive forte) ; si r est proche de -1, l\\'une augmente quand l\\'autre diminue (corrélation négative forte) ; si r est proche de 0, il n\\'y a pas de lien clair. C\\'est un outil simple pour repérer des tendances, mais il ne prouve pas que l\\'une cause l\\'autre.'
+                  }}
                 </v-alert>
               </v-col>
             </v-row>
@@ -51,7 +54,7 @@
                 <v-select
                   v-model="selectedMetricsY"
                   :items="availableMetricOptions"
-                  label="Métriques Axe Y (vertical)"
+                  :label="store.labelState === 3 ? 'Y-Axis Metrics (vertical)' : 'Métriques Axe Y (vertical)'"
                   variant="outlined"
                   density="compact"
                   multiple
@@ -64,7 +67,7 @@
                 <v-select
                   v-model="selectedMetricsX"
                   :items="availableMetricOptions"
-                  label="Métriques Axe X (horizontal)"
+                  :label="store.labelState === 3 ? 'X-Axis Metrics (horizontal)' : 'Métriques Axe X (horizontal)'"
                   variant="outlined"
                   density="compact"
                   multiple
@@ -83,7 +86,7 @@
     <div class="results-section">
       <div v-if="loading" class="loading">
         <v-progress-circular indeterminate color="primary" />
-        <p class="mt-2">Calcul des corrélations...</p>
+        <p class="mt-2">{{ store.labelState === 3 ? 'Calculating correlations...' : 'Calcul des corrélations...' }}</p>
       </div>
 
       <div v-else-if="error" class="error">
@@ -114,17 +117,17 @@
           <v-row>
             <v-col cols="12" md="4">
               <v-card class="pa-3">
-                <v-card-title class="text-h6">Statistiques</v-card-title>
+                <v-card-title class="text-h6">{{ store.labelState === 3 ? 'Statistics' : 'Statistiques' }}</v-card-title>
                 <v-card-text>
-                  <p><strong>Nb. d'observations:</strong> {{ dataSize }}</p>
-                  <p><strong>Corrélation max:</strong> {{ maxCorrelation.toFixed(3) }}</p>
-                  <p><strong>Corrélation min:</strong> {{ minCorrelation.toFixed(3) }}</p>
+                  <p><strong>{{ store.labelState === 3 ? 'Nb. of observations:' : 'Nb. d\\'observations:' }}</strong> {{ dataSize }}</p>
+                  <p><strong>{{ store.labelState === 3 ? 'Max correlation:' : 'Corrélation max:' }}</strong> {{ maxCorrelation.toFixed(3) }}</p>
+                  <p><strong>{{ store.labelState === 3 ? 'Min correlation:' : 'Corrélation min:' }}</strong> {{ minCorrelation.toFixed(3) }}</p>
                 </v-card-text>
               </v-card>
             </v-col>
             <v-col cols="12" md="8">
               <v-card class="pa-3">
-                <v-card-title class="text-h6">Corrélations les plus fortes</v-card-title>
+                <v-card-title class="text-h6">{{ store.labelState === 3 ? 'Strongest correlations' : 'Corrélations les plus fortes' }}</v-card-title>
                 <v-card-text>
                   <p v-for="corr in topCorrelations.slice(0, 5)" :key="corr.key" class="mb-2">
                     <strong>{{ corr.metric1 }} ↔ {{ corr.metric2 }}:</strong> {{ corr.value.toFixed(3) }}
@@ -138,7 +141,7 @@
 
       <div v-else class="no-data">
         <v-alert type="info" icon="mdi-information">
-          Sélectionnez un niveau d'analyse pour afficher les corrélations.
+          {{ store.labelState === 3 ? 'Select an analysis level to display correlations.' : 'Sélectionnez un niveau d\\'analyse pour afficher les corrélations.' }}
         </v-alert>
       </div>
     </div>
@@ -181,10 +184,16 @@ export default {
     const rawData = ref([])
 
     // Options
-    const scopeOptions = [
-      { value: 'departements', title: 'Départements' },
-      { value: 'communes_france', title: 'Communes (population > 50k)' }
-    ]
+    const scopeOptions = computed(() => [
+      { 
+        value: 'departements', 
+        title: store.labelState === 3 ? 'Departments' : 'Départements' 
+      },
+      { 
+        value: 'communes_france', 
+        title: store.labelState === 3 ? 'Municipalities (population > 50k)' : 'Communes (population > 50k)' 
+      }
+    ])
 
 
 
@@ -213,6 +222,9 @@ export default {
 
     // Computed properties
     const currentType = computed(() => {
+      if (store.labelState === 3) {
+        return selectedScope.value === 'departements' ? 'Departments' : 'Municipalities'
+      }
       return selectedScope.value === 'departements' ? 'Départements' : 'Communes'
     })
 
