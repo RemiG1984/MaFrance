@@ -2,7 +2,7 @@
 <template>
   <v-card>
     <v-card-title class="text-h6 pb-0">
-      Articles FdS associés à: {{ locationName }}
+      {{ isEnglish ? 'FdS articles related to:' : 'Articles FdS associés à:' }} {{ locationName }}
     </v-card-title>
 
     <v-card-text>
@@ -21,7 +21,7 @@
             :value="'tous'"
             @click="selectCategory('tous')"
           >
-            Tous ({{ totalArticles }})
+            {{ isEnglish ? 'All' : 'Tous' }} ({{ totalArticles }})
           </v-chip>
           <v-chip 
             color="primary"
@@ -33,7 +33,7 @@
             :value="category"
             @click="selectCategory(category)"
           >
-            {{ articleCategoriesRef[category] }} ({{ articles.counts[category] || 0 }})
+            {{ getCategoryLabel(category) }} ({{ articles.counts[category] || 0 }})
           </v-chip>
         </v-chip-group>
       </div>
@@ -57,7 +57,7 @@
 
         <div v-if="isLoading" class="loading">
           <v-progress-circular indeterminate size="24" color="primary"></v-progress-circular>
-          <span class="loading-text">Chargement...</span>
+          <span class="loading-text">{{ isEnglish ? 'Loading...' : 'Chargement...' }}</span>
         </div>
 
         <div v-if="filteredArticles.length === 0 && !isLoading" class="no-articles">
@@ -72,7 +72,7 @@
             size="small"
             block
           >
-            Charger plus d'articles
+            {{ isEnglish ? 'Load more articles' : 'Charger plus d\'articles' }}
           </v-btn>
         </div>
       </div>
@@ -82,7 +82,18 @@
 
 <script>
 import { articleCategoriesRef } from '../utils/metricsConfig.js';
+import { mapStores } from 'pinia'
+import { useDataStore } from '../services/store.js'
+
 const categories = Object.keys(articleCategoriesRef);
+
+const englishCategoriesRef = {
+  insecurite: 'Insecurity',
+  immigration: 'Immigration',
+  islamisme: 'Islamism',
+  defrancisation: 'De-francization',
+  wokisme: 'Wokism'
+};
 
 export default {
   name: 'ArticleList',
@@ -119,15 +130,21 @@ export default {
     };
   },
   computed: {
+    ...mapStores(useDataStore),
+    
+    isEnglish() {
+      return this.dataStore.labelState === 3;
+    },
+
     locationName() {
       if (!this.location) return '';
       switch (this.location.type) {
         case 'country':
           return 'France';
         case 'departement':
-          return this.location.name || `Département ${this.location.code}`;
+          return this.location.name || (this.isEnglish ? `Department ${this.location.code}` : `Département ${this.location.code}`);
         case 'commune':
-          return this.location.name || 'Commune';
+          return this.location.name || (this.isEnglish ? 'Municipality' : 'Commune');
         default:
           return '';
       }
@@ -139,17 +156,21 @@ export default {
       return this.articles.counts.total || 0;
     },
     noArticlesMessage() {
-      return 'Aucun article trouvé.';
+      return this.isEnglish ? 'No articles found.' : 'Aucun article trouvé.';
     }
   },
   methods: {
+    getCategoryLabel(category) {
+      return this.isEnglish ? englishCategoriesRef[category] : articleCategoriesRef[category];
+    },
+
     formatDate(dateString) {
       const date = new Date(dateString);
-      return date.toLocaleDateString('fr-FR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-      });
+      const locale = this.isEnglish ? 'en-US' : 'fr-FR';
+      const options = this.isEnglish ? 
+        { month: '2-digit', day: '2-digit', year: 'numeric' } :
+        { day: '2-digit', month: '2-digit', year: 'numeric' };
+      return date.toLocaleDateString(locale, options);
     },
     handleScroll(event) {
       const { scrollTop, scrollHeight, clientHeight } = event.target;

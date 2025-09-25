@@ -2,7 +2,7 @@
 <template>
   <v-card class="mb-4">
     <v-card-title class="text-h6 pb-0">
-      Centres de migrants pour: {{ locationName }}
+      {{ isEnglish ? 'Migrant centers for:' : 'Centres de migrants pour:' }} {{ locationName }}
     </v-card-title>
     <v-card-text>
       <div
@@ -16,12 +16,12 @@
         <table class="centres-table centres-table-header">
           <thead>
             <tr>
-              <th>Type</th>
-              <th>Places</th>
-              <th>Gestionnaire</th>
-              <th>Dept.</th>
-              <th>Commune</th>
-              <th>Adresse</th>
+              <th>{{ isEnglish ? 'Type' : 'Type' }}</th>
+              <th>{{ isEnglish ? 'Capacity' : 'Places' }}</th>
+              <th>{{ isEnglish ? 'Manager' : 'Gestionnaire' }}</th>
+              <th>{{ isEnglish ? 'Dept.' : 'Dept.' }}</th>
+              <th>{{ isEnglish ? 'Municipality' : 'Commune' }}</th>
+              <th>{{ isEnglish ? 'Address' : 'Adresse' }}</th>
             </tr>
           </thead>
         </table>
@@ -50,18 +50,21 @@
         
         <div v-if="isLoading" class="loading">
           <v-progress-circular indeterminate size="24" color="primary"></v-progress-circular>
-          Chargement...
+          {{ isEnglish ? 'Loading...' : 'Chargement...' }}
         </div>
       </div>
 
       <div v-else class="text-center">
-        <p>Aucun centre d'hébergement de migrants dans cette zone.</p>
+        <p>{{ isEnglish ? 'No migrant accommodation centers in this area.' : 'Aucun centre d\'hébergement de migrants dans cette zone.' }}</p>
       </div>
     </v-card-text>
   </v-card>
 </template>
 
 <script>
+import { mapStores } from 'pinia'
+import { useDataStore } from '../services/store.js'
+
 export default {
   name: 'CentresMigrants',
   props: {
@@ -99,13 +102,19 @@ export default {
     window.removeEventListener('resize', this.updateContainerHeight)
   },
   computed: {
+    ...mapStores(useDataStore),
+    
+    isEnglish() {
+      return this.dataStore.labelState === 3;
+    },
+
     locationName() {
       if (this.location.type === 'departement') {
         return this.location.name
       } else if (this.location.type === 'commune') {
         return this.location.name
       }
-      return 'France (1062 centres)'
+      return this.isEnglish ? 'France (1062 centers)' : 'France (1062 centres)'
     },
 
     migrantsList() {

@@ -1,13 +1,13 @@
 <template>
   <v-card class="mb-4">
     <v-card-title class="text-h6 pb-0">
-      Subventions publiques aux associations pour: {{ locationName }}
+      {{ isEnglish ? 'Public subsidies to associations for:' : 'Subventions publiques aux associations pour:' }} {{ locationName }}
     </v-card-title>
     <v-card-subtitle class="text-caption text-grey pt-0 pb-0">
       <a href="https://data.ofgl.fr/pages/acces-donnees-comptables-detaillees/"
          target="_blank"
          class="text-decoration-none">
-        source data.ofgl.fr
+        {{ isEnglish ? 'data.ofgl.fr source' : 'source data.ofgl.fr' }}
       </a>
     </v-card-subtitle>
     <v-card-text>
@@ -17,8 +17,8 @@
             <thead>
               <tr>
                 <th></th>
-                <th>Valeur /hab./an</th>
-                <th>Moyenne nationale /hab./an</th>
+                <th>{{ isEnglish ? 'Value /per capita/year' : 'Valeur /hab./an' }}</th>
+                <th>{{ isEnglish ? 'National average /per capita/year' : 'Moyenne nationale /hab./an' }}</th>
               </tr>
             </thead>
             <tbody>
@@ -28,7 +28,7 @@
                 <td class="score-main">{{ formatNumber(row.nationalAverage) }} €</td>
               </tr>
               <tr class="total-row">
-                <td class="row-title total-title">Total par hab. et par an</td>
+                <td class="row-title total-title">{{ isEnglish ? 'Total per capita per year' : 'Total par hab. et par an' }}</td>
                 <td class="score-main">{{ formatNumber(totalPerCapita) }} €</td>
                 <td class="score-main">{{ formatNumber(totalNationalAverage) }} €</td>
               </tr>
@@ -38,13 +38,16 @@
       </div>
 
       <div v-else class="text-center">
-        <p>Aucune donnée de subvention disponible pour cette zone.</p>
+        <p>{{ isEnglish ? 'No subsidy data available for this area.' : 'Aucune donnée de subvention disponible pour cette zone.' }}</p>
       </div>
     </v-card-text>
   </v-card>
 </template>
 
 <script>
+import { mapStores } from 'pinia'
+import { useDataStore } from '../services/store.js'
+
 export default {
   name: 'Subventions',
   props: {
@@ -66,6 +69,12 @@ export default {
     }
   },
   computed: {
+    ...mapStores(useDataStore),
+    
+    isEnglish() {
+      return this.dataStore.labelState === 3;
+    },
+
     locationName() {
       if (!this.location) return '';
 
@@ -73,9 +82,9 @@ export default {
         case 'country':
           return 'France';
         case 'departement':
-          return this.location.name || `Département ${this.location.code}`;
+          return this.location.name || (this.isEnglish ? `Department ${this.location.code}` : `Département ${this.location.code}`);
         case 'commune':
-          return this.location.name || 'Commune';
+          return this.location.name || (this.isEnglish ? 'Municipality' : 'Commune');
         default:
           return '';
       }
@@ -115,7 +124,7 @@ export default {
       if (countrySubventions?.etat_central != null) {
         const value = countrySubventions.etat_central;
         rows.push({
-          entity: 'Par les ministères',
+          entity: this.isEnglish ? 'By ministries' : 'Par les ministères',
           perCapita: countryPopulation > 0 ? value / countryPopulation : 0,
           nationalAverage: countryPopulation > 0 ? value / countryPopulation : 0
         });
@@ -125,7 +134,7 @@ export default {
       if (countrySubventions?.autres_organismes_publics != null) {
         const value = countrySubventions.autres_organismes_publics;
         rows.push({
-          entity: 'Par les autres organismes publics',
+          entity: this.isEnglish ? 'By other public organizations' : 'Par les autres organismes publics',
           perCapita: countryPopulation > 0 ? value / countryPopulation : 0,
           nationalAverage: countryPopulation > 0 ? value / countryPopulation : 0
         });
@@ -138,7 +147,7 @@ export default {
         const nationalRegionAverage = countrySubventions?.total_subv_region && countryPopulation > 0
           ? countrySubventions.total_subv_region / countryPopulation : 0;
         rows.push({
-          entity: 'Par la région',
+          entity: this.isEnglish ? 'By the region' : 'Par la région',
           perCapita: departementPopulation > 0 ? value / departementPopulation : 0,
           nationalAverage: nationalRegionAverage
         });
@@ -151,7 +160,7 @@ export default {
         const nationalDeptAverage = countrySubventions?.total_subv_dept && countryPopulation > 0
           ? countrySubventions.total_subv_dept / countryPopulation : 0;
         rows.push({
-          entity: 'Par le département',
+          entity: this.isEnglish ? 'By the department' : 'Par le département',
           perCapita: departementPopulation > 0 ? value / departementPopulation : 0,
           nationalAverage: nationalDeptAverage
         });
@@ -164,7 +173,7 @@ export default {
         const nationalEPCIAverage = countrySubventions?.total_subv_EPCI && countryPopulation > 0
           ? countrySubventions.total_subv_EPCI / countryPopulation : 0;
         rows.push({
-          entity: 'Par l\'agglomération',
+          entity: this.isEnglish ? 'By the agglomeration' : 'Par l\'agglomération',
           perCapita: communePopulation > 0 ? value / communePopulation : 0,
           nationalAverage: nationalEPCIAverage
         });
@@ -177,7 +186,7 @@ export default {
         const nationalCommuneAverage = countrySubventions?.total_subv_commune && countryPopulation > 0
           ? countrySubventions.total_subv_commune / countryPopulation : 0;
         rows.push({
-          entity: 'Par la commune',
+          entity: this.isEnglish ? 'By the municipality' : 'Par la commune',
           perCapita: communePopulation > 0 ? value / communePopulation : 0,
           nationalAverage: nationalCommuneAverage
         });
