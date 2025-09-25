@@ -151,7 +151,7 @@ export default {
     })
 
     const isEnglish = computed(() => {
-      return store.labelState === 3
+      return store && store.labelState === 3
     })
 
     const availableMetricOptions = computed(() => {

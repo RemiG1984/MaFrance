@@ -75,7 +75,7 @@ export default {
     ...mapStores(useDataStore),
     
     isEnglish() {
-      return this.dataStore.labelState === 3;
+      return this.dataStore && this.dataStore.labelState === 3;
     },
 
     titleBase() {
