@@ -2,7 +2,7 @@
   <div class="localisation-container">
     <!-- Header Section -->
     <div class="header-section">
-      <h1>{{ store.labelState === 3 ? 'Location of QPV, migrant centers and mosques' : 'Localisation des QPV, centres de migrants et mosquées' }}</h1>
+      <h1>Localisation des QPV, centres de migrants et mosquées</h1>
     </div>
 
     <!-- Main Content Layout -->
@@ -21,14 +21,14 @@
                     class="pa-2 pb-0 d-flex align-center justify-space-between cursor-pointer"
                     @click="overlayExpanded = !overlayExpanded"
                   >
-                    <span class="text-subtitle-2">{{ store.labelState === 3 ? 'Display locations' : 'Affichage des lieux' }}</span>
+                    <span class="text-subtitle-2">Affichage des lieux</span>
                     <v-icon size="16">{{ overlayExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
                   </v-card-title>
                   <v-expand-transition>
                     <v-card-text v-show="overlayExpanded" class="pa-2 pt-0">
                       <v-checkbox
                         v-model="showQpv"
-                        :label="store.labelState === 3 ? 'QPV Districts' : 'Quartiers QPV'"
+                        label="Quartiers QPV"
                         density="compact"
                         hide-details
                         @change="onOverlayToggle"
@@ -45,7 +45,7 @@
                       </v-checkbox>
                       <v-checkbox
                         v-model="showMigrantCenters"
-                        :label="store.labelState === 3 ? 'Migrant centers' : 'Centres de migrants'"
+                        label="Centres de migrants"
                         density="compact"
                         hide-details
                         @change="onOverlayToggle"
@@ -69,7 +69,7 @@
                       </v-checkbox>
                       <v-checkbox
                         v-model="showMosques"
-                        :label="store.labelState === 3 ? 'Mosques' : 'Mosquées'"
+                        label="Mosquées"
                         density="compact"
                         hide-details
                         @change="onOverlayToggle"
@@ -106,12 +106,12 @@
         <div class="controls-section mb-4">
           <v-card class="pa-4">
             <v-card-title class="pa-0 mb-3 text-h5">
-              {{ store.labelState === 3 ? 'Search' : 'Recherche' }}
+              Recherche
             </v-card-title>
             <v-text-field
               v-model="addressInput"
-              :label="store.labelState === 3 ? 'Search for an address' : 'Rechercher une adresse'"
-              :placeholder="store.labelState === 3 ? 'Ex: 123 Peace Street, Paris' : 'Ex: 123 Rue de la Paix, Paris'"
+              label="Rechercher une adresse"
+              placeholder="Ex: 123 Rue de la Paix, Paris"
               variant="outlined"
               density="compact"
               append-inner-icon="mdi-magnify"
@@ -128,7 +128,7 @@
               :loading="gettingLocation"
               block
             >
-              {{ store.labelState === 3 ? 'My location' : 'Ma position' }}
+              Ma position
             </v-btn>
           </v-card>
         </div>
@@ -136,7 +136,7 @@
         <!-- Distance Information -->
         <div v-if="selectedLocation && distanceInfo" class="distance-info mb-4">
           <v-card class="pa-4">
-            <h4 class="mb-3">{{ store.labelState === 3 ? 'Your location is:' : 'Votre position est à:' }}</h4>
+            <h4 class="mb-3">Votre position est à:</h4>
             
             <!-- QPV Distance -->
             <div v-if="distanceInfo.qpv" class="mt-2">
@@ -153,7 +153,7 @@
                   margin-right: 8px;
                   vertical-align: middle;
                 "></div>
-                <strong>{{ distanceInfo.qpv.distance }}&nbsp;</strong>{{ store.labelState === 3 ? 'from the nearest QPV' : 'du QPV le plus proche' }}
+                <strong>{{ distanceInfo.qpv.distance }}&nbsp;</strong>du QPV le plus proche
                 <v-icon 
                   size="16" 
                   class="ml-2"
@@ -191,7 +191,7 @@
                   border: 1px solid #333333;
                   vertical-align: middle;
                 ">↑</div>
-                <strong>{{ distanceInfo.migrantCenter.distance }}&nbsp;</strong>{{ store.labelState === 3 ? 'from the nearest migrant center' : 'du centre de migrants le plus proche' }}
+                <strong>{{ distanceInfo.migrantCenter.distance }}&nbsp;</strong>du centre de migrants le plus proche
                 <v-icon 
                   size="16" 
                   class="ml-2"
@@ -230,7 +230,7 @@
                   border: 1px solid #1b5e20;
                   vertical-align: middle;
                 ">🕌</div>
-                <strong>{{ distanceInfo.mosque.distance }}&nbsp;</strong>{{ store.labelState === 3 ? 'from the nearest mosque' : 'de la mosquée la plus proche' }}
+                <strong>{{ distanceInfo.mosque.distance }}&nbsp;</strong>de la mosquée la plus proche
                 <v-icon 
                   size="16" 
                   class="ml-2"
@@ -249,7 +249,7 @@
             </div>
 
             <div v-if="!distanceInfo.migrantCenter && !distanceInfo.qpv && !distanceInfo.mosque" class="text-grey">
-              {{ store.labelState === 3 ? 'No data available for this location' : 'Aucune donnée disponible pour cette position' }}
+              Aucune donnée disponible pour cette position
             </div>
           </v-card>
         </div>
@@ -260,7 +260,6 @@
 
 <script>
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
-import { useDataStore } from '../services/store.js'
 import L from 'leaflet'
 import 'leaflet.fullscreen'
 import 'leaflet.fullscreen/Control.FullScreen.css'
@@ -284,8 +283,6 @@ L.Icon.Default.mergeOptions({
 export default {
   name: 'Localisation',
   setup() {
-    const store = useDataStore()
-    
     // Reactive data
     const addressInput = ref('')
     const selectedLocation = ref(null)
@@ -379,7 +376,6 @@ export default {
       clearArrows()
 
       // Add new marker with click handler
-      const removeButtonText = store.labelState === 3 ? 'Remove position' : 'Supprimer la position'
       const popupContent = `
         <div>
           <strong>${address || `Position: ${lat.toFixed(4)}, ${lng.toFixed(4)}`}</strong><br>
@@ -392,7 +388,7 @@ export default {
             border-radius: 4px;
             cursor: pointer;
             font-size: 12px;
-          ">${removeButtonText}</button>
+          ">Supprimer la position</button>
         </div>
       `
       
@@ -1074,7 +1070,6 @@ export default {
     })
 
     return {
-      store,
       addressInput,
       selectedLocation,
       searchingAddress,

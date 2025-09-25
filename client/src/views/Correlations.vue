@@ -2,7 +2,7 @@
   <div class="correlations-container">
     <!-- Header Section -->
     <div class="header-section">
-      <h1>{{ store.labelState === 3 ? 'Statistical correlations between different metrics' : 'Corrélations statistiques entre les différentes métriques' }}</h1>
+      <h1>Corrélations statistiques entre les différentes métriques</h1>
     </div>
 
     <!-- Controls Section -->
@@ -11,7 +11,7 @@
         <v-expansion-panel>
           <v-expansion-panel-title>
             <v-icon left>mdi-cog</v-icon>
-            {{ store.labelState === 3 ? 'Parameters' : 'Paramètres' }}
+            Paramètres
           </v-expansion-panel-title>
           <v-expansion-panel-text>
             <v-row class="align-center mb-4">
@@ -19,7 +19,7 @@
                 <v-select
                   v-model="selectedScope"
                   :items="scopeOptions"
-                  :label="store.labelState === 3 ? 'Analysis level' : 'Niveau d\'analyse'"
+                  label="Niveau d'analyse"
                   variant="outlined"
                   density="compact"
                   @update:model-value="onScopeChanged"
@@ -36,7 +36,7 @@
                 <v-select
                   v-model="selectedMetricsY"
                   :items="availableMetricOptions"
-                  :label="store.labelState === 3 ? 'Y-Axis Metrics (vertical)' : 'Métriques Axe Y (vertical)'"
+                  label="Métriques Axe Y (vertical)"
                   variant="outlined"
                   density="compact"
                   multiple
@@ -49,7 +49,7 @@
                 <v-select
                   v-model="selectedMetricsX"
                   :items="availableMetricOptions"
-                  :label="store.labelState === 3 ? 'X-Axis Metrics (horizontal)' : 'Métriques Axe X (horizontal)'"
+                  label="Métriques Axe X (horizontal)"
                   variant="outlined"
                   density="compact"
                   multiple
@@ -68,7 +68,7 @@
     <div class="results-section">
       <div v-if="loading" class="loading">
         <v-progress-circular indeterminate color="primary" />
-        <p class="mt-2">{{ store.labelState === 3 ? 'Computing correlations...' : 'Calcul des corrélations...' }}</p>
+        <p class="mt-2">Calcul des corrélations...</p>
       </div>
 
       <div v-else-if="error" class="error">
@@ -82,7 +82,7 @@
         <CorrelationHeatmap 
           :matrix="correlationMatrix"
           :labels="metricLabels"
-          :title="store.labelState === 3 ? `Pearson correlation coefficients - ${currentType}` : `Coefficients de corrélation de Pearson - ${currentType}`"
+          :title="`Coefficients de corrélation de Pearson - ${currentType}`"
           @correlation-hover="handleCorrelationHover"
           @correlation-click="handleCorrelationClick"
         />
@@ -99,17 +99,17 @@
           <v-row>
             <v-col cols="12" md="4">
               <v-card class="pa-3">
-                <v-card-title class="text-h6">{{ store.labelState === 3 ? 'Statistics' : 'Statistiques' }}</v-card-title>
+                <v-card-title class="text-h6">Statistiques</v-card-title>
                 <v-card-text>
-                  <p><strong>{{ store.labelState === 3 ? 'Number of observations:' : 'Nb. d\'observations:' }}</strong> {{ dataSize }}</p>
-                  <p><strong>{{ store.labelState === 3 ? 'Max correlation:' : 'Corrélation max:' }}</strong> {{ maxCorrelation.toFixed(3) }}</p>
-                  <p><strong>{{ store.labelState === 3 ? 'Min correlation:' : 'Corrélation min:' }}</strong> {{ minCorrelation.toFixed(3) }}</p>
+                  <p><strong>Nb. d'observations:</strong> {{ dataSize }}</p>
+                  <p><strong>Corrélation max:</strong> {{ maxCorrelation.toFixed(3) }}</p>
+                  <p><strong>Corrélation min:</strong> {{ minCorrelation.toFixed(3) }}</p>
                 </v-card-text>
               </v-card>
             </v-col>
             <v-col cols="12" md="8">
               <v-card class="pa-3">
-                <v-card-title class="text-h6">{{ store.labelState === 3 ? 'Strongest correlations' : 'Corrélations les plus fortes' }}</v-card-title>
+                <v-card-title class="text-h6">Corrélations les plus fortes</v-card-title>
                 <v-card-text>
                   <p v-for="corr in topCorrelations.slice(0, 5)" :key="corr.key" class="mb-2">
                     <strong>{{ corr.metric1 }} ↔ {{ corr.metric2 }}:</strong> {{ corr.value.toFixed(3) }}
@@ -123,7 +123,7 @@
 
       <div v-else class="no-data">
         <v-alert type="info" icon="mdi-information">
-          {{ store.labelState === 3 ? 'Select an analysis level to display correlations.' : 'Sélectionnez un niveau d\'analyse pour afficher les corrélations.' }}
+          Sélectionnez un niveau d'analyse pour afficher les corrélations.
         </v-alert>
       </div>
     </div>
@@ -168,16 +168,10 @@ export default {
     const rawData = ref([])
 
     // Options
-    const scopeOptions = computed(() => [
-      { 
-        value: 'departements', 
-        title: store.labelState === 3 ? 'Departments' : 'Départements' 
-      },
-      { 
-        value: 'communes_france', 
-        title: store.labelState === 3 ? 'Municipalities (population > 50k)' : 'Communes (population > 50k)' 
-      }
-    ])
+    const scopeOptions = [
+      { value: 'departements', title: 'Départements' },
+      { value: 'communes_france', title: 'Communes (population > 50k)' }
+    ]
 
 
 
@@ -206,11 +200,7 @@ export default {
 
     // Computed properties
     const currentType = computed(() => {
-      if (selectedScope.value === 'departements') {
-        return store.labelState === 3 ? 'Departments' : 'Départements'
-      } else {
-        return store.labelState === 3 ? 'Municipalities' : 'Communes'
-      }
+      return selectedScope.value === 'departements' ? 'Départements' : 'Communes'
     })
 
     const maxCorrelation = computed(() => {
