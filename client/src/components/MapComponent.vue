@@ -68,6 +68,8 @@ export default {
           return 'alt1Label';
         case 'alt2':
           return 'alt2Label';
+        case 'english':
+          return 'englishLabel';
         default:
           return 'label';
       }
