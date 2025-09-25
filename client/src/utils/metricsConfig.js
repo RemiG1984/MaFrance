@@ -15,7 +15,7 @@ const MetricsConfig = {
         standard: "Ma France: état des lieux",
         alt1: "Ma France inclusive",
         alt2: "Où va ma France?",
-        english: "My France: Current State",
+        english: "My France",
     },
 
     // Version labels for different states
@@ -23,7 +23,7 @@ const MetricsConfig = {
         standard: "Version neutre ⚖️",
         alt1: "Version inclusive 🌈",
         alt2: "Version identitaire 🦅",
-        english: "English Version 🇬🇧",
+        english: "English version 🇬🇧",
     },
 
     // Label state: 0 = standard, 1 = alt1, 2 = alt2, 3 = english
