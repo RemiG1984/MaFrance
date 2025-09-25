@@ -682,6 +682,8 @@ export default {
           return metricConfig.alt1Label || metricConfig.label;
         case 'alt2':
           return metricConfig.alt2Label || metricConfig.label;
+        case 'english':
+          return metricConfig.englishLabel || metricConfig.label;
         default:
           return metricConfig.label;
       }
