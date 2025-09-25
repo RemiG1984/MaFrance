@@ -134,21 +134,14 @@ export default {
   },
   computed: {
     isEnglish() {
-      // Access store through global injection or return false as fallback
-      try {
-        const { useDataStore } = require('../services/store.js');
-        const store = useDataStore();
-        return store.labelState === 3;
-      } catch {
-        return false;
-      }
+      return this.$store && this.$store.labelState === 3;
     },
     
     locationName() {
       if (!this.location) return '';
       
       // Check if store is available and get label state
-      const isEnglish = this.isEnglish;
+      const isEnglish = this.$store && this.$store.labelState === 3;
 
       switch (this.location.type) {
         case 'country':

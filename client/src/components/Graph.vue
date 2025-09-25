@@ -37,11 +37,7 @@ export default {
     }
   },
   computed: {
-    ...mapStores(useDataStore), // Maps useDataStore to this.dataStore
-    
-    isDataStoreReady() {
-      return this.dataStore && typeof this.dataStore.labelState !== 'undefined';
-    }
+    ...mapStores(useDataStore) // Maps useDataStore to this.dataStore
   },
   data() {
     return {
@@ -60,7 +56,7 @@ export default {
     // Watch for label state changes to update chart titles
     'dataStore.labelState': {
       handler() {
-        if (this.chart && this.dataStore) {
+        if (this.chart) {
           this.updateChartTitle();
         }
       }
@@ -76,10 +72,6 @@ export default {
     getChartTitle() {
       if (!chartLabels[this.metricKey]) {
         return this.metricKey;
-      }
-      
-      if (!this.dataStore || !this.dataStore.getLabelStateName) {
-        return chartLabels[this.metricKey].label;
       }
       
       const labelStateName = this.dataStore.getLabelStateName();
@@ -108,7 +100,7 @@ export default {
     },
 
     getYAxisTitle() {
-      const isEnglish = this.dataStore && this.dataStore.labelState === 3;
+      const isEnglish = this.dataStore.labelState === 3;
       const isHomicides = this.metricKey === 'homicides_p100k' || this.metricKey === 'homicides_total_p100k';
       
       if (isEnglish) {
