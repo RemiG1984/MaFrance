@@ -61,13 +61,13 @@ export default {
         { key: "asiatique_pct", label: "Prénoms asiatiques", color: "#f59e0b", order: 7 },
       ],
       detailedCategoriesEn: [
-        { key: "musulman_pct", label: "Muslim first names", color: "#22c55e", order: 1 },
-        { key: "traditionnel_pct", label: "Traditional French first names", color: "#1e40af", order: 2 },
-        { key: "moderne_pct", label: "Modern French first names", color: "#60a5fa", order: 3 },
-        { key: "europeen_pct", label: "European first names", color: "#8b5cf6", order: 4 },
-        { key: "invente_pct", label: "Invented first names", color: "#06b6d4", order: 5 },
-        { key: "africain_pct", label: "African first names", color: "#1f2937", order: 6 },
-        { key: "asiatique_pct", label: "Asian first names", color: "#f59e0b", order: 7 },
+        { key: "musulman_pct", label: "Muslim names", color: "#22c55e", order: 1 },
+        { key: "traditionnel_pct", label: "Traditional French names", color: "#1e40af", order: 2 },
+        { key: "moderne_pct", label: "Modern French names", color: "#60a5fa", order: 3 },
+        { key: "europeen_pct", label: "European names", color: "#8b5cf6", order: 4 },
+        { key: "invente_pct", label: "Invented names", color: "#06b6d4", order: 5 },
+        { key: "africain_pct", label: "African names", color: "#1f2937", order: 6 },
+        { key: "asiatique_pct", label: "Asian names", color: "#f59e0b", order: 7 },
       ]
     }
   },
@@ -108,7 +108,7 @@ export default {
         },
         {
           key: "europeen_pct",
-          label: this.isEnglish ? "European first names" : "Prénoms européens",
+          label: this.isEnglish ? "European names" : "Prénoms européens",
           color: "#8b5cf6",
           order: 4,
         },
