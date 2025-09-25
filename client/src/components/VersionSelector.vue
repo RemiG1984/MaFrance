@@ -51,6 +51,10 @@ export default {
         {
           label: MetricsConfig.versionLabels?.alt2 || 'Version Alternative 2',
           value: 2
+        },
+        {
+          label: MetricsConfig.versionLabels?.english || 'English Version',
+          value: 3
         }
       ]
     }
