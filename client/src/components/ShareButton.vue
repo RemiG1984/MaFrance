@@ -86,7 +86,11 @@ export default {
 
       // Add version parameter
       if (this.dataStore.labelState !== 0) {
-        params.set('v', this.dataStore.labelState.toString())
+        if (this.dataStore.labelState === 3) {
+          params.set('v', 'en')
+        } else {
+          params.set('v', this.dataStore.labelState.toString())
+        }
       }
 
       // Add location parameter based on current level

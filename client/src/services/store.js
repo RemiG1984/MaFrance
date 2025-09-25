@@ -451,7 +451,12 @@ export const useDataStore = defineStore("data", {
 
         // Set version if specified
         if (params.v) {
-          const version = parseInt(params.v)
+          let version
+          if (params.v === 'en') {
+            version = 3
+          } else {
+            version = parseInt(params.v)
+          }
           if (version >= 0 && version <= 3) {
             this.setLabelState(version)
           }
