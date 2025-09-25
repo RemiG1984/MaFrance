@@ -19,7 +19,7 @@
                 <v-select
                   v-model="selectedScope"
                   :items="scopeOptions"
-                  :label="store.labelState === 3 ? 'Analysis level' : 'Niveau d\\'analyse'"
+                  :label="store.labelState === 3 ? 'Analysis level' : 'Niveau d\'analyse'"
                   variant="outlined"
                   density="compact"
                   @update:model-value="onScopeChanged"
