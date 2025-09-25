@@ -93,21 +93,9 @@ export default {
         const metricConfig = MetricsConfig.getMetricByValue(metric.value);
         if (!metricConfig) return metric;
 
-        const labelStateName = this.dataStore.getLabelStateName();
-        let label;
-        switch (labelStateName) {
-          case 'alt1':
-            label = metricConfig.alt1Label || metricConfig.label;
-            break;
-          case 'alt2':
-            label = metricConfig.alt2Label || metricConfig.label;
-            break;
-          case 'english':
-            label = metricConfig.englishLabel || metricConfig.label;
-            break;
-          default:
-            label = metricConfig.label;
-        }
+        // Use the labelKey to get the appropriate label
+        const labelProperty = this.labelKey;
+        const label = metricConfig[labelProperty] || metricConfig.label;
 
         return {
           ...metric,
@@ -152,7 +140,9 @@ export default {
         metric.value === this.selectedMetric.value
       );
       if (!isCurrentMetricAvailable && newMetrics.length > 0) {
-        this.selectedMetric = newMetrics[0];
+        // Find the metric object from availableMetrics to get the proper labels
+        const defaultMetric = this.availableMetrics.find(m => m.value === newMetrics[0].value) || newMetrics[0];
+        this.selectedMetric = defaultMetric;
         this.onMetricChange(this.selectedMetric);
       }
     },
@@ -678,17 +668,10 @@ export default {
     getIndiceName() {
       const metricConfig = MetricsConfig.getMetricByValue(this.selectedMetric.value);
       if (!metricConfig) return this.selectedMetric.value;
-      const labelStateName = this.dataStore.getLabelStateName();
-      switch (labelStateName) {
-        case 'alt1':
-          return metricConfig.alt1Label || metricConfig.label;
-        case 'alt2':
-          return metricConfig.alt2Label || metricConfig.label;
-        case 'english':
-          return metricConfig.englishLabel || metricConfig.label;
-        default:
-          return metricConfig.label;
-      }
+      
+      // Use the labelKey to get the appropriate label
+      const labelProperty = this.labelKey;
+      return metricConfig[labelProperty] || metricConfig.label;
     },
     showCommuneTooltipWhenReady() {
       if (this.mapState.level === 'departement' || !this.communesLayer) {
