@@ -22,7 +22,7 @@
                 <b>𝕏</b>
               </v-btn>
             </template>
-            <span>Suivez-nous sur X (Twitter) pour les dernières mises à jour</span>
+            <span>{{ twitterTooltip }}</span>
           </v-tooltip>
 
           <v-tooltip bottom>
@@ -41,7 +41,7 @@
                 />
               </v-btn>
             </template>
-            <span>Soutenez le projet</span>
+            <span>{{ kofiTooltip }}</span>
           </v-tooltip>
 
 
@@ -97,7 +97,7 @@
               <VersionSelector />
             </div>
           </template>
-          <span>Modifiez la cosmétique du site, pas les données</span>
+          <span>{{ versionTooltip }}</span>
         </v-tooltip>
         <v-tooltip bottom>
           <template v-slot:activator="{ props }">
@@ -105,7 +105,7 @@
               <ShareButton :showText="false" />
             </div>
           </template>
-          <span>Partagez cette visualisation avec un lien personnalisé</span>
+          <span>{{ shareTooltip }}</span>
         </v-tooltip>
         </div>
 
@@ -177,7 +177,7 @@
           target="_blank"
           class="twitter-mobile"
         >
-          <v-list-item-title>@ou_va_ma_France</v-list-item-title>
+          <v-list-item-title>{{ mobileTwitterText }}</v-list-item-title>
         </v-list-item>
 
         <v-list-item
@@ -191,7 +191,7 @@
               alt="Ko-fi"
               class="kofi-icon-mobile"
             />
-            Offrez-moi un café
+            {{ mobileKofiText }}
           </v-list-item-title>
         </v-list-item>
 
@@ -228,30 +228,94 @@ export default {
       return this.dataStore.getCurrentPageTitle()
     }
   },
+  computed: {
+    ...mapStores(useDataStore),
+    currentPageTitle() {
+      return this.dataStore.getCurrentPageTitle()
+    },
+    menuItems() {
+      const isEnglish = this.dataStore.labelState === 3;
+      
+      if (isEnglish) {
+        return [
+          { 
+            title: 'Home', 
+            path: '/',
+            tooltip: 'Return to the main page with national data'
+          },
+          {
+            title: 'Tools',
+            tooltip: 'Access various analysis and visualization tools',
+            children: [
+              { title: 'Rankings', path: '/classements' },
+              { title: 'Correlations', path: '/correlations' },
+              { title: 'Location', path: '/localisation' }
+            ]
+          },
+          { 
+            title: 'Methodology', 
+            path: '/methodologie',
+            tooltip: 'Discover how data is collected and analyzed'
+          }
+        ];
+      } else {
+        return [
+          { 
+            title: 'Accueil', 
+            path: '/',
+            tooltip: 'Retour à la page principale avec les données nationales'
+          },
+          {
+            title: 'Outils',
+            tooltip: 'Accédez aux différents outils d\'analyse et de visualisation',
+            children: [
+              { title: 'Classements', path: '/classements' },
+              { title: 'Corrélations', path: '/correlations' },
+              { title: 'Localisation', path: '/localisation' }
+            ]
+          },
+          { 
+            title: 'Méthodologie', 
+            path: '/methodologie',
+            tooltip: 'Découvrez comment les données sont collectées et analysées'
+          }
+        ];
+      }
+    },
+    twitterTooltip() {
+      return this.dataStore.labelState === 3 
+        ? 'Follow us on X (Twitter) for the latest updates'
+        : 'Suivez-nous sur X (Twitter) pour les dernières mises à jour';
+    },
+    kofiTooltip() {
+      return this.dataStore.labelState === 3 
+        ? 'Support the project'
+        : 'Soutenez le projet';
+    },
+    versionTooltip() {
+      return this.dataStore.labelState === 3 
+        ? 'Change the site cosmetics, not the data'
+        : 'Modifiez la cosmétique du site, pas les données';
+    },
+    shareTooltip() {
+      return this.dataStore.labelState === 3 
+        ? 'Share this visualization with a custom link'
+        : 'Partagez cette visualisation avec un lien personnalisé';
+    },
+    mobileTwitterText() {
+      return this.dataStore.labelState === 3 
+        ? '@ou_va_ma_France'
+        : '@ou_va_ma_France';
+    },
+    mobileKofiText() {
+      return this.dataStore.labelState === 3 
+        ? 'Buy me a coffee'
+        : 'Offrez-moi un café';
+    }
+  },
   data() {
     return {
-      mobileMenuOpen: false,
-      menuItems: [
-        { 
-          title: 'Accueil', 
-          path: '/',
-          tooltip: 'Retour à la page principale avec les données nationales'
-        },
-        {
-          title: 'Outils',
-          tooltip: 'Accédez aux différents outils d\'analyse et de visualisation',
-          children: [
-            { title: 'Classements', path: '/classements' },
-            { title: 'Corrélations', path: '/correlations' },
-            { title: 'Localisation', path: '/localisation' }
-          ]
-        },
-        { 
-          title: 'Méthodologie', 
-          path: '/methodologie',
-          tooltip: 'Découvrez comment les données sont collectées et analysées'
-        }
-      ]
+      mobileMenuOpen: false
     }
   },
   mounted() {
