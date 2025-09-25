@@ -42,7 +42,7 @@
                   <div class="text-subtitle-2 mb-2">{{ store.labelState === 3 ? 'Correlation principle' : 'Principe de la corrélation' }}</div>
                   {{ store.labelState === 3 ? 
                     'Statistical correlation measures the relationship between two variables, i.e., whether they evolve together in a certain way. For example, if we observe that when one variable increases, the other also increases (or decreases), we speak of correlation. The Pearson coefficient, denoted r, is a number between -1 and 1 that quantifies this relationship. If r is close to 1, the variables increase together (strong positive correlation); if r is close to -1, one increases when the other decreases (strong negative correlation); if r is close to 0, there is no clear link. It is a simple tool to spot trends, but it does not prove that one causes the other.' :
-                    'La corrélation statistique mesure le lien entre deux variables, c\\'est-à-dire si elles évoluent ensemble d\\'une certaine manière. Par exemple, si on observe que quand une variable augmente, l\\'autre augmente aussi (ou diminue), on parle de corrélation. Le coefficient de Pearson, noté r, est un nombre entre -1 et 1 qui quantifie cette relation. Si r est proche de 1, les variables augmentent ensemble (corrélation positive forte) ; si r est proche de -1, l\\'une augmente quand l\\'autre diminue (corrélation négative forte) ; si r est proche de 0, il n\\'y a pas de lien clair. C\\'est un outil simple pour repérer des tendances, mais il ne prouve pas que l\\'une cause l\\'autre.'
+                    'La corrélation statistique mesure le lien entre deux variables, c\'est-à-dire si elles évoluent ensemble d\'une certaine manière. Par exemple, si on observe que quand une variable augmente, l\'autre augmente aussi (ou diminue), on parle de corrélation. Le coefficient de Pearson, noté r, est un nombre entre -1 et 1 qui quantifie cette relation. Si r est proche de 1, les variables augmentent ensemble (corrélation positive forte) ; si r est proche de -1, l\'une augmente quand l\'autre diminue (corrélation négative forte) ; si r est proche de 0, il n\'y a pas de lien clair. C\'est un outil simple pour repérer des tendances, mais il ne prouve pas que l\'une cause l\'autre.'
                   }}
                 </v-alert>
               </v-col>
@@ -119,7 +119,7 @@
               <v-card class="pa-3">
                 <v-card-title class="text-h6">{{ store.labelState === 3 ? 'Statistics' : 'Statistiques' }}</v-card-title>
                 <v-card-text>
-                  <p><strong>{{ store.labelState === 3 ? 'Nb. of observations:' : 'Nb. d\\'observations:' }}</strong> {{ dataSize }}</p>
+                  <p><strong>{{ store.labelState === 3 ? 'Nb. of observations:' : 'Nb. d\'observations:' }}</strong> {{ dataSize }}</p>
                   <p><strong>{{ store.labelState === 3 ? 'Max correlation:' : 'Corrélation max:' }}</strong> {{ maxCorrelation.toFixed(3) }}</p>
                   <p><strong>{{ store.labelState === 3 ? 'Min correlation:' : 'Corrélation min:' }}</strong> {{ minCorrelation.toFixed(3) }}</p>
                 </v-card-text>
@@ -141,7 +141,7 @@
 
       <div v-else class="no-data">
         <v-alert type="info" icon="mdi-information">
-          {{ store.labelState === 3 ? 'Select an analysis level to display correlations.' : 'Sélectionnez un niveau d\\'analyse pour afficher les corrélations.' }}
+          {{ store.labelState === 3 ? 'Select an analysis level to display correlations.' : 'Sélectionnez un niveau d\'analyse pour afficher les corrélations.' }}
         </v-alert>
       </div>
     </div>
