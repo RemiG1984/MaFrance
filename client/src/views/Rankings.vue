@@ -18,7 +18,7 @@
     <!-- Results Section -->
     <div class="results-section">
       <div v-if="loading" class="loading">
-        Chargement...
+        {{ store.labelState === 3 ? 'Loading...' : 'Chargement...' }}
       </div>
 
       <div v-else-if="error" class="error">
@@ -34,7 +34,7 @@
       />
 
       <div v-else class="no-data">
-        Sélectionnez une métrique pour voir le classement.
+        {{ store.labelState === 3 ? 'Select a metric to view the ranking.' : 'Sélectionnez une métrique pour voir le classement.' }}
       </div>
     </div>
   </div>

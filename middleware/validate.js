@@ -197,8 +197,8 @@ const validatePopulationRange = [
 const validateCountry = [
   query("country")
     .optional()
-    .isIn(["France", "FRANCE"])
-    .withMessage("Pays doit être France"),
+    .isIn(["france metro", "france entiere"])
+    .withMessage("Pays doit être france entiere ou metro"),
   handleValidationErrors,
 ];
 

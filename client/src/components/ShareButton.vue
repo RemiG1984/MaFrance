@@ -3,17 +3,17 @@
     <template v-slot:activator="{ props }">
       <v-btn v-bind="props" variant="text" class="mx-2" :title="shareButtonTitle">
         <v-icon start>mdi-share-variant</v-icon>
-        <span v-if="showText">Partager</span>
+        <span v-if="showText">{{ isEnglish ? 'Share' : 'Partager' }}</span>
       </v-btn>
     </template>
     <v-card min-width="300">
       <v-card-title class="text-subtitle-1">
-        Partager cette visualisation
+        {{ isEnglish ? 'Share this visualization' : 'Partager cette visualisation' }}
       </v-card-title>
       <v-card-text>
         <v-text-field
           v-model="shareUrl"
-          label="Lien à partager"
+          :label="isEnglish ? 'Link to share' : 'Lien à partager'"
           readonly
           variant="outlined"
           density="compact"
@@ -33,7 +33,7 @@
           size="small"
         >
           <v-icon start>mdi-content-copy</v-icon>
-          Copier
+          {{ isEnglish ? 'Copy' : 'Copier' }}
         </v-btn>
         <v-btn
           @click="shareOnTwitter"
@@ -80,13 +80,21 @@ export default {
   computed: {
     ...mapStores(useDataStore),
 
+    isEnglish() {
+      return this.dataStore.labelState === 3;
+    },
+
     shareUrl() {
       const baseUrl = window.location.origin
       const params = new URLSearchParams()
 
       // Add version parameter
       if (this.dataStore.labelState !== 0) {
-        params.set('v', this.dataStore.labelState.toString())
+        if (this.dataStore.labelState === 3) {
+          params.set('v', 'en')
+        } else {
+          params.set('v', this.dataStore.labelState.toString())
+        }
       }
 
       // Add location parameter based on current level
@@ -133,11 +141,13 @@ export default {
 
 
     shareButtonTitle() {
-      return `Partager: ${this.shareLocation}`
+      return this.isEnglish ? `Share: ${this.shareLocation}` : `Partager: ${this.shareLocation}`
     },
 
     shareText() {
-      return `Découvrez les données de ${this.shareLocation} sur:`
+      return this.isEnglish ? 
+        `Discover data for ${this.shareLocation} on:` : 
+        `Découvrez les données de ${this.shareLocation} sur:`
     }
   },
 

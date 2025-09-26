@@ -6,7 +6,6 @@ const cacheService = require("../services/cacheService");
 const {
   validateDepartement,
   validateCOG,
-  validateCountry,
 } = require("../middleware/validate");
 
 // Centralized error handler for database queries
@@ -50,8 +49,8 @@ const computePercentageFields = (row) => {
   
   // Calculate percentages and multiply by 100, round to 2 decimal places
   const result = {
-    Code: row.Code,
     Type: row.Type,
+    country: row.Code, // Rename Code to country for consistency with other country data
     Ensemble: ensemble,
     etrangers_pct: parseFloat(((etrangers / ensemble) * 100).toFixed(2)),
     francais_de_naissance_pct: parseFloat(((francais_de_naissance / ensemble) * 100).toFixed(2)),
@@ -67,32 +66,27 @@ const computePercentageFields = (row) => {
 };
 
 // GET /api/nat1/country
-router.get("/country", validateCountry, (req, res) => {
-  const country = req.query.country || "France";
-  
+router.get("/country", (req, res) => {
   // Try cache first
-  const cachedData = cacheService.get(`nat1_country_${country.toLowerCase()}`);
+  const cachedData = cacheService.get(`nat1_country_all`);
   if (cachedData) {
     return res.json(cachedData);
   }
 
-  db.get(
-    `SELECT * FROM country_nat1 WHERE UPPER(Code) = ?`,
-    [country.toUpperCase()],
-    (err, row) => {
+  db.all(
+    `SELECT * FROM country_nat1 ORDER BY Code`,
+    [],
+    (err, rows) => {
       if (err) return handleDbError(err, res);
-      if (!row) {
-        return res.status(404).json({ error: "Données NAT1 non trouvées pour ce pays" });
+      if (!rows || rows.length === 0) {
+        return res.status(404).json({ error: "Données NAT1 non trouvées" });
       }
       
-      const computedData = computePercentageFields(row);
-      if (!computedData) {
-        return res.status(500).json({ error: "Erreur lors du calcul des pourcentages" });
-      }
+      const result = rows.map(row => computePercentageFields(row)).filter(Boolean);
       
       // Cache the result
-      cacheService.set(`nat1_country_${country.toLowerCase()}`, computedData);
-      res.json(computedData);
+      cacheService.set(`nat1_country_all`, result);
+      res.json(result);
     }
   );
 });
@@ -164,42 +158,6 @@ router.get("/commune", validateCOG, (req, res) => {
       res.json(computedData);
     }
   );
-});
-
-// GET /api/nat1/all - Get all available NAT1 data types
-router.get("/all", (req, res) => {
-  // Try cache first
-  const cachedData = cacheService.get("nat1_all_summary");
-  if (cachedData) {
-    return res.json(cachedData);
-  }
-
-  const queries = [
-    { name: "country", query: "SELECT COUNT(*) as count FROM country_nat1" },
-    { name: "departement", query: "SELECT COUNT(*) as count FROM department_nat1" },
-    { name: "commune", query: "SELECT COUNT(*) as count FROM commune_nat1" }
-  ];
-
-  const results = {};
-  let completed = 0;
-
-  queries.forEach(({ name, query }) => {
-    db.get(query, [], (err, row) => {
-      if (err) {
-        console.error(`Error querying ${name}:`, err.message);
-        results[name] = { count: 0, error: err.message };
-      } else {
-        results[name] = { count: row.count };
-      }
-      
-      completed++;
-      if (completed === queries.length) {
-        // Cache the result
-        cacheService.set("nat1_all_summary", results);
-        res.json(results);
-      }
-    });
-  });
 });
 
 module.exports = router;

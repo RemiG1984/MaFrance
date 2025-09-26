@@ -15,6 +15,7 @@ const MetricsConfig = {
         standard: "Ma France: état des lieux",
         alt1: "Ma France inclusive",
         alt2: "Où va ma France?",
+        english: "My France",
     },
 
     // Version labels for different states
@@ -22,9 +23,10 @@ const MetricsConfig = {
         standard: "Version neutre ⚖️",
         alt1: "Version inclusive 🌈",
         alt2: "Version identitaire 🦅",
+        english: "English version 🇬🇧",
     },
 
-    // Label state: 0 = standard, 1 = alt1, 2 = alt2
+    // Label state: 0 = standard, 1 = alt1, 2 = alt2, 3 = english
     labelState: parseInt(localStorage.getItem("metricsLabelState")) || 0,
 
     // Color scale configuration for all metrics
@@ -36,6 +38,14 @@ const MetricsConfig = {
             "#ff8a65",
             "#e53935",
             "#b10026",
+        ],
+        alt1Colors: [
+            "#f5f5e8", // Pale cream (neutral, minimal positive change)
+            "#e6f0b3", // Light yellow-green (slight improvement)
+            "#b8e084", // Warm green (moderate improvement)
+            "#80cc66", // Vibrant green (significant improvement)
+            "#4db8a3", // Bright teal (strong positive change)
+            "#2e8b8b", // Deep teal-blue (maximum positive change)
         ],
         // Define level-specific min/max values for metrics
         // Values below min are pure white (#ffffff), values above max are darkest red (#b10026)
@@ -55,7 +65,7 @@ const MetricsConfig = {
                 extra_europeen_pct: { min: 5, max: 50 },
                 Total_places_migrants: { min: 100, max: 3000 },
                 places_migrants_p1k: { min: 0.6, max: 3 },
-                islamisation_score: { min: 30, max: 140 },
+                islamisation_score: { min: 40, max: 150 },
                 musulman_pct: { min: 2, max: 40 },
                 number_of_mosques: { min: 1, max: 70 },
                 mosque_p100k: { min: 0.5, max: 7 },
@@ -90,7 +100,7 @@ const MetricsConfig = {
                 extra_europeen_pct: { min: 5, max: 50 },
                 Total_places_migrants: { min: 10, max: 500 },
                 places_migrants_p1k: { min: 0.6, max: 3 },
-                islamisation_score: { min: 30, max: 140 },
+                islamisation_score: { min: 40, max: 150 },
                 musulman_pct: { min: 2, max: 40 },
                 number_of_mosques: { min: 1, max: 5 },
                 mosque_p100k: { min: 1, max: 7 },
@@ -120,6 +130,7 @@ const MetricsConfig = {
             label: "Indice de changement général",
             alt1Label: "Indice général d'évolution inclusive",
             alt2Label: "Indice de fragmentation nationale",
+            englishLabel: "General Change Index",
             category: "général",
             format: "score",
             source: "details",
@@ -129,6 +140,7 @@ const MetricsConfig = {
             label: "Population",
             alt1Label: "Population",
             alt2Label: "Population",
+            englishLabel: "Population",
             category: "général",
             format: "number",
             source: "details",
@@ -139,6 +151,7 @@ const MetricsConfig = {
             label: "Indice d'insécurité",
             alt1Label: "Indice de répression policière",
             alt2Label: "Indice d'insécurité",
+            englishLabel: "Insecurity Index",
             category: "insécurité",
             format: "score",
             source: "details",
@@ -148,6 +161,7 @@ const MetricsConfig = {
             label: "Homicides et tentatives /100k hab.",
             alt1Label: "Homicides et tentatives /100k hab.",
             alt2Label: "Homicides et tentatives /100k hab.",
+            englishLabel: "Homicides and attempts /100k pop.",
             category: "insécurité",
             format: "rate_100k",
             source: "crime",
@@ -157,6 +171,7 @@ const MetricsConfig = {
             label: "Violences physiques /1k hab.",
             alt1Label: "Communication corporelle musclée /1k hab.",
             alt2Label: "Agressions brutales /1k hab.",
+            englishLabel: "Physical violence /1k pop.",
             category: "insécurité",
             format: "rate_1k",
             source: "crime",
@@ -166,6 +181,7 @@ const MetricsConfig = {
             label: "Violences sexuelles /1k hab.",
             alt1Label: "Libération de la parole /1k hab.",
             alt2Label: "Violences sexuelles /1k hab.",
+            englishLabel: "Sexual violence /1k pop.",
             category: "insécurité",
             format: "rate_1k",
             source: "crime",
@@ -175,6 +191,7 @@ const MetricsConfig = {
             label: "Vols /1k hab.",
             alt1Label: "Redistribution spontanée /1k hab.",
             alt2Label: "Pillages /1k hab.",
+            englishLabel: "Theft /1k pop.",
             category: "insécurité",
             format: "rate_1k",
             source: "crime",
@@ -184,6 +201,7 @@ const MetricsConfig = {
             label: "Destructions et dégradations /1k hab.",
             alt1Label: "Déconstruction créative /1k hab.",
             alt2Label: "Vandalisme /1k hab.",
+            englishLabel: "Destruction and vandalism /1k pop.",
             category: "insécurité",
             format: "rate_1k",
             source: "crime",
@@ -193,6 +211,7 @@ const MetricsConfig = {
             label: "Trafic et usage de stupéfiants /1k hab.",
             alt1Label: "Répression narcotique /1k hab.",
             alt2Label: "Trafic de drogues /1k hab.",
+            englishLabel: "Drug trafficking and use /1k pop.",
             category: "insécurité",
             format: "rate_1k",
             source: "crime",
@@ -202,6 +221,7 @@ const MetricsConfig = {
             label: "Escroqueries /1k hab.",
             alt1Label: "Astuces économiques /1k hab.",
             alt2Label: "Escroqueries /1k hab.",
+            englishLabel: "Fraud /1k pop.",
             category: "insécurité",
             format: "rate_1k",
             source: "crime",
@@ -212,6 +232,7 @@ const MetricsConfig = {
             label: "Indice d'immigration",
             alt1Label: "Indice de créolisation",
             alt2Label: "Indice de grand remplacement",
+            englishLabel: "Immigration Index",
             category: "immigration",
             format: "score",
             source: "details",
@@ -221,6 +242,7 @@ const MetricsConfig = {
             label: "Prénoms de naissance extra-européen (%)",
             alt1Label: "Prénoms exotiques (%)",
             alt2Label: "Prénoms allogènes (%)",
+            englishLabel: "Extra-European birth names (%)",
             category: "immigration",
             format: "percentage",
             source: "names",
@@ -230,6 +252,7 @@ const MetricsConfig = {
             label: "Places en centre d'hébergement pour migrant",
             alt1Label: "Places en centre d'hébergement pour réfugié",
             alt2Label: "Places en centre d'hébergement pour clandestin",
+            englishLabel: "Migrant accommodation places",
             category: "immigration",
             format: "number",
             source: "details",
@@ -239,6 +262,7 @@ const MetricsConfig = {
             label: "Places en centre d'hébergement pour migrant /1k hab",
             alt1Label: "Places en centre d'hébergement pour réfugié /1k hab",
             alt2Label: "Places en centre d'hébergement pour clandestin /1k hab",
+            englishLabel: "Migrant accommodation places /1k pop.",
             category: "immigration",
             format: "rate_1k",
             source: "details",
@@ -248,6 +272,7 @@ const MetricsConfig = {
             label: "Pop. naturalisée (%)",
             alt1Label: "Pop. naturalisée (%)",
             alt2Label: "Pop. naturalisée (%)",
+            englishLabel: "Naturalized population (%)",
             category: "immigration",
             format: "percentage",
             source: "nat1",
@@ -255,8 +280,9 @@ const MetricsConfig = {
         {
             value: "etrangers_pct",
             label: "Pop. étrangère (%)",
-            alt1Label: "Pop. étrangère  (%)",
-            alt2Label: "Pop. étrangère  (%)",
+            alt1Label: "Pop. étrangère (%)",
+            alt2Label: "Pop. étrangère (%)",
+            englishLabel: "Foreign population (%)",
             category: "immigration",
             format: "percentage",
             source: "nat1",
@@ -266,6 +292,7 @@ const MetricsConfig = {
             label: "Pop. européene (%)",
             alt1Label: "Pop. européene (%)",
             alt2Label: "Pop. européene (%)",
+            englishLabel: "European population (%)",
             category: "immigration",
             format: "percentage",
             source: "nat1",
@@ -275,6 +302,7 @@ const MetricsConfig = {
             label: "Pop. maghrébine et turque (%)",
             alt1Label: "Pop. maghrébine et turque (%)",
             alt2Label: "Pop. maghrébine et turque (%)",
+            englishLabel: "Maghrebi and Turkish population (%)",
             category: "immigration",
             format: "percentage",
             source: "nat1",
@@ -284,6 +312,7 @@ const MetricsConfig = {
             label: "Pop. africaine (%)",
             alt1Label: "Pop. africaine (%)",
             alt2Label: "Pop. africaine (%)",
+            englishLabel: "African population (%)",
             category: "immigration",
             format: "percentage",
             source: "nat1",
@@ -293,6 +322,7 @@ const MetricsConfig = {
             label: "Pop. autres nationalités (%)",
             alt1Label: "Pop. autres nationalités (%)",
             alt2Label: "Pop. autres nationalités (%)",
+            englishLabel: "Other nationalities population (%)",
             category: "immigration",
             format: "percentage",
             source: "nat1",
@@ -302,6 +332,7 @@ const MetricsConfig = {
             label: "Pop. non-européenne (%)",
             alt1Label: "Pop. non-européenne (%)",
             alt2Label: "Pop. non-européenne (%)",
+            englishLabel: "Non-European population (%)",
             category: "immigration",
             format: "percentage",
             source: "nat1",
@@ -312,6 +343,7 @@ const MetricsConfig = {
             label: "Indice de progression de l'Islam",
             alt1Label: "Indice d'enrichissement spirituel",
             alt2Label: "Indice d'islamisation",
+            englishLabel: "Islamic Progress Index",
             category: "islamisme",
             format: "score",
             source: "details",
@@ -321,6 +353,7 @@ const MetricsConfig = {
             label: "Prénoms d'origine arabo-musulmane (%)",
             alt1Label: "Prénoms orientaux (%)",
             alt2Label: "Prénoms islamiques (%)",
+            englishLabel: "Arab-Muslim origin names (%)",
             category: "islamisme",
             format: "percentage",
             source: "names",
@@ -330,6 +363,7 @@ const MetricsConfig = {
             label: "Nombre de mosquées",
             alt1Label: "Lieux de culte musulman",
             alt2Label: "Nombre de mosquées",
+            englishLabel: "Number of mosques",
             category: "islamisme",
             format: "number",
             source: "details",
@@ -339,6 +373,7 @@ const MetricsConfig = {
             label: "Nombre de Mosquées /100k hab.",
             alt1Label: "Densité des lieux de culte musulman /100k hab.",
             alt2Label: "Nombre de Mosquées /100k hab.",
+            englishLabel: "Number of mosques /100k pop.",
             category: "islamisme",
             format: "rate_100k",
             source: "details",
@@ -349,6 +384,7 @@ const MetricsConfig = {
             label: "Indice d'évolution culturelle",
             alt1Label: "Indice de dépoussiérage culturel",
             alt2Label: "Indice de défrancisation (petit remplacement)",
+            englishLabel: "Cultural Evolution Index",
             category: "défrancisation",
             format: "score",
             source: "details",
@@ -358,6 +394,7 @@ const MetricsConfig = {
             label: "Prénoms de naissance français (%)",
             alt1Label: "Prénoms franchouillards résiduels (%)",
             alt2Label: "Prénoms de naissance français (%)",
+            englishLabel: "French birth names (%)",
             category: "défrancisation",
             format: "percentage",
             source: "names",
@@ -367,6 +404,7 @@ const MetricsConfig = {
             label: "Pop. francais de naissance (%)",
             alt1Label: "Pop. francais de naissance (%)",
             alt2Label: "Pop. francais de naissance (%)",
+            englishLabel: "French-born population (%)",
             category: "défrancisation",
             format: "percentage",
             source: "nat1"
@@ -377,6 +415,7 @@ const MetricsConfig = {
             label: "Indice d'interventionnisme social",
             alt1Label: "Indice de progressisme",
             alt2Label: "Indice de wokisme",
+            englishLabel: "Social Interventionism Index",
             category: "wokisme",
             format: "score",
             source: "details",
@@ -386,6 +425,7 @@ const MetricsConfig = {
             label: "Nombre de QPV",
             alt1Label: "Quartiers prioritaires (QPV)",
             alt2Label: "Quartiers à éviter (QPV)",
+            englishLabel: "Number of Priority Districts (QPV)",
             category: "wokisme",
             format: "number",
             source: "details",
@@ -395,6 +435,7 @@ const MetricsConfig = {
             label: "% Pop. en QPV",
             alt1Label: "% Pop. en zones défavorisées (QPV)",
             alt2Label: "% Pop. en quartiers perdus (QPV)",
+            englishLabel: "% Pop. in Priority Districts (QPV)",
             category: "wokisme",
             format: "percentage",
             source: "details",
@@ -404,6 +445,7 @@ const MetricsConfig = {
             label: "% Logements sociaux",
             alt1Label: "% Logements sociaux",
             alt2Label: "% Logements sociaux",
+            englishLabel: "% Social housing",
             category: "wokisme",
             format: "percentage",
             source: "details",
@@ -413,6 +455,7 @@ const MetricsConfig = {
             label: "Subventions aux associations /hab/an",
             alt1Label: "Subventions aux associations /hab/an",
             alt2Label: "Subventions aux associations /hab/an",
+            englishLabel: "Association subsidies /pop./year",
             category: "wokisme",
             format: "currency",
             source: "subventions",
@@ -468,16 +511,14 @@ const MetricsConfig = {
         // Extra-European percentage calculation
         extra_europeen_pct: {
             formula: (data) =>
-                Math.round(
-                    data.musulman_pct + data.africain_pct + data.asiatique_pct,
-                ),
+                data.musulman_pct + data.africain_pct + data.asiatique_pct,
             components: ["musulman_pct", "africain_pct", "asiatique_pct"],
         },
 
         // French names percentage calculation
         prenom_francais_pct: {
             formula: (data) =>
-                Math.round(data.traditionnel_pct + data.moderne_pct),
+                data.traditionnel_pct + data.moderne_pct,
             components: ["traditionnel_pct", "moderne_pct"],
         },
 
@@ -707,6 +748,8 @@ const MetricsConfig = {
                 return metric.alt1Label || metric.label;
             case 2:
                 return metric.alt2Label || metric.label;
+            case 3:
+                return metric.englishLabel || metric.label;
             default:
                 return metric.label;
         }
@@ -732,7 +775,7 @@ const MetricsConfig = {
     },
 
     cycleLabelState() {
-        this.labelState = (this.labelState + 1) % 3;
+        this.labelState = (this.labelState + 1) % 4;
         localStorage.setItem("metricsLabelState", this.labelState.toString());
         window.dispatchEvent(
             new CustomEvent("metricsLabelsToggled", {
@@ -747,6 +790,8 @@ const MetricsConfig = {
                 return "alt1";
             case 2:
                 return "alt2";
+            case 3:
+                return "english";
             default:
                 return "standard";
         }

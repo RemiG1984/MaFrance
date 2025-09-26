@@ -67,8 +67,8 @@ function importNat1(db, callback) {
 
                     // Route data based on Type
                     if (type === "country") {
-                        // For country level, use 'france' as code
-                        const countryRow = ["france", type];
+                        // For country level, use 'france entiere' or 'france metro' as code from the Code field
+                        const countryRow = [code, type];
                         Object.keys(numericFields).forEach(key => {
                             countryRow.push(numericFields[key]);
                         });
@@ -98,12 +98,12 @@ function importNat1(db, callback) {
                         `Lecture de insee_NAT1_detailed_inferred.csv terminée: ${totalRows} lignes traitées, ${skippedRows} lignes ignorées`,
                     );
                     console.log(`Répartition: ${countryBatch.length} country, ${departmentBatch.length} dept, ${communeBatch.length} commune`);
-                    
+
                     // Report ignored lines
                     if (ignoredLines.length > 0) {
                         console.log("\n📋 RAPPORT DES LIGNES IGNORÉES:");
                         console.log("=" .repeat(50));
-                        
+
                         // Group by reason
                         const groupedByReason = ignoredLines.reduce((acc, line) => {
                             if (!acc[line.reason]) {
@@ -112,26 +112,26 @@ function importNat1(db, callback) {
                             acc[line.reason].push(line);
                             return acc;
                         }, {});
-                        
+
                         Object.keys(groupedByReason).forEach(reason => {
                             const lines = groupedByReason[reason];
                             console.log(`\n🔸 ${reason} (${lines.length} lignes):`);
-                            
+
                             // Show first 5 examples for each reason
                             const examples = lines.slice(0, 5);
                             examples.forEach(line => {
                                 console.log(`   Ligne ${line.lineNumber}: Type="${line.data.Type}", Code="${line.data.Code}"`);
                             });
-                            
+
                             if (lines.length > 5) {
                                 console.log(`   ... et ${lines.length - 5} autres lignes similaires`);
                             }
                         });
-                        
+
                         console.log("\n" + "=" .repeat(50));
                         console.log(`Total des lignes ignorées: ${ignoredLines.length}`);
                     }
-                    
+
                     resolve();
                 })
                 .on("error", (err) => {
@@ -184,11 +184,11 @@ function importNat1(db, callback) {
     function createTableSchema(fieldNames) {
         const baseFields = "Code TEXT PRIMARY KEY, Type TEXT";
         const sanitizedFieldNames = fieldNames.map(field => sanitizeColumnName(field));
-        
+
         // Check for duplicates after sanitization and make them unique
         const uniqueFieldNames = [];
         const nameCount = {};
-        
+
         sanitizedFieldNames.forEach(name => {
             if (nameCount[name]) {
                 nameCount[name]++;
@@ -198,18 +198,18 @@ function importNat1(db, callback) {
                 uniqueFieldNames.push(name);
             }
         });
-        
+
         const dataFields = uniqueFieldNames.map(field => `${field} REAL`).join(", ");
         return `${baseFields}, ${dataFields}`;
     }
 
     function createInsertQuery(tableName, fieldNames) {
         const sanitizedFieldNames = fieldNames.map(field => sanitizeColumnName(field));
-        
+
         // Apply same uniqueness logic as in createTableSchema
         const uniqueFieldNames = [];
         const nameCount = {};
-        
+
         sanitizedFieldNames.forEach(name => {
             if (nameCount[name]) {
                 nameCount[name]++;
@@ -219,7 +219,7 @@ function importNat1(db, callback) {
                 uniqueFieldNames.push(name);
             }
         });
-        
+
         const allFields = ["Code", "Type", ...uniqueFieldNames];
         const placeholders = allFields.map(() => "?").join(", ");
         return `INSERT OR IGNORE INTO ${tableName} (${allFields.join(", ")}) VALUES (${placeholders})`;
@@ -253,7 +253,7 @@ function importNat1(db, callback) {
                                 }
 
                                 const insertQuery = createInsertQuery("country_nat1", fieldNames);
-                                
+
                                 db.run("BEGIN TRANSACTION", (err) => {
                                     if (err) {
                                         console.error("Erreur début transaction country_nat1:", err.message);
@@ -316,7 +316,7 @@ function importNat1(db, callback) {
                                 }
 
                                 const insertQuery = createInsertQuery("department_nat1", fieldNames);
-                                
+
                                 db.run("BEGIN TRANSACTION", (err) => {
                                     if (err) {
                                         console.error("Erreur début transaction department_nat1:", err.message);
@@ -382,7 +382,7 @@ function importNat1(db, callback) {
                                 }
 
                                 const insertQuery = createInsertQuery("commune_nat1", fieldNames);
-                                
+
                                 db.run("BEGIN TRANSACTION", (err) => {
                                     if (err) {
                                         console.error("Erreur début transaction commune_nat1:", err.message);

@@ -1,7 +1,7 @@
 <template>
   <v-card class="mb-4">
     <v-card-title class="text-h6 pb-0">
-      Indices et données pour: {{ location.name }}
+      {{ cardTitle }}
     </v-card-title>
 
     <v-card-text>
@@ -14,9 +14,9 @@
       <v-table v-else-if="tableRows.length > 0" class="score-table">
         <thead>
           <tr class="score-header">
-            <th class="row-title" :style="compareHeader ? 'width: 50%' : 'width: 70%'"></th>
-            <th class="score-main" :style="compareHeader ? 'width: 25%' : 'width: 30%'">{{ mainHeader }}</th>
-            <th v-if="compareHeader" class="score-compare" style="width: 25%">{{ compareHeader }}</th>
+            <th class="row-title" :style="getHeaderWidthStyle()"></th>
+            <th class="score-main" :style="getMainColumnWidthStyle()">{{ mainHeader }}</th>
+            <th v-if="compareHeader" class="score-compare" :style="getCompareColumnWidthStyle()">{{ compareHeader }}</th>
           </tr>
         </thead>
         <tbody>
@@ -38,7 +38,7 @@
 
       <!-- Show message if no data is available -->
       <div v-else class="text-center py-8 text-grey">
-        Aucune donnée disponible pour cette localisation
+        {{ noDataMessage }}
       </div>
     </v-card-text>
   </v-card>
@@ -62,12 +62,23 @@ export default {
       loading: false,
       tableRows: [],
       mainHeader: '',
-      compareHeader: ''
+      compareHeader: '',
     }
   },
   computed: {
     dataStore() {
       return useDataStore()
+    },
+    cardTitle() {
+      const isEnglish = this.dataStore.labelState === 3;
+      return isEnglish 
+        ? `Indices and data for: ${this.location.name}`
+        : `Indices et données pour: ${this.location.name}`;
+    },
+    noDataMessage() {
+      return this.dataStore.labelState === 3 
+        ? 'No data available for this location'
+        : 'Aucune donnée disponible pour cette localisation';
     }
   },
   watch: {
@@ -162,13 +173,15 @@ export default {
     },
 
     setHeaders(level, storeSection) {
+      const isEnglish = this.dataStore.labelState === 3;
+      
       if (level === 'country') {
-        this.mainHeader = this.location.name
-        this.compareHeader = ''
+        this.mainHeader = isEnglish ? 'Metropolitan France' : 'France métropolitaine'
+        this.compareHeader = isEnglish ? 'Entire France' : 'France entière'
       } else if (level === 'departement') {
         const deptCode = this.location.code
         this.mainHeader = `${deptCode} - ${DepartementNames[deptCode] || deptCode}`
-        this.compareHeader = 'France'
+        this.compareHeader = isEnglish ? 'Metropolitan France' : 'France métropolitaine'
       } else if (level === 'commune') {
         const communeData = storeSection.details
         const departement = communeData.departement
@@ -194,13 +207,25 @@ export default {
       const title = MetricsConfig.getMetricLabel(metricKey)
       const source = metric.source || 'details'
 
+      // Handle France country level
+      if (this.location.type === 'country' && this.location.name === 'France') {
+        const main = this.getFormattedValueFromCountryArray(storeSection, metricKey, source, 'france metro')
+        const compare = this.getFormattedValueFromCountryArray(storeSection, metricKey, source, 'france entiere')
+        return { title, main, compare, subRow: isSubRow }
+      }
+
       // Get main value
       const main = this.getFormattedValue(storeSection, metricKey, source)
 
       // Get comparison value (if applicable)
       let compare = ''
       if (compareStoreSection) {
-        compare = this.getFormattedValue(compareStoreSection, metricKey, source)
+        if (this.location.type === 'departement') {
+          // For departements, compare with France metro
+          compare = this.getFormattedValueFromCountryArray(compareStoreSection, metricKey, source, 'france metro')
+        } else {
+          compare = this.getFormattedValue(compareStoreSection, metricKey, source)
+        }
       }
 
       return { title, main, compare, subRow: isSubRow }
@@ -220,6 +245,28 @@ export default {
         formatted += ` (${sectionData.annais})`
       } else if (source === 'crime' && sectionData.annee) {
         formatted += ` (${sectionData.annee})`
+      }
+
+      return formatted
+    },
+
+    getFormattedValueFromCountryArray(storeSection, metricKey, source, countryType) {
+      const sectionData = storeSection[source]
+      if (!sectionData || !Array.isArray(sectionData)) return 'N/A'
+
+      const data = sectionData.find(item => item.country === countryType)
+      if (!data) return 'N/A'
+
+      let value = MetricsConfig.calculateMetric(metricKey, data)
+      if (value == null || value === undefined || isNaN(value)) return 'N/A'
+
+      let formatted = MetricsConfig.formatMetricValue(value, metricKey)
+
+      // Add year suffix for specific sources
+      if (source === 'names' && data.annais) {
+        formatted += ` (${data.annais})`
+      } else if (source === 'crime' && data.annee) {
+        formatted += ` (${data.annee})`
       }
 
       return formatted
@@ -259,6 +306,20 @@ export default {
           subRow.classList.toggle('sub-row-hidden')
         })
       }
+    },
+
+    getHeaderWidthStyle() {
+      if (this.compareHeader) return 'width: 50%'
+      return 'width: 70%'
+    },
+
+    getMainColumnWidthStyle() {
+      if (this.compareHeader) return 'width: 25%'
+      return 'width: 30%'
+    },
+
+    getCompareColumnWidthStyle() {
+      return 'width: 25%'
     }
   }
 }
@@ -385,22 +446,22 @@ export default {
     table-layout: fixed;
     font-size: 0.875rem;
   }
-  
+
   .score-header th {
     padding: 8px 6px;
   }
-  
+
   .row-title {
     width: 50%;
     padding: 6px 8px;
     font-size: 0.875rem;
   }
-  
+
   .row-title.sub-row {
     padding-left: 24px;
     font-size: 0.8125rem;
   }
-  
+
   .score-main,
   .score-compare {
     width: 25%;
@@ -413,22 +474,22 @@ export default {
   .score-table {
     font-size: 0.8125rem;
   }
-  
+
   .score-header th {
     padding: 6px 4px;
     font-size: 0.8125rem;
   }
-  
+
   .row-title {
     padding: 4px 6px;
     font-size: 0.8125rem;
   }
-  
+
   .row-title.sub-row {
     padding-left: 20px;
     font-size: 0.75rem;
   }
-  
+
   .score-main,
   .score-compare {
     padding: 4px 3px;

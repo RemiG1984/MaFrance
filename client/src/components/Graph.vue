@@ -83,6 +83,8 @@ export default {
           return metricConfig.alt1Label || metricConfig.label;
         case 'alt2':
           return metricConfig.alt2Label || metricConfig.label;
+        case 'english':
+          return metricConfig.englishLabel || metricConfig.label;
         default:
           return metricConfig.label;
       }
@@ -92,7 +94,19 @@ export default {
       if (this.chart) {
         const newTitle = this.getChartTitle();
         this.chart.options.plugins.title.text = newTitle;
+        this.chart.options.scales.y.title.text = this.getYAxisTitle();
         this.chart.update();
+      }
+    },
+
+    getYAxisTitle() {
+      const isEnglish = this.dataStore.labelState === 3;
+      const isHomicides = this.metricKey === 'homicides_p100k' || this.metricKey === 'homicides_total_p100k';
+      
+      if (isEnglish) {
+        return isHomicides ? 'Rate (per 100k inhabitants)' : 'Rate (per thousand inhabitants)';
+      } else {
+        return isHomicides ? 'Taux (pour 100k habitants)' : 'Taux (pour mille habitants)';
       }
     },
 
@@ -287,8 +301,7 @@ export default {
               },
               title: {
                 display: true,
-                text: this.metricKey.includes('homicides') ?
-                  'Taux (pour 100k habitants)' : 'Taux (pour mille habitants)',
+                text: this.getYAxisTitle(),
                 font: {
                   family: "'Roboto', Arial, sans-serif",
                   size: 14,

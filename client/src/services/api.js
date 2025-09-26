@@ -131,43 +131,21 @@ class ApiService {
      * Determine if endpoint should be persistently cached
      */
     shouldPersistCache(endpoint) {
-        const persistentEndpoints = [
-            "/departements/crime_history",
-            "/departements/names_history",
-            "/communes/crime_history",
-            "/communes/names_history",
-            "/country/crime_history",
-            "/country/names_history",
-            "/departements/crime",
-            "/departements/names",
-            "/departements/prefet",
-            "/communes/crime",
-            "/communes/names",
-            "/communes/maire",
-            "/country/crime",
-            "/country/names",
-            "/country/ministre",
-            "/qpv/",
-            "/departements/details",
-            "/communes/details",
-            "/country/details",
-            "/articles/lieux",
-            "/articles",
-            "/articles/counts",
+        const persistentPatterns = [
             "/departements",
             "/communes",
-            "/rankings/departements",
-            "/rankings/communes",
-            "/communes/search",
-            "/migrants/departement/",
-            "/migrants/commune/",
-            "/subventions/country/",
-            "/subventions/departement/",
-            "/subventions/commune/",
+            "/country",
+            "/qpv",
+            "/rankings",
+            "/subventions",
+            "/migrants",
+            "/mosques",
+            "/nat1",
+            "/articles"
         ];
 
-        return persistentEndpoints.some((pattern) =>
-            endpoint.includes(pattern),
+        return persistentPatterns.some((pattern) =>
+            endpoint.startsWith(pattern),
         );
     }
 
@@ -180,7 +158,9 @@ class ApiService {
             if (this.cache.has(cacheKey)) {
                 const cached = this.cache.get(cacheKey);
                 if (Date.now() - cached.timestamp < this.cacheExpiry) {
-                    console.log("Using memory cached data for:", endpoint);
+                    if (import.meta.env.DEV) {
+                        console.log("Using memory cached data for:", endpoint);
+                    }
                     return cached.data;
                 }
                 this.cache.delete(cacheKey);
@@ -195,7 +175,9 @@ class ApiService {
                 persistentCached &&
                 Date.now() - persistentCached.timestamp < this.cacheExpiry
             ) {
-                console.log("Using persistent cached data for:", endpoint);
+                if (import.meta.env.DEV) {
+                    console.log("Using persistent cached data for:", endpoint);
+                }
                 this.cache.set(persistentCached, persistentCached);
                 return persistentCached.data;
             } else if (persistentCached) {
@@ -206,7 +188,9 @@ class ApiService {
         // Check if the exact same request (including parameters) is already in progress
         const requestKey = `${endpoint}?${new URLSearchParams(options.body ? JSON.parse(options.body) : {}).toString()}`;
         if (this.activeRequests.has(requestKey)) {
-            console.log("Request already in progress, waiting...", requestKey);
+            if (import.meta.env.DEV) {
+                console.log("Request already in progress, waiting...", requestKey);
+            }
             return this.activeRequests.get(requestKey);
         }
 
@@ -305,18 +289,18 @@ const apiService = new ApiService();
 // Convenience methods for common endpoints
 const api = {
     // Country data
-    getCountryDetails: (country = "France") =>
-        apiService.request(`/country/details?country=${country}`),
-    getCountryNames: (country = "France") =>
-        apiService.request(`/country/names?country=${country}`),
-    getCountryCrime: (country = "France") =>
-        apiService.request(`/country/crime?country=${country}`),
-    getCountryCrimeHistory: (country = "France") =>
-        apiService.request(`/country/crime_history?country=${country}`),
-    getCountryNamesHistory: (country = "France") =>
-        apiService.request(`/country/names_history?country=${country}`),
-    getCountryExecutive: (country = "France") =>
-        apiService.request(`/country/ministre?country=${country}`),
+    getCountryDetails: () =>
+        apiService.request(`/country/details`),
+    getCountryNames: () =>
+        apiService.request(`/country/names`),
+    getCountryCrime: () =>
+        apiService.request(`/country/crime`),
+    getCountryCrimeHistory: (country) =>
+        apiService.request(`/country/crime_history${country ? `?country=${encodeURIComponent(country)}` : ''}`),
+    getCountryNamesHistory: (country) =>
+        apiService.request(`/country/names_history${country ? `?country=${encodeURIComponent(country)}` : ''}`),
+    getCountryExecutive: () =>
+        apiService.request(`/country/ministre`),
     getCountryArticles: (country = "France") =>
         apiService.request(`/articles?country=${country}`),
 
@@ -387,8 +371,8 @@ const api = {
     },
 
     // Subventions data
-    getCountrySubventions: (country = "france") =>
-        apiService.request(`/subventions/country/${country}`),
+    getCountrySubventions: () =>
+        apiService.request(`/subventions/country`),
     getDepartementSubventions: (code) =>
         apiService.request(`/subventions/departement/${code}`),
     getCommuneSubventions: (cog) =>
@@ -396,7 +380,13 @@ const api = {
 
     // Migrant centers data
     getMigrants: (params = {}) => {
-        const queryString = buildQueryString(params);
+        // Remove undefined/null cursor before building query string
+        const cleanParams = { ...params };
+        if (cleanParams.cursor === undefined || cleanParams.cursor === null) {
+            delete cleanParams.cursor;
+        }
+        
+        const queryString = buildQueryString(cleanParams);
         const url = `/migrants`;
         return apiService.request(
             queryString ? `${url}${queryString}` : url,
@@ -407,7 +397,13 @@ const api = {
 
     // Mosque data
     getMosques: (params = {}) => {
-        const queryString = buildQueryString(params);
+        // Remove undefined/null cursor before building query string
+        const cleanParams = { ...params };
+        if (cleanParams.cursor === undefined || cleanParams.cursor === null) {
+            delete cleanParams.cursor;
+        }
+        
+        const queryString = buildQueryString(cleanParams);
         const url = `/mosques`;
         return apiService.request(
             queryString ? `${url}${queryString}` : url,
@@ -424,8 +420,14 @@ const api = {
 
     // QPV data
     getQpv: (params = {}) => {
-        const queryString = buildQueryString(params);
-        return apiService.request(`/qpv${queryString}`);
+        // Remove undefined/null cursor before building query string
+        const cleanParams = { ...params };
+        if (cleanParams.cursor === undefined || cleanParams.cursor === null) {
+            delete cleanParams.cursor;
+        }
+        
+        const queryString = buildQueryString(cleanParams);
+        return apiService.request(`/qpv${queryString ? queryString : ''}`);
     },
 
     getQpvs: () => apiService.request('/qpv/geojson'),
@@ -437,8 +439,8 @@ const api = {
     },
 
     // NAT1 data
-    getCountryNat1: (country = "France") =>
-        apiService.request(`/nat1/country?country=${country}`),
+    getCountryNat1: () =>
+        apiService.request(`/nat1/country`),
     getDepartementNat1: (code) =>
         apiService.request(`/nat1/departement?dept=${code}`),
     getCommuneNat1: (cog) =>

@@ -9,69 +9,104 @@
 
         <!-- Desktop Menu -->
         <div class="header-menu d-none d-md-flex">
-          <v-btn
-            href="https://twitter.com/intent/follow?screen_name=ou_va_ma_France"
-            target="_blank"
-            variant="text"
-            class="mx-2 twitter-btn"
-          >
-            <b>𝕏</b>
-            @ou_va_ma_France
-          </v-btn>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ props }">
+              <v-btn
+                v-bind="props"
+                href="https://twitter.com/intent/follow?screen_name=ou_va_ma_France"
+                target="_blank"
+                variant="text"
+                class="mx-2 twitter-btn"
+              >
+                @ 
+                <b>𝕏</b>
+              </v-btn>
+            </template>
+            <span>{{ twitterTooltip }}</span>
+          </v-tooltip>
 
-
-          <v-btn
-            href="https://ko-fi.com/remi63047"
-            target="_blank"
-            variant="text"
-            class="mx-2 kofi-btn"
-          >
-            <img
-              src="/images/kofi_symbol.webp"
-              alt="Ko-fi"
-              class="kofi-icon"
-            />
-          </v-btn>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ props }">
+              <v-btn
+                v-bind="props"
+                href="https://ko-fi.com/remi63047"
+                target="_blank"
+                variant="text"
+                class="mx-2 kofi-btn"
+              >
+                <img
+                  src="/images/kofi_symbol.webp"
+                  alt="Ko-fi"
+                  class="kofi-icon"
+                />
+              </v-btn>
+            </template>
+            <span>{{ kofiTooltip }}</span>
+          </v-tooltip>
 
 
           <template v-for="item in menuItems" :key="item.title">
             <!-- Regular menu item -->
-            <v-btn
-              v-if="!item.children"
-              :to="item.path"
-              variant="text"
-              class="mx-2"
-            >
-              {{ item.title }}
-            </v-btn>
-            
-            <!-- Dropdown menu item -->
-            <v-menu v-else offset-y>
+            <v-tooltip v-if="!item.children" bottom>
               <template v-slot:activator="{ props }">
                 <v-btn
                   v-bind="props"
+                  :to="item.path"
                   variant="text"
                   class="mx-2"
-                  append-icon="mdi-chevron-down"
                 >
                   {{ item.title }}
                 </v-btn>
               </template>
-              <v-list>
-                <v-list-item
-                  v-for="child in item.children"
-                  :key="child.path"
-                  :to="child.path"
-                >
-                  <v-list-item-title>{{ child.title }}</v-list-item-title>
-                </v-list-item>
-              </v-list>
-            </v-menu>
+              <span>{{ item.tooltip }}</span>
+            </v-tooltip>
+            
+            <!-- Dropdown menu item -->
+            <v-tooltip v-else bottom>
+              <template v-slot:activator="{ props: tooltipProps }">
+                <v-menu offset-y>
+                  <template v-slot:activator="{ props: menuProps }">
+                    <v-btn
+                      v-bind="{ ...menuProps, ...tooltipProps }"
+                      variant="text"
+                      class="mx-2"
+                      append-icon="mdi-chevron-down"
+                    >
+                      {{ item.title }}
+                    </v-btn>
+                  </template>
+                  <v-list>
+                    <v-list-item
+                      v-for="child in item.children"
+                      :key="child.path"
+                      :to="child.path"
+                    >
+                      <v-list-item-title>{{ child.title }}</v-list-item-title>
+                    </v-list-item>
+                  </v-list>
+                </v-menu>
+              </template>
+              <span>{{ item.tooltip }}</span>
+            </v-tooltip>
           </template>
 
         <v-spacer></v-spacer>
-        <VersionSelector />
-          <ShareButton :showText="false" />
+        <v-tooltip bottom>
+          <template v-slot:activator="{ props }">
+            <div v-bind="props">
+              <VersionSelector />
+            </div>
+          </template>
+          <span>{{ versionTooltip }}</span>
+        </v-tooltip>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ props }">
+            <div v-bind="props">
+              <ShareButton :showText="false" />
+            </div>
+          </template>
+          <span>{{ shareTooltip }}</span>
+        </v-tooltip>
         </div>
 
         <!-- Mobile Hamburger Menu -->
@@ -142,7 +177,7 @@
           target="_blank"
           class="twitter-mobile"
         >
-          <v-list-item-title>@ou_va_ma_France</v-list-item-title>
+          <v-list-item-title>{{ mobileTwitterText }}</v-list-item-title>
         </v-list-item>
 
         <v-list-item
@@ -156,7 +191,7 @@
               alt="Ko-fi"
               class="kofi-icon-mobile"
             />
-            Offrez-moi un café
+            {{ mobileKofiText }}
           </v-list-item-title>
         </v-list-item>
 
@@ -193,21 +228,94 @@ export default {
       return this.dataStore.getCurrentPageTitle()
     }
   },
+  computed: {
+    ...mapStores(useDataStore),
+    currentPageTitle() {
+      return this.dataStore.getCurrentPageTitle()
+    },
+    menuItems() {
+      const isEnglish = this.dataStore.labelState === 3;
+      
+      if (isEnglish) {
+        return [
+          { 
+            title: 'Home', 
+            path: '/',
+            tooltip: 'Return to the main page with national data'
+          },
+          {
+            title: 'Tools',
+            tooltip: 'Access various analysis and visualization tools',
+            children: [
+              { title: 'Rankings', path: '/classements' },
+              { title: 'Correlations', path: '/correlations' },
+              { title: 'Locations', path: '/localisation' }
+            ]
+          },
+          { 
+            title: 'Methodology', 
+            path: '/methodologie',
+            tooltip: 'Discover how data is collected and analyzed'
+          }
+        ];
+      } else {
+        return [
+          { 
+            title: 'Accueil', 
+            path: '/',
+            tooltip: 'Retour à la page principale avec les données nationales'
+          },
+          {
+            title: 'Outils',
+            tooltip: 'Accédez aux différents outils d\'analyse et de visualisation',
+            children: [
+              { title: 'Classements', path: '/classements' },
+              { title: 'Corrélations', path: '/correlations' },
+              { title: 'Localisation', path: '/localisation' }
+            ]
+          },
+          { 
+            title: 'Méthodologie', 
+            path: '/methodologie',
+            tooltip: 'Découvrez comment les données sont collectées et analysées'
+          }
+        ];
+      }
+    },
+    twitterTooltip() {
+      return this.dataStore.labelState === 3 
+        ? 'Follow us on X (Twitter) for the latest updates'
+        : 'Suivez-nous sur X (Twitter) pour les dernières mises à jour';
+    },
+    kofiTooltip() {
+      return this.dataStore.labelState === 3 
+        ? 'Support the project'
+        : 'Soutenez le projet';
+    },
+    versionTooltip() {
+      return this.dataStore.labelState === 3 
+        ? 'Change the site cosmetics, not the data'
+        : 'Modifiez la cosmétique du site, pas les données';
+    },
+    shareTooltip() {
+      return this.dataStore.labelState === 3 
+        ? 'Share this visualization with a custom link'
+        : 'Partagez cette visualisation avec un lien personnalisé';
+    },
+    mobileTwitterText() {
+      return this.dataStore.labelState === 3 
+        ? '@ou_va_ma_France'
+        : '@ou_va_ma_France';
+    },
+    mobileKofiText() {
+      return this.dataStore.labelState === 3 
+        ? 'Buy me a coffee'
+        : 'Offrez-moi un café';
+    }
+  },
   data() {
     return {
-      mobileMenuOpen: false,
-      menuItems: [
-        { title: 'Accueil', path: '/' },
-        {
-          title: 'Outils',
-          children: [
-            { title: 'Classements', path: '/classements' },
-            { title: 'Corrélations', path: '/correlations' },
-            { title: 'Localisation', path: '/localisation' }
-          ]
-        },
-        { title: 'Méthodologie', path: '/methodologie' }
-      ]
+      mobileMenuOpen: false
     }
   },
   mounted() {

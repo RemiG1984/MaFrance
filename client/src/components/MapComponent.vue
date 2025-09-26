@@ -68,6 +68,8 @@ export default {
           return 'alt1Label';
         case 'alt2':
           return 'alt2Label';
+        case 'english':
+          return 'englishLabel';
         default:
           return 'label';
       }
@@ -91,24 +93,16 @@ export default {
         const metricConfig = MetricsConfig.getMetricByValue(metric.value);
         if (!metricConfig) return metric;
 
-        const labelStateName = this.dataStore.getLabelStateName();
-        let label;
-        switch (labelStateName) {
-          case 'alt1':
-            label = metricConfig.alt1Label || metricConfig.label;
-            break;
-          case 'alt2':
-            label = metricConfig.alt2Label || metricConfig.label;
-            break;
-          default:
-            label = metricConfig.label;
-        }
+        // Use the labelKey to get the appropriate label
+        const labelProperty = this.labelKey;
+        const label = metricConfig[labelProperty] || metricConfig.label;
 
         return {
           ...metric,
           label: label,
           alt1Label: metricConfig.alt1Label,
-          alt2Label: metricConfig.alt2Label
+          alt2Label: metricConfig.alt2Label,
+          englishLabel: metricConfig.englishLabel
         };
       });
     },
@@ -146,7 +140,9 @@ export default {
         metric.value === this.selectedMetric.value
       );
       if (!isCurrentMetricAvailable && newMetrics.length > 0) {
-        this.selectedMetric = newMetrics[0];
+        // Find the metric object from availableMetrics to get the proper labels
+        const defaultMetric = this.availableMetrics.find(m => m.value === newMetrics[0].value) || newMetrics[0];
+        this.selectedMetric = defaultMetric;
         this.onMetricChange(this.selectedMetric);
       }
     },
@@ -158,11 +154,6 @@ export default {
     currentLevel(newLevel, oldLevel) {
       if (newLevel === 'commune' && oldLevel !== 'commune') {
         this.showCommuneTooltipWhenReady();
-      }
-    },
-    'dataStore.labelState': {
-      handler() {
-        this.updateLegend();
       }
     },
     'dataStore.selectedMetric': {
@@ -185,15 +176,39 @@ export default {
       },
       immediate: true
     },
+    'dataStore.labelState': {
+      handler() {
+        // Update color scale when version changes
+        this.updateColorScale();
+        // Update layer colors and legend if data is available
+        if (this.dataRef && Object.keys(this.dataRef).length > 0) {
+          this.updateLayerColors();
+          this.updateLegend();
+        }
+      },
+      immediate: false
+    },
   },
   mounted() {
     this.initMap()
-    this.colorscale = chroma.scale(this.scaleColors).domain([0, 1]);
+    this.updateColorScale()
 
     // Listen for metric updates from LocationSelector
     window.addEventListener('updateMapMetric', this.handleMetricUpdate)
+
+    // Listen for version changes
+    window.addEventListener('versionChanged', this.handleVersionChange)
   },
   methods: {
+    updateColorScale() {
+      const labelStateName = this.dataStore.getLabelStateName();
+      if (labelStateName === 'alt1') {
+        this.scaleColors = MetricsConfig.colorScale.alt1Colors;
+      } else {
+        this.scaleColors = MetricsConfig.colorScale.defaultColors;
+      }
+      this.colorscale = chroma.scale(this.scaleColors).domain([0, 1]);
+    },
     handleMetricUpdate(event) {
       const newMetricValue = event.detail.metric;
       const metricObj = this.availableMetrics.find(m => m.value === newMetricValue);
@@ -201,6 +216,9 @@ export default {
         this.selectedMetric = metricObj;
         this.onMetricChange(this.selectedMetric);
       }
+    },
+    handleVersionChange() {
+      this.updateData()
     },
     async initMap() {
       if (typeof L === 'undefined') {
@@ -232,7 +250,7 @@ export default {
         return div
       }
       L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a> | <a href="https://ouvamafrance.replit.app">https://ouvamafrance.replit.app</a>',
+        attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a> | <a href="https://mafrance.app">mafrance.app</a>',
         subdomains: 'abcd',
         maxZoom: 19
       }).addTo(this.map)
@@ -251,7 +269,7 @@ export default {
           this.selectedMetric = metricObj;
         }
       }
-      
+
       this.updateGeoJson()
       this.updateRanking()
       this.updateLayerColors()
@@ -570,8 +588,21 @@ export default {
       div.innerHTML = content
     },
     generateVerticalGradient() {
+      const level = this.mapState.level === 'country' ? 'departement' : 'commune'
+      const colorScaleConfig = MetricsConfig.getMetricColorScale(this.selectedMetric.value, level);
+      
       const step = 100 / (this.scaleColors.length - 1);
-      const colorStops = this.scaleColors.map((color, index) => {
+      let colors = [...this.scaleColors];
+      
+      // For inverted metrics (or prenom_francais_pct in dynamic mode), reverse the color order in legend
+      const shouldInvertLegend = (colorScaleConfig.useFixedRange && colorScaleConfig.invert) || 
+                                 (!colorScaleConfig.useFixedRange && this.selectedMetric.value === 'prenom_francais_pct');
+      
+      if (shouldInvertLegend) {
+        colors = colors.reverse();
+      }
+      
+      const colorStops = colors.map((color, index) => {
         const position = index * step;
         return `${color} ${position}%`;
       });
@@ -623,6 +654,7 @@ export default {
     onMetricChange(metric) {
       // Update store with selected metric
       this.dataStore.selectedMetric = metric.value;
+      this.updateColorScale(); // Ensure scale colors are updated based on labelState
       this.updateRanking();
       this.updateLayerColors();
       this.updateLegend();
@@ -636,15 +668,10 @@ export default {
     getIndiceName() {
       const metricConfig = MetricsConfig.getMetricByValue(this.selectedMetric.value);
       if (!metricConfig) return this.selectedMetric.value;
-      const labelStateName = this.dataStore.getLabelStateName();
-      switch (labelStateName) {
-        case 'alt1':
-          return metricConfig.alt1Label || metricConfig.label;
-        case 'alt2':
-          return metricConfig.alt2Label || metricConfig.label;
-        default:
-          return metricConfig.label;
-      }
+      
+      // Use the labelKey to get the appropriate label
+      const labelProperty = this.labelKey;
+      return metricConfig[labelProperty] || metricConfig.label;
     },
     showCommuneTooltipWhenReady() {
       if (this.mapState.level === 'departement' || !this.communesLayer) {
@@ -737,6 +764,7 @@ export default {
   },
   beforeUnmount() {
     window.removeEventListener('updateMapMetric', this.handleMetricUpdate)
+    window.removeEventListener('versionChanged', this.handleVersionChange)
     if (this.map) {
       this.map.remove()
     }
@@ -791,5 +819,5 @@ export default {
   left: 0;
   transform: translateY(-50%);
 }
-  
+
 </style>

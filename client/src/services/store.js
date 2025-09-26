@@ -2,12 +2,6 @@ import { defineStore } from "pinia";
 import api from "./api.js";
 import { DepartementNames } from "../utils/departementNames.js";
 import { MetricsConfig } from "../utils/metricsConfig.js";
-import { 
-  getDepartementFromCog, 
-  normalizeDepartementCode, 
-  serializeStats, 
-  aggregateStats
-} from "../utils/utils.js";
 
 export const useDataStore = defineStore("data", {
   state: () => ({
@@ -66,8 +60,14 @@ export const useDataStore = defineStore("data", {
       migrants: null,
       nat1: null,
     },
-    
-    
+    memorials: {
+      victims: [],
+      tags: [],
+      selectedTags: [],
+      sortBy: 'year_desc',
+      loading: false,
+    },
+    locationCache: JSON.parse(localStorage.getItem('locationCache') || '{}'),
   }),
 
   actions: {
@@ -78,25 +78,25 @@ export const useDataStore = defineStore("data", {
 
 
     // Requêtes globales getAll()
-    async fetchCountryData(code) {
+    async fetchCountryData() {
       try {
         const results = await Promise.all([
-          api.getCountryDetails(code),
-          api.getCountryNames(code),
-          api.getCountryCrime(code),
-          api.getCountryCrimeHistory(code),
-          api.getCountryNamesHistory(code),
-          api.getCountryExecutive(code),
+          api.getCountryDetails(),
+          api.getCountryNames(),
+          api.getCountryCrime(),
+          api.getCountryCrimeHistory("france metro"),
+          api.getCountryNamesHistory("france metro"),
+          api.getCountryExecutive(),
           api.getDepartementRankings({
             limit: 101,
             sort: "total_score",
             direction: "DESC",
           }),
-          api.getCountrySubventions(code),
+          api.getCountrySubventions(),
           api.getArticles({ limit: 10 }),
           api.getMigrants({ limit: 10 }),
           api.getQpv({ limit: 10 }),
-          api.getCountryNat1(code),
+          api.getCountryNat1(),
         ]);
 
         const country = {};
@@ -113,9 +113,9 @@ export const useDataStore = defineStore("data", {
         country.migrants = results[9];
         country.qpv = results[10];
         country.nat1 = results[11];
-        country.namesSeries = serializeStats(country.namesHistory);
-        country.crimeSeries = serializeStats(country.crimeHistory);
-        country.crimeAggreg = aggregateStats(country.crimeSeries.data, MetricsConfig.calculatedMetrics);
+        country.namesSeries = this.serializeStats(country.namesHistory);
+        country.crimeSeries = this.serializeStats(country.crimeHistory);
+        country.crimeAggreg = this.aggregateStats(country.crimeSeries.data);
 
         return country;
       } catch (error) {
@@ -163,11 +163,10 @@ export const useDataStore = defineStore("data", {
         departement.subventions = results[9];
         departement.migrants = results[10] || [];
         departement.nat1 = results[11];
-        departement.namesSeries = serializeStats(departement.namesHistory);
-        departement.crimeSeries = serializeStats(results[3]);
-        departement.crimeAggreg = aggregateStats(
+        departement.namesSeries = this.serializeStats(departement.namesHistory);
+        departement.crimeSeries = this.serializeStats(results[3]);
+        departement.crimeAggreg = this.aggregateStats(
           departement.crimeSeries.data,
-          MetricsConfig.calculatedMetrics
         );
 
         return departement;
@@ -208,8 +207,8 @@ export const useDataStore = defineStore("data", {
         commune.subventions = results[6];
         commune.migrants = results[7] || [];
         commune.nat1 = results[8];
-        commune.crimeSeries = serializeStats(results[2]);
-        commune.crimeAggreg = aggregateStats(commune.crimeSeries.data, MetricsConfig.calculatedMetrics);
+        commune.crimeSeries = this.serializeStats(results[2]);
+        commune.crimeAggreg = this.aggregateStats(commune.crimeSeries.data);
 
         return commune;
       } catch (error) {
@@ -298,7 +297,96 @@ export const useDataStore = defineStore("data", {
       this.setLevel("commune");
     },
 
-    
+    aggregateStats(data) {
+      // crée des stats "composites" en utilisant les formules de calculatedMetrics
+      const result = {};
+
+      // Pour chaque métrique calculée définie dans MetricsConfig
+      Object.keys(MetricsConfig.calculatedMetrics).forEach((metricKey) => {
+        const calculation = MetricsConfig.calculatedMetrics[metricKey];
+
+        // Vérifier que tous les composants nécessaires sont disponibles
+        const inputSeries = calculation.components
+          .map((key) => data[key])
+          .filter((serie) => serie); // Filtrer les séries undefined/null
+
+        if (inputSeries.length === 0) return;
+
+        const seriesLength = inputSeries[0].length;
+
+        // Calculer la métrique pour chaque entrée/level en utilisant la formule
+        result[metricKey] = [];
+
+        for (let i = 0; i < seriesLength; i++) {
+          // Créer un objet de données pour cette année/période
+          const dataPoint = {};
+          calculation.components.forEach((key) => {
+            dataPoint[key] = data[key] ? data[key][i] || 0 : 0;
+          });
+
+          // Appliquer la formule
+          const calculatedValue = calculation.formula(dataPoint);
+          result[metricKey].push(calculatedValue);
+        }
+      });
+
+      return result;
+    },
+
+    serializeStats(data) {
+      // 1. Récupération de toutes les années et de toutes les clés d'indicateurs disponibles
+      const allYears = new Set();
+      const allKeys = new Set();
+
+      if (data.length === 0)
+        return {
+          labels: [],
+          data: {},
+        };
+
+      const yearKey = data[0].hasOwnProperty("annee") ? "annee" : "annais";
+
+      // ensure years order
+      data.sort((a, b) => {
+        a[yearKey] - b[yearKey];
+      });
+
+      data.forEach((entry) => {
+        Object.keys(entry).forEach((key) => {
+          if (key === yearKey) {
+            allYears.add(entry[yearKey]);
+          } else if (key !== "COG" && key !== "dep" && key !== "country") {
+            allKeys.add(key);
+          }
+        });
+      });
+
+      const labels = Array.from(allYears);
+
+      // 2. Construction de la structure de données
+      const result = {};
+
+      for (const key of allKeys) {
+        result[key] = {};
+
+        // Création d'un map année -> valeur pour ce niveau et cette clé
+        const dataMap = {};
+        data.forEach((entry) => {
+          if (entry[yearKey] && entry[key] !== undefined) {
+            const year = entry[yearKey];
+            dataMap[year] = entry[key];
+          }
+        });
+
+        // Création du tableau avec null pour les années manquantes
+        result[key] = labels.map((year) => dataMap[year] ?? null);
+      }
+
+      return {
+        labels,
+        data: result,
+      };
+    },
 
     // Actions utilitaires
     clearDepartementData() {
@@ -363,8 +451,13 @@ export const useDataStore = defineStore("data", {
 
         // Set version if specified
         if (params.v) {
-          const version = parseInt(params.v)
-          if (version >= 0 && version <= 2) {
+          let version
+          if (params.v === 'en') {
+            version = 3
+          } else {
+            version = parseInt(params.v)
+          }
+          if (version >= 0 && version <= 3) {
             this.setLabelState(version)
           }
         }
@@ -423,7 +516,7 @@ export const useDataStore = defineStore("data", {
     },
 
     cycleLabelState() {
-      const newState = (this.labelState + 1) % 3;
+      const newState = (this.labelState + 1) % 4;
       this.setLabelState(newState);
     },
 
@@ -533,7 +626,12 @@ export const useDataStore = defineStore("data", {
           migrantParams.dept = code;
         } else if (level === 'commune') {
           migrantParams.cog = code;
-        } // No dept/cog for country
+        }
+        
+        // Remove undefined cursor parameter
+        if (migrantParams.cursor === undefined || migrantParams.cursor === null) {
+          delete migrantParams.cursor;
+        }
 
         const moreMigrants = await api.getMigrants(migrantParams);
         if (moreMigrants && moreMigrants.list) {
@@ -569,7 +667,12 @@ export const useDataStore = defineStore("data", {
           qpvParams.dept = code;
         } else if (level === 'commune') {
           qpvParams.cog = code;
-        } // No dept/cog for country
+        }
+        
+        // Remove undefined cursor parameter
+        if (qpvParams.cursor === undefined || qpvParams.cursor === null) {
+          delete qpvParams.cursor;
+        }
 
         const moreQpv = await api.getQpv(qpvParams);
         if (moreQpv && moreQpv.list) {
@@ -589,7 +692,86 @@ export const useDataStore = defineStore("data", {
         }
     },
 
-    
+    // Memorial actions
+    async fetchVictims() {
+      try {
+        this.memorials.loading = true;
+        const response = await api.getFrancocides();
+        
+        if (response && response.list) {
+          this.memorials.victims = response.list;
+        } else {
+          this.memorials.victims = [];
+        }
+      } catch (error) {
+        console.error('Error fetching victims:', error);
+        this.memorials.victims = [];
+      } finally {
+        this.memorials.loading = false;
+      }
+    },
+
+    async fetchTags() {
+      try {
+        // Use api cache for tags
+        const response = await api.getFrancocidesTags();
+        this.memorials.tags = response.tags || [];
+      } catch (error) {
+        console.error('Error fetching tags:', error);
+        this.memorials.tags = [];
+      }
+    },
+
+    async fetchLocationData(cogs) {
+      const uncachedCogs = cogs.filter(cog => !this.locationCache[cog]);
+      if (uncachedCogs.length) {
+        try {
+          const results = await Promise.allSettled(uncachedCogs.map(cog => api.getCommuneDetails(cog)));
+          results.forEach((result, i) => {
+            if (result.status === 'fulfilled' && result.value?.commune) {
+              this.locationCache[uncachedCogs[i]] = `${result.value.commune} (${result.value.departement})`;
+            }
+          });
+          localStorage.setItem('locationCache', JSON.stringify(this.locationCache));
+        } catch (error) {
+          console.error('Error fetching location data:', error);
+        }
+      }
+    },
+
+    toggleSelectedTag(tag) {
+      const index = this.memorials.selectedTags.indexOf(tag);
+      if (index > -1) {
+        this.memorials.selectedTags.splice(index, 1);
+      } else {
+        this.memorials.selectedTags.push(tag);
+      }
+    },
+
+    clearSelectedTags() {
+      this.memorials.selectedTags = [];
+    },
+
+    setSortBy(sort) {
+      this.memorials.sortBy = sort;
+    },
+
+    async fetchVictimDetails(id) {
+      try {
+        const victimDetails = await api.getFrancocideDetails(id);
+        
+        // Update the victim in the victims array with the resume data
+        const victimIndex = this.memorials.victims.findIndex(v => v.id === id);
+        if (victimIndex !== -1) {
+          this.memorials.victims[victimIndex] = { ...this.memorials.victims[victimIndex], resume: victimDetails.resume };
+        }
+        
+        return victimDetails;
+      } catch (error) {
+        console.error('Error fetching victim details:', error);
+        return null;
+      }
+    },
   },
 
   getters: {
@@ -638,6 +820,8 @@ export const useDataStore = defineStore("data", {
           return "alt1";
         case 2:
           return "alt2";
+        case 3:
+          return "english";
         default:
           return "standard";
       }
@@ -666,6 +850,50 @@ export const useDataStore = defineStore("data", {
       return this[level]?.migrants || { list: [], pagination: { hasMore: false, nextCursor: null, limit: 20 } }
     },
 
-    
+    // Getters for memorial page
+    sortedVictims: (state) => {
+      if (!state.memorials.victims.length) return [];
+      let sorted = [...state.memorials.victims];
+      switch (state.memorials.sortBy) {
+        case 'year_desc':
+          return sorted.sort((a, b) => new Date(b.date_deces) - new Date(a.date_deces));
+        case 'year_asc':
+          return sorted.sort((a, b) => new Date(a.date_deces) - new Date(b.date_deces));
+        case 'age_asc':
+          return sorted.sort((a, b) => (a.age || 0) - (b.age || 0));
+        case 'age_desc':
+          return sorted.sort((a, b) => (b.age || 0) - (a.age || 0));
+        case 'location_asc':
+          return sorted.sort((a, b) => (a.cog || '').localeCompare(b.cog || ''));
+        default:
+          return sorted;
+      }
+    },
+
+    filteredVictims: (state) => (query) => {
+      let filtered = state.sortedVictims;
+      
+      // Filter by selected tags
+      if (state.memorials.selectedTags.length) {
+        filtered = filtered.filter(victim => {
+          if (!victim.tags) return false;
+          const victimTags = victim.tags.split(',').map(tag => tag.trim());
+          return state.memorials.selectedTags.every(selectedTag =>
+            victimTags.includes(selectedTag)
+          );
+        });
+      }
+      
+      // Filter by search query
+      if (query) {
+        const lowerQuery = query.toLowerCase();
+        filtered = filtered.filter(victim =>
+          `${victim.prenom} ${victim.nom}`.toLowerCase().includes(lowerQuery) ||
+          state.locationCache[victim.cog]?.toLowerCase().includes(lowerQuery)
+        );
+      }
+      
+      return filtered;
+    },
   },
 });

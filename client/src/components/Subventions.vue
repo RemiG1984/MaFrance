@@ -1,13 +1,13 @@
 <template>
   <v-card class="mb-4">
     <v-card-title class="text-h6 pb-0">
-      Subventions publiques aux associations pour: {{ locationName }}
+      {{ isEnglish ? 'Public subsidies to associations for:' : 'Subventions publiques aux associations pour:' }} {{ locationName }}
     </v-card-title>
     <v-card-subtitle class="text-caption text-grey pt-0 pb-0">
-      <a href="https://data.ofgl.fr/pages/acces-donnees-comptables-detaillees/" 
-         target="_blank" 
+      <a href="https://data.ofgl.fr/pages/acces-donnees-comptables-detaillees/"
+         target="_blank"
          class="text-decoration-none">
-        source data.ofgl.fr
+        {{ isEnglish ? 'data.ofgl.fr source' : 'source data.ofgl.fr' }}
       </a>
     </v-card-subtitle>
     <v-card-text>
@@ -17,8 +17,8 @@
             <thead>
               <tr>
                 <th></th>
-                <th>Valeur /hab./an</th>
-                <th>Moyenne nationale /hab./an</th>
+                <th>{{ isEnglish ? 'Value /per capita/year' : 'Valeur /hab./an' }}</th>
+                <th>{{ isEnglish ? 'National average /per capita/year' : 'Moyenne nationale /hab./an' }}</th>
               </tr>
             </thead>
             <tbody>
@@ -28,7 +28,7 @@
                 <td class="score-main">{{ formatNumber(row.nationalAverage) }} €</td>
               </tr>
               <tr class="total-row">
-                <td class="row-title total-title">Total par hab. et par an</td>
+                <td class="row-title total-title">{{ isEnglish ? 'Total per capita per year' : 'Total par hab. et par an' }}</td>
                 <td class="score-main">{{ formatNumber(totalPerCapita) }} €</td>
                 <td class="score-main">{{ formatNumber(totalNationalAverage) }} €</td>
               </tr>
@@ -38,13 +38,16 @@
       </div>
 
       <div v-else class="text-center">
-        <p>Aucune donnée de subvention disponible pour cette zone.</p>
+        <p>{{ isEnglish ? 'No subsidy data available for this area.' : 'Aucune donnée de subvention disponible pour cette zone.' }}</p>
       </div>
     </v-card-text>
   </v-card>
 </template>
 
 <script>
+import { mapStores } from 'pinia'
+import { useDataStore } from '../services/store.js'
+
 export default {
   name: 'Subventions',
   props: {
@@ -66,6 +69,12 @@ export default {
     }
   },
   computed: {
+    ...mapStores(useDataStore),
+    
+    isEnglish() {
+      return this.dataStore.labelState === 3;
+    },
+
     locationName() {
       if (!this.location) return '';
 
@@ -73,9 +82,9 @@ export default {
         case 'country':
           return 'France';
         case 'departement':
-          return this.location.name || `Département ${this.location.code}`;
+          return this.location.name || (this.isEnglish ? `Department ${this.location.code}` : `Département ${this.location.code}`);
         case 'commune':
-          return this.location.name || 'Commune';
+          return this.location.name || (this.isEnglish ? 'Municipality' : 'Commune');
         default:
           return '';
       }
@@ -96,23 +105,36 @@ export default {
 
     subventionRows() {
       const rows = [];
-      const countryPopulation = this.countryData.details?.population || 0;
+
+      // Get country subventions data - prefer france metro, fallback to france entiere or first available
+      const countrySubventions = this.getCountrySubventions();
+
+      // Get population from the country details array - match the same country as subventions
+      let countryPopulation = 0;
+      if (this.countryData.details && Array.isArray(this.countryData.details)) {
+        const selectedCountry = countrySubventions?.country || 'france metro';
+        const countryDetails = this.countryData.details.find(item => item.country === selectedCountry);
+        countryPopulation = countryDetails?.population || 0;
+      } else if (this.countryData.details?.population) {
+        // Fallback for old structure
+        countryPopulation = this.countryData.details.population;
+      }
 
       // Row 1: Ministères (country data) - use country population
-      if (this.countryData.subventions?.etat_central != null) {
-        const value = this.countryData.subventions.etat_central;
+      if (countrySubventions?.etat_central != null) {
+        const value = countrySubventions.etat_central;
         rows.push({
-          entity: 'Par les ministères',
+          entity: this.isEnglish ? 'By ministries' : 'Par les ministères',
           perCapita: countryPopulation > 0 ? value / countryPopulation : 0,
           nationalAverage: countryPopulation > 0 ? value / countryPopulation : 0
         });
       }
 
       // Row 2: Autres organismes publics (country data) - use country population
-      if (this.countryData.subventions?.autres_organismes_publics != null) {
-        const value = this.countryData.subventions.autres_organismes_publics;
+      if (countrySubventions?.autres_organismes_publics != null) {
+        const value = countrySubventions.autres_organismes_publics;
         rows.push({
-          entity: 'Par les autres organismes publics',
+          entity: this.isEnglish ? 'By other public organizations' : 'Par les autres organismes publics',
           perCapita: countryPopulation > 0 ? value / countryPopulation : 0,
           nationalAverage: countryPopulation > 0 ? value / countryPopulation : 0
         });
@@ -122,10 +144,10 @@ export default {
       if (this.departementData.subventions?.subvention_region_distributed != null) {
         const value = this.departementData.subventions.subvention_region_distributed;
         const departementPopulation = this.departementData.details?.population || 0;
-        const nationalRegionAverage = this.countryData.subventions?.total_subv_region && countryPopulation > 0 
-          ? this.countryData.subventions.total_subv_region / countryPopulation : 0;
+        const nationalRegionAverage = countrySubventions?.total_subv_region && countryPopulation > 0
+          ? countrySubventions.total_subv_region / countryPopulation : 0;
         rows.push({
-          entity: 'Par la région',
+          entity: this.isEnglish ? 'By the region' : 'Par la région',
           perCapita: departementPopulation > 0 ? value / departementPopulation : 0,
           nationalAverage: nationalRegionAverage
         });
@@ -135,10 +157,10 @@ export default {
       if (this.departementData.subventions?.subvention_departement != null) {
         const value = this.departementData.subventions.subvention_departement;
         const departementPopulation = this.departementData.details?.population || 0;
-        const nationalDeptAverage = this.countryData.subventions?.total_subv_dept && countryPopulation > 0 
-          ? this.countryData.subventions.total_subv_dept / countryPopulation : 0;
+        const nationalDeptAverage = countrySubventions?.total_subv_dept && countryPopulation > 0
+          ? countrySubventions.total_subv_dept / countryPopulation : 0;
         rows.push({
-          entity: 'Par le département',
+          entity: this.isEnglish ? 'By the department' : 'Par le département',
           perCapita: departementPopulation > 0 ? value / departementPopulation : 0,
           nationalAverage: nationalDeptAverage
         });
@@ -148,10 +170,10 @@ export default {
       if (this.communeData.subventions?.subvention_EPCI_distributed != null) {
         const value = this.communeData.subventions.subvention_EPCI_distributed;
         const communePopulation = this.communeData.details?.population || 0;
-        const nationalEPCIAverage = this.countryData.subventions?.total_subv_EPCI && countryPopulation > 0 
-          ? this.countryData.subventions.total_subv_EPCI / countryPopulation : 0;
+        const nationalEPCIAverage = countrySubventions?.total_subv_EPCI && countryPopulation > 0
+          ? countrySubventions.total_subv_EPCI / countryPopulation : 0;
         rows.push({
-          entity: 'Par l\'agglomération',
+          entity: this.isEnglish ? 'By the agglomeration' : 'Par l\'agglomération',
           perCapita: communePopulation > 0 ? value / communePopulation : 0,
           nationalAverage: nationalEPCIAverage
         });
@@ -161,10 +183,10 @@ export default {
       if (this.communeData.subventions?.subvention_commune != null) {
         const value = this.communeData.subventions.subvention_commune;
         const communePopulation = this.communeData.details?.population || 0;
-        const nationalCommuneAverage = this.countryData.subventions?.total_subv_commune && countryPopulation > 0 
-          ? this.countryData.subventions.total_subv_commune / countryPopulation : 0;
+        const nationalCommuneAverage = countrySubventions?.total_subv_commune && countryPopulation > 0
+          ? countrySubventions.total_subv_commune / countryPopulation : 0;
         rows.push({
-          entity: 'Par la commune',
+          entity: this.isEnglish ? 'By the municipality' : 'Par la commune',
           perCapita: communePopulation > 0 ? value / communePopulation : 0,
           nationalAverage: nationalCommuneAverage
         });
@@ -185,6 +207,28 @@ export default {
     formatNumber(number) {
       if (number == null || isNaN(number)) return "N/A";
       return Math.round(number).toLocaleString("fr-FR").replace(/\s/g, ' ');
+    },
+
+    getCountrySubventions() {
+      // Handle both old structure (direct subventions object) and new structure (array)
+      if (this.countryData.subventions) {
+        // New structure - array of country entries
+        if (Array.isArray(this.countryData.subventions)) {
+          // Prefer "france metro", fallback to "france entiere" or first available
+          const franceMetro = this.countryData.subventions.find(item => item.country === 'france metro');
+          if (franceMetro) return franceMetro;
+
+          const franceEntiere = this.countryData.subventions.find(item => item.country === 'france entiere');
+          if (franceEntiere) return franceEntiere;
+
+          // Fallback to first item if available
+          return this.countryData.subventions[0] || null;
+        } else {
+          // Old structure - direct object
+          return this.countryData.subventions;
+        }
+      }
+      return null;
     }
   }
 }

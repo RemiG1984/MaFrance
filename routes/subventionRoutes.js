@@ -24,50 +24,29 @@ const handleValidationErrors = (req, res, next) => {
     next();
 };
 
-// Validate country parameter
-const validateCountryParam = [
-    param("country")
-        .notEmpty()
-        .withMessage("Pays requis")
-        .isIn(["france", "France", "FRANCE"])
-        .withMessage("Pays doit être France"),
-    handleValidationErrors,
-];
-
 // Get country subventions
-router.get("/country/:country", validateCountryParam, (req, res) => {
+router.get("/country", (req, res) => {
     const db = req.app.locals.db;
-    const { country } = req.params;
 
-    const query = `
-        SELECT etat_central, autres_organismes_publics, total_subv_commune, total_subv_EPCI, total_subv_dept, total_subv_region, total_subventions_parHab
-        FROM country_subventions 
-        WHERE country = ?
-    `;
+    db.all(
+        `SELECT country, etat_central, autres_organismes_publics, total_subv_commune, total_subv_EPCI, total_subv_dept, total_subv_region, total_subventions_parHab
+         FROM country_subventions 
+         ORDER BY country`,
+        [],
+        (err, rows) => {
+            if (err) {
+                return handleDbError(err, res);
+            }
 
-    db.get(query, [country], (err, row) => {
-        if (err) {
-            return handleDbError(err, res);
-        }
-
-        if (!row) {
-            return res
-                .status(404)
-                .json({
-                    error: "Données de subventions non trouvées pour ce pays",
+            if (!rows || rows.length === 0) {
+                return res.status(404).json({
+                    error: "Données de subventions non trouvées",
                 });
-        }
+            }
 
-        res.json({
-            etat_central: row.etat_central,
-            autres_organismes_publics: row.autres_organismes_publics,
-            total_subv_commune: row.total_subv_commune,
-            total_subv_EPCI: row.total_subv_EPCI,
-            total_subv_dept: row.total_subv_dept,
-            total_subv_region: row.total_subv_region,
-            total_subventions_parHab: row.total_subventions_parHab
-        });
-    });
+            res.json(rows);
+        }
+    );
 });
 
 // Get department subventions

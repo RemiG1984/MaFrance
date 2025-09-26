@@ -4,14 +4,7 @@ const API_CACHE_NAME = `ma-france-api-${BUILD_HASH}`;
 const IMAGE_CACHE_NAME = `ma-france-images-${BUILD_HASH}`;
 const TILE_CACHE_NAME = `ma-france-tiles-${BUILD_HASH}`;
 
-// API routes that should be cached
-const API_ROUTES = [
-  '/api/country/details',
-  '/api/country/names',
-  '/api/country/crime',
-  '/api/departements',
-  '/api/communes'
-];
+// All API routes are cached automatically based on /api/ prefix
 
 // Install event - no static asset caching
 self.addEventListener('install', (event) => {
@@ -188,11 +181,16 @@ async function checkForUpdates() {
     const response = await fetch('/api/version?' + Date.now());
     if (response.ok) {
       const serverInfo = await response.json();
-      console.log('Server version checked:', serverInfo);
+      // Only log in development-like environments
+      if (self.location.hostname === 'localhost' || self.location.hostname.includes('127.0.0.1')) {
+        console.log('Server version checked:', serverInfo);
+      }
       return true; // Always return true to indicate check completed
     }
   } catch (error) {
-    console.log('Error checking for updates:', error);
+    if (self.location.hostname === 'localhost' || self.location.hostname.includes('127.0.0.1')) {
+      console.log('Error checking for updates:', error);
+    }
   }
   return false;
 }

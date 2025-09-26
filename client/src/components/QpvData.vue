@@ -15,19 +15,31 @@
         <table class="qpv-table qpv-table-header">
           <thead>
             <tr>
-              <th>Quartier QPV</th>
+              <th v-if="isEnglish">Priority District</th>
+              <th v-else>Quartier QPV</th>
               <th>Population</th>
-              <th>Commune</th>
-              <th>Indice Jeunesse</th>
-              <th>Logements sociaux</th>
-              <th>Taux logements sociaux</th>
-              <th>Pop. Immigrée</th>
-              <th>Pop. Étrangère</th>
-              <th>Taux d'emploi</th>
-              <th>Taux de pauvreté</th>
-              <th>RSA socle</th>
-              <th>Allocataires CAF</th>
-              <th>Couverture CAF</th>
+              <th v-if="isEnglish">Municipality</th>
+              <th v-else>Commune</th>
+              <th v-if="isEnglish">Youth Index</th>
+              <th v-else>Indice Jeunesse</th>
+              <th v-if="isEnglish">Social Housing</th>
+              <th v-else>Logements sociaux</th>
+              <th v-if="isEnglish">Social Housing Rate</th>
+              <th v-else>Taux logements sociaux</th>
+              <th v-if="isEnglish">Immigrant Pop.</th>
+              <th v-else>Pop. Immigrée</th>
+              <th v-if="isEnglish">Foreign Pop.</th>
+              <th v-else>Pop. Étrangère</th>
+              <th v-if="isEnglish">Employment Rate</th>
+              <th v-else>Taux d'emploi</th>
+              <th v-if="isEnglish">Poverty Rate</th>
+              <th v-else>Taux de pauvreté</th>
+              <th v-if="isEnglish">Basic RSA</th>
+              <th v-else>RSA socle</th>
+              <th v-if="isEnglish">CAF Recipients</th>
+              <th v-else>Allocataires CAF</th>
+              <th v-if="isEnglish">CAF Coverage</th>
+              <th v-else>Couverture CAF</th>
             </tr>
           </thead>
         </table>
@@ -67,16 +79,16 @@
         
         <div v-if="isLoading" class="loading">
           <v-progress-circular indeterminate size="24" color="primary"></v-progress-circular>
-          Chargement...
+          {{ isEnglish ? 'Loading...' : 'Chargement...' }}
         </div>
       </div>
 
       <div v-else class="text-center">
         <p v-if="location.type === 'country'">
-          Aucun quartier prioritaire dans cette zone.
+          {{ isEnglish ? 'No priority districts in this area.' : 'Aucun quartier prioritaire dans cette zone.' }}
         </p>
         <p v-else>
-          Aucun quartier prioritaire dans cette zone.
+          {{ isEnglish ? 'No priority districts in this area.' : 'Aucun quartier prioritaire dans cette zone.' }}
         </p>
       </div>
     </v-card-text>
@@ -121,16 +133,26 @@ export default {
     window.removeEventListener('resize', this.updateContainerHeight)
   },
   computed: {
+    isEnglish() {
+      return this.$store && this.$store.labelState === 3;
+    },
+    
     locationName() {
       if (!this.location) return '';
+      
+      // Check if store is available and get label state
+      const isEnglish = this.$store && this.$store.labelState === 3;
 
       switch (this.location.type) {
         case 'country':
-          return 'France (1609 QPV)';
+          return isEnglish ? 'France (1609 Priority Districts)' : 'France (1609 QPV)';
         case 'departement':
+          if (isEnglish) {
+            return this.location.name || `Department ${this.location.code}`;
+          }
           return this.location.name || `Département ${this.location.code}`;
         case 'commune':
-          return this.location.name || 'Commune';
+          return isEnglish ? (this.location.name || 'Municipality') : (this.location.name || 'Commune');
         default:
           return '';
       }

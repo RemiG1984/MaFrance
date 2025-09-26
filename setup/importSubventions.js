@@ -10,7 +10,7 @@ function importSubventions(db, callback) {
         return new Promise((resolve, reject) => {
             const allFields = new Set();
             const files = [
-                { path: 'setup/france_subventions.csv', excludedFields: ['commune', 'population', 'total_subventions'] },
+                { path: 'setup/france_subventions.csv', excludedFields: ['country', 'commune', 'population', 'total_subventions'] },
                 { path: 'setup/departement_subventions.csv', excludedFields: ['dept_code', 'commune', 'population', 'total_subventions'] },
                 { path: 'setup/commune_subventions.csv', excludedFields: ['COG', 'commune', 'population', 'total_subventions'] }
             ];
@@ -72,7 +72,10 @@ function importSubventions(db, callback) {
                     .pipe(csv())
                     .on('data', (row) => {
                         const excludedFields = ['commune', 'population', 'total_subventions'];
-                        const values = ['france'];
+                        
+                        // Use the country field from the CSV, or default to 'FRANCE' if not present
+                        const country = row['country'];
+                        const values = [country];
                         
                         subventionFields.forEach(field => {
                             const value = row[field];
@@ -119,12 +122,13 @@ function importSubventions(db, callback) {
                                 return;
                             }
 
-                            const placeholders = `(${Array(subventionFields.length + 1).fill('?').join(', ')})`;
                             const fieldsList = ['country'].concat(subventionFields).join(', ');
+                            const placeholders = `(${Array(subventionFields.length + 1).fill('?').join(', ')})`;
+                            const batchPlaceholders = countryBatch.map(() => placeholders).join(',');
                             const flatBatch = [].concat(...countryBatch);
                             
                             db.run(
-                                `INSERT OR REPLACE INTO country_subventions (${fieldsList}) VALUES ${placeholders}`,
+                                `INSERT OR REPLACE INTO country_subventions (${fieldsList}) VALUES ${batchPlaceholders}`,
                                 flatBatch,
                                 (err) => {
                                     if (err) {
