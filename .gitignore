@@ -160,3 +160,6 @@ dist-ssr
 
 #Replit Run button configuration
 .replit
+
+#CSV files in setup/
+setup/*.csv
