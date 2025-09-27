@@ -1,6 +1,6 @@
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
-import { resolve } from "path";
+import path from "path";
 import fs from 'fs';
 
 // Generate stable build hash for cache busting - set once during build
@@ -34,7 +34,7 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@': resolve(__dirname, 'src')
+      '@': path.resolve(__dirname, 'src')
     }
   },
   publicDir: '../public',
@@ -52,28 +52,31 @@ export default defineConfig({
     }
   },
   server: {
-    host: '0.0.0.0',
-    port: 5000,
-    hmr: true, // Ensure HMR is enabled
-    allowedHosts: [
-      'ccfbc9aa-5090-4af0-90de-762081b314b7-00-28xht4x6ewgrz.spock.replit.dev', // Add the Replit host
-      'localhost', // Optional: include for local testing
-    ],
-    fs: {
-      allow: [
-        // Allow serving files from the client directory
-        '/home/runner/workspace/client',
-        // Allow serving files from node_modules for dependencies like @mdi/font
-        '/home/runner/workspace/node_modules'
-      ]
-    },
-    proxy: {
-      '/api': {
-        target: 'http://0.0.0.0:3000',
-        changeOrigin: true
-      }
+  host: true,  // Changed: Use 'true' for auto-detect (localhost on local, 0.0.0.0 on Replit/server)
+  port: 5173,  // Changed: Use 5173 for local dev (matches README.md); Replit can override via env
+  hmr: true,   // Keep: Enables Hot Module Replacement
+  allowedHosts: [
+    'localhost',  // Keep: For local testing
+    '127.0.0.1', // Added: Explicit local IP for Windows
+    'ccfbc9aa-5090-4af0-90de-762081b314b7-00-28xht4x6ewgrz.spock.replit.dev'  // Keep: Replit host
+  ],
+  fs: {
+  allow: [
+    // Allow serving files from the client directory (dynamic absolute path)
+    path.resolve(__dirname),
+    // Allow serving files from the project root (for shared assets if needed)
+    path.resolve(__dirname, '..'),
+    // Allow serving files from root node_modules (existing, already dynamic)
+    path.resolve(__dirname, '../node_modules')
+  ]
+},
+  proxy: {
+    '/api': {
+      target: 'http://localhost:3000',  // Changed: Use localhost for local backend (avoids 0.0.0.0 issues)
+      changeOrigin: true
     }
-  },
+  }
+},
   define: {
     __VUE_OPTIONS_API__: true,
     __VUE_PROD_DEVTOOLS__: false,

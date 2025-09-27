@@ -142,7 +142,7 @@ dist-ssr
 *.local
 
 # SQLite database
-.data/
+.data/france.db
 
 # Editor directories and files
 .vscode/*

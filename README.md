@@ -1,6 +1,12 @@
 
 # Ma France - Application Vue.js
 
+## English Overview
+
+Ma France is a comprehensive data analysis application that provides detailed insights into various indicators across France at national, departmental, and municipal levels. The application analyzes multiple dimensions including security, immigration, islamization, de-francization, and woke ideology through an interactive web interface with map visualizations, statistical correlations, charts, and detailed breakdowns.
+
+## Vue.js Single Page Application
+
 Cette Single Page Application Vue.js "Ma France: état des lieux" analyse différents indicateurs pour évaluer l'état des lieux en France, au niveau national, départemental et communal.
 
 ## Architecture de l'application
