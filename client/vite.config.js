@@ -3,6 +3,9 @@ import vue from "@vitejs/plugin-vue";
 import path from "path";
 import fs from 'fs';
 
+// Destructuring resolve function from the path module for Replit compatibility (not needed in VS Code)
+const { resolve } = path;
+
 // Generate stable build hash for cache busting - set once during build
 const buildHash = process.env.BUILD_HASH || Date.now().toString()
 
