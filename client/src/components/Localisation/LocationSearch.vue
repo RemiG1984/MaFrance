@@ -1,12 +1,12 @@
 <template>
   <v-card class="pa-4">
     <v-card-title class="pa-0 mb-3 text-h5">
-      Recherche
+      {{ isEnglish ? 'Search' : 'Recherche' }}
     </v-card-title>
     <v-text-field
       v-model="addressInput"
-      label="Rechercher une adresse"
-      placeholder="Ex: 123 Rue de la Paix, Paris"
+      :label="isEnglish ? 'Search for an address' : 'Rechercher une adresse'"
+      :placeholder="isEnglish ? 'Ex: 123 Peace Street, Paris' : 'Ex: 123 Rue de la Paix, Paris'"
       variant="outlined"
       density="compact"
       append-inner-icon="mdi-magnify"
@@ -23,18 +23,22 @@
       :loading="gettingLocation"
       block
     >
-      Ma position
+      {{ isEnglish ? 'My position' : 'Ma position' }}
     </v-btn>
   </v-card>
 </template>
 
 <script>
-import { ref } from 'vue'
+import { defineComponent, ref, computed } from 'vue'
+import { useDataStore } from '../../services/store.js'
 
-export default {
+export default defineComponent({
   name: 'LocationSearch',
   emits: ['location-found'],
   setup(props, { emit }) {
+    const dataStore = useDataStore()
+    const isEnglish = computed(() => dataStore.labelState === 3)
+
     const addressInput = ref('')
     const searchingAddress = ref(false)
     const gettingLocation = ref(false)
@@ -57,11 +61,11 @@ export default {
             address: result.display_name
           })
         } else {
-          alert('Adresse non trouvée. Veuillez essayer une autre adresse.')
+          alert(isEnglish.value ? 'Address not found. Please try another address.' : 'Adresse non trouvée. Veuillez essayer une autre adresse.')
         }
       } catch (error) {
         console.error('Error searching address:', error)
-        alert('Erreur lors de la recherche d\'adresse.')
+        alert(isEnglish.value ? 'Error during address search.' : 'Erreur lors de la recherche d\'adresse.')
       } finally {
         searchingAddress.value = false
       }
@@ -69,7 +73,7 @@ export default {
 
     const getCurrentLocation = () => {
       if (!navigator.geolocation) {
-        alert('La géolocalisation n\'est pas supportée par ce navigateur.')
+        alert(isEnglish.value ? 'Geolocation is not supported by this browser.' : 'La géolocalisation n\'est pas supportée par ce navigateur.')
         return
       }
 
@@ -79,13 +83,13 @@ export default {
           emit('location-found', {
             lat: position.coords.latitude,
             lng: position.coords.longitude,
-            address: 'Ma position actuelle'
+            address: isEnglish.value ? 'My current position' : 'Ma position actuelle'
           })
           gettingLocation.value = false
         },
         (error) => {
           console.error('Error getting location:', error)
-          alert('Erreur lors de la géolocalisation. Veuillez vérifier vos paramètres de localisation.')
+          alert(isEnglish.value ? 'Error during geolocation. Please check your location settings.' : 'Erreur lors de la géolocalisation. Veuillez vérifier vos paramètres de localisation.')
           gettingLocation.value = false
         },
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
@@ -97,10 +101,12 @@ export default {
       searchingAddress,
       gettingLocation,
       searchAddress,
-      getCurrentLocation
+      getCurrentLocation,
+      dataStore,
+      isEnglish
     }
   }
-}
+})
 </script>
 
 <style scoped>

@@ -1,7 +1,7 @@
 <template>
   <v-card class="mb-4">
     <v-card-title class="text-h6 pb-0">
-      Quartiers Prioritaires (QPV) à: {{ locationName }}
+      {{ isEnglish ? 'Priority Districts (QPV) in:' : 'Quartiers Prioritaires (QPV) à:' }} {{ locationName }}
     </v-card-title>
     <v-card-text>
       <div
@@ -20,12 +20,6 @@
               <th>Population</th>
               <th v-if="isEnglish">Municipality</th>
               <th v-else>Commune</th>
-              <th v-if="isEnglish">Youth Index</th>
-              <th v-else>Indice Jeunesse</th>
-              <th v-if="isEnglish">Social Housing</th>
-              <th v-else>Logements sociaux</th>
-              <th v-if="isEnglish">Social Housing Rate</th>
-              <th v-else>Taux logements sociaux</th>
               <th v-if="isEnglish">Immigrant Pop.</th>
               <th v-else>Pop. Immigrée</th>
               <th v-if="isEnglish">Foreign Pop.</th>
@@ -40,6 +34,12 @@
               <th v-else>Allocataires CAF</th>
               <th v-if="isEnglish">CAF Coverage</th>
               <th v-else>Couverture CAF</th>
+              <th v-if="isEnglish">Youth Index</th>
+              <th v-else>Indice Jeunesse</th>
+              <th v-if="isEnglish">Social Housing</th>
+              <th v-else>Logements sociaux</th>
+              <th v-if="isEnglish">Social Housing Rate</th>
+              <th v-else>Taux logements sociaux</th>
             </tr>
           </thead>
         </table>
@@ -61,9 +61,6 @@
                   </td>
                   <td class="score-main">{{formatNumber(qpv.popMuniQPV)}}</td>
                   <td class="score-main">{{qpv.lib_com}}</td>
-                  <td class="score-main">{{formatNumber(qpv.indiceJeunesse)}}</td>
-                  <td class="score-main">{{formatNumber(qpv.nombre_logements_sociaux)}}</td>
-                  <td class="score-main">{{formatPercentage(qpv.taux_logements_sociaux)}}</td>
                   <td class="score-main">{{formatPercentage(qpv.partPopImmi)}}</td>
                   <td class="score-main">{{formatPercentage(qpv.partPopEt)}}</td>
                   <td class="score-main">{{formatPercentage(qpv.taux_d_emploi)}}</td>
@@ -71,6 +68,9 @@
                   <td class="score-main">{{formatNumber(qpv.RSA_socle)}}</td>
                   <td class="score-main">{{formatNumber(qpv.allocataires_CAF)}}</td>
                   <td class="score-main">{{formatNumber(qpv.personnes_couvertes_CAF)}}</td>
+                  <td class="score-main">{{formatNumber(qpv.indiceJeunesse)}}</td>
+                  <td class="score-main">{{formatNumber(qpv.nombre_logements_sociaux)}}</td>
+                  <td class="score-main">{{formatPercentage(qpv.taux_logements_sociaux)}}</td>
                 </tr>
               </tbody>
             </table>
@@ -96,6 +96,8 @@
 </template>
 
 <script>
+import { mapStores } from 'pinia'
+import { useDataStore } from '../../services/store.js'
 export default {
   name: 'QpvData',
   props: {
@@ -133,15 +135,17 @@ export default {
     window.removeEventListener('resize', this.updateContainerHeight)
   },
   computed: {
+    ...mapStores(useDataStore),
+
     isEnglish() {
-      return this.$store && this.$store.labelState === 3;
+      return this.dataStore.labelState === 3;
     },
     
     locationName() {
       if (!this.location) return '';
       
       // Check if store is available and get label state
-      const isEnglish = this.$store && this.$store.labelState === 3;
+      const isEnglish = this.isEnglish;
 
       switch (this.location.type) {
         case 'country':

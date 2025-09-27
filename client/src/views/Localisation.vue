@@ -2,7 +2,7 @@
   <div class="localisation-container">
     <!-- Header Section -->
     <div class="header-section">
-      <h1>Localisation des QPV, centres de migrants et mosquées</h1>
+      <h1>{{ isEnglish ? 'Localization of priority districts (QPV), migrant centers and mosques' : 'Localisation des QPV, centres de migrants et mosquées' }}</h1>
     </div>
 
     <!-- Main Content Layout -->
@@ -38,8 +38,9 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import api from '../services/api.js'
+import { useDataStore } from '@/services/store.js'
 import LocationSearch from '../components/Localisation/LocationSearch.vue'
 import DistanceInfo from '../components/Localisation/DistanceInfo.vue'
 import MapContainer from '../components/Localisation/MapContainer.vue'
@@ -121,6 +122,11 @@ export default {
       showMigrantCenters: false,
       showMosques: false
     })
+
+    const dataStore = useDataStore()
+
+    // Computed properties
+    const isEnglish = computed(() => dataStore.labelState === 3)
 
     // ==================== DATA LOADING ====================
 
@@ -328,6 +334,7 @@ export default {
       migrantCentersData,
       mosquesData,
       overlayStates,
+      isEnglish,
       handleLocationFound,
       toggleQpv,
       toggleMigrant,

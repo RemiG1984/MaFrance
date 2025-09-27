@@ -3,8 +3,8 @@
     <div v-if="!selectedMetrics.metric1 || !selectedMetrics.metric2" class="no-selection">
       <v-card class="text-center pa-8">
         <v-icon size="64" color="grey-lighten-1">mdi-chart-scatter-plot</v-icon>
-        <h3 class="text-grey-darken-1 mt-4">Cliquez sur une cellule du tableau de corrélation</h3>
-        <p class="text-grey">pour afficher le nuage de points correspondant</p>
+        <h3 class="text-grey-darken-1 mt-4">{{ isEnglish ? 'Click on a correlation matrix cell' : 'Cliquez sur une cellule du tableau de corrélation' }}</h3>
+        <p class="text-grey">{{ isEnglish ? 'to display the corresponding scatter plot' : 'pour afficher le nuage de points correspondant' }}</p>
       </v-card>
     </div>
 
@@ -27,11 +27,12 @@
 </template>
 
 <script>
-import { ref, watch, nextTick, onMounted, onUnmounted } from 'vue'
+import { ref, watch, nextTick, onMounted, onUnmounted, computed } from 'vue'
 import { Chart, registerables } from 'chart.js'
 import chroma from 'chroma-js'
 import { MetricsConfig } from '../../utils/metricsConfig.js'
 import { watermarkPlugin } from '../../utils/chartWatermark.js'
+import { useDataStore } from '../../services/store.js'
 
 // Register Chart.js components
 Chart.register(...registerables, watermarkPlugin)
@@ -83,6 +84,9 @@ export default {
     const chartCanvas = ref(null)
     const chartId = `scatter-plot-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
     let chartInstance = null
+
+    const dataStore = useDataStore()
+    const isEnglish = computed(() => dataStore.labelState === 3)
 
     // Color scale for correlations (same as heatmap)
     const createColorScale = () => {
@@ -225,7 +229,7 @@ export default {
         data: {
           datasets: [
             {
-              label: 'Points de données',
+              label: isEnglish.value ? 'Data points' : 'Points de données',
               data: points,
               backgroundColor: 'rgba(54, 162, 235, 0.6)',
               borderColor: 'rgba(54, 162, 235, 1)',
@@ -235,7 +239,7 @@ export default {
               pointHitRadius: 12
             },
             {
-              label: 'Droite de régression',
+              label: isEnglish.value ? 'Regression line' : 'Droite de régression',
               data: trendLine,
               type: 'line',
               backgroundColor: 'rgba(255, 99, 132, 0.1)',
@@ -284,7 +288,7 @@ export default {
               callbacks: {
                 title: (context) => {
                   const point = context[0]
-                  return point.raw.label || 'Point de données'
+                  return point.raw.label || (isEnglish.value ? 'Data point' : 'Point de données')
                 },
                 label: (context) => {
                   const point = context.raw
@@ -294,7 +298,7 @@ export default {
                       `${getMetricDisplayName(props.selectedMetrics.metric2)}: ${point.y.toFixed(2)}`
                     ]
                   } else { // Trend line
-                    return `Droite de régression`
+                    return isEnglish.value ? 'Regression line' : 'Droite de régression'
                   }
                 }
               },
@@ -361,7 +365,7 @@ export default {
 
     // Watch specifically for when selectedMetrics changes from null to actual values
     watch(() => props.selectedMetrics, (newMetrics, oldMetrics) => {
-      if (newMetrics.metric1 && newMetrics.metric2 && 
+      if (newMetrics.metric1 && newMetrics.metric2 &&
           (!oldMetrics.metric1 || !oldMetrics.metric2)) {
         // This is the initial selection, give it extra time
         setTimeout(() => {
@@ -369,6 +373,10 @@ export default {
         }, 50)
       }
     }, { deep: true })
+
+    watch(isEnglish, () => {
+      createChart()
+    })
 
     // Lifecycle
     onMounted(() => {
@@ -391,7 +399,8 @@ export default {
       chartCanvas,
       chartId,
       getCorrelationColor,
-      getMetricDisplayName
+      getMetricDisplayName,
+      isEnglish
     }
   }
 }

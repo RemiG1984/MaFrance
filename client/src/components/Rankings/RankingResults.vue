@@ -2,18 +2,18 @@
 <template>
   <div class="ranking-results">
     <div class="data-box">
-      <h2>Classement des {{ type }}s pour {{ metricName }}</h2>
+      <h2>{{ title }}</h2>
       
       <!-- Top rankings -->
-      <h3>Top {{ topRankings.length }}</h3>
+      <h3>{{ isEnglish ? 'Top' : 'Haut' }} {{ topRankings.length }}</h3>
       <div class="table-container">
         <table class="score-table">
           <thead>
             <tr class="score-header">
-              <th style="width: 15%;">Rang</th>
-              <th style="width: 40%;">{{ type }}</th>
+              <th style="width: 15%;">{{ isEnglish ? 'Rank' : 'Rang' }}</th>
+              <th style="width: 40%;">{{ getTypeLabel(type) }}</th>
               <th style="width: 25%;">Population</th>
-              <th style="width: 20%;">Valeur</th>
+              <th style="width: 20%;">{{ isEnglish ? 'Value' : 'Valeur' }}</th>
             </tr>
           </thead>
           <tbody>
@@ -32,15 +32,15 @@
       </div>
       
       <!-- Bottom rankings -->
-      <h3>Bottom {{ bottomRankings.length }}</h3>
+      <h3>{{ isEnglish ? 'Bottom' : 'Bas' }} {{ bottomRankings.length }}</h3>
       <div class="table-container">
         <table class="score-table">
           <thead>
             <tr class="score-header">
-              <th style="width: 15%;">Rang</th>
-              <th style="width: 40%;">{{ type }}</th>
+              <th style="width: 15%;">{{ isEnglish ? 'Rank' : 'Rang' }}</th>
+              <th style="width: 40%;">{{ getTypeLabel(type) }}</th>
               <th style="width: 25%;">Population</th>
-              <th style="width: 20%;">Valeur</th>
+              <th style="width: 20%;">{{ isEnglish ? 'Value' : 'Valeur' }}</th>
             </tr>
           </thead>
           <tbody>
@@ -90,11 +90,36 @@ export default {
     const store = useDataStore()
     const labelStateKey = ref(store.labelState)
 
+    const isEnglish = computed(() => store.labelState === 3)
+
     const metricName = computed(() => {
       // Force reactivity by accessing labelStateKey
       labelStateKey.value
       return MetricsConfig.getMetricLabel(props.metric)
     })
+
+    const title = computed(() => {
+      const typePlural = isEnglish.value ? getEnglishTypePlural(props.type) : props.type + 's'
+      return isEnglish.value ? `Ranking of ${typePlural} for ${metricName.value}` : `Classement des ${props.type}s pour ${metricName.value}`
+    })
+
+    const getTypeLabel = (type) => {
+      if (isEnglish.value) {
+        if (type === 'departement') return 'Department'
+        if (type === 'commune') return 'Municipality'
+        return type
+      } else {
+        if (type === 'departement') return 'Département'
+        if (type === 'commune') return 'Commune'
+        return type
+      }
+    }
+
+    const getEnglishTypePlural = (type) => {
+      if (type === 'departement') return 'departments'
+      if (type === 'commune') return 'municipalities'
+      return type + 's'
+    }
 
     const topRankings = computed(() => {
       return props.rankings.slice(0, props.limit)
@@ -116,7 +141,7 @@ export default {
 
     const formatLocationName = (item) => {
       if (props.type === 'departement') {
-        return item.nom || item.name || `Département ${item.departement}`
+        return item.nom || item.name || (isEnglish.value ? `Department ${item.departement}` : `Département ${item.departement}`)
       } else {
         return `${item.commune || item.name || item.nom} (${item.departement || item.deptCode})`
       }
@@ -144,12 +169,15 @@ export default {
     })
 
     return {
+      isEnglish,
       metricName,
+      title,
       topRankings,
       bottomRankings,
       formatLocationName,
       formatPopulation,
-      formatMetricValue
+      formatMetricValue,
+      getTypeLabel
     }
   }
 }

@@ -6,47 +6,47 @@
 
     <!-- Legend -->
     <div class="correlation-legend">
-      <div class="legend-title">Intensité des corrélations</div>
+      <div class="legend-title">{{ isEnglish ? 'Correlation intensity' : 'Intensité des corrélations' }}</div>
       <div class="legend-scale">
         <div class="legend-item">
           <div class="legend-color" style="background: #b10026"></div>
-          <span>Très forte (+0.7)</span>
+          <span>{{ isEnglish ? 'Very strong (+0.7)' : 'Très forte (+0.7)' }}</span>
         </div>
         <div class="legend-item">
           <div class="legend-color" style="background: #e31a1c"></div>
-          <span>Forte (+0.5)</span>
+          <span>{{ isEnglish ? 'Strong (+0.5)' : 'Forte (+0.5)' }}</span>
         </div>
         <div class="legend-item">
           <div class="legend-color" style="background: #fd8d3c"></div>
-          <span>Modérée (+0.3)</span>
+          <span>{{ isEnglish ? 'Moderate (+0.3)' : 'Modérée (+0.3)' }}</span>
         </div>
         <div class="legend-item">
           <div class="legend-color" style="background: #fecc5c"></div>
-          <span>Faible (+0.1)</span>
+          <span>{{ isEnglish ? 'Weak (+0.1)' : 'Faible (+0.1)' }}</span>
         </div>
         <div class="legend-item">
           <div class="legend-color" style="background: #ffffb2"></div>
-          <span>Nulle (0)</span>
+          <span>{{ isEnglish ? 'Null (0)' : 'Nulle (0)' }}</span>
         </div>
         <div class="legend-item">
           <div class="legend-color" style="background: #c7e9b4"></div>
-          <span>Faible (-0.1)</span>
+          <span>{{ isEnglish ? 'Weak (-0.1)' : 'Faible (-0.1)' }}</span>
         </div>
         <div class="legend-item">
           <div class="legend-color" style="background: #7fcdbb"></div>
-          <span>Modérée (-0.3)</span>
+          <span>{{ isEnglish ? 'Moderate (-0.3)' : 'Modérée (-0.3)' }}</span>
         </div>
         <div class="legend-item">
           <div class="legend-color" style="background: #41b6c4"></div>
-          <span>Forte (-0.5)</span>
+          <span>{{ isEnglish ? 'Strong (-0.5)' : 'Forte (-0.5)' }}</span>
         </div>
         <div class="legend-item">
           <div class="legend-color" style="background: #2c7fb8"></div>
-          <span>Très forte (-0.7)</span>
+          <span>{{ isEnglish ? 'Very strong (-0.7)' : 'Très forte (-0.7)' }}</span>
         </div>
         <div class="legend-item">
           <div class="legend-color" style="background: #f0f0f0; border: 2px solid #ccc"></div>
-          <span>Données insuffisantes</span>
+          <span>{{ isEnglish ? 'Insufficient data' : 'Données insuffisantes' }}</span>
         </div>
       </div>
     </div>
@@ -54,10 +54,11 @@
 </template>
 
 <script>
-import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, watch, nextTick, computed } from 'vue'
 import { Chart, registerables } from 'chart.js'
 import chroma from 'chroma-js'
 import { watermarkPlugin } from '../../utils/chartWatermark.js'
+import { useDataStore } from '../../services/store.js'
 
 // Register Chart.js components
 Chart.register(...registerables, watermarkPlugin)
@@ -85,6 +86,9 @@ export default {
     const chartCanvas = ref(null)
     const chartId = `correlation-chart-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
     let chartInstance = null
+
+    const dataStore = useDataStore()
+    const isEnglish = computed(() => dataStore.labelState === 3)
 
     // Color scale for correlations (from -1 to +1)
     const createColorScale = () => {
@@ -273,8 +277,8 @@ export default {
                   if (point.isInsufficientData) {
                     return [
                       `${point.xLabel} ↔ ${point.yLabel}`,
-                      'Données insuffisantes',
-                      'Moins de 20 observations valides'
+                      isEnglish.value ? 'Insufficient data' : 'Données insuffisantes',
+                      isEnglish.value ? 'Less than 20 valid observations' : 'Moins de 20 observations valides'
                     ]
                   }
 
@@ -282,18 +286,18 @@ export default {
                   let strength = ''
 
                   const absCorr = Math.abs(correlation)
-                  if (absCorr >= 0.7) strength = 'très forte'
-                  else if (absCorr >= 0.5) strength = 'forte'
-                  else if (absCorr >= 0.3) strength = 'modérée'
-                  else if (absCorr >= 0.1) strength = 'faible'
-                  else strength = 'très faible'
+                  if (absCorr >= 0.7) strength = isEnglish.value ? 'very strong' : 'très forte'
+                  else if (absCorr >= 0.5) strength = isEnglish.value ? 'strong' : 'forte'
+                  else if (absCorr >= 0.3) strength = isEnglish.value ? 'moderate' : 'modérée'
+                  else if (absCorr >= 0.1) strength = isEnglish.value ? 'weak' : 'faible'
+                  else strength = isEnglish.value ? 'very weak' : 'très faible'
 
-                  const direction = correlation > 0 ? 'positive' : correlation < 0 ? 'négative' : 'nulle'
+                  const direction = correlation > 0 ? (isEnglish.value ? 'positive' : 'positive') : correlation < 0 ? (isEnglish.value ? 'negative' : 'négative') : (isEnglish.value ? 'null' : 'nulle')
 
                   return [
                     `${point.xLabel} ↔ ${point.yLabel}`,
-                    `Corrélation: ${correlation.toFixed(3)}`,
-                    `Force: ${strength} (${direction})`
+                    `${isEnglish.value ? 'Correlation:' : 'Corrélation:'} ${correlation.toFixed(3)}`,
+                    `${isEnglish.value ? 'Strength:' : 'Force:'} ${strength} (${direction})`
                   ]
                 }
               },
@@ -458,6 +462,10 @@ export default {
       }
     })
 
+    watch(isEnglish, () => {
+      createChart()
+    })
+
     // Lifecycle
     onMounted(() => {
       createChart()
@@ -473,7 +481,8 @@ export default {
 
     return {
       chartCanvas,
-      chartId
+      chartId,
+      isEnglish
     }
   }
 }

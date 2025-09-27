@@ -1,6 +1,6 @@
 <template>
   <v-card class="pa-4">
-    <h4 class="mb-3">Votre position est à:</h4>
+    <h4 class="mb-3">{{ isEnglish ? 'Your position is at:' : 'Votre position est à:' }}</h4>
 
       <!-- QPV Distance -->
       <div v-if="distanceInfo.qpv" class="mt-2">
@@ -9,7 +9,7 @@
           @click="$emit('toggle-qpv')"
         >
           <div class="distance-indicator qpv-indicator"></div>
-          <strong>{{ distanceInfo.qpv.distance }}&nbsp;</strong>du QPV le plus proche
+          <strong>{{ distanceInfo.qpv.distance }}&nbsp;</strong>{{ isEnglish ? 'from the nearest QPV' : 'du QPV le plus proche' }}
           <v-icon
             size="16"
             class="ml-2"
@@ -20,8 +20,8 @@
         </div>
         <v-expand-transition>
           <div v-show="distanceInfo.qpv.expanded" class="text-caption text-grey ml-6 mt-1">
-            <strong>QPV:</strong> <a :href="distanceInfo.qpv.link" target="_blank">{{ distanceInfo.qpv.name }}</a><br>
-            <strong>Commune:</strong> {{ distanceInfo.qpv.commune }}
+            <strong>{{ isEnglish ? 'QPV:' : 'QPV:' }}</strong> <a :href="distanceInfo.qpv.link" target="_blank">{{ distanceInfo.qpv.name }}</a><br>
+            <strong>{{ isEnglish ? 'Municipality:' : 'Commune:' }}</strong> {{ distanceInfo.qpv.commune }}
           </div>
         </v-expand-transition>
       </div>
@@ -33,7 +33,7 @@
           @click="$emit('toggle-migrant')"
         >
           <div class="distance-indicator migrant-indicator">↑</div>
-          <strong>{{ distanceInfo.migrantCenter.distance }}&nbsp;</strong>du centre de migrants le plus proche
+          <strong>{{ distanceInfo.migrantCenter.distance }}&nbsp;</strong>{{ isEnglish ? 'from the nearest migrant center' : 'du centre de migrants le plus proche' }}
           <v-icon
             size="16"
             class="ml-2"
@@ -44,9 +44,9 @@
         </div>
         <v-expand-transition>
           <div v-show="distanceInfo.migrantCenter.expanded" class="text-caption text-grey ml-6 mt-1">
-            <strong>Type:</strong> {{ distanceInfo.migrantCenter.type }} | <strong>Places:</strong> {{ distanceInfo.migrantCenter.places }} | <strong>Gestionnaire:</strong> {{ distanceInfo.migrantCenter.gestionnaire }}<br>
-            <strong>Adresse:</strong> {{ distanceInfo.migrantCenter.address }}<br>
-            <strong>Commune:</strong> {{ distanceInfo.migrantCenter.commune }}
+            <strong>{{ isEnglish ? 'Type:' : 'Type:' }}</strong> {{ distanceInfo.migrantCenter.type }} | <strong>{{ isEnglish ? 'Places:' : 'Places:' }}</strong> {{ distanceInfo.migrantCenter.places }} | <strong>{{ isEnglish ? 'Manager:' : 'Gestionnaire:' }}</strong> {{ distanceInfo.migrantCenter.gestionnaire }}<br>
+            <strong>{{ isEnglish ? 'Address:' : 'Adresse:' }}</strong> {{ distanceInfo.migrantCenter.address }}<br>
+            <strong>{{ isEnglish ? 'Municipality:' : 'Commune:' }}</strong> {{ distanceInfo.migrantCenter.commune }}
           </div>
         </v-expand-transition>
       </div>
@@ -58,7 +58,7 @@
           @click="$emit('toggle-mosque')"
         >
           <div class="distance-indicator mosque-indicator">🕌</div>
-          <strong>{{ distanceInfo.mosque.distance }}&nbsp;</strong>de la mosquée la plus proche
+          <strong>{{ distanceInfo.mosque.distance }}&nbsp;</strong>{{ isEnglish ? 'from the nearest mosque' : 'de la mosquée la plus proche' }}
           <v-icon
             size="16"
             class="ml-2"
@@ -70,20 +70,21 @@
         <v-expand-transition>
           <div v-show="distanceInfo.mosque.expanded" class="text-caption text-grey ml-6 mt-1">
             {{ distanceInfo.mosque.name }}<br>
-            <strong>Adresse:</strong> {{ distanceInfo.mosque.address }}<br>
-            <strong>Commune:</strong> {{ distanceInfo.mosque.commune }}
+            <strong>{{ isEnglish ? 'Address:' : 'Adresse:' }}</strong> {{ distanceInfo.mosque.address }}<br>
+            <strong>{{ isEnglish ? 'Municipality:' : 'Commune:' }}</strong> {{ distanceInfo.mosque.commune }}
           </div>
         </v-expand-transition>
       </div>
 
       <div v-if="!distanceInfo.migrantCenter && !distanceInfo.qpv && !distanceInfo.mosque" class="text-grey">
-        Aucune donnée disponible pour cette position
+        {{ isEnglish ? 'No data available for this position' : 'Aucune donnée disponible pour cette position' }}
       </div>
     </v-card>
 </template>
 
 <script>
-import { defineComponent } from 'vue'
+import { defineComponent, computed } from 'vue'
+import { useDataStore } from '../../services/store.js'
 
 export default defineComponent({
   name: 'DistanceInfo',
@@ -93,7 +94,12 @@ export default defineComponent({
       default: null
     }
   },
-  emits: ['toggle-qpv', 'toggle-migrant', 'toggle-mosque']
+  emits: ['toggle-qpv', 'toggle-migrant', 'toggle-mosque'],
+  setup() {
+    const dataStore = useDataStore()
+    const isEnglish = computed(() => dataStore.labelState === 3)
+    return { dataStore, isEnglish }
+  },
 })
 </script>
 
