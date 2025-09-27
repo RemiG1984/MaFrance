@@ -63,7 +63,7 @@
 
 <script>
 import { mapStores } from 'pinia'
-import { useDataStore } from '../services/store.js'
+import { useDataStore } from '../../services/store.js'
 
 export default {
   name: 'CentresMigrants',
@@ -185,7 +185,7 @@ export default {
 
       this.isLoading = true;
       try {
-        const { useDataStore } = await import('../services/store.js');
+        const { useDataStore } = await import('../../services/store.js');
         const dataStore = useDataStore();
         const params = {
           limit: 20

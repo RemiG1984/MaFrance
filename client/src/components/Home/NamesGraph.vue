@@ -30,10 +30,10 @@
 
 <script>
 import Chart from 'chart.js/auto';
-import { watermarkPlugin } from '../utils/chartWatermark.js'
-import { MetricsConfig } from '../utils/metricsConfig.js'
+import { watermarkPlugin } from '../../utils/chartWatermark.js'
+import { MetricsConfig } from '../../utils/metricsConfig.js'
 import { mapStores } from 'pinia'
-import { useDataStore } from '../services/store.js'
+import { useDataStore } from '../../services/store.js'
 let chart = null
 
 export default {

@@ -45,9 +45,9 @@
 </template>
 
 <script>
-import { useDataStore } from '../services/store.js'
-import { MetricsConfig } from '../utils/metricsConfig.js'
-import { DepartementNames } from '../utils/departementNames.js'
+import { useDataStore } from '../../services/store.js'
+import { MetricsConfig } from '../../utils/metricsConfig.js'
+import { DepartementNames } from '../../utils/departementNames.js'
 
 export default {
   name: 'ScoreTable',

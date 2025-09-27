@@ -234,7 +234,7 @@ export default {
 
       this.isLoading = true;
       try {
-        const { useDataStore } = await import('../services/store.js');
+        const { useDataStore } = await import('../../services/store.js');
         const dataStore = useDataStore();
         const params = {
           limit: 20

@@ -20,11 +20,11 @@
 
 <script>
 import { mapStores } from 'pinia'
-import { useDataStore } from '../services/store.js'
-import { DepartementNames } from '../utils/departementNames.js'
-import { MetricsConfig } from '../utils/metricsConfig.js'
+import { useDataStore } from '../../services/store.js'
+import { DepartementNames } from '../../utils/departementNames.js'
+import { MetricsConfig } from '../../utils/metricsConfig.js'
 import chroma from "chroma-js";
-import api from '../services/api.js'
+import api from '../../services/api.js'
 import { markRaw } from 'vue'
 
 export default {

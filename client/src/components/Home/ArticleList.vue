@@ -81,9 +81,9 @@
 </template>
 
 <script>
-import { articleCategoriesRef } from '../utils/metricsConfig.js';
+import { articleCategoriesRef } from '../../utils/metricsConfig.js';
 import { mapStores } from 'pinia'
-import { useDataStore } from '../services/store.js'
+import { useDataStore } from '../../services/store.js'
 
 const categories = Object.keys(articleCategoriesRef);
 
@@ -188,7 +188,7 @@ export default {
         this.$refs.articlesContainer.scrollTop = 0;
       }
       
-      const { useDataStore } = await import('../services/store.js');
+      const { useDataStore } = await import('../../services/store.js');
       const dataStore = useDataStore();
       const params = {
         limit: 20
@@ -214,7 +214,7 @@ export default {
       
       this.isLoading = true;
       try {
-        const { useDataStore } = await import('../services/store.js');
+        const { useDataStore } = await import('../../services/store.js');
         const dataStore = useDataStore();
         const params = {
           cursor: this.articles.pagination.nextCursor,

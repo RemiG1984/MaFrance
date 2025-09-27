@@ -46,7 +46,7 @@
 
 <script>
 import { mapStores } from 'pinia'
-import { useDataStore } from '../services/store.js'
+import { useDataStore } from '../../services/store.js'
 
 export default {
   name: 'Subventions',

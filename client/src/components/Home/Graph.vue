@@ -6,11 +6,11 @@
 
 <script>
 import { mapStores } from 'pinia'
-import { useDataStore } from '../services/store.js'
-import { chartLabels } from '../utils/metricsConfig.js'
+import { useDataStore } from '../../services/store.js'
+import { chartLabels } from '../../utils/metricsConfig.js'
 import Chart from 'chart.js/auto';
 import { markRaw } from 'vue'
-import { watermarkPlugin } from '../utils/chartWatermark.js'
+import { watermarkPlugin } from '../../utils/chartWatermark.js'
 
 export default {
   name: 'Graph',

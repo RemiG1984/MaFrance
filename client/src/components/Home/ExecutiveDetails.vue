@@ -41,8 +41,8 @@
 
 <script>
 import { mapStores } from 'pinia'
-import { useDataStore } from '../services/store.js'
-import { DepartementNames } from '../utils/departementNames.js'
+import { useDataStore } from '../../services/store.js'
+import { DepartementNames } from '../../utils/departementNames.js'
 
 export default {
   name: 'ExecutiveDetails',
