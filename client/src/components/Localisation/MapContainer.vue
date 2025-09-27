@@ -61,7 +61,8 @@
 <script>
 import { ref, onMounted, onUnmounted, nextTick, watch, computed } from 'vue'
 import { useDataStore } from '../../services/store.js'
-import L from 'leaflet'
+// Use global L from CDN to ensure fullscreen plugin is available
+const L = window.L
 
 // Shared constants
 const OVERSEAS_DEPARTMENTS = ['971', '972', '973', '974', '976']
@@ -313,6 +314,13 @@ export default {
         subdomains: 'abcd',
         maxZoom: 19
       }).addTo(map)
+
+      // Add fullscreen control if available
+      if (L.control && L.control.fullscreen) {
+        map.addControl(new L.control.fullscreen({
+          position: "topleft"
+        }))
+      }
 
       // Add click handler
       map.on('click', onMapClick)
