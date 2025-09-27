@@ -63,8 +63,8 @@
 
 <script>
 import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { useDataStore } from '../services/store.js'
-import { MetricsConfig } from '../utils/metricsConfig.js'
+import { useDataStore } from '../../services/store.js'
+import { MetricsConfig } from '../../utils/metricsConfig.js'
 
 export default {
   name: 'RankingResults',

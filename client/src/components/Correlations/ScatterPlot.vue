@@ -30,8 +30,8 @@
 import { ref, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { Chart, registerables } from 'chart.js'
 import chroma from 'chroma-js'
-import { MetricsConfig } from '../utils/metricsConfig.js'
-import { watermarkPlugin } from '../utils/chartWatermark.js'
+import { MetricsConfig } from '../../utils/metricsConfig.js'
+import { watermarkPlugin } from '../../utils/chartWatermark.js'
 
 // Register Chart.js components
 Chart.register(...registerables, watermarkPlugin)

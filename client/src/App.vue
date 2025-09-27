@@ -207,10 +207,10 @@
 </template>
 
 <script>
-import VersionSelector from './components/VersionSelector.vue'
-import LocationSelector from './components/LocationSelector.vue'
-import ShareButton from './components/ShareButton.vue'
-import HamburgerIcon from './components/HamburgerIcon.vue'
+import VersionSelector from './components/Menu/VersionSelector.vue'
+import LocationSelector from './components/Home/LocationSelector.vue'
+import ShareButton from './components/Menu/ShareButton.vue'
+import HamburgerIcon from './components/Menu/HamburgerIcon.vue'
 import { mapStores } from 'pinia'
 import { useDataStore } from './services/store.js'
 

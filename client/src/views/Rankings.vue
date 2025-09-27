@@ -46,9 +46,9 @@ import { useDataStore } from '../services/store.js'
 import api from '../services/api.js'
 import { MetricsConfig } from '../utils/metricsConfig.js'
 import { DepartementNames } from '../utils/departementNames.js'
-import VersionSelector from '../components/VersionSelector.vue'
-import RankingFilters from '../components/RankingFilters.vue'
-import RankingResults from '../components/RankingResults.vue'
+import VersionSelector from '../components/Menu/VersionSelector.vue'
+import RankingFilters from '../components/Rankings/RankingFilters.vue'
+import RankingResults from '../components/Rankings/RankingResults.vue'
 
 export default {
   name: 'Rankings',

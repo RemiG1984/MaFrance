@@ -40,9 +40,9 @@
 <script>
 import { ref, onMounted } from 'vue'
 import api from '../services/api.js'
-import LocationSearch from '../components/LocationSearch.vue'
-import DistanceInfo from '../components/DistanceInfo.vue'
-import MapContainer from '../components/MapContainer.vue'
+import LocationSearch from '../components/Localisation/LocationSearch.vue'
+import DistanceInfo from '../components/Localisation/DistanceInfo.vue'
+import MapContainer from '../components/Localisation/MapContainer.vue'
 
 // Shared constants
 const OVERSEAS_DEPARTMENTS = ['971', '972', '973', '974', '976']

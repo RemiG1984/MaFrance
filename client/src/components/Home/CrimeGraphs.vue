@@ -29,10 +29,10 @@
 </template>
 
 <script>
-import Graph from '../components/Graph.vue'
-import { MetricsConfig } from '../utils/metricsConfig.js'
+import Graph from './Graph.vue'
+import { MetricsConfig } from '../../utils/metricsConfig.js'
 import { mapStores } from 'pinia'
-import { useDataStore } from '../services/store.js'
+import { useDataStore } from '../../services/store.js'
 
 export default {
   name: 'CrimeGraphs',

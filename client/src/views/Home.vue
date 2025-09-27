@@ -100,17 +100,17 @@
 <script>
 import { mapStores } from 'pinia'
 import { useDataStore } from '../services/store.js'
-import LocationSelector from '../components/LocationSelector.vue'
-import MapComponent from '../components/MapComponent.vue'
-import ArticleList from '../components/ArticleList.vue'
-import NamesGraph from '../components/NamesGraph.vue'
-import QpvData from '../components/QpvData.vue'
-import CentresMigrants from '../components/CentresMigrants.vue'
-import ExecutiveDetails from '../components/ExecutiveDetails.vue'
-import ScoreTable from '../components/ScoreTable.vue'
-import CrimeGraphs from '../components/CrimeGraphs.vue'
-import Graph from '../components/Graph.vue'
-import Subventions from '../components/Subventions.vue'
+import LocationSelector from '../components/Home/LocationSelector.vue'
+import MapComponent from '../components/Home/MapComponent.vue'
+import ArticleList from '../components/Home/ArticleList.vue'
+import NamesGraph from '../components/Home/NamesGraph.vue'
+import QpvData from '../components/Home/QpvData.vue'
+import CentresMigrants from '../components/Home/CentresMigrants.vue'
+import ExecutiveDetails from '../components/Home/ExecutiveDetails.vue'
+import ScoreTable from '../components/Home/ScoreTable.vue'
+import CrimeGraphs from '../components/Home/CrimeGraphs.vue'
+import Graph from '../components/Home/Graph.vue'
+import Subventions from '../components/Home/Subventions.vue'
 
 export default {
   name: 'Home',

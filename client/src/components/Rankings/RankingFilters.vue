@@ -96,9 +96,9 @@
 
 <script>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
-import { useDataStore } from '../services/store.js'
-import { MetricsConfig } from '../utils/metricsConfig.js'
-import { DepartementNames } from '../utils/departementNames.js'
+import { useDataStore } from '../../services/store.js'
+import { MetricsConfig } from '../../utils/metricsConfig.js'
+import { DepartementNames } from '../../utils/departementNames.js'
 
 export default {
   name: 'RankingFilters',

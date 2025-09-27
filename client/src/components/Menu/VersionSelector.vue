@@ -25,8 +25,8 @@
 
 <script>
 import { mapStores } from 'pinia'
-import { useDataStore } from '../services/store.js'
-import { MetricsConfig } from '../utils/metricsConfig.js'
+import { useDataStore } from '../../services/store.js'
+import { MetricsConfig } from '../../utils/metricsConfig.js'
 
 export default {
   name: 'VersionSelector',
