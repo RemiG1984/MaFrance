@@ -4,6 +4,7 @@ import Rankings from '../views/Rankings.vue'
 import Methodology from '../views/Methodology.vue'
 import Correlations from '../views/Correlations.vue'
 import Localisation from '../views/Localisation.vue'
+import Demography from '../views/Demography.vue'
 
 const routes = [
   {
@@ -30,6 +31,11 @@ const routes = [
     path: '/localisation',
     name: 'Localisation',
     component: Localisation
+  },
+  {
+    path: '/demography',
+    name: 'Demography',
+    component: Demography
   }
 ]
 

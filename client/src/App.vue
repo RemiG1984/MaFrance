@@ -249,7 +249,8 @@ export default {
             children: [
               { title: 'Rankings', path: '/classements' },
               { title: 'Correlations', path: '/correlations' },
-              { title: 'Locations', path: '/localisation' }
+              { title: 'Locations', path: '/localisation' },
+              { title: 'Demography', path: '/demography' },
             ]
           },
           { 
@@ -271,7 +272,8 @@ export default {
             children: [
               { title: 'Classements', path: '/classements' },
               { title: 'Corrélations', path: '/correlations' },
-              { title: 'Localisation', path: '/localisation' }
+              { title: 'Localisation', path: '/localisation' },
+              { title: 'Démographie', path: '/demography' },
             ]
           },
           { 
