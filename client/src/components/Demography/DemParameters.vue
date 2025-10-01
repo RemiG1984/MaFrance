@@ -4,19 +4,19 @@
     <v-card-text>
       <v-select
         v-model="preset"
-        :items="['Tendance actuelle', 'Remigration et stabilisation démographique', 'custom']"
+        :items="presets.map(p => p.name).concat('custom')"
         label="Preset"
         density="compact"
         variant="outlined"
         color="primary"
-        class="mb-4 max-w-xs"
+        class="mb-0 max-w-xs"
       ></v-select>
       <v-expansion-panels>
         <v-expansion-panel>
           <v-expansion-panel-title>Paramètres Détaillés</v-expansion-panel-title>
           <v-expansion-panel-text>
             <v-row>
-              <p class="text-body-2 text-grey-darken-2 mb-4">
+              <p class="text-body-2 text-grey-darken-2 mb-0">
         Note : Tous les changements de politique commencent en 2028, en supposant une mise en œuvre après l'élection présidentielle de 2027. 
         Les projections pour 2025-2027 utilisent des hypothèses fixes (+300k migration nette/an, fécondité constante). 
         Les projections utilisent la méthode des composantes de cohortes, tenant compte de la fécondité, mortalité et solde migratoire par age.
@@ -139,31 +139,23 @@ import { ref, watch } from 'vue';
 
 // Props et emits
 const { initialTFR } = defineProps({
-  initialTFR: { type: Number, default: 1.87 }
+  initialTFR: { type: Number, default: 1.59 }
 });
 const emit = defineEmits(['update:fertility', 'update:migration', 'run']);
 
-// État
-const targetTFR = ref(initialTFR.value);
-const targetTFRYear = ref(2050);
-const constantMigration = ref(0); // en k/an, défaut 0 dès 2028
-const remigrationTotal = ref(0); // en M, défaut 0
-const remigrationStart = ref(2028);
-const remigrationEnd = ref(2032);
-const migration = ref([]);
-
 // Presets
-const preset = ref('Tendance actuelle');
-const presets = {
-  'Politique actuelle (Macron)': {
-    targetTFR: 1.5,
-    targetTFRYear: 2040,
+const presets = [
+  {
+    name: 'Tendance actuelle (politique Macron)',
+    targetTFR: 1,
+    targetTFRYear: 2045,
     constantMigration: 500,
     remigrationTotal: 0,
     remigrationStart: 2028,
     remigrationEnd: 2032
   },
-  'Remigration et stabilisation démographique': {
+  {
+    name: 'Remigration et stabilisation démographique',
     targetTFR: 2.03,
     targetTFRYear: 2048,
     constantMigration: 0,
@@ -171,7 +163,17 @@ const presets = {
     remigrationStart: 2028,
     remigrationEnd: 2033
   }
-};
+];
+
+// État
+const targetTFR = ref(presets[0].targetTFR);
+const targetTFRYear = ref(presets[0].targetTFRYear);
+const constantMigration = ref(presets[0].constantMigration); // en k/an, défaut 0 dès 2028
+const remigrationTotal = ref(presets[0].remigrationTotal); // en M, défaut 0
+const remigrationStart = ref(presets[0].remigrationStart);
+const remigrationEnd = ref(presets[0].remigrationEnd);
+const migration = ref([]);
+const preset = ref(presets[0].name);
 
 // Fonction pour construire le tableau de migration
 function buildMigrationArray() {
@@ -208,27 +210,33 @@ watch([targetTFR, targetTFRYear], () => emit('update:fertility', { targetTFR: ta
 
 // Preset watches
 watch(preset, (newPreset) => {
-  if (newPreset !== 'custom' && presets[newPreset]) {
-    const p = presets[newPreset];
-    targetTFR.value = p.targetTFR;
-    targetTFRYear.value = p.targetTFRYear;
-    constantMigration.value = p.constantMigration;
-    remigrationTotal.value = p.remigrationTotal;
-    remigrationStart.value = p.remigrationStart;
-    remigrationEnd.value = p.remigrationEnd;
+  if (newPreset !== 'custom') {
+    const p = presets.find(preset => preset.name === newPreset);
+    if (p) {
+      targetTFR.value = p.targetTFR;
+      targetTFRYear.value = p.targetTFRYear;
+      constantMigration.value = p.constantMigration;
+      remigrationTotal.value = p.remigrationTotal;
+      remigrationStart.value = p.remigrationStart;
+      remigrationEnd.value = p.remigrationEnd;
+      // Manually emit to ensure parameters are sent
+      emit('update:fertility', { targetTFR: targetTFR.value, targetTFRYear: targetTFRYear.value });
+      buildMigrationArray();
+      emit('update:migration', migration.value);
+    }
   }
-});
+}, { immediate: true });
 
 watch([targetTFR, targetTFRYear, constantMigration, remigrationTotal, remigrationStart, remigrationEnd], () => {
   let matched = false;
-  for (const [name, p] of Object.entries(presets)) {
+  for (const p of presets) {
     if (targetTFR.value === p.targetTFR &&
         targetTFRYear.value === p.targetTFRYear &&
         constantMigration.value === p.constantMigration &&
         remigrationTotal.value === p.remigrationTotal &&
         remigrationStart.value === p.remigrationStart &&
         remigrationEnd.value === p.remigrationEnd) {
-      preset.value = name;
+      preset.value = p.name;
       matched = true;
       break;
     }

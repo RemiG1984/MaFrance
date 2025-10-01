@@ -1,6 +1,6 @@
 <template>
   <div class="bg-white p-4 rounded-lg shadow">
-    <v-row align="center" class="mb-4">
+    <v-row class="mb-0">
       <v-col cols="auto">
         <h2 class="text-xl font-semibold">Population en France</h2>
       </v-col>
@@ -25,7 +25,7 @@
 </template>
 
 <script setup>
-import { ref, watch, computed, onMounted, onBeforeUnmount, markRaw } from 'vue';
+import { ref, watch, computed, onMounted, onBeforeUnmount } from 'vue';
 import Chart from 'chart.js/auto';
 
 // Props
@@ -155,11 +155,11 @@ watch(() => [props.historical, props.projected, props.yearRange], () => {
       ]
     };
 
-    chartInstance = markRaw(new Chart(chartCanvas.value.getContext('2d'), {
+    chartInstance = new Chart(chartCanvas.value.getContext('2d'), {
       type: 'line',
       data: data,
       options: chartOptions.value
-    }));
+    });
   }
 }, { immediate: true });
 

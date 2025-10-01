@@ -55,7 +55,7 @@ const historicalData = ref([]);
 const fertilityParams = ref({});
 const migrationEvol = ref([]); // Sera mis à jour par DemParameters
 const selectedScale = ref("1-2024");
-const initialTFR = ref(1.87);
+const initialTFR = ref(1.59);
 
 // Computed year range based on selected scale
 const yearRange = computed(() => {
@@ -160,7 +160,6 @@ async function loadCSVs() {
   // Calcul du TFR initial après chargement des données de fécondité
   if (fertility.value) {
     initialTFR.value = fertility.value.reduce((sum, row) => sum + parseFloat(row.rate) / 100, 0);
-    fertilityParams.value.targetTFR = initialTFR.value; // Par défaut, cible = actuel
   }
 
   // Set initial pyramid for 2024

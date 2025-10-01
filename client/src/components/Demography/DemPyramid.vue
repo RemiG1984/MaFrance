@@ -24,7 +24,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onBeforeUnmount, markRaw } from 'vue';
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 import Chart from 'chart.js/auto';
 
 // Register Chart.js components
@@ -144,11 +144,11 @@ watch(() => props.pyramid, (newPyramid) => {
     ]
   };
 
-  chartInstance = markRaw(new Chart(chartCanvas.value.getContext('2d'), {
+  chartInstance = new Chart(chartCanvas.value.getContext('2d'), {
     type: 'bar',
     data: data,
     options: pyramidOptions.value
-  }));
+  });
 }, { immediate: true, deep: true });
 
 
