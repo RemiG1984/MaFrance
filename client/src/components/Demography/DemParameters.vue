@@ -2,9 +2,6 @@
   <v-card class="pa-4 mb-4">
     <v-card-title>Paramètres de Projection</v-card-title>
     <v-card-text>
-      <p class="text-body-2 text-grey-darken-2 mb-4">
-        Note : Tous les changements de politique commencent en 2028, en supposant une mise en œuvre après l'élection présidentielle de 2027. Les projections pour 2025-2027 utilisent des hypothèses fixes (+300k migration nette/an, fécondité constante). Les projections n'ont qu'une valeur ludique et dépendent évidemment des paramètres subjectifs considérés.
-      </p>
       <v-select
         v-model="preset"
         :items="['Tendance actuelle', 'Remigration et stabilisation démographique', 'custom']"
@@ -14,103 +11,116 @@
         color="primary"
         class="mb-4 max-w-xs"
       ></v-select>
-      <v-row>
-        <!-- Paramètres de Fécondité -->
-        <v-col cols="12" md="6">
-          <v-card variant="outlined" class="pa-4">
-            <v-card-title class="text-h6">Paramètres de Fécondité</v-card-title>
-            <v-card-text>
-              <p class="text-body-2 text-grey-darken-2">TFR actuel (2024): {{ initialTFR.toFixed(2) }} enfants par femme</p>
-              <v-row>
-                <v-col cols="6">
-                  <v-text-field
-                    v-model.number="targetTFR"
-                    label="TFR Cible"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    max="5"
-                    placeholder="ex. : 2.1"
-                    density="compact"
-                    class="max-w-xs"
-                  />
-                </v-col>
-                <v-col cols="6">
-                  <v-text-field
-                    v-model.number="targetTFRYear"
-                    label="Année d'Atteinte de la Cible (≥2028)"
-                    type="number"
-                    min="2028"
-                    max="2100"
-                    placeholder="ex. : 2048"
-                    density="compact"
-                    class="max-w-xs"
-                  />
-                </v-col>
-              </v-row>
-              <p class="text-caption text-grey-darken-1 mt-2">
-                Interpolation linéaire de 2028 à l'année cible. Si l'année cible est 2028, changement immédiat en 2028.
+      <v-expansion-panels>
+        <v-expansion-panel>
+          <v-expansion-panel-title>Paramètres Détaillés</v-expansion-panel-title>
+          <v-expansion-panel-text>
+            <v-row>
+              <p class="text-body-2 text-grey-darken-2 mb-4">
+        Note : Tous les changements de politique commencent en 2028, en supposant une mise en œuvre après l'élection présidentielle de 2027. 
+        Les projections pour 2025-2027 utilisent des hypothèses fixes (+300k migration nette/an, fécondité constante). 
+        Les projections utilisent la méthode des composantes de cohortes, tenant compte de la fécondité, mortalité et solde migratoire par age.
+        Les projections n'ont qu'une valeur ludique et dépendent évidemment des paramètres subjectifs considérés.
               </p>
-            </v-card-text>
-          </v-card>
-        </v-col>
+              <!-- Paramètres de Fécondité -->
+              <v-col cols="12" md="6">
+                <v-card variant="outlined" class="pa-4">
+                  <v-card-title class="text-h6">Paramètres de Fécondité</v-card-title>
+                  <v-card-text>
+                    <p class="text-body-2 text-grey-darken-2">TFR actuel (2024): {{ initialTFR.toFixed(2) }} enfants par femme</p>
+                    <v-row>
+                      <v-col cols="6">
+                        <v-text-field
+                          v-model.number="targetTFR"
+                          label="TFR Cible"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          max="5"
+                          placeholder="ex. : 2.1"
+                          density="compact"
+                          class="max-w-xs"
+                        />
+                      </v-col>
+                      <v-col cols="6">
+                        <v-text-field
+                          v-model.number="targetTFRYear"
+                          label="Année d'Atteinte de la Cible (≥2028)"
+                          type="number"
+                          min="2028"
+                          max="2100"
+                          placeholder="ex. : 2048"
+                          density="compact"
+                          class="max-w-xs"
+                        />
+                      </v-col>
+                    </v-row>
+                    <p class="text-caption text-grey-darken-1 mt-2">
+                      Interpolation linéaire de 2028 à l'année cible. Si l'année cible est 2028, changement immédiat en 2028.
+                    </p>
+                  </v-card-text>
+                </v-card>
+              </v-col>
 
-        <!-- Paramètres de Migration -->
-        <v-col cols="12" md="6">
-          <v-card variant="outlined" class="pa-4">
-            <v-card-title class="text-h6">Paramètres d'immigration et remigration</v-card-title>
-            <v-card-text>
-              <v-text-field
-                v-model.number="constantMigration"
-                label="Immigration annuelle nette après 2028 (k/an)"
-                type="number"
-                step="100"
-                placeholder="ex. : -300 pour -300k/an dès 2028"
-                density="compact"
-                class="max-w-xs"
-              />
-              <v-row>
-                <v-col cols="4">
-                  <v-text-field
-                    v-model.number="remigrationTotal"
-                    label="Total Remigration (Millions)"
-                    type="number"
-                    step="0.1"
-                    placeholder="ex. : -4 pour -4M total"
-                    density="compact"
-                    class="max-w-xs"
-                  />
-                </v-col>
-                <v-col cols="4">
-                  <v-text-field
-                    v-model.number="remigrationStart"
-                    label="Année de Début (≥2028)"
-                    type="number"
-                    min="2028"
-                    max="2100"
-                    density="compact"
-                    class="max-w-xs"
-                  />
-                </v-col>
-                <v-col cols="4">
-                  <v-text-field
-                    v-model.number="remigrationEnd"
-                    label="Année de Fin"
-                    type="number"
-                    :min="remigrationStart"
-                    max="2100"
-                    density="compact"
-                    class="max-w-xs"
-                  />
-                </v-col>
-              </v-row>
-              <p class="text-caption text-grey-darken-1 mt-2">
-                Remigration répartie uniformément sur les années spécifiées, ajoutée à l'immigration annuelle.
-              </p>
-            </v-card-text>
-          </v-card>
-        </v-col>
-      </v-row>
+              <!-- Paramètres de Migration -->
+              <v-col cols="12" md="6">
+                <v-card variant="outlined" class="pa-4">
+                  <v-card-title class="text-h6">Paramètres d'immigration et remigration</v-card-title>
+                  <v-card-text>
+                    <v-text-field
+                      v-model.number="constantMigration"
+                      label="Immigration annuelle nette après 2028 (k/an)"
+                      type="number"
+                      step="100"
+                      placeholder="ex. : -300 pour -300k/an dès 2028"
+                      density="compact"
+                      class="max-w-xs"
+                    />
+                    <v-row>
+                      <v-col cols="4">
+                        <v-text-field
+                          v-model.number="remigrationTotal"
+                          label="Total Remigration (Millions)"
+                          type="number"
+                          step="0.1"
+                          placeholder="ex. : -4 pour -4M total"
+                          density="compact"
+                          class="max-w-xs"
+                        />
+                      </v-col>
+                      <v-col cols="4">
+                        <v-text-field
+                          v-model.number="remigrationStart"
+                          label="Année de Début (≥2028)"
+                          type="number"
+                          min="2028"
+                          max="2100"
+                          density="compact"
+                          class="max-w-xs"
+                        />
+                      </v-col>
+                      <v-col cols="4">
+                        <v-text-field
+                          v-model.number="remigrationEnd"
+                          label="Année de Fin"
+                          type="number"
+                          :min="remigrationStart"
+                          max="2100"
+                          density="compact"
+                          class="max-w-xs"
+                        />
+                      </v-col>
+                    </v-row>
+                    <p class="text-caption text-grey-darken-1 mt-2">
+                      Remigration répartie uniformément sur les années spécifiées, ajoutée à l'immigration annuelle.
+                    </p>
+                  </v-card-text>
+                </v-card>
+              </v-col>
+            </v-row>
+          </v-expansion-panel-text>
+        </v-expansion-panel>
+      </v-expansion-panels>
       <v-btn
         @click="$emit('run')"
         color="primary"

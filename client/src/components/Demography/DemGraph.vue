@@ -2,7 +2,7 @@
   <div class="bg-white p-4 rounded-lg shadow">
     <v-row align="center" class="mb-4">
       <v-col cols="auto">
-        <h2 class="text-xl font-semibold">Population Française</h2>
+        <h2 class="text-xl font-semibold">Population en France</h2>
       </v-col>
       <v-col cols="auto">
         <v-select
