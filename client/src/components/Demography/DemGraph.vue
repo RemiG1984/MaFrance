@@ -17,35 +17,20 @@
         ></v-select>
       </v-col>
     </v-row>
-    <div v-if="!chartData" class="text-center p-4">
+    <div v-if="!props.historical || !props.projected || !props.yearRange" class="text-center p-4">
       Loading data...
     </div>
-    <LineChart
-      v-if="chartData"
-      :key="JSON.stringify(chartData)"
-      :data="chartData"
-      :options="chartOptions"
-      class="h-96"
-    />
+    <canvas ref="chartCanvas" class="h-96"></canvas>
   </div>
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue';
-import { Line as LineChart } from 'vue-chartjs';
-import {
-  Chart as ChartJS,
-  Title,
-  Tooltip,
-  Legend,
-  LineElement,
-  PointElement,
-  LinearScale
-} from 'chart.js';
+import { ref, watch, computed, onMounted, onBeforeUnmount, markRaw } from 'vue';
+import Chart from 'chart.js/auto';
 import zoomPlugin from 'chartjs-plugin-zoom';
 
 // Register Chart.js components
-ChartJS.register(Title, Tooltip, Legend, LineElement, PointElement, LinearScale, zoomPlugin);
+Chart.register(zoomPlugin);
 
 // Props
 const props = defineProps({
@@ -70,9 +55,24 @@ const scaleOptions = [
 // Internal state for the select
 const internalSelectedScale = ref(props.selectedScale);
 
+// Chart canvas ref and instance
+const chartCanvas = ref(null);
+let chartInstance = null;
+
 // Watch for prop changes
 watch(() => props.selectedScale, (newVal) => {
   internalSelectedScale.value = newVal;
+});
+
+// Lifecycle hooks
+onMounted(() => {
+  // Chart registration is done above
+});
+
+onBeforeUnmount(() => {
+  if (chartInstance) {
+    chartInstance.destroy();
+  }
 });
 
 // Function to interpolate historical data
@@ -126,44 +126,45 @@ function interpolateHistoricalData(data, startYear, endYear) {
   return interpolated;
 }
 
-// Chart data
-const chartData = ref(null);
 
 watch(() => [props.historical, props.projected, props.yearRange], () => {
-  if (!props.historical || !props.projected || !props.yearRange || props.historical.length === 0) {
-    chartData.value = null;
-    return;
+  if (chartInstance) chartInstance.destroy();
+  if (props.historical && props.projected && props.yearRange && props.historical.length > 0) {
+    const historicalData = interpolateHistoricalData(props.historical, props.yearRange[0], props.yearRange[1]);
+    const projectedData = (props.projected || [])
+      .filter(d => d.year >= props.yearRange[0] && d.year <= props.yearRange[1])
+      .map(d => ({ x: d.year, y: d.totalPop / 1e6 }));
+
+    const data = {
+      datasets: [
+        {
+          label: 'Population historique (M)',
+          data: historicalData,
+          borderColor: '#3b82f6',
+          backgroundColor: '#3b82f6',
+          fill: false,
+          pointRadius: 1,
+          borderWidth: 3
+        },
+        {
+          label: 'Population projetée (M)',
+          data: projectedData,
+          borderColor: '#ef4444',
+          backgroundColor: '#ef4444',
+          fill: false,
+          pointRadius: 1,
+          borderWidth: 3,
+          borderDash: [5, 5]
+        }
+      ]
+    };
+
+    chartInstance = markRaw(new Chart(chartCanvas.value.getContext('2d'), {
+      type: 'line',
+      data: data,
+      options: chartOptions.value
+    }));
   }
-
-  const historicalData = interpolateHistoricalData(props.historical, props.yearRange[0], props.yearRange[1]);
-  const projectedData = (props.projected || [])
-    .filter(d => d.year >= props.yearRange[0] && d.year <= props.yearRange[1])
-    .map(d => ({ x: d.year, y: d.totalPop / 1e6 }));
-
-  chartData.value = {
-    labels: [], // Not needed for time series, but required by vue-chartjs
-    datasets: [
-      {
-        label: 'Population historique (M)',
-        data: historicalData,
-        borderColor: '#3b82f6',
-        backgroundColor: '#3b82f6',
-        fill: false,
-        pointRadius: 1,
-        borderWidth: 3
-      },
-      {
-        label: 'Population projetée (M)',
-        data: projectedData,
-        borderColor: '#ef4444',
-        backgroundColor: '#ef4444',
-        fill: false,
-        pointRadius: 1,
-        borderWidth: 3,
-        borderDash: [5, 5]
-      }
-    ]
-  };
 }, { immediate: true });
 
 // Chart options

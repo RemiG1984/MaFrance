@@ -14,35 +14,21 @@
       />
       <p class="text-center text-sm mt-1">Année : {{ selectedYearComputed }}</p>
     </div>
-    <div v-if="!pyramidData" class="text-center p-4">
+    <div v-if="!props.pyramid" class="text-center p-4">
       Chargement des données...
     </div>
     <div class="w-full max-w-4xl mx-auto"> <!-- Réduction largeur X via CSS -->
-      <BarChart
-        v-if="pyramidData"
-        :key="JSON.stringify(pyramidData)"
-        :data="pyramidData"
-        :options="pyramidOptions"
-        class="h-96"
-      />
+      <canvas ref="chartCanvas" class="h-96"></canvas>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
-import { Bar as BarChart } from 'vue-chartjs';
-import {
-  Chart as ChartJS,
-  Title,
-  Tooltip,
-  Legend,
-  BarElement,
-  LinearScale
-} from 'chart.js';
+import { ref, computed, watch, onMounted, onBeforeUnmount, markRaw } from 'vue';
+import Chart from 'chart.js/auto';
 
-// Enregistrement des composants Chart.js
-ChartJS.register(Title, Tooltip, Legend, BarElement, LinearScale);
+// Register Chart.js components
+Chart.register();
 
 // Props du composant
 const props = defineProps({
@@ -74,8 +60,21 @@ watch(() => props.selectedYear, (newVal) => {
 // Émettre les changements du slider
 const emit = defineEmits(['update:selectedYear']);
 
-// Données du graphique
-const pyramidData = ref(null);
+
+// Chart canvas ref and instance
+const chartCanvas = ref(null);
+let chartInstance = null;
+
+// Lifecycle hooks
+onMounted(() => {
+  // Chart registration is done above
+});
+
+onBeforeUnmount(() => {
+  if (chartInstance) {
+    chartInstance.destroy();
+  }
+});
 
 // Labels pour les tranches d'âge agrégées (21 groupes : jeune à vieux, pour compacité et orientation bas-haut)
 const ageGroups = [
@@ -86,8 +85,8 @@ const ageGroups = [
 
 // Surveillance des changements de pyramide pour mise à jour du graphique
 watch(() => props.pyramid, (newPyramid) => {
+  if (chartInstance) chartInstance.destroy();
   if (!newPyramid || !newPyramid.popF || !newPyramid.popM) {
-    pyramidData.value = null;
     return;
   }
 
@@ -117,7 +116,7 @@ watch(() => props.pyramid, (newPyramid) => {
   const femaleData = femaleAggregated.map(p => -p / 1e3); // Négatif pour gauche (femmes)
   const maleData = maleAggregated.map(p => p / 1e3); // Positif pour droite (hommes)
 
-  pyramidData.value = {
+  const data = {
     labels: [...ageGroups].reverse(), // Ordre vieux à jeune : 100+ en haut avec reversed: true
     datasets: [
       {
@@ -144,6 +143,12 @@ watch(() => props.pyramid, (newPyramid) => {
       }
     ]
   };
+
+  chartInstance = markRaw(new Chart(chartCanvas.value.getContext('2d'), {
+    type: 'bar',
+    data: data,
+    options: pyramidOptions.value
+  }));
 }, { immediate: true, deep: true });
 
 
