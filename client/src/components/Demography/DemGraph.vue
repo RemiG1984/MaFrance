@@ -16,6 +16,17 @@
           class="max-w-xs"
         ></v-select>
       </v-col>
+      <v-col cols="auto">
+        <v-btn
+          @click="showTFR = !showTFR"
+          :color="showTFR ? 'primary' : 'grey'"
+          size="small"
+          variant="outlined"
+        >
+          <v-icon>{{ showTFR ? 'mdi-eye' : 'mdi-eye-off' }}</v-icon>
+          TFR - Taux de Fécondité Total
+        </v-btn>
+      </v-col>
     </v-row>
     <div v-if="!props.historical || !props.projected || !props.yearRange" class="text-center p-4">
       Loading data...
@@ -27,13 +38,16 @@
 <script setup>
 import { ref, watch, computed, onMounted, onBeforeUnmount } from 'vue';
 import Chart from 'chart.js/auto';
+import Papa from 'papaparse';
 
 // Props
 const props = defineProps({
   historical: Array, // { year, pop }
   projected: Array, // { year, totalPop, births, deaths, netMig }
   yearRange: Array, // [startYear, endYear]
-  selectedScale: String
+  selectedScale: String,
+  targetTFR: Number,
+  targetTFRYear: Number
 });
 
 // Emits
@@ -55,6 +69,13 @@ const internalSelectedScale = ref(props.selectedScale);
 const chartCanvas = ref(null);
 let chartInstance = null;
 
+// TFR data
+const tfrData = ref([]);
+const tfrLoaded = ref(false);
+
+// Toggle for TFR display
+const showTFR = ref(false);
+
 // Watch for prop changes
 watch(() => props.selectedScale, (newVal) => {
   internalSelectedScale.value = newVal;
@@ -62,7 +83,16 @@ watch(() => props.selectedScale, (newVal) => {
 
 // Lifecycle hooks
 onMounted(() => {
-  // Chart registration is done above
+  // Load TFR data
+  fetch('/data/TFR.csv')
+    .then(res => res.text())
+    .then(csv => Papa.parse(csv, { header: true, dynamicTyping: true }))
+    .then(results => {
+      tfrData.value = results.data.filter(d => d.year && d.TFR);
+      tfrLoaded.value = true;
+      updateChart();
+    })
+    .catch(err => console.error('Error loading TFR data:', err));
 });
 
 onBeforeUnmount(() => {
@@ -122,8 +152,8 @@ function interpolateHistoricalData(data, startYear, endYear) {
   return interpolated;
 }
 
-
-watch(() => [props.historical, props.projected, props.yearRange], () => {
+// Function to update the chart
+function updateChart() {
   if (chartInstance) chartInstance.destroy();
   if (props.historical && props.projected && props.yearRange && props.historical.length > 0) {
     const historicalData = interpolateHistoricalData(props.historical, props.yearRange[0], props.yearRange[1]);
@@ -131,29 +161,84 @@ watch(() => [props.historical, props.projected, props.yearRange], () => {
       .filter(d => d.year >= props.yearRange[0] && d.year <= props.yearRange[1])
       .map(d => ({ x: d.year, y: d.totalPop / 1e6 }));
 
-    const data = {
-      datasets: [
+    const tfrFiltered = tfrData.value
+      .filter(d => d.year >= props.yearRange[0] && d.year <= props.yearRange[1] && d.year <= 2024)
+      .map(d => ({ x: d.year, y: d.TFR }));
+
+    const projectedTfr = (props.projected || [])
+      .filter(d => d.year >= props.yearRange[0] && d.year <= props.yearRange[1] && d.year > 2024)
+      .map(d => {
+        let tfr;
+        if (d.year === 2025) tfr = 1.56;
+        else if (d.year === 2026) tfr = 1.53;
+        else if (d.year === 2027) tfr = 1.5;
+        else {
+          // Interpolate from 1.5 in 2027 to targetTFR at targetTFRYear, then stable
+          if (d.year <= props.targetTFRYear) {
+            const yearsFrom2027 = d.year - 2027;
+            const totalYears = props.targetTFRYear - 2027;
+            const decline = (1.5 - props.targetTFR) * Math.min(yearsFrom2027 / totalYears, 1);
+            tfr = 1.5 - decline;
+          } else {
+            tfr = props.targetTFR;
+          }
+        }
+        return { x: d.year, y: tfr };
+      });
+
+    console.log('TFR data loaded:', tfrData.value.length, 'entries');
+    console.log('Projected TFR data:', projectedTfr.length, 'entries');
+    console.log('Sample projected TFR:', projectedTfr.slice(0, 5));
+
+    const datasets = [
+      {
+        label: 'Population historique (M)',
+        data: historicalData,
+        borderColor: '#3b82f6',
+        backgroundColor: '#3b82f6',
+        fill: false,
+        pointRadius: 1,
+        borderWidth: 3
+      },
+      {
+        label: 'Population projetée (M)',
+        data: projectedData,
+        borderColor: '#ef4444',
+        backgroundColor: '#ef4444',
+        fill: false,
+        pointRadius: 1,
+        borderWidth: 3,
+        borderDash: [5, 5]
+      }
+    ];
+
+    if (showTFR.value) {
+      datasets.push(
         {
-          label: 'Population historique (M)',
-          data: historicalData,
-          borderColor: '#3b82f6',
-          backgroundColor: '#3b82f6',
-          fill: false,
-          pointRadius: 1,
-          borderWidth: 3
-        },
-        {
-          label: 'Population projetée (M)',
-          data: projectedData,
-          borderColor: '#ef4444',
-          backgroundColor: '#ef4444',
+          label: 'TFR historique',
+          data: tfrFiltered,
+          borderColor: 'green',
+          backgroundColor: 'green',
           fill: false,
           pointRadius: 1,
           borderWidth: 3,
-          borderDash: [5, 5]
+          yAxisID: 'y1'
+        },
+        {
+          label: 'TFR projeté',
+          data: projectedTfr,
+          borderColor: 'orange',
+          backgroundColor: 'orange',
+          fill: false,
+          pointRadius: 1,
+          borderWidth: 3,
+          borderDash: [5, 5],
+          yAxisID: 'y1'
         }
-      ]
-    };
+      );
+    }
+
+    const data = { datasets };
 
     chartInstance = new Chart(chartCanvas.value.getContext('2d'), {
       type: 'line',
@@ -161,7 +246,10 @@ watch(() => [props.historical, props.projected, props.yearRange], () => {
       options: chartOptions.value
     });
   }
-}, { immediate: true });
+}
+
+watch(() => [props.historical, props.projected, props.yearRange], updateChart, { immediate: true });
+watch(showTFR, updateChart);
 
 // Chart options
 const chartOptions = computed(() => {
@@ -187,7 +275,16 @@ const chartOptions = computed(() => {
       y: {
         title: { display: true, text: 'Population (Millions)' },
         beginAtZero: false
-      }
+      },
+      ...(showTFR.value ? {
+        y1: {
+          type: 'linear',
+          position: 'right',
+          title: { display: true, text: 'TFR - Taux de Fécondité Total' },
+          beginAtZero: false,
+          grid: { drawOnChartArea: false }
+        }
+      } : {})
     },
     plugins: {
       tooltip: {

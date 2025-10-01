@@ -9,7 +9,7 @@
       @run="runProjection"
     />
     <!-- Graphique des tendances de population (en premier) -->
-    <DemGraph :historical="historicalData" :projected="projectedData" :yearRange="yearRange" :selectedScale="selectedScale" @update:selectedScale="selectedScale = $event" />
+    <DemGraph :historical="historicalData" :projected="projectedData" :yearRange="yearRange" :selectedScale="selectedScale" :targetTFR="fertilityParams.targetTFR" :targetTFRYear="fertilityParams.targetTFRYear" @update:selectedScale="selectedScale = $event" />
     <!-- Grille avec pyramide dans la première colonne et score/année dans la seconde -->
     <v-row>
       <v-col cols="6">
@@ -222,7 +222,7 @@ function projectPopulation(startYear = 2024, endYear = 2100) {
     if (year >= changeStart) {
       let scale = 1;
       const targetScale = fertilityParams.value.targetTFR / initialTFR;
-      const yearsToTarget = fertilityParams.value.targetTFRYear - 2050;
+      const yearsToTarget = fertilityParams.value.targetTFRYear - changeStart;
 
       if (yearsToTarget > 0) {
         const currentOffset = year - changeStart;
@@ -266,9 +266,12 @@ function projectPopulation(startYear = 2024, endYear = 2100) {
     // Stocker la pyramide pour cette année
     allPyrs[year + 1] = { popF: [...popF], popM: [...popM] };
 
+    // Calculer le TFR
+    const tfr = asfr.reduce((a, b) => a + b, 0);
+
     // Stocker les résultats
     const totalPop = popF.reduce((a, b) => a + b, 0) + popM.reduce((a, b) => a + b, 0);
-    results.push({ year: year + 1, totalPop, births: birthsTotal, deaths: deathsTotal, netMig });
+    results.push({ year: year + 1, totalPop, births: birthsTotal, deaths: deathsTotal, netMig, tfr });
   }
 
   allPyramids.value = allPyrs;

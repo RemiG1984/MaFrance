@@ -156,7 +156,7 @@ const presets = [
   },
   {
     name: 'Remigration et stabilisation démographique',
-    targetTFR: 2.03,
+    targetTFR: 2.1,
     targetTFRYear: 2048,
     constantMigration: 0,
     remigrationTotal: -6,
