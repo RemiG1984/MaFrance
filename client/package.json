@@ -12,7 +12,6 @@
     "@mdi/font": "^7.4.47",
     "chart.js": "^4.5.0",
     "chartjs-adapter-date-fns": "^3.0.0",
-    "chartjs-plugin-zoom": "^2.2.0",
     "chroma-js": "^3.1.2",
     "leaflet": "^1.9.4",
     "papaparse": "^5.5.3",

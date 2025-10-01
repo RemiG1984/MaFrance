@@ -27,10 +27,6 @@
 <script setup>
 import { ref, watch, computed, onMounted, onBeforeUnmount, markRaw } from 'vue';
 import Chart from 'chart.js/auto';
-import zoomPlugin from 'chartjs-plugin-zoom';
-
-// Register Chart.js components
-Chart.register(zoomPlugin);
 
 // Props
 const props = defineProps({
@@ -194,14 +190,6 @@ const chartOptions = computed(() => {
       }
     },
     plugins: {
-      zoom: {
-        zoom: {
-          wheel: { enabled: false },
-          pinch: { enabled: false },
-          mode: 'x'
-        },
-        pan: { enabled: false }
-      },
       tooltip: {
         callbacks: {
           label: (context) => `${context.parsed.y.toFixed(2)}M`
