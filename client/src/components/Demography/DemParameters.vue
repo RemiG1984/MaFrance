@@ -155,7 +155,7 @@ const migration = ref([]);
 // Presets
 const preset = ref('Tendance actuelle');
 const presets = {
-  'Tendance actuelle': {
+  'Politique actuelle (Macron)': {
     targetTFR: 1.5,
     targetTFRYear: 2040,
     constantMigration: 500,
