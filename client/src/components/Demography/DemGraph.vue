@@ -31,7 +31,7 @@
     <div v-if="!props.historical || !props.projected || !props.yearRange" class="text-center p-4">
       Loading data...
     </div>
-    <canvas ref="chartCanvas" class="h-96"></canvas>
+    <canvas ref="chartCanvas" class="h-96 min-h-96"></canvas>
   </div>
 </template>
 

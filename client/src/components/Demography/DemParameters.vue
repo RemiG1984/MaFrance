@@ -15,7 +15,7 @@
         <v-expansion-panel>
           <v-expansion-panel-title>Paramètres Détaillés</v-expansion-panel-title>
           <v-expansion-panel-text>
-            <v-row>
+            <v-row class="flex-wrap">
               <p class="text-body-2 text-grey-darken-2 mb-0">
         Note : Tous les changements de politique commencent en 2028, en supposant une mise en œuvre après l'élection présidentielle de 2027. 
         Les projections pour 2025-2027 utilisent des hypothèses fixes (+300k migration nette/an, fécondité constante). 
@@ -76,7 +76,7 @@
                       density="compact"
                       class="max-w-xs"
                     />
-                    <v-row>
+                    <v-row class="flex-wrap">
                       <v-col cols="4">
                         <v-text-field
                           v-model.number="remigrationTotal"

@@ -59,6 +59,10 @@ self.addEventListener('fetch', (event) => {
   else if (url.hostname.includes('basemaps.cartocdn.com')) {
     event.respondWith(handleTileRequest(request));
   }
+  // Handle CSV data requests with caching
+  else if (url.pathname.startsWith('/data/')) {
+    event.respondWith(handleCsvRequest(request));
+  }
   // Let all other requests (HTML, CSS, JS) go directly to network
 });
 
@@ -109,22 +113,44 @@ async function handleTileRequest(request) {
   try {
     const cache = await caches.open(TILE_CACHE_NAME);
     const cachedResponse = await cache.match(request);
-    
+
     if (cachedResponse) {
       return cachedResponse;
     }
-    
+
     const response = await fetch(request);
     if (response.ok) {
       // Cache the tile
       await cache.put(request, response.clone());
-      
+
       // Manage cache size - keep only recent tiles (limit to ~100MB worth of tiles)
       await manageTileCache(cache);
     }
     return response;
   } catch (error) {
     console.log('Tile request failed:', request.url);
+    throw error;
+  }
+}
+
+// Handle CSV data requests - cache first with network fallback
+async function handleCsvRequest(request) {
+  try {
+    const cache = await caches.open(API_CACHE_NAME);
+    const cachedResponse = await cache.match(request);
+
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+
+    const response = await fetch(request);
+    if (response.ok) {
+      cache.put(request, response.clone());
+    }
+    return response;
+  } catch (error) {
+    console.log('CSV request failed:', request.url);
+    // Return a placeholder or let it fail gracefully
     throw error;
   }
 }

@@ -12,7 +12,7 @@
     <DemGraph :historical="historicalData" :projected="projectedData" :yearRange="yearRange" :selectedScale="selectedScale" :targetTFR="fertilityParams.targetTFR" :targetTFRYear="fertilityParams.targetTFRYear" @update:selectedScale="selectedScale = $event" />
     <!-- Grille avec pyramide dans la première colonne et score/année dans la seconde -->
     <v-row>
-      <v-col cols="6">
+      <v-col cols="12" md="6">
         <DemPyramid
           :pyramid="currentPyramid"
           v-model:selectedYear="selectedYear"
@@ -21,7 +21,7 @@
           :maxYear="yearRange[1]"
         />
       </v-col>
-      <v-col cols="6">
+      <v-col cols="12" md="6">
         <!-- Année de stabilisation démographique -->
         <div class="bg-green-50 p-4 rounded-lg mb-4">
           <h3 class="text-lg font-medium mb-2">Année de Stabilisation Démographique</h3>

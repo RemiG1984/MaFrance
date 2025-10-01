@@ -1,6 +1,6 @@
 <template>
   <div class="bg-white p-4 rounded-lg shadow">
-    <h2 class="text-xl font-semibold mb-2">Pyramide des Âges - {{ selectedYearComputed }}</h2>
+    <h2 class="text-xl font-semibold mb-2">Pyramide des Âges en {{ selectedYearComputed }}</h2>
     <!-- Slider overlay au-dessus du graphique -->
     <div v-if="showSlider" class="bg-gray-100 p-3 rounded mb-3">
       <label class="block mb-2 text-sm font-medium">Sélectionnez l'année :</label>
@@ -17,7 +17,7 @@
     <div v-if="!props.pyramid" class="text-center p-4">
       Chargement des données...
     </div>
-    <div class="w-full max-w-4xl mx-auto"> <!-- Réduction largeur X via CSS -->
+    <div class="w-full max-w-full md:max-w-4xl mx-auto"> <!-- Réduction largeur X via CSS -->
       <canvas ref="chartCanvas" class="h-96"></canvas>
     </div>
   </div>
