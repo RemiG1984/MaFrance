@@ -2,7 +2,7 @@
   <div class="politique-container">
     <v-card class="mb-4">
       <v-card-title class="text-h6 pb-0" style="white-space: normal; word-break: break-word;">
-        {{ store.labelState === 3 ? 'Average commune values depending on mayor\'s political affiliation' : 'Calcul des valeurs moyennes par commune suivant l\'affiliation politique du maire.' }}
+        {{ store.labelState === 3 ? 'Average commune values depending on mayor\'s political family' : 'Calcul des valeurs moyennes par commune suivant la famille politique du maire.' }}
       </v-card-title>
 
       <v-card-text>
