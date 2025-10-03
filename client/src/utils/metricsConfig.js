@@ -381,7 +381,7 @@ const MetricsConfig = {
         // Défrancisation category
         {
             value: "defrancisation_score",
-            label: "Indice d'évolution culturelle",
+            label: "Indice de changement culturel",
             alt1Label: "Indice de dépoussiérage culturel",
             alt2Label: "Indice de défrancisation (petit remplacement)",
             englishLabel: "Cultural Evolution Index",

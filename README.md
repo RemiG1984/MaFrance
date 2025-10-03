@@ -20,7 +20,9 @@ L'application est composée de deux parties principales :
 - **Accueil** (`/`) : Carte interactive, sélecteurs de localisation, et toutes les données
 - **Classements** (`/classements`) : Tableaux de classements des départements et communes
 - **Corrélations** (`/correlations`) : Analyse des corrélations statistiques entre métriques avec heatmap et nuages de points
+- **Démographie** (`/demography`) : Analyse démographique avec graphiques d'évolution, pyramide des âges et taux de fécondité
 - **Localisation** (`/localisation`) : Carte interactive des QPV, centres de migrants et mosquées avec recherche d'adresse
+- **Politique** (`/politique`) : Analyse des valeurs moyennes des communes selon la famille politique du maire
 - **Méthodologie** (`/methodologie`) : Explication des sources et calculs
 
 ## Technologies utilisées
@@ -83,6 +85,9 @@ client/
 │   │   ├── CentresMigrants.vue     # Centres migrants
 │   │   ├── CorrelationHeatmap.vue  # Heatmap des corrélations
 │   │   ├── CrimeGraphs.vue         # Graphiques criminalité (container)
+│   │   ├── DemGraph.vue            # Graphiques démographiques
+│   │   ├── DemParameters.vue       # Paramètres démographiques
+│   │   ├── DemPyramid.vue          # Pyramide des âges
 │   │   ├── ExecutiveDetails.vue    # Détails élus
 │   │   ├── Graph.vue               # Graphiques criminalité (single graph)
 │   │   ├── HamburgerIcon.vue       # Menu hamburger mobile
@@ -98,11 +103,13 @@ client/
 │   │   ├── Subventions.vue         # Tableau des subventions
 │   │   └── VersionSelector.vue     # Sélecteur de version
 │   ├── views/            # Pages principales
-│   │   ├── Home.vue          # Page d'accueil
-│   │   ├── Rankings.vue      # Page classements
 │   │   ├── Correlations.vue  # Page analyse des corrélations
-│   │   ├── Localisation.vue  # Page carte des lieux d'intérêt
-│   │   └── Methodology.vue   # Page méthodologie
+│   │   ├── Demography.vue   # Page démographie
+│   │   ├── Home.vue         # Page d'accueil
+│   │   ├── Localisation.vue # Page carte des lieux d'intérêt
+│   │   ├── Methodology.vue  # Page méthodologie
+│   │   ├── Politique.vue    # Page analyse politique
+│   │   └── Rankings.vue     # Page classements
 │   ├── services/
 │   │   ├── api.js        # Service API centralisé
 │   │   └── store.js      # Store Pinia
@@ -148,6 +155,7 @@ client/
 ### Données spécialisées
 - `GET /api/rankings/departements` - Classements départements
 - `GET /api/rankings/communes` - Classements communes
+- `GET /api/rankings/politique` - Classements politiques par famille
 - `GET /api/migrants` - Centres migrants avec pagination
 - `GET /api/mosques` - Mosquées avec filtrage géographique
 - `GET /api/mosques/closest` - Mosquées les plus proches d'une position
