@@ -174,6 +174,7 @@ export default {
             deptCode: commune.departement,
             name: commune.commune,
             population: commune.population,
+            famille_nuance: commune.famille_nuance,
             rank: index + 1,
           };
           // Use pre-calculated values directly from API data
@@ -190,6 +191,7 @@ export default {
             deptCode: commune.departement,
             name: commune.commune,
             population: commune.population,
+            famille_nuance: commune.famille_nuance,
             rank: bottomOffset + index + 1,
           };
           // Use pre-calculated values directly from API data

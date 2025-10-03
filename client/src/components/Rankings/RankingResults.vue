@@ -27,7 +27,7 @@
               <td>{{ item.rank }}</td>
               <td>{{ formatLocationName(item) }}</td>
               <td>{{ formatPopulation(item.population) }}</td>
-              <td v-if="showPoliticalColor && type === 'Commune'">{{ formatPoliticalColor(item) }}</td>
+              <td v-if="showPoliticalColor && type === 'Commune'">{{ item.famille_nuance || 'N/A' }}</td>
               <td>{{ formatMetricValue(item[metric]) }}</td>
             </tr>
           </tbody>
@@ -57,7 +57,7 @@
               <td>{{ item.rank }}</td>
               <td>{{ formatLocationName(item) }}</td>
               <td>{{ formatPopulation(item.population) }}</td>
-              <td v-if="showPoliticalColor && type === 'Commune'">{{ formatPoliticalColor(item) }}</td>
+              <td v-if="showPoliticalColor && type === 'Commune'">{{ item.famille_nuance || 'N/A' }}</td>
               <td>{{ formatMetricValue(item[metric]) }}</td>
             </tr>
           </tbody>

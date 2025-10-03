@@ -448,11 +448,16 @@ const api = {
     getNat1Summary: () =>
         apiService.request("/nat1/all"),
 
-
+    // Politique data
+    getPolitique: () =>
+        apiService.request("/rankings/politique"),
 
     // Cache management
     clearCache: () => apiService.clearCache(),
     getCacheStats: () => apiService.getCacheStats(),
 };
+
+// Expose clearCache to window for console access. Type "window.clearApiCache" in the browser console
+window.clearApiCache = api.clearCache;
 
 export default api;

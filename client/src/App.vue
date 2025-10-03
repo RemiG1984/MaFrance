@@ -251,6 +251,7 @@ export default {
               { title: 'Correlations', path: '/correlations' },
               { title: 'Locations', path: '/localisation' },
               { title: 'Demography', path: '/demography' },
+              { title: 'Politics', path: '/politique' },
             ]
           },
           { 
@@ -274,6 +275,7 @@ export default {
               { title: 'Corrélations', path: '/correlations' },
               { title: 'Localisation', path: '/localisation' },
               { title: 'Démographie', path: '/demography' },
+              { title: 'Politique', path: '/politique' },
             ]
           },
           { 

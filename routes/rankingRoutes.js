@@ -251,9 +251,9 @@ router.get(
       d.Total_places_migrants,
       d.places_migrants_p1k,
       (COALESCE(d.insecurite_score, 0) + COALESCE(d.immigration_score, 0) + COALESCE(d.islamisation_score, 0) + COALESCE(d.defrancisation_score, 0) + COALESCE(d.wokisme_score, 0)) /5 AS total_score,
-      dn.musulman_pct, 
+      dn.musulman_pct,
       (COALESCE(dc.homicides_p100k, 0) + COALESCE(dc.tentatives_homicides_p100k, 0)) AS homicides_total_p100k,
-      ROUND((COALESCE(dc.coups_et_blessures_volontaires_p1k, 0) + 
+      ROUND((COALESCE(dc.coups_et_blessures_volontaires_p1k, 0) +
        COALESCE(dc.coups_et_blessures_volontaires_intrafamiliaux_p1k, 0) + 
        COALESCE(dc.autres_coups_et_blessures_volontaires_p1k, 0) + 
        COALESCE(dc.vols_avec_armes_p1k, 0) + 
@@ -302,5 +302,101 @@ router.get(
     });
   },
 );
+// GET /api/rankings/politique
+router.get('/politique', (req, res, next) => {
+  const sql = `
+    WITH ComputedData AS (
+      SELECT
+        l.COG,
+        l.population,
+        l.logements_sociaux_pct,
+        l.insecurite_score,
+        l.immigration_score,
+        l.islamisation_score,
+        l.defrancisation_score,
+        l.wokisme_score,
+        l.mosque_p100k,
+        l.pop_in_qpv_pct,
+        l.places_migrants_p1k,
+        (COALESCE(l.insecurite_score, 0) + COALESCE(l.immigration_score, 0) + COALESCE(l.islamisation_score, 0) + COALESCE(l.defrancisation_score, 0) + COALESCE(l.wokisme_score, 0)) / 5 AS total_score,
+        (COALESCE(cc.coups_et_blessures_volontaires_p1k, 0) +
+         COALESCE(cc.coups_et_blessures_volontaires_intrafamiliaux_p1k, 0) +
+         COALESCE(cc.autres_coups_et_blessures_volontaires_p1k, 0) +
+         COALESCE(cc.vols_avec_armes_p1k, 0) +
+         COALESCE(cc.vols_violents_sans_arme_p1k, 0)) AS violences_physiques_p1k,
+        COALESCE(cc.violences_sexuelles_p1k, 0) AS violences_sexuelles_p1k,
+        (COALESCE(cc.vols_avec_armes_p1k, 0) +
+         COALESCE(cc.vols_violents_sans_arme_p1k, 0) +
+         COALESCE(cc.vols_sans_violence_contre_des_personnes_p1k, 0) +
+         COALESCE(cc.cambriolages_de_logement_p1k, 0) +
+         COALESCE(cc.vols_de_vehicules_p1k, 0) +
+         COALESCE(cc.vols_dans_les_vehicules_p1k, 0) +
+         COALESCE(cc.vols_d_accessoires_sur_vehicules_p1k, 0)) AS vols_p1k,
+        COALESCE(cc.destructions_et_degradations_volontaires_p1k, 0) AS destructions_p1k,
+        (COALESCE(cc.usage_de_stupefiants_p1k, 0) +
+         COALESCE(cc.usage_de_stupefiants_afd_p1k, 0) +
+         COALESCE(cc.trafic_de_stupefiants_p1k, 0)) AS stupefiants_p1k,
+        COALESCE(cc.escroqueries_p1k, 0) AS escroqueries_p1k,
+        COALESCE(cs.total_subventions_parHab, 0) AS total_subventions_parHab,
+        CASE WHEN cnat1.Ensemble > 0 THEN ROUND((COALESCE(cnat1.Etrangers, 0) / cnat1.Ensemble) * 100, 2) ELSE 0 END AS etrangers_pct,
+        CASE WHEN cnat1.Ensemble > 0 THEN ROUND((COALESCE(cnat1.Francais_de_naissance, 0) / cnat1.Ensemble) * 100, 2) ELSE 0 END AS francais_de_naissance_pct,
+        CASE WHEN cnat1.Ensemble > 0 THEN ROUND((COALESCE(cnat1.Francais_par_acquisition, 0) / cnat1.Ensemble) * 100, 2) ELSE 0 END AS naturalises_pct,
+        CASE WHEN cnat1.Ensemble > 0 THEN ROUND(((COALESCE(cnat1.Portugais, 0) + COALESCE(cnat1.Italiens, 0) + COALESCE(cnat1.Espagnols, 0) + COALESCE(cnat1.Autres_nationalites_de_l_UE, 0) + COALESCE(cnat1.Autres_nationalites_d_Europe, 0)) / cnat1.Ensemble) * 100, 2) ELSE 0 END AS europeens_pct,
+        CASE WHEN cnat1.Ensemble > 0 THEN ROUND(((COALESCE(cnat1.Algeriens, 0) + COALESCE(cnat1.Marocains, 0) + COALESCE(cnat1.Tunisiens, 0) + COALESCE(cnat1.Turcs, 0)) / cnat1.Ensemble) * 100, 2) ELSE 0 END AS maghrebins_pct,
+        CASE WHEN cnat1.Ensemble > 0 THEN ROUND((COALESCE(cnat1.Autres_nationalites_d_Afrique, 0) / cnat1.Ensemble) * 100, 2) ELSE 0 END AS africains_pct,
+        CASE WHEN cnat1.Ensemble > 0 THEN ROUND((COALESCE(cnat1.Autres_nationalites, 0) / cnat1.Ensemble) * 100, 2) ELSE 0 END AS autres_nationalites_pct,
+        CASE WHEN cnat1.Ensemble > 0 THEN ROUND(((COALESCE(cnat1.Algeriens, 0) + COALESCE(cnat1.Marocains, 0) + COALESCE(cnat1.Tunisiens, 0) + COALESCE(cnat1.Turcs, 0) + COALESCE(cnat1.Autres_nationalites_d_Afrique, 0) + COALESCE(cnat1.Autres_nationalites, 0)) / cnat1.Ensemble) * 100, 2) ELSE 0 END AS non_europeens_pct,
+        CASE WHEN m.famille_nuance IN ('Gauche', 'Centre', 'Droite', 'Extrême droite') THEN m.famille_nuance ELSE 'Autres' END AS famille_nuance
+      FROM locations l
+      LEFT JOIN commune_crime cc ON l.COG = cc.COG
+        AND cc.annee = (SELECT MAX(annee) FROM commune_crime WHERE COG = l.COG)
+      LEFT JOIN commune_subventions cs ON l.COG = cs.COG
+      LEFT JOIN commune_nat1 cnat1 ON l.COG = cnat1.Code
+      LEFT JOIN maires m ON l.COG = m.cog
+      WHERE m.cog IS NOT NULL
+    )
+    SELECT
+      famille_nuance,
+      AVG(population) AS population,
+      SUM(logements_sociaux_pct * population) / NULLIF(SUM(population), 0) AS logements_sociaux_pct,
+      SUM(insecurite_score * population) / NULLIF(SUM(population), 0) AS insecurite_score,
+      SUM(immigration_score * population) / NULLIF(SUM(population), 0) AS immigration_score,
+      SUM(islamisation_score * population) / NULLIF(SUM(population), 0) AS islamisation_score,
+      SUM(defrancisation_score * population) / NULLIF(SUM(population), 0) AS defrancisation_score,
+      SUM(wokisme_score * population) / NULLIF(SUM(population), 0) AS wokisme_score,
+      SUM(mosque_p100k * population) / NULLIF(SUM(population), 0) AS mosque_p100k,
+      SUM(pop_in_qpv_pct * population) / NULLIF(SUM(population), 0) AS pop_in_qpv_pct,
+      SUM(places_migrants_p1k * population) / NULLIF(SUM(population), 0) AS places_migrants_p1k,
+      SUM(total_score * population) / NULLIF(SUM(population), 0) AS total_score,
+      SUM(violences_physiques_p1k * population) / NULLIF(SUM(population), 0) AS violences_physiques_p1k,
+      SUM(violences_sexuelles_p1k * population) / NULLIF(SUM(population), 0) AS violences_sexuelles_p1k,
+      SUM(vols_p1k * population) / NULLIF(SUM(population), 0) AS vols_p1k,
+      SUM(destructions_p1k * population) / NULLIF(SUM(population), 0) AS destructions_p1k,
+      SUM(stupefiants_p1k * population) / NULLIF(SUM(population), 0) AS stupefiants_p1k,
+      SUM(escroqueries_p1k * population) / NULLIF(SUM(population), 0) AS escroqueries_p1k,
+      SUM(total_subventions_parHab * population) / NULLIF(SUM(population), 0) AS total_subventions_parHab,
+      SUM(etrangers_pct * population) / NULLIF(SUM(population), 0) AS etrangers_pct,
+      SUM(francais_de_naissance_pct * population) / NULLIF(SUM(population), 0) AS francais_de_naissance_pct,
+      SUM(naturalises_pct * population) / NULLIF(SUM(population), 0) AS naturalises_pct,
+      SUM(europeens_pct * population) / NULLIF(SUM(population), 0) AS europeens_pct,
+      SUM(maghrebins_pct * population) / NULLIF(SUM(population), 0) AS maghrebins_pct,
+      SUM(africains_pct * population) / NULLIF(SUM(population), 0) AS africains_pct,
+      SUM(autres_nationalites_pct * population) / NULLIF(SUM(population), 0) AS autres_nationalites_pct,
+      SUM(non_europeens_pct * population) / NULLIF(SUM(population), 0) AS non_europeens_pct
+    FROM ComputedData
+    GROUP BY famille_nuance
+  `;
+
+  db.all(sql, [], (err, rows) => {
+    if (err) return handleDbError(err, res, next);
+    const result = {};
+    rows.forEach(row => {
+      const { famille_nuance, total_population, ...metrics } = row;
+      result[famille_nuance] = metrics;
+    });
+    res.json(result);
+  });
+});
+
 
 module.exports = router;

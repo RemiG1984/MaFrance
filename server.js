@@ -23,7 +23,7 @@ app.use(helmet({
 
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' ?
-    ['https://your-domain.com'] : // Replace with your actual domain
+    ['https://mafrance.app'] : // Replace with your actual domain
     true,
   credentials: true
 }));
