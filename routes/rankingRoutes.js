@@ -304,6 +304,16 @@ router.get(
 );
 // GET /api/rankings/politique
 router.get('/politique', (req, res, next) => {
+  // Try to get cached data first
+  const cacheService = require('../services/cacheService');
+  const cachedData = cacheService.get('politique_rankings');
+
+  if (cachedData) {
+    res.json(cachedData);
+    return;
+  }
+
+  // Fallback to database query if cache is empty
   const sql = `
     WITH ComputedData AS (
       SELECT

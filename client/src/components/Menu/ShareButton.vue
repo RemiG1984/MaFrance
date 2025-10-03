@@ -86,6 +86,7 @@ export default {
 
     shareUrl() {
       const baseUrl = window.location.origin
+      const currentPath = this.$route.path
       const params = new URLSearchParams()
 
       // Add version parameter
@@ -118,7 +119,8 @@ export default {
       }
 
       const queryString = params.toString()
-      return queryString ? `${baseUrl}/?${queryString}` : baseUrl
+      const fullPath = queryString ? `${currentPath}?${queryString}` : currentPath
+      return `${baseUrl}${fullPath}`
     },
 
     shareLocation() {
