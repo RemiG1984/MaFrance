@@ -3,7 +3,7 @@
     <!-- Header -->
     <v-app-bar app color="primary" dark>
       <div class="header-content-wrapper">
-        <v-app-bar-title class="text-h5 font-weight-bold">
+        <v-app-bar-title class="text-h5 font-weight-bold clickable-title" @click="$router.push('/')">
           {{ currentPageTitle }}
         </v-app-bar-title>
 
@@ -401,6 +401,10 @@ export default {
 .header-menu {
   display: flex;
   align-items: center;
+}
+
+.clickable-title {
+  cursor: pointer;
 }
 
 @media (min-width: 1600px) {
