@@ -145,6 +145,16 @@ const MetricsConfig = {
             format: "number",
             source: "details",
         },
+        {
+            value: "famille_nuance",
+            label: "Nuance familiale",
+            alt1Label: "Diversité familiale",
+            alt2Label: "Homogénéité familiale",
+            englishLabel: "Family nuance",
+            category: "général",
+            format: "string",
+            source: "details",
+        },
         // Insécurité category
         {
             value: "insecurite_score",
@@ -628,6 +638,7 @@ const MetricsConfig = {
             "autres_nationalites_pct",
             "non_europeens_pct",
             "francais_de_naissance_pct",
+            "famille_nuance",
         ],
         departement: [
             "total_score",
@@ -723,7 +734,8 @@ const MetricsConfig = {
         'total_qpv': 'u',
         'pop_in_qpv_pct': 'y',
         'logements_sociaux_pct': 'z',
-        'total_subventions_parHab': 'j'
+        'total_subventions_parHab': 'j',
+        'famille_nuance': 'c'
     },
 
     // Utility functions

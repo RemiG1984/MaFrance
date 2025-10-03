@@ -89,6 +89,16 @@
             >
           </div>
         </div>
+
+        <div v-if="currentLevel === 'commune'" class="form-group">
+          <label for="politicalFamily">{{ isEnglish ? 'Display Political Family of Mayors' : 'Afficher la Famille Politique des Maires' }}</label>
+          <input
+            type="checkbox"
+            id="politicalFamily"
+            :checked="localFilters.politicalFamily"
+            @change="onFilterChange('politicalFamily', $event)"
+          >
+        </div>
       </div>
     </div>
   </div>
@@ -118,9 +128,10 @@ export default {
     filters: {
       type: Object,
       default: () => ({
-        popLower: null,
+        popLower: 50000,
         popUpper: null,
-        topLimit: 10
+        topLimit: 10,
+        politicalFamily: true
       })
     }
   },
@@ -248,6 +259,8 @@ export default {
         }
       } else if (event.target.type === 'number') {
         value = parseInt(value, 10)
+      } else if (event.target.type === 'checkbox') {
+        value = event.target.checked
       }
 
       localFilters.value = { ...localFilters.value, [filterKey]: value }
@@ -296,13 +309,14 @@ export default {
 
     onMounted(() => {
       // updateCurrentLevel() // No longer needed here, currentLevel is computed
-
+      emitFiltersChange(localFilters.value)
+    
       // Listen for global label state changes from MetricsConfig
       const handleLabelChange = () => {
         // Force reactivity by triggering a re-render
         // The computed metricOptions will automatically update
       }
-
+    
       window.addEventListener('metricsLabelsToggled', handleLabelChange)
     })
 

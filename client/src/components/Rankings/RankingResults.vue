@@ -10,21 +10,24 @@
         <table class="score-table">
           <thead>
             <tr class="score-header">
-              <th style="width: 15%;">{{ isEnglish ? 'Rank' : 'Rang' }}</th>
-              <th style="width: 40%;">{{ getTypeLabel(type) }}</th>
-              <th style="width: 25%;">Population</th>
-              <th style="width: 20%;">{{ isEnglish ? 'Value' : 'Valeur' }}</th>
+              <th style="width: 12%;">{{ isEnglish ? 'Rank' : 'Rang' }}</th>
+              <th style="width: 35%;">{{ getTypeLabel(type) }}</th>
+              <th style="width: 20%;">Population</th>
+              <th v-if="showPoliticalColor && type === 'Commune'" style="width: 15%;">{{ isEnglish ? 'Mayor Political Family' : 'Famille Politique du Maire' }}</th>
+              <th style="width: 18%;">{{ isEnglish ? 'Value' : 'Valeur' }}</th>
             </tr>
           </thead>
           <tbody>
-            <tr 
-              v-for="item in topRankings" 
+            <tr
+              v-for="item in topRankings"
               :key="`top-${item.rank}`"
               class="score-row"
+              :style="showPoliticalColor ? { backgroundColor: getRowColor(item.famille_nuance) } : {}"
             >
               <td>{{ item.rank }}</td>
               <td>{{ formatLocationName(item) }}</td>
               <td>{{ formatPopulation(item.population) }}</td>
+              <td v-if="showPoliticalColor && type === 'Commune'">{{ formatPoliticalColor(item) }}</td>
               <td>{{ formatMetricValue(item[metric]) }}</td>
             </tr>
           </tbody>
@@ -37,21 +40,24 @@
         <table class="score-table">
           <thead>
             <tr class="score-header">
-              <th style="width: 15%;">{{ isEnglish ? 'Rank' : 'Rang' }}</th>
-              <th style="width: 40%;">{{ getTypeLabel(type) }}</th>
-              <th style="width: 25%;">Population</th>
-              <th style="width: 20%;">{{ isEnglish ? 'Value' : 'Valeur' }}</th>
+              <th style="width: 12%;">{{ isEnglish ? 'Rank' : 'Rang' }}</th>
+              <th style="width: 35%;">{{ getTypeLabel(type) }}</th>
+              <th style="width: 20%;">Population</th>
+              <th v-if="showPoliticalColor && type === 'Commune'" style="width: 15%;">{{ isEnglish ? 'Mayor Political Family' : 'Famille Politique du Maire' }}</th>
+              <th style="width: 18%;">{{ isEnglish ? 'Value' : 'Valeur' }}</th>
             </tr>
           </thead>
           <tbody>
-            <tr 
-              v-for="item in bottomRankings" 
+            <tr
+              v-for="item in bottomRankings"
               :key="`bottom-${item.rank}`"
               class="score-row"
+              :style="showPoliticalColor ? { backgroundColor: getRowColor(item.famille_nuance) } : {}"
             >
               <td>{{ item.rank }}</td>
               <td>{{ formatLocationName(item) }}</td>
               <td>{{ formatPopulation(item.population) }}</td>
+              <td v-if="showPoliticalColor && type === 'Commune'">{{ formatPoliticalColor(item) }}</td>
               <td>{{ formatMetricValue(item[metric]) }}</td>
             </tr>
           </tbody>
@@ -84,6 +90,10 @@ export default {
     limit: {
       type: Number,
       default: 10
+    },
+    showPoliticalColor: {
+      type: Boolean,
+      default: false
     }
   },
   setup(props) {
@@ -168,6 +178,18 @@ export default {
       window.removeEventListener('metricsLabelsToggled', handleLabelChange)
     })
 
+    const formatPoliticalColor = (item) => {
+      return item.famille_nuance || 'N/A'
+    }
+
+    const getRowColor = (famille_nuance) => {
+      if (famille_nuance === 'Gauche') return 'rgba(255, 100, 100, 0.2)'
+      if (famille_nuance === 'Droite') return 'rgba(100, 100, 255, 0.2)'
+      if (famille_nuance === 'Extrême droite') return 'rgba(0, 0, 128, 0.2)'
+      if (famille_nuance === 'Centre') return 'rgba(255, 165, 0, 0.2)'
+      return ''
+    }
+
     return {
       isEnglish,
       metricName,
@@ -177,6 +199,8 @@ export default {
       formatLocationName,
       formatPopulation,
       formatMetricValue,
+      formatPoliticalColor,
+      getRowColor,
       getTypeLabel
     }
   }
@@ -192,8 +216,8 @@ export default {
   background: white;
   border: 1px solid #ddd;
   border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 20px;
+  padding: 15px;
+  margin-bottom: 15px;
 }
 
 .data-box h2 {

@@ -31,6 +31,7 @@
         :metric="selectedMetric"
         :type="currentType"
         :limit="filters.topLimit"
+        :showPoliticalColor="filters.politicalFamily"
       />
 
       <div v-else class="no-data">
@@ -69,9 +70,10 @@ export default {
     const loading = ref(false)
     const error = ref('')
     const filters = ref({
-      popLower: null, // Default to null (no limit)
+      popLower: 20000, // Default to null (no limit)
       popUpper: null, // Default to null (no limit)
-      topLimit: 10
+      topLimit: 10,
+      politicalFamily: true
     })
 
     // Computed properties
