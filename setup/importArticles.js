@@ -90,13 +90,20 @@ function processRow(row) {
     const cog = row.COG && row.COG.trim() !== "" ? row.COG : null;
     const commune = row.commune && row.commune.trim() !== "" ? row.commune : null;
     const lieu = row.lieu && row.lieu.trim() !== "" ? row.lieu : null;
-
+    
     // Collect cog-lieu mapping
     if (cog && lieu) {
         if (!cogLieuMap.has(cog)) {
             cogLieuMap.set(cog, new Set());
         }
-        cogLieuMap.get(cog).add(lieu);
+        // Split lieu by ", " to handle multiple lieux
+        const lieux = lieu.split(/, /);
+        lieux.forEach(l => {
+            const trimmedL = l.trim();
+            if (trimmedL) {
+                cogLieuMap.get(cog).add(trimmedL);
+            }
+        });
     }
 
     return [

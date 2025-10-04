@@ -6,7 +6,7 @@
     </v-card-title>
 
     <v-card-text>
-      <div v-if="location?.type === 'commune'" class="lieu-filter-container mb-4">
+      <div v-if="location?.type === 'commune'" class="lieu-filter-container mb-0">
         <v-select
           v-model="selectedLieu"
           :items="lieuOptions"
