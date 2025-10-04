@@ -6,6 +6,7 @@
       </v-card-title>
 
       <v-card-text>
+        <p style="white-space: normal; word-break: break-word;" v-html='store.labelState === 3 ? "The political family is as officially defined in the list of mayors from the <a href=\"https://www.data.gouv.fr/datasets/repertoire-national-des-elus-1/\" target=\"_blank\">national directory of elected officials</a>" : "La famille politique est telle que définie officiellement dans la liste des maires du <a href=\"https://www.data.gouv.fr/datasets/repertoire-national-des-elus-1/\" target=\"_blank\">répertoire national des élus</a>"'></p>
         <!-- Loading indicator -->
         <div v-if="loading" class="d-flex justify-center align-center py-8">
           <v-progress-circular indeterminate color="primary" size="32"></v-progress-circular>

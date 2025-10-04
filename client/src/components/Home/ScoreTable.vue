@@ -71,9 +71,16 @@ export default {
     },
     cardTitle() {
       const isEnglish = this.dataStore.labelState === 3;
-      return isEnglish 
-        ? `Indices and data for: ${this.location.name}`
-        : `Indices et données pour: ${this.location.name}`;
+      let deptCode = '';
+      if (this.location.type === 'commune') {
+        deptCode = this.dataStore.commune.details?.departement || '';
+      } else if (this.location.type === 'departement') {
+        deptCode = this.location.code || '';
+      }
+      const deptPart = deptCode ? ` (${deptCode})` : '';
+      return isEnglish
+        ? `Indices and data for: ${this.location.name}${deptPart}`
+        : `Indices et données pour: ${this.location.name}${deptPart}`;
     },
     noDataMessage() {
       return this.dataStore.labelState === 3 

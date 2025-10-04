@@ -2,10 +2,11 @@ const express = require("express");
 const router = express.Router();
 const db = require("../config/db");
 const {
-  validateDepartement,
-  validateOptionalDepartement,
-  validateOptionalCOG,
+  validateCOG,
   validateLieu,
+  validateOptionalDepartement,
+  validateDepartement,
+  validateOptionalCOG,
 } = require("../middleware/validate");
 
 // Centralized error handler for database queries
@@ -171,33 +172,17 @@ router.get(
 // GET /api/articles/lieux
 router.get(
   "/lieux",
-  [validateDepartement, validateOptionalCOG, validateLieu],
+  [validateCOG, validateLieu],
   (req, res) => {
-    const { dept, cog, lieu } = req.query;
+    const { cog, lieu } = req.query;
 
-    let sql = `SELECT DISTINCT lieu 
-             FROM articles 
-             WHERE ${baseCondition} AND lieu IS NOT NULL`;
-    const params = [dept];
-
-    if (cog) {
-      sql += " AND cog = ?";
-      params.push(cog);
-    } else if (lieu) {
-      sql += " AND lieu LIKE ?";
-      params.push(`%${lieu}%`);
-    }
+    const sql = `SELECT DISTINCT lieu FROM lieux WHERE cog = ? ORDER BY lieu`;
+    const params = [cog];
 
     db.all(sql, params, (err, rows) => {
-      if (err) return handleDbError(res, err);
-      const lieuxSet = new Set();
-      rows.forEach((row) => {
-        if (row.lieu) {
-          row.lieu.split(",").forEach((l) => lieuxSet.add(l.trim()));
-        }
-      });
-      const lieux = Array.from(lieuxSet).sort();
-      res.json(lieux.map((l) => ({ lieu: l })));
+      if (err) return handleDbError(err, res);
+      const lieux = rows.map(row => ({ lieu: row.lieu }));
+      res.json(lieux);
     });
   },
 );

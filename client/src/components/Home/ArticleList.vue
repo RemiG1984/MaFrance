@@ -6,6 +6,19 @@
     </v-card-title>
 
     <v-card-text>
+      <div v-if="location?.type === 'commune'" class="lieu-filter-container mb-4">
+        <v-select
+          v-model="selectedLieu"
+          :items="lieuOptions"
+          :label="isEnglish ? 'Location filter' : 'Filtre de lieu'"
+          variant="outlined"
+          density="compact"
+          clearable
+          @update:modelValue="onLieuChange"
+          class="lieu-select"
+        ></v-select>
+      </div>
+
       <div class="categories-container mb-4">
         <v-chip-group
           v-model="selectedCategory"
@@ -84,6 +97,7 @@
 import { articleCategoriesRef } from '../../utils/metricsConfig.js';
 import { mapStores } from 'pinia'
 import { useDataStore } from '../../services/store.js'
+import api from '../../services/api.js'
 
 const categories = Object.keys(articleCategoriesRef);
 
@@ -126,7 +140,9 @@ export default {
       selectedCategory: 'tous',
       categories: categories,
       articleCategoriesRef: articleCategoriesRef,
-      isLoading: false
+      isLoading: false,
+      selectedLieu: null,
+      lieux: []
     };
   },
   computed: {
@@ -157,6 +173,26 @@ export default {
     },
     noArticlesMessage() {
       return this.isEnglish ? 'No articles found.' : 'Aucun article trouvé.';
+    },
+
+    lieuOptions() {
+      const allOption = { value: null, title: this.isEnglish ? 'All' : 'Tous' };
+      const lieuOptions = this.lieux.map(lieu => ({ value: lieu, title: lieu }));
+      return [allOption, ...lieuOptions];
+    }
+  },
+  watch: {
+    location: {
+      handler(newLocation) {
+        if (newLocation?.type === 'commune') {
+          this.selectedLieu = null;
+          this.fetchLieux();
+        } else {
+          this.lieux = [];
+          this.selectedLieu = null;
+        }
+      },
+      immediate: true
     }
   },
   methods: {
@@ -199,6 +235,9 @@ export default {
       } else if (this.location.type === 'commune') {
         params.cog = this.location.code;
         params.dept = dataStore.getCommuneDepartementCode();
+        if (this.selectedLieu) {
+          params.lieu = this.selectedLieu;
+        }
       } else if (this.location.type === 'country') {
         params.country = 'France';
       }
@@ -211,7 +250,7 @@ export default {
     },
     async loadMoreArticles() {
       if (this.isLoading || !this.articles.pagination?.hasMore) return;
-      
+
       this.isLoading = true;
       try {
         const { useDataStore } = await import('../../services/store.js');
@@ -220,26 +259,67 @@ export default {
           cursor: this.articles.pagination.nextCursor,
           limit: 20
         };
-        
+
         if (this.location.type === 'departement') {
           params.dept = this.location.code;
         } else if (this.location.type === 'commune') {
           params.cog = this.location.code;
           params.dept = dataStore.getCommuneDepartementCode();
+          if (this.selectedLieu) {
+            params.lieu = this.selectedLieu;
+          }
         } else if (this.location.type === 'country') {
           params.country = 'France';
         }
-        
+
         if (this.selectedCategory !== 'tous') {
           params.category = this.selectedCategory;
         }
-        
+
         await dataStore.loadMoreArticles(params);
       } catch (error) {
         console.error('Failed to load more articles:', error);
       } finally {
         this.isLoading = false;
       }
+    },
+
+    async fetchLieux() {
+      if (this.location?.type !== 'commune') return;
+
+      try {
+        const { useDataStore } = await import('../../services/store.js');
+        const dataStore = useDataStore();
+        const deptCode = dataStore.getCommuneDepartementCode();
+        const lieuxData = await api.getLieux(deptCode, this.location.code);
+        this.lieux = lieuxData ? lieuxData.map(item => item.lieu).sort() : [];
+      } catch (error) {
+        console.error('Failed to fetch lieux:', error);
+        this.lieux = [];
+      }
+    },
+
+    async onLieuChange() {
+      // Reset category and scroll to top
+      this.selectedCategory = 'tous';
+      if (this.$refs.articlesContainer) {
+        this.$refs.articlesContainer.scrollTop = 0;
+      }
+
+      // Refetch articles with new lieu filter
+      const { useDataStore } = await import('../../services/store.js');
+      const dataStore = useDataStore();
+      const params = {
+        limit: 20,
+        cog: this.location.code,
+        dept: dataStore.getCommuneDepartementCode()
+      };
+
+      if (this.selectedLieu) {
+        params.lieu = this.selectedLieu;
+      }
+
+      await dataStore.fetchFilteredArticles(params, false);
     }
   }
 };
@@ -333,6 +413,14 @@ export default {
 
 .categories-container {
   margin-bottom: 16px;
+}
+
+.lieu-filter-container {
+  margin-bottom: 16px;
+}
+
+.lieu-select {
+  max-width: 300px;
 }
 
 /* Mobile specific improvements */
