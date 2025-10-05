@@ -134,15 +134,15 @@ function parseFrenchDate(dateStr) {
 
 function processCSV() {
     return new Promise((resolve, reject) => {
-        if (!fs.existsSync("setup/fdesouche_analyzed.csv")) {
-            reject(new Error("setup/fdesouche_analyzed.csv n'existe pas"));
+        if (!fs.existsSync("setup/inputFiles/fdesouche_analyzed.csv")) {
+            reject(new Error("setup/inputFiles/fdesouche_analyzed.csv n'existe pas"));
             return;
         }
 
         const allArticles = [];
         let articleRows = 0;
 
-        fs.createReadStream("setup/fdesouche_analyzed.csv")
+        fs.createReadStream("setup/inputFiles/fdesouche_analyzed.csv")
             .pipe(csv())
             .on("data", (row) => {
                 const processed = processRow(row);
@@ -188,18 +188,14 @@ function insertBatches(db, allArticles) {
 
             function insertNextBatch() {
                 if (batchIndex >= allArticles.length) {
-                    insertLieux(db)
-                        .then(() => {
-                            db.run("COMMIT", (err) => {
-                                if (err) {
-                                    console.error("Erreur commit:", err.message);
-                                    reject(err);
-                                } else {
-                                    resolve();
-                                }
-                            });
-                        })
-                        .catch(reject);
+                    db.run("COMMIT", (err) => {
+                        if (err) {
+                            console.error("Erreur commit:", err.message);
+                            reject(err);
+                        } else {
+                            resolve();
+                        }
+                    });
                     return;
                 }
 
@@ -265,9 +261,10 @@ function insertLieux(db) {
 
 async function importArticles(db, callback) {
     try {
-        await createTables(db);
         const { allArticles, articleRows } = await processCSV();
+        await createTables(db);
         await insertBatches(db, allArticles);
+        await insertLieux(db);
         console.log(`Importation de ${articleRows} lignes dans articles terminée`);
         if (articleRows === 0) {
             console.warn("Avertissement: CSV est vide ou n'a pas de données valides");

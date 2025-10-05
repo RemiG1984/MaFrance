@@ -1,10 +1,9 @@
 
+const BaseImporter = require('./baseImporter');
 const fs = require("fs");
 const csv = require("csv-parser");
 
 function importNat1(db, callback) {
-    const batchSize = 1000;
-
     let totalRows = 0;
     let countryBatch = [];
     let departmentBatch = [];
@@ -14,7 +13,7 @@ function importNat1(db, callback) {
 
     function readNat1Data() {
         return new Promise((resolve, reject) => {
-            if (!fs.existsSync("setup/insee_NAT1_detailed_inferred.csv")) {
+            if (!fs.existsSync("setup/inputFiles/insee_NAT1_detailed_inferred.csv")) {
                 console.error(
                     "Erreur: insee_NAT1_detailed_inferred.csv n'existe pas dans le répertoire setup",
                 );
@@ -22,7 +21,7 @@ function importNat1(db, callback) {
                 return;
             }
 
-            fs.createReadStream("setup/insee_NAT1_detailed_inferred.csv")
+            fs.createReadStream("setup/inputFiles/insee_NAT1_detailed_inferred.csv")
                 .pipe(csv())
                 .on("data", (row) => {
                     const missingFields = [];
@@ -146,13 +145,13 @@ function importNat1(db, callback) {
 
     function getFieldNames() {
         return new Promise((resolve, reject) => {
-            if (!fs.existsSync("setup/insee_NAT1_detailed_inferred.csv")) {
+            if (!fs.existsSync("setup/inputFiles/insee_NAT1_detailed_inferred.csv")) {
                 resolve([]);
                 return;
             }
 
             let fieldNames = [];
-            fs.createReadStream("setup/insee_NAT1_detailed_inferred.csv")
+            fs.createReadStream("setup/inputFiles/insee_NAT1_detailed_inferred.csv")
                 .pipe(csv())
                 .on("headers", (headers) => {
                     // Filter out Type and Code to get only data fields
@@ -181,14 +180,14 @@ function importNat1(db, callback) {
             .replace(/^_+|_+$/g, "");        // Remove leading/trailing underscores
     }
 
-    function createTableSchema(fieldNames) {
-        const baseFields = "Code TEXT PRIMARY KEY, Type TEXT";
-        const sanitizedFieldNames = fieldNames.map(field => sanitizeColumnName(field));
 
-        // Check for duplicates after sanitization and make them unique
+    function createColumns(fieldNames) {
+        const sanitizedFieldNames = fieldNames.map(field => sanitizeColumnName(field));
+    
+        // Apply uniqueness logic
         const uniqueFieldNames = [];
         const nameCount = {};
-
+    
         sanitizedFieldNames.forEach(name => {
             if (nameCount[name]) {
                 nameCount[name]++;
@@ -198,234 +197,95 @@ function importNat1(db, callback) {
                 uniqueFieldNames.push(name);
             }
         });
-
-        const dataFields = uniqueFieldNames.map(field => `${field} REAL`).join(", ");
-        return `${baseFields}, ${dataFields}`;
+    
+        return [
+            { name: 'Code', type: 'TEXT', required: true },
+            { name: 'Type', type: 'TEXT' },
+            ...uniqueFieldNames.map(name => ({ name, type: 'REAL' }))
+        ];
     }
-
-    function createInsertQuery(tableName, fieldNames) {
-        const sanitizedFieldNames = fieldNames.map(field => sanitizeColumnName(field));
-
-        // Apply same uniqueness logic as in createTableSchema
-        const uniqueFieldNames = [];
-        const nameCount = {};
-
-        sanitizedFieldNames.forEach(name => {
-            if (nameCount[name]) {
-                nameCount[name]++;
-                uniqueFieldNames.push(`${name}_${nameCount[name]}`);
-            } else {
-                nameCount[name] = 1;
-                uniqueFieldNames.push(name);
-            }
-        });
-
-        const allFields = ["Code", "Type", ...uniqueFieldNames];
-        const placeholders = allFields.map(() => "?").join(", ");
-        return `INSERT OR IGNORE INTO ${tableName} (${allFields.join(", ")}) VALUES (${placeholders})`;
-    }
-
-    function insertCountryNat1(fieldNames) {
+    
+    function insertCountryNat1(db, fieldNames, countryBatch) {
         return new Promise((resolve, reject) => {
             if (countryBatch.length === 0) {
                 resolve();
                 return;
             }
-
-            db.serialize(() => {
-                const schema = createTableSchema(fieldNames);
-                db.run(
-                    `CREATE TABLE IF NOT EXISTS country_nat1 (${schema})`,
-                    (err) => {
-                        if (err) {
-                            console.error("Erreur création table country_nat1:", err.message);
-                            reject(err);
-                            return;
-                        }
-
-                        db.run(
-                            "CREATE INDEX IF NOT EXISTS idx_country_nat1 ON country_nat1(Code)",
-                            (err) => {
-                                if (err) {
-                                    console.error("Erreur création index country_nat1:", err.message);
-                                    reject(err);
-                                    return;
-                                }
-
-                                const insertQuery = createInsertQuery("country_nat1", fieldNames);
-
-                                db.run("BEGIN TRANSACTION", (err) => {
-                                    if (err) {
-                                        console.error("Erreur début transaction country_nat1:", err.message);
-                                        reject(err);
-                                        return;
-                                    }
-
-                                    countryBatch.forEach(row => {
-                                        db.run(insertQuery, row, (err) => {
-                                            if (err) {
-                                                console.error("Erreur insertion country_nat1:", err.message);
-                                            }
-                                        });
-                                    });
-
-                                    db.run("COMMIT", (err) => {
-                                        if (err) {
-                                            console.error("Erreur commit country_nat1:", err.message);
-                                            db.run("ROLLBACK");
-                                            reject(err);
-                                        } else {
-                                            console.log(`Importation de ${countryBatch.length} lignes dans country_nat1 terminée`);
-                                            resolve();
-                                        }
-                                    });
-                                });
-                            }
-                        );
-                    }
-                );
+    
+            const columns = createColumns(fieldNames);
+            const importer = new BaseImporter({
+                tableName: 'country_nat1',
+                columns,
+                db,
+                indexes: ['CREATE INDEX IF NOT EXISTS idx_country_nat1 ON country_nat1(Code)'],
+                insertMode: 'INSERT OR IGNORE'
             });
+    
+            importer.createTable().then(() => {
+                importer.insertBatch(countryBatch).then(() => {
+                    console.log(`Importation de ${countryBatch.length} lignes dans country_nat1 terminée`);
+                    resolve();
+                }).catch(reject);
+            }).catch(reject);
         });
     }
-
-    function insertDepartmentNat1(fieldNames) {
+    
+    function insertDepartmentNat1(db, fieldNames, departmentBatch) {
         return new Promise((resolve, reject) => {
             if (departmentBatch.length === 0) {
                 resolve();
                 return;
             }
-
-            db.serialize(() => {
-                const schema = createTableSchema(fieldNames);
-                db.run(
-                    `CREATE TABLE IF NOT EXISTS department_nat1 (${schema})`,
-                    (err) => {
-                        if (err) {
-                            console.error("Erreur création table department_nat1:", err.message);
-                            reject(err);
-                            return;
-                        }
-
-                        db.run(
-                            "CREATE INDEX IF NOT EXISTS idx_department_nat1 ON department_nat1(Code)",
-                            (err) => {
-                                if (err) {
-                                    console.error("Erreur création index department_nat1:", err.message);
-                                    reject(err);
-                                    return;
-                                }
-
-                                const insertQuery = createInsertQuery("department_nat1", fieldNames);
-
-                                db.run("BEGIN TRANSACTION", (err) => {
-                                    if (err) {
-                                        console.error("Erreur début transaction department_nat1:", err.message);
-                                        reject(err);
-                                        return;
-                                    }
-
-                                    for (let i = 0; i < departmentBatch.length; i += batchSize) {
-                                        const batch = departmentBatch.slice(i, i + batchSize);
-                                        batch.forEach(row => {
-                                            db.run(insertQuery, row, (err) => {
-                                                if (err) {
-                                                    console.error("Erreur insertion department_nat1:", err.message);
-                                                }
-                                            });
-                                        });
-                                    }
-
-                                    db.run("COMMIT", (err) => {
-                                        if (err) {
-                                            console.error("Erreur commit department_nat1:", err.message);
-                                            db.run("ROLLBACK");
-                                            reject(err);
-                                        } else {
-                                            console.log(`Importation de ${departmentBatch.length} lignes dans department_nat1 terminée`);
-                                            resolve();
-                                        }
-                                    });
-                                });
-                            }
-                        );
-                    }
-                );
+    
+            const columns = createColumns(fieldNames);
+            const importer = new BaseImporter({
+                tableName: 'department_nat1',
+                columns,
+                db,
+                indexes: ['CREATE INDEX IF NOT EXISTS idx_department_nat1 ON department_nat1(Code)'],
+                insertMode: 'INSERT OR IGNORE'
             });
+    
+            importer.createTable().then(() => {
+                importer.insertBatch(departmentBatch).then(() => {
+                    console.log(`Importation de ${departmentBatch.length} lignes dans department_nat1 terminée`);
+                    resolve();
+                }).catch(reject);
+            }).catch(reject);
         });
     }
-
-    function insertCommuneNat1(fieldNames) {
+    
+    function insertCommuneNat1(db, fieldNames, communeBatch) {
         return new Promise((resolve, reject) => {
             if (communeBatch.length === 0) {
                 resolve();
                 return;
             }
-
-            db.serialize(() => {
-                const schema = createTableSchema(fieldNames);
-                db.run(
-                    `CREATE TABLE IF NOT EXISTS commune_nat1 (${schema})`,
-                    (err) => {
-                        if (err) {
-                            console.error("Erreur création table commune_nat1:", err.message);
-                            reject(err);
-                            return;
-                        }
-
-                        db.run(
-                            "CREATE INDEX IF NOT EXISTS idx_commune_nat1 ON commune_nat1(Code)",
-                            (err) => {
-                                if (err) {
-                                    console.error("Erreur création index commune_nat1:", err.message);
-                                    reject(err);
-                                    return;
-                                }
-
-                                const insertQuery = createInsertQuery("commune_nat1", fieldNames);
-
-                                db.run("BEGIN TRANSACTION", (err) => {
-                                    if (err) {
-                                        console.error("Erreur début transaction commune_nat1:", err.message);
-                                        reject(err);
-                                        return;
-                                    }
-
-                                    for (let i = 0; i < communeBatch.length; i += batchSize) {
-                                        const batch = communeBatch.slice(i, i + batchSize);
-                                        batch.forEach(row => {
-                                            db.run(insertQuery, row, (err) => {
-                                                if (err) {
-                                                    console.error("Erreur insertion commune_nat1:", err.message);
-                                                }
-                                            });
-                                        });
-                                    }
-
-                                    db.run("COMMIT", (err) => {
-                                        if (err) {
-                                            console.error("Erreur commit commune_nat1:", err.message);
-                                            db.run("ROLLBACK");
-                                            reject(err);
-                                        } else {
-                                            console.log(`Importation de ${communeBatch.length} lignes dans commune_nat1 terminée`);
-                                            resolve();
-                                        }
-                                    });
-                                });
-                            }
-                        );
-                    }
-                );
+    
+            const columns = createColumns(fieldNames);
+            const importer = new BaseImporter({
+                tableName: 'commune_nat1',
+                columns,
+                db,
+                indexes: ['CREATE INDEX IF NOT EXISTS idx_commune_nat1 ON commune_nat1(Code)'],
+                insertMode: 'INSERT OR IGNORE'
             });
+    
+            importer.createTable().then(() => {
+                importer.insertBatch(communeBatch).then(() => {
+                    console.log(`Importation de ${communeBatch.length} lignes dans commune_nat1 terminée`);
+                    resolve();
+                }).catch(reject);
+            }).catch(reject);
         });
     }
 
     // Execute import process
     Promise.all([readNat1Data(), getFieldNames()])
         .then(([_, fieldNames]) => {
-            return insertCountryNat1(fieldNames)
-                .then(() => insertDepartmentNat1(fieldNames))
-                .then(() => insertCommuneNat1(fieldNames));
+            return insertCountryNat1(db, fieldNames, countryBatch)
+                .then(() => insertDepartmentNat1(db, fieldNames, departmentBatch))
+                .then(() => insertCommuneNat1(db, fieldNames, communeBatch));
         })
         .then(() => {
             console.log("✓ Importation NAT1 terminée");

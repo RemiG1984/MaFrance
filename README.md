@@ -73,6 +73,12 @@ L'application est composée de deux parties principales :
 │   ├── security.js       # Sécurisation des entrées
 │   └── validate.js       # Validation des données
 └── setup/                # Scripts d'import des données
+    ├── baseImporter.js   # Classe de base pour les imports CSV (DRY)
+    ├── importUtils.js    # Utilitaires communs pour les imports
+    ├── import*.js        # Scripts spécifiques d'import par type de données
+    └── inputFiles/       # Fichiers de données d'entrée
+        ├── *.csv         # Fichiers CSV de données
+        └── *.geojson     # Fichiers GeoJSON
 ```
 
 ### Frontend
@@ -395,15 +401,15 @@ L'application est configurée pour Replit avec :
 - `*_nat1` - Données de nationalité INSEE NAT1
 
 ### Import de données
-Scripts dans `setup/` pour importer :
-- Scores calculés (CSV)
-- Données criminalité INSEE
-- Analyse prénoms par géolocalisation
-- Quartiers prioritaires (QPV) avec géométries
-- Listes élus (maires, préfets, ministres)
-- Articles FdeSouche catégorisés
-- Centres migrants géolocalisés
-- Mosquées avec coordonnées
-- Données NAT1 de nationalité
+Scripts dans `setup/` pour importer (architecture DRY avec BaseImporter et importUtils pour éviter la duplication de code) :
+- Scores calculés (CSV depuis inputFiles/)
+- Données criminalité INSEE (CSV depuis inputFiles/)
+- Analyse prénoms par géolocalisation (CSV depuis inputFiles/)
+- Quartiers prioritaires (QPV) avec géométries (GeoJSON depuis inputFiles/)
+- Listes élus (maires, préfets, ministres) (CSV depuis inputFiles/)
+- Articles FdeSouche catégorisés (CSV depuis inputFiles/)
+- Centres migrants géolocalisés (CSV depuis inputFiles/)
+- Mosquées avec coordonnées (CSV depuis inputFiles/)
+- Données NAT1 de nationalité (CSV depuis inputFiles/)
 
 Cette application fournit une interface complète d'analyse territoriale française avec des données actualisées, une architecture moderne scalable et des fonctionnalités avancées de visualisation, d'analyse statistique et de géolocalisation.

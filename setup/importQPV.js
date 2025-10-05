@@ -1,224 +1,140 @@
-
-const fs = require('fs');
-const csv = require('csv-parser');
+const BaseImporter = require('./baseImporter');
 
 function importQPV(db, callback) {
-    let qpvRows = 0;
-    let qpvBatch = [];
-    const batchSize = 1000;
+    const columns = [
+        { name: 'COG', type: 'TEXT', required: true },
+        { name: 'lib_com', type: 'TEXT', required: true },
+        { name: 'codeQPV', type: 'TEXT', required: true },
+        { name: 'lib_qp', type: 'TEXT' },
+        { name: 'insee_reg', type: 'INTEGER' },
+        { name: 'lib_reg', type: 'TEXT' },
+        { name: 'insee_dep', type: 'TEXT' },
+        { name: 'lib_dep', type: 'TEXT' },
+        { name: 'siren_epci', type: 'TEXT' },
+        { name: 'lib_epci', type: 'TEXT' },
+        { name: 'popMuniQPV', type: 'INTEGER' },
+        { name: 'indiceJeunesse', type: 'REAL' },
+        { name: 'partPopEt', type: 'REAL' },
+        { name: 'partPopImmi', type: 'REAL' },
+        { name: 'partMenImmi', type: 'REAL' },
+        { name: 'partMenEt', type: 'REAL' },
+        { name: 'partMen1p', type: 'REAL' },
+        { name: 'partMen2p', type: 'REAL' },
+        { name: 'partMen3p', type: 'REAL' },
+        { name: 'partMen45p', type: 'REAL' },
+        { name: 'partMen6pp', type: 'REAL' },
+        { name: 'nombre_menages', type: 'REAL' },
+        { name: 'nombre_logements_sociaux', type: 'REAL' },
+        { name: 'taux_logements_sociaux', type: 'REAL' },
+        { name: 'taux_d_emploi', type: 'REAL' },
+        { name: 'taux_pauvrete_60', type: 'REAL' },
+        { name: 'personnes_couvertes_CAF', type: 'REAL' },
+        { name: 'allocataires_CAF', type: 'REAL' },
+        { name: 'RSA_socle', type: 'REAL' }
+    ];
 
-    function readQPVData() {
+    const requiredFields = ['COG', 'lib_com', 'codeQPV'];
+
+    const indexes = [
+        'CREATE INDEX IF NOT EXISTS idx_qpv_cog ON qpv_data(COG)',
+        'CREATE INDEX IF NOT EXISTS idx_qpv_dep ON qpv_data(insee_dep)'
+    ];
+
+    const processRow = function(row) {
+        let insee_dep = row['insee_dep'] || null;
+        if (insee_dep && /^\d+$/.test(insee_dep) && insee_dep.length < 2) {
+            insee_dep = insee_dep.padStart(2, '0');
+        }
+        return [
+            row['COG'] ? row['COG'].trim() : null,
+            row['lib_com'] ? row['lib_com'].trim() : null,
+            row['codeQPV'] ? row['codeQPV'].trim() : null,
+            row['lib_qp'] ? row['lib_qp'].trim() : null,
+            row['insee_reg'] && !isNaN(parseInt(row['insee_reg'])) ? parseInt(row['insee_reg']) : null,
+            row['lib_reg'] ? row['lib_reg'].trim() : null,
+            insee_dep,
+            row['lib_dep'] ? row['lib_dep'].trim() : null,
+            row['siren_epci'] ? row['siren_epci'].trim() : null,
+            row['lib_epci'] ? row['lib_epci'].trim() : null,
+            row['popMuniQPV'] && row['popMuniQPV'].trim() && !isNaN(parseInt(row['popMuniQPV'])) ? parseInt(row['popMuniQPV']) : null,
+            row['indiceJeunesse'] && row['indiceJeunesse'].trim() && !isNaN(parseFloat(row['indiceJeunesse'])) ? parseFloat(row['indiceJeunesse']) : null,
+            row['partPopEt'] && row['partPopEt'].trim() && !isNaN(parseFloat(row['partPopEt'])) ? parseFloat(row['partPopEt']) : null,
+            row['partPopImmi'] && row['partPopImmi'].trim() && !isNaN(parseFloat(row['partPopImmi'])) ? parseFloat(row['partPopImmi']) : null,
+            row['partMenImmi'] && row['partMenImmi'].trim() && !isNaN(parseFloat(row['partMenImmi'])) ? parseFloat(row['partMenImmi']) : null,
+            row['partMenEt'] && row['partMenEt'].trim() && !isNaN(parseFloat(row['partMenEt'])) ? parseFloat(row['partMenEt']) : null,
+            row['partMen1p'] && row['partMen1p'].trim() && !isNaN(parseFloat(row['partMen1p'])) ? parseFloat(row['partMen1p']) : null,
+            row['partMen2p'] && row['partMen2p'].trim() && !isNaN(parseFloat(row['partMen2p'])) ? parseFloat(row['partMen2p']) : null,
+            row['partMen3p'] && row['partMen3p'].trim() && !isNaN(parseFloat(row['partMen3p'])) ? parseFloat(row['partMen3p']) : null,
+            row['partMen45p'] && row['partMen45p'].trim() && !isNaN(parseFloat(row['partMen45p'])) ? parseFloat(row['partMen45p']) : null,
+            row['partMen6pp'] && row['partMen6pp'].trim() && !isNaN(parseFloat(row['partMen6pp'])) ? parseFloat(row['partMen6pp']) : null,
+            row['nombre_menages'] && row['nombre_menages'].trim() && !isNaN(parseFloat(row['nombre_menages'])) ? parseFloat(row['nombre_menages']) : null,
+            row['nombre_logements_sociaux'] && row['nombre_logements_sociaux'].trim() && !isNaN(parseFloat(row['nombre_logements_sociaux'])) ? parseFloat(row['nombre_logements_sociaux']) : null,
+            row['taux_logements_sociaux'] && row['taux_logements_sociaux'].trim() && !isNaN(parseFloat(row['taux_logements_sociaux'])) ? parseFloat(row['taux_logements_sociaux']) : null,
+            row['taux_d_emploi'] && row['taux_d_emploi'].trim() && !isNaN(parseFloat(row['taux_d_emploi'])) ? parseFloat(row['taux_d_emploi']) : null,
+            row['taux_pauvrete_60%'] && row['taux_pauvrete_60%'].trim() && !isNaN(parseFloat(row['taux_pauvrete_60%'])) ? parseFloat(row['taux_pauvrete_60%']) : null,
+            row['personnes_couvertes_CAF'] && row['personnes_couvertes_CAF'].trim() && !isNaN(parseFloat(row['personnes_couvertes_CAF'])) ? parseFloat(row['personnes_couvertes_CAF']) : null,
+            row['allocataires_CAF'] && row['allocataires_CAF'].trim() && !isNaN(parseFloat(row['allocataires_CAF'])) ? parseFloat(row['allocataires_CAF']) : null,
+            row['RSA_socle'] && row['RSA_socle'].trim() && !isNaN(parseFloat(row['RSA_socle'])) ? parseFloat(row['RSA_socle']) : null
+        ];
+    };
+
+    const createTable = function() {
+        const columnDefs = this.columns.map(col => {
+            let def = `${col.name} ${col.type}`;
+            if (col.required) def += ' NOT NULL';
+            return def;
+        }).join(', ');
+
+        const sql = `CREATE TABLE IF NOT EXISTS ${this.tableName} (${columnDefs}, PRIMARY KEY (COG, codeQPV))`;
+
         return new Promise((resolve, reject) => {
-            if (!fs.existsSync('setup/analyse_qpv.csv')) {
-                console.error('Erreur: setup/analyse_qpv.csv n\'existe pas dans le répertoire courant');
-                resolve(); // Continue with empty data
-                return;
-            }
-
-            fs.createReadStream('setup/analyse_qpv.csv')
-                .pipe(csv())
-                .on('data', (row) => {
-                    const missingFields = [];
-                    if (!row['COG']) missingFields.push('COG');
-                    if (!row['lib_com']) missingFields.push('lib_com');
-                    if (!row['codeQPV']) missingFields.push('codeQPV');
-
-                    if (missingFields.length > 0) {
-                        console.warn(`Ligne ignorée dans analyse_qpv.csv (champs manquants: ${missingFields.join(', ')}):`, row);
-                        return;
-                    }
-
-                    const cog = row['COG'];
-                    const lib_com = row['lib_com'];
-                    const codeQPV = row['codeQPV'];
-                    const lib_qp = row['lib_qp'] || null;
-                    const insee_reg = parseInt(row['insee_reg']) || null;
-                    const lib_reg = row['lib_reg'] || null;
-                    let insee_dep = row['insee_dep'] || null;
-                    // Normalize department code to match format used in other tables
-                    if (insee_dep && /^\d+$/.test(insee_dep) && insee_dep.length < 2) {
-                        insee_dep = insee_dep.padStart(2, '0');
-                    }
-                    const lib_dep = row['lib_dep'] || null;
-                    const siren_epci = row['siren_epci'] || null;
-                    const lib_epci = row['lib_epci'] || null;
-                    const popMuniQPV = row['popMuniQPV'] && row['popMuniQPV'].trim() ? parseInt(row['popMuniQPV']) : null;
-                    const indiceJeunesse = row['indiceJeunesse'] && row['indiceJeunesse'].trim() ? parseFloat(row['indiceJeunesse']) : null;
-                    const partPopEt = row['partPopEt'] && row['partPopEt'].trim() ? parseFloat(row['partPopEt']) : null;
-                    const partPopImmi = row['partPopImmi'] && row['partPopImmi'].trim() ? parseFloat(row['partPopImmi']) : null;
-                    const partMenImmi = row['partMenImmi'] && row['partMenImmi'].trim() ? parseFloat(row['partMenImmi']) : null;
-                    const partMenEt = row['partMenEt'] && row['partMenEt'].trim() ? parseFloat(row['partMenEt']) : null;
-                    const partMen1p = row['partMen1p'] && row['partMen1p'].trim() ? parseFloat(row['partMen1p']) : null;
-                    const partMen2p = row['partMen2p'] && row['partMen2p'].trim() ? parseFloat(row['partMen2p']) : null;
-                    const partMen3p = row['partMen3p'] && row['partMen3p'].trim() ? parseFloat(row['partMen3p']) : null;
-                    const partMen45p = row['partMen45p'] && row['partMen45p'].trim() ? parseFloat(row['partMen45p']) : null;
-                    const partMen6pp = row['partMen6pp'] && row['partMen6pp'].trim() ? parseFloat(row['partMen6pp']) : null;
-                    const nombre_menages = row['nombre_menages'] && row['nombre_menages'].trim() ? parseFloat(row['nombre_menages']) : null;
-                    const nombre_logements_sociaux = row['nombre_logements_sociaux'] && row['nombre_logements_sociaux'].trim() ? parseFloat(row['nombre_logements_sociaux']) : null;
-                    const taux_logements_sociaux = row['taux_logements_sociaux'] && row['taux_logements_sociaux'].trim() ? parseFloat(row['taux_logements_sociaux']) : null;
-                    const taux_d_emploi = row['taux_d_emploi'] && row['taux_d_emploi'].trim() ? parseFloat(row['taux_d_emploi']) : null;
-                    const taux_pauvrete_60 = row['taux_pauvrete_60%'] && row['taux_pauvrete_60%'].trim() ? parseFloat(row['taux_pauvrete_60%']) : null;
-                    const personnes_couvertes_CAF = row['personnes_couvertes_CAF'] && row['personnes_couvertes_CAF'].trim() ? parseFloat(row['personnes_couvertes_CAF']) : null;
-                    const allocataires_CAF = row['allocataires_CAF'] && row['allocataires_CAF'].trim() ? parseFloat(row['allocataires_CAF']) : null;
-                    const RSA_socle = row['RSA_socle'] && row['RSA_socle'].trim() ? parseFloat(row['RSA_socle']) : null;
-
-                    qpvRows++;
-                    qpvBatch.push([
-                        cog,
-                        lib_com,
-                        codeQPV,
-                        lib_qp,
-                        insee_reg,
-                        lib_reg,
-                        insee_dep,
-                        lib_dep,
-                        siren_epci,
-                        lib_epci,
-                        popMuniQPV,
-                        indiceJeunesse,
-                        partPopEt,
-                        partPopImmi,
-                        partMenImmi,
-                        partMenEt,
-                        partMen1p,
-                        partMen2p,
-                        partMen3p,
-                        partMen45p,
-                        partMen6pp,
-                        nombre_menages,
-                        nombre_logements_sociaux,
-                        taux_logements_sociaux,
-                        taux_d_emploi,
-                        taux_pauvrete_60,
-                        personnes_couvertes_CAF,
-                        allocataires_CAF,
-                        RSA_socle
-                    ]);
-                })
-                .on('end', () => {
-                    console.log(`Lecture de analyse_qpv.csv terminée: ${qpvRows} lignes`);
-                    if (qpvRows === 0) {
-                        console.warn('Avertissement: analyse_qpv.csv est vide ou n\'a pas de données valides');
-                    }
-                    resolve();
-                })
-                .on('error', (err) => {
-                    console.error('Erreur lecture analyse_qpv.csv:', err.message);
+            this.db.run(sql, (err) => {
+                if (err) {
+                    console.error(`Error creating table ${this.tableName}:`, err.message);
                     reject(err);
-                });
-        });
-    }
+                    return;
+                }
 
-    function insertQPVData() {
-        return new Promise((resolve, reject) => {
-            db.serialize(() => {
-                db.run(`
-                    CREATE TABLE IF NOT EXISTS qpv_data (
-                        COG TEXT,
-                        lib_com TEXT,
-                        codeQPV TEXT,
-                        lib_qp TEXT,
-                        insee_reg INTEGER,
-                        lib_reg TEXT,
-                        insee_dep TEXT,
-                        lib_dep TEXT,
-                        siren_epci TEXT,
-                        lib_epci TEXT,
-                        popMuniQPV INTEGER,
-                        indiceJeunesse REAL,
-                        partPopEt REAL,
-                        partPopImmi REAL,
-                        partMenImmi REAL,
-                        partMenEt REAL,
-                        partMen1p REAL,
-                        partMen2p REAL,
-                        partMen3p REAL,
-                        partMen45p REAL,
-                        partMen6pp REAL,
-                        nombre_menages REAL,
-                        nombre_logements_sociaux REAL,
-                        taux_logements_sociaux REAL,
-                        taux_d_emploi REAL,
-                        taux_pauvrete_60 REAL,
-                        personnes_couvertes_CAF REAL,
-                        allocataires_CAF REAL,
-                        RSA_socle REAL,
-                        PRIMARY KEY (COG, codeQPV)
-                    )
-                `, (err) => {
-                    if (err) {
-                        console.error('Erreur création table qpv_data:', err.message);
-                        reject(err);
-                        return;
-                    }
-
-                    db.run('CREATE INDEX IF NOT EXISTS idx_qpv_cog ON qpv_data(COG)', (err) => {
-                        if (err) {
-                            console.error('Erreur création index qpv_data:', err.message);
-                            reject(err);
-                            return;
-                        }
-
-                        db.run('CREATE INDEX IF NOT EXISTS idx_qpv_dep ON qpv_data(insee_dep)', (err) => {
+                // Create indexes
+                if (this.indexes.length > 0) {
+                    let indexCount = 0;
+                    this.indexes.forEach(indexSql => {
+                        this.db.run(indexSql, (err) => {
                             if (err) {
-                                console.error('Erreur création index qpv_data département:', err.message);
+                                console.error(`Error creating index:`, err.message);
                                 reject(err);
                                 return;
                             }
-
-                            db.run('BEGIN TRANSACTION', (err) => {
-                                if (err) {
-                                    console.error('Erreur début transaction qpv_data:', err.message);
-                                    reject(err);
-                                    return;
-                                }
-
-                                if (qpvBatch.length > 0) {
-                                    for (let i = 0; i < qpvBatch.length; i += batchSize) {
-                                        const batch = qpvBatch.slice(i, i + batchSize);
-                                        const placeholders = batch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
-                                        const flatBatch = [].concat(...batch);
-                                        
-                                        db.run(
-                                            `INSERT OR REPLACE INTO qpv_data (
-                                                COG, lib_com, codeQPV, lib_qp, insee_reg, lib_reg, insee_dep, lib_dep,
-                                                siren_epci, lib_epci, popMuniQPV, indiceJeunesse, partPopEt, partPopImmi,
-                                                partMenImmi, partMenEt, partMen1p, partMen2p, partMen3p, partMen45p,
-                                                partMen6pp, nombre_menages, nombre_logements_sociaux, taux_logements_sociaux,
-                                                taux_d_emploi, taux_pauvrete_60, personnes_couvertes_CAF, allocataires_CAF, RSA_socle
-                                            ) VALUES ${placeholders}`,
-                                            flatBatch,
-                                            (err) => {
-                                                if (err) {
-                                                    console.error('Erreur insertion batch qpv_data:', err.message);
-                                                }
-                                            }
-                                        );
-                                    }
-                                }
-
-                                db.run('COMMIT', (err) => {
-                                    if (err) {
-                                        console.error('Erreur commit qpv_data:', err.message);
-                                        db.run('ROLLBACK');
-                                        reject(err);
-                                    } else {
-                                        console.log(`Importation de ${qpvRows} lignes dans qpv_data terminée`);
-                                        resolve();
-                                    }
-                                });
-                            });
+                            indexCount++;
+                            if (indexCount === this.indexes.length) {
+                                resolve();
+                            }
                         });
                     });
-                });
+                } else {
+                    resolve();
+                }
             });
         });
-    }
+    };
 
-    return readQPVData().then(insertQPVData).then(() => callback(null)).catch((err) => {
-        console.error('Échec de l\'importation des données QPV:', err.message);
-        callback(err);
+    const importer = new BaseImporter({
+        csvPath: 'setup/inputFiles/analyse_qpv.csv',
+        tableName: 'qpv_data',
+        columns: columns,
+        requiredFields: requiredFields,
+        processRow: processRow,
+        db: db,
+        indexes: indexes,
+        createTable: createTable
     });
+
+    importer.import()
+        .then(() => callback(null))
+        .catch((err) => {
+            console.error('Failed to import QPV data:', err.message);
+            callback(err);
+        });
 }
 
 module.exports = { importQPV };

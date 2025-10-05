@@ -1,121 +1,119 @@
 
-const fs = require('fs');
-const csv = require('csv-parser');
+const BaseImporter = require('./baseImporter');
+const { parseNumericField, trimField, normalizeDepartmentCode } = require('./importUtils');
 
-function importMosques(db, callback) {
-    const csvPath = 'setup/mosques_france_with_cog.csv';
-    
-    if (!fs.existsSync(csvPath)) {
-        console.log('Mosques CSV file not found, skipping...');
-        return callback(null);
+class MosquesImporter extends BaseImporter {
+    constructor(db) {
+        super({
+            csvPath: 'setup/inputFiles/mosques_france_with_cog.csv',
+            tableName: 'mosques',
+            columns: [
+                { name: 'name', type: 'TEXT' },
+                { name: 'address', type: 'TEXT' },
+                { name: 'latitude', type: 'REAL' },
+                { name: 'longitude', type: 'REAL' },
+                { name: 'commune', type: 'TEXT' },
+                { name: 'departement', type: 'TEXT' },
+                { name: 'cog', type: 'TEXT' }
+            ],
+            db,
+            processRow: MosquesImporter.customProcessRow,
+            validateRow: MosquesImporter.customValidateRow,
+            indexes: [] // No specific indexes needed
+        });
     }
 
-    console.log('Starting mosque data import...');
+    async defaultCreateTable() {
+        return new Promise((resolve, reject) => {
+            const columnDefs = this.columns.map(col => {
+                let def = `${col.name} ${col.type}`;
+                if (col.required) def += ' NOT NULL';
+                return def;
+            }).join(', ');
 
-    db.serialize(() => {
-        // Create mosques table
-        db.run(`
-            CREATE TABLE IF NOT EXISTS mosques (
+            const sql = `CREATE TABLE IF NOT EXISTS ${this.tableName} (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT,
-                address TEXT,
-                latitude REAL,
-                longitude REAL,
-                commune TEXT,
-                departement TEXT,
-                cog TEXT,
+                ${columnDefs},
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-            )
-        `, (err) => {
-            if (err) {
-                console.error('Error creating mosques table:', err.message);
-                return callback(err);
-            }
+            )`;
 
-            const results = [];
-            let processedCount = 0;
+            this.db.run(sql, (err) => {
+                if (err) {
+                    console.error(`Error creating table ${this.tableName}:`, err.message);
+                    reject(err);
+                    return;
+                }
 
-            fs.createReadStream(csvPath)
-                .pipe(csv())
-                .on('data', (row) => {
-                    // Parse and validate coordinates
-                    const latitude = parseFloat(row.latitude || row.lat);
-                    const longitude = parseFloat(row.longitude || row.lng || row.lon);
-                    
-                    if (isNaN(latitude) || isNaN(longitude)) {
-                        return; // Skip invalid coordinates
-                    }
-
-                    // Filter to metropolitan France only (exclude overseas territories)
-                    const overseasDepartements = ['971', '972', '973', '974', '976'];
-                    const departement = row.departement || row.dept || '';
-                    
-                    if (overseasDepartements.includes(departement)) {
-                        return; // Skip overseas territories
-                    }
-
-                    results.push({
-                        name: row.nom || 'Mosquée',
-                        address: row.adresse || '',
-                        latitude: latitude,
-                        longitude: longitude,
-                        commune: row.commune || '',
-                        departement: departement,
-                        cog: row.cog || row.COG || ''
-                    });
-                })
-                .on('end', () => {
-                    console.log(`Processing ${results.length} mosques...`);
-
-                    if (results.length === 0) {
-                        console.log('No valid mosque data found');
-                        return callback(null);
-                    }
-
-                    db.run('BEGIN TRANSACTION');
-
-                    const insertStmt = db.prepare(`
-                        INSERT INTO mosques (name, address, latitude, longitude, commune, departement, cog)
-                        VALUES (?, ?, ?, ?, ?, ?, ?)
-                    `);
-
-                    results.forEach(mosque => {
-                        insertStmt.run([
-                            mosque.name,
-                            mosque.address,
-                            mosque.latitude,
-                            mosque.longitude,
-                            mosque.commune,
-                            mosque.departement,
-                            mosque.cog
-                        ]);
-                        processedCount++;
-                    });
-
-                    insertStmt.finalize((err) => {
-                        if (err) {
-                            console.error('Error inserting mosque data:', err.message);
-                            db.run('ROLLBACK');
-                            return callback(err);
-                        }
-
-                        db.run('COMMIT', (err) => {
+                // Create indexes if provided
+                if (this.indexes.length > 0) {
+                    let indexCount = 0;
+                    this.indexes.forEach(indexSql => {
+                        this.db.run(indexSql, (err) => {
                             if (err) {
-                                console.error('Error committing mosque data:', err.message);
-                                return callback(err);
+                                console.error(`Error creating index:`, err.message);
+                                reject(err);
+                                return;
                             }
-
-                            console.log(`✓ Imported ${processedCount} mosques`);
-                            callback(null);
+                            indexCount++;
+                            if (indexCount === this.indexes.length) {
+                                resolve();
+                            }
                         });
                     });
-                })
-                .on('error', (error) => {
-                    console.error('Error reading mosques CSV:', error.message);
-                    callback(error);
-                });
+                } else {
+                    resolve();
+                }
+            });
         });
-    });
+    }
+
+    static customValidateRow(row) {
+        // Parse coordinates
+        const latitude = parseNumericField(row.latitude || row.lat, false);
+        const longitude = parseNumericField(row.longitude || row.lng || row.lon, false);
+
+        if (isNaN(latitude) || isNaN(longitude)) {
+            return false; // Skip invalid coordinates
+        }
+
+        // Filter to metropolitan France only (exclude overseas territories)
+        const overseasDepartements = ['971', '972', '973', '974', '976'];
+        const departement = normalizeDepartmentCode(row.departement || row.dept || '');
+
+        if (!departement || overseasDepartements.includes(departement)) {
+            return false; // Skip overseas territories or invalid departements
+        }
+
+        return true;
+    }
+
+    static customProcessRow(row) {
+        return [
+            trimField(row.nom) || 'Mosquée',
+            trimField(row.adresse) || '',
+            parseNumericField(row.latitude || row.lat),
+            parseNumericField(row.longitude || row.lng || row.lon),
+            trimField(row.commune) || '',
+            normalizeDepartmentCode(row.departement || row.dept) || '',
+            trimField(row.cog || row.COG) || ''
+        ];
+    }
+}
+
+function importMosques(db, callback) {
+    try {
+        const importer = new MosquesImporter(db);
+        importer.import().then(() => {
+            console.log('✓ Mosque data import completed');
+            callback(null);
+        }).catch(err => {
+            console.error('Error importing mosque data:', err.message);
+            callback(err);
+        });
+    } catch (err) {
+        console.error('Error importing mosque data:', err.message);
+        callback(err);
+    }
 }
 
 module.exports = { importMosques };

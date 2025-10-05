@@ -1,531 +1,244 @@
-const fs = require('fs');
-const csv = require('csv-parser');
+const BaseImporter = require('./baseImporter');
+const { normalizeDepartmentCode } = require('./importUtils');
+
+const scoreColumns = [
+    { name: 'population', type: 'INTEGER' },
+    { name: 'insecurite_score', type: 'INTEGER' },
+    { name: 'immigration_score', type: 'INTEGER' },
+    { name: 'islamisation_score', type: 'INTEGER' },
+    { name: 'defrancisation_score', type: 'INTEGER' },
+    { name: 'wokisme_score', type: 'INTEGER' },
+    { name: 'number_of_mosques', type: 'INTEGER' },
+    { name: 'mosque_p100k', type: 'REAL' },
+    { name: 'total_qpv', type: 'INTEGER' },
+    { name: 'pop_in_qpv_pct', type: 'REAL' },
+    { name: 'logements_sociaux_pct', type: 'REAL' },
+    { name: 'Total_places_migrants', type: 'INTEGER' },
+    { name: 'places_migrants_p1k', type: 'REAL' }
+];
+
+const countryColumns = [
+    { name: 'country', type: 'TEXT' },
+    ...scoreColumns
+];
+
+const departementColumns = [
+    { name: 'departement', type: 'TEXT' },
+    ...scoreColumns
+];
+
+const locationColumns = [
+    { name: 'COG', type: 'TEXT' },
+    { name: 'departement', type: 'TEXT' },
+    { name: 'commune', type: 'TEXT' },
+    { name: 'population', type: 'INTEGER' },
+    { name: 'logements_sociaux_pct', type: 'REAL' },
+    { name: 'insecurite_score', type: 'INTEGER' },
+    { name: 'immigration_score', type: 'INTEGER' },
+    { name: 'islamisation_score', type: 'INTEGER' },
+    { name: 'defrancisation_score', type: 'INTEGER' },
+    { name: 'wokisme_score', type: 'INTEGER' },
+    { name: 'number_of_mosques', type: 'INTEGER' },
+    { name: 'mosque_p100k', type: 'REAL' },
+    { name: 'total_qpv', type: 'INTEGER' },
+    { name: 'pop_in_qpv_pct', type: 'REAL' },
+    { name: 'Total_places_migrants', type: 'INTEGER' },
+    { name: 'places_migrants_p1k', type: 'REAL' }
+];
+
+function processCountryRow(row) {
+    return [
+        row['country'],
+        parseInt(row['population'].replace(/\s/g, '')) || 0,
+        parseInt(row['Insécurité_Score']) || 0,
+        parseInt(row['Immigration_Score']) || 0,
+        parseInt(row['Islamisation_Score']) || 0,
+        parseInt(row['Défrancisation_Score']) || 0,
+        parseInt(row['Wokisme_Score']) || 0,
+        parseInt(row['Number_of_Mosques']) || 0,
+        parseFloat(row['Mosque_p100k']) || 0,
+        parseInt(row['Total_QPV']) || 0,
+        parseFloat(row['Pop_in_QPV_pct']) || 0,
+        parseFloat(row['logements_sociaux_pct']) || 0,
+        parseInt(row['Total_places_migrants']) || 0,
+        parseFloat(row['places_migrants_p1k']) || 0
+    ];
+}
+
+function processDepartementRow(row) {
+    const departement = normalizeDepartmentCode(row['departement']);
+    return [
+        departement,
+        parseInt(row['population'].replace(/\s/g, '')) || 0,
+        parseInt(row['Insécurité_Score']) || 0,
+        parseInt(row['Immigration_Score']) || 0,
+        parseInt(row['Islamisation_Score']) || 0,
+        parseInt(row['Défrancisation_Score']) || 0,
+        parseInt(row['Wokisme_Score']) || 0,
+        parseInt(row['Number_of_Mosques']) || 0,
+        parseFloat(row['Mosque_p100k']) || 0,
+        parseInt(row['Total_QPV']) || 0,
+        parseFloat(row['Pop_in_QPV_pct']) || 0,
+        parseFloat(row['logements_sociaux_pct']) || 0,
+        parseInt(row['Total_places_migrants']) || 0,
+        parseFloat(row['places_migrants_p1k']) || 0
+    ];
+}
+
+function processLocationRow(row) {
+    const departement = normalizeDepartmentCode(row['departement']);
+    return [
+        row['COG'],
+        departement,
+        row['commune'],
+        parseInt(row['population'].replace(/\s/g, '')) || 0,
+        parseFloat(row['logements_sociaux_pct']) || 0,
+        parseInt(row['Insécurité_Score']) || 0,
+        parseInt(row['Immigration_Score']) || 0,
+        parseInt(row['Islamisation_Score']) || 0,
+        parseInt(row['Défrancisation_Score']) || 0,
+        parseInt(row['Wokisme_Score']) || 0,
+        parseInt(row['Number_of_Mosques']) || 0,
+        parseFloat(row['Mosque_p100k']) || 0,
+        parseInt(row['Total_QPV']) || 0,
+        parseFloat(row['Pop_in_QPV_pct']) || 0,
+        parseInt(row['Total_places_migrants']) || 0,
+        parseFloat(row['places_migrants_p1k']) || 0
+    ];
+}
+
+function validateCountryRow(row) {
+    const missingFields = [];
+    if (!row['country']) missingFields.push('country');
+    if (!row['population']) missingFields.push('population');
+    if (!row['Mosque_p100k'] && row['Mosque_p100k'] !== '0') missingFields.push('Mosque_p100k');
+    if (!row['logements_sociaux_pct'] && row['logements_sociaux_pct'] !== '0') missingFields.push('logements_sociaux_pct');
+    if (missingFields.length > 0) {
+        console.warn(`Ligne ignorée dans france_scores.csv (champs manquants: ${missingFields.join(', ')}):`, row);
+        return false;
+    }
+    return true;
+}
+
+function validateDepartementRow(row) {
+    const missingFields = [];
+    if (!row['departement']) missingFields.push('departement');
+    if (!row['population']) missingFields.push('population');
+    if (!row['Mosque_p100k'] && row['Mosque_p100k'] !== '0') missingFields.push('Mosque_p100k');
+    if (!row['logements_sociaux_pct'] && row['logements_sociaux_pct'] !== '0') missingFields.push('logements_sociaux_pct');
+    if (!row['Total_places_migrants'] && row['Total_places_migrants'] !== '0') missingFields.push('Total_places_migrants');
+    if (!row['places_migrants_p1k'] && row['places_migrants_p1k'] !== '0') missingFields.push('places_migrants_p1k');
+    if (missingFields.length > 0) {
+        console.warn(`Ligne ignorée dans departement_scores.csv (champs manquants: ${missingFields.join(', ')}):`, row);
+        return false;
+    }
+    const departement = normalizeDepartmentCode(row['departement']);
+    if (!departement) {
+        console.warn(`Code département invalide ignoré: ${row['departement']}`, row);
+        return false;
+    }
+    return true;
+}
+
+function validateLocationRow(row) {
+    const missingFields = [];
+    if (!row['COG']) missingFields.push('COG');
+    if (!row['commune']) missingFields.push('commune');
+    if (!row['departement']) missingFields.push('departement');
+    if (!row['population']) missingFields.push('population');
+    if (!row['Mosque_p100k'] && row['Mosque_p100k'] !== '0') missingFields.push('Mosque_p100k');
+    if (!row['logements_sociaux_pct'] && row['logements_sociaux_pct'] !== '0') missingFields.push('logements_sociaux_pct');
+    if (missingFields.length > 0) {
+        console.warn(`Ligne ignorée dans commune_scores.csv (champs manquants: ${missingFields.join(', ')}):`, row);
+        return false;
+    }
+    const departement = normalizeDepartmentCode(row['departement']);
+    if (!departement) {
+        console.warn(`Code département invalide ignoré: ${row['departement']}`, row);
+        return false;
+    }
+    return true;
+}
+
+function createLocationsTable() {
+    return new Promise((resolve, reject) => {
+        const sql = `
+            CREATE TABLE IF NOT EXISTS locations (
+                COG TEXT,
+                departement TEXT,
+                commune TEXT,
+                population INTEGER,
+                logements_sociaux_pct REAL,
+                insecurite_score INTEGER,
+                immigration_score INTEGER,
+                islamisation_score INTEGER,
+                defrancisation_score INTEGER,
+                wokisme_score INTEGER,
+                number_of_mosques INTEGER,
+                mosque_p100k REAL,
+                total_qpv INTEGER,
+                pop_in_qpv_pct REAL,
+                Total_places_migrants INTEGER,
+                places_migrants_p1k REAL,
+                UNIQUE(COG, commune)
+            )
+        `;
+        this.db.run(sql, (err) => {
+            if (err) {
+                console.error('Erreur création table locations:', err.message);
+                reject(err);
+                return;
+            }
+            this.db.run('CREATE INDEX IF NOT EXISTS idx_locations_dept_commune ON locations(departement, commune)', (err) => {
+                if (err) {
+                    console.error('Erreur création index locations:', err.message);
+                    reject(err);
+                    return;
+                }
+                resolve();
+            });
+        });
+    });
+}
 
 function importScores(db, callback) {
-    const batchSize = 1000;
+    const countryImporter = new BaseImporter({
+        csvPath: 'setup/inputFiles/france_scores.csv',
+        tableName: 'country',
+        columns: countryColumns,
+        processRow: processCountryRow,
+        validateRow: validateCountryRow,
+        db,
+        indexes: ['CREATE INDEX IF NOT EXISTS idx_country ON country(country)'],
+        insertMode: 'INSERT OR IGNORE',
+        allowMissingCsv: true
+    });
 
-    // Import country from france_scores.csv
-    function importCountry() {
-        let countryRows = 0;
-        let countryBatch = [];
+    const departementImporter = new BaseImporter({
+        csvPath: 'setup/inputFiles/departement_scores.csv',
+        tableName: 'departements',
+        columns: departementColumns,
+        processRow: processDepartementRow,
+        validateRow: validateDepartementRow,
+        db,
+        indexes: ['CREATE INDEX IF NOT EXISTS idx_departements ON departements(departement)'],
+        insertMode: 'INSERT OR IGNORE'
+    });
 
-        function readCountryScores() {
-            return new Promise((resolve, reject) => {
-                if (!fs.existsSync('setup/france_scores.csv')) {
-                    console.error('Erreur: setup/france_scores.csv n\'existe pas dans le répertoire courant');
-                    resolve(); // Continue with empty data
-                    return;
-                }
+    const locationImporter = new BaseImporter({
+        csvPath: 'setup/inputFiles/commune_scores.csv',
+        tableName: 'locations',
+        columns: locationColumns,
+        processRow: processLocationRow,
+        validateRow: validateLocationRow,
+        db,
+        createTable: createLocationsTable,
+        insertMode: 'INSERT OR IGNORE'
+    });
 
-                fs.createReadStream('setup/france_scores.csv')
-                    .pipe(csv())
-                    .on('data', (row) => {
-                        const missingFields = [];
-                        if (!row['country']) missingFields.push('country');
-                        if (!row['population']) missingFields.push('population');
-                        if (!row['Mosque_p100k'] && row['Mosque_p100k'] !== '0') missingFields.push('Mosque_p100k');
-                        if (!row['logements_sociaux_pct'] && row['logements_sociaux_pct'] !== '0') missingFields.push('logements_sociaux_pct');
-
-
-                        if (missingFields.length > 0) {
-                            console.warn(`Ligne ignorée dans france_scores.csv (champs manquants: ${missingFields.join(', ')}):`, row);
-                            return;
-                        }
-
-                        const population = parseInt(row['population'].replace(/\s/g, '')) || 0;
-                        const insecurite_score = parseInt(row['Insécurité_Score']) || 0;
-                        const immigration_score = parseInt(row['Immigration_Score']) || 0;
-                        const islamisation_score = parseInt(row['Islamisation_Score']) || 0;
-                        const defrancisation_score = parseInt(row['Défrancisation_Score']) || 0;
-                        const wokisme_score = parseInt(row['Wokisme_Score']) || 0;
-                        const number_of_mosques = parseInt(row['Number_of_Mosques']) || 0;
-                        const mosque_p100k = parseFloat(row['Mosque_p100k']) || 0;
-                        const total_qpv = parseInt(row['Total_QPV']) || 0;
-                        const pop_in_qpv_pct = parseFloat(row['Pop_in_QPV_pct']) || 0;
-                        const logements_sociaux_pct = parseFloat(row['logements_sociaux_pct']) || 0;
-                        const total_places_migrants = parseInt(row['Total_places_migrants']) || 0;
-                        const places_migrants_p1k = parseFloat(row['places_migrants_p1k']) || 0;
-
-                        countryRows++;
-                        countryBatch.push([
-                            row['country'],
-                            population,
-                            insecurite_score,
-                            immigration_score,
-                            islamisation_score,
-                            defrancisation_score,
-                            wokisme_score,
-                            number_of_mosques,
-                            mosque_p100k,
-                            total_qpv,
-                            pop_in_qpv_pct,
-                            logements_sociaux_pct,
-                            total_places_migrants,
-                            places_migrants_p1k
-                        ]);
-                    })
-                    .on('end', () => {
-                        console.log(`Lecture de france_scores.csv terminée: ${countryRows} lignes`);
-                        if (countryRows === 0) {
-                            console.warn('Avertissement: france_scores.csv est vide ou n\'a pas de données valides');
-                        }
-                        resolve();
-                    })
-                    .on('error', (err) => {
-                        console.error('Erreur lecture france_scores.csv:', err.message);
-                        reject(err);
-                    });
-            });
-        }
-
-        function insertCountry() {
-            return new Promise((resolve, reject) => {
-                db.serialize(() => {
-                    db.run(`
-                        CREATE TABLE IF NOT EXISTS country (
-                            country TEXT PRIMARY KEY,
-                            population INTEGER,
-                            insecurite_score INTEGER,
-                            immigration_score INTEGER,
-                            islamisation_score INTEGER,
-                            defrancisation_score INTEGER,
-                            wokisme_score INTEGER,
-                            number_of_mosques INTEGER,
-                            mosque_p100k REAL,
-                            total_qpv INTEGER,
-                            pop_in_qpv_pct REAL,
-                            logements_sociaux_pct REAL,
-                            Total_places_migrants INTEGER,
-                            places_migrants_p1k REAL
-                        )
-                    `, (err) => {
-                        if (err) {
-                            console.error('Erreur création table country:', err.message);
-                            reject(err);
-                            return;
-                        }
-
-                        db.run('CREATE INDEX IF NOT EXISTS idx_country ON country(country)', (err) => {
-                            if (err) {
-                                console.error('Erreur création index country:', err.message);
-                                reject(err);
-                                return;
-                            }
-
-                            db.run('BEGIN TRANSACTION', (err) => {
-                                if (err) {
-                                    console.error('Erreur début transaction country:', err.message);
-                                    reject(err);
-                                    return;
-                                }
-
-                                if (countryBatch.length > 0) {
-                                    const placeholders = countryBatch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
-                                    const flatBatch = [].concat(...countryBatch);
-                                    db.run(
-                                        `INSERT OR IGNORE INTO country (country, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct, logements_sociaux_pct, Total_places_migrants, places_migrants_p1k) VALUES ${placeholders}`,
-                                        flatBatch,
-                                        (err) => {
-                                            if (err) {
-                                                console.error('Erreur insertion batch country:', err.message);
-                                                db.run('ROLLBACK');
-                                                reject(err);
-                                                return;
-                                            }
-                                            db.run('COMMIT', (err) => {
-                                                if (err) {
-                                                    console.error('Erreur commit country:', err.message);
-                                                    db.run('ROLLBACK');
-                                                    reject(err);
-                                                } else {
-                                                    console.log(`Importation de ${countryRows} lignes dans country terminée`);
-                                                    resolve();
-                                                }
-                                            });
-                                        }
-                                    );
-                                } else {
-                                    db.run('COMMIT', () => {
-                                        console.log('Aucune donnée à insérer dans country');
-                                        resolve();
-                                    });
-                                }
-                            });
-                        });
-                    });
-                });
-            });
-        }
-
-        return readCountryScores().then(insertCountry);
-    }
-
-    // Import departments from departement_scores.csv
-    function importDepartments() {
-        let departmentRows = 0;
-        let departmentBatch = [];
-
-        function readDepartmentScores() {
-            return new Promise((resolve, reject) => {
-                if (!fs.existsSync('setup/departement_scores.csv')) {
-                    console.error('Erreur: setup/departement_scores.csv n\'existe pas dans le répertoire courant');
-                    reject(new Error('Fichier setup/departement_scores.csv manquant'));
-                    return;
-                }
-
-                fs.createReadStream('setup/departement_scores.csv')
-                    .pipe(csv())
-                    .on('data', (row) => {
-                        const missingFields = [];
-                        if (!row['departement']) missingFields.push('departement');
-                        if (!row['population']) missingFields.push('population');
-                        if (!row['Mosque_p100k'] && row['Mosque_p100k'] !== '0') missingFields.push('Mosque_p100k');
-                        if (!row['logements_sociaux_pct'] && row['logements_sociaux_pct'] !== '0') missingFields.push('logements_sociaux_pct');
-                        if (!row['Total_places_migrants'] && row['Total_places_migrants'] !== '0') missingFields.push('Total_places_migrants');
-                        if (!row['places_migrants_p1k'] && row['places_migrants_p1k'] !== '0') missingFields.push('places_migrants_p1k');
-
-                        if (missingFields.length > 0) {
-                            console.warn(`Ligne ignorée dans departement_scores.csv (champs manquants: ${missingFields.join(', ')}):`, row);
-                            return;
-                        }
-
-                        let departement = row['departement'].trim().toUpperCase();
-                        if (/^\d+$/.test(departement)) {
-                            departement = departement.padStart(2, '0');
-                        }
-                        if (!/^(0[1-9]|[1-8][0-9]|9[0-5]|2[AB]|97[1-6])$/.test(departement)) {
-                            console.warn(`Code département invalide ignoré: ${departement}`, row);
-                            return;
-                        }
-
-                        const population = parseInt(row['population'].replace(/\s/g, '')) || 0;
-                        const insecurite_score = parseInt(row['Insécurité_Score']) || 0;
-                        const immigration_score = parseInt(row['Immigration_Score']) || 0;
-                        const islamisation_score = parseInt(row['Islamisation_Score']) || 0;
-                        const defrancisation_score = parseInt(row['Défrancisation_Score']) || 0;
-                        const wokisme_score = parseInt(row['Wokisme_Score']) || 0;
-                        const number_of_mosques = parseInt(row['Number_of_Mosques']) || 0;
-                        const mosque_p100k = parseFloat(row['Mosque_p100k']) || 0;
-                        const total_qpv = parseInt(row['Total_QPV']) || 0;
-                        const pop_in_qpv_pct = parseFloat(row['Pop_in_QPV_pct']) || 0;
-                        const logements_sociaux_pct = parseFloat(row['logements_sociaux_pct']) || 0;
-                        const total_places_migrants = parseInt(row['Total_places_migrants']) || 0;
-                        const places_migrants_p1k = parseFloat(row['places_migrants_p1k']) || 0;
-
-                        departmentRows++;
-                        departmentBatch.push([
-                            departement,
-                            population,
-                            insecurite_score,
-                            immigration_score,
-                            islamisation_score,
-                            defrancisation_score,
-                            wokisme_score,
-                            number_of_mosques,
-                            mosque_p100k,
-                            total_qpv,
-                            pop_in_qpv_pct,
-                            logements_sociaux_pct,
-                            total_places_migrants,
-                            places_migrants_p1k
-                        ]);
-                    })
-                    .on('end', () => {
-                        console.log(`Lecture de departement_scores.csv terminée: ${departmentRows} lignes`);
-                        if (departmentRows === 0) {
-                            console.warn('Avertissement: departement_scores.csv est vide ou n\'a pas de données valides');
-                        }
-                        resolve();
-                    })
-                    .on('error', (err) => {
-                        console.error('Erreur lecture departement_scores.csv:', err.message);
-                        reject(err);
-                    });
-            });
-        }
-
-        function insertDepartments() {
-            return new Promise((resolve, reject) => {
-                db.serialize(() => {
-                    db.run(`
-                        CREATE TABLE IF NOT EXISTS departements (
-                            departement TEXT PRIMARY KEY,
-                            population INTEGER,
-                            insecurite_score INTEGER,
-                            immigration_score INTEGER,
-                            islamisation_score INTEGER,
-                            defrancisation_score INTEGER,
-                            wokisme_score INTEGER,
-                            number_of_mosques INTEGER,
-                            mosque_p100k REAL,
-                            total_qpv INTEGER,
-                            pop_in_qpv_pct REAL,
-                            logements_sociaux_pct REAL,
-                            Total_places_migrants INTEGER,
-                            places_migrants_p1k REAL
-                        )
-                    `, (err) => {
-                        if (err) {
-                            console.error('Erreur création table departements:', err.message);
-                            reject(err);
-                            return;
-                        }
-
-                        db.run('CREATE INDEX IF NOT EXISTS idx_departements ON departements(departement)', (err) => {
-                            if (err) {
-                                console.error('Erreur création index departements:', err.message);
-                                reject(err);
-                                return;
-                            }
-
-                            db.run('BEGIN TRANSACTION', (err) => {
-                                if (err) {
-                                    console.error('Erreur début transaction departements:', err.message);
-                                    reject(err);
-                                    return;
-                                }
-
-                                for (let i = 0; i < departmentBatch.length; i += batchSize) {
-                                    const batch = departmentBatch.slice(i, i + batchSize);
-                                    const placeholders = batch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
-                                    const flatBatch = [].concat(...batch);
-                                    db.run(
-                                        `INSERT OR IGNORE INTO departements (departement, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct, logements_sociaux_pct, Total_places_migrants, places_migrants_p1k) VALUES ${placeholders}`,
-                                        flatBatch,
-                                        (err) => {
-                                            if (err) {
-                                                console.error('Erreur insertion batch departements:', err.message);
-                                            }
-                                        }
-                                    );
-                                }
-
-                                db.run('COMMIT', (err) => {
-                                    if (err) {
-                                        console.error('Erreur commit departements:', err.message);
-                                        db.run('ROLLBACK');
-                                        reject(err);
-                                    } else {
-                                        console.log(`Importation de ${departmentRows} lignes dans departements terminée`);
-                                        resolve();
-                                    }
-                                });
-                            });
-                        });
-                    });
-                });
-            });
-        }
-
-        return readDepartmentScores().then(insertDepartments);
-    }
-
-    // Import locations from commune_scores.csv
-    function importLocations() {
-        let locationsMap = new Map();
-        let locationRows = 0;
-
-        function readCommuneScores() {
-            return new Promise((resolve, reject) => {
-                if (!fs.existsSync('setup/commune_scores.csv')) {
-                    console.error('Erreur: setup/commune_scores.csv n\'existe pas dans le répertoire courant');
-                    reject(new Error('Fichier setup/commune_scores.csv manquant'));
-                    return;
-                }
-
-                fs.createReadStream('setup/commune_scores.csv')
-                    .pipe(csv())
-                    .on('data', (row) => {
-                        const missingFields = [];
-                        if (!row['COG']) missingFields.push('COG');
-                        if (!row['commune']) missingFields.push('commune');
-                        if (!row['departement']) missingFields.push('departement');
-                        if (!row['population']) missingFields.push('population');
-                        if (!row['Mosque_p100k'] && row['Mosque_p100k'] !== '0') missingFields.push('Mosque_p100k');
-                        if (!row['logements_sociaux_pct'] && row['logements_sociaux_pct'] !== '0') missingFields.push('logements_sociaux_pct');
-
-                        if (missingFields.length > 0) {
-                            console.warn(`Ligne ignorée dans commune_scores.csv (champs manquants: ${missingFields.join(', ')}):`, row);
-                            return;
-                        }
-
-                        let departement = row['departement'].trim().toUpperCase();
-                        if (/^\d+$/.test(departement)) {
-                            departement = departement.padStart(2, '0');
-                        }
-                        if (!/^(0[1-9]|[1-8][0-9]|9[0-5]|2[AB]|97[1-6])$/.test(departement)) {
-                            console.warn(`Code département invalide ignoré: ${departement}`, row);
-                            return;
-                        }
-
-                        const population = parseInt(row['population'].replace(/\s/g, '')) || 0;
-                        const logements_sociaux_pct = parseFloat(row['logements_sociaux_pct']) || 0;
-                        const insecurite_score = parseInt(row['Insécurité_Score']) || 0;
-                        const immigration_score = parseInt(row['Immigration_Score']) || 0;
-                        const islamisation_score = parseInt(row['Islamisation_Score']) || 0;
-                        const defrancisation_score = parseInt(row['Défrancisation_Score']) || 0;
-                        const wokisme_score = parseInt(row['Wokisme_Score']) || 0;
-                        const number_of_mosques = parseInt(row['Number_of_Mosques']) || 0;
-                        const mosque_p100k = parseFloat(row['Mosque_p100k']) || 0;
-                        const total_qpv = parseInt(row['Total_QPV']) || 0;
-                        const pop_in_qpv_pct = parseFloat(row['Pop_in_QPV_pct']) || 0;
-                        const total_places_migrants = parseInt(row['Total_places_migrants']) || 0;
-                        const places_migrants_p1k = parseFloat(row['places_migrants_p1k']) || 0;
-
-                        locationsMap.set(row['COG'], {
-                            code: row['COG'],
-                            departement: departement,
-                            commune: row['commune'],
-                            population: population,
-                            logements_sociaux_pct: logements_sociaux_pct,
-                            insecurite_score,
-                            immigration_score,
-                            islamisation_score,
-                            defrancisation_score,
-                            wokisme_score,
-                            number_of_mosques,
-                            mosque_p100k,
-                            total_qpv,
-                            pop_in_qpv_pct,
-                            total_places_migrants,
-                            places_migrants_p1k
-                        });
-                    })
-                    .on('end', () => {
-                        console.log(`Lecture de commune_scores.csv terminée: ${locationsMap.size} lignes`);
-                        if (locationsMap.size === 0) {
-                            console.warn('Avertissement: commune_scores.csv est vide ou n\'a pas de données valides');
-                        }
-                        resolve();
-                    })
-                    .on('error', (err) => {
-                        console.error('Erreur lecture commune_scores.csv:', err.message);
-                        reject(err);
-                    });
-            });
-        }
-
-        function insertLocations() {
-            return new Promise((resolve, reject) => {
-                db.serialize(() => {
-                    db.run(`
-                        CREATE TABLE IF NOT EXISTS locations (
-                            COG TEXT,
-                            departement TEXT,
-                            commune TEXT,
-                            population INTEGER,
-                            logements_sociaux_pct REAL,
-                            insecurite_score INTEGER,
-                            immigration_score INTEGER,
-                            islamisation_score INTEGER,
-                            defrancisation_score INTEGER,
-                            wokisme_score INTEGER,
-                            number_of_mosques INTEGER,
-                            mosque_p100k REAL,
-                            total_qpv INTEGER,
-                            pop_in_qpv_pct REAL,
-                            Total_places_migrants INTEGER,
-                            places_migrants_p1k REAL,
-                            UNIQUE(COG, commune)
-                        )
-                    `, (err) => {
-                        if (err) {
-                            console.error('Erreur création table locations:', err.message);
-                            reject(err);
-                            return;
-                        }
-
-                        db.run('CREATE INDEX IF NOT EXISTS idx_locations_dept_commune ON locations(departement, commune)', (err) => {
-                            if (err) {
-                                console.error('Erreur création index locations:', err.message);
-                                reject(err);
-                                return;
-                            }
-
-                            db.run('BEGIN TRANSACTION', (err) => {
-                                if (err) {
-                                    console.error('Erreur début transaction locations:', err.message);
-                                    reject(err);
-                                    return;
-                                }
-
-                                let locationBatch = [];
-                                for (const loc of locationsMap.values()) {
-                                    locationBatch.push([
-                                        loc.code,
-                                        loc.departement,
-                                        loc.commune,
-                                        loc.population,
-                                        loc.logements_sociaux_pct,
-                                        loc.insecurite_score,
-                                        loc.immigration_score,
-                                        loc.islamisation_score,
-                                        loc.defrancisation_score,
-                                        loc.wokisme_score,
-                                        loc.number_of_mosques,
-                                        loc.mosque_p100k,
-                                        loc.total_qpv,
-                                        loc.pop_in_qpv_pct,
-                                        loc.total_places_migrants,
-                                        loc.places_migrants_p1k
-                                    ]);
-
-                                    locationRows++;
-
-                                    if (locationBatch.length >= batchSize) {
-                                        const placeholders = locationBatch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
-                                        const flatBatch = [].concat(...locationBatch);
-                                        db.run(
-                                            `INSERT OR IGNORE INTO locations (COG, departement, commune, population, logements_sociaux_pct, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct, Total_places_migrants, places_migrants_p1k) VALUES ${placeholders}`,
-                                            flatBatch,
-                                            (err) => {
-                                                if (err) {
-                                                    console.error('Erreur insertion batch locations:', err.message);
-                                                }
-                                            }
-                                        );
-                                        locationBatch = [];
-                                    }
-                                }
-
-                                if (locationBatch.length > 0) {
-                                    const placeholders = locationBatch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
-                                    const flatBatch = [].concat(...locationBatch);
-                                    db.run(
-                                        `INSERT OR IGNORE INTO locations (COG, departement, commune, population, logements_sociaux_pct, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct, Total_places_migrants, places_migrants_p1k) VALUES ${placeholders}`,
-                                        flatBatch,
-                                        (err) => {
-                                            if (err) {
-                                                console.error('Erreur insertion batch final locations:', err.message);
-                                            }
-                                        }
-                                    );
-                                }
-
-                                db.run('COMMIT', (err) => {
-                                    if (err) {
-                                        console.error('Erreur commit locations:', err.message);
-                                        db.run('ROLLBACK');
-                                        reject(err);
-                                    } else {
-                                        console.log(`Importation de ${locationRows} lignes dans locations terminée`);
-                                        resolve();
-                                    }
-                                });
-                            });
-                        });
-                    });
-                });
-            });
-        }
-
-        return readCommuneScores().then(insertLocations);
-    }
-
-    // Execute imports sequentially
-    importCountry()
-        .then(importDepartments)
-        .then(importLocations)
+    countryImporter.import()
+        .then(() => departementImporter.import())
+        .then(() => locationImporter.import())
         .then(() => callback(null))
         .catch((err) => {
             console.error('Échec de l\'importation des scores:', err.message);
