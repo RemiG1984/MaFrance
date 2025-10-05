@@ -2,9 +2,10 @@
 const express = require("express");
 const router = express.Router();
 const cacheService = require("../services/cacheService");
+const { cacheMiddleware } = require("../middleware/cache");
 
 // GET /api/cache/stats - Get cache statistics
-router.get("/stats", (req, res) => {
+router.get("/stats", cacheMiddleware((req) => 'cache:stats'), (req, res) => {
   const stats = cacheService.getStats();
   res.json(stats);
 });

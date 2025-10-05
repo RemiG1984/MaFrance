@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../config/db");
+const { createDbHandler } = require("../middleware/errorHandler");
+const { cacheMiddleware } = require("../middleware/cache");
 const {
   validateDepartement,
   validateSort,
@@ -8,15 +10,6 @@ const {
   validatePagination,
   validatePopulationRange,
 } = require("../middleware/validate");
-
-// Centralized error handler for database queries
-const handleDbError = (err, res, next) => {
-  const error = new Error("Erreur lors de la requête à la base de données");
-  error.status = 500;
-  error.details = err.message;
-  console.error("Database error:", err.message);
-  return next(error);
-};
 
 // GET /api/rankings/communes
 router.get(
@@ -29,6 +22,7 @@ router.get(
     validatePopulationRange,
   ],
   (req, res, next) => {
+    const handleDbError = createDbHandler(res, next);
     const {
       dept = "",
       limit = 20,
@@ -187,8 +181,9 @@ router.get(
 // GET /api/rankings/departements
 router.get(
   "/departements",
-  [validateSort, validateDirection, validatePagination],
+  [validateSort, validateDirection, validatePagination, cacheMiddleware(() => 'department_rankings')],
   (req, res, next) => {
+    const handleDbError = createDbHandler(res, next);
     const {
       limit = 101,
       offset = 0,
@@ -196,7 +191,7 @@ router.get(
       direction = "DESC",
     } = req.query;
 
-    // Try to get cached data first
+    // Check if we have cached data
     const cacheService = require('../services/cacheService');
     const cachedData = cacheService.get('department_rankings');
 
@@ -303,8 +298,9 @@ router.get(
   },
 );
 // GET /api/rankings/politique
-router.get('/politique', (req, res, next) => {
-  // Try to get cached data first
+router.get('/politique', cacheMiddleware(() => 'politique_rankings'), (req, res, next) => {
+  const handleDbError = createDbHandler(res, next);
+  // Check if we have cached data
   const cacheService = require('../services/cacheService');
   const cachedData = cacheService.get('politique_rankings');
 

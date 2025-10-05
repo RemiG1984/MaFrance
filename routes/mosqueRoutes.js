@@ -2,17 +2,11 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../config/db");
-
-// Centralized error handler for database queries
-const handleDbError = (err, next) => {
-    const error = new Error("Erreur lors de la requête à la base de données");
-    error.status = 500;
-    error.details = err.message;
-    return next(error);
-};
+const { createDbHandler } = require("../middleware/errorHandler");
+const { cacheMiddleware } = require("../middleware/cache");
 
 // GET /api/mosques - Get all mosques with optional filtering
-router.get("/", (req, res, next) => {
+router.get("/", cacheMiddleware((req) => `mosques:${req.query.dept || 'all'}:${req.query.commune || 'all'}:${req.query.limit || '5000'}`), (req, res, next) => {
     const { dept, commune, limit = "5000" } = req.query;
     const queryLimit = Math.min(parseInt(limit), 5000);
 
@@ -40,9 +34,12 @@ router.get("/", (req, res, next) => {
     params.push(queryLimit);
 
     db.all(sql, params, (err, rows) => {
-        if (err) return handleDbError(err, next);
+        if (err) {
+            createDbHandler(res, next)(err);
+            return;
+        }
 
-        res.json({ 
+        res.json({
             list: rows,
             total: rows.length
         });
@@ -50,7 +47,7 @@ router.get("/", (req, res, next) => {
 });
 
 // GET /api/mosques/closest - Get closest mosques to coordinates
-router.get('/closest', (req, res, next) => {
+router.get('/closest', cacheMiddleware((req) => `mosques:closest:${req.query.lat}:${req.query.lng}:${req.query.limit || 5}`), (req, res, next) => {
     const { lat, lng, limit = 5 } = req.query;
 
     if (!lat || !lng) {
@@ -67,7 +64,7 @@ router.get('/closest', (req, res, next) => {
 
     // Calculate distance using Haversine formula in SQL
     const sql = `
-        SELECT 
+        SELECT
             *,
             (
                 6371 * 2 * ASIN(
@@ -84,7 +81,10 @@ router.get('/closest', (req, res, next) => {
     `;
 
     db.all(sql, [latitude, latitude, longitude, maxResults], (err, rows) => {
-        if (err) return handleDbError(err, next);
+        if (err) {
+            createDbHandler(res, next)(err);
+            return;
+        }
 
         const results = rows.map(row => ({
             ...row,
@@ -96,7 +96,7 @@ router.get('/closest', (req, res, next) => {
 });
 
 // GET /api/mosques/departement/:dept - Get mosques by department
-router.get("/departement/:dept", (req, res, next) => {
+router.get("/departement/:dept", cacheMiddleware((req) => `mosques:dept:${req.params.dept}:${req.query.limit || '100'}`), (req, res, next) => {
     const { dept } = req.params;
     const { limit = "100" } = req.query;
     const queryLimit = Math.min(parseInt(limit), 500);
@@ -110,9 +110,12 @@ router.get("/departement/:dept", (req, res, next) => {
     `;
 
     db.all(sql, [dept, queryLimit], (err, rows) => {
-        if (err) return handleDbError(err, next);
+        if (err) {
+            createDbHandler(res, next)(err);
+            return;
+        }
 
-        res.json({ 
+        res.json({
             list: rows,
             departement: dept,
             total: rows.length
@@ -121,7 +124,7 @@ router.get("/departement/:dept", (req, res, next) => {
 });
 
 // GET /api/mosques/commune/:cog - Get mosques by commune
-router.get("/commune/:cog", (req, res, next) => {
+router.get("/commune/:cog", cacheMiddleware((req) => `mosques:commune:${req.params.cog}:${req.query.limit || '50'}`), (req, res, next) => {
     const { cog } = req.params;
     const { limit = "50" } = req.query;
     const queryLimit = Math.min(parseInt(limit), 200);
@@ -135,9 +138,12 @@ router.get("/commune/:cog", (req, res, next) => {
     `;
 
     db.all(sql, [cog, queryLimit], (err, rows) => {
-        if (err) return handleDbError(err, next);
+        if (err) {
+            createDbHandler(res, next)(err);
+            return;
+        }
 
-        res.json({ 
+        res.json({
             list: rows,
             commune_cog: cog,
             total: rows.length

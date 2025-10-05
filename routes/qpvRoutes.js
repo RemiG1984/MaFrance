@@ -1,20 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../config/db");
+const { createDbHandler } = require("../middleware/errorHandler");
+const { cacheMiddleware } = require("../middleware/cache");
 const {
     validateDepartement,
     validateOptionalCOG,
     validateSearchQuery,
     validatePagination,
 } = require("../middleware/validate");
-
-// Centralized error handler for database queries
-const handleDbError = (err, next) => {
-    const error = new Error("Erreur lors de la requête à la base de données");
-    error.status = 500;
-    error.details = err.message;
-    return next(error);
-};
 
 // Base SQL select for QPV data
 const baseQpvSelect = `
@@ -27,7 +21,7 @@ const baseQpvSelect = `
 // GET /api/qpv - Get all QPV data with optional filtering and pagination
 router.get(
     "/",
-    [validateDepartement, validateOptionalCOG, validateSearchQuery, validatePagination],
+    [validateDepartement, validateOptionalCOG, validateSearchQuery, validatePagination, cacheMiddleware((req) => `qpv:${req.query.dept || ''}:${req.query.cog || ''}:${req.query.commune || ''}:${req.query.cursor || 0}:${req.query.limit || '20'}`)],
     (req, res, next) => {
         const { dept = "", cog = "", commune = "", cursor, limit = "20" } = req.query;
         const pageLimit = Math.min(parseInt(limit), 100);
@@ -70,7 +64,10 @@ router.get(
         params.push(pageLimit + 1);
 
         db.all(sql, params, (err, rows) => {
-            if (err) return handleDbError(err, next);
+            if (err) {
+                createDbHandler(res, next)(err);
+                return;
+            }
 
             const hasMore = rows.length > pageLimit;
             const qpvs = hasMore ? rows.slice(0, pageLimit) : rows;
@@ -98,7 +95,7 @@ router.get(
 );
 
 // Get QPV GeoJSON data from database
-router.get('/geojson', (req, res) => {
+router.get('/geojson', cacheMiddleware((req) => 'qpv:geojson'), (req, res) => {
     try {
         const query = `
             SELECT 
@@ -114,8 +111,8 @@ router.get('/geojson', (req, res) => {
 
         db.all(query, [], (err, rows) => {
             if (err) {
-                console.error('Error fetching QPV GeoJSON from database:', err);
-                return res.status(500).json({ error: 'Database error' });
+                createDbHandler(res)(err);
+                return;
             }
 
             // Convert database rows back to GeoJSON format
@@ -146,7 +143,7 @@ router.get('/geojson', (req, res) => {
 });
 
 // Get closest QPVs to coordinates
-router.get('/closest', (req, res) => {
+router.get('/closest', cacheMiddleware((req) => `qpv:closest:${req.query.lat}:${req.query.lng}:${req.query.limit || 5}`), (req, res) => {
     const { lat, lng, limit = 5 } = req.query;
 
     if (!lat || !lng) {
@@ -165,8 +162,8 @@ router.get('/closest', (req, res) => {
 
     db.all(query, [lat, lat, lng, lng, parseInt(limit)], (err, rows) => {
         if (err) {
-            console.error('Error fetching closest QPVs:', err);
-            return res.status(500).json({ error: 'Database error' });
+            createDbHandler(res)(err);
+            return;
         }
 
         // Calculate actual distance and format results
@@ -180,7 +177,7 @@ router.get('/closest', (req, res) => {
 });
 
 // GET /api/qpv/nearby - Get QPVs near coordinates
-router.get("/nearby", (req, res, next) => {
+router.get("/nearby", cacheMiddleware((req) => `qpv:nearby:${req.query.lat}:${req.query.lng}:${req.query.limit || '5'}`), (req, res, next) => {
     const { lat, lng, limit = "5" } = req.query;
 
     if (!lat || !lng) {
@@ -222,7 +219,10 @@ router.get("/nearby", (req, res, next) => {
     `;
 
     db.all(sql, [latitude, latitude, longitude, maxResults], (err, rows) => {
-        if (err) return handleDbError(err, next);
+        if (err) {
+            createDbHandler(res, next)(err);
+            return;
+        }
 
         const qpvs = rows.map(row => ({
             code_qp: row.code_qp,

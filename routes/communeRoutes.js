@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const db = require("../config/db");
 const SearchService = require("../services/searchService");
+const { createDbHandler } = require("../middleware/errorHandler");
+const { cacheMiddleware } = require("../middleware/cache");
 const {
   validateDepartement,
   validateCOG,
@@ -13,15 +15,6 @@ const {
   validateDeptAndCOG,
 } = require("../middleware/validate");
 
-// Centralized error handler for database queries
-const handleDbError = (err, res) => {
-  console.error("Database error:", err.message);
-  res.status(500).json({
-    error: "Erreur lors de la requête à la base de données",
-    details: err.message,
-  });
-};
-
 // GET /api/communes
 router.get("/", [validateDepartement, validateSearchQuery], async (req, res) => {
   const { dept, q = "" } = req.query;
@@ -30,9 +23,8 @@ router.get("/", [validateDepartement, validateSearchQuery], async (req, res) => 
     const results = await SearchService.searchCommunes(dept, q, 10);
     res.json(results);
   } catch (error) {
-    return handleDbError(error, () => res.status(500).json({ 
-      error: "Erreur lors de la recherche de communes" 
-    }));
+    const dbHandler = createDbHandler(res);
+    dbHandler(error);
   }
 });
 
@@ -44,9 +36,8 @@ router.get("/suggestions", [validateDepartement, validateSearchQuery], async (re
     const suggestions = await SearchService.getCommuneSuggestions(dept, q, 5);
     res.json(suggestions);
   } catch (error) {
-    return handleDbError(error, () => res.status(500).json({ 
-      error: "Erreur lors de la récupération des suggestions" 
-    }));
+    const dbHandler = createDbHandler(res);
+    dbHandler(error);
   }
 });
 
@@ -62,34 +53,37 @@ router.get("/search", [validateSearchQuery], async (req, res) => {
     const results = await SearchService.searchCommunesGlobally(q, 15);
     res.json(results);
   } catch (error) {
-    return handleDbError(error, () => res.status(500).json({ 
-      error: "Erreur lors de la recherche globale de communes" 
-    }));
+    const dbHandler = createDbHandler(res);
+    dbHandler(error);
   }
 });
 
 // GET /api/communes/all
-router.get("/all", (req, res) => {
+router.get("/all", cacheMiddleware((req) => 'communes:all'), (req, res) => {
+  const dbHandler = createDbHandler(res);
   db.all(
     "SELECT COG, departement, commune, population, logements_sociaux_pct, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct, total_places_migrants, places_migrants_p1k FROM locations",
     [],
     (err, rows) => {
-      if (err) return handleDbError(err, res);
+      dbHandler(err);
+      if (err) return;
       res.json(rows);
     },
   );
 });
 
 // GET /api/communes/names
-router.get("/names", validateCOG, (req, res) => {
+router.get("/names", validateCOG, cacheMiddleware((req) => `communes:names:${req.query.cog}`), (req, res) => {
   const { cog } = req.query;
+  const dbHandler = createDbHandler(res);
   db.get(
     `SELECT musulman_pct, africain_pct, asiatique_pct, traditionnel_pct, moderne_pct, annais
-     FROM commune_names 
+     FROM commune_names
      WHERE COG = ? AND annais = (SELECT MAX(annais) FROM commune_names WHERE COG = ?)`,
     [cog, cog],
     (err, row) => {
-      if (err) return handleDbError(res, err);
+      dbHandler(err);
+      if (err) return;
       if (!row)
         return res.status(404).json({
           error: "Données de prénoms non trouvées pour la dernière année",
@@ -100,31 +94,35 @@ router.get("/names", validateCOG, (req, res) => {
 });
 
 // GET /api/communes/names_history
-router.get("/names_history", validateCOG, (req, res) => {
+router.get("/names_history", validateCOG, cacheMiddleware((req) => `communes:names_history:${req.query.cog}`), (req, res) => {
   const { cog } = req.query;
+  const dbHandler = createDbHandler(res);
   db.all(
     `SELECT musulman_pct, africain_pct, asiatique_pct, traditionnel_pct, moderne_pct, invente_pct, europeen_pct, annais
-     FROM commune_names 
-     WHERE COG = ? 
+     FROM commune_names
+     WHERE COG = ?
      ORDER BY annais ASC`,
     [cog],
     (err, rows) => {
-      if (err) return handleDbError(res, err);
+      dbHandler(err);
+      if (err) return;
       res.json(rows);
     },
   );
 });
 
 // GET /api/communes/crime
-router.get("/crime", validateCOG, (req, res) => {
+router.get("/crime", validateCOG, cacheMiddleware((req) => `communes:crime:${req.query.cog}`), (req, res) => {
   const { cog } = req.query;
+  const dbHandler = createDbHandler(res);
   db.get(
-    `SELECT * 
-     FROM commune_crime 
+    `SELECT *
+     FROM commune_crime
      WHERE COG = ? AND annee = (SELECT MAX(annee) FROM commune_crime WHERE COG = ?)`,
     [cog, cog],
     (err, row) => {
-      if (err) return handleDbError(res, err);
+      dbHandler(err);
+      if (err) return;
       if (!row)
         return res.status(404).json({
           error: "Données criminelles non trouvées pour la dernière année",
@@ -135,29 +133,33 @@ router.get("/crime", validateCOG, (req, res) => {
 });
 
 // GET /api/communes/crime_history
-router.get("/crime_history", validateCOG, (req, res) => {
+router.get("/crime_history", validateCOG, cacheMiddleware((req) => `communes:crime_history:${req.query.cog}`), (req, res) => {
   const { cog } = req.query;
+  const dbHandler = createDbHandler(res);
   db.all(
     `SELECT *
-     FROM commune_crime 
-     WHERE COG = ? 
+     FROM commune_crime
+     WHERE COG = ?
      ORDER BY annee ASC`,
     [cog],
     (err, rows) => {
-      if (err) return handleDbError(res, err);
+      dbHandler(err);
+      if (err) return;
       res.json(rows);
     },
   );
 });
 
 // GET /api/communes/details
-router.get("/details", validateCOG, (req, res) => {
+router.get("/details", validateCOG, cacheMiddleware((req) => `communes:details:${req.query.cog}`), (req, res) => {
   const { cog } = req.query;
+  const dbHandler = createDbHandler(res);
   db.get(
     'SELECT COG, departement, commune, population, logements_sociaux_pct, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct, total_places_migrants, places_migrants_p1k FROM locations WHERE COG = ?',
     [cog],
     (err, row) => {
-      if (err) return handleDbError(res, err);
+      dbHandler(err);
+      if (err) return;
       if (!row) return res.status(404).json({ error: "Commune non trouvée" });
       res.json(row);
     },
@@ -192,13 +194,15 @@ const nuanceMap = {
 };
 
 // GET /api/communes/maire
-router.get("/maire", validateCOG, (req, res) => {
+router.get("/maire", validateCOG, cacheMiddleware((req) => `communes:maire:${req.query.cog}`), (req, res) => {
   const { cog } = req.query;
+  const dbHandler = createDbHandler(res);
   db.get(
     "SELECT cog, prenom, nom, date_mandat, famille_nuance, nuance_politique FROM maires WHERE cog = ?",
     [cog],
     (err, row) => {
-      if (err) return handleDbError(res, err);
+      dbHandler(err);
+      if (err) return;
       if (!row) return res.status(404).json({ error: "Maire non trouvé" });
 
       // Map the nuance_politique code to its full description

@@ -1,26 +1,20 @@
 const express = require("express");
 const router = express.Router();
+const { createDbHandler } = require("../middleware/errorHandler");
+const { cacheMiddleware } = require("../middleware/cache");
 const {
     validateOptionalDepartement,
     validateOptionalCOG,
     validatePagination,
 } = require("../middleware/validate");
 
-// Centralized error handler for database queries
-const handleDbError = (err, res) => {
-    console.error("Database error:", err.message);
-    res.status(500).json({
-        error: "Erreur lors de la requête à la base de données",
-        details: err.message,
-    });
-};
-
 // Single endpoint for all migrant centers
 router.get(
     "/",
-    [validateOptionalDepartement, validateOptionalCOG, validatePagination],
+    [validateOptionalDepartement, validateOptionalCOG, validatePagination, cacheMiddleware((req) => `migrants:${req.query.dept || 'all'}:${req.query.cog || 'all'}:${req.query.cursor || 0}`)],
     (req, res) => {
         const db = req.app.locals.db;
+        const dbHandler = createDbHandler(res);
         const { dept, cog, cursor, limit = "20" } = req.query;
         const pageLimit = Math.min(parseInt(limit), 2000);
         const offset = cursor ? parseInt(cursor) : 0;
@@ -53,9 +47,8 @@ router.get(
         params.push(offset);
 
         db.all(query, params, (err, rows) => {
-            if (err) {
-                return handleDbError(err, res);
-            }
+            dbHandler(err);
+            if (err) return;
 
             const hasMore = rows.length > pageLimit;
             const centers = hasMore ? rows.slice(0, pageLimit) : rows;

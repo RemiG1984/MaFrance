@@ -2,20 +2,12 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../config/db");
-const cacheService = require("../services/cacheService");
+const { createDbHandler } = require("../middleware/errorHandler");
+const { cacheMiddleware } = require("../middleware/cache");
 const {
   validateDepartement,
   validateCOG,
 } = require("../middleware/validate");
-
-// Centralized error handler for database queries
-const handleDbError = (err, res) => {
-  console.error("Database error:", err.message);
-  res.status(500).json({
-    error: "Erreur lors de la requête à la base de données",
-    details: err.message,
-  });
-};
 
 // Function to compute percentage fields from raw NAT1 data
 const computePercentageFields = (row) => {
@@ -66,43 +58,32 @@ const computePercentageFields = (row) => {
 };
 
 // GET /api/nat1/country
-router.get("/country", (req, res) => {
-  // Try cache first
-  const cachedData = cacheService.get(`nat1_country_all`);
-  if (cachedData) {
-    return res.json(cachedData);
-  }
+router.get("/country", cacheMiddleware(() => `nat1_country_all`), (req, res, next) => {
+  const handleDbError = createDbHandler(res, next);
 
   db.all(
     `SELECT * FROM country_nat1 ORDER BY Code`,
     [],
     (err, rows) => {
-      if (err) return handleDbError(err, res);
+      if (err) return handleDbError(err);
       if (!rows || rows.length === 0) {
         return res.status(404).json({ error: "Données NAT1 non trouvées" });
       }
-      
+
       const result = rows.map(row => computePercentageFields(row)).filter(Boolean);
-      
-      // Cache the result
-      cacheService.set(`nat1_country_all`, result);
+
       res.json(result);
     }
   );
 });
 
 // GET /api/nat1/departement
-router.get("/departement", validateDepartement, (req, res) => {
+router.get("/departement", validateDepartement, cacheMiddleware((req) => `nat1_dept_${req.query.dept}`), (req, res, next) => {
+  const handleDbError = createDbHandler(res, next);
   const { dept } = req.query;
-  
+
   if (!dept) {
     return res.status(400).json({ error: "Paramètre dept requis" });
-  }
-
-  // Try cache first
-  const cachedData = cacheService.get(`nat1_dept_${dept}`);
-  if (cachedData) {
-    return res.json(cachedData);
   }
 
   // Normalize department code for consistency
@@ -112,49 +93,40 @@ router.get("/departement", validateDepartement, (req, res) => {
     `SELECT * FROM department_nat1 WHERE Code = ?`,
     [normalizedDept],
     (err, row) => {
-      if (err) return handleDbError(err, res);
+      if (err) return handleDbError(err);
       if (!row) {
         return res.status(404).json({ error: "Données NAT1 non trouvées pour ce département" });
       }
-      
+
       const computedData = computePercentageFields(row);
       if (!computedData) {
         return res.status(500).json({ error: "Erreur lors du calcul des pourcentages" });
       }
-      
-      // Cache the result
-      cacheService.set(`nat1_dept_${dept}`, computedData);
+
       res.json(computedData);
     }
   );
 });
 
 // GET /api/nat1/commune
-router.get("/commune", validateCOG, (req, res) => {
+router.get("/commune", validateCOG, cacheMiddleware((req) => `nat1_commune_${req.query.cog}`), (req, res, next) => {
+  const handleDbError = createDbHandler(res, next);
   const { cog } = req.query;
-  
-  // Try cache first
-  const cachedData = cacheService.get(`nat1_commune_${cog}`);
-  if (cachedData) {
-    return res.json(cachedData);
-  }
 
   db.get(
     `SELECT * FROM commune_nat1 WHERE Code = ?`,
     [cog],
     (err, row) => {
-      if (err) return handleDbError(err, res);
+      if (err) return handleDbError(err);
       if (!row) {
         return res.status(404).json({ error: "Données NAT1 non trouvées pour cette commune" });
       }
-      
+
       const computedData = computePercentageFields(row);
       if (!computedData) {
         return res.status(500).json({ error: "Erreur lors du calcul des pourcentages" });
       }
-      
-      // Cache the result
-      cacheService.set(`nat1_commune_${cog}`, computedData);
+
       res.json(computedData);
     }
   );

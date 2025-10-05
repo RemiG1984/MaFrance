@@ -178,7 +178,7 @@ app.get('/{*path}', (req, res) => {
 });
 
 // Error handling
-const errorHandler = require("./middleware/errorHandler");
+const { errorHandler } = require("./middleware/errorHandler");
 app.use(errorHandler);
 
 // Start server

@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../config/db");
+const { createDbHandler } = require("../middleware/errorHandler");
 const {
   validateCOG,
   validateLieu,
@@ -8,14 +9,6 @@ const {
   validateDepartement,
   validateOptionalCOG,
 } = require("../middleware/validate");
-
-// Centralized error handler for database queries
-const handleDbError = (err, next) => {
-  const error = new Error("Erreur lors de la requête à la base de données");
-  error.status = 500;
-  error.details = err.message;
-  return next(error);
-};
 
 // Base condition for articles with at least one category flag
 const getBaseCondition = (hasDept) => {
@@ -29,21 +22,22 @@ const getBaseCondition = (hasDept) => {
 router.get(
   "/",
   [validateOptionalDepartement, validateOptionalCOG, validateLieu],
-  (req, res) => {
+  (req, res, next) => {
+    const handleDbError = createDbHandler(res, next);
     const { dept, cog, lieu, category, cursor, limit = '20' } = req.query;
     const pageLimit = Math.min(parseInt(limit), 100); // Cap at 100 items per page
 
     // First, get total counts for all categories (always needed for UI)
     const baseCondition = getBaseCondition(!!dept);
     let countSql = `
-    SELECT 
+    SELECT
       SUM(insecurite) as insecurite_count,
       SUM(immigration) as immigration_count,
       SUM(islamisme) as islamisme_count,
       SUM(defrancisation) as defrancisation_count,
       SUM(wokisme) as wokisme_count,
       COUNT(*) as total_count
-    FROM articles 
+    FROM articles
     WHERE ${baseCondition}`;
     const countParams = dept ? [dept] : [];
 
@@ -58,7 +52,7 @@ router.get(
 
     // Get counts first
     db.get(countSql, countParams, (err, countRow) => {
-      if (err) return handleDbError(err, res);
+      if (err) return handleDbError(err);
 
       const counts = {
         insecurite: countRow?.insecurite_count || 0,
@@ -105,7 +99,7 @@ router.get(
 
       // Get articles
       db.all(sql, params, (err, rows) => {
-        if (err) return handleDbError(err, res);
+        if (err) return handleDbError(err);
         
         const hasMore = rows.length > pageLimit;
         const articles = hasMore ? rows.slice(0, pageLimit) : rows;
@@ -132,17 +126,18 @@ router.get(
 router.get(
   "/counts",
   [validateDepartement, validateOptionalCOG, validateLieu],
-  (req, res) => {
+  (req, res, next) => {
+    const handleDbError = createDbHandler(res, next);
     const { dept, cog, lieu } = req.query;
 
     let sql = `
-    SELECT 
+    SELECT
       SUM(insecurite) as insecurite_count,
       SUM(immigration) as immigration_count,
       SUM(islamisme) as islamisme_count,
       SUM(defrancisation) as defrancisation_count,
       SUM(wokisme) as wokisme_count
-    FROM articles 
+    FROM articles
     WHERE ${baseCondition}`;
     const params = [dept];
 
@@ -156,7 +151,7 @@ router.get(
     }
 
     db.get(sql, params, (err, row) => {
-      if (err) return handleDbError(res, err);
+      if (err) return handleDbError(err);
       const result = {
         insecurite: row?.insecurite_count || 0,
         immigration: row?.immigration_count || 0,
@@ -173,14 +168,15 @@ router.get(
 router.get(
   "/lieux",
   [validateCOG, validateLieu],
-  (req, res) => {
+  (req, res, next) => {
+    const handleDbError = createDbHandler(res, next);
     const { cog, lieu } = req.query;
 
     const sql = `SELECT DISTINCT lieu FROM lieux WHERE cog = ? ORDER BY lieu`;
     const params = [cog];
 
     db.all(sql, params, (err, rows) => {
-      if (err) return handleDbError(err, res);
+      if (err) return handleDbError(err);
       const lieux = rows.map(row => ({ lieu: row.lieu }));
       res.json(lieux);
     });

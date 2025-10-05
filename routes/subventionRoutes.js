@@ -1,14 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { param, validationResult } = require("express-validator");
-// Centralized error handler for database queries
-const handleDbError = (err, res) => {
-  console.error("Database error:", err.message);
-  res.status(500).json({
-    error: "Erreur lors de la requête à la base de données",
-    details: err.message,
-  });
-};
+const { createDbHandler } = require("../middleware/errorHandler");
 const {
     validateDepartementParam,
     validateCOGParam,
@@ -25,17 +18,18 @@ const handleValidationErrors = (req, res, next) => {
 };
 
 // Get country subventions
-router.get("/country", (req, res) => {
+router.get("/country", (req, res, next) => {
+    const handleDbError = createDbHandler(res, next);
     const db = req.app.locals.db;
 
     db.all(
         `SELECT country, etat_central, autres_organismes_publics, total_subv_commune, total_subv_EPCI, total_subv_dept, total_subv_region, total_subventions_parHab
-         FROM country_subventions 
+         FROM country_subventions
          ORDER BY country`,
         [],
         (err, rows) => {
             if (err) {
-                return handleDbError(err, res);
+                return handleDbError(err);
             }
 
             if (!rows || rows.length === 0) {
@@ -50,19 +44,20 @@ router.get("/country", (req, res) => {
 });
 
 // Get department subventions
-router.get("/departement/:dept", validateDepartementParam, (req, res) => {
+router.get("/departement/:dept", validateDepartementParam, (req, res, next) => {
+    const handleDbError = createDbHandler(res, next);
     const db = req.app.locals.db;
     const { dept } = req.params;
 
     const query = `
         SELECT subvention_region_distributed, subvention_departement, total_subventions_parHab
-        FROM department_subventions 
+        FROM department_subventions
         WHERE dep = ?
     `;
 
     db.get(query, [dept], (err, row) => {
         if (err) {
-            return handleDbError(err, res);
+            return handleDbError(err);
         }
 
         if (!row) {
@@ -82,19 +77,20 @@ router.get("/departement/:dept", validateDepartementParam, (req, res) => {
 });
 
 // Get commune subventions
-router.get("/commune/:cog", validateCOGParam, (req, res) => {
+router.get("/commune/:cog", validateCOGParam, (req, res, next) => {
+    const handleDbError = createDbHandler(res, next);
     const db = req.app.locals.db;
     const { cog } = req.params;
 
     const query = `
         SELECT subvention_EPCI_distributed, subvention_commune, total_subventions_parHab
-        FROM commune_subventions 
+        FROM commune_subventions
         WHERE COG = ?
     `;
 
     db.get(query, [cog], (err, row) => {
         if (err) {
-            return handleDbError(err, res);
+            return handleDbError(err);
         }
 
         if (!row) {

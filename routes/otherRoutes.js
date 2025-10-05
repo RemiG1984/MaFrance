@@ -1,19 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../config/db");
+const { createDbHandler } = require("../middleware/errorHandler");
 const {
   validateDepartement,
   validateSearchQuery,
 } = require("../middleware/validate");
-
-// Centralized error handler for database queries
-const handleDbError = (err, res) => {
-  console.error("Database error:", err.message);
-  res.status(500).json({
-    error: "Erreur lors de la requête à la base de données",
-    details: err.message,
-  });
-};
 
 // GET /api/search
 router.get(
@@ -21,6 +13,7 @@ router.get(
   [validateDepartement, validateSearchQuery],
   (req, res) => {
     const { dept, q } = req.query;
+    const dbHandler = createDbHandler(res);
 
     const normalizedQuery = q
       .toLowerCase()
@@ -29,12 +22,13 @@ router.get(
 
     const sql = `
     SELECT COG, departement, commune, population, insecurite_score, immigration_score, islamisation_score, defrancisation_score, wokisme_score, number_of_mosques, mosque_p100k, total_qpv, pop_in_qpv_pct
-    FROM locations 
+    FROM locations
     WHERE departement = ?
   `;
 
     db.all(sql, [dept], (err, rows) => {
-      if (err) return handleDbError(res, err);
+      dbHandler(err);
+      if (err) return;
 
       const filteredCommunes = rows
         .filter((row) =>
