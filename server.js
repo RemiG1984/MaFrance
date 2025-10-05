@@ -14,11 +14,20 @@ const cacheService = require("./services/cacheService");
 // Enable compression
 app.use(compression());
 
-// Security middleware - simplified for Replit preview compatibility
+// Security middleware
 app.use(helmet({
-  contentSecurityPolicy: false, // Disable CSP completely
-  frameguard: false, // Allow iframe embedding
-  hsts: false, // Disable HSTS for development
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:"],
+    },
+  },
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+  },
 }));
 
 app.use(cors({
@@ -36,7 +45,7 @@ const limiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
-//app.use('/api/', limiter);
+app.use('/api/', limiter);
 
 // Stricter rate limit for search endpoints
 const searchLimiter = rateLimit({
@@ -102,8 +111,7 @@ const nat1Routes = require('./routes/nat1Routes');
 app.locals.db = db;
 
 // Attach routes with search rate limiting where applicable
-//app.use("/api/communes", searchLimiter, communeRoutes);
-app.use("/api/communes", communeRoutes);
+app.use("/api/communes", searchLimiter, communeRoutes);
 app.use("/api/departements", departementRoutes);
 app.use("/api/country", countryRoutes);
 app.use("/api/articles", articleRoutes);
