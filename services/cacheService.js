@@ -433,9 +433,9 @@ class CacheService {
 
             db.all(sql, [], (err, rows) => {
                 if (err) return reject(err);
-                this.set('department_rankings', rows);
+                this.set('department_rankings', { data: rows, total_count: rows.length });
                 console.log(`Cached department rankings data for ${rows.length} departments`);
-                resolve(rows);
+                resolve({ data: rows, total_count: rows.length });
             });
         });
     }
