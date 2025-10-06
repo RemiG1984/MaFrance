@@ -11,7 +11,7 @@ const {
 // Single endpoint for all migrant centers
 router.get(
     "/",
-    [validateOptionalDepartement, validateOptionalCOG, validatePagination, cacheMiddleware((req) => `migrants:${req.query.dept || 'all'}:${req.query.cog || 'all'}:${req.query.cursor || 0}`)],
+    [validateOptionalDepartement, validateOptionalCOG, validatePagination, cacheMiddleware((req) => `migrants:${req.query.dept || 'all'}:${req.query.cog || 'all'}:${req.query.cursor || 0}:${req.query.limit || 20}`)],
     (req, res) => {
         const db = req.app.locals.db;
         const dbHandler = createDbHandler(res);
