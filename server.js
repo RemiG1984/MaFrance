@@ -18,12 +18,12 @@ app.use(compression());
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "https://unpkg.com"],
-      styleSrc: ["'self'", "https://fonts.googleapis.com"],
-      fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "https://nominatim.openstreetmap.org", "https://france-geojson.gregoiredavid.fr", "https://geo.api.gouv.fr"],
+      defaultSrc: ["*"],
+      scriptSrc: ["*"],
+      styleSrc: ["*"],
+      fontSrc: ["*"],
+      imgSrc: ["*"],
+      connectSrc: ["*"],
     },
   },
   hsts: {
