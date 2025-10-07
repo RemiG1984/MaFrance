@@ -24,7 +24,7 @@
                   @change="onOverlayToggle"
                 >
                   <template v-slot:prepend>
-                    <div class="overlay-indicator qpv-indicator"></div>
+                    <div class="overlay-indicator qpv-indicator" :style="{ backgroundColor: isInclusive ? '#0000ff' : '#ff0000', borderColor: isInclusive ? '#0000cc' : '#cc0000' }"></div>
                   </template>
                 </v-checkbox>
                 <v-checkbox
@@ -35,7 +35,7 @@
                   @change="onOverlayToggle"
                 >
                   <template v-slot:prepend>
-                    <div class="overlay-indicator migrant-indicator">↑</div>
+                    <div class="overlay-indicator migrant-indicator">{{ isInclusive ? '🧸' : '↑' }}</div>
                   </template>
                 </v-checkbox>
                 <v-checkbox
@@ -46,7 +46,7 @@
                   @change="onOverlayToggle"
                 >
                   <template v-slot:prepend>
-                    <div class="overlay-indicator mosque-indicator">🕌</div>
+                    <div class="overlay-indicator mosque-indicator">{{ isInclusive ? '🦄' : '🕌' }}</div>
                   </template>
                 </v-checkbox>
               </v-card-text>
@@ -143,20 +143,25 @@ const getPolygonCentroid = (coordinates) => {
 const iconCache = new Map()
 
 // Generic icon creation function with caching
-const createIcon = (type, zoom) => {
-  const key = `${type}-${zoom}`
-  if (iconCache.has(key)) {
-    return iconCache.get(key)
-  }
+const createIcon = (type, zoom, isInclusive) => {
+   const key = `${type}-${zoom}-${isInclusive ? 'inclusive' : 'standard'}`
+   if (iconCache.has(key)) {
+     return iconCache.get(key)
+   }
 
-  let size = ICON_SIZES.small
-  if (zoom >= ZOOM_THRESHOLDS.small) size = ICON_SIZES.medium
-  if (zoom >= ZOOM_THRESHOLDS.medium) size = ICON_SIZES.large
-  if (zoom >= ZOOM_THRESHOLDS.large) size = ICON_SIZES.xlarge
-  if (zoom >= ZOOM_THRESHOLDS.xlarge) size = ICON_SIZES.xxlarge
+   let size = ICON_SIZES.small
+   if (zoom >= ZOOM_THRESHOLDS.small) size = ICON_SIZES.medium
+   if (zoom >= ZOOM_THRESHOLDS.medium) size = ICON_SIZES.large
+   if (zoom >= ZOOM_THRESHOLDS.large) size = ICON_SIZES.xlarge
+   if (zoom >= ZOOM_THRESHOLDS.xlarge) size = ICON_SIZES.xxlarge
 
-  const color = ICON_COLORS[type]
-  const symbol = type === 'migrant' ? '↑' : '🕌'
+   const color = ICON_COLORS[type]
+   let symbol = ''
+   if (type === 'migrant') {
+     symbol = isInclusive ? '🧸' : '↑'
+   } else if (type === 'mosque') {
+     symbol = isInclusive ? '🦄' : '🕌'
+   }
 
   const icon = L.divIcon({
     html: `<div style="
@@ -246,6 +251,7 @@ export default {
   setup(props, { emit }) {
     const dataStore = useDataStore()
     const isEnglish = computed(() => dataStore.labelState === 3)
+    const isInclusive = computed(() => dataStore.labelState === 1)
     // ==================== REACTIVE DATA ====================
 
     // Layer visibility toggles
@@ -356,7 +362,7 @@ export default {
 
       props.migrantCentersData.forEach(center => {
         const marker = L.marker([parseFloat(center.latitude), parseFloat(center.longitude)], {
-          icon: createIcon('migrant', currentZoom)
+          icon: createIcon('migrant', currentZoom, isInclusive.value)
         })
         .bindPopup(
           `<strong>${isEnglish.value ? labels.migrantCenter.en : labels.migrantCenter.fr}</strong><br>` +
@@ -385,7 +391,7 @@ export default {
 
       props.mosquesData.forEach(mosque => {
         const marker = L.marker([parseFloat(mosque.latitude), parseFloat(mosque.longitude)], {
-          icon: createIcon('mosque', currentZoom)
+          icon: createIcon('mosque', currentZoom, isInclusive.value)
         })
         .bindPopup(
           `<strong>${mosque.name || (isEnglish.value ? labels.mosque.en : labels.mosque.fr)}</strong><br>` +
@@ -409,7 +415,7 @@ export default {
       const currentZoom = map.getZoom()
       migrantCentersLayer.eachLayer(layer => {
         if (layer.setIcon) {
-          layer.setIcon(createIcon('migrant', currentZoom))
+          layer.setIcon(createIcon('migrant', currentZoom, isInclusive.value))
         }
       })
     }
@@ -421,7 +427,7 @@ export default {
       const currentZoom = map.getZoom()
       mosqueLayer.eachLayer(layer => {
         if (layer.setIcon) {
-          layer.setIcon(createIcon('mosque', currentZoom))
+          layer.setIcon(createIcon('mosque', currentZoom, isInclusive.value))
         }
       })
     }
@@ -438,8 +444,8 @@ export default {
 
       qpvLayer = L.geoJSON(props.qpvData.geojson, {
         style: () => ({
-          fillColor: '#ff0000',
-          color: '#cc0000',
+          fillColor: isInclusive.value ? '#0000ff' : '#ff0000',
+          color: isInclusive.value ? '#0000cc' : '#cc0000',
           weight: 1,
           fillOpacity: 0.4,
           opacity: 0.8
@@ -669,7 +675,7 @@ export default {
 
       // Determine arrow color based on location type
       let arrowColor = '#000000' // Black for migrant centers (consistent with icon)
-      if (location.type === 'qpv') arrowColor = '#ff0000'
+      if (location.type === 'qpv') arrowColor = isInclusive.value ? '#0000ff' : '#ff0000'
       if (location.type === 'mosque') arrowColor = '#2e7d32'
 
       // Create polyline arrow
@@ -816,6 +822,7 @@ export default {
       overlayExpanded,
       onOverlayToggle,
       isEnglish,
+      isInclusive,
       labels
     }
   }
