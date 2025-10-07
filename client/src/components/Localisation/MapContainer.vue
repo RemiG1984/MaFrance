@@ -61,8 +61,8 @@
 <script>
 import { ref, onMounted, onUnmounted, nextTick, watch, computed } from 'vue'
 import { useDataStore } from '../../services/store.js'
-// Use global L from CDN to ensure fullscreen plugin is available
-const L = window.L
+import L from 'leaflet'
+import 'leaflet-fullscreen'
 
 // Shared constants
 const OVERSEAS_DEPARTMENTS = ['971', '972', '973', '974', '976']

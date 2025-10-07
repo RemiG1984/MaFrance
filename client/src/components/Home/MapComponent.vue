@@ -26,6 +26,8 @@ import { MetricsConfig } from '../../utils/metricsConfig.js'
 import chroma from "chroma-js";
 import api from '../../services/api.js'
 import { markRaw } from 'vue'
+import L from 'leaflet'
+import 'leaflet-fullscreen'
 
 export default {
   name: 'MapComponent',
@@ -221,10 +223,6 @@ export default {
       this.updateData()
     },
     async initMap() {
-      if (typeof L === 'undefined') {
-        console.error('Leaflet not loaded')
-        return
-      }
       const p = 1
       const maxBounds = [
         [41.362164776515-p, -5.138001239929-p],
