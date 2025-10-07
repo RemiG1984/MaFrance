@@ -19,8 +19,8 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["*"],
-      scriptSrc: ["*"],
-      styleSrc: ["*"],
+      scriptSrc: ["*", "'unsafe-inline'"],
+      styleSrc: ["*", "'unsafe-inline'"],
       fontSrc: ["*"],
       imgSrc: ["*"],
       connectSrc: ["*"],
