@@ -86,8 +86,10 @@ export default {
       let departmentData = store.country?.departementsRankings?.data;
 
       if (!departmentData) {
-        error.value = "Données de classement départemental non disponibles dans le store.";
-        return [];
+        // Fetch the data if not present
+        const fetchedData = await api.getDepartementRankings({ limit: 101, sort: "total_score", direction: "DESC" });
+        store.country.departementsRankings = fetchedData;
+        departmentData = fetchedData.data;
       }
 
       const totalDepartments = departmentData.length;
