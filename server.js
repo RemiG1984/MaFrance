@@ -16,16 +16,7 @@ app.use(compression());
 
 // Security middleware
 app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["*"],
-      scriptSrc: ["*", "'unsafe-inline'"],
-      styleSrc: ["*", "'unsafe-inline'"],
-      fontSrc: ["*"],
-      imgSrc: ["*"],
-      connectSrc: ["*"],
-    },
-  },
+  contentSecurityPolicy: false,
   hsts: {
     maxAge: 31536000,
     includeSubDomains: true,

@@ -22,7 +22,7 @@ const MetricsConfig = {
     versionLabels: {
         standard: "Version neutre ⚖️",
         alt1: "Version inclusive 🌈",
-        alt2: "Version identitaire 🦅",
+        alt2: "Version identitaire 🐓",
         english: "English version 🇬🇧",
     },
 
