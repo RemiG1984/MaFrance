@@ -135,7 +135,7 @@ export default {
         const [qpvResponse, migrantsResponse, mosquesResponse] = await Promise.all([
           api.getQpvs(),
           api.getMigrants({ limit: 1500 }),
-          api.getMosques()
+          api.getMosques({ limit: 3000 })
         ])
 
         qpvData.value = qpvResponse
