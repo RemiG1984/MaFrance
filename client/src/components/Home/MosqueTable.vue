@@ -1,7 +1,7 @@
 <template>
   <v-card class="mb-4">
     <v-card-title class="text-h6 pb-0">
-      {{ isEnglish ? 'Mosques for:' : 'Mosquées pour:' }} {{ locationName }} ({{ mosquesList.length }} {{ isEnglish ? 'mosques' : 'mosquées' }})
+      {{ isEnglish ? 'Mosques for:' : 'Mosquées pour:' }} {{ locationName }}
     </v-card-title>
     <v-card-text>
       <div
@@ -77,7 +77,7 @@ export default {
           limit: 20
         }
       })
-    }
+    },
   },
   data() {
     return {
@@ -86,15 +86,20 @@ export default {
       containerHeight: 400,
       itemHeight: 60,
       scrollTop: 0,
-      bufferSize: 5
+      bufferSize: 5,
+      scrollListenerAttached: false
     }
   },
   mounted() {
     this.updateContainerHeight()
     window.addEventListener('resize', this.updateContainerHeight)
+    if (this.data.pagination?.hasMore) {
+      this.attachScrollListener()
+    }
   },
   beforeUnmount() {
     window.removeEventListener('resize', this.updateContainerHeight)
+    this.removeScrollListener()
   },
   computed: {
     ...mapStores(useDataStore),
@@ -153,9 +158,31 @@ export default {
       }
     },
 
+    attachScrollListener() {
+      if (!this.scrollListenerAttached && this.$refs.tableContainer) {
+        this.$refs.tableContainer.addEventListener('scroll', this.handleScroll)
+        this.scrollListenerAttached = true
+      }
+    },
+
+    removeScrollListener() {
+      if (this.scrollListenerAttached && this.$refs.tableContainer) {
+        this.$refs.tableContainer.removeEventListener('scroll', this.handleScroll)
+        this.scrollListenerAttached = false
+      }
+    },
+
     handleScroll(event) {
       this.scrollTop = event.target.scrollTop;
-      // No loadMore for mosques as per API
+      const scrollBottom = this.scrollTop + this.containerHeight;
+      const contentHeight = this.virtualHeight;
+      if (
+        scrollBottom >= contentHeight - 200 &&
+        !this.isLoading &&
+        this.data.pagination?.hasMore
+      ) {
+      this.$emit('load-more');
+    }
     }
   },
   watch: {
@@ -166,6 +193,13 @@ export default {
         })
       },
       deep: true
+    },
+    'data.pagination.hasMore': function(newVal) {
+      if (newVal) {
+        this.attachScrollListener()
+      } else {
+        this.removeScrollListener()
+      }
     }
   }
 }

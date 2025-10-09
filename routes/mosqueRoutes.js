@@ -1,17 +1,32 @@
 
 const express = require("express");
 const router = express.Router();
-const db = require("../config/db");
 const { createDbHandler } = require("../middleware/errorHandler");
 const { cacheMiddleware } = require("../middleware/cache");
-const { validateOptionalCOG, validateOptionalDepartement } = require("../middleware/validate");
+const {
+    validateOptionalDepartement,
+    validateOptionalCOG,
+} = require("../middleware/validate");
 
 // GET /api/mosques - Get all mosques with optional filtering
-router.get("/", validateOptionalDepartement, validateOptionalCOG, cacheMiddleware((req) => `mosques:${req.query.dept || 'all'}:${req.query.cog || 'all'}:${req.query.limit || '5000'}`), (req, res, next) => {
-    const { dept, cog, limit = "5000" } = req.query;
-    const queryLimit = Math.min(parseInt(limit), 5000);
+router.get(
+    "/",
+    [validateOptionalDepartement, validateOptionalCOG, cacheMiddleware((req) => `mosques:${req.query.dept || 'all'}:${req.query.cog || 'all'}:${req.query.cursor || 0}:${req.query.limit || 20}`)],
+    (req, res, next) => {
+        const db = req.app.locals.db;
+        const dbHandler = createDbHandler(res);
+        const { dept, cog, cursor, limit = "20" } = req.query;
+        const pageLimit = Math.min(parseInt(limit), 2000);
+        const offset = cursor ? parseInt(cursor) : 0;
 
-    let sql = `
+        // Prevent simultaneous dept and cog
+        if (dept && cog) {
+            return res
+                .status(400)
+                .json({ error: "Cannot specify both dept and cog" });
+        }
+
+    let dataSql = `
         SELECT id, name, address, latitude, longitude, commune, departement, cog
         FROM mosques
     `;
@@ -26,29 +41,41 @@ router.get("/", validateOptionalDepartement, validateOptionalCOG, cacheMiddlewar
         conditions.push("cog = ?");
         params.push(cog);
     }
-    
+
     if (conditions.length > 0) {
-        sql += " WHERE " + conditions.join(" AND ");
+        dataSql += " WHERE " + conditions.join(" AND ");
     }
 
-    sql += ` ORDER BY name ASC LIMIT ?`;
-    params.push(queryLimit);
-    
-    db.all(sql, params, (err, rows) => {
-        if (err) {
-            createDbHandler(res, next)(err);
-            return;
-        }
+    dataSql += " ORDER BY name ASC, id ASC LIMIT ? OFFSET ?";
+    params.push(pageLimit + 1);
+    params.push(offset);
+
+    db.all(dataSql, params, (err, rows) => {
+        dbHandler(err);
+        if (err) return;
+
+        const hasMore = rows.length > pageLimit;
+        const mosques = hasMore ? rows.slice(0, pageLimit) : rows;
+        const nextCursor =
+            hasMore && mosques.length > 0
+                ? mosques[mosques.length - 1].id
+                : null;
 
         res.json({
-            list: rows,
-            total: rows.length
+            list: mosques,
+            pagination: {
+                hasMore: hasMore,
+                nextCursor: nextCursor,
+                limit: pageLimit,
+            },
         });
     });
 });
 
 // GET /api/mosques/closest - Get closest mosques to coordinates
 router.get('/closest', cacheMiddleware((req) => `mosques:closest:${req.query.lat}:${req.query.lng}:${req.query.limit || 5}`), (req, res, next) => {
+    const db = req.app.locals.db;
+    const dbHandler = createDbHandler(res);
     const { lat, lng, limit = 5 } = req.query;
 
     if (!lat || !lng) {
@@ -82,10 +109,8 @@ router.get('/closest', cacheMiddleware((req) => `mosques:closest:${req.query.lat
     `;
 
     db.all(sql, [latitude, latitude, longitude, maxResults], (err, rows) => {
-        if (err) {
-            createDbHandler(res, next)(err);
-            return;
-        }
+        dbHandler(err);
+        if (err) return;
 
         const results = rows.map(row => ({
             ...row,

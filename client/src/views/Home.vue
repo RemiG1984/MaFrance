@@ -97,6 +97,7 @@
             <MosqueTable
               :location="currentLocation"
               :data="mosquesData"
+              @load-more="handleLoadMoreMosques"
             />
           </v-col>
         </v-row>
@@ -147,11 +148,12 @@ export default {
       }
 
       switch(this.dataStore.currentLevel){
-        case 'country': 
+        case 'country':
           location = {
             name: 'France',
             code: null,
             type: this.dataStore.currentLevel,
+            number_of_mosques: this.dataStore.country?.details?.number_of_mosques || 0,
           }
         break
         case 'departement':
@@ -159,6 +161,7 @@ export default {
             name: this.dataStore.levels.departement,
             code: this.dataStore.getDepartementCode(),
             type: this.dataStore.currentLevel,
+            number_of_mosques: this.dataStore.departement?.details?.number_of_mosques || 0,
           }
         break
         case 'commune':
@@ -166,8 +169,9 @@ export default {
             name: this.dataStore.levels.commune,
             code: this.dataStore.getCommuneCode(),
             type: this.dataStore.currentLevel,
+            number_of_mosques: this.dataStore.commune?.details?.number_of_mosques || 0,
           }
-        break  
+        break
       }
 
       return location
@@ -288,6 +292,11 @@ export default {
       return this.dataStore.getCurrentMosques
     },
 
+    mosqueTotal(){
+      const level = this.dataStore.currentLevel
+      return this.dataStore[level]?.details?.number_of_mosques || 0
+    },
+
     currentSubventions() {
       return this.dataStore.getCurrentSubventions
     },
@@ -398,6 +407,25 @@ export default {
         } else if (location.type === 'commune') {
           await this.dataStore.fetchMosques('commune', location.code)
         }
+    },
+
+    async handleLoadMoreMosques() {
+      const level = this.dataStore.currentLevel;
+      let code = null;
+
+      if (level === 'departement') {
+        code = this.dataStore.getDepartementCode();
+      } else if (level === 'commune') {
+        code = this.dataStore.getCommuneCode();
+      }
+
+      const currentMosques = this.dataStore.getCurrentMosques;
+      const params = {
+        cursor: currentMosques.pagination.nextCursor,
+        limit: currentMosques.pagination.limit
+      };
+
+      await this.dataStore.loadMoreMosques(level, code, params);
     }
 
   },
