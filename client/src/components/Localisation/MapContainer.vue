@@ -4,55 +4,7 @@
       <v-card-text class="pa-0 position-relative">
         <div id="localisationMap" class="localisation-map"></div>
 
-        <!-- Map Overlay Controls -->
-        <div class="map-overlay-controls">
-          <v-card elevation="2">
-            <v-card-title
-              class="pa-2 pb-0 d-flex align-center justify-space-between cursor-pointer"
-              @click="overlayExpanded = !overlayExpanded"
-            >
-              <span class="text-subtitle-2">{{ isEnglish ? labels.displayPlaces.en : labels.displayPlaces.fr }}</span>
-              <v-icon size="16">{{ overlayExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-            </v-card-title>
-            <v-expand-transition>
-              <v-card-text v-show="overlayExpanded" class="pa-2 pt-0">
-                <v-checkbox
-                  v-model="showQpv"
-                  :label="isEnglish ? labels.qpv.en : labels.qpv.fr"
-                  density="compact"
-                  hide-details
-                  @change="onOverlayToggle"
-                >
-                  <template v-slot:prepend>
-                    <div class="overlay-indicator qpv-indicator" :style="{ backgroundColor: isInclusive ? '#0000ff' : '#ff0000', borderColor: isInclusive ? '#0000cc' : '#cc0000' }"></div>
-                  </template>
-                </v-checkbox>
-                <v-checkbox
-                  v-model="showMigrantCenters"
-                  :label="isEnglish ? labels.migrantCenters.en : labels.migrantCenters.fr"
-                  density="compact"
-                  hide-details
-                  @change="onOverlayToggle"
-                >
-                  <template v-slot:prepend>
-                    <div class="overlay-indicator migrant-indicator">{{ isInclusive ? '🧸' : '↑' }}</div>
-                  </template>
-                </v-checkbox>
-                <v-checkbox
-                  v-model="showMosques"
-                  :label="isEnglish ? labels.mosques.en : labels.mosques.fr"
-                  density="compact"
-                  hide-details
-                  @change="onOverlayToggle"
-                >
-                  <template v-slot:prepend>
-                    <div class="overlay-indicator mosque-indicator">{{ isInclusive ? '🦄' : '🕌' }}</div>
-                  </template>
-                </v-checkbox>
-              </v-card-text>
-            </v-expand-transition>
-          </v-card>
-        </div>
+        <LocationDataBox @overlay-toggled="handleOverlayToggle" />
       </v-card-text>
     </v-card>
   </div>
@@ -63,6 +15,7 @@ import { ref, onMounted, onUnmounted, nextTick, watch, computed } from 'vue'
 import { useDataStore } from '../../services/store.js'
 import L from 'leaflet'
 import 'leaflet-fullscreen'
+import LocationDataBox from './LocationDataBox.vue'
 
 const ICON_COLORS = {
   qpv: '#ff0000',
@@ -145,43 +98,20 @@ L.Icon.Default.mergeOptions({
   shadowUrl
 })
 
-// Translation labels
-const labels = {
-  displayPlaces: { fr: 'Affichage des lieux', en: 'Display of places' },
-  qpv: { fr: 'Quartiers QPV', en: 'QPV Districts' },
-  migrantCenters: { fr: 'Centres de migrants', en: 'Migrant Centers' },
-  mosques: { fr: 'Mosquées', en: 'Mosques' },
-  migrantCenter: { fr: 'Centre de migrants', en: 'Migrant Center' },
-  type: { fr: 'Type:', en: 'Type:' },
-  places: { fr: 'Places:', en: 'Places:' },
-  manager: { fr: 'Gestionnaire:', en: 'Manager:' },
-  commune: { fr: 'Commune:', en: 'Municipality:' },
-  departement: { fr: 'Département:', en: 'Department:' },
-  address: { fr: 'Adresse:', en: 'Address:' },
-  mosque: { fr: 'Mosquée', en: 'Mosque' },
-  latitude: { fr: 'Latitude:', en: 'Latitude:' },
-  longitude: { fr: 'Longitude:', en: 'Longitude:' },
-  qpvLabel: { fr: 'QPV:', en: 'QPV:' },
-  code: { fr: 'Code:', en: 'Code:' },
-  removePosition: { fr: 'Supprimer la position', en: 'Remove position' },
-  position: { fr: 'Position:', en: 'Position:' },
-  distance: { fr: 'Distance:', en: 'Distance:' },
-  name: { fr: 'Nom:', en: 'Name:' }
-}
 
 export default {
   name: 'MapContainer',
   props: {
     qpvData: {
-      type: Object,
+      type: [Object, null],
       required: true
     },
     migrantCentersData: {
-      type: Array,
+      type: [Array, null],
       required: true
     },
     mosquesData: {
-      type: Array,
+      type: [Array, null],
       required: true
     },
     selectedLocation: {
@@ -198,17 +128,91 @@ export default {
     }
   },
   emits: ['location-selected', 'overlay-toggled'],
+  components: {
+    LocationDataBox
+  },
   setup(props, { emit }) {
     const dataStore = useDataStore()
     const isEnglish = computed(() => dataStore.labelState === 3)
     const isInclusive = computed(() => dataStore.labelState === 1)
+
+    const labels = computed(() => ({
+      qpvLabel: {
+        en: 'QPV',
+        fr: 'QPV'
+      },
+      qpv: {
+        en: 'QPV Districts',
+        fr: 'Quartiers QPV'
+      },
+      code: {
+        en: 'Code',
+        fr: 'Code'
+      },
+      commune: {
+        en: 'Commune',
+        fr: 'Commune'
+      },
+      departement: {
+        en: 'Department',
+        fr: 'Département'
+      },
+      migrantCenter: {
+        en: 'Migrant Center',
+        fr: 'Centre de migrants'
+      },
+      type: {
+        en: 'Type',
+        fr: 'Type'
+      },
+      places: {
+        en: 'Places',
+        fr: 'Places'
+      },
+      manager: {
+        en: 'Manager',
+        fr: 'Gestionnaire'
+      },
+      address: {
+        en: 'Address',
+        fr: 'Adresse'
+      },
+      mosque: {
+        en: 'Mosque',
+        fr: 'Mosquée'
+      },
+      latitude: {
+        en: 'Latitude',
+        fr: 'Latitude'
+      },
+      longitude: {
+        en: 'Longitude',
+        fr: 'Longitude'
+      },
+      position: {
+        en: 'Position',
+        fr: 'Position'
+      },
+      removePosition: {
+        en: 'Remove Position',
+        fr: 'Supprimer Position'
+      },
+      distance: {
+        en: 'Distance',
+        fr: 'Distance'
+      },
+      name: {
+        en: 'Name',
+        fr: 'Nom'
+      }
+    }))
+
     // ==================== REACTIVE DATA ====================
 
     // Layer visibility toggles
     const showMigrantCenters = ref(false)
     const showQpv = ref(true)
     const showMosques = ref(false)
-    const overlayExpanded = ref(true)
 
     // ==================== MAP STATE ====================
 
@@ -312,11 +316,11 @@ export default {
           icon: createIcon('migrant', currentZoom, isInclusive.value)
         })
         .bindPopup(
-          `<strong>${isEnglish.value ? labels.migrantCenter.en : labels.migrantCenter.fr}</strong><br>` +
-          `<strong>${isEnglish.value ? labels.type.en : labels.type.fr}</strong> ${center.type_centre || center.type || 'N/A'} | <strong>${isEnglish.value ? labels.places.en : labels.places.fr}</strong> ${center.places || 'N/A'} | <strong>${isEnglish.value ? labels.manager.en : labels.manager.fr}</strong> ${center.gestionnaire || 'N/A'}<br>` +
-          `<strong>${isEnglish.value ? labels.commune.en : labels.commune.fr}</strong> ${center.commune || 'N/A'}<br>` +
-          `<strong>${isEnglish.value ? labels.departement.en : labels.departement.fr}</strong> ${center.departement || 'N/A'}<br>` +
-          `<strong>${isEnglish.value ? labels.address.en : labels.address.fr}</strong> ${center.adresse || 'N/A'}`
+          `<strong>${isEnglish.value ? labels.value.migrantCenter.en : labels.value.migrantCenter.fr}</strong><br>` +
+          `<strong>${isEnglish.value ? labels.value.type.en : labels.value.type.fr}</strong> ${center.type_centre || center.type || 'N/A'} | <strong>${isEnglish.value ? labels.value.places.en : labels.value.places.fr}</strong> ${center.places || 'N/A'} | <strong>${isEnglish.value ? labels.value.manager.en : labels.value.manager.fr}</strong> ${center.gestionnaire || 'N/A'}<br>` +
+          `<strong>${isEnglish.value ? labels.value.commune.en : labels.value.commune.fr}</strong> ${center.commune || 'N/A'}<br>` +
+          `<strong>${isEnglish.value ? labels.value.departement.en : labels.value.departement.fr}</strong> ${center.departement || 'N/A'}<br>` +
+          `<strong>${isEnglish.value ? labels.value.address.en : labels.value.address.fr}</strong> ${center.adresse || 'N/A'}`
         )
 
         migrantCentersLayer.addLayer(marker)
@@ -341,11 +345,11 @@ export default {
           icon: createIcon('mosque', currentZoom, isInclusive.value)
         })
         .bindPopup(
-          `<strong>${mosque.name || (isEnglish.value ? labels.mosque.en : labels.mosque.fr)}</strong><br>` +
-          `<strong>${isEnglish.value ? labels.address.en : labels.address.fr}</strong> ${mosque.address || 'N/A'}<br>` +
-          `<strong>${isEnglish.value ? labels.commune.en : labels.commune.fr}</strong> ${mosque.commune || 'N/A'}<br>` +
-          `<strong>${isEnglish.value ? labels.latitude.en : labels.latitude.fr}</strong> ${mosque.latitude.toFixed(4)}<br>` +
-          `<strong>${isEnglish.value ? labels.longitude.en : labels.longitude.fr}</strong> ${mosque.longitude.toFixed(4)}`
+          `<strong>${mosque.name || (isEnglish.value ? labels.value.mosque.en : labels.value.mosque.fr)}</strong><br>` +
+          `<strong>${isEnglish.value ? labels.value.address.en : labels.value.address.fr}</strong> ${mosque.address || 'N/A'}<br>` +
+          `<strong>${isEnglish.value ? labels.value.commune.en : labels.value.commune.fr}</strong> ${mosque.commune || 'N/A'}<br>` +
+          `<strong>${isEnglish.value ? labels.value.latitude.en : labels.value.latitude.fr}</strong> ${mosque.latitude.toFixed(4)}<br>` +
+          `<strong>${isEnglish.value ? labels.value.longitude.en : labels.value.longitude.fr}</strong> ${mosque.longitude.toFixed(4)}`
         )
         mosqueLayer.addLayer(marker)
       })
@@ -406,10 +410,10 @@ export default {
           const departement = feature.properties.lib_dep || 'N/A'
 
           layer.bindPopup(
-            `<strong>${isEnglish.value ? labels.qpvLabel.en : labels.qpvLabel.fr} ${qpvName}</strong><br>` +
-            `<strong>${isEnglish.value ? labels.code.en : labels.code.fr}</strong> ${qpvCode}<br>` +
-            `<strong>${isEnglish.value ? labels.commune.en : labels.commune.fr}</strong> ${commune}<br>` +
-            `<strong>${isEnglish.value ? labels.departement.en : labels.departement.fr}</strong> ${departement}`
+            `<strong>${isEnglish.value ? labels.value.qpvLabel.en : labels.value.qpvLabel.fr} ${qpvName}</strong><br>` +
+            `<strong>${isEnglish.value ? labels.value.code.en : labels.value.code.fr}</strong> ${qpvCode}<br>` +
+            `<strong>${isEnglish.value ? labels.value.commune.en : labels.value.commune.fr}</strong> ${commune}<br>` +
+            `<strong>${isEnglish.value ? labels.value.departement.en : labels.value.departement.fr}</strong> ${departement}`
           )
 
           layer.on('mouseover', (e) => {
@@ -436,38 +440,11 @@ export default {
       qpvLayer.addTo(map)
     }
 
-    // Handle overlay toggle changes
-    const onOverlayToggle = () => {
-      emit('overlay-toggled', {
-        showQpv: showQpv.value,
-        showMigrantCenters: showMigrantCenters.value,
-        showMosques: showMosques.value
-      })
-
-      // Handle migrant centers layer
-      if (showMigrantCenters.value) {
-        showMigrantCentersOnMap()
-      } else if (migrantCentersLayer) {
-        map.removeLayer(migrantCentersLayer)
-      }
-
-      // Handle QPV layer
-      if (showQpv.value) {
-        if (!qpvLayer) {
-          loadQpvLayer()
-        } else if (!map.hasLayer(qpvLayer)) {
-          qpvLayer.addTo(map)
-        }
-      } else if (qpvLayer && map.hasLayer(qpvLayer)) {
-        map.removeLayer(qpvLayer)
-      }
-
-      // Handle mosque layer
-      if (showMosques.value) {
-        showMosquesOnMap()
-      } else if (mosqueLayer && map.hasLayer(mosqueLayer)) {
-        map.removeLayer(mosqueLayer)
-      }
+    const handleOverlayToggle = (overlayStates) => {
+      showQpv.value = overlayStates.showQpv
+      showMigrantCenters.value = overlayStates.showMigrantCenters
+      showMosques.value = overlayStates.showMosques
+      emit('overlay-toggled', overlayStates)
     }
 
     // ==================== SELECTED LOCATION MANAGEMENT ====================
@@ -483,7 +460,7 @@ export default {
       // Add new marker with click handler
       const popupContent = `
         <div>
-          <strong>${address || `${isEnglish.value ? labels.position.en : labels.position.fr} ${lat.toFixed(4)}, ${lng.toFixed(4)}`}</strong><br>
+          <strong>${address || `${isEnglish.value ? labels.value.position.en : labels.value.position.fr} ${lat.toFixed(4)}, ${lng.toFixed(4)}`}</strong><br>
           <button onclick="window.removePositionMarker()" style="
             margin-top: 8px;
             padding: 4px 8px;
@@ -493,7 +470,7 @@ export default {
             border-radius: 4px;
             cursor: pointer;
             font-size: 12px;
-          ">${isEnglish.value ? labels.removePosition.en : labels.removePosition.fr}</button>
+          ">${isEnglish.value ? labels.value.removePosition.en : labels.value.removePosition.fr}</button>
         </div>
       `
 
@@ -609,25 +586,25 @@ export default {
       // Add popup to arrow line
       let locationName
       if (location.type === 'migrant') {
-        locationName = `${isEnglish.value ? labels.migrantCenter.en : labels.migrantCenter.fr} - ${location.commune || 'N/A'}`
+        locationName = `${isEnglish.value ? labels.value.migrantCenter.en : labels.value.migrantCenter.fr} - ${location.commune || 'N/A'}`
       } else if (location.type === 'qpv') {
-        locationName = `${isEnglish.value ? labels.qpvLabel.en : labels.qpvLabel.fr} ${location.lib_qp || location.code_qp || 'N/A'}`
+        locationName = `${isEnglish.value ? labels.value.qpvLabel.en : labels.value.qpvLabel.fr} ${location.lib_qp || location.code_qp || 'N/A'}`
       } else if (location.type === 'mosque') {
-        locationName = `${location.name || (isEnglish.value ? labels.mosque.en : labels.mosque.fr)} - ${location.commune || 'N/A'}`
+        locationName = `${location.name || (isEnglish.value ? labels.value.mosque.en : labels.value.mosque.fr)} - ${location.commune || 'N/A'}`
       }
 
       arrowLine.bindPopup(
         `<strong>${locationName}</strong><br>` +
-        `<strong>${isEnglish.value ? labels.distance.en : labels.distance.fr}</strong> ${formattedDistance}` +
+        `<strong>${isEnglish.value ? labels.value.distance.en : labels.value.distance.fr}</strong> ${formattedDistance}` +
         (location.type === 'migrant'
-          ? `<br><strong>${isEnglish.value ? labels.type.en : labels.type.fr}</strong> ${location.type_centre || location.type || 'N/A'} | <strong>${isEnglish.value ? labels.places.en : labels.places.fr}</strong> ${location.places || 'N/A'} | <strong>${isEnglish.value ? labels.manager.en : labels.manager.fr}</strong> ${location.gestionnaire || 'N/A'}`
+          ? `<br><strong>${isEnglish.value ? labels.value.type.en : labels.value.type.fr}</strong> ${location.type_centre || location.type || 'N/A'} | <strong>${isEnglish.value ? labels.value.places.en : labels.value.places.fr}</strong> ${location.places || 'N/A'} | <strong>${isEnglish.value ? labels.value.manager.en : labels.value.manager.fr}</strong> ${location.gestionnaire || 'N/A'}`
           : location.type === 'qpv'
-          ? `<br><strong>${isEnglish.value ? labels.commune.en : labels.commune.fr}</strong> ${location.lib_com || 'N/A'}` +
-            `<br><strong>${isEnglish.value ? labels.departement.en : labels.departement.fr}</strong> ${location.lib_dep || 'N/A'}`
+          ? `<br><strong>${isEnglish.value ? labels.value.commune.en : labels.value.commune.fr}</strong> ${location.lib_com || 'N/A'}` +
+            `<br><strong>${isEnglish.value ? labels.value.departement.en : labels.value.departement.fr}</strong> ${location.lib_dep || 'N/A'}`
           : location.type === 'mosque'
-          ? `<br><strong>${isEnglish.value ? labels.name.en : labels.name.fr}</strong> ${location.name || (isEnglish.value ? labels.mosque.en : labels.mosque.fr)}` +
-            `<br><strong>${isEnglish.value ? labels.address.en : labels.address.fr}</strong> ${location.address || 'N/A'}` +
-            `<br><strong>${isEnglish.value ? labels.commune.en : labels.commune.fr}</strong> ${location.commune || 'N/A'}`
+          ? `<br><strong>${isEnglish.value ? labels.value.name.en : labels.value.name.fr}</strong> ${location.name || (isEnglish.value ? labels.value.mosque.en : labels.value.mosque.fr)}` +
+            `<br><strong>${isEnglish.value ? labels.value.address.en : labels.value.address.fr}</strong> ${location.address || 'N/A'}` +
+            `<br><strong>${isEnglish.value ? labels.value.commune.en : labels.value.commune.fr}</strong> ${location.commune || 'N/A'}`
           : ''
         )
       )
@@ -693,8 +670,7 @@ export default {
       showMigrantCenters,
       showQpv,
       showMosques,
-      overlayExpanded,
-      onOverlayToggle,
+      handleOverlayToggle,
       isEnglish,
       isInclusive,
       labels
@@ -748,36 +724,6 @@ export default {
   background: transparent;
 }
 
-/* Overlay indicators */
-.overlay-indicator {
-  width: 16px;
-  height: 16px;
-  margin-right: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  font-weight: bold;
-}
-
-.qpv-indicator {
-  background: #ff0000;
-  border: 2px solid #cc0000;
-}
-
-.migrant-indicator {
-  background: #000000;
-  color: white;
-  border-radius: 50%;
-  border: 1px solid #333333;
-}
-
-.mosque-indicator {
-  background: #2e7d32;
-  color: white;
-  border-radius: 50%;
-  border: 1px solid #1b5e20;
-}
 
 @media (max-width: 768px) {
   .localisation-map {
