@@ -1,56 +1,58 @@
 <template>
   <v-card>
-    <v-card-title class="text-h6 pb-1">
+    <v-card-title class="text-h6 pb-1" @click="toggleCollapse" style="cursor: pointer">
       {{ cardTitle }}
     </v-card-title>
-    <v-card-text>
-      <v-row>
-        <v-col cols="12" sm="3">
-          <v-btn
-            @click="selectFrance"
-            :color="location.type === 'country' ? 'primary' : 'grey'"
-            variant="elevated"
-            block
-          >
-            France
-          </v-btn>
-        </v-col>
-        
-        <v-col cols="12" sm="4">
-          <v-select
-            v-model="selectedDepartement"
-            @update:model-value="onDepartementChange"
-            :items="sortedDepartements"
-            item-title="name"
-            item-value="code"
-            :label="departementLabel"
-            variant="outlined"
-            clearable
-            density="compact"
-            hide-details
-          ></v-select>
-        </v-col>
-        
-        <v-col cols="12" sm="5">
-          <v-autocomplete
-            v-model="selectedCommune"
-            @update:model-value="onCommuneSelect"
-            @input="onCommuneInput"
-            :items="communeSuggestions"
-            item-title="displayName"
-            item-value="COG"
-            :label="communeLabel"
-            variant="outlined"
-            clearable
-            :loading="loading"
-            v-model:search="communeQuery"
-            return-object
-            density="compact"
-            hide-details
-          ></v-autocomplete>
-        </v-col>
-      </v-row>
-    </v-card-text>
+    <v-expand-transition v-show="!isCollapsed">
+      <v-card-text>
+        <v-row>
+          <v-col cols="12" sm="3">
+            <v-btn
+              @click="selectFrance"
+              :color="location.type === 'country' ? 'primary' : 'grey'"
+              variant="elevated"
+              block
+            >
+              France
+            </v-btn>
+          </v-col>
+          
+          <v-col cols="12" sm="4">
+            <v-select
+              v-model="selectedDepartement"
+              @update:model-value="onDepartementChange"
+              :items="sortedDepartements"
+              item-title="name"
+              item-value="code"
+              :label="departementLabel"
+              variant="outlined"
+              clearable
+              density="compact"
+              hide-details
+            ></v-select>
+          </v-col>
+          
+          <v-col cols="12" sm="5">
+            <v-autocomplete
+              v-model="selectedCommune"
+              @update:model-value="onCommuneSelect"
+              @input="onCommuneInput"
+              :items="communeSuggestions"
+              item-title="displayName"
+              item-value="COG"
+              :label="communeLabel"
+              variant="outlined"
+              clearable
+              :loading="loading"
+              v-model:search="communeQuery"
+              return-object
+              density="compact"
+              hide-details
+            ></v-autocomplete>
+          </v-col>
+        </v-row>
+      </v-card-text>
+    </v-expand-transition>
   </v-card>
 </template>
 
@@ -77,7 +79,8 @@ export default {
       communeSuggestions: [],
       communesData: [],
       departementNames: DepartementNames,
-      loading: false
+      loading: false,
+      isCollapsed: false
     }
   },
   computed: {
@@ -175,6 +178,10 @@ export default {
         this.loading = false
       }
     },
+
+    toggleCollapse() {
+      this.isCollapsed = !this.isCollapsed
+    }
   },
   
 }

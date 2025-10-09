@@ -1,7 +1,7 @@
 
 <template>
   <v-card>
-    <v-card-title class="text-h6 pb-0 d-flex justify-space-between align-center">
+    <v-card-title class="text-h6 pb-0 d-flex justify-space-between align-center" @click="toggleCollapse" style="cursor: pointer">
       <span>{{ isEnglish ? 'First Names Evolution' : 'Évolution des Prénoms' }}</span>
       <v-btn
         @click="toggleView"
@@ -20,11 +20,13 @@
       </a>
     </v-card-subtitle>
     
-    <v-card-text>      
-      <div class="chart-container">
-        <canvas ref="chartCanvas" class="chart-canvas"></canvas>
-      </div>
-    </v-card-text>
+    <v-expand-transition v-show="!isCollapsed">
+      <v-card-text>
+        <div class="chart-container">
+          <canvas ref="chartCanvas" class="chart-canvas"></canvas>
+        </div>
+      </v-card-text>
+    </v-expand-transition>
   </v-card>
 </template>
 
@@ -51,6 +53,7 @@ export default {
   data() {
     return {
       currentView: 'detailed', // 'detailed' or 'simplified'
+      isCollapsed: false,
       detailedCategoriesFr: [
         { key: "musulman_pct", label: "Prénoms musulmans", color: "#22c55e", order: 1 },
         { key: "traditionnel_pct", label: "Prénoms français traditionnels", color: "#1e40af", order: 2 },
@@ -155,6 +158,10 @@ export default {
     toggleView() {
       this.currentView = this.currentView === 'detailed' ? 'simplified' : 'detailed';
       this.updateChart();
+    },
+
+    toggleCollapse() {
+      this.isCollapsed = !this.isCollapsed;
     },
 
     handleLabelChange() {

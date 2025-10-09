@@ -1,10 +1,11 @@
 <template>
   <v-card class="mb-4">
-    <v-card-title class="text-h6 pb-0">
+    <v-card-title class="text-h6 pb-0" @click="toggleCollapse" style="cursor: pointer;">
       {{ cardTitle }}
     </v-card-title>
 
-    <v-card-text>
+    <v-expand-transition>
+      <v-card-text v-show="!isCollapsed">
       <!-- Show loading indicator while data is being fetched -->
       <div v-if="loading" class="d-flex justify-center align-center py-8">
         <v-progress-circular indeterminate color="primary" size="32"></v-progress-circular>
@@ -40,7 +41,8 @@
       <div v-else class="text-center py-8 text-grey">
         {{ noDataMessage }}
       </div>
-    </v-card-text>
+      </v-card-text>
+    </v-expand-transition>
   </v-card>
 </template>
 
@@ -63,6 +65,7 @@ export default {
       tableRows: [],
       mainHeader: '',
       compareHeader: '',
+      isCollapsed: false,
     }
   },
   computed: {
@@ -126,6 +129,9 @@ export default {
     window.removeEventListener('metricsLabelsToggled', this.updateTable)
   },
   methods: {
+    toggleCollapse() {
+      this.isCollapsed = !this.isCollapsed;
+    },
     updateTable() {
       if (!this.location || !this.location.type) {
         this.tableRows = []

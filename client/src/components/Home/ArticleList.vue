@@ -1,95 +1,97 @@
 
 <template>
   <v-card>
-    <v-card-title class="text-h6 pb-0">
+    <v-card-title class="text-h6 pb-0" @click="toggleCollapse" style="cursor: pointer">
       {{ isEnglish ? 'FdS articles related to:' : 'Articles FdS associés à:' }} {{ locationName }}
     </v-card-title>
 
-    <v-card-text>
-      <div v-if="location?.type === 'commune'" class="lieu-filter-container mb-0">
-        <v-select
-          v-model="selectedLieu"
-          :items="lieuOptions"
-          :label="isEnglish ? 'Location filter' : 'Filtre de lieu'"
-          variant="outlined"
-          density="compact"
-          clearable
-          @update:modelValue="onLieuChange"
-          class="lieu-select"
-        ></v-select>
-      </div>
-
-      <div class="categories-container mb-4">
-        <v-chip-group
-          v-model="selectedCategory"
-          active-class="primary--text"
-          column
-          mandatory
-        >
-          <v-chip 
-            color="primary"
-            variant="flat"
-            label
-            size="small"
-            :value="'tous'"
-            @click="selectCategory('tous')"
-          >
-            {{ isEnglish ? 'All' : 'Tous' }} ({{ totalArticles }})
-          </v-chip>
-          <v-chip 
-            color="primary"
-            variant="flat"
-            label
-            size="small"
-            v-for="category in categories"
-            :key="category"
-            :value="category"
-            @click="selectCategory(category)"
-          >
-            {{ getCategoryLabel(category) }} ({{ articles.counts[category] || 0 }})
-          </v-chip>
-        </v-chip-group>
-      </div>
-
-      <div class="articles-container" ref="articlesContainer" @scroll="handleScroll">
-        <div
-          class="article-item"
-          v-for="(item, i) in filteredArticles"
-          :key="item.url + i"
-        >
-          <div class="article-header">
-            <span class="article-date">{{ formatDate(item.date) }}</span>
-            <span class="article-location">{{ item.commune }} ({{ item.departement }})</span>
-          </div>
-          <div class="article-title">
-            <a :href='item.url' target="_blank" rel="noopener noreferrer">
-              {{ item.title }}
-            </a>
-          </div>
-        </div>
-
-        <div v-if="isLoading" class="loading">
-          <v-progress-circular indeterminate size="24" color="primary"></v-progress-circular>
-          <span class="loading-text">{{ isEnglish ? 'Loading...' : 'Chargement...' }}</span>
-        </div>
-
-        <div v-if="filteredArticles.length === 0 && !isLoading" class="no-articles">
-          {{ noArticlesMessage }}
-        </div>
-
-        <div v-if="articles.pagination?.hasMore && !isLoading" class="load-more">
-          <v-btn
-            @click="loadMoreArticles"
+    <v-expand-transition>
+      <v-card-text v-show="!isCollapsed">
+        <div v-if="location?.type === 'commune'" class="lieu-filter-container mb-0">
+          <v-select
+            v-model="selectedLieu"
+            :items="lieuOptions"
+            :label="isEnglish ? 'Location filter' : 'Filtre de lieu'"
             variant="outlined"
-            color="primary"
-            size="small"
-            block
-          >
-            {{ isEnglish ? 'Load more articles' : 'Charger plus d\'articles' }}
-          </v-btn>
+            density="compact"
+            clearable
+            @update:modelValue="onLieuChange"
+            class="lieu-select"
+          ></v-select>
         </div>
-      </div>
-    </v-card-text>
+
+        <div class="categories-container mb-4">
+          <v-chip-group
+            v-model="selectedCategory"
+            active-class="primary--text"
+            column
+            mandatory
+          >
+            <v-chip
+              color="primary"
+              variant="flat"
+              label
+              size="small"
+              :value="'tous'"
+              @click="selectCategory('tous')"
+            >
+              {{ isEnglish ? 'All' : 'Tous' }} ({{ totalArticles }})
+            </v-chip>
+            <v-chip
+              color="primary"
+              variant="flat"
+              label
+              size="small"
+              v-for="category in categories"
+              :key="category"
+              :value="category"
+              @click="selectCategory(category)"
+            >
+              {{ getCategoryLabel(category) }} ({{ articles.counts[category] || 0 }})
+            </v-chip>
+          </v-chip-group>
+        </div>
+
+        <div class="articles-container" ref="articlesContainer" @scroll="handleScroll">
+          <div
+            class="article-item"
+            v-for="(item, i) in filteredArticles"
+            :key="item.url + i"
+          >
+            <div class="article-header">
+              <span class="article-date">{{ formatDate(item.date) }}</span>
+              <span class="article-location">{{ item.commune }} ({{ item.departement }})</span>
+            </div>
+            <div class="article-title">
+              <a :href='item.url' target="_blank" rel="noopener noreferrer">
+                {{ item.title }}
+              </a>
+            </div>
+          </div>
+
+          <div v-if="isLoading" class="loading">
+            <v-progress-circular indeterminate size="24" color="primary"></v-progress-circular>
+            <span class="loading-text">{{ isEnglish ? 'Loading...' : 'Chargement...' }}</span>
+          </div>
+
+          <div v-if="filteredArticles.length === 0 && !isLoading" class="no-articles">
+            {{ noArticlesMessage }}
+          </div>
+
+          <div v-if="articles.pagination?.hasMore && !isLoading" class="load-more">
+            <v-btn
+              @click="loadMoreArticles"
+              variant="outlined"
+              color="primary"
+              size="small"
+              block
+            >
+              {{ isEnglish ? 'Load more articles' : 'Charger plus d\'articles' }}
+            </v-btn>
+          </div>
+        </div>
+      </v-card-text>
+    </v-expand-transition>
   </v-card>
 </template>
 
@@ -142,7 +144,8 @@ export default {
       articleCategoriesRef: articleCategoriesRef,
       isLoading: false,
       selectedLieu: null,
-      lieux: []
+      lieux: [],
+      isCollapsed: false
     };
   },
   computed: {
@@ -320,6 +323,10 @@ export default {
       }
 
       await dataStore.fetchFilteredArticles(params, false);
+    },
+
+    toggleCollapse() {
+      this.isCollapsed = !this.isCollapsed;
     }
   }
 };

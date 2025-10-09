@@ -1,9 +1,11 @@
 <template>
   <v-card class="mb-4">
-    <v-card-title class="text-h6 pb-0">
+    <v-card-title class="text-h6 pb-0" @click="toggleCollapse" style="cursor: pointer;">
       {{ isEnglish ? 'Mosques for:' : 'Mosquées pour:' }} {{ locationName }}
     </v-card-title>
-    <v-card-text>
+
+    <v-expand-transition>
+      <v-card-text v-show="!isCollapsed">
       <div
         class="table-container"
         ref="tableContainer"
@@ -52,7 +54,8 @@
       <div v-else class="text-center">
         <p>{{ isEnglish ? 'No mosques in this area.' : 'Aucune mosquée dans cette zone.' }}</p>
       </div>
-    </v-card-text>
+      </v-card-text>
+    </v-expand-transition>
   </v-card>
 </template>
 
@@ -82,6 +85,7 @@ export default {
   data() {
     return {
       isLoading: false,
+      isCollapsed: false,
       // Virtual scrolling
       containerHeight: 400,
       itemHeight: 60,
@@ -156,6 +160,10 @@ export default {
       if (this.$refs.tableContainer) {
         this.containerHeight = this.$refs.tableContainer.clientHeight
       }
+    },
+
+    toggleCollapse() {
+      this.isCollapsed = !this.isCollapsed;
     },
 
     attachScrollListener() {

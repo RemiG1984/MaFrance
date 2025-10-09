@@ -1,6 +1,6 @@
 <template>
   <v-card class="mb-4">
-    <v-card-title class="text-h6 pb-0">
+    <v-card-title class="text-h6 pb-0" @click="toggleCollapse" style="cursor: pointer">
       {{ isEnglish ? 'Public subsidies to associations for:' : 'Subventions publiques aux associations pour:' }} {{ locationName }}
     </v-card-title>
     <v-card-subtitle class="text-caption text-grey pt-0 pb-0">
@@ -10,37 +10,39 @@
         {{ isEnglish ? 'data.ofgl.fr source' : 'source data.ofgl.fr' }}
       </a>
     </v-card-subtitle>
-    <v-card-text>
-      <div v-if="subventionRows && subventionRows.length > 0">
-        <div class="table-container">
-          <table class="subventions-table">
-            <thead>
-              <tr>
-                <th></th>
-                <th>{{ isEnglish ? 'Value /per capita/year' : 'Valeur /hab./an' }}</th>
-                <th>{{ isEnglish ? 'National average /per capita/year' : 'Moyenne nationale /hab./an' }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(row, index) in subventionRows" :key="index">
-                <td class="row-title">{{ row.entity }}</td>
-                <td class="score-main">{{ formatNumber(row.perCapita) }} €</td>
-                <td class="score-main">{{ formatNumber(row.nationalAverage) }} €</td>
-              </tr>
-              <tr class="total-row">
-                <td class="row-title total-title">{{ isEnglish ? 'Total per capita per year' : 'Total par hab. et par an' }}</td>
-                <td class="score-main">{{ formatNumber(totalPerCapita) }} €</td>
-                <td class="score-main">{{ formatNumber(totalNationalAverage) }} €</td>
-              </tr>
-            </tbody>
-          </table>
+    <v-expand-transition>
+      <v-card-text v-show="!isCollapsed">
+        <div v-if="subventionRows && subventionRows.length > 0">
+          <div class="table-container">
+            <table class="subventions-table">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>{{ isEnglish ? 'Value /per capita/year' : 'Valeur /hab./an' }}</th>
+                  <th>{{ isEnglish ? 'National average /per capita/year' : 'Moyenne nationale /hab./an' }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(row, index) in subventionRows" :key="index">
+                  <td class="row-title">{{ row.entity }}</td>
+                  <td class="score-main">{{ formatNumber(row.perCapita) }} €</td>
+                  <td class="score-main">{{ formatNumber(row.nationalAverage) }} €</td>
+                </tr>
+                <tr class="total-row">
+                  <td class="row-title total-title">{{ isEnglish ? 'Total per capita per year' : 'Total par hab. et par an' }}</td>
+                  <td class="score-main">{{ formatNumber(totalPerCapita) }} €</td>
+                  <td class="score-main">{{ formatNumber(totalNationalAverage) }} €</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
 
-      <div v-else class="text-center">
-        <p>{{ isEnglish ? 'No subsidy data available for this area.' : 'Aucune donnée de subvention disponible pour cette zone.' }}</p>
-      </div>
-    </v-card-text>
+        <div v-else class="text-center">
+          <p>{{ isEnglish ? 'No subsidy data available for this area.' : 'Aucune donnée de subvention disponible pour cette zone.' }}</p>
+        </div>
+      </v-card-text>
+    </v-expand-transition>
   </v-card>
 </template>
 
@@ -66,6 +68,11 @@ export default {
     communeData: {
       type: Object,
       default: () => ({})
+    }
+  },
+  data() {
+    return {
+      isCollapsed: false
     }
   },
   computed: {
@@ -204,6 +211,10 @@ export default {
     }
   },
   methods: {
+    toggleCollapse() {
+      this.isCollapsed = !this.isCollapsed;
+    },
+
     formatNumber(number) {
       if (number == null || isNaN(number)) return "N/A";
       return Math.round(number).toLocaleString("fr-FR").replace(/\s/g, ' ');

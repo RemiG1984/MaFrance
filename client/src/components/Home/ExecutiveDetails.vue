@@ -1,41 +1,43 @@
 <template>
   <v-card class="mb-4">
-    <v-card-title class="text-h6 pb-0">
+    <v-card-title class="text-h6 pb-0" @click="toggleCollapse" style="cursor: pointer;">
       {{ cardTitle }}
     </v-card-title>
 
-    <v-card-text>
-      <div v-if="loading" class="d-flex justify-center align-center py-8">
-        <v-progress-circular indeterminate color="primary" size="32"></v-progress-circular>
-      </div>
+    <v-expand-transition>
+      <v-card-text v-show="!isCollapsed">
+        <div v-if="loading" class="d-flex justify-center align-center py-8">
+          <v-progress-circular indeterminate color="primary" size="32"></v-progress-circular>
+        </div>
 
-      <div v-else-if="executiveData" class="executive-box">
-        <p>
-          {{ executiveData.position }} {{ executiveData.locationPreposition }} {{ executiveData.location }}: 
-          <span class="executive-name font-weight-bold">{{ executiveData.prenom }} {{ executiveData.nom }}</span>
-          <span v-if="executiveData.dateLabel">{{ executiveData.dateLabel }}</span>
-          <br v-if="executiveData.familleNuance">
-          <span v-if="executiveData.familleNuance">
-            {{ politicalFamilyLabel }}: <span class="executive-famille">{{ executiveData.familleNuance }}</span>
-          </span>
-        </p>
-      </div>
+        <div v-else-if="executiveData" class="executive-box">
+          <p>
+            {{ executiveData.position }} {{ executiveData.locationPreposition }} {{ executiveData.location }}:
+            <span class="executive-name font-weight-bold">{{ executiveData.prenom }} {{ executiveData.nom }}</span>
+            <span v-if="executiveData.dateLabel">{{ executiveData.dateLabel }}</span>
+            <br v-if="executiveData.familleNuance">
+            <span v-if="executiveData.familleNuance">
+              {{ politicalFamilyLabel }}: <span class="executive-famille">{{ executiveData.familleNuance }}</span>
+            </span>
+          </p>
+        </div>
 
-      <div v-else class="text-center py-8 text-grey">
-        <p v-if="location.type === 'country'">
-          {{ noDataMessages.country }}
-        </p>
-        <p v-else-if="location.type === 'departement'">
-          {{ noDataMessages.departement }}
-        </p>
-        <p v-else-if="location.type === 'commune'">
-          {{ noDataMessages.commune }}
-        </p>
-        <p v-else>
-          {{ noDataMessages.default }}
-        </p>
-      </div>
-    </v-card-text>
+        <div v-else class="text-center py-8 text-grey">
+          <p v-if="location.type === 'country'">
+            {{ noDataMessages.country }}
+          </p>
+          <p v-else-if="location.type === 'departement'">
+            {{ noDataMessages.departement }}
+          </p>
+          <p v-else-if="location.type === 'commune'">
+            {{ noDataMessages.commune }}
+          </p>
+          <p v-else>
+            {{ noDataMessages.default }}
+          </p>
+        </div>
+      </v-card-text>
+    </v-expand-transition>
   </v-card>
 </template>
 
@@ -54,7 +56,8 @@ export default {
   },
   data() {
     return {
-      loading: false
+      loading: false,
+      isCollapsed: false
     }
   },
   computed: {
@@ -189,6 +192,10 @@ export default {
         console.error('Error formatting date:', error);
         return dateString;
       }
+    },
+
+    toggleCollapse() {
+      this.isCollapsed = !this.isCollapsed;
     }
   },
 

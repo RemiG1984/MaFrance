@@ -1,6 +1,6 @@
 <template>
   <v-card class="mb-4">
-    <v-card-title class="text-h6 pb-0">
+    <v-card-title class="text-h6 pb-0" @click="toggleCollapse" style="cursor: pointer;">
       {{ cardTitle }}
     </v-card-title>
     <v-card-subtitle class="text-caption text-grey pt-0 pb-0">
@@ -10,21 +10,23 @@
         {{ sourceText }}
       </a>
     </v-card-subtitle>
-    <v-card-text>
-      <v-row no-gutters>
-        <v-col cols="12" lg="6"
-        class="chart-container pa-1"
-        v-for="chartKey in availableCharts"
-        :key="chartKey">
-          <Graph
-            :metricKey="chartKey"
-            :data="aggregatedData[chartKey]"
-            :dataLabels="labels"
-            :location="location"
-          />
-        </v-col>
-      </v-row>
-    </v-card-text>
+    <v-expand-transition>
+      <v-card-text v-show="!isCollapsed">
+        <v-row no-gutters>
+          <v-col cols="12" lg="6"
+          class="chart-container pa-1"
+          v-for="chartKey in availableCharts"
+          :key="chartKey">
+            <Graph
+              :metricKey="chartKey"
+              :data="aggregatedData[chartKey]"
+              :dataLabels="labels"
+              :location="location"
+            />
+          </v-col>
+        </v-row>
+      </v-card-text>
+    </v-expand-transition>
   </v-card>
 </template>
 
@@ -64,7 +66,8 @@ export default {
         'destructions_p1k',
         'stupefiants_p1k',
         'escroqueries_p1k'
-      ]
+      ],
+      isCollapsed: false
     }
   },
   mounted() {
@@ -150,7 +153,9 @@ export default {
     }
   },
   methods: {
-
+    toggleCollapse() {
+      this.isCollapsed = !this.isCollapsed;
+    }
   },
   watch: {
     // Watch for label state changes to update chart data
