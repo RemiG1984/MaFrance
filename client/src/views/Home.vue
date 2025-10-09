@@ -84,11 +84,19 @@
 
           <!-- Subventions -->
           <v-col cols="12">
-            <Subventions 
+            <Subventions
               :location="currentLocation"
               :countryData="dataStore.country"
               :departementData="dataStore.departement"
               :communeData="dataStore.commune"
+            />
+          </v-col>
+
+          <!-- Mosque Table -->
+          <v-col cols="12">
+            <MosqueTable
+              :location="currentLocation"
+              :data="mosquesData"
             />
           </v-col>
         </v-row>
@@ -111,6 +119,7 @@ import ScoreTable from '../components/Home/ScoreTable.vue'
 import CrimeGraphs from '../components/Home/CrimeGraphs.vue'
 import Graph from '../components/Home/Graph.vue'
 import Subventions from '../components/Home/Subventions.vue'
+import MosqueTable from '../components/Home/MosqueTable.vue'
 
 export default {
   name: 'Home',
@@ -126,6 +135,7 @@ export default {
     CrimeGraphs,
     Graph,
     Subventions,
+    MosqueTable,
   },
   computed: {
     ...mapStores(useDataStore),
@@ -273,6 +283,11 @@ export default {
     migrantsData(){
       return this.dataStore.getCurrentMigrants
     },
+
+    mosquesData(){
+      return this.dataStore.getCurrentMosques
+    },
+
     currentSubventions() {
       return this.dataStore.getCurrentSubventions
     },
@@ -373,6 +388,15 @@ export default {
           await this.dataStore.fetchDepartementQpv(location.code)
         } else if (location.type === 'commune') {
           await this.dataStore.fetchCommuneQpv(location.code)
+        }
+
+        // Fetch mosques data
+        if (location.type === 'country') {
+          await this.dataStore.fetchMosques('country')
+        } else if (location.type === 'departement') {
+          await this.dataStore.fetchMosques('departement', location.code)
+        } else if (location.type === 'commune') {
+          await this.dataStore.fetchMosques('commune', location.code)
         }
     }
 

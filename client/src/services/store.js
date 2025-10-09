@@ -28,6 +28,7 @@ export const useDataStore = defineStore("data", {
       crimeAggreg: null,
       subventions: null,
       migrants: null,
+      mosques: null,
       articles: null,
       nat1: null,
     },
@@ -46,6 +47,7 @@ export const useDataStore = defineStore("data", {
       crimeAggreg: null,
       subventions: null,
       migrants: null,
+      mosques: null,
       nat1: null,
     },
     commune: {
@@ -59,6 +61,7 @@ export const useDataStore = defineStore("data", {
       crimeAggreg: null,
       subventions: null,
       migrants: null,
+      mosques: null,
       nat1: null,
     },
     locationCache: JSON.parse(localStorage.getItem('locationCache') || '{}'),
@@ -68,8 +71,6 @@ export const useDataStore = defineStore("data", {
     async searchCommunes(query) {
       return await api.searchCommunes(query);
     },
-
-
 
     // Requêtes globales getAll()
     async fetchCountryData() {
@@ -89,6 +90,7 @@ export const useDataStore = defineStore("data", {
           api.getCountrySubventions(),
           api.getArticles({ limit: 10 }),
           api.getMigrants({ limit: 10 }),
+          api.getMosques({ limit: 10 }),
           api.getQpv({ limit: 10 }),
           api.getCountryNat1(),
         ]);
@@ -102,11 +104,11 @@ export const useDataStore = defineStore("data", {
         country.executive = results[5];
         country.departementsRankings = results[6];
         country.subventions = results[7];
-        const articlesResponse = results[8];
-        country.articles = articlesResponse;
+        country.articles = results[8];
         country.migrants = results[9];
-        country.qpv = results[10];
-        country.nat1 = results[11];
+        country.mosques = results[10];
+        country.qpv = results[11];
+        country.nat1 = results[12];
         country.namesSeries = serializeStats(country.namesHistory);
         country.crimeSeries = serializeStats(country.crimeHistory);
         country.crimeAggreg = aggregateStats(country.crimeSeries.data, MetricsConfig.calculatedMetrics);
@@ -140,6 +142,7 @@ export const useDataStore = defineStore("data", {
           }),
           api.getDepartementSubventions(code),
           api.getMigrants({ dept: code, limit: 100 }),
+          api.getMosques({ dept: code, limit: 100 }),
           api.getDepartementNat1(code),
         ]);
 
@@ -152,11 +155,11 @@ export const useDataStore = defineStore("data", {
         departement.qpv = results[5];
         departement.executive = results[6];
         departement.communesRankings = results[7];
-        const articlesResponse = results[8];
-        departement.articles = articlesResponse;
+        departement.articles = results[8];
         departement.subventions = results[9];
         departement.migrants = results[10] || [];
-        departement.nat1 = results[11];
+        departement.mosques = results[11] || [];
+        departement.nat1 = results[12];
         departement.namesSeries = serializeStats(departement.namesHistory);
         departement.crimeSeries = serializeStats(results[3]);
         departement.crimeAggreg = aggregateStats(
@@ -188,6 +191,7 @@ export const useDataStore = defineStore("data", {
           }),
           api.getCommuneSubventions(code),
           api.getMigrants({ cog: code, limit: 100 }),
+          api.getMosques({ cog: code, limit: 100 }),
           api.getCommuneNat1(code),
         ]);
 
@@ -197,11 +201,11 @@ export const useDataStore = defineStore("data", {
         commune.crimeHistory = results[2];
         commune.qpv = results[3];
         commune.executive = results[4];
-        const articlesResponse = results[5];
-        commune.articles = articlesResponse;
+        commune.articles = results[5];
         commune.subventions = results[6];
         commune.migrants = results[7] || [];
-        commune.nat1 = results[8];
+        commune.mosques = results[8] || [];
+        commune.nat1 = results[9];
         commune.crimeSeries = serializeStats(results[2]);
         commune.crimeAggreg = aggregateStats(commune.crimeSeries.data, MetricsConfig.calculatedMetrics);
 
@@ -311,6 +315,7 @@ export const useDataStore = defineStore("data", {
         crimeAggreg: null,
         subventions: null,
         migrants: null,
+        mosques: null,
         nat1: null,
       };
     },
@@ -327,6 +332,7 @@ export const useDataStore = defineStore("data", {
         crimeAggreg: null,
         subventions: null,
         migrants: null,
+        mosques: null,
         nat1: null,
       };
     },
@@ -533,7 +539,7 @@ export const useDataStore = defineStore("data", {
         } else if (level === 'commune') {
           migrantParams.cog = code;
         }
-        
+
         // Remove undefined cursor parameter
         if (migrantParams.cursor === undefined || migrantParams.cursor === null) {
           delete migrantParams.cursor;
@@ -546,6 +552,47 @@ export const useDataStore = defineStore("data", {
         }
       } catch (error) {
         console.error(`Error loading more ${level} migrants:`, error);
+      }
+    },
+
+    async fetchMosques(level, code) {
+      try {
+        let params = { limit: level === 'country' ? 20 : 100 };
+        if (level === 'departement') {
+          params.dept = code;
+        } else if (level === 'commune') {
+          params.cog = code;
+        } // No params for country
+
+        const mosques = await api.getMosques(params);
+        this[level].mosques = mosques || { list: [], pagination: { hasMore: false, nextCursor: null, limit: params.limit } };
+      } catch (error) {
+        console.error(`Error fetching ${level} mosques:`, error);
+        this[level].mosques = { list: [], pagination: { hasMore: false, nextCursor: null, limit: 20 } };
+      }
+    },
+
+    async loadMoreMosques(level, code, params) {
+      try {
+        let mosqueParams = { ...params };
+        if (level === 'departement') {
+          mosqueParams.dept = code;
+        } else if (level === 'commune') {
+          mosqueParams.cog = code;
+        }
+
+        // Remove undefined cursor parameter
+        if (mosqueParams.cursor === undefined || mosqueParams.cursor === null) {
+          delete mosqueParams.cursor;
+        }
+
+        const moreMosques = await api.getMosques(mosqueParams);
+        if (moreMosques && moreMosques.list) {
+          this[level].mosques.list.push(...moreMosques.list);
+          this[level].mosques.pagination = moreMosques.pagination;
+        }
+      } catch (error) {
+        console.error(`Error loading more ${level} mosques:`, error);
       }
     },
 
@@ -690,6 +737,11 @@ export const useDataStore = defineStore("data", {
     getCurrentMigrants() {
       const level = this.currentLevel
       return this[level]?.migrants || { list: [], pagination: { hasMore: false, nextCursor: null, limit: 20 } }
+    },
+
+    getCurrentMosques() {
+      const level = this.currentLevel
+      return this[level]?.mosques || { list: [], pagination: { hasMore: false, nextCursor: null, limit: 20 } }
     },
   },
 });
