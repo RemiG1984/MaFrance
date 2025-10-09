@@ -4,7 +4,7 @@
       <v-card-text class="pa-0 position-relative">
         <div id="localisationMap" class="localisation-map"></div>
 
-        <LocationDataBox @overlay-toggled="handleOverlayToggle" />
+        <LocationDataBox :zoom="currentZoom" :center="currentCenter" @overlay-toggled="handleOverlayToggle" @cadastral-data-loaded="$emit('cadastral-data-loaded', $event)" />
       </v-card-text>
     </v-card>
   </div>
@@ -125,9 +125,21 @@ export default {
     closestLocations: {
       type: Array,
       default: () => []
+    },
+    cadastralData: {
+      type: [Object, null],
+      default: null
+    },
+    zoom: {
+      type: Number,
+      default: null
+    },
+    center: {
+      type: Object,
+      default: null
     }
   },
-  emits: ['location-selected', 'overlay-toggled'],
+  emits: ['location-selected', 'overlay-toggled', 'cadastral-data-loaded'],
   components: {
     LocationDataBox
   },
@@ -204,6 +216,18 @@ export default {
       name: {
         en: 'Name',
         fr: 'Nom'
+      },
+      sectionID: {
+        en: 'Section ID',
+        fr: 'ID Section'
+      },
+      price: {
+        en: 'Average Price',
+        fr: 'Prix Moyen'
+      },
+      cog: {
+        en: 'COG',
+        fr: 'COG'
       }
     }))
 
@@ -213,6 +237,8 @@ export default {
     const showMigrantCenters = ref(false)
     const showQpv = ref(true)
     const showMosques = ref(false)
+    const showCadastral = ref(false)
+
 
     // ==================== MAP STATE ====================
 
@@ -221,10 +247,15 @@ export default {
     let qpvLayer = null
     let migrantCentersLayer = null
     let mosqueLayer = null
+    let cadastralLayer = null
 
     // Map markers and layers
     let selectedMarker = null
     let arrowLayers = []
+
+    // Current map zoom and center
+    const currentZoom = ref(6)
+    const currentCenter = ref({ lat: 46.603354, lng: 1.888334 })
 
     // ==================== UTILITY FUNCTIONS ====================
 
@@ -253,7 +284,12 @@ export default {
       await nextTick()
 
       // Initialize map centered on France
-      map = L.map('localisationMap').setView([46.603354, 1.888334], 6)
+      map = L.map('localisationMap').setView([currentCenter.value.lat, currentCenter.value.lng], currentZoom.value)
+
+      // Set initial zoom and center values
+      currentZoom.value = map.getZoom()
+      const center = map.getCenter()
+      currentCenter.value = { lat: center.lat, lng: center.lng }
 
       // Set map bounds to metropolitan France (including Corsica)
       const bounds = L.latLngBounds(
@@ -282,13 +318,16 @@ export default {
       // Add click handler
       map.on('click', onMapClick)
 
-      // Add zoom handler for updating icons
-      map.on('zoomend', updateAllIcons)
+      // Add event handlers to update zoom and center
+      map.on('zoomend', () => {
+        currentZoom.value = map.getZoom()
+      })
 
-      // Load QPV layer by default since showQpv is true by default
-      if (showQpv.value) {
-        loadQpvLayer()
-      }
+      map.on('moveend', () => {
+        const center = map.getCenter()
+        currentCenter.value = { lat: center.lat, lng: center.lng }
+      })
+
     }
 
     // Handle map click
@@ -440,10 +479,104 @@ export default {
       qpvLayer.addTo(map)
     }
 
+    // Load cadastral GeoJSON layer
+    const loadCadastralLayer = () => {
+      try {
+        if (!map) {
+          return
+        }
+
+        if (!props.cadastralData || !props.cadastralData.sections) {
+          return
+        }
+
+        if (cadastralLayer) {
+          map.removeLayer(cadastralLayer)
+        }
+
+        const priceValues = props.cadastralData.sections.map(s => s.price).filter(v => v !== null && v !== undefined)
+        let minMAM = null
+        let maxMAM = null
+        if (priceValues.length > 0) {
+          minMAM = Math.min(...priceValues)
+          maxMAM = Math.max(...priceValues)
+        }
+
+        const getColor = (mam) => {
+          if (mam === null || mam === undefined || minMAM === null || maxMAM === null) {
+            return '#808080' // gray for null or no data
+          }
+          const ratio = (mam - minMAM) / (maxMAM - minMAM)
+          const r = Math.round(255 * ratio)
+          const g = Math.round(255 * (1 - ratio))
+          const b = 0
+          return `rgb(${r},${g},${b})`
+        }
+
+        const features = props.cadastralData.sections.map(section => ({
+          type: 'Feature',
+          properties: {
+            sectionID: section.sectionID,
+            cog: section.cog,
+            price: section.price
+          },
+          geometry: { type: "Polygon", coordinates: [section.geometry] }
+        }))
+
+        const geoJsonData = {
+          type: 'FeatureCollection',
+          features: features
+        }
+
+        cadastralLayer = L.geoJSON(geoJsonData, {
+          style: (feature) => {
+            const mam = feature.properties.price
+            return {
+              fillColor: getColor(mam),
+              color: '#000000',
+              weight: 1,
+              fillOpacity: 0.6,
+              opacity: 0.8
+            }
+          },
+          onEachFeature: (feature, layer) => {
+            const sectionID = feature.properties.sectionID || 'N/A'
+            const cog = feature.properties.cog || 'N/A'
+            const mam = feature.properties.price
+            const priceText = mam !== null && mam !== undefined ? `€${mam.toLocaleString()}` : 'N/A'
+            layer.bindPopup(`<strong>${isEnglish.value ? labels.value.sectionID.en : labels.value.sectionID.fr}:</strong> ${sectionID}<br><strong>${isEnglish.value ? labels.value.cog.en : labels.value.cog.fr}:</strong> ${cog}<br><strong>${isEnglish.value ? labels.value.price.en : labels.value.price.fr}:</strong> ${priceText}`)
+
+            layer.on('mouseover', () => {
+              layer.setStyle({
+                fillOpacity: 0.8,
+                weight: 2
+              })
+            })
+
+            layer.on('mouseout', () => {
+              const mam = feature.properties.price
+              layer.setStyle({
+                fillColor: getColor(mam),
+                fillOpacity: 0.6,
+                weight: 1
+              })
+            })
+          }
+        })
+
+        cadastralLayer.addTo(map)
+
+        cadastralLayer.bringToFront()
+      } catch (error) {
+        console.error('loadCadastralLayer: Error occurred:', error)
+      }
+    }
+
     const handleOverlayToggle = (overlayStates) => {
       showQpv.value = overlayStates.showQpv
       showMigrantCenters.value = overlayStates.showMigrantCenters
       showMosques.value = overlayStates.showMosques
+      showCadastral.value = overlayStates.showCadastral
       emit('overlay-toggled', overlayStates)
     }
 
@@ -655,9 +788,58 @@ export default {
       }
     }, { deep: true, immediate: true })
 
+    watch(() => props.cadastralData, (newData) => {
+      if (newData && newData.sections) {
+        loadCadastralLayer()
+      } else if (cadastralLayer) {
+        map.removeLayer(cadastralLayer)
+        cadastralLayer = null
+      }
+    }, { deep: true })
+
+    watch(() => props.overlayStates.cadastral, (newVal) => {
+      if (newVal && props.cadastralData) {
+        loadCadastralLayer()
+      } else if (cadastralLayer) {
+        map.removeLayer(cadastralLayer)
+        cadastralLayer = null
+      }
+    })
+
+    // Watchers for overlay toggles
+    watch(showQpv, (newVal) => {
+      if (newVal && props.qpvData && props.qpvData.geojson && props.qpvData.geojson.features) {
+        loadQpvLayer()
+      } else if (!newVal && qpvLayer) {
+        map.removeLayer(qpvLayer)
+        qpvLayer = null
+      }
+    })
+
+    watch(showMigrantCenters, (newVal) => {
+      if (newVal && props.migrantCentersData && props.migrantCentersData.length > 0) {
+        showMigrantCentersOnMap()
+      } else if (!newVal && migrantCentersLayer) {
+        map.removeLayer(migrantCentersLayer)
+        migrantCentersLayer = null
+      }
+    })
+
+    watch(showMosques, (newVal) => {
+      if (newVal && props.mosquesData && props.mosquesData.length > 0) {
+        showMosquesOnMap()
+      } else if (!newVal && mosqueLayer) {
+        map.removeLayer(mosqueLayer)
+        mosqueLayer = null
+      }
+    })
+
     // Lifecycle
     onMounted(() => {
       initMap()
+      if (props.cadastralData && props.cadastralData.sections) {
+        loadCadastralLayer()
+      }
     })
 
     onUnmounted(() => {
@@ -670,10 +852,13 @@ export default {
       showMigrantCenters,
       showQpv,
       showMosques,
+      showCadastral,
       handleOverlayToggle,
       isEnglish,
       isInclusive,
-      labels
+      labels,
+      currentZoom,
+      currentCenter
     }
   }
 }

@@ -16,9 +16,13 @@
           :selectedLocation="selectedLocation"
           :overlayStates="overlayStates"
           :closestLocations="closestLocations"
+          :cadastralData="cadastralData"
+          :zoom="zoom"
+          :center="center"
           @location-selected="handleLocationSelected"
           @overlay-toggled="handleOverlayToggled"
           @location-cleared="handleLocationCleared"
+          @cadastral-data-loaded="handleCadastralDataLoaded"
         />
       </v-col>
 
@@ -78,6 +82,11 @@ export default {
     const expandedMigrant = ref(false)
     const expandedMosque = ref(false)
 
+    // Cadastral data
+    const zoom = ref(null)
+    const center = ref(null)
+    const cadastralData = ref(null)
+
     // Data for map
     const qpvData = ref(null)
     const migrantCentersData = ref([])
@@ -85,7 +94,8 @@ export default {
     const overlayStates = ref({
       showQpv: true,
       showMigrantCenters: false,
-      showMosques: false
+      showMosques: false,
+      cadastral: false
     })
 
     const dataStore = useDataStore()
@@ -175,6 +185,12 @@ const isMetropolitan = (departement) => {
       handleLocationSelected(location)
     }
 
+
+    const handleCadastralDataLoaded = (data) => {
+      console.log('Cadastral data loaded:', data)
+      cadastralData.value = data
+    }
+
     // Lifecycle
     onMounted(() => {
       loadData()
@@ -187,6 +203,9 @@ const isMetropolitan = (departement) => {
       expandedQpv,
       expandedMigrant,
       expandedMosque,
+      zoom,
+      center,
+      cadastralData,
       qpvData,
       migrantCentersData,
       mosquesData,
@@ -199,7 +218,8 @@ const isMetropolitan = (departement) => {
       toggleMosque,
       handleLocationSelected,
       handleOverlayToggled,
-      handleLocationCleared
+      handleLocationCleared,
+      handleCadastralDataLoaded
     }
   }
 }

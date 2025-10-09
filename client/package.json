@@ -15,6 +15,7 @@
     "chroma-js": "^3.1.2",
     "leaflet": "^1.9.4",
     "leaflet-fullscreen": "^1.0.2",
+    "pako": "^2.1.0",
     "papaparse": "^5.5.3",
     "pinia": "^3.0.3",
     "vue": "^3.5.17",
