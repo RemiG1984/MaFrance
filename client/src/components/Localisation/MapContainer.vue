@@ -64,9 +64,6 @@ import { useDataStore } from '../../services/store.js'
 import L from 'leaflet'
 import 'leaflet-fullscreen'
 
-// Shared constants
-const OVERSEAS_DEPARTMENTS = ['971', '972', '973', '974', '976']
-
 const ICON_COLORS = {
   qpv: '#ff0000',
   migrant: '#000000',
@@ -86,57 +83,6 @@ const ZOOM_THRESHOLDS = {
   medium: 10,
   large: 12,
   xlarge: 14
-}
-
-// Utility function to format distance
-const formatDistance = (distance) => {
-  return distance < 1
-    ? `${Math.round(distance * 1000)}m`
-    : `${distance.toFixed(1)}km`
-}
-
-// Utility function to check if coordinates are valid
-const isValidCoordinates = (lat, lng) => {
-  return lat && lng && !isNaN(parseFloat(lat)) && !isNaN(parseFloat(lng))
-}
-
-// Utility function to check if department is metropolitan France
-const isMetropolitan = (department) => {
-  return !OVERSEAS_DEPARTMENTS.includes(department)
-}
-
-// Calculate centroid from GeoJSON geometry
-const calculateGeometryCentroid = (geometry) => {
-  try {
-    if (geometry.type === 'MultiPolygon') {
-      // For MultiPolygon, use the first polygon's first ring
-      const coordinates = geometry.coordinates[0][0]
-      return getPolygonCentroid(coordinates)
-    } else if (geometry.type === 'Polygon') {
-      const coordinates = geometry.coordinates[0]
-      return getPolygonCentroid(coordinates)
-    }
-    return null
-  } catch (error) {
-    console.error('Error calculating centroid:', error)
-    return null
-  }
-}
-
-// Get polygon centroid
-const getPolygonCentroid = (coordinates) => {
-  let x = 0, y = 0
-  const len = coordinates.length
-
-  coordinates.forEach(coord => {
-    x += coord[0] // longitude
-    y += coord[1] // latitude
-  })
-
-  return {
-    lng: x / len,
-    lat: y / len
-  }
 }
 
 // Icon cache for performance
@@ -245,6 +191,10 @@ export default {
     overlayStates: {
       type: Object,
       required: true
+    },
+    closestLocations: {
+      type: Array,
+      default: () => []
     }
   },
   emits: ['location-selected', 'overlay-toggled'],
@@ -274,27 +224,24 @@ export default {
 
     // ==================== UTILITY FUNCTIONS ====================
 
-    /**
-     * Calculate distance between two points using Haversine formula
-     * @param {number} lat1 - Latitude of first point
-     * @param {number} lon1 - Longitude of first point
-     * @param {number} lat2 - Latitude of second point
-     * @param {number} lon2 - Longitude of second point
-     * @returns {number} Distance in kilometers
-     */
-    const calculateDistance = (lat1, lon1, lat2, lon2) => {
-      const R = 6371 // Earth's radius in km
-      const dLat = (lat2 - lat1) * Math.PI / 180
-      const dLon = (lon2 - lon1) * Math.PI / 180
-      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                Math.sin(dLon/2) * Math.sin(dLon/2)
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
-      return R * c
+    const isMetropolitan = (departement) => {
+      if (!departement) return false
+      const dept = departement.toString().toUpperCase()
+      // Exclude overseas territories
+      const overseas = ['971', '972', '973', '974', '976']
+      return !overseas.includes(dept)
+    }
+
+    // Format distance as "X.XXkm" or "XXXm"
+    const formatDistance = (distance) => {
+      if (distance < 1000) {
+        return `${Math.round(distance)}m`
+      } else {
+        return `${(distance / 1000).toFixed(2)}km`
+      }
     }
 
     // ==================== MAP MANAGEMENT ====================
-
     /**
      * Initialize the Leaflet map with default settings
      */
@@ -556,97 +503,18 @@ export default {
 
       // Center map on location
       map.setView([lat, lng], Math.max(map.getZoom(), 10))
-
-      // Create arrows to closest locations
-      createArrowsToClosest(lat, lng)
     }
 
-    // Create arrows pointing to closest locations of each type
-    const createArrowsToClosest = (lat, lng) => {
+    // Create arrows pointing to closest locations using provided closestLocations
+    const createArrowsFromClosestLocations = (lat, lng, locations) => {
+      clearArrows()
       try {
-        const closestLocations = []
-
-        // Find closest migrant center (only if migrant centers are shown)
-        if (props.overlayStates.showMigrantCenters && props.migrantCentersData.length > 0) {
-          const migrantCentersWithDistances = props.migrantCentersData
-            .filter(center => isValidCoordinates(center.latitude, center.longitude))
-            .map(center => ({
-              ...center,
-              latitude: parseFloat(center.latitude),
-              longitude: parseFloat(center.longitude),
-              distance: calculateDistance(lat, lng, parseFloat(center.latitude), parseFloat(center.longitude)),
-              type: 'migrant'
-            }))
-            .sort((a, b) => a.distance - b.distance)
-
-          if (migrantCentersWithDistances.length > 0) {
-            const closest = migrantCentersWithDistances[0]
-            closestLocations.push(closest)
-          }
-        }
-
-        // Find closest QPV (only if QPVs are shown)
-        if (props.overlayStates.showQpv && props.qpvData && props.qpvData.geojson && props.qpvData.geojson.features) {
-          const allQpvs = props.qpvData.geojson.features.map(feature => {
-            if (!feature || !feature.properties) return null
-
-            // Skip overseas territories
-            if (!isMetropolitan(feature.properties.insee_dep)) return null
-
-            // Calculate centroid from geometry
-            const centroid = calculateGeometryCentroid(feature.geometry)
-            if (!centroid) return null
-
-            return {
-              ...feature.properties,
-              latitude: centroid.lat,
-              longitude: centroid.lng
-            }
-          }).filter(qpv => qpv !== null)
-
-          const qpvsWithDistances = allQpvs
-            .filter(qpv => isValidCoordinates(qpv.latitude, qpv.longitude))
-            .map(qpv => ({
-              ...qpv,
-              latitude: parseFloat(qpv.latitude),
-              longitude: parseFloat(qpv.longitude),
-              distance: calculateDistance(lat, lng, parseFloat(qpv.latitude), parseFloat(qpv.longitude)),
-              type: 'qpv'
-            }))
-            .sort((a, b) => a.distance - b.distance)
-
-          if (qpvsWithDistances.length > 0) {
-            const closest = qpvsWithDistances[0]
-            closestLocations.push(closest)
-          }
-        }
-
-        // Find closest mosque (only if mosques are shown)
-        if (props.overlayStates.showMosques && props.mosquesData.length > 0) {
-          const mosquesWithDistances = props.mosquesData
-            .filter(mosque => isValidCoordinates(mosque.latitude, mosque.longitude))
-            .map(mosque => ({
-              ...mosque,
-              latitude: parseFloat(mosque.latitude),
-              longitude: parseFloat(mosque.longitude),
-              distance: calculateDistance(lat, lng, parseFloat(mosque.latitude), parseFloat(mosque.longitude)),
-              type: 'mosque'
-            }))
-            .sort((a, b) => a.distance - b.distance)
-
-          if (mosquesWithDistances.length > 0) {
-            const closest = mosquesWithDistances[0]
-            closestLocations.push(closest)
-          }
-        }
-
         // Create arrows for each closest location
-        closestLocations.forEach(location => {
+        locations.forEach(location => {
           createArrowToLocation(lat, lng, location)
         })
-
       } catch (error) {
-        console.error('Error creating arrows to closest locations:', error)
+        console.error('Error creating arrows from closest locations:', error)
       }
     }
 
@@ -803,6 +671,12 @@ export default {
         removeSelectedLocation()
       }
     })
+
+    watch(() => props.closestLocations, (newClosestLocations) => {
+      if (props.selectedLocation && newClosestLocations && newClosestLocations.length > 0) {
+        createArrowsFromClosestLocations(props.selectedLocation.lat, props.selectedLocation.lng, newClosestLocations)
+      }
+    }, { deep: true, immediate: true })
 
     // Lifecycle
     onMounted(() => {
