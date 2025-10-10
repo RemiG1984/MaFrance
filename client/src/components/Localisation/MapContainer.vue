@@ -16,6 +16,7 @@ import { useDataStore } from '../../services/store.js'
 import { useLocationStore } from './locationStore.js'
 import L from 'leaflet'
 import 'leaflet-fullscreen'
+import 'leaflet-fullscreen/dist/leaflet.fullscreen.css'
 import LocationDataBox from './LocationDataBox.vue'
 
 const ICON_COLORS = {
@@ -482,10 +483,23 @@ export default {
             return '#808080' // gray for null or no data
           }
           const ratio = (price - minPrice) / (maxPrice - minPrice)
-          const r = Math.round(255 * ratio)
-          const g = Math.round(255 * (1 - ratio))
-          const b = 0
-          return `rgb(${r},${g},${b})`
+          const lowColor = { r: 70, g: 130, b: 180 }
+          const midColor = { r: 240, g: 230, b: 140 }
+          const highColor = { r: 218, g: 165, b: 32 }
+          const interpolate = (color1, color2, t) => {
+            return {
+              r: Math.round(color1.r + (color2.r - color1.r) * t),
+              g: Math.round(color1.g + (color2.g - color1.g) * t),
+              b: Math.round(color1.b + (color2.b - color1.b) * t)
+            }
+          }
+          let color;
+          if (ratio <= 0.5) {
+            color = interpolate(lowColor, midColor, ratio / 0.5)
+          } else {
+            color = interpolate(midColor, highColor, (ratio - 0.5) / 0.5)
+          }
+          return `rgb(${color.r},${color.g},${color.b})`
         }
 
         const features = locationStore.cadastralData.sections.map(section => ({

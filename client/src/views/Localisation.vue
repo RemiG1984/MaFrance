@@ -2,7 +2,7 @@
   <div class="localisation-container">
     <!-- Header Section -->
     <div class="header-section">
-      <h1>{{ isEnglish ? 'Localization of priority districts (QPV), migrant centers and mosques' : 'Localisation des QPV, centres de migrants et mosquées' }}</h1>
+      <h1>{{ isEnglish ? 'Localization of priority districts (QPV), migrant centers and mosques vs real estate price' : 'Localisation des QPV, centres de migrants et mosquées vs prix de l\'immobilier' }}</h1>
     </div>
 
     <!-- Main Content Layout -->

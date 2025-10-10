@@ -28,6 +28,7 @@ import api from '../../services/api.js'
 import { markRaw } from 'vue'
 import L from 'leaflet'
 import 'leaflet-fullscreen'
+import 'leaflet-fullscreen/dist/leaflet.fullscreen.css';
 
 export default {
   name: 'MapComponent',

@@ -62,7 +62,7 @@
                 v-if="showCadastral"
                 v-model="priceRange"
                 :min="500"
-                :max="locationStore.maxPrice"
+                :max="20000"
                 :step="100"
                 density="compact"
                 hide-details
