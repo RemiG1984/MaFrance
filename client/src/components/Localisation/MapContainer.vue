@@ -458,6 +458,7 @@ export default {
       })
 
       qpvLayer.addTo(map)
+      qpvLayer.bringToFront()
     }
 
     // Load cadastral GeoJSON layer
@@ -572,8 +573,6 @@ export default {
         })
 
         cadastralLayer.addTo(map)
-
-        cadastralLayer.bringToFront()
 
         map.invalidateSize()
       } catch (error) {
