@@ -18,8 +18,8 @@ export const useLocationStore = defineStore('location', {
 
     // Cadastral data
     cadastralData: null,
-    minMAM: 500,
-    maxMAM: 20000,
+    minPrice: 500,
+    maxPrice: 20000,
     isManual: false,
 
     // Overlay visibility states
@@ -104,8 +104,8 @@ export const useLocationStore = defineStore('location', {
         if (prices.length > 0) {
           const calcMin = Math.max(Math.min(...prices), 500)
           const calcMax = Math.min(Math.max(...prices), 20000)
-          this.minMAM = calcMin
-          this.maxMAM = calcMax
+          this.minPrice = calcMin
+          this.maxPrice = calcMax
         }
       }
     },
@@ -113,8 +113,8 @@ export const useLocationStore = defineStore('location', {
     // Set cadastral bounds manually
     setCadastralBounds(bounds) {
       this.isManual = true
-      this.minMAM = bounds[0]
-      this.maxMAM = bounds[1]
+      this.minPrice = bounds[0]
+      this.maxPrice = bounds[1]
     },
 
     // Reset manual bounds flag

@@ -475,13 +475,13 @@ export default {
         }
 
         // Color function for choropleth
-        const getColor = (mam) => {
-          const minMAM = locationStore.minMAM
-          const maxMAM = locationStore.maxMAM
-          if (mam === null || mam === undefined || minMAM === null || maxMAM === null) {
+        const getColor = (price) => {
+          const minPrice = locationStore.minPrice
+          const maxPrice = locationStore.maxPrice
+          if (price === null || price === undefined || minPrice === null || maxPrice === null) {
             return '#808080' // gray for null or no data
           }
-          const ratio = (mam - minMAM) / (maxMAM - minMAM)
+          const ratio = (price - minPrice) / (maxPrice - minPrice)
           const r = Math.round(255 * ratio)
           const g = Math.round(255 * (1 - ratio))
           const b = 0
@@ -785,7 +785,7 @@ export default {
     })
 
     // Watch for boundary changes to update choropleth colors in real time
-    watch(() => [locationStore.minMAM, locationStore.maxMAM], ([newMin, newMax]) => {
+    watch(() => [locationStore.minPrice, locationStore.maxPrice], ([newMin, newMax]) => {
       if (locationStore.cadastralData && locationStore.cadastralData.sections && locationStore.cadastralData.sections.length > 0) {
         loadCadastralLayer()
       }

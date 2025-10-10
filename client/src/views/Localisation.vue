@@ -144,8 +144,8 @@ const handleLocationFound = (location) => {
       zoom: computed(() => locationStore.zoom),
       center: computed(() => locationStore.center),
       cadastralData: computed(() => locationStore.cadastralData),
-      minMAM: computed(() => locationStore.minMAM),
-      maxMAM: computed(() => locationStore.maxMAM),
+      minPrice: computed(() => locationStore.minPrice),
+      maxPrice: computed(() => locationStore.maxPrice),
 
       // Local reactive data
       qpvData,
