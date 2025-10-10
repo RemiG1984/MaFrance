@@ -416,4 +416,23 @@ export default {
   border-radius: 50%;
   border: 1px solid #0d47a1;
 }
+
+/* Reduce font size on small screens */
+@media (max-width: 768px) {
+  :deep(.v-card-title) {
+    font-size: 0.7rem !important;
+  }
+
+  :deep(.v-checkbox .v-label) {
+    font-size: 0.7rem !important;
+  }
+
+  :deep(.v-range-slider .v-label) {
+    font-size: 0.7 !important;
+  }
+
+  :deep(.text-caption) {
+    font-size: 0.6rem !important;
+  }
+}
 </style>
