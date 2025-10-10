@@ -10,50 +10,56 @@
       </v-card-title>
       <v-expand-transition>
         <v-card-text v-show="overlayExpanded" class="pa-2 pt-0">
-          <v-checkbox
-            v-model="showQpv"
-            :label="isEnglish ? labels.qpv.en : labels.qpv.fr"
-            density="compact"
-            hide-details
-            @change="onOverlayToggle"
-          >
-            <template v-slot:prepend>
-              <div class="overlay-indicator qpv-indicator" :style="{ backgroundColor: isInclusive ? '#0000ff' : '#ff0000', borderColor: isInclusive ? '#0000cc' : '#cc0000' }"></div>
-            </template>
-          </v-checkbox>
-          <v-checkbox
-            v-model="showMigrantCenters"
-            :label="isEnglish ? labels.migrantCenters.en : labels.migrantCenters.fr"
-            density="compact"
-            hide-details
-            @change="onOverlayToggle"
-          >
-            <template v-slot:prepend>
-              <div class="overlay-indicator migrant-indicator">{{ isInclusive ? '🧸' : '↑' }}</div>
-            </template>
-          </v-checkbox>
-          <v-checkbox
-            v-model="showMosques"
-            :label="isEnglish ? labels.mosques.en : labels.mosques.fr"
-            density="compact"
-            hide-details
-            @change="onOverlayToggle"
-          >
-            <template v-slot:prepend>
-              <div class="overlay-indicator mosque-indicator">{{ isInclusive ? '🦄' : '🕌' }}</div>
-            </template>
-          </v-checkbox>
-          <v-checkbox
-            v-model="showCadastral"
-            :label="isEnglish ? labels.cadastral.en : labels.cadastral.fr"
-            density="compact"
-            hide-details
-            @change="onOverlayToggle"
-          >
-            <template v-slot:prepend>
-              <div class="overlay-indicator cadastral-indicator">📐</div>
-            </template>
-          </v-checkbox>
+          <v-row>
+            <v-col cols="6">
+              <v-checkbox
+                v-model="showQpv"
+                :label="isEnglish ? labels.qpv.en : labels.qpv.fr"
+                density="compact"
+                hide-details
+                @change="onOverlayToggle"
+              >
+                <template v-slot:prepend>
+                  <div class="overlay-indicator qpv-indicator" :style="{ backgroundColor: isInclusive ? '#0000ff' : '#ff0000', borderColor: isInclusive ? '#0000cc' : '#cc0000' }"></div>
+                </template>
+              </v-checkbox>
+              <v-checkbox
+                v-model="showMigrantCenters"
+                :label="isEnglish ? labels.migrantCenters.en : labels.migrantCenters.fr"
+                density="compact"
+                hide-details
+                @change="onOverlayToggle"
+              >
+                <template v-slot:prepend>
+                  <div class="overlay-indicator migrant-indicator">{{ isInclusive ? '🧸' : '↑' }}</div>
+                </template>
+              </v-checkbox>
+              <v-checkbox
+                v-model="showMosques"
+                :label="isEnglish ? labels.mosques.en : labels.mosques.fr"
+                density="compact"
+                hide-details
+                @change="onOverlayToggle"
+              >
+                <template v-slot:prepend>
+                  <div class="overlay-indicator mosque-indicator">{{ isInclusive ? '🦄' : '🕌' }}</div>
+                </template>
+              </v-checkbox>
+            </v-col>
+            <v-col cols="6">
+              <v-checkbox
+                v-model="showCadastral"
+                :label="isEnglish ? labels.cadastral.en : labels.cadastral.fr"
+                density="compact"
+                hide-details
+                @change="onOverlayToggle"
+              >
+                <template v-slot:prepend>
+                  <div class="overlay-indicator cadastral-indicator">📐</div>
+                </template>
+              </v-checkbox>
+            </v-col>
+          </v-row>
         </v-card-text>
       </v-expand-transition>
     </v-card>
@@ -64,6 +70,13 @@
 import { ref, computed, watch } from 'vue'
 import { useDataStore } from '../../services/store.js'
 import pako from 'pako'
+
+// Arrondissement mappings for DVF API
+const arrondissementMappings = {
+  '69123': Array.from({ length: 9 }, (_, i) => `6938${i + 1}`), // Lyon: 69381 to 69389
+  '75056': Array.from({ length: 20 }, (_, i) => `751${String(i + 1).padStart(2, '0')}`), // Paris: 75101 to 75120
+  '13055': Array.from({ length: 16 }, (_, i) => `132${String(i + 1).padStart(2, '0')}`), // Marseille: 13201 to 13216
+}
 
 // Translation labels
 const labels = {
@@ -106,7 +119,8 @@ export default {
     const departementsCache = ref(new Map())
     const cadastralCache = ref(new Map())
     const sectionDVF = ref(new Map())
-    const maxSections = 2000
+    const fetchedCommunes = ref(new Set())
+    const maxSections = 5000
 
     // Haversine distance calculation
     const haversineDistance = (lat1, lng1, lat2, lng2) => {
@@ -137,6 +151,9 @@ export default {
         const shouldFetch = lastFetchLat.value === null || lastFetchLng.value === null || haversineDistance(newCenter.lat, newCenter.lng, lastFetchLat.value, lastFetchLng.value) > 1;
         if (!shouldFetch) {
           console.log('Skipping cadastral fetch: distance from last fetch < 10km');
+          // Emit current accumulated data
+          const sectionsArray = Array.from(sectionDVF.value.values())
+          emit('cadastral-data-loaded', { type: 'SectionCollection', sections: sectionsArray })
           isLoadingCadastral.value = false;
           return;
         }
@@ -175,59 +192,71 @@ export default {
           const limitedCommunes = sortedCommunes.slice(0, 10);
           console.log('Taking 10 closest communes:', limitedCommunes.length)
 
-          // 4. Fetch cadastre and DVF data in parallel for each commune
-          const communePromises = limitedCommunes.map(async (commune) => {
+          // 4. Fetch cadastre and DVF data in parallel for each commune not already fetched
+          const communesToFetch = limitedCommunes.filter(commune => !fetchedCommunes.value.has(commune.code))
+          console.log('Communes to fetch:', communesToFetch.length, 'out of', limitedCommunes.length)
+          const communePromises = communesToFetch.map(async (commune) => {
             const cog = commune.code
             console.log('Fetching cadastre and DVF for commune:', cog)
 
-            // Fetch cadastre
+            // Fetch cadastre (handle arrondissements for special communes)
             const cadastrePromise = (async () => {
-              let sections = cadastralCache.value.get(cog)
-              if (!sections) {
-                const departement = cog.substring(0, 2)
-                const url = `https://cadastre.data.gouv.fr/data/etalab-cadastre/latest/geojson/communes/${departement}/${cog}/cadastre-${cog}-sections.json.gz`
-                console.log('Fetching cadastre from URL for', cog, ':', url)
-                try {
-                  const response = await fetch(url)
-                  if (response.ok) {
-                    const arrayBuffer = await response.arrayBuffer();
-                    const decompressed = pako.ungzip(new Uint8Array(arrayBuffer), { to: 'string' });
-                    const geojson = JSON.parse(decompressed);
-                    sections = geojson.features ? geojson.features.map(feature => ({
-                      sectionID: feature.id,
-                      cog: feature.properties?.commune,
-                      geometry: feature.geometry.coordinates[0][0]
-                    })) : []
-                    cadastralCache.value.set(cog, sections)
-                    console.log('Cadastre fetched for', cog, ':', sections.length, 'sections')
-                  } else {
+              const cadastreCodes = arrondissementMappings[cog] || [cog]
+              const cadastrePromises = cadastreCodes.map(async (code) => {
+                let sections = cadastralCache.value.get(code)
+                if (!sections) {
+                  const departement = code.substring(0, 2)
+                  const url = `https://cadastre.data.gouv.fr/data/etalab-cadastre/latest/geojson/communes/${departement}/${code}/cadastre-${code}-sections.json.gz`
+                  console.log('Fetching cadastre from URL for', code, ':', url)
+                  try {
+                    const response = await fetch(url)
+                    if (response.ok) {
+                      const arrayBuffer = await response.arrayBuffer();
+                      const decompressed = pako.ungzip(new Uint8Array(arrayBuffer), { to: 'string' });
+                      const geojson = JSON.parse(decompressed);
+                      sections = geojson.features ? geojson.features.map(feature => ({
+                        sectionID: feature.id,
+                        cog: feature.properties?.commune,
+                        geometry: feature.geometry.coordinates[0][0]
+                      })) : []
+                      cadastralCache.value.set(code, sections)
+                      console.log('Cadastre fetched for', code, ':', sections.length, 'sections')
+                    } else {
+                      sections = []
+                      console.log('Failed to fetch cadastre for', code, ' - response not ok')
+                    }
+                  } catch (e) {
                     sections = []
-                    console.log('Failed to fetch cadastre for', cog, ' - response not ok')
+                    console.log('Error fetching cadastre for', code, ':', e)
                   }
-                } catch (e) {
-                  sections = []
-                  console.log('Error fetching cadastre for', cog, ':', e)
                 }
-              }
-              return sections
+                return sections
+              })
+              const cadastreResults = await Promise.all(cadastrePromises)
+              return cadastreResults.flat()
             })()
 
-            // Fetch DVF
+            // Fetch DVF (handle arrondissements for special communes)
             const dvfPromise = (async () => {
-              try {
-                const dvfUrl = `https://dvf-api.data.gouv.fr/commune/${cog}/sections`
-                const dvfResponse = await fetch(dvfUrl)
-                if (dvfResponse.ok) {
-                  const dvfData = await dvfResponse.json()
-                  return dvfData
-                } else {
-                  console.log('Failed to fetch DVF for', cog, ' - response not ok')
+              const dvfCodes = arrondissementMappings[cog] || [cog]
+              const dvfPromises = dvfCodes.map(async (code) => {
+                try {
+                  const dvfUrl = `https://dvf-api.data.gouv.fr/commune/${code}/sections`
+                  const dvfResponse = await fetch(dvfUrl)
+                  if (dvfResponse.ok) {
+                    const dvfData = await dvfResponse.json()
+                    return dvfData.data || []
+                  } else {
+                    console.log('Failed to fetch DVF for', code, ' - response not ok')
+                    return []
+                  }
+                } catch (e) {
+                  console.log('Error fetching DVF for', code, ':', e)
                   return []
                 }
-              } catch (e) {
-                console.log('Error fetching DVF for', cog, ':', e)
-                return []
-              }
+              })
+              const dvfResults = await Promise.all(dvfPromises)
+              return { data: dvfResults.flat() }
             })()
 
             // Await both in parallel
@@ -258,6 +287,9 @@ export default {
                 sectionDVF.value.set(section.sectionID, section)
               }
             })
+
+            // Mark commune as fetched
+            fetchedCommunes.value.add(commune.code)
           })
           await Promise.all(communePromises)
 

@@ -267,13 +267,11 @@ export default {
       return !overseas.includes(dept)
     }
 
-    // Format distance as "X.XXkm" or "XXXm"
+    // Format distance as "X.Xkm" or "XXXm"
     const formatDistance = (distance) => {
-      if (distance < 1000) {
-        return `${Math.round(distance)}m`
-      } else {
-        return `${(distance / 1000).toFixed(2)}km`
-      }
+      return distance < 1
+        ? `${Math.round(distance * 1000)}m`
+        : `${distance.toFixed(1)}km`
     }
 
     // ==================== MAP MANAGEMENT ====================
@@ -500,6 +498,9 @@ export default {
         if (priceValues.length > 0) {
           minMAM = Math.min(...priceValues)
           maxMAM = Math.max(...priceValues)
+          // Clamp to limit outlier impact
+          minMAM = Math.max(minMAM, 500)
+          maxMAM = Math.min(maxMAM, 20000)
         }
 
         const getColor = (mam) => {
@@ -544,8 +545,8 @@ export default {
             const sectionID = feature.properties.sectionID || 'N/A'
             const communeName = feature.properties.communeName || 'N/A'
             const mam = feature.properties.price
-            const priceText = mam !== null && mam !== undefined ? `€${mam.toLocaleString()}` : 'N/A'
-            layer.bindPopup(`<strong>${isEnglish.value ? labels.value.sectionID.en : labels.value.sectionID.fr}:</strong> ${sectionID}<br><strong>${isEnglish.value ? labels.value.commune.en : labels.value.commune.fr}:</strong> ${communeName}<br><strong>${isEnglish.value ? labels.value.price.en : labels.value.price.fr}:</strong> ${priceText}`)
+            const priceText = mam !== null && mam !== undefined ? `${mam.toLocaleString()}` : 'N/A'
+            layer.bindPopup(`<strong>${isEnglish.value ? labels.value.sectionID.en : labels.value.sectionID.fr}:</strong> ${sectionID}<br><strong>${isEnglish.value ? labels.value.commune.en : labels.value.commune.fr}:</strong> ${communeName}<br><strong>${isEnglish.value ? labels.value.price.en : labels.value.price.fr}:</strong> ${priceText} €/m²`)
 
             layer.on('mouseover', () => {
               layer.setStyle({
@@ -798,9 +799,12 @@ export default {
       }
     }, { deep: true })
 
-    watch(() => props.overlayStates.cadastral, (newVal) => {
-      if (newVal && props.cadastralData) {
-        loadCadastralLayer()
+    watch(() => props.overlayStates.cadastral, async (newVal) => {
+      if (newVal) {
+        await nextTick()
+        if (props.cadastralData && props.cadastralData.sections && props.cadastralData.sections.length > 0) {
+          loadCadastralLayer()
+        }
       } else if (cadastralLayer) {
         map.removeLayer(cadastralLayer)
         cadastralLayer = null
