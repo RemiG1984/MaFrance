@@ -475,6 +475,17 @@ export default {
           map.removeLayer(cadastralLayer)
         }
 
+        const hexToRgb = (hex) => {
+          const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+          return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+          } : null;
+        };
+        const rgbToHex = (r, g, b) => {
+          return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+        };
         // Color function for choropleth
         const getColor = (price) => {
           const minPrice = locationStore.minPrice
@@ -482,10 +493,16 @@ export default {
           if (price === null || price === undefined || minPrice === null || maxPrice === null) {
             return '#808080' // gray for null or no data
           }
+          if (price < minPrice) {
+            return '#4682B4' // lowColor for prices below min
+          }
+          if (price > maxPrice) {
+            return '#DAA520' // highColor for prices above max
+          }
           const ratio = (price - minPrice) / (maxPrice - minPrice)
-          const lowColor = { r: 70, g: 130, b: 180 }
-          const midColor = { r: 240, g: 230, b: 140 }
-          const highColor = { r: 218, g: 165, b: 32 }
+          const lowColor = hexToRgb('#4682B4')
+          const midColor = hexToRgb('#F0E68C')
+          const highColor = hexToRgb('#DAA520')
           const interpolate = (color1, color2, t) => {
             return {
               r: Math.round(color1.r + (color2.r - color1.r) * t),
@@ -499,7 +516,7 @@ export default {
           } else {
             color = interpolate(midColor, highColor, (ratio - 0.5) / 0.5)
           }
-          return `rgb(${color.r},${color.g},${color.b})`
+          return rgbToHex(color.r, color.g, color.b)
         }
 
         const features = locationStore.cadastralData.sections.map(section => ({
