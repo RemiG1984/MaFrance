@@ -13,19 +13,7 @@
           :qpvData="qpvData"
           :migrantCentersData="migrantCentersData"
           :mosquesData="mosquesData"
-          :selectedLocation="selectedLocation"
-          :overlayStates="overlayStates"
-          :closestLocations="closestLocations"
-          :cadastralData="cadastralData"
-          :zoom="zoom"
-          :center="center"
-          :minMAM="minMAM"
-          :maxMAM="maxMAM"
-          @location-selected="handleLocationSelected"
-          @overlay-toggled="handleOverlayToggled"
-          @location-cleared="handleLocationCleared"
           @cadastral-data-loaded="handleCadastralDataLoaded"
-          @cadastralBoundsChanged="handleCadastralBoundsChanged"
         />
       </v-col>
 
@@ -39,18 +27,9 @@
         <!-- Distance Information -->
         <div v-if="selectedLocation" class="distance-info mb-4">
           <DistanceInfo
-            :selectedLocation="selectedLocation"
             :migrantCentersData="migrantCentersData"
             :qpvData="qpvData"
             :mosquesData="mosquesData"
-            :overlayStates="overlayStates"
-            :expanded-qpv="expandedQpv"
-            :expanded-migrant="expandedMigrant"
-            :expanded-mosque="expandedMosque"
-            @distance-computed="handleDistanceComputed"
-            @toggle-qpv="toggleQpv"
-            @toggle-migrant="toggleMigrant"
-            @toggle-mosque="toggleMosque"
           />
         </div>
       </v-col>
@@ -62,6 +41,7 @@
 import { ref, onMounted, computed } from 'vue'
 import api from '../services/api.js'
 import { useDataStore } from '@/services/store.js'
+import { useLocationStore } from '../components/Localisation/locationStore.js'
 import LocationSearch from '../components/Localisation/LocationSearch.vue'
 import DistanceInfo from '../components/Localisation/DistanceInfo.vue'
 import MapContainer from '../components/Localisation/MapContainer.vue'
@@ -75,36 +55,16 @@ export default {
     MapContainer
   },
   setup() {
+    // ==================== STORES ====================
+    const dataStore = useDataStore()
+    const locationStore = useLocationStore()
+
     // ==================== REACTIVE DATA ====================
-
-    // User input and location state
-    const selectedLocation = ref(null)
-    const distanceInfo = ref(null)
-    const closestLocations = ref([])
-    const expandedQpv = ref(false)
-    const expandedMigrant = ref(false)
-    const expandedMosque = ref(false)
-
-    // Cadastral data
-    const zoom = ref(null)
-    const center = ref(null)
-    const cadastralData = ref(null)
-    const minMAM = ref(500)
-    const maxMAM = ref(20000)
-    const isManual = ref(false)
 
     // Data for map
     const qpvData = ref(null)
     const migrantCentersData = ref([])
     const mosquesData = ref([])
-    const overlayStates = ref({
-      showQpv: true,
-      showMigrantCenters: false,
-      showMosques: false,
-      cadastral: false
-    })
-
-    const dataStore = useDataStore()
 
     // Computed properties
     const isEnglish = computed(() => dataStore.labelState === 3)
@@ -152,65 +112,24 @@ const isMetropolitan = (departement) => {
   return !overseas.includes(dept)
 }
 
-// ==================== TOGGLE FUNCTIONS ====================
+// ==================== HANDLER FUNCTIONS ====================
 
-    const toggleQpv = () => {
-      expandedQpv.value = !expandedQpv.value
-    }
+const handleLocationSelected = (location) => {
+  locationStore.setSelectedLocation(location)
+}
 
-    const toggleMigrant = () => {
-      expandedMigrant.value = !expandedMigrant.value
-    }
 
-    const toggleMosque = () => {
-      expandedMosque.value = !expandedMosque.value
-    }
 
-    const handleLocationSelected = (location) => {
-      selectedLocation.value = { lat: location.lat, lng: location.lng, address: location.address }
-    }
+const handleLocationFound = (location) => {
+  handleLocationSelected(location)
+}
 
-    const handleOverlayToggled = (states) => {
-      overlayStates.value = states
-    }
-
-    const handleLocationCleared = () => {
-      selectedLocation.value = null
-      distanceInfo.value = null
-    }
-
-    const handleDistanceComputed = ({ distanceInfo: newDistanceInfo, closestLocations: newClosestLocations }) => {
-      distanceInfo.value = newDistanceInfo
-      closestLocations.value = newClosestLocations
-      expandedQpv.value = false
-      expandedMigrant.value = false
-      expandedMosque.value = false
-    }
-
-    const handleLocationFound = (location) => {
-      handleLocationSelected(location)
-    }
 
 
     const handleCadastralDataLoaded = (data) => {
-      cadastralData.value = data
-      // Update bounds if not manually adjusted
-      if (!isManual.value && data.sections && data.sections.length > 0) {
-        const prices = data.sections.map(s => s.price).filter(p => p != null && p !== undefined)
-        if (prices.length > 0) {
-          const calcMin = Math.max(Math.min(...prices), 500)
-          const calcMax = Math.min(Math.max(...prices), 20000)
-          minMAM.value = calcMin
-          maxMAM.value = calcMax
-        }
-      }
+      locationStore.setCadastralData(data)
     }
 
-    const handleCadastralBoundsChanged = (bounds) => {
-      isManual.value = true
-      minMAM.value = bounds[0]
-      maxMAM.value = bounds[1]
-    }
 
     // Lifecycle
     onMounted(() => {
@@ -218,32 +137,26 @@ const isMetropolitan = (departement) => {
     })
 
     return {
-      selectedLocation,
-      distanceInfo,
-      closestLocations,
-      expandedQpv,
-      expandedMigrant,
-      expandedMosque,
-      zoom,
-      center,
-      cadastralData,
-      minMAM,
-      maxMAM,
+      // Store state (reactive)
+      selectedLocation: computed(() => locationStore.selectedLocation),
+      distanceInfo: computed(() => locationStore.distanceInfo),
+      closestLocations: computed(() => locationStore.closestLocations),
+      zoom: computed(() => locationStore.zoom),
+      center: computed(() => locationStore.center),
+      cadastralData: computed(() => locationStore.cadastralData),
+      minMAM: computed(() => locationStore.minMAM),
+      maxMAM: computed(() => locationStore.maxMAM),
+
+      // Local reactive data
       qpvData,
       migrantCentersData,
       mosquesData,
-      overlayStates,
       isEnglish,
+
+      // Handlers
       handleLocationFound,
-      handleDistanceComputed,
-      toggleQpv,
-      toggleMigrant,
-      toggleMosque,
       handleLocationSelected,
-      handleOverlayToggled,
-      handleLocationCleared,
-      handleCadastralDataLoaded,
-      handleCadastralBoundsChanged
+      handleCadastralDataLoaded
     }
   }
 }

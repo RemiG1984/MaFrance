@@ -83,6 +83,7 @@
 <script>
 import { ref, computed, watch } from 'vue'
 import { useDataStore } from '../../services/store.js'
+import { useLocationStore } from './locationStore.js'
 import pako from 'pako'
 
 // Arrondissement mappings for DVF API
@@ -103,41 +104,35 @@ const labels = {
 
 export default {
   name: 'LocationDataBox',
-  props: {
-    zoom: {
-      type: Number,
-      default: null
-    },
-    center: {
-      type: Object,
-      default: null
-    },
-    minMAM: {
-      type: Number,
-      default: 500
-    },
-    maxMAM: {
-      type: Number,
-      default: 20000
-    }
-  },
-  emits: ['overlay-toggled', 'cadastral-data-loaded', 'cadastralBoundsChanged'],
+  emits: ['cadastral-data-loaded'],
   setup(props, { emit }) {
     const dataStore = useDataStore()
+    const locationStore = useLocationStore()
     const isEnglish = computed(() => dataStore.labelState === 3)
     const isInclusive = computed(() => dataStore.labelState === 1)
 
     // Layer visibility toggles
-    const showMigrantCenters = ref(false)
-    const showQpv = ref(true)
-    const showMosques = ref(false)
-    const showCadastral = ref(false)
+    const showMigrantCenters = computed({
+      get: () => locationStore.overlayStates.showMigrantCenters,
+      set: (value) => locationStore.setOverlayStates({ showMigrantCenters: value })
+    })
+    const showQpv = computed({
+      get: () => locationStore.overlayStates.showQpv,
+      set: (value) => locationStore.setOverlayStates({ showQpv: value })
+    })
+    const showMosques = computed({
+      get: () => locationStore.overlayStates.showMosques,
+      set: (value) => locationStore.setOverlayStates({ showMosques: value })
+    })
+    const showCadastral = computed({
+      get: () => locationStore.overlayStates.cadastral,
+      set: (value) => locationStore.setOverlayStates({ cadastral: value })
+    })
     const overlayExpanded = ref(true)
     const isLoadingCadastral = ref(false)
     const lastFetchLat = ref(null)
     const lastFetchLng = ref(null)
-    const priceRange = ref([500, 20000])
-    const isManual = ref(false)
+    const priceRange = ref([locationStore.minMAM, locationStore.maxMAM])
     const timeout = ref(null)
 
     // Reactive caches for departements and cadastral data
@@ -161,7 +156,7 @@ export default {
 
     // Handle overlay toggle changes
     const onOverlayToggle = () => {
-      emit('overlay-toggled', {
+      locationStore.setOverlayStates({
         showQpv: showQpv.value,
         showMigrantCenters: showMigrantCenters.value,
         showMosques: showMosques.value,
@@ -173,20 +168,19 @@ export default {
     const onPriceRangeChange = () => {
       if (timeout.value) clearTimeout(timeout.value)
       timeout.value = setTimeout(() => {
-        isManual.value = true
-        emit('cadastralBoundsChanged', priceRange.value)
+        locationStore.setCadastralBounds(priceRange.value)
       }, 300)
     }
 
-    // Watch for prop changes to update slider if not manually adjusted
-    watch([() => props.minMAM, () => props.maxMAM], ([newMin, newMax]) => {
-      if (!isManual.value) {
+    // Watch for store changes to update slider if not manually adjusted
+    watch([() => locationStore.minMAM, () => locationStore.maxMAM], ([newMin, newMax]) => {
+      if (!locationStore.isManual) {
         priceRange.value = [newMin, newMax]
       }
     })
 
     // Watch for center, showCadastral, and zoom changes and fetch cadastral data if enabled and zoom >= 10
-    watch([() => props.center, showCadastral, () => props.zoom], async ([newCenter, newShow, newZoom]) => {
+    watch([() => locationStore.center, showCadastral, () => locationStore.zoom], async ([newCenter, newShow, newZoom]) => {
       if (newShow && newCenter && newZoom >= 10) {
         isLoadingCadastral.value = true
         const shouldFetch = lastFetchLat.value === null || lastFetchLng.value === null || haversineDistance(newCenter.lat, newCenter.lng, lastFetchLat.value, lastFetchLng.value) > 1;
@@ -194,7 +188,9 @@ export default {
           // Skipping cadastral fetch: distance from last fetch < 10km
           // Emit current accumulated data
           const sectionsArray = Array.from(sectionDVF.value.values())
-          emit('cadastral-data-loaded', { type: 'SectionCollection', sections: sectionsArray })
+          const combinedGeoJSON = { type: 'SectionCollection', sections: sectionsArray }
+          emit('cadastral-data-loaded', combinedGeoJSON)
+          locationStore.setCadastralData(combinedGeoJSON)
           isLoadingCadastral.value = false;
           return;
         }
@@ -218,8 +214,8 @@ export default {
 
           // 3. Sort communes by distance to center and take 10 closest
           const sortedCommunes = communes.sort((a, b) => {
-            const distA = haversineDistance(props.center.lat, props.center.lng, a.centre.coordinates[1], a.centre.coordinates[0]);
-            const distB = haversineDistance(props.center.lat, props.center.lng, b.centre.coordinates[1], b.centre.coordinates[0]);
+            const distA = haversineDistance(locationStore.center.lat, locationStore.center.lng, a.centre.coordinates[1], a.centre.coordinates[0]);
+            const distB = haversineDistance(locationStore.center.lat, locationStore.center.lng, b.centre.coordinates[1], b.centre.coordinates[0]);
             return distA - distB;
           });
           const limitedCommunes = sortedCommunes.slice(0, 10);
@@ -331,16 +327,21 @@ export default {
             sections: sectionsArray
           }
           emit('cadastral-data-loaded', combinedGeoJSON)
+          locationStore.setCadastralData(combinedGeoJSON)
           lastFetchLat.value = newCenter.lat;
           lastFetchLng.value = newCenter.lng;
         } catch (e) {
           console.error('Failed to load cadastral data:', e)
-          emit('cadastral-data-loaded', { type: 'SectionCollection', sections: [] })
+          const emptyData = { type: 'SectionCollection', sections: [] }
+          emit('cadastral-data-loaded', emptyData)
+          locationStore.setCadastralData(emptyData)
         } finally {
           isLoadingCadastral.value = false
         }
       } else {
-        emit('cadastral-data-loaded', { type: 'SectionCollection', sections: [] })
+        const emptyData = { type: 'SectionCollection', sections: [] }
+        emit('cadastral-data-loaded', emptyData)
+        locationStore.setCadastralData(emptyData)
       }
     })
 

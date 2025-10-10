@@ -3,80 +3,80 @@
     <h4 class="mb-3">{{ isEnglish ? 'Your position is at:' : 'Votre position est à:' }}</h4>
 
       <!-- QPV Distance -->
-      <div v-if="distanceInfo.qpv" class="mt-2">
+      <div v-if="locationStore.distanceInfo.qpv" class="mt-2">
         <div
           class="distance-summary cursor-pointer d-flex align-center"
-          @click="$emit('toggle-qpv')"
+          @click="locationStore.toggleExpandedQpv()"
         >
           <div class="distance-indicator qpv-indicator"></div>
-          <strong>{{ distanceInfo.qpv.distance }}&nbsp;</strong>{{ isEnglish ? 'from the nearest QPV' : 'du QPV le plus proche' }}
+          <strong>{{ locationStore.distanceInfo.qpv.distance }}&nbsp;</strong>{{ isEnglish ? 'from the nearest QPV' : 'du QPV le plus proche' }}
           <v-icon
             size="16"
             class="ml-2"
-            :class="expandedQpv ? 'rotate-180' : ''"
+            :class="locationStore.expandedQpv ? 'rotate-180' : ''"
           >
             mdi-chevron-down
           </v-icon>
         </div>
         <v-expand-transition>
-          <div v-show="expandedQpv" class="text-caption text-grey ml-6 mt-1">
-            <strong>{{ isEnglish ? 'QPV:' : 'QPV:' }}</strong> <a :href="distanceInfo.qpv.link" target="_blank">{{ distanceInfo.qpv.name }}</a><br>
-            <strong>{{ isEnglish ? 'Municipality:' : 'Commune:' }}</strong> {{ distanceInfo.qpv.commune }}
+          <div v-show="locationStore.expandedQpv" class="text-caption text-grey ml-6 mt-1">
+            <strong>{{ isEnglish ? 'QPV:' : 'QPV:' }}</strong> <a :href="locationStore.distanceInfo.qpv.link" target="_blank">{{ locationStore.distanceInfo.qpv.name }}</a><br>
+            <strong>{{ isEnglish ? 'Municipality:' : 'Commune:' }}</strong> {{ locationStore.distanceInfo.qpv.commune }}
           </div>
         </v-expand-transition>
       </div>
 
       <!-- Migrant Center Distance -->
-      <div v-if="distanceInfo.migrantCenter" class="mt-2">
+      <div v-if="locationStore.distanceInfo.migrantCenter" class="mt-2">
         <div
           class="distance-summary cursor-pointer d-flex align-center"
-          @click="$emit('toggle-migrant')"
+          @click="locationStore.toggleExpandedMigrant()"
         >
           <div class="distance-indicator migrant-indicator">↑</div>
-          <strong>{{ distanceInfo.migrantCenter.distance }}&nbsp;</strong>{{ isEnglish ? 'from the nearest migrant center' : 'du centre de migrants le plus proche' }}
+          <strong>{{ locationStore.distanceInfo.migrantCenter.distance }}&nbsp;</strong>{{ isEnglish ? 'from the nearest migrant center' : 'du centre de migrants le plus proche' }}
           <v-icon
             size="16"
             class="ml-2"
-            :class="expandedMigrant ? 'rotate-180' : ''"
+            :class="locationStore.expandedMigrant ? 'rotate-180' : ''"
           >
             mdi-chevron-down
           </v-icon>
         </div>
         <v-expand-transition>
-          <div v-show="expandedMigrant" class="text-caption text-grey ml-6 mt-1">
-            <strong>{{ isEnglish ? 'Type:' : 'Type:' }}</strong> {{ distanceInfo.migrantCenter.type }} | <strong>{{ isEnglish ? 'Places:' : 'Places:' }}</strong> {{ distanceInfo.migrantCenter.places }} | <strong>{{ isEnglish ? 'Manager:' : 'Gestionnaire:' }}</strong> {{ distanceInfo.migrantCenter.gestionnaire }}<br>
-            <strong>{{ isEnglish ? 'Address:' : 'Adresse:' }}</strong> {{ distanceInfo.migrantCenter.address }}<br>
-            <strong>{{ isEnglish ? 'Municipality:' : 'Commune:' }}</strong> {{ distanceInfo.migrantCenter.commune }}
+          <div v-show="locationStore.expandedMigrant" class="text-caption text-grey ml-6 mt-1">
+            <strong>{{ isEnglish ? 'Type:' : 'Type:' }}</strong> {{ locationStore.distanceInfo.migrantCenter.type }} | <strong>{{ isEnglish ? 'Places:' : 'Places:' }}</strong> {{ locationStore.distanceInfo.migrantCenter.places }} | <strong>{{ isEnglish ? 'Manager:' : 'Gestionnaire:' }}</strong> {{ locationStore.distanceInfo.migrantCenter.gestionnaire }}<br>
+            <strong>{{ isEnglish ? 'Address:' : 'Adresse:' }}</strong> {{ locationStore.distanceInfo.migrantCenter.address }}<br>
+            <strong>{{ isEnglish ? 'Municipality:' : 'Commune:' }}</strong> {{ locationStore.distanceInfo.migrantCenter.commune }}
           </div>
         </v-expand-transition>
       </div>
 
       <!-- Mosque Distance -->
-      <div v-if="distanceInfo.mosque" class="mt-2">
+      <div v-if="locationStore.distanceInfo.mosque" class="mt-2">
         <div
           class="distance-summary cursor-pointer d-flex align-center"
-          @click="$emit('toggle-mosque')"
+          @click="locationStore.toggleExpandedMosque()"
         >
           <div class="distance-indicator mosque-indicator">🕌</div>
-          <strong>{{ distanceInfo.mosque.distance }}&nbsp;</strong>{{ isEnglish ? 'from the nearest mosque' : 'de la mosquée la plus proche' }}
+          <strong>{{ locationStore.distanceInfo.mosque.distance }}&nbsp;</strong>{{ isEnglish ? 'from the nearest mosque' : 'de la mosquée la plus proche' }}
           <v-icon
             size="16"
             class="ml-2"
-            :class="expandedMosque ? 'rotate-180' : ''"
+            :class="locationStore.expandedMosque ? 'rotate-180' : ''"
           >
             mdi-chevron-down
           </v-icon>
         </div>
         <v-expand-transition>
-          <div v-show="expandedMosque" class="text-caption text-grey ml-6 mt-1">
-            {{ distanceInfo.mosque.name }}<br>
-            <strong>{{ isEnglish ? 'Address:' : 'Adresse:' }}</strong> {{ distanceInfo.mosque.address }}<br>
-            <strong>{{ isEnglish ? 'Municipality:' : 'Commune:' }}</strong> {{ distanceInfo.mosque.commune }}
+          <div v-show="locationStore.expandedMosque" class="text-caption text-grey ml-6 mt-1">
+            {{ locationStore.distanceInfo.mosque.name }}<br>
+            <strong>{{ isEnglish ? 'Address:' : 'Adresse:' }}</strong> {{ locationStore.distanceInfo.mosque.address }}<br>
+            <strong>{{ isEnglish ? 'Municipality:' : 'Commune:' }}</strong> {{ locationStore.distanceInfo.mosque.commune }}
           </div>
         </v-expand-transition>
       </div>
 
-      <div v-if="!distanceInfo.migrantCenter && !distanceInfo.qpv && !distanceInfo.mosque" class="text-grey">
+      <div v-if="!locationStore.distanceInfo.migrantCenter && !locationStore.distanceInfo.qpv && !locationStore.distanceInfo.mosque" class="text-grey">
         {{ isEnglish ? 'No data available for this position' : 'Aucune donnée disponible pour cette position' }}
       </div>
     </v-card>
@@ -85,6 +85,7 @@
 <script>
 import { defineComponent, computed, ref, watch } from 'vue'
 import { useDataStore } from '../../services/store.js'
+import { useLocationStore } from './locationStore.js'
 
 // Shared constants
 const OVERSEAS_DEPARTMENTS = ['971', '972', '973', '974', '976']
@@ -143,10 +144,6 @@ const getPolygonCentroid = (coordinates) => {
 export default defineComponent({
   name: 'DistanceInfo',
   props: {
-    selectedLocation: {
-      type: Object,
-      default: null
-    },
     migrantCentersData: {
       type: Array,
       default: () => []
@@ -158,31 +155,12 @@ export default defineComponent({
     mosquesData: {
       type: Array,
       default: () => []
-    },
-    overlayStates: {
-      type: Object,
-      required: true
-    },
-    expandedQpv: {
-      type: Boolean,
-      default: false
-    },
-    expandedMigrant: {
-      type: Boolean,
-      default: false
-    },
-    expandedMosque: {
-      type: Boolean,
-      default: false
     }
   },
-  emits: ['toggle-qpv', 'toggle-migrant', 'toggle-mosque', 'distance-computed'],
-  setup(props, { emit }) {
+  setup(props) {
     const dataStore = useDataStore()
+    const locationStore = useLocationStore()
     const isEnglish = computed(() => dataStore.labelState === 3)
-
-    const distanceInfo = ref({})
-    const closestLocations = ref([])
 
     /**
      * Calculate distance between two points using Haversine formula
@@ -204,20 +182,18 @@ export default defineComponent({
     }
 
     const computeDistances = () => {
-      if (!props.selectedLocation) {
-        distanceInfo.value = {}
-        closestLocations.value = []
-        emit('distance-computed', { distanceInfo: {}, closestLocations: [] })
+      if (!locationStore.selectedLocation) {
+        locationStore.setDistanceInfo({}, [])
         return
       }
 
-      const lat = props.selectedLocation.lat
-      const lng = props.selectedLocation.lng
+      const lat = locationStore.selectedLocation.lat
+      const lng = locationStore.selectedLocation.lng
       const newDistanceInfo = {}
       const newClosestLocations = []
 
       // Find closest migrant center
-      if (props.overlayStates.showMigrantCenters && props.migrantCentersData.length > 0) {
+      if (locationStore.overlayStates.showMigrantCenters && props.migrantCentersData.length > 0) {
         const migrantCentersWithDistances = props.migrantCentersData
           .filter(center => isValidCoordinates(center.latitude, center.longitude))
           .map(center => ({
@@ -246,7 +222,7 @@ export default defineComponent({
       }
 
       // Find closest QPV
-      if (props.overlayStates.showQpv && props.qpvData && props.qpvData.geojson && props.qpvData.geojson.features) {
+      if (locationStore.overlayStates.showQpv && props.qpvData && props.qpvData.geojson && props.qpvData.geojson.features) {
         const allQpvs = props.qpvData.geojson.features.map(feature => {
           if (!feature || !feature.properties) return null
 
@@ -288,7 +264,7 @@ export default defineComponent({
       }
 
       // Find closest mosque
-      if (props.overlayStates.showMosques && props.mosquesData.length > 0) {
+      if (locationStore.overlayStates.showMosques && props.mosquesData.length > 0) {
         const mosquesWithDistances = props.mosquesData
           .filter(mosque => isValidCoordinates(mosque.latitude, mosque.longitude))
           .map(mosque => ({
@@ -314,15 +290,13 @@ export default defineComponent({
         }
       }
 
-      distanceInfo.value = newDistanceInfo
-      closestLocations.value = newClosestLocations
-      emit('distance-computed', { distanceInfo: newDistanceInfo, closestLocations: newClosestLocations })
+      locationStore.setDistanceInfo(newDistanceInfo, newClosestLocations)
     }
 
-    // Watch for changes in props that affect distance calculation
-    watch([() => props.selectedLocation, () => props.overlayStates], computeDistances, { deep: true })
+    // Watch for changes in store state that affect distance calculation
+    watch([() => locationStore.selectedLocation, () => locationStore.overlayStates], computeDistances, { deep: true })
 
-    return { dataStore, isEnglish, distanceInfo }
+    return { dataStore, isEnglish, locationStore }
   },
 })
 </script>

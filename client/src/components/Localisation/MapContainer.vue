@@ -4,7 +4,7 @@
       <v-card-text class="pa-0 position-relative">
         <div id="localisationMap" class="localisation-map"></div>
 
-        <LocationDataBox :zoom="currentZoom" :center="currentCenter" :minMAM="minMAM" :maxMAM="maxMAM" @overlay-toggled="handleOverlayToggle" @cadastral-data-loaded="$emit('cadastral-data-loaded', $event)" @cadastralBoundsChanged="handleBoundsChanged" />
+        <LocationDataBox @cadastral-data-loaded="$emit('cadastral-data-loaded', $event)" />
       </v-card-text>
     </v-card>
   </div>
@@ -13,6 +13,7 @@
 <script>
 import { ref, onMounted, onUnmounted, nextTick, watch, computed } from 'vue'
 import { useDataStore } from '../../services/store.js'
+import { useLocationStore } from './locationStore.js'
 import L from 'leaflet'
 import 'leaflet-fullscreen'
 import LocationDataBox from './LocationDataBox.vue'
@@ -113,46 +114,15 @@ export default {
     mosquesData: {
       type: [Array, null],
       required: true
-    },
-    selectedLocation: {
-      type: Object,
-      default: null
-    },
-    overlayStates: {
-      type: Object,
-      required: true
-    },
-    closestLocations: {
-      type: Array,
-      default: () => []
-    },
-    cadastralData: {
-      type: [Object, null],
-      default: null
-    },
-    zoom: {
-      type: Number,
-      default: null
-    },
-    center: {
-      type: Object,
-      default: null
-    },
-    minMAM: {
-      type: Number,
-      default: 500
-    },
-    maxMAM: {
-      type: Number,
-      default: 20000
     }
   },
-  emits: ['location-selected', 'overlay-toggled', 'cadastral-data-loaded', 'cadastralBoundsChanged'],
+  emits: ['location-selected', 'cadastral-data-loaded'],
   components: {
     LocationDataBox
   },
   setup(props, { emit }) {
     const dataStore = useDataStore()
+    const locationStore = useLocationStore()
     const isEnglish = computed(() => dataStore.labelState === 3)
     const isInclusive = computed(() => dataStore.labelState === 1)
 
@@ -241,11 +211,11 @@ export default {
 
     // ==================== REACTIVE DATA ====================
 
-    // Layer visibility toggles
-    const showMigrantCenters = ref(false)
-    const showQpv = ref(true)
-    const showMosques = ref(false)
-    const showCadastral = ref(false)
+    // Layer visibility toggles - now computed from store
+    const showMigrantCenters = computed(() => locationStore.overlayStates.showMigrantCenters)
+    const showQpv = computed(() => locationStore.overlayStates.showQpv)
+    const showMosques = computed(() => locationStore.overlayStates.showMosques)
+    const showCadastral = computed(() => locationStore.overlayStates.cadastral)
 
 
     // ==================== MAP STATE ====================
@@ -296,6 +266,8 @@ export default {
       currentZoom.value = map.getZoom()
       const center = map.getCenter()
       currentCenter.value = { lat: center.lat, lng: center.lng }
+      locationStore.setZoom(currentZoom.value)
+      locationStore.setCenter(currentCenter.value)
 
       // Set map bounds to metropolitan France (including Corsica)
       const bounds = L.latLngBounds(
@@ -327,18 +299,20 @@ export default {
       // Add event handlers to update zoom and center
       map.on('zoomend', () => {
         currentZoom.value = map.getZoom()
+        locationStore.setZoom(currentZoom.value)
       })
 
       map.on('moveend', () => {
         const center = map.getCenter()
         currentCenter.value = { lat: center.lat, lng: center.lng }
+        locationStore.setCenter(currentCenter.value)
       })
 
     }
 
     // Handle map click
     const onMapClick = (e) => {
-      emit('location-selected', { lat: e.latlng.lat, lng: e.latlng.lng })
+      locationStore.setSelectedLocation({ lat: e.latlng.lat, lng: e.latlng.lng })
     }
 
     // ==================== LAYER MANAGEMENT ====================
@@ -492,7 +466,7 @@ export default {
           return
         }
 
-        if (!props.cadastralData || !props.cadastralData.sections) {
+        if (!locationStore.cadastralData || !locationStore.cadastralData.sections) {
           return
         }
 
@@ -502,8 +476,8 @@ export default {
 
         // Color function for choropleth
         const getColor = (mam) => {
-          const minMAM = props.minMAM
-          const maxMAM = props.maxMAM
+          const minMAM = locationStore.minMAM
+          const maxMAM = locationStore.maxMAM
           if (mam === null || mam === undefined || minMAM === null || maxMAM === null) {
             return '#808080' // gray for null or no data
           }
@@ -514,7 +488,7 @@ export default {
           return `rgb(${r},${g},${b})`
         }
 
-        const features = props.cadastralData.sections.map(section => ({
+        const features = locationStore.cadastralData.sections.map(section => ({
           type: 'Feature',
           properties: {
             sectionID: section.sectionID,
@@ -576,17 +550,6 @@ export default {
       }
     }
 
-    const handleOverlayToggle = (overlayStates) => {
-      showQpv.value = overlayStates.showQpv
-      showMigrantCenters.value = overlayStates.showMigrantCenters
-      showMosques.value = overlayStates.showMosques
-      showCadastral.value = overlayStates.showCadastral
-      emit('overlay-toggled', overlayStates)
-    }
-
-    const handleBoundsChanged = (bounds) => {
-      emit('cadastralBoundsChanged', bounds)
-    }
 
     // ==================== SELECTED LOCATION MANAGEMENT ====================
 
@@ -625,6 +588,10 @@ export default {
 
     // Create arrows pointing to closest locations using provided closestLocations
     const createArrowsFromClosestLocations = (lat, lng, locations) => {
+      if (!map) {
+        console.log('Map not initialized yet, skipping arrow creation')
+        return
+      }
       clearArrows()
       try {
         // Create arrows for each closest location
@@ -782,7 +749,7 @@ export default {
       }
     }, { deep: true })
 
-    watch(() => props.selectedLocation, (newLocation) => {
+    watch(() => locationStore.selectedLocation, (newLocation) => {
       if (newLocation) {
         setSelectedLocation(newLocation.lat, newLocation.lng, newLocation.address)
       } else {
@@ -790,13 +757,13 @@ export default {
       }
     })
 
-    watch(() => props.closestLocations, (newClosestLocations) => {
-      if (props.selectedLocation && newClosestLocations && newClosestLocations.length > 0) {
-        createArrowsFromClosestLocations(props.selectedLocation.lat, props.selectedLocation.lng, newClosestLocations)
+    watch(() => locationStore.closestLocations, (newClosestLocations) => {
+      if (locationStore.selectedLocation && newClosestLocations && newClosestLocations.length > 0) {
+        createArrowsFromClosestLocations(locationStore.selectedLocation.lat, locationStore.selectedLocation.lng, newClosestLocations)
       }
     }, { deep: true, immediate: true })
 
-    watch(() => props.cadastralData, (newData) => {
+    watch(() => locationStore.cadastralData, (newData) => {
       if (newData && newData.sections) {
         loadCadastralLayer()
       } else if (cadastralLayer) {
@@ -805,10 +772,10 @@ export default {
       }
     }, { deep: true })
 
-    watch(() => props.overlayStates.cadastral, async (newVal) => {
+    watch(() => locationStore.overlayStates.cadastral, async (newVal) => {
       if (newVal) {
         await nextTick()
-        if (props.cadastralData && props.cadastralData.sections && props.cadastralData.sections.length > 0) {
+        if (locationStore.cadastralData && locationStore.cadastralData.sections && locationStore.cadastralData.sections.length > 0) {
           loadCadastralLayer()
         }
       } else if (cadastralLayer) {
@@ -818,8 +785,8 @@ export default {
     })
 
     // Watch for boundary changes to update choropleth colors in real time
-    watch(() => [props.minMAM, props.maxMAM], ([newMin, newMax]) => {
-      if (props.cadastralData && props.cadastralData.sections && props.cadastralData.sections.length > 0) {
+    watch(() => [locationStore.minMAM, locationStore.maxMAM], ([newMin, newMax]) => {
+      if (locationStore.cadastralData && locationStore.cadastralData.sections && locationStore.cadastralData.sections.length > 0) {
         loadCadastralLayer()
       }
     })
@@ -855,7 +822,7 @@ export default {
     // Lifecycle
     onMounted(() => {
       initMap()
-      if (props.cadastralData && props.cadastralData.sections) {
+      if (locationStore.cadastralData && locationStore.cadastralData.sections) {
         loadCadastralLayer()
       }
     })
@@ -871,13 +838,12 @@ export default {
       showQpv,
       showMosques,
       showCadastral,
-      handleOverlayToggle,
-      handleBoundsChanged,
       isEnglish,
       isInclusive,
       labels,
       currentZoom,
-      currentCenter
+      currentCenter,
+      locationStore
     }
   }
 }
