@@ -188,5 +188,15 @@ const handleLocationFound = (location) => {
     align-items: flex-start;
     gap: 16px;
   }
+
+  .header-section h1 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-section h1 {
+    font-size: 1.25rem;
+  }
 }
 </style>
