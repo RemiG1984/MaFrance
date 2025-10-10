@@ -287,6 +287,13 @@ export default {
         maxZoom: 19
       }).addTo(map)
 
+      // Create custom panes for layer ordering
+      const choroplethPane = map.createPane('choroplethPane', map.getPanes().overlayPane)
+      choroplethPane.style.zIndex = 400
+
+      const qpvPane = map.createPane('qpvPane', map.getPanes().overlayPane)
+      qpvPane.style.zIndex = 500
+
       // Add fullscreen control if available
       if (L.control && L.control.fullscreen) {
         map.addControl(new L.control.fullscreen({
@@ -414,6 +421,7 @@ export default {
       if (!props.qpvData || !props.qpvData.geojson || !props.qpvData.geojson.features) return
 
       qpvLayer = L.geoJSON(props.qpvData.geojson, {
+        pane: 'qpvPane',
         style: () => ({
           fillColor: isInclusive.value ? '#0000ff' : '#ff0000',
           color: isInclusive.value ? '#0000cc' : '#cc0000',
@@ -458,7 +466,6 @@ export default {
       })
 
       qpvLayer.addTo(map)
-      qpvLayer.bringToFront()
     }
 
     // Load cadastral GeoJSON layer
@@ -537,6 +544,7 @@ export default {
         }
 
         cadastralLayer = L.geoJSON(geoJsonData, {
+          pane: 'choroplethPane',
           style: (feature) => {
             const mam = feature.properties.price
             return {
