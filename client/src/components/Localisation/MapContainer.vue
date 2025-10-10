@@ -518,6 +518,7 @@ export default {
           properties: {
             sectionID: section.sectionID,
             cog: section.cog,
+            communeName: section.communeName,
             price: section.price
           },
           geometry: { type: "Polygon", coordinates: [section.geometry] }
@@ -541,10 +542,10 @@ export default {
           },
           onEachFeature: (feature, layer) => {
             const sectionID = feature.properties.sectionID || 'N/A'
-            const cog = feature.properties.cog || 'N/A'
+            const communeName = feature.properties.communeName || 'N/A'
             const mam = feature.properties.price
             const priceText = mam !== null && mam !== undefined ? `€${mam.toLocaleString()}` : 'N/A'
-            layer.bindPopup(`<strong>${isEnglish.value ? labels.value.sectionID.en : labels.value.sectionID.fr}:</strong> ${sectionID}<br><strong>${isEnglish.value ? labels.value.cog.en : labels.value.cog.fr}:</strong> ${cog}<br><strong>${isEnglish.value ? labels.value.price.en : labels.value.price.fr}:</strong> ${priceText}`)
+            layer.bindPopup(`<strong>${isEnglish.value ? labels.value.sectionID.en : labels.value.sectionID.fr}:</strong> ${sectionID}<br><strong>${isEnglish.value ? labels.value.commune.en : labels.value.commune.fr}:</strong> ${communeName}<br><strong>${isEnglish.value ? labels.value.price.en : labels.value.price.fr}:</strong> ${priceText}`)
 
             layer.on('mouseover', () => {
               layer.setStyle({

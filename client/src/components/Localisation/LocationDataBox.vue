@@ -105,7 +105,8 @@ export default {
     // Reactive caches for departements and cadastral data
     const departementsCache = ref(new Map())
     const cadastralCache = ref(new Map())
-    const sectionDVF = ref([])
+    const sectionDVF = ref(new Map())
+    const maxSections = 2000
 
     // Haversine distance calculation
     const haversineDistance = (lat1, lng1, lat2, lng2) => {
@@ -175,7 +176,6 @@ export default {
           console.log('Taking 10 closest communes:', limitedCommunes.length)
 
           // 4. Fetch cadastre and DVF data in parallel for each commune
-          sectionDVF.value = []
           const communePromises = limitedCommunes.map(async (commune) => {
             const cog = commune.code
             console.log('Fetching cadastre and DVF for commune:', cog)
@@ -248,18 +248,32 @@ export default {
               sectionID: section.sectionID,
               geometry: section.geometry,
               cog: section.cog,
+              communeName: commune.nom,
               price: dvfMap.get(section.sectionID) ?? null
             }))
 
-            sectionDVF.value.push(...joinedSections)
+            // Add to sectionDVF map, deduplicating by sectionID
+            joinedSections.forEach(section => {
+              if (!sectionDVF.value.has(section.sectionID)) {
+                sectionDVF.value.set(section.sectionID, section)
+              }
+            })
           })
           await Promise.all(communePromises)
-          console.log('Total sectionDVF collected:', sectionDVF.value.length)
+
+          // Enforce max sections limit by removing oldest (first inserted)
+          while (sectionDVF.value.size > maxSections) {
+            const firstKey = sectionDVF.value.keys().next().value
+            sectionDVF.value.delete(firstKey)
+          }
+
+          const sectionsArray = Array.from(sectionDVF.value.values())
+          console.log('Total sectionDVF collected:', sectionsArray.length)
 
           // Emit the sectionDVF array
           const combinedGeoJSON = {
             type: 'SectionCollection',
-            sections: sectionDVF.value
+            sections: sectionsArray
           }
           console.log('Emitting cadastral data with', combinedGeoJSON.sections.length, 'sections')
           if (combinedGeoJSON.sections.length > 0) {
