@@ -4,7 +4,7 @@
       <v-card-text class="pa-0 position-relative">
         <div id="localisationMap" class="localisation-map"></div>
 
-        <LocationDataBox :zoom="currentZoom" :center="currentCenter" @overlay-toggled="handleOverlayToggle" @cadastral-data-loaded="$emit('cadastral-data-loaded', $event)" />
+        <LocationDataBox :zoom="currentZoom" :center="currentCenter" :minMAM="minMAM" :maxMAM="maxMAM" @overlay-toggled="handleOverlayToggle" @cadastral-data-loaded="$emit('cadastral-data-loaded', $event)" @cadastralBoundsChanged="handleBoundsChanged" />
       </v-card-text>
     </v-card>
   </div>
@@ -137,9 +137,17 @@ export default {
     center: {
       type: Object,
       default: null
+    },
+    minMAM: {
+      type: Number,
+      default: 500
+    },
+    maxMAM: {
+      type: Number,
+      default: 20000
     }
   },
-  emits: ['location-selected', 'overlay-toggled', 'cadastral-data-loaded'],
+  emits: ['location-selected', 'overlay-toggled', 'cadastral-data-loaded', 'cadastralBoundsChanged'],
   components: {
     LocationDataBox
   },
@@ -492,18 +500,10 @@ export default {
           map.removeLayer(cadastralLayer)
         }
 
-        const priceValues = props.cadastralData.sections.map(s => s.price).filter(v => v !== null && v !== undefined)
-        let minMAM = null
-        let maxMAM = null
-        if (priceValues.length > 0) {
-          minMAM = Math.min(...priceValues)
-          maxMAM = Math.max(...priceValues)
-          // Clamp to limit outlier impact
-          minMAM = Math.max(minMAM, 500)
-          maxMAM = Math.min(maxMAM, 20000)
-        }
-
+        // Color function for choropleth
         const getColor = (mam) => {
+          const minMAM = props.minMAM
+          const maxMAM = props.maxMAM
           if (mam === null || mam === undefined || minMAM === null || maxMAM === null) {
             return '#808080' // gray for null or no data
           }
@@ -569,6 +569,8 @@ export default {
         cadastralLayer.addTo(map)
 
         cadastralLayer.bringToFront()
+
+        map.invalidateSize()
       } catch (error) {
         console.error('loadCadastralLayer: Error occurred:', error)
       }
@@ -580,6 +582,10 @@ export default {
       showMosques.value = overlayStates.showMosques
       showCadastral.value = overlayStates.showCadastral
       emit('overlay-toggled', overlayStates)
+    }
+
+    const handleBoundsChanged = (bounds) => {
+      emit('cadastralBoundsChanged', bounds)
     }
 
     // ==================== SELECTED LOCATION MANAGEMENT ====================
@@ -811,6 +817,13 @@ export default {
       }
     })
 
+    // Watch for boundary changes to update choropleth colors in real time
+    watch(() => [props.minMAM, props.maxMAM], ([newMin, newMax]) => {
+      if (props.cadastralData && props.cadastralData.sections && props.cadastralData.sections.length > 0) {
+        loadCadastralLayer()
+      }
+    })
+
     // Watchers for overlay toggles
     watch(showQpv, (newVal) => {
       if (newVal && props.qpvData && props.qpvData.geojson && props.qpvData.geojson.features) {
@@ -859,6 +872,7 @@ export default {
       showMosques,
       showCadastral,
       handleOverlayToggle,
+      handleBoundsChanged,
       isEnglish,
       isInclusive,
       labels,

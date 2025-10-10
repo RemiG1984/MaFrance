@@ -19,10 +19,13 @@
           :cadastralData="cadastralData"
           :zoom="zoom"
           :center="center"
+          :minMAM="minMAM"
+          :maxMAM="maxMAM"
           @location-selected="handleLocationSelected"
           @overlay-toggled="handleOverlayToggled"
           @location-cleared="handleLocationCleared"
           @cadastral-data-loaded="handleCadastralDataLoaded"
+          @cadastralBoundsChanged="handleCadastralBoundsChanged"
         />
       </v-col>
 
@@ -86,6 +89,9 @@ export default {
     const zoom = ref(null)
     const center = ref(null)
     const cadastralData = ref(null)
+    const minMAM = ref(500)
+    const maxMAM = ref(20000)
+    const isManual = ref(false)
 
     // Data for map
     const qpvData = ref(null)
@@ -187,8 +193,23 @@ const isMetropolitan = (departement) => {
 
 
     const handleCadastralDataLoaded = (data) => {
-      console.log('Cadastral data loaded:', data)
       cadastralData.value = data
+      // Update bounds if not manually adjusted
+      if (!isManual.value && data.sections && data.sections.length > 0) {
+        const prices = data.sections.map(s => s.price).filter(p => p != null && p !== undefined)
+        if (prices.length > 0) {
+          const calcMin = Math.max(Math.min(...prices), 500)
+          const calcMax = Math.min(Math.max(...prices), 20000)
+          minMAM.value = calcMin
+          maxMAM.value = calcMax
+        }
+      }
+    }
+
+    const handleCadastralBoundsChanged = (bounds) => {
+      isManual.value = true
+      minMAM.value = bounds[0]
+      maxMAM.value = bounds[1]
     }
 
     // Lifecycle
@@ -206,6 +227,8 @@ const isMetropolitan = (departement) => {
       zoom,
       center,
       cadastralData,
+      minMAM,
+      maxMAM,
       qpvData,
       migrantCentersData,
       mosquesData,
@@ -219,7 +242,8 @@ const isMetropolitan = (departement) => {
       handleLocationSelected,
       handleOverlayToggled,
       handleLocationCleared,
-      handleCadastralDataLoaded
+      handleCadastralDataLoaded,
+      handleCadastralBoundsChanged
     }
   }
 }

@@ -58,6 +58,20 @@
                   <div class="overlay-indicator cadastral-indicator">📐</div>
                 </template>
               </v-checkbox>
+              <v-range-slider
+                v-if="showCadastral"
+                v-model="priceRange"
+                :min="500"
+                :max="20000"
+                :step="100"
+                density="compact"
+                hide-details
+                @update:model-value="onPriceRangeChange"
+                class="mt-2"
+              />
+              <div v-if="showCadastral" class="text-caption text-center mt-1">
+                {{ priceRange[0] }} - {{ priceRange[1] }} €/m²
+              </div>
             </v-col>
           </v-row>
         </v-card-text>
@@ -97,9 +111,17 @@ export default {
     center: {
       type: Object,
       default: null
+    },
+    minMAM: {
+      type: Number,
+      default: 500
+    },
+    maxMAM: {
+      type: Number,
+      default: 20000
     }
   },
-  emits: ['overlay-toggled', 'cadastral-data-loaded'],
+  emits: ['overlay-toggled', 'cadastral-data-loaded', 'cadastralBoundsChanged'],
   setup(props, { emit }) {
     const dataStore = useDataStore()
     const isEnglish = computed(() => dataStore.labelState === 3)
@@ -114,13 +136,16 @@ export default {
     const isLoadingCadastral = ref(false)
     const lastFetchLat = ref(null)
     const lastFetchLng = ref(null)
+    const priceRange = ref([500, 20000])
+    const isManual = ref(false)
+    const timeout = ref(null)
 
     // Reactive caches for departements and cadastral data
     const departementsCache = ref(new Map())
     const cadastralCache = ref(new Map())
     const sectionDVF = ref(new Map())
     const fetchedCommunes = ref(new Set())
-    const maxSections = 5000
+    const maxSections = 2000
 
     // Haversine distance calculation
     const haversineDistance = (lat1, lng1, lat2, lng2) => {
@@ -144,13 +169,29 @@ export default {
       })
     }
 
+    // Handle price range changes
+    const onPriceRangeChange = () => {
+      if (timeout.value) clearTimeout(timeout.value)
+      timeout.value = setTimeout(() => {
+        isManual.value = true
+        emit('cadastralBoundsChanged', priceRange.value)
+      }, 300)
+    }
+
+    // Watch for prop changes to update slider if not manually adjusted
+    watch([() => props.minMAM, () => props.maxMAM], ([newMin, newMax]) => {
+      if (!isManual.value) {
+        priceRange.value = [newMin, newMax]
+      }
+    })
+
     // Watch for center, showCadastral, and zoom changes and fetch cadastral data if enabled and zoom >= 10
     watch([() => props.center, showCadastral, () => props.zoom], async ([newCenter, newShow, newZoom]) => {
       if (newShow && newCenter && newZoom >= 10) {
         isLoadingCadastral.value = true
         const shouldFetch = lastFetchLat.value === null || lastFetchLng.value === null || haversineDistance(newCenter.lat, newCenter.lng, lastFetchLat.value, lastFetchLng.value) > 1;
         if (!shouldFetch) {
-          console.log('Skipping cadastral fetch: distance from last fetch < 10km');
+          // Skipping cadastral fetch: distance from last fetch < 10km
           // Emit current accumulated data
           const sectionsArray = Array.from(sectionDVF.value.values())
           emit('cadastral-data-loaded', { type: 'SectionCollection', sections: sectionsArray })
@@ -158,17 +199,13 @@ export default {
           return;
         }
         try {
-          console.log('Fetching cadastral data for center coordinates:', newCenter)
           // 1. Get departement from map center
           const depUrl = `https://geo.api.gouv.fr/communes?lat=${newCenter.lat}&lon=${newCenter.lng}&fields=codeDepartement`
-          console.log('Departement query URL:', depUrl)
           const depResponse = await fetch(depUrl)
           if (!depResponse.ok) throw new Error('Failed to fetch departement')
           const deps = await depResponse.json()
           if (deps.length === 0) throw new Error('No departement found')
           const departementCode = deps[0].codeDepartement
-
-          console.log('Departement found:', departementCode)
 
           // 2. Fetch all communes in that departement (cached)
           let communes = departementsCache.value.get(departementCode)
@@ -177,27 +214,20 @@ export default {
             if (!communesResponse.ok) throw new Error('Failed to fetch communes')
             communes = await communesResponse.json()
             departementsCache.value.set(departementCode, communes)
-            console.log('First 5 commune centers:', communes.slice(0,5).map(c => c.centre.coordinates))
           }
 
-          console.log('Communes fetched/cached for departement', departementCode, ':', communes.length)
-
           // 3. Sort communes by distance to center and take 10 closest
-          console.log('Sorting all communes by distance to center')
           const sortedCommunes = communes.sort((a, b) => {
             const distA = haversineDistance(props.center.lat, props.center.lng, a.centre.coordinates[1], a.centre.coordinates[0]);
             const distB = haversineDistance(props.center.lat, props.center.lng, b.centre.coordinates[1], b.centre.coordinates[0]);
             return distA - distB;
           });
           const limitedCommunes = sortedCommunes.slice(0, 10);
-          console.log('Taking 10 closest communes:', limitedCommunes.length)
 
           // 4. Fetch cadastre and DVF data in parallel for each commune not already fetched
           const communesToFetch = limitedCommunes.filter(commune => !fetchedCommunes.value.has(commune.code))
-          console.log('Communes to fetch:', communesToFetch.length, 'out of', limitedCommunes.length)
           const communePromises = communesToFetch.map(async (commune) => {
             const cog = commune.code
-            console.log('Fetching cadastre and DVF for commune:', cog)
 
             // Fetch cadastre (handle arrondissements for special communes)
             const cadastrePromise = (async () => {
@@ -207,7 +237,6 @@ export default {
                 if (!sections) {
                   const departement = code.substring(0, 2)
                   const url = `https://cadastre.data.gouv.fr/data/etalab-cadastre/latest/geojson/communes/${departement}/${code}/cadastre-${code}-sections.json.gz`
-                  console.log('Fetching cadastre from URL for', code, ':', url)
                   try {
                     const response = await fetch(url)
                     if (response.ok) {
@@ -220,14 +249,11 @@ export default {
                         geometry: feature.geometry.coordinates[0][0]
                       })) : []
                       cadastralCache.value.set(code, sections)
-                      console.log('Cadastre fetched for', code, ':', sections.length, 'sections')
                     } else {
                       sections = []
-                      console.log('Failed to fetch cadastre for', code, ' - response not ok')
                     }
                   } catch (e) {
                     sections = []
-                    console.log('Error fetching cadastre for', code, ':', e)
                   }
                 }
                 return sections
@@ -247,11 +273,9 @@ export default {
                     const dvfData = await dvfResponse.json()
                     return dvfData.data || []
                   } else {
-                    console.log('Failed to fetch DVF for', code, ' - response not ok')
                     return []
                   }
                 } catch (e) {
-                  console.log('Error fetching DVF for', code, ':', e)
                   return []
                 }
               })
@@ -300,23 +324,17 @@ export default {
           }
 
           const sectionsArray = Array.from(sectionDVF.value.values())
-          console.log('Total sectionDVF collected:', sectionsArray.length)
 
           // Emit the sectionDVF array
           const combinedGeoJSON = {
             type: 'SectionCollection',
             sections: sectionsArray
           }
-          console.log('Emitting cadastral data with', combinedGeoJSON.sections.length, 'sections')
-          if (combinedGeoJSON.sections.length > 0) {
-            console.log('Sample section from combined cadastral data:', combinedGeoJSON.sections[0])
-          }
           emit('cadastral-data-loaded', combinedGeoJSON)
           lastFetchLat.value = newCenter.lat;
           lastFetchLng.value = newCenter.lng;
         } catch (e) {
           console.error('Failed to load cadastral data:', e)
-          console.log('Error details:', e.message)
           emit('cadastral-data-loaded', { type: 'SectionCollection', sections: [] })
         } finally {
           isLoadingCadastral.value = false
@@ -333,6 +351,8 @@ export default {
       showCadastral,
       overlayExpanded,
       onOverlayToggle,
+      onPriceRangeChange,
+      priceRange,
       isEnglish,
       isInclusive,
       labels,
