@@ -173,7 +173,7 @@
             <div class="data-card">
               <h3 class="data-title">Centres d'hébergement de migrants</h3>
               <p class="data-text">
-                Les données ont été récupérées en aout 2025 du site officiel de la CIMADE.
+                Les données ont été récupérées en aout 2025 du site officiel de la CIMADE, complétées et corrigés par des retour utilisateurs.
               </p>
             </div>
             <div class="data-card">
@@ -183,6 +183,14 @@
                 Les subventions des agglomérations et communautés de commune ont été ventilées par commune suivant la population.
                 Les subventions des régions ont été ventilées par département suivant la population.
                 Pour Paris, les subventions de la Mairie apparaissent en tant que département. Il n'y a donc aucune subvention au niveau des arrondissements.
+              </p>
+            </div>
+            <div class="data-card">
+              <h3 class="data-title">Prix de l'immobilier</h3>
+              <p class="data-text">
+                Les prix moyens de l'immobilier par section cadastrale disponibles sur la carte outil <a href="/localisation" target="_blank" class="link">Localisation</a> sont issus du site officiel <a href="https://dvf-api.data.gouv.fr/" target="_blank" class="link">dvf-api.data.gouv.fr/</a>, qui en distribue les données par API. 
+                Par exemple, le lien <a href="https://dvf-api.data.gouv.fr/commune/75101/sections" target="_blank" class="link">dvf-api.data.gouv.fr/commune/75101/sections</a>permet de récupérer les données par section cadastrales du 1e arrondissement de Paris. La valeur "m_am" est celle utilisée.
+                Ce sont les mêmes données qui sont utilisées par le site <a href="https://explore.data.gouv.fr/" target="_blank" class="link">explore.data.gouv.fr/</a> par exemple.
               </p>
             </div>
           </div>
@@ -221,7 +229,7 @@
               <tr>
                   <td>Mosquées</td>
                   <td>
-                      <a href="https://www.trouvetamosquee.fr/category/mosquees-de-france/" target="_blank" class="link">www.trouvetamosquee.fr</a>
+                      <a href="https://www.trouvetamosquee.fr/category/mosquees-de-france/" target="_blank" class="link">www.trouvetamosquee.fr</a>, complété et corrigé avec des retours utilisateurs validés via Google map.
                   </td>
               </tr>
               <tr>
@@ -260,6 +268,13 @@
                   <td>Subventions publiques aux associations</td>
                   <td>
                       <a href="https://data.ofgl.fr/pages/acces-donnees-comptables-detaillees/" target="_blank" class="link">data.ofgl.fr</a> et le jaune budgétaire <a href="https://www.budget.gouv.fr/documentation/documents-budgetaires/exercice-2025/projet-loi-finances-les/jaunes-budgetaires-2025-plf-2025" target="_blank" class="link">www.budget.gouv.fr</a>
+                  </td>
+              </tr>
+              <tr>
+                  <td>Prix moyen de l'immobilier</td>
+                  <td>
+                      <a href="https://dvf-api.data.gouv.fr/" target="_blank" class="link">dvf-api.data.gouv.fr/</a>. 
+                      Les données sont automatiquement les dernières disponibles (2024 à ce jour)
                   </td>
               </tr>
             </tbody>
