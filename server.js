@@ -38,7 +38,7 @@ const limiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
-app.use('/api/', limiter);
+//app.use('/api/', limiter);
 
 // Stricter rate limit for search endpoints
 const searchLimiter = rateLimit({
