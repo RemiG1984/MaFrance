@@ -12,17 +12,23 @@
         <v-card-text v-show="overlayExpanded" class="pa-2 pt-0">
           <v-row>
             <v-col cols="6">
-              <v-checkbox
-                v-model="showQpv"
-                :label="isEnglish ? labels.qpv.en : labels.qpv.fr"
-                density="compact"
-                hide-details
-                @change="onOverlayToggle"
-              >
-                <template v-slot:prepend>
-                  <div class="overlay-indicator qpv-indicator" :style="{ backgroundColor: isInclusive ? '#0000ff' : '#ff0000', borderColor: isInclusive ? '#0000cc' : '#cc0000' }"></div>
+              <v-tooltip text='Les "quartiers"..' location="top">
+                <template v-slot:activator="{ props }">
+                  <span v-bind="props">
+                    <v-checkbox
+                      v-model="showQpv"
+                      :label="isEnglish ? labels.qpv.en : labels.qpv.fr"
+                      density="compact"
+                      hide-details
+                      @change="onOverlayToggle"
+                    >
+                      <template v-slot:prepend>
+                        <div class="overlay-indicator qpv-indicator" :style="{ backgroundColor: isInclusive ? '#0000ff' : '#ff0000', borderColor: isInclusive ? '#0000cc' : '#cc0000' }"></div>
+                      </template>
+                    </v-checkbox>
+                  </span>
                 </template>
-              </v-checkbox>
+              </v-tooltip>
               <v-checkbox
                 v-model="showMigrantCenters"
                 :label="isEnglish ? labels.migrantCenters.en : labels.migrantCenters.fr"

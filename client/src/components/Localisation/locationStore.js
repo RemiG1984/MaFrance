@@ -102,8 +102,8 @@ export const useLocationStore = defineStore('location', {
       if (!this.isManual && data?.sections?.length > 0) {
         const prices = data.sections.map(s => s.price).filter(p => p != null && p !== undefined)
         if (prices.length > 0) {
-          const calcMin = Math.max(Math.min(...prices), 500)
-          const calcMax = Math.min(Math.max(...prices), 20000)
+          const calcMin = Math.round(Math.max(Math.min(...prices), 500)*1.1)
+          const calcMax = Math.round(Math.min(Math.max(...prices), 20000)*0.9)
           this.minPrice = calcMin
           this.maxPrice = calcMax
         }
