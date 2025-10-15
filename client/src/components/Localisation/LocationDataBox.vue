@@ -47,17 +47,24 @@
               </v-checkbox>
             </v-col>
             <v-col cols="6">
-              <v-checkbox
-                v-model="showCadastral"
-                :label="isEnglish ? labels.cadastral.en : labels.cadastral.fr"
-                density="compact"
-                hide-details
-                @change="onOverlayToggle"
-              >
-                <template v-slot:prepend>
-                  <div class="overlay-indicator cadastral-indicator">📐</div>
+              <v-tooltip text="Il faut zoomer pour voir les prix de l'immobilier" location="top">
+                <template v-slot:activator="{ props }">
+                  <span v-bind="props">
+                    <v-checkbox
+                      v-model="showCadastral"
+                      :label="isEnglish ? labels.cadastral.en : labels.cadastral.fr"
+                      density="compact"
+                      hide-details
+                      :disabled="locationStore.zoom < 12"
+                      @change="onOverlayToggle"
+                    >
+                      <template v-slot:prepend>
+                        <div class="overlay-indicator cadastral-indicator">📐</div>
+                      </template>
+                    </v-checkbox>
+                  </span>
                 </template>
-              </v-checkbox>
+              </v-tooltip>
               <v-range-slider
                 v-if="showCadastral"
                 v-model="priceRange"
@@ -66,6 +73,7 @@
                 :step="100"
                 density="compact"
                 hide-details
+                :disabled="locationStore.zoom < 12"
                 @update:model-value="onPriceRangeChange"
                 class="mt-2"
               />
@@ -340,14 +348,14 @@ export default {
       }
     }
 
-    // Watch for center, showCadastral, and zoom changes and fetch cadastral data if enabled and zoom >= 10
+    // Watch for center, showCadastral, and zoom changes and fetch cadastral data if enabled and zoom >= 12
     watch([() => locationStore.center, showCadastral, () => locationStore.zoom], ([newCenter, newShow, newZoom]) => {
       // Clear existing timeout
       if (mapMovementTimeout.value) {
         clearTimeout(mapMovementTimeout.value)
       }
 
-      if (newShow && newCenter && newZoom >= 10) {
+      if (newShow && newCenter && newZoom >= 12) {
         // Debounce the fetch by 500ms
         mapMovementTimeout.value = setTimeout(() => {
           fetchCadastralData(newCenter, newZoom)
