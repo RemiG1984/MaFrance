@@ -320,7 +320,7 @@ export default {
 
     // Handle map click
     const onMapClick = (e) => {
-      locationStore.setSelectedLocation({ lat: e.latlng.lat, lng: e.latlng.lng })
+        locationStore.setSelectedLocation({ lat: e.latlng.lat, lng: e.latlng.lng })
     }
 
     // ==================== LAYER MANAGEMENT ====================
@@ -632,10 +632,10 @@ export default {
       }
       clearArrows()
       try {
-        // Create arrows for each closest location
-        locations.forEach(location => {
-          createArrowToLocation(lat, lng, location)
-        })
+          // Create arrows for each closest location
+          locations.forEach(location => {
+            createArrowToLocation(lat, lng, location)
+          })
       } catch (error) {
         console.error('Error creating arrows from closest locations:', error)
       }
@@ -763,6 +763,7 @@ export default {
         selectedMarker = null
       }
       clearArrows()
+      locationStore.clearLocation()
     }
 
     // Make removeSelectedLocation globally available for popup button
@@ -789,7 +790,7 @@ export default {
 
     watch(() => locationStore.selectedLocation, (newLocation) => {
       if (newLocation) {
-        setSelectedLocation(newLocation.lat, newLocation.lng, newLocation.address)
+            setSelectedLocation(newLocation.lat, newLocation.lng, newLocation.address)
       } else {
         removeSelectedLocation()
       }
@@ -797,7 +798,7 @@ export default {
 
     watch(() => locationStore.closestLocations, (newClosestLocations) => {
       if (locationStore.selectedLocation && newClosestLocations && newClosestLocations.length > 0) {
-        createArrowsFromClosestLocations(locationStore.selectedLocation.lat, locationStore.selectedLocation.lng, newClosestLocations)
+            createArrowsFromClosestLocations(locationStore.selectedLocation.lat, locationStore.selectedLocation.lng, newClosestLocations)
       }
     }, { deep: true, immediate: true })
 
