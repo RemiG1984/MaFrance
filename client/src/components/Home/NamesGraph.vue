@@ -4,7 +4,7 @@
     <v-card-title class="text-h6 pb-0 d-flex justify-space-between align-center" @click="toggleCollapse" style="cursor: pointer">
       <span>{{ isEnglish ? 'First Names Evolution' : 'Évolution des Prénoms' }}</span>
       <v-btn
-        @click="toggleView"
+        @click.stop="toggleView"
         color="primary"
         variant="outlined"
         size="small"
