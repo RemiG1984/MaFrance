@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import api from '../../services/api.js'
 
 export const useLocationStore = defineStore('location', {
   state: () => ({
@@ -28,7 +29,12 @@ export const useLocationStore = defineStore('location', {
       showMigrantCenters: false,
       showMosques: false,
       cadastral: false
-    }
+    },
+
+    // Data for map
+    qpvData: null,
+    migrantCentersData: [],
+    mosquesData: []
   }),
 
   getters: {
@@ -39,7 +45,23 @@ export const useLocationStore = defineStore('location', {
     getOverlayStates: (state) => state.overlayStates,
 
     // Check if any expansion panels are open
-    hasExpandedPanels: (state) => state.expandedQpv || state.expandedMigrant || state.expandedMosque
+    hasExpandedPanels: (state) => state.expandedQpv || state.expandedMigrant || state.expandedMosque,
+
+    // Utility functions
+    isValidCoordinates: () => (latitude, longitude) => {
+      if (latitude == null || longitude == null) return false
+      if (isNaN(latitude) || isNaN(longitude)) return false
+      // Check if coordinates are within reasonable bounds for France
+      return latitude >= 41 && latitude <= 51 && longitude >= -5 && longitude <= 10
+    },
+
+    isMetropolitan: () => (departement) => {
+      if (!departement) return false
+      const dept = departement.toString().toUpperCase()
+      // Exclude overseas territories
+      const overseas = ['971', '972', '973', '974', '976']
+      return !overseas.includes(dept)
+    }
   },
 
   actions: {
@@ -120,6 +142,31 @@ export const useLocationStore = defineStore('location', {
     // Reset manual bounds flag
     resetManualBounds() {
       this.isManual = false
+    },
+
+    // Load data for map
+    async loadData() {
+      try {
+        const [qpvResponse, migrantsResponse, mosquesResponse] = await Promise.all([
+          api.getQpvs(),
+          api.getMigrants({ limit: 1500 }),
+          api.getMosques({ limit: 3000 })
+        ])
+
+        this.qpvData = qpvResponse
+
+        this.migrantCentersData = migrantsResponse.list.filter(center =>
+          this.isValidCoordinates(center.latitude, center.longitude) &&
+          this.isMetropolitan(center.departement)
+        )
+
+        this.mosquesData = mosquesResponse.list.filter(mosque =>
+          this.isValidCoordinates(mosque.latitude, mosque.longitude) &&
+          this.isMetropolitan(mosque.departement)
+        )
+      } catch (error) {
+        console.error('Error loading data:', error)
+      }
     }
   }
 })

@@ -10,9 +10,6 @@
       <!-- Map Section (8/12 columns) -->
       <v-col cols="12" md="8">
         <MapContainer
-          :qpvData="qpvData"
-          :migrantCentersData="migrantCentersData"
-          :mosquesData="mosquesData"
           @cadastral-data-loaded="handleCadastralDataLoaded"
         />
       </v-col>
@@ -26,11 +23,7 @@
 
         <!-- Distance Information -->
         <div v-if="selectedLocation" class="distance-info mb-4">
-          <DistanceInfo
-            :migrantCentersData="migrantCentersData"
-            :qpvData="qpvData"
-            :mosquesData="mosquesData"
-          />
+          <DistanceInfo />
         </div>
       </v-col>
     </v-row>
@@ -39,7 +32,6 @@
 
 <script>
 import { ref, onMounted, computed } from 'vue'
-import api from '../services/api.js'
 import { useDataStore } from '@/services/store.js'
 import { useLocationStore } from '../components/Localisation/locationStore.js'
 import LocationSearch from '../components/Localisation/LocationSearch.vue'
@@ -59,58 +51,8 @@ export default {
     const dataStore = useDataStore()
     const locationStore = useLocationStore()
 
-    // ==================== REACTIVE DATA ====================
-
-    // Data for map
-    const qpvData = ref(null)
-    const migrantCentersData = ref([])
-    const mosquesData = ref([])
-
-    // Computed properties
+    // ==================== COMPUTED PROPERTIES ====================
     const isEnglish = computed(() => dataStore.labelState === 3)
-
-    // ==================== DATA LOADING ====================
-
-    const loadData = async () => {
-      try {
-        const [qpvResponse, migrantsResponse, mosquesResponse] = await Promise.all([
-          api.getQpvs(),
-          api.getMigrants({ limit: 1500 }),
-          api.getMosques({ limit: 3000 })
-        ])
-
-        qpvData.value = qpvResponse
-
-        migrantCentersData.value = migrantsResponse.list.filter(center =>
-          isValidCoordinates(center.latitude, center.longitude) &&
-          isMetropolitan(center.departement)
-        )
-
-        mosquesData.value = mosquesResponse.list.filter(mosque =>
-          isValidCoordinates(mosque.latitude, mosque.longitude) &&
-          isMetropolitan(mosque.departement)
-        )
-      } catch (error) {
-        console.error('Error loading data:', error)
-      }
-    }
-
-// ==================== UTILITY FUNCTIONS ====================
-
-const isValidCoordinates = (latitude, longitude) => {
-  if (latitude == null || longitude == null) return false
-  if (isNaN(latitude) || isNaN(longitude)) return false
-  // Check if coordinates are within reasonable bounds for France
-  return latitude >= 41 && latitude <= 51 && longitude >= -5 && longitude <= 10
-}
-
-const isMetropolitan = (departement) => {
-  if (!departement) return false
-  const dept = departement.toString().toUpperCase()
-  // Exclude overseas territories
-  const overseas = ['971', '972', '973', '974', '976']
-  return !overseas.includes(dept)
-}
 
 // ==================== HANDLER FUNCTIONS ====================
 
@@ -118,46 +60,41 @@ const handleLocationSelected = (location) => {
   locationStore.setSelectedLocation(location)
 }
 
-
-
 const handleLocationFound = (location) => {
   handleLocationSelected(location)
 }
 
+const handleCadastralDataLoaded = (data) => {
+  locationStore.setCadastralData(data)
+}
 
+// Lifecycle
+onMounted(() => {
+  locationStore.loadData()
+})
 
-    const handleCadastralDataLoaded = (data) => {
-      locationStore.setCadastralData(data)
-    }
+return {
+  // Store state (reactive)
+  selectedLocation: computed(() => locationStore.selectedLocation),
+  distanceInfo: computed(() => locationStore.distanceInfo),
+  closestLocations: computed(() => locationStore.closestLocations),
+  zoom: computed(() => locationStore.zoom),
+  center: computed(() => locationStore.center),
+  cadastralData: computed(() => locationStore.cadastralData),
+  minPrice: computed(() => locationStore.minPrice),
+  maxPrice: computed(() => locationStore.maxPrice),
 
+  // Store data (reactive)
+  qpvData: computed(() => locationStore.qpvData),
+  migrantCentersData: computed(() => locationStore.migrantCentersData),
+  mosquesData: computed(() => locationStore.mosquesData),
+  isEnglish,
 
-    // Lifecycle
-    onMounted(() => {
-      loadData()
-    })
-
-    return {
-      // Store state (reactive)
-      selectedLocation: computed(() => locationStore.selectedLocation),
-      distanceInfo: computed(() => locationStore.distanceInfo),
-      closestLocations: computed(() => locationStore.closestLocations),
-      zoom: computed(() => locationStore.zoom),
-      center: computed(() => locationStore.center),
-      cadastralData: computed(() => locationStore.cadastralData),
-      minPrice: computed(() => locationStore.minPrice),
-      maxPrice: computed(() => locationStore.maxPrice),
-
-      // Local reactive data
-      qpvData,
-      migrantCentersData,
-      mosquesData,
-      isEnglish,
-
-      // Handlers
-      handleLocationFound,
-      handleLocationSelected,
-      handleCadastralDataLoaded
-    }
+  // Handlers
+  handleLocationFound,
+  handleLocationSelected,
+  handleCadastralDataLoaded
+}
   }
 }
 </script>

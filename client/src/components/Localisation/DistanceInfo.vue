@@ -87,24 +87,11 @@ import { defineComponent, computed, ref, watch } from 'vue'
 import { useDataStore } from '../../services/store.js'
 import { useLocationStore } from './locationStore.js'
 
-// Shared constants
-const OVERSEAS_DEPARTMENTS = ['971', '972', '973', '974', '976']
-
 // Utility function to format distance
 const formatDistance = (distance) => {
   return distance < 1
     ? `${Math.round(distance * 1000)}m`
     : `${distance.toFixed(1)}km`
-}
-
-// Utility function to check if coordinates are valid
-const isValidCoordinates = (lat, lng) => {
-  return lat && lng && !isNaN(parseFloat(lat)) && !isNaN(parseFloat(lng))
-}
-
-// Utility function to check if department is metropolitan France
-const isMetropolitan = (department) => {
-  return !OVERSEAS_DEPARTMENTS.includes(department)
 }
 
 // Calculate centroid from GeoJSON geometry
@@ -144,18 +131,7 @@ const getPolygonCentroid = (coordinates) => {
 export default defineComponent({
   name: 'DistanceInfo',
   props: {
-    migrantCentersData: {
-      type: Array,
-      default: () => []
-    },
-    qpvData: {
-      type: Object,
-      default: null
-    },
-    mosquesData: {
-      type: Array,
-      default: () => []
-    }
+    // Props no longer needed as data comes from store
   },
   setup(props) {
     const dataStore = useDataStore()
@@ -193,9 +169,9 @@ export default defineComponent({
       const newClosestLocations = []
 
       // Find closest migrant center
-      if (locationStore.overlayStates.showMigrantCenters && props.migrantCentersData.length > 0) {
-        const migrantCentersWithDistances = props.migrantCentersData
-          .filter(center => isValidCoordinates(center.latitude, center.longitude))
+      if (locationStore.overlayStates.showMigrantCenters && locationStore.migrantCentersData.length > 0) {
+        const migrantCentersWithDistances = locationStore.migrantCentersData
+          .filter(center => locationStore.isValidCoordinates(center.latitude, center.longitude))
           .map(center => ({
             ...center,
             latitude: parseFloat(center.latitude),
@@ -222,11 +198,11 @@ export default defineComponent({
       }
 
       // Find closest QPV
-      if (locationStore.overlayStates.showQpv && props.qpvData && props.qpvData.geojson && props.qpvData.geojson.features) {
-        const allQpvs = props.qpvData.geojson.features.map(feature => {
+      if (locationStore.overlayStates.showQpv && locationStore.qpvData && locationStore.qpvData.geojson && locationStore.qpvData.geojson.features) {
+        const allQpvs = locationStore.qpvData.geojson.features.map(feature => {
           if (!feature || !feature.properties) return null
 
-          if (!isMetropolitan(feature.properties.insee_dep)) return null
+          if (!locationStore.isMetropolitan(feature.properties.insee_dep)) return null
 
           const centroid = calculateGeometryCentroid(feature.geometry)
           if (!centroid) return null
@@ -239,7 +215,7 @@ export default defineComponent({
         }).filter(qpv => qpv !== null)
 
         const qpvsWithDistances = allQpvs
-          .filter(qpv => isValidCoordinates(qpv.latitude, qpv.longitude))
+          .filter(qpv => locationStore.isValidCoordinates(qpv.latitude, qpv.longitude))
           .map(qpv => ({
             ...qpv,
             latitude: parseFloat(qpv.latitude),
@@ -264,9 +240,9 @@ export default defineComponent({
       }
 
       // Find closest mosque
-      if (locationStore.overlayStates.showMosques && props.mosquesData.length > 0) {
-        const mosquesWithDistances = props.mosquesData
-          .filter(mosque => isValidCoordinates(mosque.latitude, mosque.longitude))
+      if (locationStore.overlayStates.showMosques && locationStore.mosquesData.length > 0) {
+        const mosquesWithDistances = locationStore.mosquesData
+          .filter(mosque => locationStore.isValidCoordinates(mosque.latitude, mosque.longitude))
           .map(mosque => ({
             ...mosque,
             latitude: parseFloat(mosque.latitude),

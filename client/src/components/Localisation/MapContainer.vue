@@ -104,18 +104,7 @@ L.Icon.Default.mergeOptions({
 export default {
   name: 'MapContainer',
   props: {
-    qpvData: {
-      type: [Object, null],
-      required: true
-    },
-    migrantCentersData: {
-      type: [Array, null],
-      required: true
-    },
-    mosquesData: {
-      type: [Array, null],
-      required: true
-    }
+    // Props no longer needed as data comes from store
   },
   emits: ['location-selected', 'cadastral-data-loaded'],
   components: {
@@ -238,14 +227,6 @@ export default {
 
     // ==================== UTILITY FUNCTIONS ====================
 
-    const isMetropolitan = (departement) => {
-      if (!departement) return false
-      const dept = departement.toString().toUpperCase()
-      // Exclude overseas territories
-      const overseas = ['971', '972', '973', '974', '976']
-      return !overseas.includes(dept)
-    }
-
     // Format distance as "X.Xkm" or "XXXm"
     const formatDistance = (distance) => {
       return distance < 1
@@ -329,7 +310,7 @@ export default {
      * Display migrant centers as markers on the map
      */
     const showMigrantCentersOnMap = () => {
-      if (!map || !props.migrantCentersData.length) return
+      if (!map || !locationStore.migrantCentersData.length) return
 
       if (migrantCentersLayer) {
         map.removeLayer(migrantCentersLayer)
@@ -338,7 +319,7 @@ export default {
       const currentZoom = map.getZoom()
       migrantCentersLayer = L.layerGroup()
 
-      props.migrantCentersData.forEach(center => {
+      locationStore.migrantCentersData.forEach(center => {
         const marker = L.marker([parseFloat(center.latitude), parseFloat(center.longitude)], {
           icon: createIcon('migrant', currentZoom, isInclusive.value)
         })
@@ -358,7 +339,7 @@ export default {
 
     // Show mosques on map
     const showMosquesOnMap = () => {
-      if (!map || !props.mosquesData.length) return
+      if (!map || !locationStore.mosquesData.length) return
 
       if (mosqueLayer) {
         map.removeLayer(mosqueLayer)
@@ -367,7 +348,7 @@ export default {
       const currentZoom = map.getZoom()
       mosqueLayer = L.layerGroup()
 
-      props.mosquesData.forEach(mosque => {
+      locationStore.mosquesData.forEach(mosque => {
         const marker = L.marker([parseFloat(mosque.latitude), parseFloat(mosque.longitude)], {
           icon: createIcon('mosque', currentZoom, isInclusive.value)
         })
@@ -418,9 +399,9 @@ export default {
 
     // Load QPV GeoJSON layer
     const loadQpvLayer = () => {
-      if (!props.qpvData || !props.qpvData.geojson || !props.qpvData.geojson.features) return
+      if (!locationStore.qpvData || !locationStore.qpvData.geojson || !locationStore.qpvData.geojson.features) return
 
-      qpvLayer = L.geoJSON(props.qpvData.geojson, {
+      qpvLayer = L.geoJSON(locationStore.qpvData.geojson, {
         pane: 'qpvPane',
         style: () => ({
           fillColor: isInclusive.value ? '#0000ff' : '#ff0000',
@@ -461,7 +442,7 @@ export default {
         filter: (feature) => {
           // Only include metropolitan France features
           return feature && feature.geometry && feature.properties &&
-                 isMetropolitan(feature.properties.insee_dep)
+                 locationStore.isMetropolitan(feature.properties.insee_dep)
         }
       })
 
@@ -769,20 +750,20 @@ export default {
     // Make removeSelectedLocation globally available for popup button
     window.removePositionMarker = removeSelectedLocation
 
-    // Watch for prop changes to update layers
-    watch(() => props.migrantCentersData, (newData) => {
+    // Watch for store data changes to update layers
+    watch(() => locationStore.migrantCentersData, (newData) => {
       if (showMigrantCenters.value) {
         showMigrantCentersOnMap()
       }
     }, { deep: true })
 
-    watch(() => props.mosquesData, (newData) => {
+    watch(() => locationStore.mosquesData, (newData) => {
       if (showMosques.value) {
         showMosquesOnMap()
       }
     }, { deep: true })
 
-    watch(() => props.qpvData, (newData) => {
+    watch(() => locationStore.qpvData, (newData) => {
       if (showQpv.value) {
         loadQpvLayer()
       }
@@ -832,7 +813,7 @@ export default {
 
     // Watchers for overlay toggles
     watch(showQpv, (newVal) => {
-      if (newVal && props.qpvData && props.qpvData.geojson && props.qpvData.geojson.features) {
+      if (newVal && locationStore.qpvData && locationStore.qpvData.geojson && locationStore.qpvData.geojson.features) {
         loadQpvLayer()
       } else if (!newVal && qpvLayer) {
         map.removeLayer(qpvLayer)
@@ -841,7 +822,7 @@ export default {
     })
 
     watch(showMigrantCenters, (newVal) => {
-      if (newVal && props.migrantCentersData && props.migrantCentersData.length > 0) {
+      if (newVal && locationStore.migrantCentersData && locationStore.migrantCentersData.length > 0) {
         showMigrantCentersOnMap()
       } else if (!newVal && migrantCentersLayer) {
         map.removeLayer(migrantCentersLayer)
@@ -850,7 +831,7 @@ export default {
     })
 
     watch(showMosques, (newVal) => {
-      if (newVal && props.mosquesData && props.mosquesData.length > 0) {
+      if (newVal && locationStore.mosquesData && locationStore.mosquesData.length > 0) {
         showMosquesOnMap()
       } else if (!newVal && mosqueLayer) {
         map.removeLayer(mosqueLayer)
