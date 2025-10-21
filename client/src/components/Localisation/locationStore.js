@@ -34,7 +34,11 @@ export const useLocationStore = defineStore('location', {
     // Data for map
     qpvData: null,
     migrantCentersData: [],
-    mosquesData: []
+    mosquesData: [],
+
+    // Loading states
+    loadingMigrants: false,
+    loadingMosques: false
   }),
 
   getters: {
@@ -147,25 +151,41 @@ export const useLocationStore = defineStore('location', {
     // Load data for map
     async loadData() {
       try {
-        const [qpvResponse, migrantsResponse, mosquesResponse] = await Promise.all([
-          api.getQpvs(),
-          api.getMigrants({ limit: 1500 }),
-          api.getMosques({ limit: 3000 })
-        ])
-
+        // Load QPV data synchronously
+        const qpvResponse = await api.getQpvs()
         this.qpvData = qpvResponse
 
-        this.migrantCentersData = migrantsResponse.list.filter(center =>
-          this.isValidCoordinates(center.latitude, center.longitude) &&
-          this.isMetropolitan(center.departement)
-        )
+        // Load migrant centers asynchronously with loading state
+        this.loadingMigrants = true
+        const migrantsPromise = api.getMigrants({ limit: 1500 }).then(migrantsResponse => {
+          this.migrantCentersData = migrantsResponse.list.filter(center =>
+            this.isValidCoordinates(center.latitude, center.longitude) &&
+            this.isMetropolitan(center.departement)
+          )
+          this.loadingMigrants = false
+        }).catch(error => {
+          console.error('Error loading migrant centers:', error)
+          this.loadingMigrants = false
+        })
 
-        this.mosquesData = mosquesResponse.list.filter(mosque =>
-          this.isValidCoordinates(mosque.latitude, mosque.longitude) &&
-          this.isMetropolitan(mosque.departement)
-        )
+        // Load mosques asynchronously with loading state
+        this.loadingMosques = true
+        const mosquesPromise = api.getMosques({ limit: 3000 }).then(mosquesResponse => {
+          this.mosquesData = mosquesResponse.list.filter(mosque =>
+            this.isValidCoordinates(mosque.latitude, mosque.longitude) &&
+            this.isMetropolitan(mosque.departement)
+          )
+          this.loadingMosques = false
+        }).catch(error => {
+          console.error('Error loading mosques:', error)
+          this.loadingMosques = false
+        })
+
+        // Start both async loads
+        migrantsPromise
+        mosquesPromise
       } catch (error) {
-        console.error('Error loading data:', error)
+        console.error('Error loading QPV data:', error)
       }
     }
   }

@@ -225,6 +225,11 @@ export default {
     const currentZoom = ref(6)
     const currentCenter = ref({ lat: 46.603354, lng: 1.888334 })
 
+    // Filtered data for viewport-based rendering
+    const visibleMigrantCenters = ref([])
+    const visibleMosques = ref([])
+    const visibleQpvFeatures = ref([])
+
     // ==================== UTILITY FUNCTIONS ====================
 
     // Format distance as "X.Xkm" or "XXXm"
@@ -232,6 +237,38 @@ export default {
       return distance < 1
         ? `${Math.round(distance * 1000)}m`
         : `${distance.toFixed(1)}km`
+    }
+
+    // Check if a point is within the current map bounds
+    const isPointInBounds = (lat, lng) => {
+      if (!map) return false
+      const bounds = map.getBounds()
+      return bounds.contains([lat, lng])
+    }
+
+    // Filter data based on current viewport
+    const filterDataForViewport = () => {
+      if (!map) return
+
+      // Filter migrant centers
+      visibleMigrantCenters.value = locationStore.migrantCentersData.filter(center =>
+        isPointInBounds(parseFloat(center.latitude), parseFloat(center.longitude))
+      )
+
+      // Filter mosques
+      visibleMosques.value = locationStore.mosquesData.filter(mosque =>
+        isPointInBounds(parseFloat(mosque.latitude), parseFloat(mosque.longitude))
+      )
+
+      // Filter QPV features (for potential future use)
+      if (locationStore.qpvData && locationStore.qpvData.geojson && locationStore.qpvData.geojson.features) {
+        visibleQpvFeatures.value = locationStore.qpvData.geojson.features.filter(feature => {
+          if (!feature.geometry || !feature.geometry.coordinates) return false
+          // For polygons, check if any point is in bounds (simplified check)
+          const coords = feature.geometry.coordinates[0]
+          return coords.some(coord => isPointInBounds(coord[1], coord[0]))
+        })
+      }
     }
 
     // ==================== MAP MANAGEMENT ====================
@@ -289,12 +326,16 @@ export default {
       map.on('zoomend', () => {
         currentZoom.value = map.getZoom()
         locationStore.setZoom(currentZoom.value)
+        filterDataForViewport()
+        updateVisibleMarkers()
       })
 
       map.on('moveend', () => {
         const center = map.getCenter()
         currentCenter.value = { lat: center.lat, lng: center.lng }
         locationStore.setCenter(currentCenter.value)
+        filterDataForViewport()
+        updateVisibleMarkers()
       })
 
     }
@@ -307,10 +348,10 @@ export default {
     // ==================== LAYER MANAGEMENT ====================
 
     /**
-     * Display migrant centers as markers on the map
+     * Display migrant centers as markers on the map using filtered data
      */
     const showMigrantCentersOnMap = () => {
-      if (!map || !locationStore.migrantCentersData.length) return
+      if (!map || !visibleMigrantCenters.value.length) return
 
       if (migrantCentersLayer) {
         map.removeLayer(migrantCentersLayer)
@@ -319,7 +360,7 @@ export default {
       const currentZoom = map.getZoom()
       migrantCentersLayer = L.layerGroup()
 
-      locationStore.migrantCentersData.forEach(center => {
+      visibleMigrantCenters.value.forEach(center => {
         const marker = L.marker([parseFloat(center.latitude), parseFloat(center.longitude)], {
           icon: createIcon('migrant', currentZoom, isInclusive.value)
         })
@@ -337,9 +378,9 @@ export default {
       migrantCentersLayer.addTo(map)
     }
 
-    // Show mosques on map
+    // Show mosques on map using filtered data
     const showMosquesOnMap = () => {
-      if (!map || !locationStore.mosquesData.length) return
+      if (!map || !visibleMosques.value.length) return
 
       if (mosqueLayer) {
         map.removeLayer(mosqueLayer)
@@ -348,7 +389,7 @@ export default {
       const currentZoom = map.getZoom()
       mosqueLayer = L.layerGroup()
 
-      locationStore.mosquesData.forEach(mosque => {
+      visibleMosques.value.forEach(mosque => {
         const marker = L.marker([parseFloat(mosque.latitude), parseFloat(mosque.longitude)], {
           icon: createIcon('mosque', currentZoom, isInclusive.value)
         })
@@ -395,6 +436,16 @@ export default {
     const updateAllIcons = () => {
       updateMigrantCenterIcons()
       updateMosqueIcons()
+    }
+
+    // Update visible markers after viewport change
+    const updateVisibleMarkers = () => {
+      if (showMigrantCenters.value) {
+        showMigrantCentersOnMap()
+      }
+      if (showMosques.value) {
+        showMosquesOnMap()
+      }
     }
 
     // Load QPV GeoJSON layer
@@ -750,14 +801,16 @@ export default {
     // Make removeSelectedLocation globally available for popup button
     window.removePositionMarker = removeSelectedLocation
 
-    // Watch for store data changes to update layers
+    // Watch for store data changes to update layers and filter data
     watch(() => locationStore.migrantCentersData, (newData) => {
+      filterDataForViewport()
       if (showMigrantCenters.value) {
         showMigrantCentersOnMap()
       }
     }, { deep: true })
 
     watch(() => locationStore.mosquesData, (newData) => {
+      filterDataForViewport()
       if (showMosques.value) {
         showMosquesOnMap()
       }
@@ -845,6 +898,10 @@ export default {
       if (locationStore.cadastralData && locationStore.cadastralData.sections) {
         loadCadastralLayer()
       }
+      // Initial filtering after map is ready
+      nextTick(() => {
+        filterDataForViewport()
+      })
     })
 
     onUnmounted(() => {
