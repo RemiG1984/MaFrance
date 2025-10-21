@@ -642,11 +642,11 @@ export default {
               return
             }
 
-            const circonscriptionCode = feature.properties.codeCirconscription || 'N/A'
             const circonscriptionName = feature.properties.nomCirconscription || 'N/A'
+            const departementName = feature.properties.nomDepartement || 'N/A'
 
             layer.bindPopup(
-              `<strong>${isEnglish.value ? labels.value.circonscriptions.en : labels.value.circonscriptions.fr}</strong> ${circonscriptionName} (${circonscriptionCode})`
+              `<strong>${isEnglish.value ? labels.value.circonscriptions.en : labels.value.circonscriptions.fr}</strong> ${circonscriptionName} de ${departementName}`
             )
           }
         })
