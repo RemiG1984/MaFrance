@@ -86,6 +86,16 @@
               <div v-if="showCadastral" class="text-caption text-center mt-1">
                 {{ priceRange[0] }} - {{ priceRange[1] }} €/m²
               </div>
+              <v-select
+                v-model="selectedOverlay"
+                :items="['Départements', 'Régions', 'Circonscriptions']"
+                :label="isEnglish ? labels.decoupage.en : labels.decoupage.fr"
+                density="compact"
+                hide-details
+                clearable
+                @update:model-value="onOverlaySelectionChange"
+                class="mt-2"
+              ></v-select>
             </v-col>
           </v-row>
         </v-card-text>
@@ -114,6 +124,11 @@ const labels = {
   migrantCenters: { fr: 'Centres de migrants', en: 'Migrant Centers' },
   mosques: { fr: 'Mosquées', en: 'Mosques' },
   cadastral: { fr: 'Prix de l\'immobilier (€/m²)', en: 'Real Estate Price (€/m²)' },
+  overlays: { fr: 'Superpositions', en: 'Overlays' },
+  departments: { fr: 'Départements', en: 'Departments' },
+  regions: { fr: 'Régions', en: 'Regions' },
+  circonscriptions: { fr: 'Circonscriptions', en: 'Circonscriptions' },
+  decoupage: { fr: 'Découpage', en: 'Division' },
 }
 
 export default {
@@ -142,6 +157,11 @@ export default {
       get: () => locationStore.overlayStates.cadastral,
       set: (value) => locationStore.setOverlayStates({ cadastral: value })
     })
+    const showDepartements = computed({
+      get: () => locationStore.overlayStates.showDepartements,
+      set: (value) => locationStore.setOverlayStates({ showDepartements: value })
+    })
+    const selectedOverlay = ref(null)
     const overlayExpanded = ref(true)
     const isLoadingCadastral = ref(false)
     const lastFetchLat = ref(null)
@@ -175,8 +195,19 @@ export default {
         showQpv: showQpv.value,
         showMigrantCenters: showMigrantCenters.value,
         showMosques: showMosques.value,
-        cadastral: showCadastral.value
+        cadastral: showCadastral.value,
+        showDepartements: showDepartements.value
       })
+    }
+
+    // Handle overlay selection changes
+    const onOverlaySelectionChange = (newSelection) => {
+      selectedOverlay.value = newSelection
+      // Update the store based on selection
+      const showDepartements = newSelection === 'Départements'
+      const showRegions = newSelection === 'Régions'
+      const showCirconscriptions = newSelection === 'Circonscriptions'
+      locationStore.setOverlayStates({ showDepartements, showRegions, showCirconscriptions })
     }
 
     // Handle price range changes
@@ -378,8 +409,11 @@ export default {
       showQpv,
       showMosques,
       showCadastral,
+      showDepartements,
+      selectedOverlay,
       overlayExpanded,
       onOverlayToggle,
+      onOverlaySelectionChange,
       onPriceRangeChange,
       priceRange,
       isEnglish,

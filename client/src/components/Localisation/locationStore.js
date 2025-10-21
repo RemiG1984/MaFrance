@@ -28,8 +28,14 @@ export const useLocationStore = defineStore('location', {
       showQpv: true,
       showMigrantCenters: false,
       showMosques: false,
-      cadastral: false
+      cadastral: false,
+      showDepartements: false,
+      showRegions: false,
+      showCirconscriptions: false
     },
+
+    // Selected overlay for single selection system
+    selectedOverlay: null,
 
     // Data for map
     qpvData: null,
@@ -47,6 +53,9 @@ export const useLocationStore = defineStore('location', {
 
     // Get current overlay states
     getOverlayStates: (state) => state.overlayStates,
+
+    // Get selected overlay
+    getSelectedOverlay: (state) => state.selectedOverlay,
 
     // Check if any expansion panels are open
     hasExpandedPanels: (state) => state.expandedQpv || state.expandedMigrant || state.expandedMosque,
@@ -87,6 +96,13 @@ export const useLocationStore = defineStore('location', {
     // Set overlay states
     setOverlayStates(states) {
       this.overlayStates = { ...this.overlayStates, ...states }
+    },
+
+    // Set selected overlay
+    setSelectedOverlay(overlay) {
+      this.selectedOverlay = overlay
+      // Update overlayStates for backward compatibility
+      this.overlayStates.showDepartements = overlay === 'departements'
     },
 
     // Set distance information and closest locations

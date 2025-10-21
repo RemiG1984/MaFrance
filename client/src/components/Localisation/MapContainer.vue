@@ -137,6 +137,10 @@ export default {
         en: 'Department',
         fr: 'Département'
       },
+      region: {
+        en: 'Region',
+        fr: 'Région'
+      },
       migrantCenter: {
         en: 'Migrant Center',
         fr: 'Centre de migrants'
@@ -196,6 +200,10 @@ export default {
       cog: {
         en: 'COG',
         fr: 'COG'
+      },
+      circonscriptions: {
+        en: 'Circonscriptions',
+        fr: 'Circonscriptions'
       }
     }))
 
@@ -206,6 +214,9 @@ export default {
     const showQpv = computed(() => locationStore.overlayStates.showQpv)
     const showMosques = computed(() => locationStore.overlayStates.showMosques)
     const showCadastral = computed(() => locationStore.overlayStates.cadastral)
+    const showDepartements = computed(() => locationStore.overlayStates.showDepartements)
+    const showRegions = computed(() => locationStore.overlayStates.showRegions)
+    const showCirconscriptions = computed(() => locationStore.overlayStates.showCirconscriptions)
 
 
     // ==================== MAP STATE ====================
@@ -216,6 +227,9 @@ export default {
     let migrantCentersLayer = null
     let mosqueLayer = null
     let cadastralLayer = null
+    let departementsLayer = null
+    let regionsLayer = null
+    let circonscriptionsLayer = null
 
     // Map markers and layers
     let selectedMarker = null
@@ -311,6 +325,12 @@ export default {
 
       const qpvPane = map.createPane('qpvPane', map.getPanes().overlayPane)
       qpvPane.style.zIndex = 500
+
+      const departementsPane = map.createPane('departementsPane', map.getPanes().overlayPane)
+      departementsPane.style.zIndex = 300
+
+      const circonscriptionsPane = map.createPane('circonscriptionsPane', map.getPanes().overlayPane)
+      circonscriptionsPane.style.zIndex = 600
 
       // Add fullscreen control if available
       if (L.control && L.control.fullscreen) {
@@ -498,6 +518,146 @@ export default {
       })
 
       qpvLayer.addTo(map)
+    }
+
+    // Load départements boundary layer
+    const loadDepartementsLayer = async () => {
+      if (!map) return
+
+      if (departementsLayer) {
+        map.removeLayer(departementsLayer)
+      }
+
+      try {
+        const response = await fetch('https://france-geojson.gregoiredavid.fr/repo/departements.geojson')
+        const geoJsonData = await response.json()
+
+        departementsLayer = L.geoJSON(geoJsonData, {
+          pane: 'departementsPane',
+          style: () => ({
+            fillColor: 'transparent',
+            color: '#333333',
+            weight: 2,
+            opacity: 0.8,
+            fillOpacity: 0
+          }),
+          onEachFeature: (feature, layer) => {
+            if (!feature || !feature.properties) return
+
+            const deptCode = feature.properties.code || 'N/A'
+            const deptName = feature.properties.nom || 'N/A'
+
+            layer.bindPopup(
+              `<strong>${isEnglish.value ? labels.value.departement.en : labels.value.departement.fr}</strong> ${deptName} (${deptCode})`
+            )
+          },
+          filter: (feature) => {
+            // Only include metropolitan France features
+            return feature && feature.properties && locationStore.isMetropolitan(feature.properties.code)
+          }
+        })
+
+        departementsLayer.addTo(map)
+      } catch (error) {
+        console.error('Error loading départements GeoJSON:', error)
+      }
+    }
+
+    // Load régions boundary layer
+    const loadRegionsLayer = async () => {
+      if (!map) return
+
+      if (regionsLayer) {
+        map.removeLayer(regionsLayer)
+      }
+
+      try {
+        const response = await fetch('https://france-geojson.gregoiredavid.fr/repo/regions.geojson')
+        const geoJsonData = await response.json()
+
+        regionsLayer = L.geoJSON(geoJsonData, {
+          pane: 'departementsPane',
+          style: () => ({
+            fillColor: 'transparent',
+            color: '#333333',
+            weight: 2,
+            opacity: 0.8,
+            fillOpacity: 0
+          }),
+          onEachFeature: (feature, layer) => {
+            if (!feature || !feature.properties) return
+
+            const regionCode = feature.properties.code || 'N/A'
+            const regionName = feature.properties.nom || 'N/A'
+
+            layer.bindPopup(
+              `<strong>${isEnglish.value ? labels.value.region.en : labels.value.region.fr}</strong> ${regionName} (${regionCode})`
+            )
+          },
+          filter: (feature) => {
+            // Only include metropolitan France features
+            return feature && feature.properties && locationStore.isMetropolitan(feature.properties.code)
+          }
+        })
+
+        regionsLayer.addTo(map)
+      } catch (error) {
+        console.error('Error loading régions GeoJSON:', error)
+      }
+    }
+
+    // Load circonscriptions boundary layer
+    const loadCirconscriptionsLayer = async () => {
+      if (!map) {
+        console.warn('loadCirconscriptionsLayer: Map not initialized')
+        return
+      }
+
+      if (circonscriptionsLayer) {
+        map.removeLayer(circonscriptionsLayer)
+        circonscriptionsLayer = null
+      }
+
+      try {
+        const response = await fetch('https://static.data.gouv.fr/resources/contours-geographiques-des-circonscriptions-legislatives/20240613-191520/circonscriptions-legislatives-p10.geojson')
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+
+        const geoJsonData = await response.json()
+
+        circonscriptionsLayer = L.geoJSON(geoJsonData, {
+          pane: 'circonscriptionsPane',
+          style: () => ({
+            fillColor: 'transparent',
+            color: '#333333',
+            weight: 1,
+            opacity: 0.8,
+            fillOpacity: 0
+          }),
+          onEachFeature: (feature, layer) => {
+            if (!feature || !feature.properties) {
+              console.warn('loadCirconscriptionsLayer: Feature missing properties:', feature)
+              return
+            }
+
+            const circonscriptionCode = feature.properties.codeCirconscription || 'N/A'
+            const circonscriptionName = feature.properties.nomCirconscription || 'N/A'
+
+            layer.bindPopup(
+              `<strong>${isEnglish.value ? labels.value.circonscriptions.en : labels.value.circonscriptions.fr}</strong> ${circonscriptionName} (${circonscriptionCode})`
+            )
+          }
+        })
+
+        circonscriptionsLayer.addTo(map)
+
+      } catch (error) {
+        console.error('loadCirconscriptionsLayer: Error occurred while loading circonscriptions layer:', error)
+        // Reset layer reference on error
+        circonscriptionsLayer = null
+      }
     }
 
     // Load cadastral GeoJSON layer
@@ -892,6 +1052,33 @@ export default {
       }
     })
 
+    watch(showDepartements, async (newVal) => {
+      if (newVal) {
+        await loadDepartementsLayer()
+      } else if (!newVal && departementsLayer) {
+        map.removeLayer(departementsLayer)
+        departementsLayer = null
+      }
+    })
+
+    watch(showRegions, async (newVal) => {
+      if (newVal) {
+        await loadRegionsLayer()
+      } else if (!newVal && regionsLayer) {
+        map.removeLayer(regionsLayer)
+        regionsLayer = null
+      }
+    })
+
+    watch(showCirconscriptions, async (newVal) => {
+      if (newVal) {
+        await loadCirconscriptionsLayer()
+      } else if (!newVal && circonscriptionsLayer) {
+        map.removeLayer(circonscriptionsLayer)
+        circonscriptionsLayer = null
+      }
+    })
+
     // Lifecycle
     onMounted(() => {
       initMap()
@@ -915,6 +1102,9 @@ export default {
       showQpv,
       showMosques,
       showCadastral,
+      showDepartements,
+      showRegions,
+      showCirconscriptions,
       isEnglish,
       isInclusive,
       labels,
