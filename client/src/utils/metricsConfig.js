@@ -590,6 +590,10 @@ const MetricsConfig = {
                 data.destructions_et_degradations_volontaires_p1k,
             components: ["destructions_et_degradations_volontaires_p1k"],
         },
+        escroqueries_p1k: {
+            formula: (data) => data.escroqueries_p1k,
+            components: ["escroqueries_p1k"],
+        },
     },
 
     // Data availability by geographic level
