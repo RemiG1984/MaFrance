@@ -182,12 +182,35 @@ app.get('/{*path}', (req, res) => {
 const { errorHandler } = require("./middleware/errorHandler");
 app.use(errorHandler);
 
-// Start server
-const server = app.listen(config.server.port, config.server.host, () => {
-  console.log(
-    `Server running at http://${config.server.host}:${config.server.port}`,
-  );
-});
+// Start server with async preload
+async function startServer() {
+  try {
+    console.log('Initializing server-side cache...');
+    await cacheService.initCache();  // Await your preload (adapt function name if different, e.g., preloadAll() from cacheService.js)
+    // If preload is separate functions, await them here: await preloadDepartments(); await preloadCountry(); etc.
+
+    const server = app.listen(config.server.port, config.server.host, () => {
+      console.log(`Server running at http://${config.server.host}:${config.server.port}`);
+    });
+
+    console.log('Server startup complete - cache preloaded, awaiting requests');
+
+    // Graceful shutdown
+    process.on("SIGINT", () => {
+      console.log("Fermeture du serveur...");
+      server.close(() => {
+        console.log("Serveur arrêté");
+        process.exit(0);
+      });
+    });
+  } catch (error) {
+    console.error('Startup error during preload:', error);
+    process.exit(1);
+  }
+}
+
+// Launch async startup
+startServer();
 
 // Graceful shutdown
 process.on("SIGINT", () => {

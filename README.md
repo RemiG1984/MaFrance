@@ -229,7 +229,7 @@ client/
 ## Installation et développement
 
 ### Prérequis
-- Node.js (version 16 ou supérieure)
+- Node.js (version 18 ou supérieure)
 - npm
 
 ### Installation complète
