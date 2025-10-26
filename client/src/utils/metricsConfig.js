@@ -32,14 +32,17 @@ const MetricsConfig = {
     // Color scale configuration for all metrics
     colorScale: {
         defaultColors: [
-            "#fff7c7",
-            "#ffe083",
-            "#ffb74d",
-            "#ff8a65",
-            "#e53935",
-            "#b10026",
+            "#fffef5", // 0 – almost‑white (lowest / “no impact”)
+            "#fff7c7", // 1 – original pale yellow
+            "#ffe6a3", // 2 – slightly richer light orange
+            "#ffc04d", // 3 – warm orange
+            "#ff8a65", // 4 – red‑orange (unchanged – already good)
+            "#e53935", // 5 – bright red (unchanged)
+            "#b10026", // 6 – dark red (unchanged)
+            "#6a0033"  // 7 – deep crimson‑purple (moderate saturation, clearly darker)
         ],
         alt1Colors: [
+            "#fffef0", // 0 – almost white
             "#f5f5e8", // Pale cream (neutral, minimal positive change)
             "#e6f0b3", // Light yellow-green (slight improvement)
             "#b8e084", // Warm green (moderate improvement)
