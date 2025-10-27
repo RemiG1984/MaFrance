@@ -370,14 +370,13 @@ L'application utilise un service worker (`public/sw.js`) pour :
 - **Rechargement automatique** : Actualisation lors de nouvelles versions
 - **Cache API** : Mise en cache intelligente des réponses API
 
-## Déploiement sur Replit
+## Déploiement sur server VPS de production:
 
 ### Configuration production
-L'application est configurée pour Replit avec :
-- Binding sur `0.0.0.0:3000`
-- Build automatisé via workflows
-- Service de fichiers statiques intégré
-- Variables d'environnement configurées
+L'application est configurée pour production avec :
+- pm2
+- Nginx (directly serve the static files, forward to port :3000 internally for api requests)
+- Build automatisé via script (deploy)
 - Service worker activé pour cache offline
 
 ### Workflows disponibles
