@@ -1367,7 +1367,7 @@ departement,commune,code postal,adresse,nom,COG,validation,latitude,longitude,co
 69,Givors,69700,Rue Romain Rolland - 69700 GIVORS,Association Iqra,69091,exact_match,45.6015168027718,4.76546941586407,1
 69,Givors,69700,21 Rue Gambetta - 69700 GIVORS,Association de l'Unité Islamique,69091,exact_match,45.5815604,4.7766413,0.9
 69,Givors,69700,39 rue Joseph Longarini - 69700 GIVORS,Mosquée,69091,exact_match,45.5850797054808,4.77290421352283,0.5
-69,Lyon,69009,"5 Rue Maurice Béjart, - 69009 LYON",Centre Musulman de la Duchère,69123,exact_match,45.7882929,4.7930929,1
+69,Lyon,69009,"5 Rue Maurice Béjart, - 69009 LYON",Grande Mosquée Attawba,69123,exact_match,45.7882929,4.7930929,1
 69,Lyon,69007,52 rue Rachais - 69007 LYON,Mosquée Garibaldi,69123,exact_match,45.7505927,4.8498999,1
 69,Lyon,69007,64 Rue Clément Marot - 69007 LYON,Mosquée El-feth,69123,exact_match,45.7355229,4.8378703,1
 69,Lyon,69007,137 Grande Rue de la Guillotière - 69007 LYON,Mosquée Wasila,69123,exact_match,45.7505324,4.8498128,1
@@ -1377,7 +1377,6 @@ departement,commune,code postal,adresse,nom,COG,validation,latitude,longitude,co
 69,Lyon,69008,146 Boulevard Pinel - 69008 LYON,Grande Mosquée de Lyon,69123,exact_match,45.7369276,4.8906426,1
 69,Lyon,69230,Bd de la Croix Rouge  - 69230 LYON,Salle de prière,69123,exact_match,45.6993699649785,4.78288100239015,1
 69,Lyon,69009,84 avenue Sidoine Apollinaire - 69009 LYON,Mosquée Kouba,69123,exact_match,45.7672173,4.7974319,1
-69,Lyon,69009,509 Avenue de la Sauvegarde - 69009 LYON,Association Musulmane de la Duchère Attouba,69123,exact_match,45.7877582,4.7916518,1
 69,Lyon,69008,21 Rue Genton - 69008 LYON,Mosquée En-Nour,69123,exact_match,45.7338653,4.8847492,1
 69,Lyon,69008,Passage Comtois - 69008 LYON,Mosquée Ahl Hadith,69123,exact_match,45.7304303850112,4.8768458354796,1
 69,Lyon,69008,110 Avenue Paul Santy - 69008 LYON,Mosquée Al Fatiha,69123,exact_match,45.7292901,4.8756092,1
@@ -1387,7 +1386,7 @@ departement,commune,code postal,adresse,nom,COG,validation,latitude,longitude,co
 69,Lyon,69005,21 Rue des Fossés de Trion - 69005 LYON,Association Culturelle Parents et Amis Elèves Musulmans,69123,exact_match,45.7563574,4.8121533,1
 69,Lyon,69003,19 Rue Paul Bert - 69003 LYON,Association Islam,69123,exact_match,45.7558748,4.8448263,1
 69,Lyon,69001,12 Rue Imbert Colomès - 69001 LYON,Association Islamique Croix Rousse Mosquée Kouba,69123,exact_match,45.7713582,4.8329764,1
-69,Lyon,69009,"102 rue Saint-Cyr, - 69009 LYON",Mosquée de Rochecardon,69123,exact_match,45.7867246,4.8083754,0.9
+69,Lyon,69009,"102 rue Saint-Cyr, - 69009 LYON",Mosquée Rawda,69123,exact_match,45.7867246,4.8083754,0.9
 69,Lyon,69002,"63, rue Delandine - 69002 LYON",Mosquée de Perrache,69123,exact_match,45.7425723,4.8237852,0.9
 69,Lyon,69008,51 rue jean sarraizin - 69008 LYON,Petit mosquée,69123,exact_match,45.731325,4.866806,0.8
 69,Lyon,69007,8/10 rue Paul Massimi - 69007 GERLAND,Mosquée Imam Malik-Gerland,69123,mapped_to_Lyon,45.738034076461,4.84258358116728,0.5
@@ -3042,3 +3041,4 @@ departement,commune,code postal,adresse,nom,COG,validation,latitude,longitude,co
 78,Rambouillet,78120,"6 rue Gustave Eiffel, 78120 Rambouillet ",Salle de prière,78517,https://mosqueederambouillet.fr/votre-future-mosquee/,48.62516,1.826089,1
 94,Vitry-sur-Seine,94400,27 rue Elsa Triolet 94400 Vitry-sur-Seine,Mosquée de Vitry-sur-Seine,94081,google map,48.78088,2.402625,1
 42,Roanne,42300,2 impasse Champromis 42300 Roanne,Mosquée Nour-Roanne,42187,google map,46.047979,4.0658123,1
+62,Béthune,62400,"1 Rue Jean Baptiste Lebas, 62400 Béthune",Mosquée de Béthune,62119,Twitter and google map,50.5197693,2.638938997,1
