@@ -412,3 +412,10 @@ Scripts dans `setup/` pour importer (architecture DRY avec BaseImporter et impor
 - Données NAT1 de nationalité (CSV depuis inputFiles/)
 
 Cette application fournit une interface complète d'analyse territoriale française avec des données actualisées, une architecture moderne scalable et des fonctionnalités avancées de visualisation, d'analyse statistique et de géolocalisation.
+
+### GDPR and privacy compliance
+Aggregated public data per GDPR Art. 89. 
+No personal data is included. All building adresses are publicly available. 
+
+## License
+This project is licensed under the **MIT License**
