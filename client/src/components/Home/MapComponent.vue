@@ -354,7 +354,7 @@ export default {
     },
     async loadDepartementsGeoJson() {
       try {
-        const response = await fetch('https://france-geojson.gregoiredavid.fr/repo/departements.geojson')
+        const response = await fetch('/geo/departements.geojson')
         const geoJson = await response.json()
         this.departementsLayer = markRaw(L.geoJSON(geoJson, {
           style: this.getStyle.bind(this),

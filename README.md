@@ -45,89 +45,169 @@ L'application est composée de deux parties principales :
 
 ## Structure des fichiers
 
-### Backend
+### Racine
 ```
 /
+├── .gitignore             # Fichiers ignorés par Git
+├── LICENCE.md             # Licence du projet
+├── package.json           # Dépendances et scripts backend
+├── package-lock.json      # Verrouillage versions dépendances backend
+├── README.md              # Documentation du projet
 ├── server.js              # Point d'entrée du serveur Express
-├── config/
+├── .data/                 # Données persistantes (cache, etc.)
+├── .vscode/               # Configuration VS Code
+├── config/                # Configuration serveur
 │   ├── db.js             # Configuration base de données SQLite
 │   └── index.js          # Configuration générale
+├── middleware/            # Middlewares Express
+│   ├── cache.js          # Middleware cache
+│   ├── errorHandler.js   # Gestion des erreurs
+│   ├── security.js       # Sécurisation des entrées
+│   └── validate.js       # Validation des données
+├── public/                # Assets statiques servis par le serveur
+│   ├── android-chrome-192x192.png
+│   ├── android-chrome-512x512.png
+│   ├── apple-touch-icon.png
+│   ├── browserconfig.xml
+│   ├── classements-1200x630.png
+│   ├── demography-1200x630.png
+│   ├── favicon-16x16.png
+│   ├── favicon-32x32.png
+│   ├── favicon.ico
+│   ├── localisation-1200x630.png
+│   ├── robots.txt
+│   ├── site.webmanifest
+│   ├── sw.js             # Service Worker
+│   ├── twitter-1200x630.png
+│   ├── data/             # Données publiques
+│   │   ├── fertility.csv
+│   │   ├── migration.csv
+│   │   ├── mortality.csv
+│   │   ├── pop_historique.csv
+│   │   ├── pyramid.csv
+│   │   └── TFR.csv
+│   └── images/           # Images publiques
+│       └── kofi_symbol.webp
 ├── routes/               # Routes API
 │   ├── articleRoutes.js  # Articles FdeSouche
+│   ├── cacheRoutes.js    # Gestion cache
 │   ├── communeRoutes.js  # Données communes
 │   ├── countryRoutes.js  # Données nationales
 │   ├── departementRoutes.js # Données départementales
 │   ├── migrantRoutes.js  # Centres migrants
 │   ├── mosqueRoutes.js   # Mosquées
 │   ├── nat1Routes.js     # Données nationalité NAT1
+│   ├── otherRoutes.js    # Routes diverses
 │   ├── qpvRoutes.js      # Quartiers prioritaires
 │   ├── rankingRoutes.js  # Classements
-│   ├── subventionRoutes.js # Subventions
-│   ├── cacheRoutes.js    # Gestion cache
-│   └── otherRoutes.js    # Routes diverses
-├── services/
+│   └── subventionRoutes.js # Subventions
+├── services/             # Services métier
 │   ├── cacheService.js   # Service de cache persistant
 │   └── searchService.js  # Service de recherche
-├── middleware/
-│   ├── errorHandler.js   # Gestion des erreurs
-│   ├── security.js       # Sécurisation des entrées
-│   └── validate.js       # Validation des données
 └── setup/                # Scripts d'import des données
     ├── baseImporter.js   # Classe de base pour les imports CSV (DRY)
+    ├── importArticles.js # Import articles FdeSouche
+    ├── importCrimeData.js # Import données criminalité
+    ├── importElus.js     # Import élus (maires, préfets, ministres)
+    ├── importMigrants.js # Import centres migrants
+    ├── importMosques.js  # Import mosquées
+    ├── importNames.js    # Import analyse prénoms
+    ├── importNat1.js     # Import données NAT1
+    ├── importQPV.js      # Import quartiers prioritaires
+    ├── importQpvGeoJson.js # Import géométries QPV
+    ├── importScores.js   # Import scores calculés
+    ├── importSubventions.js # Import subventions
     ├── importUtils.js    # Utilitaires communs pour les imports
-    ├── import*.js        # Scripts spécifiques d'import par type de données
     └── inputFiles/       # Fichiers de données d'entrée
-        ├── *.csv         # Fichiers CSV de données
-        └── *.geojson     # Fichiers GeoJSON
+        ├── analyse_prenom_commune.csv
+        ├── analyse_prenom_departement.csv
+        ├── analyse_prenom_france.csv
+        ├── analyse_qpv.csv
+        ├── centres_migrants.csv
+        ├── commune_scores.csv
+        ├── commune_subventions.csv
+        ├── crime_data_commune.csv
+        ├── crime_data_departement.csv
+        ├── crime_data_france.csv
+        ├── departement_scores.csv
+        ├── departement_subventions.csv
+        ├── fdesouche_analyzed.csv
+        ├── france_scores.csv
+        ├── france_subventions.csv
+        ├── insee_NAT1_detailed_inferred.csv
+        ├── maires_list.csv
+        ├── ministre_interieur_list.csv
+        ├── mosques_france_with_cog.csv
+        ├── prefets_list.csv
+        └── qpv2024_simplified.geojson
 ```
 
 ### Frontend
 ```
 client/
-├── src/
-│   ├── components/       # Composants Vue réutilisables
-│   │   ├── ArticleList.vue         # Liste articles
-│   │   ├── CacheManager.vue        # Gestionnaire cache
-│   │   ├── CentresMigrants.vue     # Centres migrants
-│   │   ├── CorrelationHeatmap.vue  # Heatmap des corrélations
-│   │   ├── CrimeGraphs.vue         # Graphiques criminalité (container)
-│   │   ├── DemGraph.vue            # Graphiques démographiques
-│   │   ├── DemParameters.vue       # Paramètres démographiques
-│   │   ├── DemPyramid.vue          # Pyramide des âges
-│   │   ├── ExecutiveDetails.vue    # Détails élus
-│   │   ├── Graph.vue               # Graphiques criminalité (single graph)
-│   │   ├── HamburgerIcon.vue       # Menu hamburger mobile
-│   │   ├── LocationSelector.vue    # Sélecteurs géographiques
-│   │   ├── MapComponent.vue        # Carte Leaflet
-│   │   ├── NamesGraph.vue          # Graphiques prénoms de naissance
-│   │   ├── QpvData.vue             # Données QPV
-│   │   ├── RankingFilters.vue      # Filtres classements
-│   │   ├── RankingResults.vue      # Résultats classements
-│   │   ├── ScatterPlot.vue         # Nuages de points pour corrélations
-│   │   ├── ScoreTable.vue          # Tableaux de scores
-│   │   ├── ShareButton.vue         # Création d'url spécifiques de partage
-│   │   ├── Subventions.vue         # Tableau des subventions
-│   │   └── VersionSelector.vue     # Sélecteur de version
-│   ├── views/            # Pages principales
-│   │   ├── Correlations.vue  # Page analyse des corrélations
-│   │   ├── Demography.vue   # Page démographie
-│   │   ├── Home.vue         # Page d'accueil
-│   │   ├── Localisation.vue # Page carte des lieux d'intérêt
-│   │   ├── Methodology.vue  # Page méthodologie
-│   │   ├── Politique.vue    # Page analyse politique
-│   │   └── Rankings.vue     # Page classements
-│   ├── services/
-│   │   ├── api.js        # Service API centralisé
-│   │   └── store.js      # Store Pinia
-│   ├── utils/            # Utilitaires
-│   │   ├── metricsConfig.js      # Configuration métriques
-│   │   ├── chartWatermark.js     # Watermark graphiques
-│   │   ├── departementNames.js   # Noms département
-│   │   └── utils.js              # Fonctions utilitaires
-│   ├── plugins/
-│   │   └── vuetify.js    # Configuration Vuetify
-│   └── router/
-│       └── index.js      # Configuration routes
+├── index.html            # Point d'entrée HTML
+├── package.json          # Dépendances et scripts frontend
+├── package-lock.json     # Verrouillage versions dépendances frontend
+├── vite.config.js        # Configuration Vite
+└── src/
+    ├── App.vue           # Composant racine Vue
+    ├── main.js           # Point d'entrée JavaScript
+    ├── style.css         # Styles globaux
+    ├── components/       # Composants Vue réutilisables
+    │   ├── Correlations/
+    │   │   ├── CorrelationHeatmap.vue  # Heatmap des corrélations
+    │   │   └── ScatterPlot.vue         # Nuages de points pour corrélations
+    │   ├── Demography/
+    │   │   ├── DemGraph.vue            # Graphiques démographiques
+    │   │   ├── DemParameters.vue       # Paramètres démographiques
+    │   │   └── DemPyramid.vue          # Pyramide des âges
+    │   ├── Home/
+    │   │   ├── ArticleList.vue         # Liste articles
+    │   │   ├── CentresMigrants.vue     # Centres migrants
+    │   │   ├── CrimeGraphs.vue         # Graphiques criminalité (container)
+    │   │   ├── ExecutiveDetails.vue    # Détails élus
+    │   │   ├── Graph.vue               # Graphiques criminalité (single graph)
+    │   │   ├── LocationSelector.vue    # Sélecteurs géographiques
+    │   │   ├── MapComponent.vue        # Carte Leaflet
+    │   │   ├── MosqueTable.vue         # Tableau des mosquées
+    │   │   ├── NamesGraph.vue          # Graphiques prénoms de naissance
+    │   │   ├── QpvData.vue             # Données QPV
+    │   │   ├── ScoreTable.vue          # Tableaux de scores
+    │   │   ├── Subventions.vue         # Tableau des subventions
+    │   │   └── VersionSelector.vue     # Sélecteur de version
+    │   ├── Localisation/
+    │   │   ├── DistanceInfo.vue        # Informations de distance
+    │   │   ├── LocationDataBox.vue     # Boîte de données de localisation
+    │   │   ├── LocationSearch.vue      # Recherche de localisation
+    │   │   ├── locationStore.js        # Store de localisation
+    │   │   └── MapContainer.vue        # Conteneur de carte
+    │   ├── Menu/
+    │   │   ├── HamburgerIcon.vue       # Menu hamburger mobile
+    │   │   └── ShareButton.vue         # Création d'url spécifiques de partage
+    │   └── Rankings/
+    │       ├── RankingFilters.vue      # Filtres classements
+    │       └── RankingResults.vue      # Résultats classements
+    ├── plugins/
+    │   └── vuetify.js    # Configuration Vuetify
+    ├── router/
+    │   └── index.js      # Configuration routes
+    ├── services/
+    │   ├── api.js        # Service API centralisé
+    │   └── store.js      # Store Pinia
+    ├── utils/            # Utilitaires
+    │   ├── chartWatermark.js     # Watermark graphiques
+    │   ├── departementNames.js   # Noms département
+    │   ├── metricsConfig.js      # Configuration métriques
+    │   └── utils.js              # Fonctions utilitaires
+    └── views/            # Pages principales
+        ├── Correlations.vue  # Page analyse des corrélations
+        ├── Demography.vue   # Page démographie
+        ├── Home.vue         # Page d'accueil
+        ├── Localisation.vue # Page carte des lieux d'intérêt
+        ├── Methodology.vue  # Page méthodologie
+        ├── Politique.vue    # Page analyse politique
+        ├── Rankings.vue     # Page classements
+        └── Support.vue      # Page support
 ```
 
 ## API Endpoints
