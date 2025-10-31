@@ -1,30 +1,35 @@
 
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const { createDbHandler } = require("../middleware/errorHandler");
-const { cacheMiddleware } = require("../middleware/cache");
+const { createDbHandler } = require('../middleware/errorHandler');
+const { cacheMiddleware } = require('../middleware/cache');
 const {
-    validateOptionalDepartement,
-    validateOptionalCOG,
-} = require("../middleware/validate");
+  validateOptionalDepartement,
+  validateOptionalCOG
+} = require('../middleware/validate');
+const {
+  DEFAULT_LIMIT,
+  MAX_PAGINATION_LIMIT,
+  HTTP_BAD_REQUEST
+} = require('../constants');
 
 // GET /api/mosques - Get all mosques with optional filtering
 router.get(
-    "/",
-    [validateOptionalDepartement, validateOptionalCOG, cacheMiddleware((req) => `mosques:${req.query.dept || 'all'}:${req.query.cog || 'all'}:${req.query.cursor || 0}:${req.query.limit || 20}`)],
-    (req, res, next) => {
-        const db = req.app.locals.db;
-        const dbHandler = createDbHandler(res);
-        const { dept, cog, cursor, limit = "20" } = req.query;
-        const pageLimit = Math.min(parseInt(limit), 2000);
-        const offset = cursor ? parseInt(cursor) : 0;
+  '/',
+  [validateOptionalDepartement, validateOptionalCOG, cacheMiddleware((req) => `mosques:${req.query.dept || 'all'}:${req.query.cog || 'all'}:${req.query.cursor || 0}:${req.query.limit || DEFAULT_LIMIT}`)],
+  (req, res) => {
+    const db = req.app.locals.db;
+    const dbHandler = createDbHandler(res);
+    const { dept, cog, cursor, limit = DEFAULT_LIMIT } = req.query;
+    const pageLimit = Math.min(parseInt(limit), MAX_PAGINATION_LIMIT);
+    const offset = cursor ? parseInt(cursor) : 0;
 
-        // Prevent simultaneous dept and cog
-        if (dept && cog) {
-            return res
-                .status(400)
-                .json({ error: "Cannot specify both dept and cog" });
-        }
+    // Prevent simultaneous dept and cog
+    if (dept && cog) {
+      return res
+        .status(HTTP_BAD_REQUEST)
+        .json({ error: 'Cannot specify both dept and cog' });
+    }
 
     let dataSql = `
         SELECT id, name, address, latitude, longitude, commune, departement, cog
@@ -34,64 +39,66 @@ router.get(
     const params = [];
 
     if (dept) {
-        conditions.push("departement = ?");
-        params.push(dept);
+      conditions.push('departement = ?');
+      params.push(dept);
     }
     if (cog) {
-        conditions.push("cog = ?");
-        params.push(cog);
+      conditions.push('cog = ?');
+      params.push(cog);
     }
 
     if (conditions.length > 0) {
-        dataSql += " WHERE " + conditions.join(" AND ");
+      dataSql += ' WHERE ' + conditions.join(' AND ');
     }
 
-    dataSql += " ORDER BY name ASC, id ASC LIMIT ? OFFSET ?";
+    dataSql += ' ORDER BY name ASC, id ASC LIMIT ? OFFSET ?';
     params.push(pageLimit + 1);
     params.push(offset);
 
     db.all(dataSql, params, (err, rows) => {
-        dbHandler(err);
-        if (err) return;
+      dbHandler(err);
+      if (err) {
+        return;
+      }
 
-        const hasMore = rows.length > pageLimit;
-        const mosques = hasMore ? rows.slice(0, pageLimit) : rows;
-        const nextCursor =
+      const hasMore = rows.length > pageLimit;
+      const mosques = hasMore ? rows.slice(0, pageLimit) : rows;
+      const nextCursor =
             hasMore && mosques.length > 0
-                ? mosques[mosques.length - 1].id
-                : null;
+              ? mosques[mosques.length - 1].id
+              : null;
 
-        res.json({
-            list: mosques,
-            pagination: {
-                hasMore: hasMore,
-                nextCursor: nextCursor,
-                limit: pageLimit,
-            },
-        });
+      res.json({
+        list: mosques,
+        pagination: {
+          hasMore: hasMore,
+          nextCursor: nextCursor,
+          limit: pageLimit
+        }
+      });
     });
-});
+  });
 
 // GET /api/mosques/closest - Get closest mosques to coordinates
-router.get('/closest', cacheMiddleware((req) => `mosques:closest:${req.query.lat}:${req.query.lng}:${req.query.limit || 5}`), (req, res, next) => {
-    const db = req.app.locals.db;
-    const dbHandler = createDbHandler(res);
-    const { lat, lng, limit = 5 } = req.query;
+router.get('/closest', cacheMiddleware((req) => `mosques:closest:${req.query.lat}:${req.query.lng}:${req.query.limit || 5}`), (req, res) => {
+  const db = req.app.locals.db;
+  const dbHandler = createDbHandler(res);
+  const { lat, lng, limit = 5 } = req.query;
 
-    if (!lat || !lng) {
-        return res.status(400).json({ error: 'Latitude and longitude are required' });
-    }
+  if (!lat || !lng) {
+    return res.status(HTTP_BAD_REQUEST).json({ error: 'Latitude and longitude are required' });
+  }
 
-    const latitude = parseFloat(lat);
-    const longitude = parseFloat(lng);
-    const maxResults = Math.min(parseInt(limit), 20);
+  const latitude = parseFloat(lat);
+  const longitude = parseFloat(lng);
+  const maxResults = Math.min(parseInt(limit), DEFAULT_LIMIT);
 
-    if (isNaN(latitude) || isNaN(longitude)) {
-        return res.status(400).json({ error: 'Invalid coordinates' });
-    }
+  if (isNaN(latitude) || isNaN(longitude)) {
+    return res.status(HTTP_BAD_REQUEST).json({ error: 'Invalid coordinates' });
+  }
 
-    // Calculate distance using Haversine formula in SQL
-    const sql = `
+  // Calculate distance using Haversine formula in SQL
+  const sql = `
         SELECT
             *,
             (
@@ -108,18 +115,19 @@ router.get('/closest', cacheMiddleware((req) => `mosques:closest:${req.query.lat
         LIMIT ?
     `;
 
-    db.all(sql, [latitude, latitude, longitude, maxResults], (err, rows) => {
-        dbHandler(err);
-        if (err) return;
+  db.all(sql, [latitude, latitude, longitude, maxResults], (err, rows) => {
+    dbHandler(err);
+    if (err) {
+      return;
+    }
 
-        const results = rows.map(row => ({
-            ...row,
-            distance_km: Math.round(row.distance_km * 100) / 100
-        }));
+    const results = rows.map(row => ({
+      ...row,
+      distance_km: Math.round(row.distance_km * 100) / 100
+    }));
 
-        res.json({ list: results });
-    });
+    res.json({ list: results });
+  });
 });
-
 
 module.exports = router;

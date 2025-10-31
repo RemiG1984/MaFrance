@@ -16,17 +16,19 @@ const DEPARTMENT_CODE_REGEX = /^(0[1-9]|[1-8][0-9]|9[0-5]|2[AB]|97[1-6])$/;
  * @returns {Date|null} Parsed Date object or null if invalid.
  */
 function parseFrenchDate(dateStr) {
-    if (!dateStr) return null;
-    const frenchDateMatch = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-    if (frenchDateMatch) {
-        const [, day, month, year] = frenchDateMatch;
-        const date = new Date(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`);
-        // Validate the date is valid
-        if (date.getFullYear() == year && date.getMonth() + 1 == month && date.getDate() == day) {
-            return date;
-        }
-    }
+  if (!dateStr) {
     return null;
+  }
+  const frenchDateMatch = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (frenchDateMatch) {
+    const [, day, month, year] = frenchDateMatch;
+    const date = new Date(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`);
+    // Validate the date is valid
+    if (date.getFullYear() === year && date.getMonth() + 1 === month && date.getDate() === day) {
+      return date;
+    }
+  }
+  return null;
 }
 
 /**
@@ -35,14 +37,16 @@ function parseFrenchDate(dateStr) {
  * @returns {string|null} Validated date string or null if invalid.
  */
 function parseISODate(dateStr) {
-    if (!dateStr) return null;
-    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
-        const date = new Date(dateStr);
-        if (!isNaN(date.getTime())) {
-            return dateStr;
-        }
-    }
+  if (!dateStr) {
     return null;
+  }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    const date = new Date(dateStr);
+    if (!isNaN(date.getTime())) {
+      return dateStr;
+    }
+  }
+  return null;
 }
 
 /**
@@ -51,17 +55,19 @@ function parseISODate(dateStr) {
  * @returns {string|null} Date string in YYYY-MM-DD format or null if invalid.
  */
 function parseShortFrenchDate(dateStr) {
-    if (!dateStr) return null;
-    const match = dateStr.match(/^(\d{2})\/(\d{2})\/(\d{2})$/);
-    if (match) {
-        const [, day, month, year] = match;
-        const fullYear = `20${year}`;
-        const date = new Date(`${fullYear}-${month}-${day}`);
-        if (date.getFullYear() == fullYear && date.getMonth() + 1 == month && date.getDate() == day) {
-            return `${fullYear}-${month}-${day}`;
-        }
-    }
+  if (!dateStr) {
     return null;
+  }
+  const match = dateStr.match(/^(\d{2})\/(\d{2})\/(\d{2})$/);
+  if (match) {
+    const [, day, month, year] = match;
+    const fullYear = `20${year}`;
+    const date = new Date(`${fullYear}-${month}-${day}`);
+    if (date.getFullYear() === fullYear && date.getMonth() + 1 === month && date.getDate() === day) {
+      return `${fullYear}-${month}-${day}`;
+    }
+  }
+  return null;
 }
 
 /**
@@ -70,17 +76,19 @@ function parseShortFrenchDate(dateStr) {
  * @returns {string|null} Normalized department code or null if invalid.
  */
 function normalizeDepartmentCode(code) {
-    if (!code) return null;
-    let normalized = code.trim().toUpperCase();
-    // Pad numeric codes with leading zero
-    if (/^\d+$/.test(normalized)) {
-        normalized = normalized.padStart(2, '0');
-    }
-    // Validate against known department codes
-    if (DEPARTMENT_CODE_REGEX.test(normalized)) {
-        return normalized;
-    }
+  if (!code) {
     return null;
+  }
+  let normalized = code.trim().toUpperCase();
+  // Pad numeric codes with leading zero
+  if (/^\d+$/.test(normalized)) {
+    normalized = normalized.padStart(2, '0');
+  }
+  // Validate against known department codes
+  if (DEPARTMENT_CODE_REGEX.test(normalized)) {
+    return normalized;
+  }
+  return null;
 }
 
 /**
@@ -89,7 +97,7 @@ function normalizeDepartmentCode(code) {
  * @returns {boolean} True if valid COG code.
  */
 function validateCOG(cog) {
-    return cog && /^\d{5}$/.test(cog.trim());
+  return cog && /^\d{5}$/.test(cog.trim());
 }
 
 /**
@@ -99,11 +107,11 @@ function validateCOG(cog) {
  * @returns {number|null} Parsed number or null if invalid.
  */
 function parseNumericField(value, allowNull = true) {
-    if (value === null || value === undefined || value === '') {
-        return allowNull ? null : NaN;
-    }
-    const num = parseFloat(value);
-    return !isNaN(num) ? num : (allowNull ? null : NaN);
+  if (value === null || value === undefined || value === '') {
+    return allowNull ? null : NaN;
+  }
+  const num = parseFloat(value);
+  return !isNaN(num) ? num : (allowNull ? null : NaN);
 }
 
 /**
@@ -113,11 +121,11 @@ function parseNumericField(value, allowNull = true) {
  * @returns {number|null} Parsed integer or null if invalid.
  */
 function parseIntegerField(value, allowNull = true) {
-    if (value === null || value === undefined || value === '') {
-        return allowNull ? null : NaN;
-    }
-    const num = parseInt(value, 10);
-    return !isNaN(num) ? num : (allowNull ? null : NaN);
+  if (value === null || value === undefined || value === '') {
+    return allowNull ? null : NaN;
+  }
+  const num = parseInt(value, 10);
+  return !isNaN(num) ? num : (allowNull ? null : NaN);
 }
 
 /**
@@ -126,13 +134,17 @@ function parseIntegerField(value, allowNull = true) {
  * @returns {number} 1 for true, 0 for false.
  */
 function parseBooleanField(value) {
-    if (typeof value === 'boolean') return value ? 1 : 0;
-    if (typeof value === 'number') return value === 1 ? 1 : 0;
-    if (typeof value === 'string') {
-        const normalized = value.trim().toLowerCase();
-        return ['1', '1.0', 'true', 'yes', 'oui'].includes(normalized) ? 1 : 0;
-    }
-    return 0;
+  if (typeof value === 'boolean') {
+    return value ? 1 : 0;
+  }
+  if (typeof value === 'number') {
+    return value === 1 ? 1 : 0;
+  }
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+    return ['1', '1.0', 'true', 'yes', 'oui'].includes(normalized) ? 1 : 0;
+  }
+  return 0;
 }
 
 /**
@@ -142,11 +154,11 @@ function parseBooleanField(value) {
  * @returns {string|null} Trimmed string or null if empty and allowNull is true.
  */
 function trimField(value, allowNull = true) {
-    if (value === null || value === undefined) {
-        return allowNull ? null : '';
-    }
-    const trimmed = value.trim();
-    return trimmed || (allowNull ? null : '');
+  if (value === null || value === undefined) {
+    return allowNull ? null : '';
+  }
+  const trimmed = value.trim();
+  return trimmed || (allowNull ? null : '');
 }
 
 /**
@@ -156,7 +168,7 @@ function trimField(value, allowNull = true) {
  * @returns {Array<string>} Array of missing field names.
  */
 function validateRequiredFields(row, requiredFields) {
-    return requiredFields.filter(field => !row[field] || row[field].trim() === '');
+  return requiredFields.filter(field => !row[field] || row[field].trim() === '');
 }
 
 /**
@@ -165,9 +177,11 @@ function validateRequiredFields(row, requiredFields) {
  * @returns {string|null} Uppercase M/F or null if invalid.
  */
 function validateSexe(sexe) {
-    if (!sexe) return null;
-    const normalized = sexe.trim().toUpperCase();
-    return ['M', 'F'].includes(normalized) ? normalized : null;
+  if (!sexe) {
+    return null;
+  }
+  const normalized = sexe.trim().toUpperCase();
+  return ['M', 'F'].includes(normalized) ? normalized : null;
 }
 
 /**
@@ -176,21 +190,21 @@ function validateSexe(sexe) {
  * @returns {string|null} Uppercase country code or null if empty.
  */
 function normalizeCountryCode(country) {
-    return country ? country.trim().toUpperCase() : null;
+  return country ? country.trim().toUpperCase() : null;
 }
 
 module.exports = {
-    DEPARTMENT_CODE_REGEX,
-    parseFrenchDate,
-    parseISODate,
-    parseShortFrenchDate,
-    normalizeDepartmentCode,
-    validateCOG,
-    parseNumericField,
-    parseIntegerField,
-    parseBooleanField,
-    trimField,
-    validateRequiredFields,
-    validateSexe,
-    normalizeCountryCode,
+  DEPARTMENT_CODE_REGEX,
+  parseFrenchDate,
+  parseISODate,
+  parseShortFrenchDate,
+  normalizeDepartmentCode,
+  validateCOG,
+  parseNumericField,
+  parseIntegerField,
+  parseBooleanField,
+  trimField,
+  validateRequiredFields,
+  validateSexe,
+  normalizeCountryCode
 };

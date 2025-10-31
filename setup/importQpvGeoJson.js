@@ -2,24 +2,20 @@
 const fs = require('fs');
 
 function importQpvGeoJson(db, callback) {
-    const geoJsonPath = 'setup/inputFiles/qpv2024_simplified.geojson'; // You'll place your GeoJSON file here
-    
-    if (!fs.existsSync(geoJsonPath)) {
-        console.log('QPV GeoJSON file not found, skipping...');
-        return callback(null);
-    }
+  const geoJsonPath = 'setup/inputFiles/qpv2024_simplified.geojson'; // You'll place your GeoJSON file here
 
-    try {
-        const geoJsonData = JSON.parse(fs.readFileSync(geoJsonPath, 'utf8'));
-        let processedCount = 0;
-        const batchSize = 1000;
-        let batch = [];
+  if (!fs.existsSync(geoJsonPath)) {
+    return callback(null);
+  }
 
-        console.log('Processing QPV GeoJSON data...');
+  try {
+    const geoJsonData = JSON.parse(fs.readFileSync(geoJsonPath, 'utf8'));
+    const batchSize = 1000;
+    let batch = [];
 
-        db.serialize(() => {
-            // Create table for QPV coordinates
-            db.run(`
+    db.serialize(() => {
+      // Create table for QPV coordinates
+      db.run(`
                 CREATE TABLE IF NOT EXISTS qpv_coordinates (
                     code_qp TEXT PRIMARY KEY,
                     lib_qp TEXT,
@@ -32,113 +28,107 @@ function importQpvGeoJson(db, callback) {
                     geometry TEXT
                 )
             `, (err) => {
-                if (err) {
-                    console.error('Error creating qpv_coordinates table:', err.message);
-                    return callback(err);
-                }
+        if (err) {
+          return callback(err);
+        }
 
-                db.run('BEGIN TRANSACTION');
+        db.run('BEGIN TRANSACTION');
 
-                geoJsonData.features.forEach(feature => {
-                    const props = feature.properties;
-                    const geometry = feature.geometry;
-                    
-                    // Calculate centroid from geometry
-                    const centroid = calculateCentroid(geometry);
-                    
-                    if (centroid) {
-                        batch.push([
-                            props.code_qp,
-                            props.lib_qp,
-                            props.insee_com,
-                            props.lib_com,
-                            props.insee_dep,
-                            props.lib_dep,
-                            centroid.lat,
-                            centroid.lng,
-                            JSON.stringify(geometry)
-                        ]);
-                        processedCount++;
+        geoJsonData.features.forEach(feature => {
+          const props = feature.properties;
+          const geometry = feature.geometry;
 
-                        if (batch.length >= batchSize) {
-                            insertBatch(db, batch);
-                            batch = [];
-                        }
-                    }
-                });
+          // Calculate centroid from geometry
+          const centroid = calculateCentroid(geometry);
 
-                // Insert remaining batch
-                if (batch.length > 0) {
-                    insertBatch(db, batch);
-                }
+          if (centroid) {
+            batch.push([
+              props.code_qp,
+              props.lib_qp,
+              props.insee_com,
+              props.lib_com,
+              props.insee_dep,
+              props.lib_dep,
+              centroid.lat,
+              centroid.lng,
+              JSON.stringify(geometry)
+            ]);
 
-                db.run('COMMIT', (err) => {
-                    if (err) {
-                        console.error('Error committing QPV coordinates:', err.message);
-                        db.run('ROLLBACK');
-                        return callback(err);
-                    }
-                    
-                    console.log(`Imported ${processedCount} QPV coordinates`);
-                    callback(null);
-                });
-            });
+            if (batch.length >= batchSize) {
+              insertBatch(db, batch);
+              batch = [];
+            }
+          }
         });
 
-    } catch (error) {
-        console.error('Error reading QPV GeoJSON file:', error.message);
-        callback(error);
-    }
+        // Insert remaining batch
+        if (batch.length > 0) {
+          insertBatch(db, batch);
+        }
+
+        db.run('COMMIT', (commitErr) => {
+          if (commitErr) {
+            db.run('ROLLBACK');
+            return callback(commitErr);
+          }
+
+          callback(null);
+        });
+      });
+    });
+
+  } catch (error) {
+    callback(error);
+  }
 }
 
 function insertBatch(db, batch) {
-    const placeholders = batch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
-    const flatBatch = [].concat(...batch);
-    
-    db.run(
-        `INSERT OR REPLACE INTO qpv_coordinates (
+  const placeholders = batch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?)').join(',');
+  const flatBatch = [].concat(...batch);
+
+  db.run(
+    `INSERT OR REPLACE INTO qpv_coordinates (
             code_qp, lib_qp, insee_com, lib_com, insee_dep, lib_dep, 
             latitude, longitude, geometry
         ) VALUES ${placeholders}`,
-        flatBatch,
-        (err) => {
-            if (err) {
-                console.error('Error inserting QPV coordinates batch:', err.message);
-            }
-        }
-    );
+    flatBatch,
+    (err) => {
+      if (err) {
+        // Error handling for batch insert
+      }
+    }
+  );
 }
 
 function calculateCentroid(geometry) {
-    try {
-        if (geometry.type === 'MultiPolygon') {
-            // For MultiPolygon, use the first polygon's first ring
-            const coordinates = geometry.coordinates[0][0];
-            return getPolygonCentroid(coordinates);
-        } else if (geometry.type === 'Polygon') {
-            const coordinates = geometry.coordinates[0];
-            return getPolygonCentroid(coordinates);
-        }
-        return null;
-    } catch (error) {
-        console.error('Error calculating centroid:', error);
-        return null;
+  try {
+    if (geometry.type === 'MultiPolygon') {
+      // For MultiPolygon, use the first polygon's first ring
+      const coordinates = geometry.coordinates[0][0];
+      return getPolygonCentroid(coordinates);
+    } else if (geometry.type === 'Polygon') {
+      const coordinates = geometry.coordinates[0];
+      return getPolygonCentroid(coordinates);
     }
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 function getPolygonCentroid(coordinates) {
-    let x = 0, y = 0;
-    const len = coordinates.length;
-    
-    coordinates.forEach(coord => {
-        x += coord[0]; // longitude
-        y += coord[1]; // latitude
-    });
-    
-    return {
-        lng: x / len,
-        lat: y / len
-    };
+  let x = 0, y = 0;
+  const len = coordinates.length;
+
+  coordinates.forEach(coord => {
+    x += coord[0]; // longitude
+    y += coord[1]; // latitude
+  });
+
+  return {
+    lng: x / len,
+    lat: y / len
+  };
 }
 
 module.exports = { importQpvGeoJson };

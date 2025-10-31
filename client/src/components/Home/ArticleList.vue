@@ -1,7 +1,7 @@
 
 <template>
   <v-card>
-    <v-card-title class="text-h6 pb-0" @click="toggleCollapse" style="cursor: pointer">
+    <v-card-title class="text-h6 pb-0" style="cursor: pointer" @click="toggleCollapse">
       {{ isEnglish ? 'FdS articles related to:' : 'Articles FdS associés à:' }} {{ locationName }}
     </v-card-title>
 
@@ -15,9 +15,9 @@
             variant="outlined"
             density="compact"
             clearable
-            @update:modelValue="onLieuChange"
             class="lieu-select"
-          ></v-select>
+            @update:model-value="onLieuChange"
+          />
         </div>
 
         <div class="categories-container mb-4">
@@ -38,12 +38,12 @@
               {{ isEnglish ? 'All' : 'Tous' }} ({{ totalArticles }})
             </v-chip>
             <v-chip
+              v-for="category in categories"
+              :key="category"
               color="primary"
               variant="flat"
               label
               size="small"
-              v-for="category in categories"
-              :key="category"
               :value="category"
               @click="selectCategory(category)"
             >
@@ -52,25 +52,25 @@
           </v-chip-group>
         </div>
 
-        <div class="articles-container" ref="articlesContainer" @scroll="handleScroll">
+        <div ref="articlesContainer" class="articles-container" @scroll="handleScroll">
           <div
-            class="article-item"
             v-for="(item, i) in filteredArticles"
             :key="item.url + i"
+            class="article-item"
           >
             <div class="article-header">
               <span class="article-date">{{ formatDate(item.date) }}</span>
               <span class="article-location">{{ item.commune }} ({{ item.departement }})</span>
             </div>
             <div class="article-title">
-              <a :href='item.url' target="_blank" rel="noopener noreferrer">
+              <a :href="item.url" target="_blank" rel="noopener noreferrer">
                 {{ item.title }}
               </a>
             </div>
           </div>
 
           <div v-if="isLoading" class="loading">
-            <v-progress-circular indeterminate size="24" color="primary"></v-progress-circular>
+            <v-progress-circular indeterminate size="24" color="primary" />
             <span class="loading-text">{{ isEnglish ? 'Loading...' : 'Chargement...' }}</span>
           </div>
 
@@ -80,11 +80,11 @@
 
           <div v-if="articles.pagination?.hasMore && !isLoading" class="load-more">
             <v-btn
-              @click="loadMoreArticles"
               variant="outlined"
               color="primary"
               size="small"
               block
+              @click="loadMoreArticles"
             >
               {{ isEnglish ? 'Load more articles' : 'Charger plus d\'articles' }}
             </v-btn>
@@ -97,9 +97,9 @@
 
 <script>
 import { articleCategoriesRef } from '../../utils/metricsConfig.js';
-import { mapStores } from 'pinia'
-import { useDataStore } from '../../services/store.js'
-import api from '../../services/api.js'
+import { mapStores } from 'pinia';
+import { useDataStore } from '../../services/store.js';
+import api from '../../services/api.js';
 
 const categories = Object.keys(articleCategoriesRef);
 
@@ -116,10 +116,11 @@ export default {
   props: {
     location: {
       type: Object,
+      default: () => ({})
     },
     articles: {
       type: Object,
-      default: () => ({ 
+      default: () => ({
         list: [],
         counts: {
           insecurite: 0,
@@ -150,22 +151,24 @@ export default {
   },
   computed: {
     ...mapStores(useDataStore),
-    
+
     isEnglish() {
       return this.dataStore.labelState === 3;
     },
 
     locationName() {
-      if (!this.location) return '';
+      if (!this.location) {
+        return '';
+      }
       switch (this.location.type) {
-        case 'country':
-          return 'France';
-        case 'departement':
-          return this.location.name || (this.isEnglish ? `Department ${this.location.code}` : `Département ${this.location.code}`);
-        case 'commune':
-          return this.location.name || (this.isEnglish ? 'Municipality' : 'Commune');
-        default:
-          return '';
+      case 'country':
+        return 'France';
+      case 'departement':
+        return this.location.name || (this.isEnglish ? `Department ${this.location.code}` : `Département ${this.location.code}`);
+      case 'commune':
+        return this.location.name || (this.isEnglish ? 'Municipality' : 'Commune');
+      default:
+        return '';
       }
     },
     filteredArticles() {
@@ -206,7 +209,7 @@ export default {
     formatDate(dateString) {
       const date = new Date(dateString);
       const locale = this.isEnglish ? 'en-US' : 'fr-FR';
-      const options = this.isEnglish ? 
+      const options = this.isEnglish ?
         { month: '2-digit', day: '2-digit', year: 'numeric' } :
         { day: '2-digit', month: '2-digit', year: 'numeric' };
       return date.toLocaleDateString(locale, options);
@@ -226,13 +229,13 @@ export default {
       if (this.$refs.articlesContainer) {
         this.$refs.articlesContainer.scrollTop = 0;
       }
-      
-      const { useDataStore } = await import('../../services/store.js');
-      const dataStore = useDataStore();
+
+      const { useDataStore: useDataStoreFn } = await import('../../services/store.js');
+      const dataStore = useDataStoreFn();
       const params = {
         limit: 20
       };
-      
+
       if (this.location.type === 'departement') {
         params.dept = this.location.code;
       } else if (this.location.type === 'commune') {
@@ -244,20 +247,22 @@ export default {
       } else if (this.location.type === 'country') {
         params.country = 'France';
       }
-      
+
       if (category !== 'tous') {
         params.category = category;
       }
-      
+
       await dataStore.fetchFilteredArticles(params, false);
     },
     async loadMoreArticles() {
-      if (this.isLoading || !this.articles.pagination?.hasMore) return;
+      if (this.isLoading || !this.articles.pagination?.hasMore) {
+        return;
+      }
 
       this.isLoading = true;
       try {
-        const { useDataStore } = await import('../../services/store.js');
-        const dataStore = useDataStore();
+        const { useDataStore: useDataStoreFn } = await import('../../services/store.js');
+        const dataStore = useDataStoreFn();
         const params = {
           cursor: this.articles.pagination.nextCursor,
           limit: 20
@@ -280,24 +285,25 @@ export default {
         }
 
         await dataStore.loadMoreArticles(params);
-      } catch (error) {
-        console.error('Failed to load more articles:', error);
+      } catch {
+        // Ignore errors
       } finally {
         this.isLoading = false;
       }
     },
 
     async fetchLieux() {
-      if (this.location?.type !== 'commune') return;
+      if (this.location?.type !== 'commune') {
+        return;
+      }
 
       try {
-        const { useDataStore } = await import('../../services/store.js');
-        const dataStore = useDataStore();
+        const { useDataStore: useDataStoreFn } = await import('../../services/store.js');
+        const dataStore = useDataStoreFn();
         const deptCode = dataStore.getCommuneDepartementCode();
         const lieuxData = await api.getLieux(deptCode, this.location.code);
         this.lieux = lieuxData ? lieuxData.map(item => item.lieu).sort() : [];
-      } catch (error) {
-        console.error('Failed to fetch lieux:', error);
+      } catch {
         this.lieux = [];
       }
     },
@@ -310,8 +316,8 @@ export default {
       }
 
       // Refetch articles with new lieu filter
-      const { useDataStore } = await import('../../services/store.js');
-      const dataStore = useDataStore();
+      const { useDataStore: useDataStoreFn } = await import('../../services/store.js');
+      const dataStore = useDataStoreFn();
       const params = {
         limit: 20,
         cog: this.location.code,
@@ -435,28 +441,28 @@ export default {
   .article-item {
     padding: 10px;
   }
-  
+
   .article-header {
     gap: 6px;
   }
-  
+
   .article-date {
     font-size: 0.8rem;
   }
-  
+
   .article-location {
     font-size: 0.75rem;
   }
-  
+
   .article-title a {
     font-size: 0.85rem;
     line-height: 1.4;
   }
-  
+
   .categories-container :deep(.v-chip-group) {
     gap: 4px;
   }
-  
+
   .categories-container :deep(.v-chip) {
     font-size: 0.75rem;
     height: auto;
@@ -470,11 +476,11 @@ export default {
   .article-item {
     padding: 8px;
   }
-  
+
   .article-title a {
     font-size: 0.8rem;
   }
-  
+
   .categories-container :deep(.v-chip) {
     font-size: 0.7rem;
     padding: 3px 6px;

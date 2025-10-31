@@ -2,34 +2,42 @@
 <template>
   <div class="methodology">
     <div class="content-card">
-      <h1 class="main-title">Méthodologie, termes utilisés et logique</h1>
-      
+      <h1 class="main-title">
+        Méthodologie, termes utilisés et logique
+      </h1>
+
       <div class="content">
         <section class="section">
-          <h2 class="section-title">Présentation</h2>
+          <h2 class="section-title">
+            Présentation
+          </h2>
           <p class="text">
-            Cette application analyse différents indicateurs pour évaluer l'état des lieux en France, 
-            au niveau des départements et des communes. Les données proviennent de sources officielles 
+            Cette application analyse différents indicateurs pour évaluer l'état des lieux en France,
+            au niveau des départements et des communes. Les données proviennent de sources officielles
             et sont traitées selon une méthodologie rigoureuse.
           </p>
           <p class="text">
             Le site est en béta ouverte. Il est possible que des bugs ou erreurs soient présents. Des fonctions et données supplémentaires sont ajoutées régulièrement.
           </p>
           <p class="text">
-            Si vous souhaitez m'aider, vous pouver m'apporter une petite contribution via le lien Ko-fi pour m'aider à couvrir les frais de fonctionnement du site: <a href="https://ko-fi.com/remi63047" target="_blank" class="link">ko-fi.com/remi63047</a> 
+            Si vous souhaitez m'aider, vous pouver m'apporter une petite contribution via le lien Ko-fi pour m'aider à couvrir les frais de fonctionnement du site: <a href="https://ko-fi.com/remi63047" target="_blank" class="link">ko-fi.com/remi63047</a>
             ou via un don en <a href="/support" target="_blank" class="link">cryptomonaies</a>
           </p>
         </section>
 
         <section class="section">
-          <h2 class="section-title">Calcul des indices</h2>
+          <h2 class="section-title">
+            Calcul des indices
+          </h2>
           <p class="text">
             Pour chaque indice, le calcul est effectué via une matrice de pondération sur chaque donnée d'entrée (par habitant). La pondération est la même pour l'ensemble des niveaux géographiques (communes, départements, France), ce qui permet de comparer les résultats directement. La valeur des coefficients de pondération n'est pas très importante, puisque ces coefficients sont les mêmes partout.
             L'étalonage des indices est effectué de manière à ce que la moyenne nationale ait une valeur de 100. Cela permet de comparer les résultats directement entre les différents niveaux géographiques. Un département ou une commune ayant une valeur inférieure à 100 est en dessous de la moyenne nationale pour cet indice.
           </p>
           <div class="indices-list">
             <div class="indice-card blue">
-              <h3 class="indice-title">Indice de changement général</h3>
+              <h3 class="indice-title">
+                Indice de changement général
+              </h3>
               <p class="indice-text">
                 Représente la moyenne des 5 indices ci-dessous. Cet indice est également étalonné à 100 au niveau national.
                 Moins de 100 signifie que la zone sélectionnée est en dessous de la moyenne nationale.
@@ -40,7 +48,9 @@
             </div>
 
             <div class="indice-card red">
-              <h3 class="indice-title">Indice d'insécurité</h3>
+              <h3 class="indice-title">
+                Indice d'insécurité
+              </h3>
               <p class="indice-text">
                 Utilise l'ensemble des données à propos d'activités
                 illégales (violences, vols, vandalisme...), les
@@ -52,7 +62,9 @@
             </div>
 
             <div class="indice-card red">
-              <h3 class="indice-title">Indice d'immigration</h3>
+              <h3 class="indice-title">
+                Indice d'immigration
+              </h3>
               <p class="indice-text">
                 Décrit l'ensemble des données à propos de personnes ou
                 de groupes dont l'origine et l'identité n'est pas
@@ -63,7 +75,9 @@
             </div>
 
             <div class="indice-card red">
-              <h3 class="indice-title">Indice de progression de l'Islam</h3>
+              <h3 class="indice-title">
+                Indice de progression de l'Islam
+              </h3>
               <p class="indice-text">
                 Décrit l'ensemble des données ayant trait à la religion
                 musulmane, et sa progression dans l'espace Français.
@@ -73,7 +87,9 @@
             </div>
 
             <div class="indice-card red">
-              <h3 class="indice-title">Indice d'évolution culturelle</h3>
+              <h3 class="indice-title">
+                Indice d'évolution culturelle
+              </h3>
               <p class="indice-text">
                 Décrit l'ensemble des données ayant trait à l'érosion
                 sociétale de l'identité culturelle Française, ainsi que
@@ -86,7 +102,9 @@
             </div>
 
             <div class="indice-card red">
-              <h3 class="indice-title">Indice d'interventionnisme social</h3>
+              <h3 class="indice-title">
+                Indice d'interventionnisme social
+              </h3>
               <p class="indice-text">
                 Décrit l'ensemble des données reflétant une idéologie
                 gauchiste promouvant un changement sociétal. Sont inclus
@@ -103,12 +121,16 @@
             </div>
           </div>
         </section>
-            
+
         <section class="section">
-          <h2 class="section-title">Principales données</h2>
+          <h2 class="section-title">
+            Principales données
+          </h2>
           <div class="data-list">
             <div class="data-card">
-              <h3 class="data-title">Données de criminalité</h3>
+              <h3 class="data-title">
+                Données de criminalité
+              </h3>
               <p class="data-text">
                 Les données de criminalité sont issues de la base SSMSI
                 du Ministère de l'Intérieur, mise à jour pour 2024.
@@ -123,7 +145,9 @@
               </p>
             </div>
             <div class="data-card">
-              <h3 class="data-title">Données de nationalité</h3>
+              <h3 class="data-title">
+                Données de nationalité
+              </h3>
               <p class="data-text">
                 Les données de nationalité sont issues du recensement de l'INSEE de 2022.
               </p>
@@ -135,7 +159,9 @@
               </p>
             </div>
             <div class="data-card">
-              <h3 class="data-title">Lieux de culte musulmans</h3>
+              <h3 class="data-title">
+                Lieux de culte musulmans
+              </h3>
               <p class="data-text">
                 Les données ont été récupérés de divers sites internet.
                 Il est possible que les données soient incomplètes,
@@ -143,7 +169,9 @@
               </p>
             </div>
             <div class="data-card">
-              <h3 class="data-title">Quartiers Prioritaires de la Ville</h3>
+              <h3 class="data-title">
+                Quartiers Prioritaires de la Ville
+              </h3>
               <p class="data-text">
                 Les données sont issues de la base publique et du site
                 internet officiel https://sig.ville.gouv.fr/ Le taux de
@@ -151,7 +179,9 @@
               </p>
             </div>
             <div class="data-card">
-              <h3 class="data-title">Prénoms de naissance</h3>
+              <h3 class="data-title">
+                Prénoms de naissance
+              </h3>
               <p class="data-text">
                 Les données de prénoms sont issus des bases publiques
                 disponibles sur data.gouv.fr
@@ -163,7 +193,9 @@
               </p>
             </div>
             <div class="data-card">
-              <h3 class="data-title">Catégories d'articles FdeSouche</h3>
+              <h3 class="data-title">
+                Catégories d'articles FdeSouche
+              </h3>
               <p class="data-text">
                 Les articles du site fdesouche.com ont été catégorisés
                 et localisés. Il s'agit d'une approche subjective aidée
@@ -171,13 +203,17 @@
               </p>
             </div>
             <div class="data-card">
-              <h3 class="data-title">Centres d'hébergement de migrants</h3>
+              <h3 class="data-title">
+                Centres d'hébergement de migrants
+              </h3>
               <p class="data-text">
                 Les données ont été récupérées en aout 2025 du site officiel de la CIMADE, complétées et corrigés par des retour utilisateurs.
               </p>
             </div>
             <div class="data-card">
-              <h3 class="data-title">Subventions publiques aux associations</h3>
+              <h3 class="data-title">
+                Subventions publiques aux associations
+              </h3>
               <p class="data-text">
                 Les données ont été récupérées en aout 2025 des sources officielles (data.ofgl.fr et budget.gouv.fr).
                 Les subventions des agglomérations et communautés de commune ont été ventilées par commune suivant la population.
@@ -186,103 +222,109 @@
               </p>
             </div>
             <div class="data-card">
-              <h3 class="data-title">Prix de l'immobilier</h3>
+              <h3 class="data-title">
+                Prix de l'immobilier
+              </h3>
               <p class="data-text">
-                Les prix moyens de l'immobilier par section cadastrale disponibles sur la carte outil <a href="/localisation" target="_blank" class="link">Localisation</a> sont issus du site officiel <a href="https://dvf-api.data.gouv.fr/" target="_blank" class="link">dvf-api.data.gouv.fr/</a>, qui en distribue les données par API. 
+                Les prix moyens de l'immobilier par section cadastrale disponibles sur la carte outil <a href="/localisation" target="_blank" class="link">Localisation</a> sont issus du site officiel <a href="https://dvf-api.data.gouv.fr/" target="_blank" class="link">dvf-api.data.gouv.fr/</a>, qui en distribue les données par API.
                 Par exemple, le lien <a href="https://dvf-api.data.gouv.fr/commune/75101/sections" target="_blank" class="link">dvf-api.data.gouv.fr/commune/75101/sections</a>permet de récupérer les données par section cadastrales du 1e arrondissement de Paris. La valeur "m_am" est celle utilisée.
                 Ce sont les mêmes données qui sont utilisées par le site <a href="https://explore.data.gouv.fr/" target="_blank" class="link">explore.data.gouv.fr/</a> par exemple.
               </p>
             </div>
           </div>
         </section>
-                
+
         <section class="section">
-          <h2 class="sources-title">Résumé des Sources</h2>
+          <h2 class="sources-title">
+            Résumé des Sources
+          </h2>
           <table class="sources-table">
             <tbody>
               <tr>
-                  <th>Données</th>
-                  <th>Description et lien</th>
+                <th>Données</th>
+                <th>Description et lien</th>
               </tr>
               <tr>
-                  <td>Criminalité</td>
-                  <td>
-                      <a href="https://www.data.gouv.fr/datasets/service-statistique-ministeriel-de-la-securite-interieure-base-des-series-chronologiques/" target="_blank" class="link">Données du Service Statistique Ministériel de la Sécurité Intérieure (SSMSI)</a>
-                      et
-                      <a href="https://ssmsi.shinyapps.io/donneesterritoriales/" target="_blank" class="link">Données SSMSI cartographiées dans une app officielle</a>
-                  </td>
+                <td>Criminalité</td>
+                <td>
+                  <a href="https://www.data.gouv.fr/datasets/service-statistique-ministeriel-de-la-securite-interieure-base-des-series-chronologiques/" target="_blank" class="link">Données du Service Statistique Ministériel de la Sécurité Intérieure (SSMSI)</a>
+                  et
+                  <a href="https://ssmsi.shinyapps.io/donneesterritoriales/" target="_blank" class="link">Données SSMSI cartographiées dans une app officielle</a>
+                </td>
               </tr>
               <tr>
-                  <td>Nationalité</td>
-                  <td>
-                      <a href="https://www.insee.fr/fr/statistiques/zones/8582090" target="_blank" class="link">Recensement de la population de l'INSEE en 2022</a>
-                  </td>
+                <td>Nationalité</td>
+                <td>
+                  <a href="https://www.insee.fr/fr/statistiques/zones/8582090" target="_blank" class="link">Recensement de la population de l'INSEE en 2022</a>
+                </td>
               </tr>
               <tr>
-                  <td>Prénoms</td>
-                  <td>
-                      <a href="https://www.insee.fr/fr/statistiques/8595130?sommaire=8595113" target="_blank" class="link">Fichier des prénoms d'état civil INSEE</a>
-                      et
-                      <a href="https://www.data.gouv.fr/datasets/liste-de-prenoms/" target="_blank" class="link">Liste des prénoms INSEE</a>
-                  </td>
+                <td>Prénoms</td>
+                <td>
+                  <a href="https://www.insee.fr/fr/statistiques/8595130?sommaire=8595113" target="_blank" class="link">Fichier des prénoms d'état civil INSEE</a>
+                  et
+                  <a href="https://www.data.gouv.fr/datasets/liste-de-prenoms/" target="_blank" class="link">Liste des prénoms INSEE</a>
+                </td>
               </tr>
               <tr>
-                  <td>Mosquées</td>
-                  <td>
-                      <a href="https://www.trouvetamosquee.fr/category/mosquees-de-france/" target="_blank" class="link">www.trouvetamosquee.fr</a>, complété et corrigé avec des retours utilisateurs validés via Google map.
-                  </td>
+                <td>Mosquées</td>
+                <td>
+                  <a href="https://www.trouvetamosquee.fr/category/mosquees-de-france/" target="_blank" class="link">www.trouvetamosquee.fr</a>, complété et corrigé avec des retours utilisateurs validés via Google map.
+                </td>
               </tr>
               <tr>
-                  <td>Logements sociaux</td>
-                  <td>
-                      <a href="https://www.data.gouv.fr/datasets/taux-de-logements-sociaux-dans-les-communes/" target="_blank" class="link">Taux de logements sociaux dans les communes</a>
-                  </td>
+                <td>Logements sociaux</td>
+                <td>
+                  <a href="https://www.data.gouv.fr/datasets/taux-de-logements-sociaux-dans-les-communes/" target="_blank" class="link">Taux de logements sociaux dans les communes</a>
+                </td>
               </tr>
               <tr>
-                  <td>Quartiers Prioritaires de la Ville</td>
-                  <td>
-                      <a href="https://sig.ville.gouv.fr/" target="_blank" class="link">Système d'information géographique de la politique de la ville</a>
-                      et
-                      <a href="https://www.data.gouv.fr/datasets/quartiers-prioritaires-de-la-politique-de-la-ville-qpv/" target="_blank" class="link">Liste des QPV</a>
-                  </td>
+                <td>Quartiers Prioritaires de la Ville</td>
+                <td>
+                  <a href="https://sig.ville.gouv.fr/" target="_blank" class="link">Système d'information géographique de la politique de la ville</a>
+                  et
+                  <a href="https://www.data.gouv.fr/datasets/quartiers-prioritaires-de-la-politique-de-la-ville-qpv/" target="_blank" class="link">Liste des QPV</a>
+                </td>
               </tr>
               <tr>
-                  <td>Responsables executifs</td>
-                  <td>
-                      <a href="https://www.data.gouv.fr/datasets/repertoire-national-des-elus-1/" target="_blank" class="link">Répertoire national des élus</a>
-                  </td>
+                <td>Responsables executifs</td>
+                <td>
+                  <a href="https://www.data.gouv.fr/datasets/repertoire-national-des-elus-1/" target="_blank" class="link">Répertoire national des élus</a>
+                </td>
               </tr>
               <tr>
-                  <td>Articles FdeSouche</td>
-                  <td>
-                      <a href="https://fdesouche.com" target="_blank" class="link">fdesouche.com</a>
-                  </td>
+                <td>Articles FdeSouche</td>
+                <td>
+                  <a href="https://fdesouche.com" target="_blank" class="link">fdesouche.com</a>
+                </td>
               </tr>
               <tr>
-                  <td>Centres d'hébergement pour migrants</td>
-                  <td>
-                      <a href="https://www.lacimade.org/schemas-regionaux-daccueil-des-demandeurs-dasile-quel-etat-des-lieux-2024/" target="_blank" class="link">lacimade.org</a>
-                  </td>
+                <td>Centres d'hébergement pour migrants</td>
+                <td>
+                  <a href="https://www.lacimade.org/schemas-regionaux-daccueil-des-demandeurs-dasile-quel-etat-des-lieux-2024/" target="_blank" class="link">lacimade.org</a>
+                </td>
               </tr>
               <tr>
-                  <td>Subventions publiques aux associations</td>
-                  <td>
-                      <a href="https://data.ofgl.fr/pages/acces-donnees-comptables-detaillees/" target="_blank" class="link">data.ofgl.fr</a> et le jaune budgétaire <a href="https://www.budget.gouv.fr/documentation/documents-budgetaires/exercice-2025/projet-loi-finances-les/jaunes-budgetaires-2025-plf-2025" target="_blank" class="link">www.budget.gouv.fr</a>
-                  </td>
+                <td>Subventions publiques aux associations</td>
+                <td>
+                  <a href="https://data.ofgl.fr/pages/acces-donnees-comptables-detaillees/" target="_blank" class="link">data.ofgl.fr</a> et le jaune budgétaire <a href="https://www.budget.gouv.fr/documentation/documents-budgetaires/exercice-2025/projet-loi-finances-les/jaunes-budgetaires-2025-plf-2025" target="_blank" class="link">www.budget.gouv.fr</a>
+                </td>
               </tr>
               <tr>
-                  <td>Prix moyen de l'immobilier</td>
-                  <td>
-                      <a href="https://dvf-api.data.gouv.fr/" target="_blank" class="link">dvf-api.data.gouv.fr/</a>. 
-                      Les données sont automatiquement les dernières disponibles (2024 à ce jour)
-                  </td>
+                <td>Prix moyen de l'immobilier</td>
+                <td>
+                  <a href="https://dvf-api.data.gouv.fr/" target="_blank" class="link">dvf-api.data.gouv.fr/</a>.
+                  Les données sont automatiquement les dernières disponibles (2024 à ce jour)
+                </td>
               </tr>
             </tbody>
           </table>
         </section>
-            
+
         <section class="section">
-          <h2 class="section-title">Limites et précautions</h2>
+          <h2 class="section-title">
+            Limites et précautions
+          </h2>
           <div class="warning-box">
             <ul class="warning-list">
               <li>Les données sont mises à jour selon la disponibilité des sources officielles</li>
@@ -303,7 +345,7 @@
 <script>
 export default {
   name: 'Methodology'
-}
+};
 </script>
 
 <style scoped>

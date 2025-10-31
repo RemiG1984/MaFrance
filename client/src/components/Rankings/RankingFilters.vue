@@ -5,19 +5,27 @@
       <div class="form-group">
         <label for="scopeSelect">{{ isEnglish ? 'Scope:' : 'Portée :' }}</label>
         <select id="scopeSelect" :value="selectedScope" @change="onScopeChange">
-          <option value="departements">{{ isEnglish ? 'Departments' : 'Départements' }}</option>
-          <option value="communes_dept">{{ isEnglish ? 'Municipalities (by department)' : 'Communes (par département)' }}</option>
-          <option value="communes_france">{{ isEnglish ? 'Municipalities (entire France)' : 'Communes (France entière)' }}</option>
+          <option value="departements">
+            {{ isEnglish ? 'Departments' : 'Départements' }}
+          </option>
+          <option value="communes_dept">
+            {{ isEnglish ? 'Municipalities (by department)' : 'Communes (par département)' }}
+          </option>
+          <option value="communes_france">
+            {{ isEnglish ? 'Municipalities (entire France)' : 'Communes (France entière)' }}
+          </option>
         </select>
       </div>
 
       <div v-show="selectedScope === 'communes_dept'" class="form-group">
         <label for="departementSelect">{{ isEnglish ? 'Department:' : 'Département :' }}</label>
         <select id="departementSelect" :value="selectedDepartement" @change="onDepartementChange">
-          <option value="">{{ isEnglish ? '-- All departments --' : '-- Tous les départements --' }}</option>
-          <option 
-            v-for="dept in departments" 
-            :key="dept.code" 
+          <option value="">
+            {{ isEnglish ? '-- All departments --' : '-- Tous les départements --' }}
+          </option>
+          <option
+            v-for="dept in departments"
+            :key="dept.code"
             :value="dept.code"
           >
             {{ dept.name }}
@@ -28,10 +36,12 @@
       <div class="form-group">
         <label for="metricSelect">{{ isEnglish ? 'Metric:' : 'Métrique :' }}</label>
         <select id="metricSelect" :value="selectedMetric" @change="onMetricChange">
-          <option value="">{{ isEnglish ? '-- Choose a metric --' : '-- Choisir une métrique --' }}</option>
-          <option 
-            v-for="option in availableMetricOptions" 
-            :key="option.value" 
+          <option value="">
+            {{ isEnglish ? '-- Choose a metric --' : '-- Choisir une métrique --' }}
+          </option>
+          <option
+            v-for="option in availableMetricOptions"
+            :key="option.value"
             :value="option.value"
           >
             {{ option.label }}
@@ -50,42 +60,42 @@
       <div class="advanced-controls-row">
         <div class="form-group">
           <label for="topLimit">{{ isEnglish ? 'Number of results (Top/Bottom):' : 'Nombre de résultats (Top/Bottom) :' }}</label>
-          <input 
-            type="number" 
-            id="topLimit" 
+          <input
+            id="topLimit"
+            type="number"
             :value="filters.topLimit"
-            @input="onFilterChange('topLimit', $event)"
-            min="1" 
+            min="1"
             max="100"
+            @input="onFilterChange('topLimit', $event)"
           >
         </div>
 
         <div v-show="localScope.includes('communes')" class="population-controls">
           <div class="form-group">
             <label for="popLower">{{ isEnglish ? 'Population min:' : 'Population min:' }}</label>
-            <input 
-              type="number" 
-              id="popLower" 
+            <input
+              id="popLower"
+              type="number"
               :value="localFilters.popLower || ''"
-              @input="onFilterChange('popLower', $event)"
-              min="0" 
+              min="0"
               max="1000000"
               step="1000"
               :placeholder="isEnglish ? 'e.g.: 1000' : 'Ex: 1000'"
+              @input="onFilterChange('popLower', $event)"
             >
           </div>
 
           <div class="form-group">
             <label for="popUpper">{{ isEnglish ? 'Population max:' : 'Population max:' }}</label>
-            <input 
-              type="number" 
-              id="popUpper" 
+            <input
+              id="popUpper"
+              type="number"
               :value="localFilters.popUpper || ''"
-              @input="onFilterChange('popUpper', $event)"
-              min="0" 
+              min="0"
               max="1000000"
               step="1000"
               :placeholder="isEnglish ? 'e.g.: 50000' : 'Ex: 50000'"
+              @input="onFilterChange('popUpper', $event)"
             >
           </div>
         </div>
@@ -93,8 +103,8 @@
         <div v-if="currentLevel === 'commune'" class="form-group">
           <label for="politicalFamily">{{ isEnglish ? 'Display Political Family of Mayors' : 'Afficher la Famille Politique des Maires' }}</label>
           <input
-            type="checkbox"
             id="politicalFamily"
+            type="checkbox"
             :checked="localFilters.politicalFamily"
             @change="onFilterChange('politicalFamily', $event)"
           >
@@ -105,10 +115,10 @@
 </template>
 
 <script>
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
-import { useDataStore } from '../../services/store.js'
-import { MetricsConfig } from '../../utils/metricsConfig.js'
-import { DepartementNames } from '../../utils/departementNames.js'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
+import { useDataStore } from '../../services/store.js';
+import { MetricsConfig } from '../../utils/metricsConfig.js';
+import { DepartementNames } from '../../utils/departementNames.js';
 
 export default {
   name: 'RankingFilters',
@@ -137,198 +147,197 @@ export default {
   },
   emits: ['filters-changed', 'selection-changed'],
   setup(props, { emit }) {
-    const store = useDataStore()
+    const store = useDataStore();
 
     // Local state to manage dropdown selections within the component
-    const localScope = ref(props.selectedScope)
-    const localDepartement = ref(props.selectedDepartement)
-    const localMetric = ref(props.selectedMetric)
-    const localFilters = ref({ ...props.filters })
+    const localScope = ref(props.selectedScope);
+    const localDepartement = ref(props.selectedDepartement);
+    const localMetric = ref(props.selectedMetric);
+    const localFilters = ref({ ...props.filters });
 
     // UI state only
-    const showFilters = ref(false)
+    const showFilters = ref(false);
 
     // Debounce timer for population filters
-    let populationDebounceTimer = null
-
-    // Helper function to update the current level based on scope
-    const updateCurrentLevel = () => {
-      // This function is implicitly used in computed properties and watchers
-    }
+    let populationDebounceTimer = null;
 
     // Computed properties based on props and local state
     const currentLevel = computed(() => {
-      return localScope.value.includes('communes') ? 'commune' : 'departement'
-    })
+      return localScope.value.includes('communes') ? 'commune' : 'departement';
+    });
 
     const isEnglish = computed(() => {
-      return store.labelState === 3
-    })
+      return store.labelState === 3;
+    });
 
     const availableMetricOptions = computed(() => {
-      const level = currentLevel.value
+      const level = currentLevel.value;
       // Force reactivity to store label state changes
-      const labelState = store.labelState
+      const labelState = store.labelState;
 
       // Sync MetricsConfig label state with store before getting options
-      MetricsConfig.labelState = labelState
+      MetricsConfig.labelState = labelState;
 
-      return MetricsConfig.getAvailableMetricOptions(level)
-    })
+      return MetricsConfig.getAvailableMetricOptions(level);
+    });
 
     // Validate population filters
     const validatePopulationFilters = () => {
-      const { popLower, popUpper } = localFilters.value
+      const { popLower, popUpper } = localFilters.value;
 
       // Convert to numbers for comparison
-      const lowerNum = popLower ? parseInt(popLower, 10) : null
-      const upperNum = popUpper ? parseInt(popUpper, 10) : null
+      const lowerNum = popLower ? parseInt(popLower, 10) : null;
+      const upperNum = popUpper ? parseInt(popUpper, 10) : null;
 
       // Validate that lower is less than upper if both are set
       if (lowerNum !== null && upperNum !== null && lowerNum >= upperNum) {
-        return false
+        return false;
       }
 
-      return true
-    }
+      return true;
+    };
 
     const departments = computed(() => {
       return Object.entries(DepartementNames)
         .sort(([a], [b]) => {
           const parseCode = (code) => {
-            if (code === '2A') return 20.1
-            if (code === '2B') return 20.2
-            return parseInt(code, 10)
-          }
-          return parseCode(a) - parseCode(b)
+            if (code === '2A') {
+              return 20.1;
+            }
+            if (code === '2B') {
+              return 20.2;
+            }
+            return parseInt(code, 10);
+          };
+          return parseCode(a) - parseCode(b);
         })
         .map(([code, name]) => ({
           code,
           name: `${code} - ${name}`
-        }))
-    })
+        }));
+    });
 
     // Event handlers - emit to parent
     const emitSelectionChange = (payload) => {
-      emit('selection-changed', payload)
-    }
+      emit('selection-changed', payload);
+    };
 
     const emitFiltersChange = (payload) => {
-      emit('filters-changed', payload)
-    }
+      emit('filters-changed', payload);
+    };
 
     const onScopeChange = (event) => {
-      localScope.value = event.target.value
+      localScope.value = event.target.value;
       emitSelectionChange({
         scope: localScope.value,
         departement: '',
         metric: '',
         level: localScope.value.includes('communes') ? 'commune' : 'departement'
-      })
-    }
+      });
+    };
 
     const onDepartementChange = (event) => {
-      localDepartement.value = event.target.value
+      localDepartement.value = event.target.value;
       emitSelectionChange({
         scope: localScope.value,
         departement: localDepartement.value,
         metric: localMetric.value,
         level: currentLevel.value
-      })
-    }
+      });
+    };
 
     const onMetricChange = (event) => {
-      localMetric.value = event.target.value
+      localMetric.value = event.target.value;
       emitSelectionChange({
         scope: localScope.value,
         departement: localDepartement.value,
         metric: localMetric.value,
         level: currentLevel.value
-      })
-    }
+      });
+    };
 
     const onFilterChange = (filterKey, event) => {
-      let value = event.target.value
+      let value = event.target.value;
 
       // Handle number inputs for population filters
       if (filterKey === 'popLower' || filterKey === 'popUpper') {
-        value = value ? parseInt(value, 10) : null
+        value = value ? parseInt(value, 10) : null;
         // Validate the value is positive
         if (value !== null && value < 0) {
-          value = 0
+          value = 0;
         }
       } else if (event.target.type === 'number') {
-        value = parseInt(value, 10)
+        value = parseInt(value, 10);
       } else if (event.target.type === 'checkbox') {
-        value = event.target.checked
+        value = event.target.checked;
       }
 
-      localFilters.value = { ...localFilters.value, [filterKey]: value }
+      localFilters.value = { ...localFilters.value, [filterKey]: value };
 
       // Handle population filters with debounce
       if (filterKey === 'popLower' || filterKey === 'popUpper') {
         // Clear existing timer
         if (populationDebounceTimer) {
-          clearTimeout(populationDebounceTimer)
+          clearTimeout(populationDebounceTimer);
         }
 
         // Set new timer - emit after 800ms of no typing
         populationDebounceTimer = setTimeout(() => {
           if (validatePopulationFilters()) {
-            emitFiltersChange(localFilters.value)
+            emitFiltersChange(localFilters.value);
           }
-        }, 1200)
+        }, 1200);
       } else {
         // Non-population filters emit immediately
-        emitFiltersChange(localFilters.value)
+        emitFiltersChange(localFilters.value);
       }
-    }
+    };
 
     // Watchers
     watch(() => props.selectedScope, (newScope) => {
-      localScope.value = newScope
-    })
+      localScope.value = newScope;
+    });
 
     watch(() => props.selectedDepartement, (newDept) => {
-      localDepartement.value = newDept
-    })
+      localDepartement.value = newDept;
+    });
 
     watch(() => props.selectedMetric, (newMetric) => {
-      localMetric.value = newMetric
-    })
+      localMetric.value = newMetric;
+    });
 
     watch(() => props.filters, (newFilters) => {
-      localFilters.value = { ...newFilters }
-    }, { deep: true })
+      localFilters.value = { ...newFilters };
+    }, { deep: true });
 
     // Watch for label state changes from store
     watch(() => store.labelState, () => {
       // Force re-computation of metric options when label state changes
       // This ensures dropdown labels update immediately
-    })
+    });
 
     onMounted(() => {
       // updateCurrentLevel() // No longer needed here, currentLevel is computed
-      emitFiltersChange(localFilters.value)
-    
+      emitFiltersChange(localFilters.value);
+
       // Listen for global label state changes from MetricsConfig
       const handleLabelChange = () => {
         // Force reactivity by triggering a re-render
         // The computed metricOptions will automatically update
-      }
-    
-      window.addEventListener('metricsLabelsToggled', handleLabelChange)
-    })
+      };
+
+      window.addEventListener('metricsLabelsToggled', handleLabelChange);
+    });
 
     onUnmounted(() => {
       // Clean up debounce timer
       if (populationDebounceTimer) {
-        clearTimeout(populationDebounceTimer)
+        clearTimeout(populationDebounceTimer);
       }
 
       // Clean up event listener
-      window.removeEventListener('metricsLabelsToggled', () => {})
-    })
+      window.removeEventListener('metricsLabelsToggled', () => {});
+    });
 
     return {
       store,
@@ -348,9 +357,9 @@ export default {
       onFilterChange,
       emitSelectionChange,
       emitFiltersChange
-    }
+    };
   }
-}
+};
 </script>
 
 <style scoped>

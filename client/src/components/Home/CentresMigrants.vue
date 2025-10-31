@@ -1,72 +1,84 @@
 
 <template>
   <v-card class="mb-4">
-    <v-card-title class="text-h6 pb-0" @click="toggleCollapse" style="cursor: pointer;">
+    <v-card-title class="text-h6 pb-0" style="cursor: pointer;" @click="toggleCollapse">
       {{ isEnglish ? 'Migrant centers for:' : 'Centres de migrants pour:' }} {{ locationName }}
     </v-card-title>
 
     <v-expand-transition>
       <v-card-text v-show="!isCollapsed">
-      <div
-        class="table-container"
-        ref="tableContainer"
-        @scroll="handleScroll"
-        v-if="visibleMigrants && visibleMigrants.length > 0"
-        :style="{ maxHeight: computedContainerHeight + 'px' }"
-      >
-        <!-- Fixed header outside of virtual scroll -->
-        <table class="centres-table centres-table-header">
-          <thead>
-            <tr>
-              <th>{{ isEnglish ? 'Type' : 'Type' }}</th>
-              <th>{{ isEnglish ? 'Capacity' : 'Places' }}</th>
-              <th>{{ isEnglish ? 'Manager' : 'Gestionnaire' }}</th>
-              <th>{{ isEnglish ? 'Dept.' : 'Dept.' }}</th>
-              <th>{{ isEnglish ? 'Municipality' : 'Commune' }}</th>
-              <th>{{ isEnglish ? 'Address' : 'Adresse' }}</th>
-            </tr>
-          </thead>
-        </table>
-        
-        <!-- Virtual scrolled content -->
-        <div class="virtual-scroll-wrapper" :style="{ height: virtualHeight + 'px' }">
-          <div class="virtual-scroll-content" :style="{ transform: `translateY(${offsetY}px)`, paddingTop: '40px' }">
-            <table class="centres-table centres-table-body">
-              <tbody>
-                <tr
-                  v-for="(centre, i) in visibleMigrants"
-                  :key="centre.COG + '-' + centre.gestionnaire + '-' + i"
-                  :style="{ height: itemHeight + 'px' }"
-                >
-                  <td class="row-title">{{ centre.type || 'N/A' }}</td>
-                  <td class="score-main">{{ formatNumber(centre.places) }}</td>
-                  <td class="score-main">{{ centre.gestionnaire || 'N/A' }}</td>
-                  <td class="score-main">{{ centre.departement || 'N/A' }}</td>
-                  <td class="score-main">{{ centre.commune || 'N/A' }}</td>
-                  <td class="score-main">{{ centre.adresse || 'N/A' }}</td>
-                </tr>
-              </tbody>
-            </table>
+        <div
+          v-if="visibleMigrants && visibleMigrants.length > 0"
+          ref="tableContainer"
+          class="table-container"
+          :style="{ maxHeight: computedContainerHeight + 'px' }"
+          @scroll="handleScroll"
+        >
+          <!-- Fixed header outside of virtual scroll -->
+          <table class="centres-table centres-table-header">
+            <thead>
+              <tr>
+                <th>{{ isEnglish ? 'Type' : 'Type' }}</th>
+                <th>{{ isEnglish ? 'Capacity' : 'Places' }}</th>
+                <th>{{ isEnglish ? 'Manager' : 'Gestionnaire' }}</th>
+                <th>{{ isEnglish ? 'Dept.' : 'Dept.' }}</th>
+                <th>{{ isEnglish ? 'Municipality' : 'Commune' }}</th>
+                <th>{{ isEnglish ? 'Address' : 'Adresse' }}</th>
+              </tr>
+            </thead>
+          </table>
+
+          <!-- Virtual scrolled content -->
+          <div class="virtual-scroll-wrapper" :style="{ height: virtualHeight + 'px' }">
+            <div class="virtual-scroll-content" :style="{ transform: `translateY(${offsetY}px)`, paddingTop: '40px' }">
+              <table class="centres-table centres-table-body">
+                <tbody>
+                  <tr
+                    v-for="(centre, i) in visibleMigrants"
+                    :key="centre.COG + '-' + centre.gestionnaire + '-' + i"
+                    :style="{ height: itemHeight + 'px' }"
+                  >
+                    <td class="row-title">
+                      {{ centre.type || 'N/A' }}
+                    </td>
+                    <td class="score-main">
+                      {{ formatNumber(centre.places) }}
+                    </td>
+                    <td class="score-main">
+                      {{ centre.gestionnaire || 'N/A' }}
+                    </td>
+                    <td class="score-main">
+                      {{ centre.departement || 'N/A' }}
+                    </td>
+                    <td class="score-main">
+                      {{ centre.commune || 'N/A' }}
+                    </td>
+                    <td class="score-main">
+                      {{ centre.adresse || 'N/A' }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div v-if="isLoading" class="loading">
+            <v-progress-circular indeterminate size="24" color="primary" />
+            {{ isEnglish ? 'Loading...' : 'Chargement...' }}
           </div>
         </div>
-        
-        <div v-if="isLoading" class="loading">
-          <v-progress-circular indeterminate size="24" color="primary"></v-progress-circular>
-          {{ isEnglish ? 'Loading...' : 'Chargement...' }}
-        </div>
-      </div>
 
-      <div v-else class="text-center">
-        <p>{{ isEnglish ? 'No migrant accommodation centers in this area.' : 'Aucun centre d\'hébergement de migrants dans cette zone.' }}</p>
-      </div>
+        <div v-else class="text-center">
+          <p>{{ isEnglish ? 'No migrant accommodation centers in this area.' : 'Aucun centre d\'hébergement de migrants dans cette zone.' }}</p>
+        </div>
       </v-card-text>
     </v-expand-transition>
   </v-card>
 </template>
 
 <script>
-import { mapStores } from 'pinia'
-import { useDataStore } from '../../services/store.js'
+import { mapStores } from 'pinia';
+import { useDataStore } from '../../services/store.js';
 
 export default {
   name: 'CentresMigrants',
@@ -96,58 +108,51 @@ export default {
       itemHeight: 60,
       scrollTop: 0,
       bufferSize: 5
-    }
-  },
-  mounted() {
-    this.updateContainerHeight()
-    window.addEventListener('resize', this.updateContainerHeight)
-  },
-  beforeUnmount() {
-    window.removeEventListener('resize', this.updateContainerHeight)
+    };
   },
   computed: {
     ...mapStores(useDataStore),
-    
+
     isEnglish() {
       return this.dataStore.labelState === 3;
     },
 
     locationName() {
       if (this.location.type === 'departement') {
-        return this.location.name
+        return this.location.name;
       } else if (this.location.type === 'commune') {
-        return this.location.name
+        return this.location.name;
       }
-      return this.isEnglish ? 'France (1062 centers)' : 'France (1062 centres)'
+      return this.isEnglish ? 'France (1062 centers)' : 'France (1062 centres)';
     },
 
     migrantsList() {
-      return this.data.list || []
+      return this.data.list || [];
     },
 
     // Virtual scrolling computed properties
     visibleStartIndex() {
-      return Math.max(0, Math.floor(this.scrollTop / this.itemHeight) - this.bufferSize)
+      return Math.max(0, Math.floor(this.scrollTop / this.itemHeight) - this.bufferSize);
     },
 
     visibleEndIndex() {
-      const visibleCount = Math.ceil(this.containerHeight / this.itemHeight)
+      const visibleCount = Math.ceil(this.containerHeight / this.itemHeight);
       return Math.min(
         this.migrantsList.length - 1,
         this.visibleStartIndex + visibleCount + this.bufferSize * 2
-      )
+      );
     },
 
     visibleMigrants() {
-      return this.migrantsList.slice(this.visibleStartIndex, this.visibleEndIndex + 1)
+      return this.migrantsList.slice(this.visibleStartIndex, this.visibleEndIndex + 1);
     },
 
     virtualHeight() {
-      return this.migrantsList.length * this.itemHeight
+      return this.migrantsList.length * this.itemHeight;
     },
 
     offsetY() {
-      return this.visibleStartIndex * this.itemHeight
+      return this.visibleStartIndex * this.itemHeight;
     },
 
     computedContainerHeight() {
@@ -155,19 +160,38 @@ export default {
       return this.migrantsList.length === 0 && !this.isLoading ? 50 : 400;
     }
   },
+  watch: {
+    data: {
+      handler() {
+        this.$nextTick(() => {
+          this.updateContainerHeight();
+        });
+      },
+      deep: true
+    }
+  },
+  mounted() {
+    this.updateContainerHeight();
+    window.addEventListener('resize', this.updateContainerHeight);
+  },
+  beforeUnmount() {
+    window.removeEventListener('resize', this.updateContainerHeight);
+  },
   methods: {
     toggleCollapse() {
       this.isCollapsed = !this.isCollapsed;
     },
 
     formatNumber(number) {
-      if (number == null || isNaN(number)) return "N/A";
-      return number.toLocaleString("fr-FR");
+      if (number === null || isNaN(number)) {
+        return 'N/A';
+      }
+      return number.toLocaleString('fr-FR');
     },
 
     updateContainerHeight() {
       if (this.$refs.tableContainer) {
-        this.containerHeight = this.$refs.tableContainer.clientHeight
+        this.containerHeight = this.$refs.tableContainer.clientHeight;
       }
     },
 
@@ -187,42 +211,36 @@ export default {
     },
 
     async loadMoreMigrants() {
-      if (this.isLoading || !this.data.pagination?.hasMore) return;
+      if (this.isLoading || !this.data.pagination?.hasMore) {
+        return;
+      }
       // Skip if not country (per proposal)
-      if (this.location.type !== 'country') return;
+      if (this.location.type !== 'country') {
+        return;
+      }
 
       this.isLoading = true;
       try {
-        const { useDataStore } = await import('../../services/store.js');
-        const dataStore = useDataStore();
+        const { useDataStore: useDataStoreFn } = await import('../../services/store.js');
+        const dataStore = useDataStoreFn();
         const params = {
           limit: 20
         };
-        
+
         // Only include cursor if it has a valid value
         if (this.data.pagination.nextCursor) {
           params.cursor = this.data.pagination.nextCursor;
         }
-        
+
         await dataStore.loadMoreMigrants('country', null, params);
-      } catch (error) {
-        console.error('Failed to load more migrants:', error);
+      } catch {
+        // Ignore errors
       } finally {
         this.isLoading = false;
       }
     }
-  },
-  watch: {
-    data: {
-      handler() {
-        this.$nextTick(() => {
-          this.updateContainerHeight()
-        })
-      },
-      deep: true
-    }
   }
-}
+};
 </script>
 
 <style scoped>

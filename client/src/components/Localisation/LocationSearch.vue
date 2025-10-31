@@ -10,18 +10,18 @@
       variant="outlined"
       density="compact"
       append-inner-icon="mdi-magnify"
-      @click:append-inner="searchAddress"
-      @keyup.enter="searchAddress"
       :loading="searchingAddress"
       class="mb-3"
+      @click:append-inner="searchAddress"
+      @keyup.enter="searchAddress"
     />
     <v-btn
       color="primary"
       variant="outlined"
       prepend-icon="mdi-crosshairs-gps"
-      @click="getCurrentLocation"
       :loading="gettingLocation"
       block
+      @click="getCurrentLocation"
     >
       {{ isEnglish ? 'My position' : 'Ma position' }}
     </v-btn>
@@ -29,72 +29,72 @@
 </template>
 
 <script>
-import { defineComponent, ref, computed } from 'vue'
-import { useDataStore } from '../../services/store.js'
+import { defineComponent, ref, computed } from 'vue';
+import { useDataStore } from '../../services/store.js';
 
 export default defineComponent({
   name: 'LocationSearch',
   emits: ['location-found'],
-  setup(props, { emit }) {
-    const dataStore = useDataStore()
-    const isEnglish = computed(() => dataStore.labelState === 3)
+  setup(_props, { emit }) {
+    const dataStore = useDataStore();
+    const isEnglish = computed(() => dataStore.labelState === 3);
 
-    const addressInput = ref('')
-    const searchingAddress = ref(false)
-    const gettingLocation = ref(false)
+    const addressInput = ref('');
+    const searchingAddress = ref(false);
+    const gettingLocation = ref(false);
 
-    const searchAddress = async () => {
-      if (!addressInput.value.trim()) return
+    const searchAddress = async() => {
+      if (!addressInput.value.trim()) {
+        return;
+      }
 
-      searchingAddress.value = true
+      searchingAddress.value = true;
       try {
         const response = await fetch(
           `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addressInput.value)}&limit=1&countrycodes=fr`
-        )
-        const data = await response.json()
+        );
+        const data = await response.json();
 
         if (data && data.length > 0) {
-          const result = data[0]
+          const result = data[0];
           emit('location-found', {
             lat: parseFloat(result.lat),
             lng: parseFloat(result.lon),
             address: result.display_name
-          })
+          });
         } else {
-          alert(isEnglish.value ? 'Address not found. Please try another address.' : 'Adresse non trouvée. Veuillez essayer une autre adresse.')
+          alert(isEnglish.value ? 'Address not found. Please try another address.' : 'Adresse non trouvée. Veuillez essayer une autre adresse.');
         }
-      } catch (error) {
-        console.error('Error searching address:', error)
-        alert(isEnglish.value ? 'Error during address search.' : 'Erreur lors de la recherche d\'adresse.')
+      } catch {
+        alert(isEnglish.value ? 'Error during address search.' : 'Erreur lors de la recherche d\'adresse.');
       } finally {
-        searchingAddress.value = false
+        searchingAddress.value = false;
       }
-    }
+    };
 
     const getCurrentLocation = () => {
       if (!navigator.geolocation) {
-        alert(isEnglish.value ? 'Geolocation is not supported by this browser.' : 'La géolocalisation n\'est pas supportée par ce navigateur.')
-        return
+        alert(isEnglish.value ? 'Geolocation is not supported by this browser.' : 'La géolocalisation n\'est pas supportée par ce navigateur.');
+        return;
       }
 
-      gettingLocation.value = true
+      gettingLocation.value = true;
       navigator.geolocation.getCurrentPosition(
         (position) => {
           emit('location-found', {
             lat: position.coords.latitude,
             lng: position.coords.longitude,
             address: isEnglish.value ? 'My current position' : 'Ma position actuelle'
-          })
-          gettingLocation.value = false
+          });
+          gettingLocation.value = false;
         },
-        (error) => {
-          console.error('Error getting location:', error)
-          alert(isEnglish.value ? 'Error during geolocation. Please check your location settings.' : 'Erreur lors de la géolocalisation. Veuillez vérifier vos paramètres de localisation.')
-          gettingLocation.value = false
+        () => {
+          alert(isEnglish.value ? 'Error during geolocation. Please check your location settings.' : 'Erreur lors de la géolocalisation. Veuillez vérifier vos paramètres de localisation.');
+          gettingLocation.value = false;
         },
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-      )
-    }
+      );
+    };
 
     return {
       addressInput,
@@ -104,9 +104,9 @@ export default defineComponent({
       getCurrentLocation,
       dataStore,
       isEnglish
-    }
+    };
   }
-})
+});
 </script>
 
 <style scoped>

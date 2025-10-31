@@ -1,67 +1,75 @@
 <template>
   <v-card class="mb-4">
-    <v-card-title class="text-h6 pb-0" @click="toggleCollapse" style="cursor: pointer;">
+    <v-card-title class="text-h6 pb-0" style="cursor: pointer;" @click="toggleCollapse">
       {{ isEnglish ? 'Mosques for:' : 'Mosquées pour:' }} {{ locationName }}
     </v-card-title>
 
     <v-expand-transition>
       <v-card-text v-show="!isCollapsed">
-      <div
-        class="table-container"
-        ref="tableContainer"
-        @scroll="handleScroll"
-        v-if="visibleMosques && visibleMosques.length > 0"
-        :style="{ maxHeight: computedContainerHeight + 'px' }"
-      >
-        <!-- Fixed header outside of virtual scroll -->
-        <table class="mosques-table mosques-table-header">
-          <thead>
-            <tr>
-              <th>{{ isEnglish ? 'Mosque Name' : 'Nom de la mosquée' }}</th>
-              <th>{{ isEnglish ? 'Address' : 'Adresse' }}</th>
-              <th>{{ isEnglish ? 'Municipality' : 'Commune' }}</th>
-              <th>{{ isEnglish ? 'Dept.' : 'Dept.' }}</th>
-            </tr>
-          </thead>
-        </table>
+        <div
+          v-if="visibleMosques && visibleMosques.length > 0"
+          ref="tableContainer"
+          class="table-container"
+          :style="{ maxHeight: computedContainerHeight + 'px' }"
+          @scroll="handleScroll"
+        >
+          <!-- Fixed header outside of virtual scroll -->
+          <table class="mosques-table mosques-table-header">
+            <thead>
+              <tr>
+                <th>{{ isEnglish ? 'Mosque Name' : 'Nom de la mosquée' }}</th>
+                <th>{{ isEnglish ? 'Address' : 'Adresse' }}</th>
+                <th>{{ isEnglish ? 'Municipality' : 'Commune' }}</th>
+                <th>{{ isEnglish ? 'Dept.' : 'Dept.' }}</th>
+              </tr>
+            </thead>
+          </table>
 
-        <!-- Virtual scrolled content -->
-        <div class="virtual-scroll-wrapper" :style="{ height: virtualHeight + 'px' }">
-          <div class="virtual-scroll-content" :style="{ transform: `translateY(${offsetY}px)`, paddingTop: '40px' }">
-            <table class="mosques-table mosques-table-body">
-              <tbody>
-                <tr
-                  v-for="(mosque, i) in visibleMosques"
-                  :key="mosque.id + '-' + i"
-                  :style="{ height: itemHeight + 'px' }"
-                >
-                  <td class="row-title">{{ mosque.name || 'N/A' }}</td>
-                  <td class="score-main">{{ mosque.address || 'N/A' }}</td>
-                  <td class="score-main">{{ mosque.commune || 'N/A' }}</td>
-                  <td class="score-main">{{ mosque.departement || 'N/A' }}</td>
-                </tr>
-              </tbody>
-            </table>
+          <!-- Virtual scrolled content -->
+          <div class="virtual-scroll-wrapper" :style="{ height: virtualHeight + 'px' }">
+            <div class="virtual-scroll-content" :style="{ transform: `translateY(${offsetY}px)`, paddingTop: '40px' }">
+              <table class="mosques-table mosques-table-body">
+                <tbody>
+                  <tr
+                    v-for="(mosque, i) in visibleMosques"
+                    :key="mosque.id + '-' + i"
+                    :style="{ height: itemHeight + 'px' }"
+                  >
+                    <td class="row-title">
+                      {{ mosque.name || 'N/A' }}
+                    </td>
+                    <td class="score-main">
+                      {{ mosque.address || 'N/A' }}
+                    </td>
+                    <td class="score-main">
+                      {{ mosque.commune || 'N/A' }}
+                    </td>
+                    <td class="score-main">
+                      {{ mosque.departement || 'N/A' }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div v-if="isLoading" class="loading">
+            <v-progress-circular indeterminate size="24" color="primary" />
+            {{ isEnglish ? 'Loading...' : 'Chargement...' }}
           </div>
         </div>
 
-        <div v-if="isLoading" class="loading">
-          <v-progress-circular indeterminate size="24" color="primary"></v-progress-circular>
-          {{ isEnglish ? 'Loading...' : 'Chargement...' }}
+        <div v-else class="text-center">
+          <p>{{ isEnglish ? 'No mosques in this area.' : 'Aucune mosquée dans cette zone.' }}</p>
         </div>
-      </div>
-
-      <div v-else class="text-center">
-        <p>{{ isEnglish ? 'No mosques in this area.' : 'Aucune mosquée dans cette zone.' }}</p>
-      </div>
       </v-card-text>
     </v-expand-transition>
   </v-card>
 </template>
 
 <script>
-import { mapStores } from 'pinia'
-import { useDataStore } from '../../services/store.js'
+import { mapStores } from 'pinia';
+import { useDataStore } from '../../services/store.js';
 
 export default {
   name: 'MosqueTable',
@@ -80,8 +88,9 @@ export default {
           limit: 20
         }
       })
-    },
+    }
   },
+  emits: ['load-more'],
   data() {
     return {
       isLoading: false,
@@ -92,18 +101,7 @@ export default {
       scrollTop: 0,
       bufferSize: 5,
       scrollListenerAttached: false
-    }
-  },
-  mounted() {
-    this.updateContainerHeight()
-    window.addEventListener('resize', this.updateContainerHeight)
-    if (this.data.pagination?.hasMore) {
-      this.attachScrollListener()
-    }
-  },
-  beforeUnmount() {
-    window.removeEventListener('resize', this.updateContainerHeight)
-    this.removeScrollListener()
+    };
   },
   computed: {
     ...mapStores(useDataStore),
@@ -114,40 +112,40 @@ export default {
 
     locationName() {
       if (this.location.type === 'departement') {
-        return this.location.name
+        return this.location.name;
       } else if (this.location.type === 'commune') {
-        return this.location.name
+        return this.location.name;
       }
-      return this.isEnglish ? 'France' : 'France'
+      return this.isEnglish ? 'France' : 'France';
     },
 
     mosquesList() {
-      return this.data.list || []
+      return this.data.list || [];
     },
 
     // Virtual scrolling computed properties
     visibleStartIndex() {
-      return Math.max(0, Math.floor(this.scrollTop / this.itemHeight) - this.bufferSize)
+      return Math.max(0, Math.floor(this.scrollTop / this.itemHeight) - this.bufferSize);
     },
 
     visibleEndIndex() {
-      const visibleCount = Math.ceil(this.containerHeight / this.itemHeight)
+      const visibleCount = Math.ceil(this.containerHeight / this.itemHeight);
       return Math.min(
         this.mosquesList.length - 1,
         this.visibleStartIndex + visibleCount + this.bufferSize * 2
-      )
+      );
     },
 
     visibleMosques() {
-      return this.mosquesList.slice(this.visibleStartIndex, this.visibleEndIndex + 1)
+      return this.mosquesList.slice(this.visibleStartIndex, this.visibleEndIndex + 1);
     },
 
     virtualHeight() {
-      return this.mosquesList.length * this.itemHeight
+      return this.mosquesList.length * this.itemHeight;
     },
 
     offsetY() {
-      return this.visibleStartIndex * this.itemHeight
+      return this.visibleStartIndex * this.itemHeight;
     },
 
     computedContainerHeight() {
@@ -155,10 +153,38 @@ export default {
       return this.mosquesList.length === 0 && !this.isLoading ? 50 : 400;
     }
   },
+  watch: {
+    data: {
+      handler() {
+        this.$nextTick(() => {
+          this.updateContainerHeight();
+        });
+      },
+      deep: true
+    },
+    'data.pagination.hasMore': function(newVal) {
+      if (newVal) {
+        this.attachScrollListener();
+      } else {
+        this.removeScrollListener();
+      }
+    }
+  },
+  mounted() {
+    this.updateContainerHeight();
+    window.addEventListener('resize', this.updateContainerHeight);
+    if (this.data.pagination?.hasMore) {
+      this.attachScrollListener();
+    }
+  },
+  beforeUnmount() {
+    window.removeEventListener('resize', this.updateContainerHeight);
+    this.removeScrollListener();
+  },
   methods: {
     updateContainerHeight() {
       if (this.$refs.tableContainer) {
-        this.containerHeight = this.$refs.tableContainer.clientHeight
+        this.containerHeight = this.$refs.tableContainer.clientHeight;
       }
     },
 
@@ -168,15 +194,15 @@ export default {
 
     attachScrollListener() {
       if (!this.scrollListenerAttached && this.$refs.tableContainer) {
-        this.$refs.tableContainer.addEventListener('scroll', this.handleScroll)
-        this.scrollListenerAttached = true
+        this.$refs.tableContainer.addEventListener('scroll', this.handleScroll);
+        this.scrollListenerAttached = true;
       }
     },
 
     removeScrollListener() {
       if (this.scrollListenerAttached && this.$refs.tableContainer) {
-        this.$refs.tableContainer.removeEventListener('scroll', this.handleScroll)
-        this.scrollListenerAttached = false
+        this.$refs.tableContainer.removeEventListener('scroll', this.handleScroll);
+        this.scrollListenerAttached = false;
       }
     },
 
@@ -189,28 +215,11 @@ export default {
         !this.isLoading &&
         this.data.pagination?.hasMore
       ) {
-      this.$emit('load-more');
-    }
-    }
-  },
-  watch: {
-    data: {
-      handler() {
-        this.$nextTick(() => {
-          this.updateContainerHeight()
-        })
-      },
-      deep: true
-    },
-    'data.pagination.hasMore': function(newVal) {
-      if (newVal) {
-        this.attachScrollListener()
-      } else {
-        this.removeScrollListener()
+        this.$emit('load-more');
       }
     }
   }
-}
+};
 </script>
 
 <style scoped>

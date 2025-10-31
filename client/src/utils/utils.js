@@ -1,17 +1,19 @@
 export function dedupeArrByKey(arr, key) {
   const map = new Map();
   return arr.filter(obj => {
-    const value = obj[key]
+    const value = obj[key];
     if (map.has(value)) {
-      return false
+      return false;
     }
-    map.set(value, true)
-    return true
-  })
+    map.set(value, true);
+    return true;
+  });
 }
 export function arrGetLast(arr) {
-  if(arr.length === 0) return null
-  return arr[arr.length-1]
+  if (arr.length === 0) {
+    return null;
+  }
+  return arr[arr.length - 1];
 }
 export function formatNumber(value, decimals = 0) {
   if (value === null || value === undefined || isNaN(value)) {
@@ -31,18 +33,34 @@ export function formatNumber(value, decimals = 0) {
  * @returns {string|null} - The département code or null if invalid
  */
 export function getDepartementFromCog(cog) {
-  if (!cog) return null;
+  if (!cog) {
+    return null;
+  }
 
   const cogStr = cog.toString();
 
   // Handle special cases for overseas territories (5-digit codes)
-  if (cogStr.startsWith('971')) return '971'; // Guadeloupe
-  if (cogStr.startsWith('972')) return '972'; // Martinique
-  if (cogStr.startsWith('973')) return '973'; // Guyane
-  if (cogStr.startsWith('974')) return '974'; // Réunion
-  if (cogStr.startsWith('976')) return '976'; // Mayotte
-  if (cogStr.startsWith('2A')) return '2A'; // Corse-du-Sud
-  if (cogStr.startsWith('2B')) return '2B'; // Haute-Corse
+  if (cogStr.startsWith('971')) {
+    return '971';
+  } // Guadeloupe
+  if (cogStr.startsWith('972')) {
+    return '972';
+  } // Martinique
+  if (cogStr.startsWith('973')) {
+    return '973';
+  } // Guyane
+  if (cogStr.startsWith('974')) {
+    return '974';
+  } // Réunion
+  if (cogStr.startsWith('976')) {
+    return '976';
+  } // Mayotte
+  if (cogStr.startsWith('2A')) {
+    return '2A';
+  } // Corse-du-Sud
+  if (cogStr.startsWith('2B')) {
+    return '2B';
+  } // Haute-Corse
 
   // Metropolitan France
   if (cogStr.length === 4) {
@@ -66,13 +84,19 @@ export function getDepartementFromCog(cog) {
  * @returns {string} - The normalized département code
  */
 export function normalizeDepartementCode(deptCode) {
-  if (!deptCode) return '';
+  if (!deptCode) {
+    return '';
+  }
 
   const deptStr = deptCode.toString().trim().toUpperCase();
 
   // Handle special cases (Corsica, overseas territories)
-  if (['2A', '2B'].includes(deptStr)) return deptStr;
-  if (['971', '972', '973', '974', '976'].includes(deptStr)) return deptStr;
+  if (['2A', '2B'].includes(deptStr)) {
+    return deptStr;
+  }
+  if (['971', '972', '973', '974', '976'].includes(deptStr)) {
+    return deptStr;
+  }
 
   // For numeric départements, pad with leading zero if single digit
   if (/^\d+$/.test(deptStr)) {
@@ -92,13 +116,14 @@ export function serializeStats(data) {
   const allYears = new Set();
   const allKeys = new Set();
 
-  if (data.length === 0)
+  if (data.length === 0) {
     return {
       labels: [],
-      data: {},
+      data: {}
     };
+  }
 
-  const yearKey = data[0].hasOwnProperty("annee") ? "annee" : "annais";
+  const yearKey = Object.prototype.hasOwnProperty.call(data[0], 'annee') ? 'annee' : 'annais';
 
   // ensure years order
   data.sort((a, b) => {
@@ -109,7 +134,7 @@ export function serializeStats(data) {
     Object.keys(entry).forEach((key) => {
       if (key === yearKey) {
         allYears.add(entry[yearKey]);
-      } else if (key !== "COG" && key !== "dep" && key !== "country") {
+      } else if (key !== 'COG' && key !== 'dep' && key !== 'country') {
         allKeys.add(key);
       }
     });
@@ -138,7 +163,7 @@ export function serializeStats(data) {
 
   return {
     labels,
-    data: result,
+    data: result
   };
 }
 
@@ -161,7 +186,9 @@ export function aggregateStats(data, calculatedMetrics) {
       .map((key) => data[key])
       .filter((serie) => serie); // Filtrer les séries undefined/null
 
-    if (inputSeries.length === 0) return;
+    if (inputSeries.length === 0) {
+      return;
+    }
 
     const seriesLength = inputSeries[0].length;
 

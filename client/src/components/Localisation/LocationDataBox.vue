@@ -6,14 +6,16 @@
         @click="overlayExpanded = !overlayExpanded"
       >
         <span class="text-subtitle-2">{{ isEnglish ? labels.displayPlaces.en : labels.displayPlaces.fr }}</span>
-        <v-icon size="16">{{ overlayExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+        <v-icon size="16">
+          {{ overlayExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+        </v-icon>
       </v-card-title>
       <v-expand-transition>
         <v-card-text v-show="overlayExpanded" class="pa-2 pt-0">
           <v-row>
             <v-col cols="6">
-              <v-tooltip text='Les "quartiers"..' location="top">
-                <template v-slot:activator="{ props }">
+              <v-tooltip text="Les &quot;quartiers&quot;.." location="top">
+                <template #activator="{ props }">
                   <span v-bind="props">
                     <v-checkbox
                       v-model="showQpv"
@@ -22,8 +24,8 @@
                       hide-details
                       @change="onOverlayToggle"
                     >
-                      <template v-slot:prepend>
-                        <div class="overlay-indicator qpv-indicator" :style="{ backgroundColor: isInclusive ? '#0000ff' : '#ff0000', borderColor: isInclusive ? '#0000cc' : '#cc0000' }"></div>
+                      <template #prepend>
+                        <div class="overlay-indicator qpv-indicator" :style="{ backgroundColor: isInclusive ? '#0000ff' : '#ff0000', borderColor: isInclusive ? '#0000cc' : '#cc0000' }" />
                       </template>
                     </v-checkbox>
                   </span>
@@ -36,8 +38,10 @@
                 hide-details
                 @change="onOverlayToggle"
               >
-                <template v-slot:prepend>
-                  <div class="overlay-indicator migrant-indicator">{{ isInclusive ? '🧸' : '↑' }}</div>
+                <template #prepend>
+                  <div class="overlay-indicator migrant-indicator">
+                    {{ isInclusive ? '🧸' : '↑' }}
+                  </div>
                 </template>
               </v-checkbox>
               <v-checkbox
@@ -47,14 +51,16 @@
                 hide-details
                 @change="onOverlayToggle"
               >
-                <template v-slot:prepend>
-                  <div class="overlay-indicator mosque-indicator">{{ isInclusive ? '🦄' : '🕌' }}</div>
+                <template #prepend>
+                  <div class="overlay-indicator mosque-indicator">
+                    {{ isInclusive ? '🦄' : '🕌' }}
+                  </div>
                 </template>
               </v-checkbox>
             </v-col>
             <v-col cols="6">
               <v-tooltip text="Il faut zoomer pour voir les prix de l'immobilier" location="top">
-                <template v-slot:activator="{ props }">
+                <template #activator="{ props }">
                   <span v-bind="props">
                     <v-checkbox
                       v-model="showCadastral"
@@ -64,7 +70,7 @@
                       :disabled="locationStore.zoom < 12"
                       @change="onOverlayToggle"
                     >
-                      <template v-slot:prepend>
+                      <template #prepend>
                         <div class="overlay-indicator cadastral-indicator">📐</div>
                       </template>
                     </v-checkbox>
@@ -80,8 +86,8 @@
                 density="compact"
                 hide-details
                 :disabled="locationStore.zoom < 12"
-                @update:model-value="onPriceRangeChange"
                 class="mt-2"
+                @update:model-value="onPriceRangeChange"
               />
               <div v-if="showCadastral" class="text-caption text-center mt-1">
                 {{ priceRange[0] }} - {{ priceRange[1] }} €/m²
@@ -93,9 +99,9 @@
                 density="compact"
                 hide-details
                 clearable
-                @update:model-value="onOverlaySelectionChange"
                 class="mt-2"
-              ></v-select>
+                @update:model-value="onOverlaySelectionChange"
+              />
             </v-col>
           </v-row>
         </v-card-text>
@@ -105,17 +111,17 @@
 </template>
 
 <script>
-import { ref, computed, watch } from 'vue'
-import { useDataStore } from '../../services/store.js'
-import { useLocationStore } from './locationStore.js'
-import pako from 'pako'
+import { ref, computed, watch } from 'vue';
+import { useDataStore } from '../../services/store.js';
+import { useLocationStore } from './locationStore.js';
+import pako from 'pako';
 
 // Arrondissement mappings for DVF API
 const arrondissementMappings = {
   '69123': Array.from({ length: 9 }, (_, i) => `6938${i + 1}`), // Lyon: 69381 to 69389
   '75056': Array.from({ length: 20 }, (_, i) => `751${String(i + 1).padStart(2, '0')}`), // Paris: 75101 to 75120
-  '13055': Array.from({ length: 16 }, (_, i) => `132${String(i + 1).padStart(2, '0')}`), // Marseille: 13201 to 13216
-}
+  '13055': Array.from({ length: 16 }, (_, i) => `132${String(i + 1).padStart(2, '0')}`) // Marseille: 13201 to 13216
+};
 
 // Translation labels
 const labels = {
@@ -128,64 +134,64 @@ const labels = {
   departments: { fr: 'Départements', en: 'Departments' },
   regions: { fr: 'Régions', en: 'Regions' },
   circonscriptions: { fr: 'Circonscriptions', en: 'Circonscriptions' },
-  decoupage: { fr: 'Découpage', en: 'Division' },
-}
+  decoupage: { fr: 'Découpage', en: 'Division' }
+};
 
 export default {
   name: 'LocationDataBox',
   emits: ['cadastral-data-loaded'],
-  setup(props, { emit }) {
-    const dataStore = useDataStore()
-    const locationStore = useLocationStore()
-    const isEnglish = computed(() => dataStore.labelState === 3)
-    const isInclusive = computed(() => dataStore.labelState === 1)
+  setup(_props, { emit }) {
+    const dataStore = useDataStore();
+    const locationStore = useLocationStore();
+    const isEnglish = computed(() => dataStore.labelState === 3);
+    const isInclusive = computed(() => dataStore.labelState === 1);
 
     // Layer visibility toggles
     const showMigrantCenters = computed({
       get: () => locationStore.overlayStates.showMigrantCenters,
       set: (value) => locationStore.setOverlayStates({ showMigrantCenters: value })
-    })
+    });
     const showQpv = computed({
       get: () => locationStore.overlayStates.showQpv,
       set: (value) => locationStore.setOverlayStates({ showQpv: value })
-    })
+    });
     const showMosques = computed({
       get: () => locationStore.overlayStates.showMosques,
       set: (value) => locationStore.setOverlayStates({ showMosques: value })
-    })
+    });
     const showCadastral = computed({
       get: () => locationStore.overlayStates.cadastral,
       set: (value) => locationStore.setOverlayStates({ cadastral: value })
-    })
+    });
     const showDepartements = computed({
       get: () => locationStore.overlayStates.showDepartements,
       set: (value) => locationStore.setOverlayStates({ showDepartements: value })
-    })
-    const selectedOverlay = ref(null)
-    const overlayExpanded = ref(true)
-    const isLoadingCadastral = ref(false)
-    const lastFetchLat = ref(null)
-    const lastFetchLng = ref(null)
-    const priceRange = ref([locationStore.minPrice, locationStore.maxPrice])
-    const timeout = ref(null)
-    const mapMovementTimeout = ref(null)
+    });
+    const selectedOverlay = ref(null);
+    const overlayExpanded = ref(true);
+    const isLoadingCadastral = ref(false);
+    const lastFetchLat = ref(null);
+    const lastFetchLng = ref(null);
+    const priceRange = ref([locationStore.minPrice, locationStore.maxPrice]);
+    const timeout = ref(null);
+    const mapMovementTimeout = ref(null);
 
     // Reactive caches for departements and cadastral data
-    const departementsCache = ref(new Map())
-    const cadastralCache = ref(new Map())
-    const sectionDVF = ref(new Map())
-    const fetchedCommunes = ref(new Set())
-    const maxSections = 2000
+    const departementsCache = ref(new Map());
+    const cadastralCache = ref(new Map());
+    const sectionDVF = ref(new Map());
+    const fetchedCommunes = ref(new Set());
+    const maxSections = 2000;
 
     // Haversine distance calculation
     const haversineDistance = (lat1, lng1, lat2, lng2) => {
       const R = 6371; // Earth's radius in km
       const dLat = (lat2 - lat1) * Math.PI / 180;
       const dLng = (lng2 - lng1) * Math.PI / 180;
-      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+      const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
         Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-        Math.sin(dLng/2) * Math.sin(dLng/2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        Math.sin(dLng / 2) * Math.sin(dLng / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
       return R * c;
     };
 
@@ -197,64 +203,72 @@ export default {
         showMosques: showMosques.value,
         cadastral: showCadastral.value,
         showDepartements: showDepartements.value
-      })
-    }
+      });
+    };
 
     // Handle overlay selection changes
     const onOverlaySelectionChange = (newSelection) => {
-      selectedOverlay.value = newSelection
+      selectedOverlay.value = newSelection;
       // Update the store based on selection
-      const showDepartements = newSelection === 'Départements'
-      const showRegions = newSelection === 'Régions'
-      const showCirconscriptions = newSelection === 'Circonscriptions'
-      locationStore.setOverlayStates({ showDepartements, showRegions, showCirconscriptions })
-    }
+      const showDepartements = newSelection === 'Départements';
+      const showRegions = newSelection === 'Régions';
+      const showCirconscriptions = newSelection === 'Circonscriptions';
+      locationStore.setOverlayStates({ showDepartements, showRegions, showCirconscriptions });
+    };
 
     // Handle price range changes
     const onPriceRangeChange = () => {
-      if (timeout.value) clearTimeout(timeout.value)
+      if (timeout.value) {
+        clearTimeout(timeout.value);
+      }
       timeout.value = setTimeout(() => {
-        locationStore.setCadastralBounds(priceRange.value)
-      }, 300)
-    }
+        locationStore.setCadastralBounds(priceRange.value);
+      }, 300);
+    };
 
     // Watch for store changes to update slider if not manually adjusted
     watch([() => locationStore.minPrice, () => locationStore.maxPrice], ([newMin, newMax]) => {
       if (!locationStore.isManual) {
-        priceRange.value = [newMin, newMax]
+        priceRange.value = [newMin, newMax];
       }
-    })
+    });
 
     // Function to fetch cadastral data
-    const fetchCadastralData = async (newCenter, newZoom) => {
-      isLoadingCadastral.value = true
+    const fetchCadastralData = async(newCenter) => {
+      isLoadingCadastral.value = true;
       const shouldFetch = lastFetchLat.value === null || lastFetchLng.value === null || haversineDistance(newCenter.lat, newCenter.lng, lastFetchLat.value, lastFetchLng.value) > 1;
       if (!shouldFetch) {
         // Skipping cadastral fetch: distance from last fetch < 1km
         // Emit current accumulated data
-        const sectionsArray = Array.from(sectionDVF.value.values())
-        const combinedGeoJSON = { type: 'SectionCollection', sections: sectionsArray }
-        emit('cadastral-data-loaded', combinedGeoJSON)
-        locationStore.setCadastralData(combinedGeoJSON)
+        const sectionsArray = Array.from(sectionDVF.value.values());
+        const combinedGeoJSON = { type: 'SectionCollection', sections: sectionsArray };
+        emit('cadastral-data-loaded', combinedGeoJSON);
+        locationStore.setCadastralData(combinedGeoJSON);
         isLoadingCadastral.value = false;
         return;
       }
       try {
         // 1. Get departement from map center
-        const depUrl = `https://geo.api.gouv.fr/communes?lat=${newCenter.lat}&lon=${newCenter.lng}&fields=codeDepartement`
-        const depResponse = await fetch(depUrl)
-        if (!depResponse.ok) throw new Error('Failed to fetch departement')
-        const deps = await depResponse.json()
-        if (deps.length === 0) throw new Error('No departement found')
-        const departementCode = deps[0].codeDepartement
+        const depUrl = `https://geo.api.gouv.fr/communes?lat=${newCenter.lat}&lon=${newCenter.lng}&fields=codeDepartement`;
+        const depResponse = await fetch(depUrl);
+        if (!depResponse.ok) {
+          throw new Error('Failed to fetch departement');
+        }
+        const deps = await depResponse.json();
+        if (deps.length === 0) {
+          throw new Error('No departement found');
+        }
+        const departementCode = deps[0].codeDepartement;
 
         // 2. Fetch all communes in that departement (cached)
-        let communes = departementsCache.value.get(departementCode)
+        let communes = departementsCache.value.get(departementCode);
         if (!communes) {
-          const communesResponse = await fetch(`https://geo.api.gouv.fr/departements/${departementCode}/communes?fields=code,centre`)
-          if (!communesResponse.ok) throw new Error('Failed to fetch communes')
-          communes = await communesResponse.json()
-          departementsCache.value.set(departementCode, communes)
+          const communesResponse = await fetch(`https://geo.api.gouv.fr/departements/${departementCode}/communes?fields=code,centre`);
+          if (!communesResponse.ok) {
+            throw new Error('Failed to fetch communes');
+          }
+          communes = await communesResponse.json();
+          departementsCache.value.set(departementCode, communes);
         }
 
         // 3. Sort communes by distance to center and take 10 closest
@@ -266,20 +280,20 @@ export default {
         const limitedCommunes = sortedCommunes.slice(0, 10);
 
         // 4. Fetch cadastre and DVF data in parallel for each commune not already fetched
-        const communesToFetch = limitedCommunes.filter(commune => !fetchedCommunes.value.has(commune.code))
-        const communePromises = communesToFetch.map(async (commune) => {
-          const cog = commune.code
+        const communesToFetch = limitedCommunes.filter(commune => !fetchedCommunes.value.has(commune.code));
+        const communePromises = communesToFetch.map(async(commune) => {
+          const cog = commune.code;
 
           // Fetch cadastre (handle arrondissements for special communes)
-          const cadastrePromise = (async () => {
-            const cadastreCodes = arrondissementMappings[cog] || [cog]
-            const cadastrePromises = cadastreCodes.map(async (code) => {
-              let sections = cadastralCache.value.get(code)
+          const cadastrePromise = (async() => {
+            const cadastreCodes = arrondissementMappings[cog] || [cog];
+            const cadastrePromises = cadastreCodes.map(async(code) => {
+              let sections = cadastralCache.value.get(code);
               if (!sections) {
-                const departement = code.substring(0, 2)
-                const url = `https://cadastre.data.gouv.fr/data/etalab-cadastre/latest/geojson/communes/${departement}/${code}/cadastre-${code}-sections.json.gz`
+                const departement = code.substring(0, 2);
+                const url = `https://cadastre.data.gouv.fr/data/etalab-cadastre/latest/geojson/communes/${departement}/${code}/cadastre-${code}-sections.json.gz`;
                 try {
-                  const response = await fetch(url)
+                  const response = await fetch(url);
                   if (response.ok) {
                     const arrayBuffer = await response.arrayBuffer();
                     const decompressed = pako.ungzip(new Uint8Array(arrayBuffer), { to: 'string' });
@@ -288,53 +302,53 @@ export default {
                       sectionID: feature.id,
                       cog: feature.properties?.commune,
                       geometry: feature.geometry.coordinates[0][0]
-                    })) : []
-                    cadastralCache.value.set(code, sections)
+                    })) : [];
+                    cadastralCache.value.set(code, sections);
                   } else {
-                    sections = []
+                    sections = [];
                   }
-                } catch (e) {
-                  sections = []
+                } catch {
+                  sections = [];
                 }
               }
-              return sections
-            })
-            const cadastreResults = await Promise.all(cadastrePromises)
-            return cadastreResults.flat()
-          })()
+              return sections;
+            });
+            const cadastreResults = await Promise.all(cadastrePromises);
+            return cadastreResults.flat();
+          })();
 
           // Fetch DVF (handle arrondissements for special communes)
-          const dvfPromise = (async () => {
-            const dvfCodes = arrondissementMappings[cog] || [cog]
-            const dvfPromises = dvfCodes.map(async (code) => {
+          const dvfPromise = (async() => {
+            const dvfCodes = arrondissementMappings[cog] || [cog];
+            const dvfPromises = dvfCodes.map(async(code) => {
               try {
-                const dvfUrl = `https://dvf-api.data.gouv.fr/commune/${code}/sections`
-                const dvfResponse = await fetch(dvfUrl)
+                const dvfUrl = `https://dvf-api.data.gouv.fr/commune/${code}/sections`;
+                const dvfResponse = await fetch(dvfUrl);
                 if (dvfResponse.ok) {
-                  const dvfData = await dvfResponse.json()
-                  return dvfData.data || []
+                  const dvfData = await dvfResponse.json();
+                  return dvfData.data || [];
                 } else {
-                  return []
+                  return [];
                 }
-              } catch (e) {
-                return []
+              } catch {
+                return [];
               }
-            })
-            const dvfResults = await Promise.all(dvfPromises)
-            return { data: dvfResults.flat() }
-          })()
+            });
+            const dvfResults = await Promise.all(dvfPromises);
+            return { data: dvfResults.flat() };
+          })();
 
           // Await both in parallel
-          const [sections, dvfData] = await Promise.all([cadastrePromise, dvfPromise])
+          const [sections, dvfData] = await Promise.all([cadastrePromise, dvfPromise]);
 
           // Create DVF map
-          const dvfMap = new Map()
+          const dvfMap = new Map();
           if (dvfData.data && Array.isArray(dvfData.data)) {
             dvfData.data.forEach(section => {
               if (section.c && section.m_am !== null && section.m_am !== undefined) {
-                dvfMap.set(section.c, section.m_am)
+                dvfMap.set(section.c, section.m_am);
               }
-            })
+            });
           }
 
           // Join sections with prices
@@ -344,65 +358,64 @@ export default {
             cog: section.cog,
             communeName: commune.nom,
             price: dvfMap.get(section.sectionID) ?? null
-          }))
+          }));
 
           // Add to sectionDVF map, deduplicating by sectionID
           joinedSections.forEach(section => {
             if (!sectionDVF.value.has(section.sectionID)) {
-              sectionDVF.value.set(section.sectionID, section)
+              sectionDVF.value.set(section.sectionID, section);
             }
-          })
+          });
 
           // Mark commune as fetched
-          fetchedCommunes.value.add(commune.code)
-        })
-        await Promise.all(communePromises)
+          fetchedCommunes.value.add(commune.code);
+        });
+        await Promise.all(communePromises);
 
         // Enforce max sections limit by removing oldest (first inserted)
         while (sectionDVF.value.size > maxSections) {
-          const firstKey = sectionDVF.value.keys().next().value
-          sectionDVF.value.delete(firstKey)
+          const firstKey = sectionDVF.value.keys().next().value;
+          sectionDVF.value.delete(firstKey);
         }
 
-        const sectionsArray = Array.from(sectionDVF.value.values())
+        const sectionsArray = Array.from(sectionDVF.value.values());
 
         // Emit the sectionDVF array
         const combinedGeoJSON = {
           type: 'SectionCollection',
           sections: sectionsArray
-        }
-        emit('cadastral-data-loaded', combinedGeoJSON)
-        locationStore.setCadastralData(combinedGeoJSON)
+        };
+        emit('cadastral-data-loaded', combinedGeoJSON);
+        locationStore.setCadastralData(combinedGeoJSON);
         lastFetchLat.value = newCenter.lat;
         lastFetchLng.value = newCenter.lng;
-      } catch (e) {
-        console.error('Failed to load cadastral data:', e)
-        const emptyData = { type: 'SectionCollection', sections: [] }
-        emit('cadastral-data-loaded', emptyData)
-        locationStore.setCadastralData(emptyData)
+      } catch {
+        const emptyData = { type: 'SectionCollection', sections: [] };
+        emit('cadastral-data-loaded', emptyData);
+        locationStore.setCadastralData(emptyData);
       } finally {
-        isLoadingCadastral.value = false
+        isLoadingCadastral.value = false;
       }
-    }
+    };
 
     // Watch for center, showCadastral, and zoom changes and fetch cadastral data if enabled and zoom >= 12
     watch([() => locationStore.center, showCadastral, () => locationStore.zoom], ([newCenter, newShow, newZoom]) => {
       // Clear existing timeout
       if (mapMovementTimeout.value) {
-        clearTimeout(mapMovementTimeout.value)
+        clearTimeout(mapMovementTimeout.value);
       }
 
       if (newShow && newCenter && newZoom >= 12) {
         // Debounce the fetch by 500ms
         mapMovementTimeout.value = setTimeout(() => {
-          fetchCadastralData(newCenter, newZoom)
-        }, 500)
+          fetchCadastralData(newCenter, newZoom);
+        }, 500);
       } else {
-        const emptyData = { type: 'SectionCollection', sections: [] }
-        emit('cadastral-data-loaded', emptyData)
-        locationStore.setCadastralData(emptyData)
+        const emptyData = { type: 'SectionCollection', sections: [] };
+        emit('cadastral-data-loaded', emptyData);
+        locationStore.setCadastralData(emptyData);
       }
-    })
+    });
 
     return {
       showMigrantCenters,
@@ -421,9 +434,9 @@ export default {
       labels,
       isLoadingCadastral,
       locationStore
-    }
+    };
   }
-}
+};
 </script>
 
 <style scoped>

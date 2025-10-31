@@ -1,36 +1,56 @@
 <template>
   <div class="container mx-auto p-4">
-    <h1 class="text-2xl font-bold mb-4">Projection Démographique en France</h1>
+    <h1 class="text-2xl font-bold mb-4">
+      Projection Démographique en France
+    </h1>
     <!-- Paramètres d'entrée -->
     <DemParameters
-      :initialTFR="initialTFR"
+      :initial-t-f-r="initialTFR"
       @update:fertility="fertilityParams = $event"
       @update:migration="migrationEvol = $event"
       @run="runProjection"
     />
     <!-- Graphique des tendances de population (en premier) -->
-    <DemGraph :historical="historicalData" :projected="projectedData" :yearRange="yearRange" :selectedScale="selectedScale" :targetTFR="fertilityParams.targetTFR" :targetTFRYear="fertilityParams.targetTFRYear" @update:selectedScale="selectedScale = $event" />
+    <DemGraph
+      :historical="historicalData"
+      :projected="projectedData"
+      :year-range="yearRange"
+      :selected-scale="selectedScale"
+      :target-t-f-r="fertilityParams.targetTFR"
+      :target-t-f-r-year="fertilityParams.targetTFRYear"
+      @update:selected-scale="selectedScale = $event"
+    />
     <!-- Grille avec pyramide dans la première colonne et score/année dans la seconde -->
     <v-row>
       <v-col cols="12" md="6">
         <DemPyramid
+          v-model:selected-year="selectedYear"
           :pyramid="currentPyramid"
-          v-model:selectedYear="selectedYear"
-          :year2100Pyramid="year2100Pyramid"
-          :minYear="2024"
-          :maxYear="yearRange[1]"
+          :year2100-pyramid="year2100Pyramid"
+          :min-year="2024"
+          :max-year="yearRange[1]"
         />
       </v-col>
       <v-col cols="12" md="6">
         <!-- Année de stabilisation démographique -->
         <div class="bg-green-50 p-4 rounded-lg mb-4">
-          <h3 class="text-lg font-medium mb-2">Année de Stabilisation Démographique</h3>
-          <p class="text-sm" v-if="stabilizationYear !== null">La population se stabilise à partir de {{ stabilizationYear }} (variations absolues < 0,2 %/an).</p>
-          <p class="text-sm" v-else>Aucune stabilisation démographique n'a été atteinte</p>
+          <h3 class="text-lg font-medium mb-2">
+            Année de Stabilisation Démographique
+          </h3>
+          <p v-if="stabilizationYear !== null" class="text-sm">
+            La population se stabilise à partir de {{ stabilizationYear }} (variations absolues &lt; 0,2 %/an).
+          </p>
+          <p v-else class="text-sm">
+            Aucune stabilisation démographique n'a été atteinte
+          </p>
         </div>
         <div v-if="stabilityScore !== null" class="mt-4 p-3 bg-blue-50 rounded">
-          <h3 class="text-lg font-medium mb-2">Score de Stabilité Démographique (pour 2100)</h3>
-          <p class="text-sm">Score : {{ stabilityScore }}/100 (plus élevé = pyramide plus proche de l'idéal stationnaire)</p>
+          <h3 class="text-lg font-medium mb-2">
+            Score de Stabilité Démographique (pour 2100)
+          </h3>
+          <p class="text-sm">
+            Score : {{ stabilityScore }}/100 (plus élevé = pyramide plus proche de l'idéal stationnaire)
+          </p>
         </div>
       </v-col>
     </v-row>
@@ -54,17 +74,17 @@ const historicalData = ref([]);
 // État pour les paramètres
 const fertilityParams = ref({});
 const migrationEvol = ref([]); // Sera mis à jour par DemParameters
-const selectedScale = ref("1-2024");
+const selectedScale = ref('1-2024');
 const initialTFR = ref(1.59);
 
 // Computed year range based on selected scale
 const yearRange = computed(() => {
   const scales = {
-    "1-2024": [1, 2024],
-    "1000-2024": [1000, 2024],
-    "1900-2024": [1900, 2024],
-    "1900-2100": [1900, 2100],
-    "1000-2100": [1000, 2100]
+    '1-2024': [1, 2024],
+    '1000-2024': [1000, 2024],
+    '1900-2024': [1900, 2024],
+    '1900-2100': [1900, 2100],
+    '1000-2100': [1000, 2100]
   };
   return scales[selectedScale.value] || [1900, 2100];
 });
@@ -129,7 +149,7 @@ async function loadCSVs() {
     { url: '/data/pop_historique.csv', target: historicalData }
   ];
 
-  const promises = files.map(async ({ url, target }) => {
+  const promises = files.map(async({ url, target }) => {
     const response = await fetch(url);
     const text = await response.text();
     return new Promise((resolve, reject) => {
@@ -137,7 +157,9 @@ async function loadCSVs() {
         header: true,
         skipEmptyLines: true,
         transform: (value, header) => {
-          if (header === 'age' || header === 'year') return value;
+          if (header === 'age' || header === 'year') {
+            return value;
+          }
           if (header === 'female' || header === 'male') {
             return value.includes('%') ? parseFloat(value.replace('%', '')) / 100 : parseFloat(value);
           }
@@ -148,7 +170,6 @@ async function loadCSVs() {
           resolve();
         },
         error: (err) => {
-          console.error(`Erreur de chargement ${url}:`, err);
           reject(err);
         }
       });
@@ -178,7 +199,7 @@ function computeStabilizationYear(data) {
   for (let i = 1; i < data.length; i++) {
     let isStable = true;
     for (let j = i; j < data.length; j++) {
-      const prevPop = data[j-1].totalPop;
+      const prevPop = data[j - 1].totalPop;
       const currPop = data[j].totalPop;
       const growthRate = Math.abs((currPop - prevPop) / prevPop);
       if (growthRate >= 0.001) { // 0.1%
@@ -197,7 +218,9 @@ function computeStabilizationYear(data) {
 // Note: Logique sound – augmentation initiale due à momentum démographique (cohortes jeunes/large, births > deaths courts termes malgré TFR<2 et mig=0 après 2027).
 // À long terme, déclin attendu avec mortalité âge-spécifique croissante (de mortality.csv).
 function projectPopulation(startYear = 2024, endYear = 2100) {
-  if (!pyramid.value || !mortality.value || !fertility.value || !migration.value) return [];
+  if (!pyramid.value || !mortality.value || !fertility.value || !migration.value) {
+    return [];
+  }
 
   // Initialiser les tableaux de population
   let popF = pyramid.value.map(row => parseInt(row.females));
@@ -280,11 +303,6 @@ function projectPopulation(startYear = 2024, endYear = 2100) {
   return results;
 }
 
-// Mettre à jour la pyramide lors du changement d'année
-function updatePyramid() {
-  // La computed gère cela
-}
-
 // Lancer la projection lors des changements de paramètres ou clic bouton
 async function runProjection() {
   if (!pyramid.value) {
@@ -293,7 +311,7 @@ async function runProjection() {
   allPyramids.value = {}; // Réinitialiser
   year2100Pyramid.value = null;
   stabilizationYear.value = null;
-  selectedScale.value = "1900-2100"; // Changer l'échelle avant projection
+  selectedScale.value = '1900-2100'; // Changer l'échelle avant projection
   projectedData.value = projectPopulation(2024, yearRange.value[1]);
   selectedYear.value = 2100; // Réinitialiser le graph pyramide à 2100
 }

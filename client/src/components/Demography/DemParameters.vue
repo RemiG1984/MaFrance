@@ -10,24 +10,28 @@
         variant="outlined"
         color="primary"
         class="mb-0 max-w-xs"
-      ></v-select>
+      />
       <v-expansion-panels>
         <v-expansion-panel>
           <v-expansion-panel-title>Paramètres Détaillés</v-expansion-panel-title>
           <v-expansion-panel-text>
             <v-row class="flex-wrap">
               <p class="text-body-2 text-grey-darken-2 mb-0">
-        Note : Tous les changements de politique commencent en 2028, en supposant une mise en œuvre après l'élection présidentielle de 2027. 
-        Les projections pour 2025-2027 utilisent des hypothèses fixes (+300k migration nette/an, fécondité constante). 
-        Les projections utilisent la méthode des composantes de cohortes, tenant compte de la fécondité, mortalité et solde migratoire par age.
-        Les projections n'ont qu'une valeur ludique et dépendent évidemment des paramètres subjectifs considérés.
+                Note : Tous les changements de politique commencent en 2028, en supposant une mise en œuvre après l'élection présidentielle de 2027.
+                Les projections pour 2025-2027 utilisent des hypothèses fixes (+300k migration nette/an, fécondité constante).
+                Les projections utilisent la méthode des composantes de cohortes, tenant compte de la fécondité, mortalité et solde migratoire par age.
+                Les projections n'ont qu'une valeur ludique et dépendent évidemment des paramètres subjectifs considérés.
               </p>
               <!-- Paramètres de Fécondité -->
               <v-col cols="12" md="6">
                 <v-card variant="outlined" class="pa-4">
-                  <v-card-title class="text-h6">Paramètres de Fécondité</v-card-title>
+                  <v-card-title class="text-h6">
+                    Paramètres de Fécondité
+                  </v-card-title>
                   <v-card-text>
-                    <p class="text-body-2 text-grey-darken-2">TFR actuel (2024): {{ initialTFR.toFixed(2) }} enfants par femme</p>
+                    <p class="text-body-2 text-grey-darken-2">
+                      TFR actuel (2024): {{ initialTFR.toFixed(2) }} enfants par femme
+                    </p>
                     <v-row>
                       <v-col cols="6">
                         <v-text-field
@@ -65,7 +69,9 @@
               <!-- Paramètres de Migration -->
               <v-col cols="12" md="6">
                 <v-card variant="outlined" class="pa-4">
-                  <v-card-title class="text-h6">Paramètres d'immigration et remigration</v-card-title>
+                  <v-card-title class="text-h6">
+                    Paramètres d'immigration et remigration
+                  </v-card-title>
                   <v-card-text>
                     <v-text-field
                       v-model.number="constantMigration"
@@ -122,11 +128,11 @@
         </v-expansion-panel>
       </v-expansion-panels>
       <v-btn
-        @click="$emit('run')"
         color="primary"
         class="mt-4"
         block
         variant="elevated"
+        @click="$emit('run')"
       >
         Lancer la Projection
       </v-btn>

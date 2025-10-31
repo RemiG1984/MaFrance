@@ -1,50 +1,98 @@
 <template>
   <v-card class="mb-4">
-    <v-card-title class="text-h6 pb-0" @click="toggleCollapse" style="cursor: pointer">
+    <v-card-title class="text-h6 pb-0" style="cursor: pointer" @click="toggleCollapse">
       {{ isEnglish ? 'Priority Districts (QPV) in:' : 'Quartiers Prioritaires (QPV) à:' }} {{ locationName }}
     </v-card-title>
     <v-expand-transition>
       <v-card-text v-show="!isCollapsed">
         <div
-          class="table-container"
-          ref="tableContainer"
-          @scroll="handleScroll"
           v-if="visibleQpvs && visibleQpvs.length > 0"
+          ref="tableContainer"
+          class="table-container"
           :style="{ maxHeight: computedContainerHeight + 'px' }"
+          @scroll="handleScroll"
         >
           <!-- Fixed header outside of virtual scroll -->
           <table class="qpv-table qpv-table-header">
             <thead>
               <tr>
-                <th v-if="isEnglish">Priority District</th>
-                <th v-else>Quartier QPV</th>
+                <th v-if="isEnglish">
+                  Priority District
+                </th>
+                <th v-else>
+                  Quartier QPV
+                </th>
                 <th>Population</th>
-                <th v-if="isEnglish">Municipality</th>
-                <th v-else>Commune</th>
-                <th v-if="isEnglish">Immigrant Pop.</th>
-                <th v-else>Pop. Immigrée</th>
-                <th v-if="isEnglish">Foreign Pop.</th>
-                <th v-else>Pop. Étrangère</th>
-                <th v-if="isEnglish">Employment Rate</th>
-                <th v-else>Taux d'emploi</th>
-                <th v-if="isEnglish">Poverty Rate</th>
-                <th v-else>Taux de pauvreté</th>
-                <th v-if="isEnglish">Basic RSA</th>
-                <th v-else>RSA socle</th>
-                <th v-if="isEnglish">CAF Recipients</th>
-                <th v-else>Allocataires CAF</th>
-                <th v-if="isEnglish">CAF Coverage</th>
-                <th v-else>Couverture CAF</th>
-                <th v-if="isEnglish">Youth Index</th>
-                <th v-else>Indice Jeunesse</th>
-                <th v-if="isEnglish">Social Housing</th>
-                <th v-else>Logements sociaux</th>
-                <th v-if="isEnglish">Social Housing Rate</th>
-                <th v-else>Taux logements sociaux</th>
+                <th v-if="isEnglish">
+                  Municipality
+                </th>
+                <th v-else>
+                  Commune
+                </th>
+                <th v-if="isEnglish">
+                  Immigrant Pop.
+                </th>
+                <th v-else>
+                  Pop. Immigrée
+                </th>
+                <th v-if="isEnglish">
+                  Foreign Pop.
+                </th>
+                <th v-else>
+                  Pop. Étrangère
+                </th>
+                <th v-if="isEnglish">
+                  Employment Rate
+                </th>
+                <th v-else>
+                  Taux d'emploi
+                </th>
+                <th v-if="isEnglish">
+                  Poverty Rate
+                </th>
+                <th v-else>
+                  Taux de pauvreté
+                </th>
+                <th v-if="isEnglish">
+                  Basic RSA
+                </th>
+                <th v-else>
+                  RSA socle
+                </th>
+                <th v-if="isEnglish">
+                  CAF Recipients
+                </th>
+                <th v-else>
+                  Allocataires CAF
+                </th>
+                <th v-if="isEnglish">
+                  CAF Coverage
+                </th>
+                <th v-else>
+                  Couverture CAF
+                </th>
+                <th v-if="isEnglish">
+                  Youth Index
+                </th>
+                <th v-else>
+                  Indice Jeunesse
+                </th>
+                <th v-if="isEnglish">
+                  Social Housing
+                </th>
+                <th v-else>
+                  Logements sociaux
+                </th>
+                <th v-if="isEnglish">
+                  Social Housing Rate
+                </th>
+                <th v-else>
+                  Taux logements sociaux
+                </th>
               </tr>
             </thead>
           </table>
-          
+
           <!-- Virtual scrolled content -->
           <div class="virtual-scroll-wrapper" :style="{ height: virtualHeight + 'px' }">
             <div class="virtual-scroll-content" :style="{ transform: `translateY(${offsetY}px)`, paddingTop: '36px' }">
@@ -56,30 +104,54 @@
                     :style="{ height: itemHeight + 'px' }"
                   >
                     <td class="row-title">
-                        <a :href="'https://sig.ville.gouv.fr/territoire/'+qpv.codeQPV" target="_blank">
-                            {{qpv.lib_qp || qpv.codeQPV}}
-                        </a>
+                      <a :href="'https://sig.ville.gouv.fr/territoire/'+qpv.codeQPV" target="_blank">
+                        {{ qpv.lib_qp || qpv.codeQPV }}
+                      </a>
                     </td>
-                    <td class="score-main">{{formatNumber(qpv.popMuniQPV)}}</td>
-                    <td class="score-main">{{qpv.lib_com}}</td>
-                    <td class="score-main">{{formatPercentage(qpv.partPopImmi)}}</td>
-                    <td class="score-main">{{formatPercentage(qpv.partPopEt)}}</td>
-                    <td class="score-main">{{formatPercentage(qpv.taux_d_emploi)}}</td>
-                    <td class="score-main">{{formatPercentage(qpv.taux_pauvrete_60)}}</td>
-                    <td class="score-main">{{formatNumber(qpv.RSA_socle)}}</td>
-                    <td class="score-main">{{formatNumber(qpv.allocataires_CAF)}}</td>
-                    <td class="score-main">{{formatNumber(qpv.personnes_couvertes_CAF)}}</td>
-                    <td class="score-main">{{formatNumber(qpv.indiceJeunesse)}}</td>
-                    <td class="score-main">{{formatNumber(qpv.nombre_logements_sociaux)}}</td>
-                    <td class="score-main">{{formatPercentage(qpv.taux_logements_sociaux)}}</td>
+                    <td class="score-main">
+                      {{ formatNumber(qpv.popMuniQPV) }}
+                    </td>
+                    <td class="score-main">
+                      {{ qpv.lib_com }}
+                    </td>
+                    <td class="score-main">
+                      {{ formatPercentage(qpv.partPopImmi) }}
+                    </td>
+                    <td class="score-main">
+                      {{ formatPercentage(qpv.partPopEt) }}
+                    </td>
+                    <td class="score-main">
+                      {{ formatPercentage(qpv.taux_d_emploi) }}
+                    </td>
+                    <td class="score-main">
+                      {{ formatPercentage(qpv.taux_pauvrete_60) }}
+                    </td>
+                    <td class="score-main">
+                      {{ formatNumber(qpv.RSA_socle) }}
+                    </td>
+                    <td class="score-main">
+                      {{ formatNumber(qpv.allocataires_CAF) }}
+                    </td>
+                    <td class="score-main">
+                      {{ formatNumber(qpv.personnes_couvertes_CAF) }}
+                    </td>
+                    <td class="score-main">
+                      {{ formatNumber(qpv.indiceJeunesse) }}
+                    </td>
+                    <td class="score-main">
+                      {{ formatNumber(qpv.nombre_logements_sociaux) }}
+                    </td>
+                    <td class="score-main">
+                      {{ formatPercentage(qpv.taux_logements_sociaux) }}
+                    </td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </div>
-          
+
           <div v-if="isLoading" class="loading">
-            <v-progress-circular indeterminate size="24" color="primary"></v-progress-circular>
+            <v-progress-circular indeterminate size="24" color="primary" />
             {{ isEnglish ? 'Loading...' : 'Chargement...' }}
           </div>
         </div>
@@ -98,8 +170,8 @@
 </template>
 
 <script>
-import { mapStores } from 'pinia'
-import { useDataStore } from '../../services/store.js'
+import { mapStores } from 'pinia';
+import { useDataStore } from '../../services/store.js';
 export default {
   name: 'QpvData',
   props: {
@@ -128,14 +200,7 @@ export default {
       itemHeight: 60,
       scrollTop: 0,
       bufferSize: 5
-    }
-  },
-  mounted() {
-    this.updateContainerHeight()
-    window.addEventListener('resize', this.updateContainerHeight)
-  },
-  beforeUnmount() {
-    window.removeEventListener('resize', this.updateContainerHeight)
+    };
   },
   computed: {
     ...mapStores(useDataStore),
@@ -143,58 +208,60 @@ export default {
     isEnglish() {
       return this.dataStore.labelState === 3;
     },
-    
+
     locationName() {
-      if (!this.location) return '';
-      
+      if (!this.location) {
+        return '';
+      }
+
       // Check if store is available and get label state
       const isEnglish = this.isEnglish;
 
       switch (this.location.type) {
-        case 'country':
-          return isEnglish ? 'France (1609 Priority Districts)' : 'France (1609 QPV)';
-        case 'departement':
-          if (isEnglish) {
-            return this.location.name || `Department ${this.location.code}`;
-          }
-          return this.location.name || `Département ${this.location.code}`;
-        case 'commune':
-          return isEnglish ? (this.location.name || 'Municipality') : (this.location.name || 'Commune');
-        default:
-          return '';
+      case 'country':
+        return isEnglish ? 'France (1609 Priority Districts)' : 'France (1609 QPV)';
+      case 'departement':
+        if (isEnglish) {
+          return this.location.name || `Department ${this.location.code}`;
+        }
+        return this.location.name || `Département ${this.location.code}`;
+      case 'commune':
+        return isEnglish ? (this.location.name || 'Municipality') : (this.location.name || 'Commune');
+      default:
+        return '';
       }
     },
 
     qpvList() {
       if (Array.isArray(this.data)) {
-        return this.data
+        return this.data;
       }
-      return this.data.list || []
+      return this.data.list || [];
     },
 
     // Virtual scrolling computed properties
     visibleStartIndex() {
-      return Math.max(0, Math.floor(this.scrollTop / this.itemHeight) - this.bufferSize)
+      return Math.max(0, Math.floor(this.scrollTop / this.itemHeight) - this.bufferSize);
     },
 
     visibleEndIndex() {
-      const visibleCount = Math.ceil(this.containerHeight / this.itemHeight)
+      const visibleCount = Math.ceil(this.containerHeight / this.itemHeight);
       return Math.min(
         this.qpvList.length - 1,
         this.visibleStartIndex + visibleCount + this.bufferSize * 2
-      )
+      );
     },
 
     visibleQpvs() {
-      return this.qpvList.slice(this.visibleStartIndex, this.visibleEndIndex + 1)
+      return this.qpvList.slice(this.visibleStartIndex, this.visibleEndIndex + 1);
     },
 
     virtualHeight() {
-      return this.qpvList.length * this.itemHeight
+      return this.qpvList.length * this.itemHeight;
     },
 
     offsetY() {
-      return this.visibleStartIndex * this.itemHeight
+      return this.visibleStartIndex * this.itemHeight;
     },
 
     computedContainerHeight() {
@@ -202,24 +269,45 @@ export default {
       return this.qpvList.length === 0 && !this.isLoading ? 50 : 400;
     }
   },
+  watch: {
+    data: {
+      handler() {
+        this.$nextTick(() => {
+          this.updateContainerHeight();
+        });
+      },
+      deep: true
+    }
+  },
+  mounted() {
+    this.updateContainerHeight();
+    window.addEventListener('resize', this.updateContainerHeight);
+  },
+  beforeUnmount() {
+    window.removeEventListener('resize', this.updateContainerHeight);
+  },
   methods: {
     toggleCollapse() {
       this.isCollapsed = !this.isCollapsed;
     },
 
     formatNumber(number) {
-      if (number == null || isNaN(number)) return "N/A";
-      return number.toLocaleString("fr-FR");
+      if (number === null || isNaN(number)) {
+        return 'N/A';
+      }
+      return number.toLocaleString('fr-FR');
     },
 
     formatPercentage(value) {
-      if (value == null || isNaN(value)) return "N/A";
-      return value.toFixed(1) + "%";
+      if (value === null || isNaN(value)) {
+        return 'N/A';
+      }
+      return value.toFixed(1) + '%';
     },
 
     updateContainerHeight() {
       if (this.$refs.tableContainer) {
-        this.containerHeight = this.$refs.tableContainer.clientHeight
+        this.containerHeight = this.$refs.tableContainer.clientHeight;
       }
     },
 
@@ -239,42 +327,36 @@ export default {
     },
 
     async loadMoreQpvs() {
-      if (this.isLoading || !this.data.pagination?.hasMore) return;
+      if (this.isLoading || !this.data.pagination?.hasMore) {
+        return;
+      }
       // Skip if not country
-      if (this.location.type !== 'country') return;
+      if (this.location.type !== 'country') {
+        return;
+      }
 
       this.isLoading = true;
       try {
-        const { useDataStore } = await import('../../services/store.js');
-        const dataStore = useDataStore();
+        const { useDataStore: useDataStoreFn } = await import('../../services/store.js');
+        const dataStore = useDataStoreFn();
         const params = {
           limit: 20
         };
-        
+
         // Only add cursor if it's a valid value
-        if (this.data.pagination.nextCursor != null) {
+        if (this.data.pagination.nextCursor !== null) {
           params.cursor = this.data.pagination.nextCursor;
         }
-        
+
         await dataStore.loadMoreQpv('country', null, params);
-      } catch (error) {
-        console.error('Failed to load more QPVs:', error);
+      } catch {
+        // Ignore errors
       } finally {
         this.isLoading = false;
       }
     }
-  },
-  watch: {
-    data: {
-      handler() {
-        this.$nextTick(() => {
-          this.updateContainerHeight()
-        })
-      },
-      deep: true
-    }
   }
-}
+};
 </script>
 
 <style scoped>

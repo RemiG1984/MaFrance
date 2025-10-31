@@ -1,24 +1,29 @@
 <template>
   <div class="bg-white p-4 rounded-lg shadow">
-    <h2 class="text-xl font-semibold mb-2">Pyramide des Âges en {{ selectedYearComputed }}</h2>
+    <h2 class="text-xl font-semibold mb-2">
+      Pyramide des Âges en {{ selectedYearComputed }}
+    </h2>
     <!-- Slider overlay au-dessus du graphique -->
     <div v-if="showSlider" class="bg-gray-100 p-3 rounded mb-3">
       <label class="block mb-2 text-sm font-medium">Sélectionnez l'année :</label>
       <input
-        type="range"
+        :key="selectedYearComputed"
         v-model="selectedYearComputed"
+        type="range"
         :min="minYear"
         :max="maxYear"
-        :key="selectedYearComputed"
         class="w-full"
-      />
-      <p class="text-center text-sm mt-1">Année : {{ selectedYearComputed }}</p>
+      >
+      <p class="text-center text-sm mt-1">
+        Année : {{ selectedYearComputed }}
+      </p>
     </div>
     <div v-if="!props.pyramid" class="text-center p-4">
       Chargement des données...
     </div>
-    <div class="w-full max-w-full md:max-w-4xl mx-auto"> <!-- Réduction largeur X via CSS -->
-      <canvas ref="chartCanvas" class="h-96"></canvas>
+    <div class="w-full max-w-full md:max-w-4xl mx-auto">
+      <!-- Réduction largeur X via CSS -->
+      <canvas ref="chartCanvas" class="h-96" />
     </div>
   </div>
 </template>
@@ -32,9 +37,15 @@ Chart.register();
 
 // Props du composant
 const props = defineProps({
-  pyramid: Object, // { popF: [], popM: [] } - populations par âge (tableaux de 101 éléments)
+  pyramid: {
+    type: Object,
+    default: () => ({ popF: [], popM: [] })
+  }, // { popF: [], popM: [] } - populations par âge (tableaux de 101 éléments)
   selectedYear: { type: [Number, String], default: 2024 },
-  year2100Pyramid: Object, // Pyramide spécifique pour 2100 (pour le score de stabilité)
+  year2100Pyramid: {
+    type: Object,
+    default: () => ({ popF: [], popM: [] })
+  }, // Pyramide spécifique pour 2100 (pour le score de stabilité)
   minYear: { type: Number, default: 2024 },
   maxYear: { type: Number, default: 2100 },
   showSlider: { type: Boolean, default: true }
@@ -60,7 +71,6 @@ watch(() => props.selectedYear, (newVal) => {
 // Émettre les changements du slider
 const emit = defineEmits(['update:selectedYear']);
 
-
 // Chart canvas ref and instance
 const chartCanvas = ref(null);
 let chartInstance = null;
@@ -85,7 +95,9 @@ const ageGroups = [
 
 // Surveillance des changements de pyramide pour mise à jour du graphique
 watch(() => props.pyramid, (newPyramid) => {
-  if (chartInstance) chartInstance.destroy();
+  if (chartInstance) {
+    chartInstance.destroy();
+  }
   if (!newPyramid || !newPyramid.popF || !newPyramid.popM) {
     return;
   }
@@ -150,7 +162,6 @@ watch(() => props.pyramid, (newPyramid) => {
     options: pyramidOptions.value
   });
 }, { immediate: true, deep: true });
-
 
 // Options du graphique (configuration pour compacité et orientation)
 const pyramidOptions = computed(() => ({

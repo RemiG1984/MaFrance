@@ -6,10 +6,19 @@
       </v-card-title>
 
       <v-card-text>
-        <p style="white-space: normal; word-break: break-word;" v-html='store.labelState === 3 ? "The political family is as officially defined in the list of mayors from the <a href=\"https://www.data.gouv.fr/datasets/repertoire-national-des-elus-1/\" target=\"_blank\">national directory of elected officials</a>" : "La famille politique est telle que définie officiellement dans la liste des maires du <a href=\"https://www.data.gouv.fr/datasets/repertoire-national-des-elus-1/\" target=\"_blank\">répertoire national des élus</a>"'></p>
+        <p style="white-space: normal; word-break: break-word;">
+          <template v-if="store.labelState === 3">
+            The political family is as officially defined in the list of mayors from the
+            <a href="https://www.data.gouv.fr/datasets/repertoire-national-des-elus-1/" target="_blank">national directory of elected officials</a>
+          </template>
+          <template v-else>
+            La famille politique est telle que définie officiellement dans la liste des maires du
+            <a href="https://www.data.gouv.fr/datasets/repertoire-national-des-elus-1/" target="_blank">répertoire national des élus</a>
+          </template>
+        </p>
         <!-- Loading indicator -->
         <div v-if="loading" class="d-flex justify-center align-center py-8">
-          <v-progress-circular indeterminate color="primary" size="32"></v-progress-circular>
+          <v-progress-circular indeterminate color="primary" size="32" />
         </div>
 
         <!-- Error message -->
@@ -21,12 +30,24 @@
         <v-table v-else-if="tableRows.length > 0" class="politique-table">
           <thead>
             <tr class="politique-header">
-              <th class="metric-column">{{ store.labelState === 3 ? 'Metric' : 'Métrique' }}</th>
-              <th class="value-column gauche-header">{{ store.labelState === 3 ? 'Left' : 'Gauche' }}</th>
-              <th class="value-column centre-header">{{ store.labelState === 3 ? 'Center' : 'Centre' }}</th>
-              <th class="value-column autres-header">{{ store.labelState === 3 ? 'Others' : 'Autres' }}</th>
-              <th class="value-column droite-header">{{ store.labelState === 3 ? 'Right' : 'Droite' }}</th>
-              <th class="value-column extreme-droite-header">{{ store.labelState === 3 ? 'Far Right' : 'Extrême droite' }}</th>
+              <th class="metric-column">
+                {{ store.labelState === 3 ? 'Metric' : 'Métrique' }}
+              </th>
+              <th class="value-column gauche-header">
+                {{ store.labelState === 3 ? 'Left' : 'Gauche' }}
+              </th>
+              <th class="value-column centre-header">
+                {{ store.labelState === 3 ? 'Center' : 'Centre' }}
+              </th>
+              <th class="value-column autres-header">
+                {{ store.labelState === 3 ? 'Others' : 'Autres' }}
+              </th>
+              <th class="value-column droite-header">
+                {{ store.labelState === 3 ? 'Right' : 'Droite' }}
+              </th>
+              <th class="value-column extreme-droite-header">
+                {{ store.labelState === 3 ? 'Far Right' : 'Extrême droite' }}
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -40,11 +61,21 @@
               <td :class="getTitleClasses(row)">
                 <span>{{ row.title }}</span>
               </td>
-              <td class="value-cell">{{ row.gauche }}</td>
-              <td class="value-cell">{{ row.centre }}</td>
-              <td class="value-cell">{{ row.autres }}</td>
-              <td class="value-cell">{{ row.droite }}</td>
-              <td class="value-cell">{{ row.extremeDroite }}</td>
+              <td class="value-cell">
+                {{ row.gauche }}
+              </td>
+              <td class="value-cell">
+                {{ row.centre }}
+              </td>
+              <td class="value-cell">
+                {{ row.autres }}
+              </td>
+              <td class="value-cell">
+                {{ row.droite }}
+              </td>
+              <td class="value-cell">
+                {{ row.extremeDroite }}
+              </td>
             </tr>
           </tbody>
         </v-table>
@@ -59,122 +90,122 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue'
-import { useDataStore } from '../services/store.js'
-import api from '../services/api.js'
-import { MetricsConfig, articleCategoriesRef } from '@/utils/metricsConfig'
+import { ref, onMounted } from 'vue';
+import { useDataStore } from '../services/store.js';
+import api from '../services/api.js';
+import { MetricsConfig, articleCategoriesRef } from '@/utils/metricsConfig';
 
 export default {
   name: 'Politique',
   setup() {
-    const store = useDataStore()
-    const loading = ref(true)
-    const error = ref('')
-    const tableRows = ref([])
-    const data = ref({})
+    const store = useDataStore();
+    const loading = ref(true);
+    const error = ref('');
+    const tableRows = ref([]);
+    const data = ref({});
 
     const getCategoryLabel = (category) => {
       if (category === 'général') {
-        return store.labelState === 3 ? 'General' : 'Général'
+        return store.labelState === 3 ? 'General' : 'Général';
       }
-      return articleCategoriesRef[category] || category
-    }
+      return articleCategoriesRef[category] || category;
+    };
 
-    const fetchPolitiqueData = async () => {
+    const fetchPolitiqueData = async() => {
       try {
-        loading.value = true
-        error.value = ''
+        loading.value = true;
+        error.value = '';
 
-        const originalData = await api.getPolitique()
+        const originalData = await api.getPolitique();
         if (!originalData) {
-          throw new Error(store.labelState === 3 ? 'Failed to fetch data' : 'Échec de récupération des données')
+          throw new Error(store.labelState === 3 ? 'Failed to fetch data' : 'Échec de récupération des données');
         }
 
-        const availableMetrics = new Set(Object.keys(originalData.Gauche || {}))
+        const availableMetrics = new Set(Object.keys(originalData.Gauche || {}));
 
-        const processedData = { gauche: originalData.Gauche || {}, centre: originalData.Centre || {}, autres: originalData.Autres || {}, droite: originalData.Droite || {}, extremeDroite: originalData["Extrême droite"] || {} };
-        data.value = processedData
+        const processedData = { gauche: originalData.Gauche || {}, centre: originalData.Centre || {}, autres: originalData.Autres || {}, droite: originalData.Droite || {}, extremeDroite: originalData['Extrême droite'] || {} };
+        data.value = processedData;
 
-        const categories = ['général', 'insécurité', 'immigration', 'islamisme', 'défrancisation', 'wokisme']
-        const rows = []
+        const categories = ['général', 'insécurité', 'immigration', 'islamisme', 'défrancisation', 'wokisme'];
+        const rows = [];
 
         categories.forEach(category => {
-          const categoryMetrics = MetricsConfig.getMetricsByCategory(category).filter(metric => availableMetrics.has(metric.value))
-          if (categoryMetrics.length === 0) return
+          const categoryMetrics = MetricsConfig.getMetricsByCategory(category).filter(metric => availableMetrics.has(metric.value));
+          if (categoryMetrics.length === 0) {
+            return;
+          }
 
           // Main row (first metric)
-          const mainMetric = categoryMetrics[0]
-          rows.push(createRow(mainMetric, false))
+          const mainMetric = categoryMetrics[0];
+          rows.push(createRow(mainMetric, false));
 
           // Sub-rows (remaining metrics)
           categoryMetrics.slice(1).forEach(subMetric => {
-            rows.push(createRow(subMetric, true))
-          })
-        })
+            rows.push(createRow(subMetric, true));
+          });
+        });
 
-        tableRows.value = addGroupIds(rows)
+        tableRows.value = addGroupIds(rows);
       } catch (err) {
         error.value = store.labelState === 3
           ? `Error loading data: ${err.message}`
-          : `Erreur lors du chargement des données : ${err.message}`
-        console.error('Erreur fetchPolitiqueData:', err)
+          : `Erreur lors du chargement des données : ${err.message}`;
       } finally {
-        loading.value = false
+        loading.value = false;
       }
-    }
-
+    };
 
     const createRow = (metric, isSubRow = false) => {
-       const metricKey = metric.value
-       const title = MetricsConfig.getMetricLabel(metricKey)
-       const gauche = MetricsConfig.formatMetricValue(data.value.gauche?.[metricKey], metricKey)
-       const centre = MetricsConfig.formatMetricValue(data.value.centre?.[metricKey], metricKey)
-       const autres = MetricsConfig.formatMetricValue(data.value.autres?.[metricKey], metricKey)
-       const droite = MetricsConfig.formatMetricValue(data.value.droite?.[metricKey], metricKey)
-       const extremeDroite = MetricsConfig.formatMetricValue(data.value.extremeDroite?.[metricKey], metricKey)
+      const metricKey = metric.value;
+      const title = MetricsConfig.getMetricLabel(metricKey);
+      const gauche = MetricsConfig.formatMetricValue(data.value.gauche?.[metricKey], metricKey);
+      const centre = MetricsConfig.formatMetricValue(data.value.centre?.[metricKey], metricKey);
+      const autres = MetricsConfig.formatMetricValue(data.value.autres?.[metricKey], metricKey);
+      const droite = MetricsConfig.formatMetricValue(data.value.droite?.[metricKey], metricKey);
+      const extremeDroite = MetricsConfig.formatMetricValue(data.value.extremeDroite?.[metricKey], metricKey);
 
-       return { title, gauche, centre, autres, droite, extremeDroite, subRow: isSubRow }
-    }
+      return { title, gauche, centre, autres, droite, extremeDroite, subRow: isSubRow };
+    };
 
     const addGroupIds = (rows) => {
-      let currentGroupId = null
+      let currentGroupId = null;
       return rows.map((row, index) => {
         if (!row.subRow) {
-          currentGroupId = `group-${index}`
+          currentGroupId = `group-${index}`;
         }
-        return { ...row, groupId: currentGroupId, id: index }
-      })
-    }
+        return { ...row, groupId: currentGroupId, id: index };
+      });
+    };
 
     const getRowClasses = (row) => {
-      const classes = ['politique-row']
+      const classes = ['politique-row'];
       if (row.subRow) {
-        classes.push('sub-row', `group-${row.groupId}`, 'sub-row-hidden')
+        classes.push('sub-row', `group-${row.groupId}`, 'sub-row-hidden');
       }
-      return classes.join(' ')
-    }
+      return classes.join(' ');
+    };
 
     const getTitleClasses = (row) => {
-      const classes = ['metric-cell']
+      const classes = ['metric-cell'];
       if (row.subRow) {
-        classes.push('sub-row')
+        classes.push('sub-row');
       }
-      return classes.join(' ')
-    }
+      return classes.join(' ');
+    };
 
     const handleRowClick = (row) => {
       if (!row.subRow) {
-        const groupId = row.groupId
-        const subRows = document.querySelectorAll(`.sub-row.group-${groupId}`)
+        const groupId = row.groupId;
+        const subRows = document.querySelectorAll(`.sub-row.group-${groupId}`);
         subRows.forEach((subRow) => {
-          subRow.classList.toggle('sub-row-hidden')
-        })
+          subRow.classList.toggle('sub-row-hidden');
+        });
       }
-    }
+    };
 
     onMounted(() => {
-      fetchPolitiqueData()
-    })
+      fetchPolitiqueData();
+    });
 
     return {
       store,
@@ -188,10 +219,10 @@ export default {
       addGroupIds,
       getRowClasses,
       getTitleClasses,
-      handleRowClick,
-    }
+      handleRowClick
+    };
   }
-}
+};
 </script>
 
 <style scoped>

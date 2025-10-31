@@ -10,7 +10,7 @@
         <!-- Desktop Menu -->
         <div class="header-menu d-none d-md-flex">
           <v-tooltip bottom>
-            <template v-slot:activator="{ props }">
+            <template #activator="{ props }">
               <v-btn
                 v-bind="props"
                 href="https://twitter.com/intent/follow?screen_name=ou_va_ma_France"
@@ -18,7 +18,7 @@
                 variant="text"
                 class="mx-2 twitter-btn"
               >
-                @ 
+                @
                 <b>𝕏</b>
               </v-btn>
             </template>
@@ -26,7 +26,7 @@
           </v-tooltip>
 
           <v-tooltip bottom>
-            <template v-slot:activator="{ props }">
+            <template #activator="{ props }">
               <v-btn
                 v-bind="props"
                 href="https://ko-fi.com/remi63047"
@@ -38,17 +38,16 @@
                   src="/images/kofi_symbol.webp"
                   alt="Ko-fi"
                   class="kofi-icon"
-                />
+                >
               </v-btn>
             </template>
             <span>{{ kofiTooltip }}</span>
           </v-tooltip>
 
-
           <template v-for="item in menuItems" :key="item.title">
             <!-- Regular menu item -->
             <v-tooltip v-if="!item.children" bottom>
-              <template v-slot:activator="{ props }">
+              <template #activator="{ props }">
                 <v-btn
                   v-bind="props"
                   :to="item.path"
@@ -60,12 +59,12 @@
               </template>
               <span>{{ item.tooltip }}</span>
             </v-tooltip>
-            
+
             <!-- Dropdown menu item -->
             <v-tooltip v-else bottom>
-              <template v-slot:activator="{ props: tooltipProps }">
+              <template #activator="{ props: tooltipProps }">
                 <v-menu offset-y>
-                  <template v-slot:activator="{ props: menuProps }">
+                  <template #activator="{ props: menuProps }">
                     <v-btn
                       v-bind="{ ...menuProps, ...tooltipProps }"
                       variant="text"
@@ -90,35 +89,35 @@
             </v-tooltip>
           </template>
 
-        <v-spacer></v-spacer>
-        <v-tooltip bottom>
-          <template v-slot:activator="{ props }">
-            <div v-bind="props">
-              <VersionSelector />
-            </div>
-          </template>
-          <span>{{ versionTooltip }}</span>
-        </v-tooltip>
-        <v-tooltip bottom>
-          <template v-slot:activator="{ props }">
-            <div v-bind="props">
-              <ShareButton :showText="false" />
-            </div>
-          </template>
-          <span>{{ shareTooltip }}</span>
-        </v-tooltip>
+          <v-spacer />
+          <v-tooltip bottom>
+            <template #activator="{ props }">
+              <div v-bind="props">
+                <VersionSelector />
+              </div>
+            </template>
+            <span>{{ versionTooltip }}</span>
+          </v-tooltip>
+          <v-tooltip bottom>
+            <template #activator="{ props }">
+              <div v-bind="props">
+                <ShareButton :show-text="false" />
+              </div>
+            </template>
+            <span>{{ shareTooltip }}</span>
+          </v-tooltip>
         </div>
 
         <!-- Mobile Hamburger Menu -->
         <div class="d-flex d-md-none">
           <v-btn
             icon
-            @click="mobileMenuOpen = !mobileMenuOpen"
             class="hamburger-btn"
+            @click="mobileMenuOpen = !mobileMenuOpen"
           >
             <hamburger-icon
-            color="white"
-            :opened="mobileMenuOpen"
+              color="white"
+              :opened="mobileMenuOpen"
             />
           </v-btn>
         </div>
@@ -142,10 +141,10 @@
           >
             <v-list-item-title>{{ item.title }}</v-list-item-title>
           </v-list-item>
-          
+
           <!-- Expandable menu item -->
           <v-list-group v-else :value="item.title">
-            <template v-slot:activator="{ props }">
+            <template #activator="{ props }">
               <v-list-item v-bind="props">
                 <v-list-item-title>{{ item.title }}</v-list-item-title>
               </v-list-item>
@@ -154,15 +153,15 @@
               v-for="child in item.children"
               :key="child.path"
               :to="child.path"
-              @click="mobileMenuOpen = false"
               class="pl-8"
+              @click="mobileMenuOpen = false"
             >
               <v-list-item-title>{{ child.title }}</v-list-item-title>
             </v-list-item>
           </v-list-group>
         </template>
 
-        <v-divider class="my-2"></v-divider>
+        <v-divider class="my-2" />
 
         <v-list-item>
           <VersionSelector />
@@ -190,11 +189,10 @@
               src="/images/kofi_symbol.webp"
               alt="Ko-fi"
               class="kofi-icon-mobile"
-            />
+            >
             {{ mobileKofiText }}
           </v-list-item-title>
         </v-list-item>
-
       </v-list>
     </v-navigation-drawer>
     <!-- Main Content -->
@@ -207,39 +205,37 @@
 </template>
 
 <script>
-import VersionSelector from './components/Menu/VersionSelector.vue'
-import LocationSelector from './components/Home/LocationSelector.vue'
-import ShareButton from './components/Menu/ShareButton.vue'
-import HamburgerIcon from './components/Menu/HamburgerIcon.vue'
-import { mapStores } from 'pinia'
-import { useDataStore } from './services/store.js'
+import VersionSelector from './components/Menu/VersionSelector.vue';
+
+import ShareButton from './components/Menu/ShareButton.vue';
+import HamburgerIcon from './components/Menu/HamburgerIcon.vue';
+import { mapStores } from 'pinia';
+import { useDataStore } from './services/store.js';
 
 export default {
   name: 'App',
   components: {
     VersionSelector,
-    LocationSelector,
     ShareButton,
     HamburgerIcon
   },
-  computed: {
-    ...mapStores(useDataStore),
-    currentPageTitle() {
-      return this.dataStore.getCurrentPageTitle()
-    }
+  data() {
+    return {
+      mobileMenuOpen: false
+    };
   },
   computed: {
     ...mapStores(useDataStore),
     currentPageTitle() {
-      return this.dataStore.getCurrentPageTitle()
+      return this.dataStore.getCurrentPageTitle();
     },
     menuItems() {
       const isEnglish = this.dataStore.labelState === 3;
-      
+
       if (isEnglish) {
         return [
-          { 
-            title: 'Home', 
+          {
+            title: 'Home',
             path: '/',
             tooltip: 'Return to the main page with national data'
           },
@@ -251,19 +247,19 @@ export default {
               { title: 'Correlations', path: '/correlations' },
               { title: 'Locations', path: '/localisation' },
               { title: 'Demography', path: '/demography' },
-              { title: 'Politics', path: '/politique' },
+              { title: 'Politics', path: '/politique' }
             ]
           },
-          { 
-            title: 'Methodology', 
+          {
+            title: 'Methodology',
             path: '/methodologie',
             tooltip: 'Discover how data is collected and analyzed'
           }
         ];
       } else {
         return [
-          { 
-            title: 'Accueil', 
+          {
+            title: 'Accueil',
             path: '/',
             tooltip: 'Retour à la page principale avec les données nationales'
           },
@@ -275,11 +271,11 @@ export default {
               { title: 'Corrélations', path: '/correlations' },
               { title: 'Localisation', path: '/localisation' },
               { title: 'Démographie', path: '/demography' },
-              { title: 'Politique', path: '/politique' },
+              { title: 'Politique', path: '/politique' }
             ]
           },
-          { 
-            title: 'Méthodologie', 
+          {
+            title: 'Méthodologie',
             path: '/methodologie',
             tooltip: 'Découvrez comment les données sont collectées et analysées'
           }
@@ -287,74 +283,75 @@ export default {
       }
     },
     twitterTooltip() {
-      return this.dataStore.labelState === 3 
+      return this.dataStore.labelState === 3
         ? 'Follow us on X (Twitter) for the latest updates'
         : 'Suivez-nous sur X (Twitter) pour les dernières mises à jour';
     },
     kofiTooltip() {
-      return this.dataStore.labelState === 3 
+      return this.dataStore.labelState === 3
         ? 'Support the project'
         : 'Soutenez le projet';
     },
     versionTooltip() {
-      return this.dataStore.labelState === 3 
+      return this.dataStore.labelState === 3
         ? 'Change the site cosmetics, not the data'
         : 'Modifiez la cosmétique du site, pas les données';
     },
     shareTooltip() {
-      return this.dataStore.labelState === 3 
+      return this.dataStore.labelState === 3
         ? 'Share this visualization with a custom link'
         : 'Partagez cette visualisation avec un lien personnalisé';
     },
     mobileTwitterText() {
-      return this.dataStore.labelState === 3 
+      return this.dataStore.labelState === 3
         ? '@ou_va_ma_France'
         : '@ou_va_ma_France';
     },
     mobileKofiText() {
-      return this.dataStore.labelState === 3 
+      return this.dataStore.labelState === 3
         ? 'Buy me a coffee'
         : 'Offrez-moi un café';
     }
   },
-  data() {
-    return {
-      mobileMenuOpen: false
-    }
-  },
   mounted() {
     // Handle URL parameters for shared links
-    this.handleUrlParameters()
-    
+    this.handleUrlParameters();
+
     // Initialize store to sync with MetricsConfig
-    this.dataStore.initializeStore()
+    this.dataStore.initializeStore();
   },
   methods: {
     handleUrlParameters() {
-      const urlParams = new URLSearchParams(window.location.search)
-      
+      const urlParams = new URLSearchParams(window.location.search);
+
       // Check if there are any relevant parameters
-      const hasParams = urlParams.has('v') || urlParams.has('c') || urlParams.has('m')
-      
+      const hasParams = urlParams.has('v') || urlParams.has('c') || urlParams.has('m');
+
       if (hasParams) {
-        const params = {}
-        
+        const params = {};
+
         // Extract parameters
-        if (urlParams.has('v')) params.v = urlParams.get('v')
-        if (urlParams.has('c')) params.c = urlParams.get('c')
-        if (urlParams.has('m')) params.m = urlParams.get('m')
-        
+        if (urlParams.has('v')) {
+          params.v = urlParams.get('v');
+        }
+        if (urlParams.has('c')) {
+          params.c = urlParams.get('c');
+        }
+        if (urlParams.has('m')) {
+          params.m = urlParams.get('m');
+        }
+
         // Store in sessionStorage for the store to process
-        sessionStorage.setItem('pendingNavigation', JSON.stringify(params))
-        
+        sessionStorage.setItem('pendingNavigation', JSON.stringify(params));
+
         // Clear URL parameters to keep URL clean
-        const url = new URL(window.location)
-        url.search = ''
-        window.history.replaceState({}, '', url)
+        const url = new URL(window.location);
+        url.search = '';
+        window.history.replaceState({}, '', url);
       }
     }
   }
-}
+};
 </script>
 
 <style>

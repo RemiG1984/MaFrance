@@ -1,8 +1,8 @@
 <template>
-  <span 
+  <span
     class="hamburger"
     :class="{ active: opened }"
-  ></span>
+  />
 </template>
 
 <script>
@@ -11,10 +11,10 @@ export default {
   props: {
     opened: {
       type: Boolean,
-      default: false,
-    },
-  },
-}
+      default: false
+    }
+  }
+};
 </script>
 
 <style scoped>

@@ -3,18 +3,28 @@
   <div class="ranking-results">
     <div class="data-box">
       <h2>{{ title }}</h2>
-      
+
       <!-- Top rankings -->
       <h3>{{ isEnglish ? 'Top' : 'Haut' }} {{ topRankings.length }}</h3>
       <div class="table-container">
         <table class="score-table">
           <thead>
             <tr class="score-header">
-              <th style="width: 12%;">{{ isEnglish ? 'Rank' : 'Rang' }}</th>
-              <th style="width: 35%;">{{ getTypeLabel(type) }}</th>
-              <th style="width: 20%;">Population</th>
-              <th v-if="showPoliticalColor && type === 'Commune'" style="width: 15%;">{{ isEnglish ? 'Mayor Political Family' : 'Famille Politique du Maire' }}</th>
-              <th style="width: 18%;">{{ isEnglish ? 'Value' : 'Valeur' }}</th>
+              <th style="width: 12%;">
+                {{ isEnglish ? 'Rank' : 'Rang' }}
+              </th>
+              <th style="width: 35%;">
+                {{ getTypeLabel(type) }}
+              </th>
+              <th style="width: 20%;">
+                Population
+              </th>
+              <th v-if="showPoliticalColor && type === 'Commune'" style="width: 15%;">
+                {{ isEnglish ? 'Mayor Political Family' : 'Famille Politique du Maire' }}
+              </th>
+              <th style="width: 18%;">
+                {{ isEnglish ? 'Value' : 'Valeur' }}
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -27,24 +37,36 @@
               <td>{{ item.rank }}</td>
               <td>{{ formatLocationName(item) }}</td>
               <td>{{ formatPopulation(item.population) }}</td>
-              <td v-if="showPoliticalColor && type === 'Commune'">{{ item.famille_nuance || 'N/A' }}</td>
+              <td v-if="showPoliticalColor && type === 'Commune'">
+                {{ item.famille_nuance || 'N/A' }}
+              </td>
               <td>{{ formatMetricValue(item[metric]) }}</td>
             </tr>
           </tbody>
         </table>
       </div>
-      
+
       <!-- Bottom rankings -->
       <h3>{{ isEnglish ? 'Bottom' : 'Bas' }} {{ bottomRankings.length }}</h3>
       <div class="table-container">
         <table class="score-table">
           <thead>
             <tr class="score-header">
-              <th style="width: 12%;">{{ isEnglish ? 'Rank' : 'Rang' }}</th>
-              <th style="width: 35%;">{{ getTypeLabel(type) }}</th>
-              <th style="width: 20%;">Population</th>
-              <th v-if="showPoliticalColor && type === 'Commune'" style="width: 15%;">{{ isEnglish ? 'Mayor Political Family' : 'Famille Politique du Maire' }}</th>
-              <th style="width: 18%;">{{ isEnglish ? 'Value' : 'Valeur' }}</th>
+              <th style="width: 12%;">
+                {{ isEnglish ? 'Rank' : 'Rang' }}
+              </th>
+              <th style="width: 35%;">
+                {{ getTypeLabel(type) }}
+              </th>
+              <th style="width: 20%;">
+                Population
+              </th>
+              <th v-if="showPoliticalColor && type === 'Commune'" style="width: 15%;">
+                {{ isEnglish ? 'Mayor Political Family' : 'Famille Politique du Maire' }}
+              </th>
+              <th style="width: 18%;">
+                {{ isEnglish ? 'Value' : 'Valeur' }}
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -57,7 +79,9 @@
               <td>{{ item.rank }}</td>
               <td>{{ formatLocationName(item) }}</td>
               <td>{{ formatPopulation(item.population) }}</td>
-              <td v-if="showPoliticalColor && type === 'Commune'">{{ item.famille_nuance || 'N/A' }}</td>
+              <td v-if="showPoliticalColor && type === 'Commune'">
+                {{ item.famille_nuance || 'N/A' }}
+              </td>
               <td>{{ formatMetricValue(item[metric]) }}</td>
             </tr>
           </tbody>
@@ -68,9 +92,9 @@
 </template>
 
 <script>
-import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { useDataStore } from '../../services/store.js'
-import { MetricsConfig } from '../../utils/metricsConfig.js'
+import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { useDataStore } from '../../services/store.js';
+import { MetricsConfig } from '../../utils/metricsConfig.js';
 
 export default {
   name: 'RankingResults',
@@ -97,98 +121,118 @@ export default {
     }
   },
   setup(props) {
-    const store = useDataStore()
-    const labelStateKey = ref(store.labelState)
+    const store = useDataStore();
+    const labelStateKey = ref(store.labelState);
 
-    const isEnglish = computed(() => store.labelState === 3)
+    const isEnglish = computed(() => store.labelState === 3);
 
     const metricName = computed(() => {
       // Force reactivity by accessing labelStateKey
-      labelStateKey.value
-      return MetricsConfig.getMetricLabel(props.metric)
-    })
+      labelStateKey.value;
+      return MetricsConfig.getMetricLabel(props.metric);
+    });
 
     const title = computed(() => {
-      const typePlural = isEnglish.value ? getEnglishTypePlural(props.type) : props.type + 's'
-      return isEnglish.value ? `Ranking of ${typePlural} for ${metricName.value}` : `Classement des ${props.type}s pour ${metricName.value}`
-    })
+      const typePlural = isEnglish.value ? getEnglishTypePlural(props.type) : props.type + 's';
+      return isEnglish.value ? `Ranking of ${typePlural} for ${metricName.value}` : `Classement des ${props.type}s pour ${metricName.value}`;
+    });
 
     const getTypeLabel = (type) => {
       if (isEnglish.value) {
-        if (type === 'departement') return 'Department'
-        if (type === 'commune') return 'Municipality'
-        return type
+        if (type === 'departement') {
+          return 'Department';
+        }
+        if (type === 'commune') {
+          return 'Municipality';
+        }
+        return type;
       } else {
-        if (type === 'departement') return 'Département'
-        if (type === 'commune') return 'Commune'
-        return type
+        if (type === 'departement') {
+          return 'Département';
+        }
+        if (type === 'commune') {
+          return 'Commune';
+        }
+        return type;
       }
-    }
+    };
 
     const getEnglishTypePlural = (type) => {
-      if (type === 'departement') return 'departments'
-      if (type === 'commune') return 'municipalities'
-      return type + 's'
-    }
+      if (type === 'departement') {
+        return 'departments';
+      }
+      if (type === 'commune') {
+        return 'municipalities';
+      }
+      return type + 's';
+    };
 
     const topRankings = computed(() => {
-      return props.rankings.slice(0, props.limit)
-    })
+      return props.rankings.slice(0, props.limit);
+    });
 
     const bottomRankings = computed(() => {
-      const totalCount = props.rankings.length
+      const totalCount = props.rankings.length;
       if (totalCount <= props.limit) {
-        return [] // No bottom rankings if we have fewer items than the limit
+        return []; // No bottom rankings if we have fewer items than the limit
       }
-      
+
       // Calculate how many items to show in bottom list
-      const remainingItems = totalCount - props.limit
-      const bottomCount = Math.min(props.limit, remainingItems)
-      
+      const remainingItems = totalCount - props.limit;
+      const bottomCount = Math.min(props.limit, remainingItems);
+
       // Get the last X items (they already have correct ranks from API)
-      return props.rankings.slice(-bottomCount)
-    })
+      return props.rankings.slice(-bottomCount);
+    });
 
     const formatLocationName = (item) => {
       if (props.type === 'departement') {
-        return item.nom || item.name || (isEnglish.value ? `Department ${item.departement}` : `Département ${item.departement}`)
+        return item.nom || item.name || (isEnglish.value ? `Department ${item.departement}` : `Département ${item.departement}`);
       } else {
-        return `${item.commune || item.name || item.nom} (${item.departement || item.deptCode})`
+        return `${item.commune || item.name || item.nom} (${item.departement || item.deptCode})`;
       }
-    }
+    };
 
     const formatPopulation = (population) => {
-      return population?.toLocaleString('fr-FR') || 'N/A'
-    }
+      return population?.toLocaleString('fr-FR') || 'N/A';
+    };
 
     const formatMetricValue = (value) => {
-      return MetricsConfig.formatMetricValue(value, props.metric)
-    }
+      return MetricsConfig.formatMetricValue(value, props.metric);
+    };
 
     // Listen for label state changes
     const handleLabelChange = (event) => {
-      labelStateKey.value = event.detail.labelState
-    }
+      labelStateKey.value = event.detail.labelState;
+    };
 
     onMounted(() => {
-      window.addEventListener('metricsLabelsToggled', handleLabelChange)
-    })
+      window.addEventListener('metricsLabelsToggled', handleLabelChange);
+    });
 
     onUnmounted(() => {
-      window.removeEventListener('metricsLabelsToggled', handleLabelChange)
-    })
+      window.removeEventListener('metricsLabelsToggled', handleLabelChange);
+    });
 
     const formatPoliticalColor = (item) => {
-      return item.famille_nuance || 'N/A'
-    }
+      return item.famille_nuance || 'N/A';
+    };
 
     const getRowColor = (famille_nuance) => {
-      if (famille_nuance === 'Gauche') return 'rgba(255, 100, 100, 0.2)'
-      if (famille_nuance === 'Droite') return 'rgba(100, 100, 255, 0.2)'
-      if (famille_nuance === 'Extrême droite') return 'rgba(0, 0, 128, 0.2)'
-      if (famille_nuance === 'Centre') return 'rgba(255, 165, 0, 0.2)'
-      return ''
-    }
+      if (famille_nuance === 'Gauche') {
+        return 'rgba(255, 100, 100, 0.2)';
+      }
+      if (famille_nuance === 'Droite') {
+        return 'rgba(100, 100, 255, 0.2)';
+      }
+      if (famille_nuance === 'Extrême droite') {
+        return 'rgba(0, 0, 128, 0.2)';
+      }
+      if (famille_nuance === 'Centre') {
+        return 'rgba(255, 165, 0, 0.2)';
+      }
+      return '';
+    };
 
     return {
       isEnglish,
@@ -202,9 +246,9 @@ export default {
       formatPoliticalColor,
       getRowColor,
       getTypeLabel
-    }
+    };
   }
-}
+};
 </script>
 
 <style scoped>
@@ -283,17 +327,17 @@ export default {
   .data-box {
     padding: 15px;
   }
-  
+
   .score-header th,
   .score-row td {
     padding: 8px 6px;
     font-size: 12px;
   }
-  
+
   .data-box h2 {
     font-size: 1.3rem;
   }
-  
+
   .data-box h3 {
     font-size: 1.1rem;
   }
@@ -303,7 +347,7 @@ export default {
   .table-container {
     font-size: 11px;
   }
-  
+
   .score-header th,
   .score-row td {
     padding: 6px 4px;

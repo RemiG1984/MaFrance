@@ -1,55 +1,63 @@
 <template>
   <v-card class="mb-4">
-    <v-card-title class="text-h6 pb-0" @click="toggleCollapse" style="cursor: pointer;">
+    <v-card-title class="text-h6 pb-0" style="cursor: pointer;" @click="toggleCollapse">
       {{ cardTitle }}
     </v-card-title>
 
     <v-expand-transition>
       <v-card-text v-show="!isCollapsed">
-      <!-- Show loading indicator while data is being fetched -->
-      <div v-if="loading" class="d-flex justify-center align-center py-8">
-        <v-progress-circular indeterminate color="primary" size="32"></v-progress-circular>
-      </div>
+        <!-- Show loading indicator while data is being fetched -->
+        <div v-if="loading" class="d-flex justify-center align-center py-8">
+          <v-progress-circular indeterminate color="primary" size="32" />
+        </div>
 
-      <!-- Display table if there are rows -->
-      <v-table v-else-if="tableRows.length > 0" class="score-table">
-        <thead>
-          <tr class="score-header">
-            <th class="row-title" :style="getHeaderWidthStyle()"></th>
-            <th class="score-main" :style="getMainColumnWidthStyle()">{{ mainHeader }}</th>
-            <th v-if="compareHeader" class="score-compare" :style="getCompareColumnWidthStyle()">{{ compareHeader }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="(row, index) in tableRows"
-            :key="index"
-            :class="getRowClasses(row)"
-            :data-group-id="row.groupId"
-            @click="handleRowClick(row)"
-          >
-            <td :class="getTitleClasses(row)">
-              <span>{{ row.title }}</span>
-            </td>
-            <td class="score-main">{{ row.main }}</td>
-            <td v-if="compareHeader" class="score-compare">{{ row.compare || '' }}</td>
-          </tr>
-        </tbody>
-      </v-table>
+        <!-- Display table if there are rows -->
+        <v-table v-else-if="tableRows.length > 0" class="score-table">
+          <thead>
+            <tr class="score-header">
+              <th class="row-title" :style="getHeaderWidthStyle()" />
+              <th class="score-main" :style="getMainColumnWidthStyle()">
+                {{ mainHeader }}
+              </th>
+              <th v-if="compareHeader" class="score-compare" :style="getCompareColumnWidthStyle()">
+                {{ compareHeader }}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="(row, index) in tableRows"
+              :key="index"
+              :class="getRowClasses(row)"
+              :data-group-id="row.groupId"
+              @click="handleRowClick(row)"
+            >
+              <td :class="getTitleClasses(row)">
+                <span>{{ row.title }}</span>
+              </td>
+              <td class="score-main">
+                {{ row.main }}
+              </td>
+              <td v-if="compareHeader" class="score-compare">
+                {{ row.compare || '' }}
+              </td>
+            </tr>
+          </tbody>
+        </v-table>
 
-      <!-- Show message if no data is available -->
-      <div v-else class="text-center py-8 text-grey">
-        {{ noDataMessage }}
-      </div>
+        <!-- Show message if no data is available -->
+        <div v-else class="text-center py-8 text-grey">
+          {{ noDataMessage }}
+        </div>
       </v-card-text>
     </v-expand-transition>
   </v-card>
 </template>
 
 <script>
-import { useDataStore } from '../../services/store.js'
-import { MetricsConfig } from '../../utils/metricsConfig.js'
-import { DepartementNames } from '../../utils/departementNames.js'
+import { useDataStore } from '../../services/store.js';
+import { MetricsConfig } from '../../utils/metricsConfig.js';
+import { DepartementNames } from '../../utils/departementNames.js';
 
 export default {
   name: 'ScoreTable',
@@ -65,12 +73,12 @@ export default {
       tableRows: [],
       mainHeader: '',
       compareHeader: '',
-      isCollapsed: false,
-    }
+      isCollapsed: false
+    };
   },
   computed: {
     dataStore() {
-      return useDataStore()
+      return useDataStore();
     },
     cardTitle() {
       const isEnglish = this.dataStore.labelState === 3;
@@ -86,7 +94,7 @@ export default {
         : `Indices et données pour: ${this.location.name}${deptPart}`;
     },
     noDataMessage() {
-      return this.dataStore.labelState === 3 
+      return this.dataStore.labelState === 3
         ? 'No data available for this location'
         : 'Aucune donnée disponible pour cette localisation';
     }
@@ -94,39 +102,45 @@ export default {
   watch: {
     location: {
       handler() {
-        this.updateTable()
+        this.updateTable();
       },
       immediate: true
     },
     'dataStore.labelState': {
       handler() {
-        this.updateTable()
+        this.updateTable();
       }
     },
     'dataStore.country': {
       handler() {
-        if (this.location.type === 'country') this.updateTable()
+        if (this.location.type === 'country') {
+          this.updateTable();
+        }
       },
       deep: true
     },
     'dataStore.departement': {
       handler() {
-        if (this.location.type === 'departement') this.updateTable()
+        if (this.location.type === 'departement') {
+          this.updateTable();
+        }
       },
       deep: true
     },
     'dataStore.commune': {
       handler() {
-        if (this.location.type === 'commune') this.updateTable()
+        if (this.location.type === 'commune') {
+          this.updateTable();
+        }
       },
       deep: true
     }
   },
   mounted() {
-    window.addEventListener('metricsLabelsToggled', this.updateTable)
+    window.addEventListener('metricsLabelsToggled', this.updateTable);
   },
   beforeUnmount() {
-    window.removeEventListener('metricsLabelsToggled', this.updateTable)
+    window.removeEventListener('metricsLabelsToggled', this.updateTable);
   },
   methods: {
     toggleCollapse() {
@@ -134,208 +148,226 @@ export default {
     },
     updateTable() {
       if (!this.location || !this.location.type) {
-        this.tableRows = []
-        return
+        this.tableRows = [];
+        return;
       }
 
-      const level = this.location.type
-      const storeSection = this.dataStore[level]
+      const level = this.location.type;
+      const storeSection = this.dataStore[level];
 
-      if (!storeSection || !storeSection.details) {  // Check if data is loaded
-        this.loading = true
-        this.tableRows = []
-        return
+      if (!storeSection || !storeSection.details) { // Check if data is loaded
+        this.loading = true;
+        this.tableRows = [];
+        return;
       }
 
-      this.loading = false
+      this.loading = false;
 
-      let compareStoreSection = null
+      let compareStoreSection = null;
 
       if (level === 'departement') {
-        compareStoreSection = this.dataStore.country
+        compareStoreSection = this.dataStore.country;
       } else if (level === 'commune') {
-        compareStoreSection = this.dataStore.departement
+        compareStoreSection = this.dataStore.departement;
       }
 
       // Set headers based on geographic level
-      this.setHeaders(level, storeSection)
+      this.setHeaders(level, storeSection);
 
-      const rows = []
+      const rows = [];
 
       // Get ordered unique categories, excluding 'général'
-      const categories = this.getUniqueCategories()
+      const categories = this.getUniqueCategories();
 
       // Build rows for each category
       categories.forEach(category => {
         const categoryMetrics = MetricsConfig.getMetricsByCategory(category)
-          .filter(m => MetricsConfig.isMetricAvailable(m.value, level))
+          .filter(m => MetricsConfig.isMetricAvailable(m.value, level));
 
-        if (categoryMetrics.length === 0) return
+        if (categoryMetrics.length === 0) {
+          return;
+        }
 
         // Main row (first metric, usually the score)
-        const mainMetric = categoryMetrics[0]
-        rows.push(this.createRow(mainMetric, storeSection, compareStoreSection, false))
+        const mainMetric = categoryMetrics[0];
+        rows.push(this.createRow(mainMetric, storeSection, compareStoreSection, false));
 
         // Sub-rows (remaining metrics)
         categoryMetrics.slice(1).forEach(subMetric => {
-          rows.push(this.createRow(subMetric, storeSection, compareStoreSection, true))
-        })
-      })
+          rows.push(this.createRow(subMetric, storeSection, compareStoreSection, true));
+        });
+      });
 
-      this.tableRows = this.addGroupIds(rows)
+      this.tableRows = this.addGroupIds(rows);
     },
 
     setHeaders(level, storeSection) {
       const isEnglish = this.dataStore.labelState === 3;
-      
+
       if (level === 'country') {
-        this.mainHeader = isEnglish ? 'Metropolitan France' : 'France métropolitaine'
-        this.compareHeader = isEnglish ? 'Entire France' : 'France entière'
+        this.mainHeader = isEnglish ? 'Metropolitan France' : 'France métropolitaine';
+        this.compareHeader = isEnglish ? 'Entire France' : 'France entière';
       } else if (level === 'departement') {
-        const deptCode = this.location.code
-        this.mainHeader = `${deptCode} - ${DepartementNames[deptCode] || deptCode}`
-        this.compareHeader = isEnglish ? 'Metropolitan France' : 'France métropolitaine'
+        const deptCode = this.location.code;
+        this.mainHeader = `${deptCode} - ${DepartementNames[deptCode] || deptCode}`;
+        this.compareHeader = isEnglish ? 'Metropolitan France' : 'France métropolitaine';
       } else if (level === 'commune') {
-        const communeData = storeSection.details
-        const departement = communeData.departement
-        const commune = communeData.commune
-        this.mainHeader = `${departement} - ${commune}`
-        this.compareHeader = DepartementNames[departement] || departement
+        const communeData = storeSection.details;
+        const departement = communeData.departement;
+        const commune = communeData.commune;
+        this.mainHeader = `${departement} - ${commune}`;
+        this.compareHeader = DepartementNames[departement] || departement;
       }
     },
 
     getUniqueCategories() {
-      const seen = new Set()
+      const seen = new Set();
       return MetricsConfig.metrics
         .map(m => m.category)
         .filter(c => {
-          if (seen.has(c)) return false
-          seen.add(c)
-          return true
-        })
+          if (seen.has(c)) {
+            return false;
+          }
+          seen.add(c);
+          return true;
+        });
     },
 
     createRow(metric, storeSection, compareStoreSection, isSubRow = false) {
-      const metricKey = metric.value
-      const title = MetricsConfig.getMetricLabel(metricKey)
-      const source = metric.source || 'details'
+      const metricKey = metric.value;
+      const title = MetricsConfig.getMetricLabel(metricKey);
+      const source = metric.source || 'details';
 
       // Handle France country level
       if (this.location.type === 'country' && this.location.name === 'France') {
-        const main = this.getFormattedValueFromCountryArray(storeSection, metricKey, source, 'france metro')
-        const compare = this.getFormattedValueFromCountryArray(storeSection, metricKey, source, 'france entiere')
-        return { title, main, compare, subRow: isSubRow }
+        const main = this.getFormattedValueFromCountryArray(storeSection, metricKey, source, 'france metro');
+        const compare = this.getFormattedValueFromCountryArray(storeSection, metricKey, source, 'france entiere');
+        return { title, main, compare, subRow: isSubRow };
       }
 
       // Get main value
-      const main = this.getFormattedValue(storeSection, metricKey, source)
+      const main = this.getFormattedValue(storeSection, metricKey, source);
 
       // Get comparison value (if applicable)
-      let compare = ''
+      let compare = '';
       if (compareStoreSection) {
         if (this.location.type === 'departement') {
           // For departements, compare with France metro
-          compare = this.getFormattedValueFromCountryArray(compareStoreSection, metricKey, source, 'france metro')
+          compare = this.getFormattedValueFromCountryArray(compareStoreSection, metricKey, source, 'france metro');
         } else {
-          compare = this.getFormattedValue(compareStoreSection, metricKey, source)
+          compare = this.getFormattedValue(compareStoreSection, metricKey, source);
         }
       }
 
-      return { title, main, compare, subRow: isSubRow }
+      return { title, main, compare, subRow: isSubRow };
     },
 
     getFormattedValue(storeSection, metricKey, source) {
-      const sectionData = storeSection[source]
-      if (!sectionData) return 'N/A'
+      const sectionData = storeSection[source];
+      if (!sectionData) {
+        return 'N/A';
+      }
 
-      let value = MetricsConfig.calculateMetric(metricKey, sectionData)
-      if (value == null || value === undefined || isNaN(value)) return 'N/A'
+      const value = MetricsConfig.calculateMetric(metricKey, sectionData);
+      if (value === null || value === undefined || isNaN(value)) {
+        return 'N/A';
+      }
 
-      let formatted = MetricsConfig.formatMetricValue(value, metricKey)
+      let formatted = MetricsConfig.formatMetricValue(value, metricKey);
 
       // Add year suffix for specific sources
       if (source === 'names' && sectionData.annais) {
-        formatted += ` (${sectionData.annais})`
+        formatted += ` (${sectionData.annais})`;
       } else if (source === 'crime' && sectionData.annee) {
-        formatted += ` (${sectionData.annee})`
+        formatted += ` (${sectionData.annee})`;
       }
 
-      return formatted
+      return formatted;
     },
 
     getFormattedValueFromCountryArray(storeSection, metricKey, source, countryType) {
-      const sectionData = storeSection[source]
-      if (!sectionData || !Array.isArray(sectionData)) return 'N/A'
+      const sectionData = storeSection[source];
+      if (!sectionData || !Array.isArray(sectionData)) {
+        return 'N/A';
+      }
 
-      const data = sectionData.find(item => item.country === countryType)
-      if (!data) return 'N/A'
+      const data = sectionData.find(item => item.country === countryType);
+      if (!data) {
+        return 'N/A';
+      }
 
-      let value = MetricsConfig.calculateMetric(metricKey, data)
-      if (value == null || value === undefined || isNaN(value)) return 'N/A'
+      const value = MetricsConfig.calculateMetric(metricKey, data);
+      if (value === null || value === undefined || isNaN(value)) {
+        return 'N/A';
+      }
 
-      let formatted = MetricsConfig.formatMetricValue(value, metricKey)
+      let formatted = MetricsConfig.formatMetricValue(value, metricKey);
 
       // Add year suffix for specific sources
       if (source === 'names' && data.annais) {
-        formatted += ` (${data.annais})`
+        formatted += ` (${data.annais})`;
       } else if (source === 'crime' && data.annee) {
-        formatted += ` (${data.annee})`
+        formatted += ` (${data.annee})`;
       }
 
-      return formatted
+      return formatted;
     },
 
     addGroupIds(rows) {
-      let currentGroupId = null
+      let currentGroupId = null;
       return rows.map((row, index) => {
         if (!row.subRow) {
-          currentGroupId = `group-${index}`
+          currentGroupId = `group-${index}`;
         }
-        return { ...row, groupId: currentGroupId }
-      })
+        return { ...row, groupId: currentGroupId };
+      });
     },
 
     getRowClasses(row) {
-      const classes = ['score-row']
+      const classes = ['score-row'];
       if (row.subRow) {
-        classes.push('sub-row', `group-${row.groupId}`, 'sub-row-hidden')
+        classes.push('sub-row', `group-${row.groupId}`, 'sub-row-hidden');
       }
-      return classes.join(' ')
+      return classes.join(' ');
     },
 
     getTitleClasses(row) {
-      const classes = ['row-title']
+      const classes = ['row-title'];
       if (row.subRow) {
-        classes.push('sub-row')
+        classes.push('sub-row');
       }
-      return classes.join(' ')
+      return classes.join(' ');
     },
 
     handleRowClick(row) {
       if (!row.subRow) {
-        const groupId = row.groupId
-        const subRows = this.$el.querySelectorAll(`.sub-row.group-${groupId}`)
+        const groupId = row.groupId;
+        const subRows = this.$el.querySelectorAll(`.sub-row.group-${groupId}`);
         subRows.forEach((subRow) => {
-          subRow.classList.toggle('sub-row-hidden')
-        })
+          subRow.classList.toggle('sub-row-hidden');
+        });
       }
     },
 
     getHeaderWidthStyle() {
-      if (this.compareHeader) return 'width: 50%'
-      return 'width: 70%'
+      if (this.compareHeader) {
+        return 'width: 50%';
+      }
+      return 'width: 70%';
     },
 
     getMainColumnWidthStyle() {
-      if (this.compareHeader) return 'width: 25%'
-      return 'width: 30%'
+      if (this.compareHeader) {
+        return 'width: 25%';
+      }
+      return 'width: 30%';
     },
 
     getCompareColumnWidthStyle() {
-      return 'width: 25%'
+      return 'width: 25%';
     }
   }
-}
+};
 </script>
 
 <style scoped>

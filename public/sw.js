@@ -7,7 +7,7 @@ const TILE_CACHE_NAME = `ma-france-tiles-${BUILD_HASH}`;
 // All API routes are cached automatically based on /api/ prefix
 
 // Install event - no static asset caching
-self.addEventListener('install', (event) => {
+self.addEventListener('install', () => {
   console.log('Service Worker installing with build hash:', BUILD_HASH);
   // Skip waiting to activate immediately
   self.skipWaiting();
@@ -21,7 +21,7 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           // Delete old cache versions - keep only current build hash caches
-          if (cacheName !== API_CACHE_NAME && 
+          if (cacheName !== API_CACHE_NAME &&
               cacheName !== IMAGE_CACHE_NAME &&
               cacheName !== TILE_CACHE_NAME &&
               (cacheName.startsWith('ma-france-') || cacheName.startsWith('workbox-'))) {
@@ -50,17 +50,11 @@ self.addEventListener('fetch', (event) => {
   // Handle API requests
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(handleApiRequest(request));
-  }
-  // Handle francocides images with caching
-  else if (url.pathname.startsWith('/images/francocides/')) {
+  } else if (url.pathname.startsWith('/images/francocides/')) {
     event.respondWith(handleImageRequest(request));
-  }
-  // Handle map tiles from CartoDB with caching
-  else if (url.hostname.includes('basemaps.cartocdn.com')) {
+  } else if (url.hostname.includes('basemaps.cartocdn.com')) {
     event.respondWith(handleTileRequest(request));
-  }
-  // Handle CSV data requests with caching
-  else if (url.pathname.startsWith('/data/')) {
+  } else if (url.pathname.startsWith('/data/')) {
     event.respondWith(handleCsvRequest(request));
   }
   // Let all other requests (HTML, CSS, JS) go directly to network
@@ -91,11 +85,11 @@ async function handleImageRequest(request) {
   try {
     const cache = await caches.open(IMAGE_CACHE_NAME);
     const cachedResponse = await cache.match(request);
-    
+
     if (cachedResponse) {
       return cachedResponse;
     }
-    
+
     const response = await fetch(request);
     if (response.ok) {
       cache.put(request, response.clone());
@@ -160,7 +154,7 @@ async function manageTileCache(cache) {
   try {
     const keys = await cache.keys();
     const maxTiles = 1000; // Approximate limit - each tile is ~10-50KB
-    
+
     if (keys.length > maxTiles) {
       // Remove oldest tiles (FIFO)
       const tilesToDelete = keys.slice(0, keys.length - maxTiles);
@@ -192,7 +186,7 @@ async function doBackgroundSync() {
           await cache.put(request, response);
         }
       } catch (error) {
-        console.log('Failed to refresh cached request:', request.url);
+        console.log('Failed to refresh cached request:', request.url, error);
       }
     }
   } catch (error) {

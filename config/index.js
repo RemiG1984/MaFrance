@@ -1,15 +1,17 @@
 
+const { SERVER_PORT } = require('../constants');
+
 module.exports = {
   server: {
-    port: process.env.PORT || 3000,
+    port: process.env.PORT || SERVER_PORT,
     host: '0.0.0.0',
     env: process.env.NODE_ENV || 'development'
   },
-  
+
   database: {
     path: process.env.DB_PATH || '.data/france.db'
   },
-  
+
   api: {
     limits: {
       communes: 10,
@@ -21,7 +23,7 @@ module.exports = {
       connection: 5000
     }
   },
-  
+
   validation: {
     search: {
       minLength: 2,
@@ -43,7 +45,7 @@ module.exports = {
       ]
     }
   },
-  
+
   logging: {
     level: process.env.LOG_LEVEL || 'info',
     enableSqlLogging: process.env.ENABLE_SQL_LOGGING === 'true'

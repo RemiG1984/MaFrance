@@ -1,13 +1,13 @@
 <template>
   <v-card class="mb-4">
-    <v-card-title class="text-h6 pb-0" @click="toggleCollapse" style="cursor: pointer;">
+    <v-card-title class="text-h6 pb-0" style="cursor: pointer;" @click="toggleCollapse">
       {{ cardTitle }}
     </v-card-title>
 
     <v-expand-transition>
       <v-card-text v-show="!isCollapsed">
         <div v-if="loading" class="d-flex justify-center align-center py-8">
-          <v-progress-circular indeterminate color="primary" size="32"></v-progress-circular>
+          <v-progress-circular indeterminate color="primary" size="32" />
         </div>
 
         <div v-else-if="executiveData" class="executive-box">
@@ -42,9 +42,9 @@
 </template>
 
 <script>
-import { mapStores } from 'pinia'
-import { useDataStore } from '../../services/store.js'
-import { DepartementNames } from '../../utils/departementNames.js'
+import { mapStores } from 'pinia';
+import { useDataStore } from '../../services/store.js';
+import { DepartementNames } from '../../utils/departementNames.js';
 
 export default {
   name: 'ExecutiveDetails',
@@ -58,7 +58,7 @@ export default {
     return {
       loading: false,
       isCollapsed: false
-    }
+    };
   },
   computed: {
     ...mapStores(useDataStore),
@@ -74,19 +74,21 @@ export default {
     },
 
     locationName() {
-      if (!this.location) return '';
+      if (!this.location) {
+        return '';
+      }
 
       const isEnglish = this.dataStore.labelState === 3;
 
       switch (this.location.type) {
-        case 'country':
-          return 'France';
-        case 'departement':
-          return this.location.name || (isEnglish ? `Department ${this.location.code}` : `Département ${this.location.code}`);
-        case 'commune':
-          return this.location.name || (isEnglish ? 'Municipality' : 'Commune');
-        default:
-          return '';
+      case 'country':
+        return 'France';
+      case 'departement':
+        return this.location.name || (isEnglish ? `Department ${this.location.code}` : `Département ${this.location.code}`);
+      case 'commune':
+        return this.location.name || (isEnglish ? 'Municipality' : 'Commune');
+      default:
+        return '';
       }
     },
 
@@ -111,7 +113,9 @@ export default {
     },
 
     executiveData() {
-      if (!this.location) return null;
+      if (!this.location) {
+        return null;
+      }
 
       let executive = null;
       let position = '';
@@ -120,44 +124,48 @@ export default {
       const isEnglish = this.dataStore.labelState === 3;
 
       switch (this.location.type) {
-        case 'country':
-          executive = this.dataStore.country.executive;
-          position = isEnglish ? 'Minister of Interior' : 'Ministre de l\'intérieur';
-          locationName = 'France';
-          break;
+      case 'country':
+        executive = this.dataStore.country.executive;
+        position = isEnglish ? 'Minister of Interior' : 'Ministre de l\'intérieur';
+        locationName = 'France';
+        break;
 
-        case 'departement':
-          executive = this.dataStore.departement.executive;
-          position = isEnglish ? 'Prefect' : 'Préfet';
-          const deptCode = this.location.code;
-          locationName = `${DepartementNames[deptCode]} (${deptCode})`;
-          break;
-
-        case 'commune':
-          executive = this.dataStore.commune.executive;
-          position = isEnglish ? 'Mayor' : 'Maire';
-          const communeDetails = this.dataStore.commune.details;
-          if (communeDetails) {
-            locationName = `${this.location.name} (${communeDetails.departement})`;
-          } else {
-            locationName = this.location.name || (isEnglish ? 'Municipality' : 'Commune');
-          }
-          break;
-
-        default:
-          return null;
+      case 'departement': {
+        executive = this.dataStore.departement.executive;
+        position = isEnglish ? 'Prefect' : 'Préfet';
+        const deptCode = this.location.code;
+        locationName = `${DepartementNames[deptCode]} (${deptCode})`;
+        break;
       }
 
-      if (!executive) return null;
+      case 'commune': {
+        executive = this.dataStore.commune.executive;
+        position = isEnglish ? 'Mayor' : 'Maire';
+        const communeDetails = this.dataStore.commune.details;
+        if (communeDetails) {
+          locationName = `${this.location.name} (${communeDetails.departement})`;
+        } else {
+          locationName = this.location.name || (isEnglish ? 'Municipality' : 'Commune');
+        }
+        break;
+      }
+
+      default:
+        return null;
+      }
+
+      if (!executive) {
+        return null;
+      }
 
       // Format the date label
       let dateLabel = '';
       if (executive.date_mandat) {
-        dateLabel = isEnglish 
+        dateLabel = isEnglish
           ? ` since ${this.formatDate(executive.date_mandat)}`
           : ` depuis le ${this.formatDate(executive.date_mandat)}`;
       } else if (executive.date_poste) {
-        dateLabel = isEnglish 
+        dateLabel = isEnglish
           ? ` since ${this.formatDate(executive.date_poste)}`
           : ` depuis le ${this.formatDate(executive.date_poste)}`;
       }
@@ -177,9 +185,21 @@ export default {
     }
   },
 
+  watch: {
+    location: {
+      handler() {
+        // The store will handle loading the executive data
+        // when the location changes through the main app logic
+      },
+      immediate: true
+    }
+  },
+
   methods: {
     formatDate(dateString) {
-      if (!dateString) return '';
+      if (!dateString) {
+        return '';
+      }
 
       try {
         const date = new Date(dateString);
@@ -188,8 +208,7 @@ export default {
           month: 'long',
           day: 'numeric'
         });
-      } catch (error) {
-        console.error('Error formatting date:', error);
+      } catch {
         return dateString;
       }
     },
@@ -197,18 +216,8 @@ export default {
     toggleCollapse() {
       this.isCollapsed = !this.isCollapsed;
     }
-  },
-
-  watch: {
-    location: {
-      handler(newLocation) {
-        // The store will handle loading the executive data
-        // when the location changes through the main app logic
-      },
-      immediate: true
-    }
   }
-}
+};
 </script>
 
 <style scoped>

@@ -9,6 +9,17 @@ Ma France is a comprehensive data analysis application that provides detailed in
 
 Cette Single Page Application Vue.js "Ma France: état des lieux" analyse différents indicateurs pour évaluer l'état des lieux en France, au niveau national, départemental et communal.
 
+**Fonctionnalités clés :**
+- 🗺️ **Cartes interactives** avec visualisation géographique
+- 📊 **Analyses statistiques** avec corrélations et graphiques
+- 🔍 **Recherche avancée** par commune et département
+- 🏛️ **Données politiques** et démographiques
+- 🕌 **Cartographie spécialisée** (QPV, centres migrants, mosquées)
+- 📈 **Tableaux de classement** départemental et communal
+- 🔒 **Sécurité renforcée** avec rate limiting et validation
+- 🧪 **Suite de tests complète** (99.6% de couverture)
+- 🐳 **Déploiement conteneurisé** prêt pour production
+
 ## Architecture de l'application
 
 ### Structure générale
@@ -31,6 +42,8 @@ L'application est composée de deux parties principales :
 - **Node.js** avec Express 5.1.0
 - **SQLite3** (5.1.7) pour la base de données
 - **Sécurité** : Helmet, CORS, rate limiting, validation des entrées
+- **Cache** : Service de cache persistant avec TTL
+- **Monitoring** : Health checks et métriques d'application
 - **Utilitaires** : Compression, dotenv, csv-parser, chroma-js
 
 ### Frontend
@@ -89,11 +102,13 @@ L'application est composée de deux parties principales :
 │   └── images/           # Images publiques
 │       └── kofi_symbol.webp
 ├── routes/               # Routes API
+│   ├── base/
+│   │   └── BaseRoute.js  # Classe de base pour toutes les routes API (DRY pattern)
 │   ├── articleRoutes.js  # Articles FdeSouche
 │   ├── cacheRoutes.js    # Gestion cache
-│   ├── communeRoutes.js  # Données communes
-│   ├── countryRoutes.js  # Données nationales
-│   ├── departementRoutes.js # Données départementales
+│   ├── communeRoutes.js  # Données communes (utilise BaseRoute)
+│   ├── countryRoutes.js  # Données nationales (utilise BaseRoute)
+│   ├── departementRoutes.js # Données départementales (utilise BaseRoute)
 │   ├── migrantRoutes.js  # Centres migrants
 │   ├── mosqueRoutes.js   # Mosquées
 │   ├── nat1Routes.js     # Données nationalité NAT1
@@ -311,8 +326,25 @@ client/
 ### Prérequis
 - Node.js (version 18 ou supérieure)
 - npm
+- Docker & Docker Compose (pour déploiement conteneurisé)
 
-### Installation complète
+### Installation rapide avec Docker (Recommandé)
+```bash
+# Cloner le repository
+git clone https://github.com/RemiG1984/MaFrance.git
+cd MaFrance
+
+# Configurer l'environnement
+cp .env.example .env
+
+# Démarrer avec Docker Compose
+docker-compose up -d
+
+# Vérifier que l'application fonctionne
+curl http://localhost:3000/api/health
+```
+
+### Installation traditionnelle
 ```bash
 # Installation dépendances racine (backend)
 npm install
@@ -424,6 +456,23 @@ VITE_API_BASE_URL=http://localhost:3000/api
 - **Sanitisation** : Nettoyage entrées utilisateur
 - **CORS** : Contrôle origine des requêtes
 - **CSP** : Content Security Policy
+- **Sécurité conteneur** : Utilisateur non-root, surface d'attaque minimale
+- **Analyse de vulnérabilités** : Scan automatique avec Trivy
+
+## Tests et Qualité
+
+### Suite de tests
+- **100+ tests** couvrant toutes les routes et services
+- **99.6% de couverture** de code
+- **Tests d'intégration** pour les workflows API complets
+- **Tests de performance** avec benchmarking
+- **Tests unitaires** pour utilitaires et middleware
+
+### CI/CD
+- **GitHub Actions** : Tests automatisés sur Node.js 18, 20, 22
+- **Linting intégré** : ESLint pour code quality
+- **Sécurité automatisée** : Scan de vulnérabilités hebdomadaire
+- **Dépendabot** : Mises à jour automatiques des dépendances
 
 ## Performance
 
@@ -450,14 +499,25 @@ L'application utilise un service worker (`public/sw.js`) pour :
 - **Rechargement automatique** : Actualisation lors de nouvelles versions
 - **Cache API** : Mise en cache intelligente des réponses API
 
-## Déploiement sur server VPS de production:
+## Déploiement
 
-### Configuration production
+### Déploiement rapide avec Docker (Recommandé)
+```bash
+# Production avec nginx reverse proxy
+docker-compose --profile production up -d
+
+# Développement uniquement
+docker-compose up -d
+```
+
+### Déploiement traditionnel sur server VPS
 L'application est configurée pour production avec :
 - pm2
 - Nginx (directly serve the static files, forward to port :3000 internally for api requests)
 - Build automatisé via script (deploy)
 - Service worker activé pour cache offline
+
+Voir [DEPLOYMENT.md](DEPLOYMENT.md) pour les instructions détaillées.
 
 ### Workflows disponibles
 - **HMR Development** : Développement avec hot reload (client sur port 5173)

@@ -125,7 +125,12 @@ class SearchService {
         });
     }
 
-    
+    /**
+     * Get commune suggestions for autocomplete (limited results)
+     */
+    static async getCommuneSuggestions(departement, query, limit = 5) {
+        return await this.searchCommunes(departement, query, limit);
+    }
 
     /**
      * Search communes globally (without department filter) with fuzzy matching and ranking

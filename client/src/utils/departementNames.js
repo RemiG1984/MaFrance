@@ -26,8 +26,8 @@ const DepartementNames = {
   '19': 'Corrèze',
   '2A': 'Corse-du-Sud',
   '2B': 'Haute-Corse',
-  '21': "Côte-d'Or",
-  '22': "Côtes-d'Armor",
+  '21': 'Côte-d\'Or',
+  '22': 'Côtes-d\'Armor',
   '23': 'Creuse',
   '24': 'Dordogne',
   '25': 'Doubs',
@@ -100,7 +100,7 @@ const DepartementNames = {
   '92': 'Hauts-de-Seine',
   '93': 'Seine-Saint-Denis',
   '94': 'Val-de-Marne',
-  '95': "Val-d'Oise",
+  '95': 'Val-d\'Oise',
   '971': 'Guadeloupe',
   '972': 'Martinique',
   '973': 'Guyane',
@@ -109,4 +109,4 @@ const DepartementNames = {
 };
 
 // Export for ES6 modules
-export { DepartementNames }; 
+export { DepartementNames };

@@ -1,44 +1,49 @@
 
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const db = require("../config/db");
-const { createDbHandler } = require("../middleware/errorHandler");
-const { cacheMiddleware } = require("../middleware/cache");
+const db = require('../config/db');
+const { createDbHandler } = require('../middleware/errorHandler');
+const { cacheMiddleware } = require('../middleware/cache');
 const {
   validateDepartement,
-  validateCOG,
-} = require("../middleware/validate");
+  validateCOG
+} = require('../middleware/validate');
+const { HTTP_NOT_FOUND, HTTP_BAD_REQUEST, HTTP_INTERNAL_SERVER_ERROR } = require('../constants');
 
 // Function to compute percentage fields from raw NAT1 data
 const computePercentageFields = (row) => {
-  if (!row) return null;
-  
+  if (!row) {
+    return null;
+  }
+
   const ensemble = parseFloat(row.Ensemble) || 0;
-  if (ensemble === 0) return null; // Avoid division by zero
-  
+  if (ensemble === 0) {
+    return null;
+  } // Avoid division by zero
+
   const etrangers = parseFloat(row.Etrangers) || 0;
   const francais_de_naissance = parseFloat(row.Francais_de_naissance) || 0;
   const francais_par_acquisition = parseFloat(row.Francais_par_acquisition) || 0;
-  
+
   // European nationalities
   const portugais = parseFloat(row.Portugais) || 0;
   const italiens = parseFloat(row.Italiens) || 0;
   const espagnols = parseFloat(row.Espagnols) || 0;
   const autres_ue = parseFloat(row.Autres_nationalites_de_l_UE) || 0;
   const autres_europe = parseFloat(row.Autres_nationalites_d_Europe) || 0;
-  
+
   // Maghreb and Turkey
   const algeriens = parseFloat(row.Algeriens) || 0;
   const marocains = parseFloat(row.Marocains) || 0;
   const tunisiens = parseFloat(row.Tunisiens) || 0;
   const turcs = parseFloat(row.Turcs) || 0;
-  
+
   // Other African nationalities
   const autres_afrique = parseFloat(row.Autres_nationalites_d_Afrique) || 0;
-  
+
   // Other nationalities
   const autres_nationalites = parseFloat(row.Autres_nationalites) || 0;
-  
+
   // Calculate percentages and multiply by 100, round to 2 decimal places
   const result = {
     Type: row.Type,
@@ -53,21 +58,23 @@ const computePercentageFields = (row) => {
     autres_nationalites_pct: parseFloat(((autres_nationalites / ensemble) * 100).toFixed(2)),
     non_europeens_pct: parseFloat((((algeriens + marocains + tunisiens + turcs + autres_afrique + autres_nationalites) / ensemble) * 100).toFixed(2))
   };
-  
+
   return result;
 };
 
 // GET /api/nat1/country
-router.get("/country", cacheMiddleware(() => `nat1_country_all`), (req, res, next) => {
+router.get('/country', cacheMiddleware(() => 'nat1_country_all'), (_req, res, next) => {
   const handleDbError = createDbHandler(res, next);
 
   db.all(
-    `SELECT * FROM country_nat1 ORDER BY Code`,
+    'SELECT * FROM country_nat1 ORDER BY Code',
     [],
     (err, rows) => {
-      if (err) return handleDbError(err);
+      if (err) {
+        return handleDbError(err);
+      }
       if (!rows || rows.length === 0) {
-        return res.status(404).json({ error: "Données NAT1 non trouvées" });
+        return res.status(HTTP_NOT_FOUND).json({ error: 'Données NAT1 non trouvées' });
       }
 
       const result = rows.map(row => computePercentageFields(row)).filter(Boolean);
@@ -78,29 +85,31 @@ router.get("/country", cacheMiddleware(() => `nat1_country_all`), (req, res, nex
 });
 
 // GET /api/nat1/departement
-router.get("/departement", validateDepartement, cacheMiddleware((req) => `nat1_dept_${req.query.dept}`), (req, res, next) => {
+router.get('/departement', validateDepartement, cacheMiddleware((req) => `nat1_dept_${req.query.dept}`), (req, res, next) => {
   const handleDbError = createDbHandler(res, next);
   const { dept } = req.query;
 
   if (!dept) {
-    return res.status(400).json({ error: "Paramètre dept requis" });
+    return res.status(HTTP_BAD_REQUEST).json({ error: 'Paramètre dept requis' });
   }
 
   // Normalize department code for consistency
-  const normalizedDept = /^\d+$/.test(dept) && dept.length < 2 ? dept.padStart(2, "0") : dept;
+  const normalizedDept = /^\d+$/.test(dept) && dept.length < 2 ? dept.padStart(2, '0') : dept;
 
   db.get(
-    `SELECT * FROM department_nat1 WHERE Code = ?`,
+    'SELECT * FROM department_nat1 WHERE Code = ?',
     [normalizedDept],
     (err, row) => {
-      if (err) return handleDbError(err);
+      if (err) {
+        return handleDbError(err);
+      }
       if (!row) {
-        return res.status(404).json({ error: "Données NAT1 non trouvées pour ce département" });
+        return res.status(HTTP_NOT_FOUND).json({ error: 'Données NAT1 non trouvées pour cette commune' });
       }
 
       const computedData = computePercentageFields(row);
       if (!computedData) {
-        return res.status(500).json({ error: "Erreur lors du calcul des pourcentages" });
+        return res.status(HTTP_INTERNAL_SERVER_ERROR).json({ error: 'Erreur lors du calcul des pourcentages' });
       }
 
       res.json(computedData);
@@ -109,22 +118,24 @@ router.get("/departement", validateDepartement, cacheMiddleware((req) => `nat1_d
 });
 
 // GET /api/nat1/commune
-router.get("/commune", validateCOG, cacheMiddleware((req) => `nat1_commune_${req.query.cog}`), (req, res, next) => {
+router.get('/commune', validateCOG, cacheMiddleware((req) => `nat1_commune_${req.query.cog}`), (req, res, next) => {
   const handleDbError = createDbHandler(res, next);
   const { cog } = req.query;
 
   db.get(
-    `SELECT * FROM commune_nat1 WHERE Code = ?`,
+    'SELECT * FROM commune_nat1 WHERE Code = ?',
     [cog],
     (err, row) => {
-      if (err) return handleDbError(err);
+      if (err) {
+        return handleDbError(err);
+      }
       if (!row) {
-        return res.status(404).json({ error: "Données NAT1 non trouvées pour cette commune" });
+        return res.status(HTTP_NOT_FOUND).json({ error: 'Données NAT1 non trouvées pour ce département' });
       }
 
       const computedData = computePercentageFields(row);
       if (!computedData) {
-        return res.status(500).json({ error: "Erreur lors du calcul des pourcentages" });
+        return res.status(HTTP_INTERNAL_SERVER_ERROR).json({ error: 'Erreur lors du calcul des pourcentages' });
       }
 
       res.json(computedData);

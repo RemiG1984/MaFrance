@@ -31,13 +31,12 @@
 </template>
 
 <script>
-import { ref, onMounted, computed } from 'vue'
-import { useDataStore } from '@/services/store.js'
-import { useLocationStore } from '../components/Localisation/locationStore.js'
-import LocationSearch from '../components/Localisation/LocationSearch.vue'
-import DistanceInfo from '../components/Localisation/DistanceInfo.vue'
-import MapContainer from '../components/Localisation/MapContainer.vue'
-
+import { onMounted, computed } from 'vue';
+import { useDataStore } from '@/services/store.js';
+import { useLocationStore } from '../components/Localisation/locationStore.js';
+import LocationSearch from '../components/Localisation/LocationSearch.vue';
+import DistanceInfo from '../components/Localisation/DistanceInfo.vue';
+import MapContainer from '../components/Localisation/MapContainer.vue';
 
 export default {
   name: 'Localisation',
@@ -47,56 +46,56 @@ export default {
     MapContainer
   },
   setup() {
-    // ==================== STORES ====================
-    const dataStore = useDataStore()
-    const locationStore = useLocationStore()
+    // ======================= STORES =======================
+    const dataStore = useDataStore();
+    const locationStore = useLocationStore();
 
-    // ==================== COMPUTED PROPERTIES ====================
-    const isEnglish = computed(() => dataStore.labelState === 3)
+    // ======================= COMPUTED PROPERTIES =======================
+    const isEnglish = computed(() => dataStore.labelState === 3);
 
-// ==================== HANDLER FUNCTIONS ====================
+    // ======================= HANDLER FUNCTIONS =======================
 
-const handleLocationSelected = (location) => {
-  locationStore.setSelectedLocation(location)
-}
+    const handleLocationSelected = (location) => {
+      locationStore.setSelectedLocation(location);
+    };
 
-const handleLocationFound = (location) => {
-  handleLocationSelected(location)
-}
+    const handleLocationFound = (location) => {
+      handleLocationSelected(location);
+    };
 
-const handleCadastralDataLoaded = (data) => {
-  locationStore.setCadastralData(data)
-}
+    const handleCadastralDataLoaded = (data) => {
+      locationStore.setCadastralData(data);
+    };
 
-// Lifecycle
-onMounted(() => {
-  locationStore.loadData()
-})
+    // Lifecycle
+    onMounted(() => {
+      locationStore.loadData();
+    });
 
-return {
-  // Store state (reactive)
-  selectedLocation: computed(() => locationStore.selectedLocation),
-  distanceInfo: computed(() => locationStore.distanceInfo),
-  closestLocations: computed(() => locationStore.closestLocations),
-  zoom: computed(() => locationStore.zoom),
-  center: computed(() => locationStore.center),
-  cadastralData: computed(() => locationStore.cadastralData),
-  minPrice: computed(() => locationStore.minPrice),
-  maxPrice: computed(() => locationStore.maxPrice),
+    return {
+      // Store state (reactive)
+      selectedLocation: computed(() => locationStore.selectedLocation),
+      distanceInfo: computed(() => locationStore.distanceInfo),
+      closestLocations: computed(() => locationStore.closestLocations),
+      zoom: computed(() => locationStore.zoom),
+      center: computed(() => locationStore.center),
+      cadastralData: computed(() => locationStore.cadastralData),
+      minPrice: computed(() => locationStore.minPrice),
+      maxPrice: computed(() => locationStore.maxPrice),
 
-  // Store data (reactive)
-  qpvData: computed(() => locationStore.qpvData),
-  migrantCentersData: computed(() => locationStore.migrantCentersData),
-  mosquesData: computed(() => locationStore.mosquesData),
-  isEnglish,
+      // Store data (reactive)
+      qpvData: computed(() => locationStore.qpvData),
+      migrantCentersData: computed(() => locationStore.migrantCentersData),
+      mosquesData: computed(() => locationStore.mosquesData),
+      isEnglish,
 
-  // Handlers
-  handleLocationFound,
-  handleLocationSelected,
-  handleCadastralDataLoaded
-}
+      // Handlers
+      handleLocationFound,
+      handleLocationSelected,
+      handleCadastralDataLoaded
+    };
   }
-}
+};
 </script>
 
 <style scoped>

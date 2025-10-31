@@ -1,6 +1,6 @@
 <template>
   <v-menu offset-y>
-    <template v-slot:activator="{ props }">
+    <template #activator="{ props }">
       <v-btn
         v-bind="props"
         variant="text"
@@ -14,8 +14,8 @@
       <v-list-item
         v-for="(option, index) in versionOptions"
         :key="index"
-        @click="selectVersion(index)"
         :class="{ 'v-list-item--active': labelState === index }"
+        @click="selectVersion(index)"
       >
         <v-list-item-title>{{ option.label }}</v-list-item-title>
       </v-list-item>
@@ -24,19 +24,19 @@
 </template>
 
 <script>
-import { mapStores } from 'pinia'
-import { useDataStore } from '../../services/store.js'
-import { MetricsConfig } from '../../utils/metricsConfig.js'
+import { mapStores } from 'pinia';
+import { useDataStore } from '../../services/store.js';
+import { MetricsConfig } from '../../utils/metricsConfig.js';
 
 export default {
   name: 'VersionSelector',
   computed: {
     ...mapStores(useDataStore),
     labelState() {
-      return this.dataStore.labelState
+      return this.dataStore.labelState;
     },
     currentVersionLabel() {
-      return this.dataStore.getCurrentVersionLabel()
+      return this.dataStore.getCurrentVersionLabel();
     },
     versionOptions() {
       return [
@@ -56,37 +56,37 @@ export default {
           label: MetricsConfig.versionLabels?.english || 'English Version',
           value: 3
         }
-      ]
-    }
-  },
-  methods: {
-    selectVersion(index) {
-      this.dataStore.setLabelState(index)
-      this.updatePageTitle()
-
-      // Dispatch event to notify components about version change
-      window.dispatchEvent(new CustomEvent('versionChanged', {
-        detail: { labelState: index }
-      }))
-    },
-    updatePageTitle() {
-      const newTitle = this.dataStore.getCurrentPageTitle()
-      document.title = newTitle
-
-      // Update header h1 only on Home page
-      if (this.$route.name === 'Home') {
-        const headerH1 = document.querySelector('h1')
-        if (headerH1) {
-          headerH1.textContent = newTitle
-        }
-      }
+      ];
     }
   },
   mounted() {
     // Set initial page title
-    this.updatePageTitle()
+    this.updatePageTitle();
+  },
+  methods: {
+    selectVersion(index) {
+      this.dataStore.setLabelState(index);
+      this.updatePageTitle();
+
+      // Dispatch event to notify components about version change
+      window.dispatchEvent(new CustomEvent('versionChanged', {
+        detail: { labelState: index }
+      }));
+    },
+    updatePageTitle() {
+      const newTitle = this.dataStore.getCurrentPageTitle();
+      document.title = newTitle;
+
+      // Update header h1 only on Home page
+      if (this.$route.name === 'Home') {
+        const headerH1 = document.querySelector('h1');
+        if (headerH1) {
+          headerH1.textContent = newTitle;
+        }
+      }
+    }
   }
-}
+};
 </script>
 
 <style scoped>
