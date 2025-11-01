@@ -101,7 +101,7 @@ const MetricsConfig = {
                 escroqueries_p1k: { min: 2, max: 10 },
                 immigration_score: {min: 40, max: 150 },
                 extra_europeen_pct: { min: 5, max: 50 },
-                Total_places_migrants: { min: 20, max: 1000 },
+                Total_places_migrants: { min: 1, max: 1000 },
                 places_migrants_p1k: { min: 1, max: 5 },
                 islamisation_score: { min: 40, max: 150 },
                 musulman_pct: { min: 2, max: 40 },
