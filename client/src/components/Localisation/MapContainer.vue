@@ -22,6 +22,7 @@ import LocationDataBox from './LocationDataBox.vue'
 const ICON_COLORS = {
   qpv: '#ff0000',
   migrant: '#000000',
+  migrant_accompaniment: '#666666',
   mosque: '#2e7d32'
 }
 
@@ -58,10 +59,16 @@ const createIcon = (type, zoom, isInclusive) => {
 
    const color = ICON_COLORS[type]
    let symbol = ''
+   let borderColor = '#333333'
    if (type === 'migrant') {
      symbol = isInclusive ? '🧸' : '↑'
+     borderColor = '#333333'
+   } else if (type === 'migrant_accompaniment') {
+     symbol = isInclusive ? '🧸' : '↑'
+     borderColor = '#999999'
    } else if (type === 'mosque') {
      symbol = isInclusive ? '🦄' : '🕌'
+     borderColor = '#1b5e20'
    }
 
   const icon = L.divIcon({
@@ -76,7 +83,7 @@ const createIcon = (type, zoom, isInclusive) => {
       justify-content: center;
       font-weight: bold;
       font-size: ${Math.max(12, size - 4)}px;
-      border: 2px solid ${type === 'migrant' ? '#333333' : '#1b5e20'};
+      border: 2px solid ${borderColor};
       box-shadow: 0 2px 4px rgba(0,0,0,0.3);
     ">${symbol}</div>`,
     className: `${type}-icon`,
@@ -145,6 +152,10 @@ export default {
         en: 'Migrant Center',
         fr: 'Centre de migrants'
       },
+      migrantAccompanimentCenter: {
+        en: 'Migrant Accompaniment Center',
+        fr: 'Centre d\'accompagnement de migrants'
+      },
       type: {
         en: 'Type',
         fr: 'Type'
@@ -211,6 +222,7 @@ export default {
 
     // Layer visibility toggles - now computed from store
     const showMigrantCenters = computed(() => locationStore.overlayStates.showMigrantCenters)
+    const showMigrantAccompanimentCenters = computed(() => locationStore.overlayStates.showMigrantAccompanimentCenters)
     const showQpv = computed(() => locationStore.overlayStates.showQpv)
     const showMosques = computed(() => locationStore.overlayStates.showMosques)
     const showCadastral = computed(() => locationStore.overlayStates.cadastral)
@@ -225,6 +237,7 @@ export default {
     let map = null
     let qpvLayer = null
     let migrantCentersLayer = null
+    let migrantAccompanimentCentersLayer = null
     let mosqueLayer = null
     let cadastralLayer = null
     let departementsLayer = null
@@ -284,6 +297,19 @@ export default {
         })
       }
     }
+
+    // Separate migrant centers by type
+    const visibleMigrantShelterCenters = computed(() =>
+      visibleMigrantCenters.value.filter(center =>
+        center.places !== null && center.places !== undefined && center.places !== 'N/A' && center.places !== ''
+      )
+    )
+
+    const visibleMigrantAccompanimentCenters = computed(() =>
+      visibleMigrantCenters.value.filter(center =>
+        center.places === null || center.places === undefined || center.places === 'N/A' || center.places === ''
+      )
+    )
 
     // ==================== MAP MANAGEMENT ====================
     /**
@@ -368,10 +394,10 @@ export default {
     // ==================== LAYER MANAGEMENT ====================
 
     /**
-     * Display migrant centers as markers on the map using filtered data
+     * Display migrant shelter centers as markers on the map
      */
-    const showMigrantCentersOnMap = () => {
-      if (!map || !visibleMigrantCenters.value.length) return
+    const showMigrantShelterCentersOnMap = () => {
+      if (!map || !visibleMigrantShelterCenters.value.length) return
 
       if (migrantCentersLayer) {
         map.removeLayer(migrantCentersLayer)
@@ -380,7 +406,7 @@ export default {
       const currentZoom = map.getZoom()
       migrantCentersLayer = L.layerGroup()
 
-      visibleMigrantCenters.value.forEach(center => {
+      visibleMigrantShelterCenters.value.forEach(center => {
         const marker = L.marker([parseFloat(center.latitude), parseFloat(center.longitude)], {
           icon: createIcon('migrant', currentZoom, isInclusive.value)
         })
@@ -396,6 +422,37 @@ export default {
       })
 
       migrantCentersLayer.addTo(map)
+    }
+
+    /**
+     * Display migrant accompaniment centers as markers on the map
+     */
+    const showMigrantAccompanimentCentersOnMap = () => {
+      if (!map || !visibleMigrantAccompanimentCenters.value.length) return
+
+      if (migrantAccompanimentCentersLayer) {
+        map.removeLayer(migrantAccompanimentCentersLayer)
+      }
+
+      const currentZoom = map.getZoom()
+      migrantAccompanimentCentersLayer = L.layerGroup()
+
+      visibleMigrantAccompanimentCenters.value.forEach(center => {
+        const marker = L.marker([parseFloat(center.latitude), parseFloat(center.longitude)], {
+          icon: createIcon('migrant_accompaniment', currentZoom, isInclusive.value)
+        })
+        .bindPopup(
+          `<strong>${isEnglish.value ? labels.value.migrantAccompanimentCenter.en : labels.value.migrantAccompanimentCenter.fr}</strong><br>` +
+          `<strong>${isEnglish.value ? labels.value.type.en : labels.value.type.fr}</strong> ${center.type_centre || center.type || 'N/A'} | <strong>${isEnglish.value ? labels.value.manager.en : labels.value.manager.fr}</strong> ${center.gestionnaire || 'N/A'}<br>` +
+          `<strong>${isEnglish.value ? labels.value.commune.en : labels.value.commune.fr}</strong> ${center.commune || 'N/A'}<br>` +
+          `<strong>${isEnglish.value ? labels.value.departement.en : labels.value.departement.fr}</strong> ${center.departement || 'N/A'}<br>` +
+          `<strong>${isEnglish.value ? labels.value.address.en : labels.value.address.fr}</strong> ${center.adresse || 'N/A'}`
+        )
+
+        migrantAccompanimentCentersLayer.addLayer(marker)
+      })
+
+      migrantAccompanimentCentersLayer.addTo(map)
     }
 
     // Show mosques on map using filtered data
@@ -461,7 +518,10 @@ export default {
     // Update visible markers after viewport change
     const updateVisibleMarkers = () => {
       if (showMigrantCenters.value) {
-        showMigrantCentersOnMap()
+        showMigrantShelterCentersOnMap()
+      }
+      if (showMigrantAccompanimentCenters.value) {
+        showMigrantAccompanimentCentersOnMap()
       }
       if (showMosques.value) {
         showMosquesOnMap()
@@ -529,7 +589,7 @@ export default {
       }
 
       try {
-        const response = await fetch('https://france-geojson.gregoiredavid.fr/repo/departements.geojson')
+        const response = await fetch('https://object.data.gouv.fr/contours-administratifs/2025/geojson/departements-1000m.geojson')
         const geoJsonData = await response.json()
 
         departementsLayer = L.geoJSON(geoJsonData, {
@@ -572,7 +632,7 @@ export default {
       }
 
       try {
-        const response = await fetch('https://france-geojson.gregoiredavid.fr/repo/regions.geojson')
+        const response = await fetch('https://object.data.gouv.fr/contours-administratifs/2025/geojson/regions-1000m.geojson')
         const geoJsonData = await response.json()
 
         regionsLayer = L.geoJSON(geoJsonData, {
@@ -858,6 +918,7 @@ export default {
 
       // Determine arrow color based on location type
       let arrowColor = '#000000' // Black for migrant centers (consistent with icon)
+      if (location.type === 'migrant_accompaniment') arrowColor = '#666666'
       if (location.type === 'qpv') arrowColor = isInclusive.value ? '#0000ff' : '#ff0000'
       if (location.type === 'mosque') arrowColor = '#2e7d32'
 
@@ -925,6 +986,8 @@ export default {
       let locationName
       if (location.type === 'migrant') {
         locationName = `${isEnglish.value ? labels.value.migrantCenter.en : labels.value.migrantCenter.fr} - ${location.commune || 'N/A'}`
+      } else if (location.type === 'migrant_accompaniment') {
+        locationName = `${isEnglish.value ? 'Migrant Accompaniment Center' : 'Centre d\'accompagnement de migrants'} - ${location.commune || 'N/A'}`
       } else if (location.type === 'qpv') {
         locationName = `${isEnglish.value ? labels.value.qpvLabel.en : labels.value.qpvLabel.fr} ${location.lib_qp || location.code_qp || 'N/A'}`
       } else if (location.type === 'mosque') {
@@ -936,6 +999,8 @@ export default {
         `<strong>${isEnglish.value ? labels.value.distance.en : labels.value.distance.fr}</strong> ${formattedDistance}` +
         (location.type === 'migrant'
           ? `<br><strong>${isEnglish.value ? labels.value.type.en : labels.value.type.fr}</strong> ${location.type_centre || location.type || 'N/A'} | <strong>${isEnglish.value ? labels.value.places.en : labels.value.places.fr}</strong> ${location.places || 'N/A'} | <strong>${isEnglish.value ? labels.value.manager.en : labels.value.manager.fr}</strong> ${location.gestionnaire || 'N/A'}`
+          : location.type === 'migrant_accompaniment'
+          ? `<br><strong>${isEnglish.value ? 'Type' : 'Type'}</strong> Accompagnement | <strong>${isEnglish.value ? labels.value.manager.en : labels.value.manager.fr}</strong> ${location.gestionnaire || 'N/A'}`
           : location.type === 'qpv'
           ? `<br><strong>${isEnglish.value ? labels.value.commune.en : labels.value.commune.fr}</strong> ${location.lib_com || 'N/A'}` +
             `<br><strong>${isEnglish.value ? labels.value.departement.en : labels.value.departement.fr}</strong> ${location.lib_dep || 'N/A'}`
@@ -965,7 +1030,10 @@ export default {
     watch(() => locationStore.migrantCentersData, (newData) => {
       filterDataForViewport()
       if (showMigrantCenters.value) {
-        showMigrantCentersOnMap()
+        showMigrantShelterCentersOnMap()
+      }
+      if (showMigrantAccompanimentCenters.value) {
+        showMigrantAccompanimentCentersOnMap()
       }
     }, { deep: true })
 
@@ -1036,10 +1104,19 @@ export default {
 
     watch(showMigrantCenters, (newVal) => {
       if (newVal && locationStore.migrantCentersData && locationStore.migrantCentersData.length > 0) {
-        showMigrantCentersOnMap()
+        showMigrantShelterCentersOnMap()
       } else if (!newVal && migrantCentersLayer) {
         map.removeLayer(migrantCentersLayer)
         migrantCentersLayer = null
+      }
+    })
+
+    watch(showMigrantAccompanimentCenters, (newVal) => {
+      if (newVal && locationStore.migrantCentersData && locationStore.migrantCentersData.length > 0) {
+        showMigrantAccompanimentCentersOnMap()
+      } else if (!newVal && migrantAccompanimentCentersLayer) {
+        map.removeLayer(migrantAccompanimentCentersLayer)
+        migrantAccompanimentCentersLayer = null
       }
     })
 
@@ -1099,6 +1176,7 @@ export default {
 
     return {
       showMigrantCenters,
+      showMigrantAccompanimentCenters,
       showQpv,
       showMosques,
       showCadastral,

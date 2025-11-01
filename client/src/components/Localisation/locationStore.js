@@ -25,8 +25,9 @@ export const useLocationStore = defineStore('location', {
 
     // Overlay visibility states
     overlayStates: {
-      showQpv: true,
-      showMigrantCenters: false,
+      showQpv: false,
+      showMigrantCenters: true,
+      showMigrantAccompanimentCenters: false,
       showMosques: false,
       cadastral: false,
       showDepartements: false,
@@ -173,11 +174,12 @@ export const useLocationStore = defineStore('location', {
 
         // Load migrant centers asynchronously with loading state
         this.loadingMigrants = true
-        const migrantsPromise = api.getMigrants({ limit: 1500 }).then(migrantsResponse => {
+        const migrantsPromise = api.getMigrants({ limit: 3000 }).then(migrantsResponse => {
           this.migrantCentersData = migrantsResponse.list.filter(center =>
             this.isValidCoordinates(center.latitude, center.longitude) &&
             this.isMetropolitan(center.departement)
           )
+          console.log(`Loaded ${this.migrantCentersData.length} migrant centers`)
           this.loadingMigrants = false
         }).catch(error => {
           console.error('Error loading migrant centers:', error)

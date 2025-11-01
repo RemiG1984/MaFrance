@@ -354,7 +354,7 @@ export default {
     },
     async loadDepartementsGeoJson() {
       try {
-        const response = await fetch('/geo/departements.geojson')
+        const response = await fetch('https://object.data.gouv.fr/contours-administratifs/2025/geojson/departements-1000m.geojson')
         const geoJson = await response.json()
         this.departementsLayer = markRaw(L.geoJSON(geoJson, {
           style: this.getStyle.bind(this),

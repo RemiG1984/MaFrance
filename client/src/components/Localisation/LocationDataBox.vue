@@ -41,6 +41,17 @@
                 </template>
               </v-checkbox>
               <v-checkbox
+                v-model="showMigrantAccompanimentCenters"
+                :label="isEnglish ? labels.migrantAccompanimentCenters.en : labels.migrantAccompanimentCenters.fr"
+                density="compact"
+                hide-details
+                @change="onOverlayToggle"
+              >
+                <template v-slot:prepend>
+                  <div class="overlay-indicator migrant-accompaniment-indicator">{{ isInclusive ? '🧸' : '↑' }}</div>
+                </template>
+              </v-checkbox>
+              <v-checkbox
                 v-model="showMosques"
                 :label="isEnglish ? labels.mosques.en : labels.mosques.fr"
                 density="compact"
@@ -121,7 +132,8 @@ const arrondissementMappings = {
 const labels = {
   displayPlaces: { fr: 'Affichage des lieux', en: 'Display of places' },
   qpv: { fr: 'Quartiers QPV', en: 'QPV Districts' },
-  migrantCenters: { fr: 'Centres de migrants', en: 'Migrant Centers' },
+  migrantCenters: { fr: 'Centres d\'hébergement de migrants', en: 'Migrant Shelter Centers' },
+  migrantAccompanimentCenters: { fr: 'Centres d\'accompagnement de migrants', en: 'Migrant Accompaniment Centers' },
   mosques: { fr: 'Mosquées', en: 'Mosques' },
   cadastral: { fr: 'Prix de l\'immobilier (€/m²)', en: 'Real Estate Price (€/m²)' },
   overlays: { fr: 'Superpositions', en: 'Overlays' },
@@ -144,6 +156,10 @@ export default {
     const showMigrantCenters = computed({
       get: () => locationStore.overlayStates.showMigrantCenters,
       set: (value) => locationStore.setOverlayStates({ showMigrantCenters: value })
+    })
+    const showMigrantAccompanimentCenters = computed({
+      get: () => locationStore.overlayStates.showMigrantAccompanimentCenters,
+      set: (value) => locationStore.setOverlayStates({ showMigrantAccompanimentCenters: value })
     })
     const showQpv = computed({
       get: () => locationStore.overlayStates.showQpv,
@@ -194,6 +210,7 @@ export default {
       locationStore.setOverlayStates({
         showQpv: showQpv.value,
         showMigrantCenters: showMigrantCenters.value,
+        showMigrantAccompanimentCenters: showMigrantAccompanimentCenters.value,
         showMosques: showMosques.value,
         cadastral: showCadastral.value,
         showDepartements: showDepartements.value
@@ -406,6 +423,7 @@ export default {
 
     return {
       showMigrantCenters,
+      showMigrantAccompanimentCenters,
       showQpv,
       showMosques,
       showCadastral,
@@ -449,6 +467,13 @@ export default {
   color: white;
   border-radius: 50%;
   border: 1px solid #333333;
+}
+
+.migrant-accompaniment-indicator {
+  background: #666666;
+  color: white;
+  border-radius: 50%;
+  border: 1px solid #999999;
 }
 
 .mosque-indicator {
