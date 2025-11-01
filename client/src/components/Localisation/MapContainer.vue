@@ -4,6 +4,7 @@
       <v-card-text class="pa-0 position-relative">
         <div id="localisationMap" class="localisation-map"></div>
 
+
         <LocationDataBox @cadastral-data-loaded="$emit('cadastral-data-loaded', $event)" />
       </v-card-text>
     </v-card>
@@ -215,6 +216,14 @@ export default {
       circonscriptions: {
         en: 'Circonscriptions',
         fr: 'Circonscriptions'
+      },
+      filterByType: {
+        en: 'Filter by Type',
+        fr: 'Filtrer par type de centre'
+      },
+      all: {
+        en: 'All',
+        fr: 'Tous'
       }
     }))
 
@@ -229,6 +238,9 @@ export default {
     const showDepartements = computed(() => locationStore.overlayStates.showDepartements)
     const showRegions = computed(() => locationStore.overlayStates.showRegions)
     const showCirconscriptions = computed(() => locationStore.overlayStates.showCirconscriptions)
+
+    // Filter dropdown reactive data - now managed by locationStore
+    const selectedTypes = computed(() => locationStore.selectedTypes)
 
 
     // ==================== MAP STATE ====================
@@ -407,12 +419,15 @@ export default {
       migrantCentersLayer = L.layerGroup()
 
       visibleMigrantShelterCenters.value.forEach(center => {
+        const centerType = center.type_centre || center.type || ''
+        if (selectedTypes.value.length > 0 && !selectedTypes.value.includes(centerType)) return
+
         const marker = L.marker([parseFloat(center.latitude), parseFloat(center.longitude)], {
           icon: createIcon('migrant', currentZoom, isInclusive.value)
         })
         .bindPopup(
           `<strong>${isEnglish.value ? labels.value.migrantCenter.en : labels.value.migrantCenter.fr}</strong><br>` +
-          `<strong>${isEnglish.value ? labels.value.type.en : labels.value.type.fr}</strong> ${center.type_centre || center.type || 'N/A'} | <strong>${isEnglish.value ? labels.value.places.en : labels.value.places.fr}</strong> ${center.places || 'N/A'} | <strong>${isEnglish.value ? labels.value.manager.en : labels.value.manager.fr}</strong> ${center.gestionnaire || 'N/A'}<br>` +
+          `<strong>${isEnglish.value ? labels.value.type.en : labels.value.type.fr}</strong> ${centerType || 'N/A'} | <strong>${isEnglish.value ? labels.value.places.en : labels.value.places.fr}</strong> ${center.places || 'N/A'} | <strong>${isEnglish.value ? labels.value.manager.en : labels.value.manager.fr}</strong> ${center.gestionnaire || 'N/A'}<br>` +
           `<strong>${isEnglish.value ? labels.value.commune.en : labels.value.commune.fr}</strong> ${center.commune || 'N/A'}<br>` +
           `<strong>${isEnglish.value ? labels.value.departement.en : labels.value.departement.fr}</strong> ${center.departement || 'N/A'}<br>` +
           `<strong>${isEnglish.value ? labels.value.address.en : labels.value.address.fr}</strong> ${center.adresse || 'N/A'}`
@@ -438,12 +453,15 @@ export default {
       migrantAccompanimentCentersLayer = L.layerGroup()
 
       visibleMigrantAccompanimentCenters.value.forEach(center => {
+        const centerType = center.type_centre || center.type || ''
+        if (selectedTypes.value.length > 0 && !selectedTypes.value.includes(centerType)) return
+
         const marker = L.marker([parseFloat(center.latitude), parseFloat(center.longitude)], {
           icon: createIcon('migrant_accompaniment', currentZoom, isInclusive.value)
         })
         .bindPopup(
           `<strong>${isEnglish.value ? labels.value.migrantAccompanimentCenter.en : labels.value.migrantAccompanimentCenter.fr}</strong><br>` +
-          `<strong>${isEnglish.value ? labels.value.type.en : labels.value.type.fr}</strong> ${center.type_centre || center.type || 'N/A'} | <strong>${isEnglish.value ? labels.value.manager.en : labels.value.manager.fr}</strong> ${center.gestionnaire || 'N/A'}<br>` +
+          `<strong>${isEnglish.value ? labels.value.type.en : labels.value.type.fr}</strong> ${centerType || 'N/A'} | <strong>${isEnglish.value ? labels.value.manager.en : labels.value.manager.fr}</strong> ${center.gestionnaire || 'N/A'}<br>` +
           `<strong>${isEnglish.value ? labels.value.commune.en : labels.value.commune.fr}</strong> ${center.commune || 'N/A'}<br>` +
           `<strong>${isEnglish.value ? labels.value.departement.en : labels.value.departement.fr}</strong> ${center.departement || 'N/A'}<br>` +
           `<strong>${isEnglish.value ? labels.value.address.en : labels.value.address.fr}</strong> ${center.adresse || 'N/A'}`
@@ -1156,6 +1174,16 @@ export default {
       }
     })
 
+    // Watch for type filter changes
+    watch(selectedTypes, () => {
+      if (showMigrantCenters.value) {
+        showMigrantShelterCentersOnMap()
+      }
+      if (showMigrantAccompanimentCenters.value) {
+        showMigrantAccompanimentCentersOnMap()
+      }
+    }, { deep: true })
+
     // Lifecycle
     onMounted(() => {
       initMap()
@@ -1188,7 +1216,7 @@ export default {
       labels,
       currentZoom,
       currentCenter,
-      locationStore
+      locationStore,
     }
   }
 }
@@ -1212,6 +1240,7 @@ export default {
   z-index: 999;
   max-width: 200px;
 }
+
 
 /* Custom marker styles */
 :deep(.custom-div-icon) {

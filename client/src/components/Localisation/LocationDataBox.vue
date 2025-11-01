@@ -107,6 +107,37 @@
                 @update:model-value="onOverlaySelectionChange"
                 class="mt-2"
               ></v-select>
+
+              <!-- Migrant center type filter -->
+              <div v-if="showMigrantCenters || showMigrantAccompanimentCenters" class="mt-3">
+                <v-select
+                  v-model="selectedTypes"
+                  :items="uniqueTypes"
+                  label="Filtrer par type de centre"
+                  variant="outlined"
+                  density="compact"
+                  class="filter-select"
+                  :menu-props="{ maxHeight: 200 }"
+                  multiple
+                  chips
+                  closable-chips
+                  @update:model-value="onTypeFilterChange"
+                >
+                  <template v-slot:selection="{ item, index }">
+                    <v-chip
+                      v-if="index < 2"
+                      :text="item.value"
+                      size="small"
+                      closable
+                      @click:close="removeType(item.value)"
+                      class="mr-1"
+                    ></v-chip>
+                    <span v-if="index === 2" class="text-grey text-caption align-self-center">
+                      (+{{ selectedTypes.length - 2 }} autres)
+                    </span>
+                  </template>
+                </v-select>
+              </div>
             </v-col>
           </v-row>
         </v-card-text>
@@ -186,6 +217,32 @@ export default {
     const timeout = ref(null)
     const mapMovementTimeout = ref(null)
 
+    // Migrant center type filter
+    const selectedTypes = computed({
+      get: () => locationStore.selectedTypes,
+      set: (value) => locationStore.setSelectedTypes(value)
+    })
+    const uniqueTypes = computed(() => {
+      const types = new Set()
+      if (showMigrantCenters.value) {
+        locationStore.migrantCentersData
+          .filter(center => center.places !== null && center.places !== undefined && center.places !== 'N/A' && center.places !== '')
+          .forEach(center => {
+            const type = center.type_centre || center.type || ''
+            if (type && type.trim() !== '') types.add(type.trim())
+          })
+      }
+      if (showMigrantAccompanimentCenters.value) {
+        locationStore.migrantCentersData
+          .filter(center => center.places === null || center.places === undefined || center.places === 'N/A' || center.places === '')
+          .forEach(center => {
+            const type = center.type_centre || center.type || ''
+            if (type && type.trim() !== '') types.add(type.trim())
+          })
+      }
+      return Array.from(types).sort()
+    })
+
     // Reactive caches for departements and cadastral data
     const departementsCache = ref(new Map())
     const cadastralCache = ref(new Map())
@@ -233,6 +290,17 @@ export default {
       timeout.value = setTimeout(() => {
         locationStore.setCadastralBounds(priceRange.value)
       }, 300)
+    }
+
+    // Handle type filter changes
+    const onTypeFilterChange = () => {
+      locationStore.setSelectedTypes(selectedTypes.value)
+    }
+
+    // Remove a specific type from selection
+    const removeType = (typeToRemove) => {
+      const newTypes = selectedTypes.value.filter(type => type !== typeToRemove)
+      locationStore.setSelectedTypes(newTypes)
     }
 
     // Watch for store changes to update slider if not manually adjusted
@@ -438,7 +506,11 @@ export default {
       isInclusive,
       labels,
       isLoadingCadastral,
-      locationStore
+      locationStore,
+      selectedTypes,
+      uniqueTypes,
+      onTypeFilterChange,
+      removeType
     }
   }
 }

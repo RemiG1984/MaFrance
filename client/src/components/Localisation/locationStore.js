@@ -38,6 +38,9 @@ export const useLocationStore = defineStore('location', {
     // Selected overlay for single selection system
     selectedOverlay: null,
 
+    // Migrant center type filter
+    selectedTypes: [],
+
     // Data for map
     qpvData: null,
     migrantCentersData: [],
@@ -104,6 +107,11 @@ export const useLocationStore = defineStore('location', {
       this.selectedOverlay = overlay
       // Update overlayStates for backward compatibility
       this.overlayStates.showDepartements = overlay === 'departements'
+    },
+
+    // Set selected types for migrant center filtering
+    setSelectedTypes(types) {
+      this.selectedTypes = types || []
     },
 
     // Set distance information and closest locations
