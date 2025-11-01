@@ -751,6 +751,9 @@ export default {
         });
       }
     },
+    panToFrance() {
+      this.map.setView([46.603354, 1.888334], 5);
+    },
     getMetricLabel(metric) {
       const metricMap = {
         total_score: 'Score global',

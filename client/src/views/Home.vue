@@ -6,8 +6,9 @@
         <v-row>
           <!-- Location Selector -->
           <v-col cols="12">
-            <LocationSelector 
+            <LocationSelector
               :location="currentLocation"
+              @france-selected="handleFranceSelected"
             />
           </v-col>
 
@@ -426,6 +427,10 @@ export default {
       };
 
       await this.dataStore.loadMoreMosques(level, code, params);
+    },
+
+    handleFranceSelected() {
+      this.$refs.mapComponent.panToFrance();
     }
 
   },

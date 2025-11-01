@@ -126,6 +126,7 @@ export default {
       this.communeQuery = ''
       this.communeSuggestions = []
       this.dataStore.setCountry()
+      this.$emit('france-selected')
     },
     
     onDepartementChange() {
