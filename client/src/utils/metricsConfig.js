@@ -12,10 +12,10 @@
 const MetricsConfig = {
     // Page titles for different label states
     pageTitles: {
-        standard: "Ma France: état des lieux",
-        alt1: "Ma France inclusive",
-        alt2: "Où va ma France?",
-        english: "My France",
+        standard: "mafrance.app : État des lieux",
+        alt1: "mafrance.app : Ma France inclusive",
+        alt2: "mafrance.app : Où va ma France?",
+        english: "mafrance.app : My France",
     },
 
     // Version labels for different states
