@@ -41,6 +41,17 @@
                 </template>
               </v-checkbox>
               <v-checkbox
+                v-model="showMigrantAccompanimentCenters"
+                :label="isEnglish ? labels.migrantAccompanimentCenters.en : labels.migrantAccompanimentCenters.fr"
+                density="compact"
+                hide-details
+                @change="onOverlayToggle"
+              >
+                <template v-slot:prepend>
+                  <div class="overlay-indicator migrant-accompaniment-indicator">{{ isInclusive ? '🧸' : '↑' }}</div>
+                </template>
+              </v-checkbox>
+              <v-checkbox
                 v-model="showMosques"
                 :label="isEnglish ? labels.mosques.en : labels.mosques.fr"
                 density="compact"
@@ -96,6 +107,37 @@
                 @update:model-value="onOverlaySelectionChange"
                 class="mt-2"
               ></v-select>
+
+              <!-- Migrant center type filter -->
+              <div v-if="showMigrantCenters || showMigrantAccompanimentCenters" class="mt-3">
+                <v-select
+                  v-model="selectedTypes"
+                  :items="uniqueTypes"
+                  label="Filtrer par type de centre"
+                  variant="outlined"
+                  density="compact"
+                  class="filter-select"
+                  :menu-props="{ maxHeight: 200 }"
+                  multiple
+                  chips
+                  closable-chips
+                  @update:model-value="onTypeFilterChange"
+                >
+                  <template v-slot:selection="{ item, index }">
+                    <v-chip
+                      v-if="index < 2"
+                      :text="item.value"
+                      size="small"
+                      closable
+                      @click:close="removeType(item.value)"
+                      class="mr-1"
+                    ></v-chip>
+                    <span v-if="index === 2" class="text-grey text-caption align-self-center">
+                      (+{{ selectedTypes.length - 2 }} autres)
+                    </span>
+                  </template>
+                </v-select>
+              </div>
             </v-col>
           </v-row>
         </v-card-text>
@@ -121,7 +163,8 @@ const arrondissementMappings = {
 const labels = {
   displayPlaces: { fr: 'Affichage des lieux', en: 'Display of places' },
   qpv: { fr: 'Quartiers QPV', en: 'QPV Districts' },
-  migrantCenters: { fr: 'Centres de migrants', en: 'Migrant Centers' },
+  migrantCenters: { fr: 'Centres d\'hébergement de migrants', en: 'Migrant Shelter Centers' },
+  migrantAccompanimentCenters: { fr: 'Centres d\'accompagnement de migrants', en: 'Migrant Accompaniment Centers' },
   mosques: { fr: 'Mosquées', en: 'Mosques' },
   cadastral: { fr: 'Prix de l\'immobilier (€/m²)', en: 'Real Estate Price (€/m²)' },
   overlays: { fr: 'Superpositions', en: 'Overlays' },
@@ -144,6 +187,10 @@ export default {
     const showMigrantCenters = computed({
       get: () => locationStore.overlayStates.showMigrantCenters,
       set: (value) => locationStore.setOverlayStates({ showMigrantCenters: value })
+    })
+    const showMigrantAccompanimentCenters = computed({
+      get: () => locationStore.overlayStates.showMigrantAccompanimentCenters,
+      set: (value) => locationStore.setOverlayStates({ showMigrantAccompanimentCenters: value })
     })
     const showQpv = computed({
       get: () => locationStore.overlayStates.showQpv,
@@ -170,6 +217,32 @@ export default {
     const timeout = ref(null)
     const mapMovementTimeout = ref(null)
 
+    // Migrant center type filter
+    const selectedTypes = computed({
+      get: () => locationStore.selectedTypes,
+      set: (value) => locationStore.setSelectedTypes(value)
+    })
+    const uniqueTypes = computed(() => {
+      const types = new Set()
+      if (showMigrantCenters.value) {
+        locationStore.migrantCentersData
+          .filter(center => center.places !== null && center.places !== undefined && center.places !== 'N/A' && center.places !== '')
+          .forEach(center => {
+            const type = center.type_centre || center.type || ''
+            if (type && type.trim() !== '') types.add(type.trim())
+          })
+      }
+      if (showMigrantAccompanimentCenters.value) {
+        locationStore.migrantCentersData
+          .filter(center => center.places === null || center.places === undefined || center.places === 'N/A' || center.places === '')
+          .forEach(center => {
+            const type = center.type_centre || center.type || ''
+            if (type && type.trim() !== '') types.add(type.trim())
+          })
+      }
+      return Array.from(types).sort()
+    })
+
     // Reactive caches for departements and cadastral data
     const departementsCache = ref(new Map())
     const cadastralCache = ref(new Map())
@@ -194,6 +267,7 @@ export default {
       locationStore.setOverlayStates({
         showQpv: showQpv.value,
         showMigrantCenters: showMigrantCenters.value,
+        showMigrantAccompanimentCenters: showMigrantAccompanimentCenters.value,
         showMosques: showMosques.value,
         cadastral: showCadastral.value,
         showDepartements: showDepartements.value
@@ -216,6 +290,17 @@ export default {
       timeout.value = setTimeout(() => {
         locationStore.setCadastralBounds(priceRange.value)
       }, 300)
+    }
+
+    // Handle type filter changes
+    const onTypeFilterChange = () => {
+      locationStore.setSelectedTypes(selectedTypes.value)
+    }
+
+    // Remove a specific type from selection
+    const removeType = (typeToRemove) => {
+      const newTypes = selectedTypes.value.filter(type => type !== typeToRemove)
+      locationStore.setSelectedTypes(newTypes)
     }
 
     // Watch for store changes to update slider if not manually adjusted
@@ -406,6 +491,7 @@ export default {
 
     return {
       showMigrantCenters,
+      showMigrantAccompanimentCenters,
       showQpv,
       showMosques,
       showCadastral,
@@ -420,7 +506,11 @@ export default {
       isInclusive,
       labels,
       isLoadingCadastral,
-      locationStore
+      locationStore,
+      selectedTypes,
+      uniqueTypes,
+      onTypeFilterChange,
+      removeType
     }
   }
 }
@@ -449,6 +539,13 @@ export default {
   color: white;
   border-radius: 50%;
   border: 1px solid #333333;
+}
+
+.migrant-accompaniment-indicator {
+  background: #666666;
+  color: white;
+  border-radius: 50%;
+  border: 1px solid #999999;
 }
 
 .mosque-indicator {

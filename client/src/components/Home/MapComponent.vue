@@ -354,7 +354,7 @@ export default {
     },
     async loadDepartementsGeoJson() {
       try {
-        const response = await fetch('/geo/departements.geojson')
+        const response = await fetch('https://object.data.gouv.fr/contours-administratifs/2025/geojson/departements-1000m.geojson')
         const geoJson = await response.json()
         this.departementsLayer = markRaw(L.geoJSON(geoJson, {
           style: this.getStyle.bind(this),
@@ -750,6 +750,9 @@ export default {
           this.showCommuneTooltip();
         });
       }
+    },
+    panToFrance() {
+      this.map.setView([46.603354, 1.888334], 5);
     },
     getMetricLabel(metric) {
       const metricMap = {

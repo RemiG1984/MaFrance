@@ -16,7 +16,7 @@ router.get(
         const db = req.app.locals.db;
         const dbHandler = createDbHandler(res);
         const { dept, cog, cursor, limit = "20" } = req.query;
-        const pageLimit = Math.min(parseInt(limit), 2000);
+        const pageLimit = Math.min(parseInt(limit), 3000);
         const offset = cursor ? parseInt(cursor) : 0;
 
         // Prevent simultaneous dept and cog
